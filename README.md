@@ -19,4 +19,4 @@ format (http://www.tptp.org). You can find a few examples in the
 you can freely use quantifiers. If it succeeds in proving your
 problem, twee will print a human-readable proof.
 
-For the official manual, see http://nick8325.github.io/twee.
+For the official manual, see https://twee.smallbone.se.
