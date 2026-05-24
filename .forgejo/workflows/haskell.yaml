@@ -1,20 +1,44 @@
-# CI configuration for GitHub
+# CI configuration for Codeberg
 
 on:
   - push
   - pull_request
 
+enable-email-notifications: true
+
 name: build
 jobs:
-  test:
-    name: Run tests
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-      - uses: haskell-actions/setup@v2
-        id: setup
+  build:
+    runs-on: debian
+    strategy:
+      matrix:
+        ghc: ['9.2.8', '9.4.8', '9.6.7', '9.8.4', '9.10.3', '9.12.4']
 
-      # Dependency caching
+    name: GHC ${{ matrix.ghc }}
+    steps:
+      - name: Check out project
+        uses: actions/checkout@v6
+
+      - name: Restore cached GHC
+        id: ghcup-cache
+        uses: actions/cache/restore@v5
+        with:
+          path: /root/.ghcup
+          key: ${{ runner.os }}-ghcup-ghc${{ matrix.ghc }}
+
+      - name: Set up GHC
+        uses: https://github.com/haskell-actions/setup@v2
+        id: setup
+        with:
+          ghc-version: ${{ matrix.ghc }}
+
+      - name: Save cached GHC
+        uses: actions/cache/save@v5
+        if: steps.ghcup-cache.outputs.cache-hit != 'true'
+        with:
+          path: /root/.ghcup
+          key: ${{ steps.ghcup-cache.outputs.cache-primary-key }}
+
       - name: Configure the build
         run: |
           cabal configure --enable-tests --enable-benchmarks --disable-documentation --upgrade-dependencies
@@ -40,7 +64,6 @@ jobs:
         with:
           path: ${{ steps.setup.outputs.cabal-store }}
           key: ${{ steps.cache.outputs.cache-primary-key }}
-      # End dependency caching
 
       - name: Build project
         run: cabal build
