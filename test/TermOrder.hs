@@ -2,6 +2,7 @@
 
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE TypeFamilies #-}
 module TermOrder(tests) where
 
 import Common
