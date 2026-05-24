@@ -443,7 +443,7 @@ data Constant =
   Constant {
     con_prec    :: {-# UNPACK #-} !Precedence,
     con_id      :: {-# UNPACK #-} !Int,
-    con_name    :: {-# UNPACK #-} !String,
+    con_name    :: !String,
     con_arity   :: {-# UNPACK #-} !Int,
     con_label   :: !(Maybe String),
     con_size    :: !Integer,
