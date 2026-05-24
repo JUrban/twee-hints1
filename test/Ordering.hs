@@ -82,4 +82,4 @@ tests =
     testProperty "order invariant under swap" prop_order_swap,
     testProperty "order invariant under rearrangement" prop_order_rearrange,
     testProperty "order respects size" prop_order_size,
-    testProperty "order respects term order of erase terms" prop_order_erase ]
+    testProperty "order respects term order of erased terms" prop_order_erase ]
