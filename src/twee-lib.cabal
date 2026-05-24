@@ -1,7 +1,7 @@
 name:                twee-lib
 version:             2.6.2
 synopsis:            An equational theorem prover
-homepage:            http://github.com/nick8325/twee
+homepage:            http://smallbone.se
 license:             BSD3
 license-file:        LICENSE
 author:              Nick Smallbone
@@ -26,8 +26,8 @@ description:
 
 source-repository head
   type:     git
-  location: https://github.com/nick8325/twee.git
-  branch:   master
+  location: https://codeberg.org/nick8325/twee
+  branch:   main
 
 flag llvm
   description: Build using LLVM backend for faster code.

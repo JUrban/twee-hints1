@@ -2,7 +2,7 @@ cabal-version:       2.2
 name:                twee
 version:             2.6.2
 synopsis:            An equational theorem prover
-homepage:            https://github.com/nick8325/twee
+homepage:            https://twee.smallbone.se
 license:             BSD-3-Clause
 license-file:        LICENSE
 author:              Nick Smallbone
@@ -25,8 +25,8 @@ description:
 
 source-repository head
   type:     git
-  location: https://github.com/nick8325/twee.git
-  branch:   master
+  location: https://codeberg.org/nick8325/twee
+  branch:   main
 
 flag static
   description: Build a static binary.
