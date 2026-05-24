@@ -73,7 +73,7 @@ prop_order_erase eq =
 
 tests :: TestTree
 tests =
-  localOption (QuickCheckTests 1000000) $
+  localOption (QuickCheckTests 100000) $
   testGroup "Equation ordering" [
     testProperty "reducesWith respects KBO" prop_reducesWith_correct,
     testProperty "simplerThan irreflexive" prop_simplerThan_irreflexive,

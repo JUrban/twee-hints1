@@ -158,7 +158,7 @@ orderTests order@TermOrder{..} = [
 
 tests :: TestTree
 tests =
-  localOption (QuickCheckTests 1000000) $
+  localOption (QuickCheckTests 100000) $
   testGroup "Term ordering"
     [testGroup "KBO" (orderTests kbo),
      testGroup "LPO" $

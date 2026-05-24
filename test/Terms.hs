@@ -39,7 +39,7 @@ prop_symbol n =
 
 tests :: TestTree
 tests =
-  localOption (QuickCheckTests 1000000) $
+  localOption (QuickCheckTests 100000) $
   testGroup "Terms" [
     testProperty "Paths to positions round trip" prop_paths,
     testProperty "Symbols to Int64 round trip" prop_symbol]

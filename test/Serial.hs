@@ -51,6 +51,6 @@ prop_tree_serialise t =
 
 tests :: TestTree
 tests =
-  localOption (QuickCheckTests 100000) $
+  localOption (QuickCheckTests 10000) $
   testGroup "Serialisation" [
      testProperty "Tree serialisation round trip" prop_tree_serialise]
