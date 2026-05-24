@@ -1038,7 +1038,7 @@ complete1 config@Config{..} state
           (Just (info, overlap, _, _), state) ->
             (True, consider config state info overlap)
       Just (ReadShowBinary g) -> -- random mode
-        let (g1, g2) = Random.splitGen g in
+        let (g1, g2) = Random.split g in
         let state' = state { st_random_seed = Just (ReadShowBinary g2) } in
         case findCriticalPair config state' g1 of
           Nothing -> (True, state'{st_problem_term = Nothing})
