@@ -747,8 +747,11 @@ generaliseProof instGoal =
       Symm <$> generaliseStep p
     generaliseStep (Trans p q) =
       liftM2 Trans (generaliseStep p) (generaliseStep q)
-    generaliseStep (Cong f ps) =
-      Cong f <$> mapM generaliseStep ps
+    generaliseStep (Cong f ps) = do
+      q <- cong f <$> mapM generaliseStep ps
+      case q of
+        Refl{} -> generaliseStep q
+        _ -> return q
 
     freshen xs f = do
       n <- get
