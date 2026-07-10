@@ -175,13 +175,13 @@ parseMainFlags = do
     flag "fun-weight" ["Weight given to function symbols"] 1 argNum
   flags_dump_proof <-
     expert $
-    inGroup "Debugging flags" $
+    inGroup "Debugging options" $
     flag "dump-proof"
       ["Dump a binary proof to this file (off by default)."]
       Nothing (Just <$> argFile)
   flags_dump_state <-
     expert $
-    inGroup "Debugging flags" $
+    inGroup "Debugging options" $
     flag "dump-state"
       ["Dump prover state to this file on termination (off by default)."]
       Nothing (Just <$> argFile)
