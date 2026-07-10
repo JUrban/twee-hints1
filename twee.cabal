@@ -46,12 +46,13 @@ common executable-stuff
                        containers,
                        pretty,
                        split,
-                       jukebox >= 0.5.9,
+                       jukebox >= 0.5.10,
                        ansi-terminal >= 0.9,
                        symbol,
                        hashable,
                        bytestring,
-                       binary
+                       binary,
+                       process
   other-modules:       SequentialMain
   ghc-options:         -W -fno-warn-incomplete-patterns
 

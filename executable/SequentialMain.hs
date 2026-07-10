@@ -46,6 +46,9 @@ import GHC.Generics
 import Data.Hashable
 import Data.Binary.Sharing
 import qualified Data.ByteString.Lazy as BS
+import System.Process
+import qualified Jukebox.TPTP.Parse.Core as TPTP
+import qualified Jukebox.TPTP.ParseSnippet as Snippet
 
 data MainFlags =
   MainFlags {
@@ -72,7 +75,8 @@ data MainFlags =
     flags_goal_heuristic :: Bool,
     flags_funweight :: Float,
     flags_dump_proof :: Maybe FilePath,
-    flags_dump_state :: Maybe FilePath }
+    flags_dump_state :: Maybe FilePath,
+    flags_stitch :: Maybe FilePath }
 
 parseMainFlags :: OptionParser MainFlags
 parseMainFlags = do
@@ -184,6 +188,12 @@ parseMainFlags = do
     inGroup "Debugging options" $
     flag "dump-state"
       ["Dump prover state to this file on termination (off by default)."]
+      Nothing (Just <$> argFile)
+  flags_stitch <-
+    expert $
+    inGroup "Critical pair weighting heuristics" $
+    flag "stitch"
+      ["Path to 'stitch' tool for discovering abstractions (disabled by default)."]
       Nothing (Just <$> argFile)
 
   return MainFlags{..}
@@ -994,7 +1004,39 @@ runTwee globals (TSTPFlags tstp) horn precedence config0 flags@MainFlags{..} lat
         (show goal_number) (Just goal_name) goal_eqn
   line
 
-  state <- complete output config withBackwardsGoal
+  state <-
+    case flags_stitch of
+      Nothing -> do
+        complete output config withBackwardsGoal
+      Just stitch -> do
+        let
+          (timeout, final_timeout) =
+            case cfg_max_time config of
+              Just time -> (time / 5, Just (time * 4 / 5))
+              Nothing -> (30, Nothing)
+        intermediate <- complete output config{cfg_max_time = Just timeout} withBackwardsGoal
+        let
+          score rule =
+            (KBO.size (lhs rule), lhs rule,
+             KBO.size (rhs rule), rhs rule)
+          actives =
+            sortBy (comparing (score . active_rule)) $
+            IntMap.elems (st_active_set intermediate)
+          pres = present (cfg_proof_presentation config){cfg_all_lemmas = True} (map active_proof actives) []
+          proofStr = show (pPrintPresentation (cfg_proof_presentation config){cfg_use_colour = False} pres)
+        line
+        say "Running Stitch..."
+        hintsStrs <- lines <$> readProcess stitch [] proofStr
+        let toTerm' t = toTerm (varNums t) t
+        let parseTerm str = toTerm' (Snippet.giveProblem obligs (Snippet.form (TPTP.term TPTP.NoQuantification Map.empty)) str)
+        let hints = map parseTerm hintsStrs
+        mapM_ (say . show . pPrint) hints
+        let config' = config{cfg_max_time = final_timeout}
+        complete output config' $
+          interreduce config' $
+          simplifyQueue config' $
+          foldl' (addHint config') intermediate hints
+
   line
 
   case flags_dump_state of
