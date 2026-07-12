@@ -1028,7 +1028,7 @@ runTwee globals (TSTPFlags tstp) horn precedence config0 flags@MainFlags{..} lat
         say "Running Stitch..."
         hintsStrs <- lines <$> readProcess stitch [] proofStr
         let toTerm' t = toTerm (varNums t) t
-        let parseTerm str = toTerm' (Snippet.giveProblem obligs (Snippet.form (TPTP.term TPTP.NoQuantification Map.empty)) str)
+        let parseTerm str = toTerm' (Snippet.giveProblem prob (Snippet.form (TPTP.term TPTP.NoQuantification Map.empty)) str)
         let hints = map parseTerm hintsStrs
         mapM_ (say . show . pPrint) hints
         let config' = config{cfg_max_time = final_timeout}
