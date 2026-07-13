@@ -1,11 +1,11 @@
 <HR><!------------------------------------------------------------------------>
-<H2>Twee 2.6</H2>
+<H2>Twee 2.7</H2>
 Nick Smallbone<BR>
 Chalmers University of Technology, Sweden<BR>
 
 <H3>Architecture</H3>
 
-Twee 2.6 [Sma21] is a theorem prover for unit equality problems
+Twee 2.7 [Sma21] is a theorem prover for unit equality problems
 based on unfailing completion [BDP89]. It implements a DISCOUNT loop,
 where the active set contains rewrite rules (and unorientable
 equations) and the passive set contains critical pairs.
@@ -19,8 +19,8 @@ The ground joinability test performs case splits on the order of
 variables, in the style of [MN90], and discharges individual cases by
 rewriting modulo a variable ordering.
 <P>
-This year's version has fixes for some completeness bugs which allows
-some slightly more aggressive redundancy criteria to be used.
+This year's version adds preliminary support for discovering interesting
+term patterns during proof search [AJS26].
 
 <H3>Strategies</H3>
 
@@ -65,7 +65,7 @@ In particular, reasoning about the passive set does not invoke the
 kernel.
 <P>
 Twee can be downloaded as open source from:
-<PRE><A HREF="https://nick8325.github.io/twee/">https://nick8325.github.io/twee</A></PRE>
+<PRE><A HREF="https://twee.smallbone.se/">https://twee.smallbone.se</A></PRE>
 
 <H3>Expected Competition Performance</H3>
 
@@ -105,6 +105,14 @@ Competing with the top provers.
      <EM>Journal of Symbolic Computation</EM> 6(1),
      pp.1-18,
      Elsevier.
+<DT> AJS26
+</DT><DD> Axelrod G., Johansson M., Smallbone N. (2026),
+     <STRONG>Twitch: Learning Abstractions for Equational Theorem Proving</STRONG>,
+     Biere, A. et al.
+     <EM>13th International Joint Conference on Automated Reasoning</EM>,
+     Lecture Notes in Artificial Intelligence 16688,
+     Springer.
+</DD>
 </DD>
 </DL>
 <P>
