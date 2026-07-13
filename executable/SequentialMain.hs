@@ -65,6 +65,7 @@ data MainFlags =
     flags_flatten_goals_lightly :: Bool,
     flags_flatten_all :: Bool,
     flags_flatten_regeneralise :: Bool,
+    flags_flatten_every :: Int,
     flags_eliminate :: [String],
     flags_backwards_goal :: Int,
     flags_flatten_backwards_goal :: Int,
@@ -140,6 +141,10 @@ parseMainFlags = do
     expert $
     inGroup "Completion heuristics" $
     bool "flatten" ["Flatten all clauses by adding new axioms (off by default)."] False
+  flags_flatten_every <-
+    expert $
+    inGroup "Completion heuristics" $
+    flag "flatten-every" ["Flatten only every nth subterm (default = 1)."] 1 argNum
   flags_flatten_regeneralise <-
     expert $
     inGroup "Completion heuristics" $
@@ -622,8 +627,8 @@ makeContext hints prob = run (hints, prob) $ \(_, prob) -> do
     ctx_funs = Map.fromList (zip [0..] allFuns),
     ctx_ids = Map.fromList (zip allFuns [0..]) }
 
-flattenGoals :: Int -> Bool -> Bool -> Bool -> [Jukebox.Term] -> Problem Clause -> Problem Clause
-flattenGoals backwardsGoal flattenNonGround flattenAll full hints prob =
+flattenGoals :: Int -> Bool -> Bool -> Bool -> Int -> [Jukebox.Term] -> Problem Clause -> Problem Clause
+flattenGoals backwardsGoal flattenNonGround flattenAll full depthMod hints prob =
   run (hints, prob) $ \(_, prob) -> do
     let ts = usort $ extraTerms prob
     cs <- mapM define ts
@@ -646,6 +651,10 @@ flattenGoals backwardsGoal flattenNonGround flattenAll full hints prob =
 
     isVar (Jukebox.Var _) = True
     isVar _ = False
+
+    depthOk t = depthMod == 1 || depth t `mod` depthMod == 0
+    depth (_f :@: ts) = 1 + maximum (0:map depth ts)
+    depth _ = 1
 
     define (f :@: ts) = do
       name <- newName f
@@ -816,9 +825,9 @@ runTwee globals (TSTPFlags tstp) horn precedence config0 flags@MainFlags{..} lat
   let
     -- Encode whatever needs encoding in the problem
     obligs1
-      | flags_flatten_goals_lightly = flattenGoals flags_flatten_backwards_goal flags_flatten_nonground False False hints obligs
-      | flags_flatten_all = flattenGoals flags_flatten_backwards_goal flags_flatten_nonground True True hints obligs
-      | flags_flatten_goals = flattenGoals flags_flatten_backwards_goal flags_flatten_nonground False True hints obligs
+      | flags_flatten_goals_lightly = flattenGoals flags_flatten_backwards_goal flags_flatten_nonground False False flags_flatten_every hints obligs
+      | flags_flatten_all = flattenGoals flags_flatten_backwards_goal flags_flatten_nonground True True flags_flatten_every hints obligs
+      | flags_flatten_goals = flattenGoals flags_flatten_backwards_goal flags_flatten_nonground False True flags_flatten_every hints obligs
       | otherwise = obligs
     obligs2
       | flags_distributivity_heuristic = addDistributivityHeuristic hints obligs1
