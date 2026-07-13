@@ -51,7 +51,7 @@ common executable-stuff
                        containers,
                        pretty,
                        split,
-                       jukebox >= 0.5.10,
+                       jukebox >= 0.5.11,
                        ansi-terminal >= 0.9,
                        symbol,
                        hashable,
