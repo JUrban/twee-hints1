@@ -5,4 +5,4 @@ vmem=$(ulimit -v)
 # cpus+2: one for Twee master process, and one for luck
 vmem=$((vmem/(cpus+2)))
 ulimit -v $vmem
-exec ./twee $cpus --quiet $*
+exec ./twee $cpus $PWD/stitch --quiet $*

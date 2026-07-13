@@ -47,7 +47,8 @@ raceStdout xs = do
               loop
         loop
 
-variants :: [[String]]
+variants :: FilePath -> [[String]]
+{-
 variants =
   map words
   ["--lhs-weight 1 --flip-ordering --normalise-queue-percent 10 --cp-renormalise-threshold 10 --complete-subsets --ground-joining-incomplete-limit 15",
@@ -59,8 +60,19 @@ variants =
    "--set-join --lhs-weight 1 --no-flatten-goal --complete-subsets --goal-heuristic",
    "--no-kbo-weight0-unary --kbo-weight0 --no-flatten-goal"]
   -- "--random-mode --random-mode-goal-directed --no-flatten-goal --no-connectedness --no-ground-joining"]
+-}
+variants stitch =
+  map words
+  ["--lhs-weight 1 --flip-ordering --normalise-queue-percent 10 --cp-renormalise-threshold 10 --complete-subsets --ground-joining-incomplete-limit 15 --flatten-every 2",
+   "--no-flatten-goal",
+   "--stitch " ++ stitch ++ " --hint-skel-cost 0 --hint-skel-factor 0.5",
+   "--lhs-weight 9 --flip-ordering --complete-subsets --normalise-queue-percent 10 --cp-renormalise-threshold 10",
+   "--flatten --complete-subsets",
+   "--flatten-regeneralise",
+   "--stitch " ++ stitch ++ " --hint-skel-cost 0 --hint-skel-factor 0.5 --no-flatten-goal",
+   "--lhs-weight 1 --flip-ordering --normalise-queue-percent 10 --cp-renormalise-threshold 10 --complete-subsets --ground-joining-incomplete-limit 15 --flatten-regeneralise"]
 
 main = do
   hSetBuffering stdout LineBuffering
-  (n:args) <- getArgs
-  raceStdout [(unwords variant, withArgs (args ++ variant) SequentialMain.main) | variant <- take (read n) variants]
+  (n:stitch:args) <- getArgs
+  raceStdout [(unwords variant, withArgs (args ++ variant) SequentialMain.main) | variant <- take (read n) (variants stitch)]
