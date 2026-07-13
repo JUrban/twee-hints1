@@ -1085,7 +1085,7 @@ runTwee globals (TSTPFlags tstp) horn precedence config0 flags@MainFlags{..} lat
             Just inp -> go inp
            where
             go Input{source = Unknown} = []
-            go Input{source = Inference _ _ inps} = concatMap (go . inputValue) inps
+            go Input{source = Inference _ _ _ inps} = concatMap (go . inputValue) inps
             go inp@Input{source = FromFile _ _} = [inp]
 
       when flags_explain_encoding $ do
@@ -1248,7 +1248,7 @@ presentToJukebox ctx toEquation axioms goals Presentation{..} =
           -- Check if this looks like the correct clause;
           -- if not, try its ancestors.
           find inp | ok inp = [inp]
-          find Input{source = Inference _ _ inps} =
+          find Input{source = Inference _ _ _ inps} =
             concatMap (find . inputValue) inps
           find _ = []
 
