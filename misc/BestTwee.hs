@@ -14,15 +14,6 @@ import qualified Data.Map as Map
 import Data.Map(Map)
 import Data.FileEmbed
 
-solvedInTime :: NominalDiffTime -> FilePath -> String -> IO Bool
-solvedInTime timeLimit dir prob = do
-  let
-    stdout = dir </> prob ++ ".p.stdout"
-    stderr = dir </> prob ++ ".p.stderr"
-  outTime <- getModificationTime stdout
-  errTime <- getModificationTime stderr
-  return (diffUTCTime outTime errTime <= timeLimit)
-
 notE :: [(String, Double)]
 notE = filter (\(x, _) -> '+' `notElem` x) [
   ("GRP702+1", 0.06), ("GRP715+1", 0.06), ("GRP660+2", 0.12), ("GRP660+3", 0.12),
@@ -54,10 +45,12 @@ notE = filter (\(x, _) -> '+' `notElem` x) [
 ratings :: Map String Double
 ratings =
   Map.fromList
-    [ (name, read rating)
+    [ (strip ".p" name, read rating)
     | [name, rating] <- map words (lines input)]
   where
     input = $(embedStringFile "ratings")
+    strip suf str
+      | suf `isSuffixOf` str = take (length str - length suf) str
 
 problemBonus :: (Int, Int, Int, Int, Int, Int) -> String -> Int
 problemBonus (b0, b1, b2, b3, b4, b5) p =
@@ -90,15 +83,12 @@ bonuses =
    ("rating 1", (0, 0, 0, 0, 0, 1))]
 
 readResults ok = do
-  filenames <- glob "/home/nick/twee-out/*/times"
+  filenames <- glob "results/*/times"
   fmap (filter (\(x, _) -> x `notElem` banned)) $ forM filenames $ \filename -> do
     let name = takeFileName (takeDirectory filename)
     let unpack xs = (takeBaseName name, read time :: Double) where [name, time] = words xs
     solved <- filter (ok . fst) . map unpack . lines <$> readFile filename
     let solvedInTime t = [name | (name, time) <- solved, time < t]
---    fast <- filterM (solvedInTime 120 directory) solved
---    med  <- filterM (solvedInTime 240 directory) solved
---    slow <- filterM (solvedInTime 600 directory) solved
     let fast = solvedInTime 120
     let med  = solvedInTime 210
     let slow = solvedInTime (1/0)
