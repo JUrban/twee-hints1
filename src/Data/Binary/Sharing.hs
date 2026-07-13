@@ -1,7 +1,7 @@
 -- | A serialisation library with support for sharing. Built on top of binary.
 
 {-# LANGUAGE ConstraintKinds, GADTs, DerivingVia, TypeSynonymInstances, FlexibleInstances, DefaultSignatures, DeriveAnyClass, DeriveFunctor, TupleSections #-}
-module Data.Binary.Sharing(Binary(..), Shared(..), Put, PutM, encode, runPut, liftPut, unliftPut, Get, decode, runGet, liftGet, unliftGet, putList, getList, putWord8, getWord8, putInt8, getInt8, putIntegral, getIntegral, ReadShowBinary(..)) where
+module Data.Binary.Sharing(Binary(..), Shared(..), Put, PutM, encode, encodeFile, runPut, liftPut, unliftPut, Get, decode, decodeFile, runGet, liftGet, unliftGet, putList, getList, putWord8, getWord8, putInt8, getInt8, putIntegral, getIntegral, ReadShowBinary(..)) where
 import qualified Data.Binary as S
 import qualified Data.Binary.Get as S
 import qualified Data.Binary.Put as S
@@ -76,6 +76,10 @@ runPut = S.runPut . unliftPut
 encode :: Binary a => a -> BS.ByteString
 encode = runPut . put
 
+-- | Serialise a value to a file.
+encodeFile :: Binary a => FilePath -> a -> IO ()
+encodeFile path = BS.writeFile path . encode
+
 -- | A deserialiser.
 newtype Get a = Get { unGet :: Store -> S.Get (a, Store) } deriving Functor
 instance Applicative Get where
@@ -106,6 +110,10 @@ runGet = S.runGet . unliftGet
 -- | Deserialise a value.
 decode :: Binary a => BS.ByteString -> a
 decode = runGet get
+
+-- | Deserialise a value from a file.
+decodeFile :: Binary a => FilePath -> IO a
+decodeFile path = decode <$> BS.readFile path
 
 ----------------------------------------------------------------------
 -- The sharing primitive.
