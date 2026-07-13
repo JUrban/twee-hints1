@@ -864,25 +864,15 @@ addHintRulesPairs config rule state =
 
 {-# INLINEABLE addHintRulePairs #-}
 addHintRulePairs :: Function f => Config f -> Rule f -> Active f -> State f -> State f
-addHintRulePairs _config _rule _active state =
-  state
-  {-
+addHintRulePairs config rule active state =
   foldl' considerOverlap state (overlaps (Index.empty :: Index f (Rule f)) [makeActive rule] active)
     where
       -- hack: need to turn the turn into an Active to invoke 'overlaps'
-      makeActive rule = Active 0 (Info 0 IntSet.empty) rule Nothing (rule_proof rule) (modelFromOrder []) (positionsRule rule)
-      considerOverlap state Overlap{..}
-        -- Only consider if the hint is the inner rule, i.e. we have an instance
-        -- of the active
-        | active_rule overlap_rule2 == rule =
-          -- considerNorm (result t . normaliseTerm state) t u $
-          considerNorm (simplifyTerm state) t u $
-          state
-        | otherwise = state
+      makeActive rule = Active 0 (Info (Depth 0) IntSet.empty) rule Nothing (rule_proof rule) (modelFromOrder []) (positionsRule rule)
+      considerOverlap state Overlap{..} = considerNorm (simplifyTerm state) t u state
         where
           t = eqn_lhs overlap_eqn
           u = eqn_rhs overlap_eqn
-          --t = overlap_top
 
       -- t: term we are considering adding a hint for
       -- u: version of the term where perhaps a hint has already been added
@@ -902,8 +892,6 @@ addHintRulePairs _config _rule _active state =
           u' = norm u
           st = scoreTerm config (st_hints state) t'
           su = scoreTerm config (st_hints state) u'
-  -}
-
 
 {-# INLINEABLE addHintHintsPairs #-}
 addHintHintsPairs :: Function f => Config f -> Rule f -> State f -> State f
