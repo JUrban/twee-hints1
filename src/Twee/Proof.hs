@@ -80,6 +80,9 @@ data Axiom f =
     -- | A description of the axiom.
     -- Has no semantic meaning; for convenience only.
     axiom_name :: !String,
+    -- | Human-readable names for the variables of the axiom.
+    -- Has no semantic meaning; for convenience only.
+    axiom_vars :: !(Maybe (Map Var String)),
     -- | The equation which the axiom asserts.
     axiom_eqn :: !(Equation f) }
   deriving (Eq, Ord, Show, Generic, Hashable)
@@ -174,10 +177,10 @@ instance (Intern f, PrettyTerm f) => Pretty (Axiom f) where
     pPrintTuple [pPrint axiom_number, text axiom_name, pPrint axiom_eqn]
 
 instance (Intern f, Binary f) => Binary (Axiom f) where
-  put Axiom{..} = Binary.put (Shared (axiom_number, axiom_name, axiom_eqn))
+  put Axiom{..} = Binary.put (Shared (axiom_number, axiom_name, axiom_vars, axiom_eqn))
   get = do
-    Shared (num, name, eqn) <- Binary.get
-    return (Axiom num name eqn)
+    Shared (num, name, vars, eqn) <- Binary.get
+    return (Axiom num name vars eqn)
 
 instance (Intern f, Binary f) => Binary (Proof f) where
   put = Binary.put . Shared . derivation
@@ -531,6 +534,7 @@ data ProvedGoal f =
     -- In general, subst pg_witness_hint pg_goal_hint == equation pg_proof.
     -- For non-existential goals, pg_goal_hint == equation pg_proof
     -- and pg_witness_hint is the empty substitution.
+    pg_vars         :: Maybe (Map Var String),
     pg_goal_hint    :: Equation f,
     pg_witness_hint :: Subst f }
   deriving (Show, Generic, Binary)
@@ -542,6 +546,7 @@ provedGoal number name proof =
     pg_number = number,
     pg_name = name,
     pg_proof = proof,
+    pg_vars = Nothing,
     pg_goal_hint = equation proof,
     pg_witness_hint = emptySubst }
 
@@ -861,19 +866,19 @@ pPrintSubst sub =
 pPrintPresentation :: forall f. Function f => Config f -> Presentation f -> Doc
 pPrintPresentation config (Presentation axioms lemmas goals) =
   vcat $ intersperse (text "") $
-    vcat [ describeEquation "Axiom" (axiomNum axiom) (Just name) eqn $$
+    vcat [ describeEquation "Axiom" (axiomNum axiom) (Just name) vars eqn $$
            ppAxiomUses axiom
-         | axiom@(Axiom _ name eqn) <- axioms,
+         | axiom@(Axiom _ name vars eqn) <- axioms,
            not (invisible eqn) ]:
-    [ pp "Lemma" (lemmaNum p) Nothing (equation p) emptySubst p
+    [ pp "Lemma" (lemmaNum p) Nothing (equation p) Nothing emptySubst p
     | p <- lemmas,
       not (invisible (equation p)) ] ++
-    [ pp "Goal" (show num) (Just pg_name) pg_goal_hint pg_witness_hint pg_proof
+    [ pp "Goal" (show num) (Just pg_name) pg_goal_hint pg_vars pg_witness_hint pg_proof
     | (num, ProvedGoal{..}) <- zip [1..] goals ]
   where
-    pp kind n mname eqn witness p =
-      describeEquation kind n mname eqn $$
-      ppWitness witness $$
+    pp kind n mname eqn names witness p =
+      describeEquation kind n mname names eqn $$
+      ppWitness names witness $$
       text "Proof:" $$
       pPrintLemma config axiomNum lemmaNum p
 
@@ -882,14 +887,18 @@ pPrintPresentation config (Presentation axioms lemmas goals) =
     axiomNum x = show (fromJust (Map.lookup x axiomNums))
     lemmaNum x = show (fromJust (Map.lookup x lemmaNums))
 
-    ppWitness sub
+    ppWitness names sub
       | sub == emptySubst = pPrintEmpty
       | otherwise =
           vcat [
             text "The goal is true when:",
             nest 2 $ vcat
-              [ pPrint x <+> text "=" <+> pPrint t
-              | (x, t) <- substToList sub ],
+              [ text name <+> text "=" <+> pPrint t
+              | (x, t) <- substToList sub,
+                let name =
+                      case names of
+                        Nothing -> prettyShow x
+                        Just names -> fromJust (Map.lookup x names) ],
             if minimal `elem` funs sub then
               text "where" <+> doubleQuotes (pPrint (minimal :: Sym f)) <+>
               text "stands for an arbitrary term of your choice."
@@ -919,13 +928,30 @@ pPrintPresentation config (Presentation axioms lemmas goals) =
 -- Used both here and in the main file.
 describeEquation ::
   Function f =>
-  String -> String -> Maybe String -> Equation f -> Doc
-describeEquation kind num mname eqn =
+  String -> String -> Maybe String -> Maybe (Map Var String) -> Equation f -> Doc
+describeEquation kind num mname mvars eqn =
   text kind <+> text num <#>
   (case mname of
      Nothing -> text ""
      Just name -> text (" (" ++ name ++ ")")) <#>
-  text ":" <+> pPrint eqn <#> text "."
+  text ":" <+> pPrint (prettyVars eqn) <#> text "."
+  where
+    var x =
+      case mvars of
+        Nothing -> prettyShow x
+        Just vars -> fromJust (Map.lookup x vars)
+    prettyVars (t :=: u) = build (pv t) :=: build (pv u)
+    pv (Var x) = con (Sym (PrettyVar (var x)))
+    pv (App (Sym f) ts) = app (Sym (PrettyFunc f)) (map pv (unpack ts))
+
+data PrettyVars f = PrettyVar String | PrettyFunc f
+  deriving (Eq, Generic, Hashable)
+instance Pretty f => Pretty (PrettyVars f) where
+  pPrint (PrettyVar x) = text x
+  pPrint (PrettyFunc f) = pPrint f
+instance PrettyTerm f => PrettyTerm (PrettyVars f) where
+  termStyle (PrettyVar _) = uncurried
+  termStyle (PrettyFunc f) = termStyle f
 
 ----------------------------------------------------------------------
 -- Making proofs of existential goals more readable.
@@ -964,16 +990,17 @@ decodeGoal :: Function f => Config f -> ProvedGoal f -> ProvedGoal f
 decodeGoal config pg =
   case maybeDecodeGoal config pg of
     Nothing -> pg
-    Just (name, witness, goal, deriv) ->
+    Just (name, vars, witness, goal, deriv) ->
       checkProvedGoal $
       pg {
         pg_name = name,
         pg_proof = certify deriv,
+        pg_vars = vars,
         pg_goal_hint = goal,
         pg_witness_hint = witness }
 
 maybeDecodeGoal :: forall f. Function f =>
-  Config f -> ProvedGoal f -> Maybe (String, Subst f, Equation f, Derivation f)
+  Config f -> ProvedGoal f -> Maybe (String, Maybe (Map Var String), Subst f, Equation f, Derivation f)
 maybeDecodeGoal Config{..} ProvedGoal{..}
   | not cfg_eliminate_existentials_coding = Nothing
   --  N.B. presentWithGoals takes care of expanding any lemma which mentions
@@ -996,11 +1023,11 @@ maybeDecodeGoal Config{..} ProvedGoal{..}
     decodeReflexivity _ = Nothing
 
     -- Detect $equals(t, u) = $false.
-    decodeConjecture :: Derivation f -> Maybe (String, Equation f, Subst f)
+    decodeConjecture :: Derivation f -> Maybe (String, Maybe (Map Var String), Equation f, Subst f)
     decodeConjecture (UseAxiom Axiom{..} sub) = do
       guard (isFalseTerm (eqn_rhs axiom_eqn))
       (t, u) <- decodeEquality (eqn_lhs axiom_eqn)
-      return (axiom_name, t :=: u, sub)
+      return (axiom_name, axiom_vars, t :=: u, sub)
     decodeConjecture _ = Nothing
 
     extract (p:ps) = do
@@ -1012,10 +1039,10 @@ maybeDecodeGoal Config{..} ProvedGoal{..}
     cont p1 p2 (p:ps)
       | Just t <- decodeReflexivity p =
         cont (Refl t) (Refl t) ps
-      | Just (name, eqn, sub) <- decodeConjecture p =
+      | Just (name, vars, eqn, sub) <- decodeConjecture p =
         -- If p1: s=t and p2: s=u
         -- then symm p1 `trans` p2: t=u.
-        return (name, sub, eqn, symm p1 `trans` p2)
+        return (name, vars, sub, eqn, symm p1 `trans` p2)
       | Cong eq [p1', p2'] <- p, isEquals eq =
         cont (p1 `trans` p1') (p2 `trans` p2') ps
     cont _ _ _ = Nothing

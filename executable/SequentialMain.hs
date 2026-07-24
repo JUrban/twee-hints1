@@ -883,7 +883,11 @@ runTwee globals (TSTPFlags tstp) horn precedence config0 flags@MainFlags{..} lat
         xs = usort (vars t)
         ids = Map.fromList (zip xs [0..])
     toEquation (t, u) =
-      canonicalise (toTerm var t :=: toTerm var u)
+      toTerm var t :=: toTerm var u
+      where
+        var = varNums (t, u)
+    equationVars (t, u) =
+      Map.fromList [(V n, base (name x)) | x <- vars (t, u), let n = var x]
       where
         var = varNums (t, u)
 
@@ -903,7 +907,7 @@ runTwee globals (TSTPFlags tstp) horn precedence config0 flags@MainFlags{..} lat
       [ goal n pre_name (toEquation pre_eqn)
       | (n, PreEquation{..}) <- zip [1..] goals0 ]
     axioms =
-      [ Axiom n pre_name (toEquation pre_eqn)
+      [ Axiom n pre_name (Just (equationVars pre_eqn)) (toEquation pre_eqn)
       | (n, PreEquation{..}) <- zip [1..] axioms0 ]
     defs =
       [ axiom
@@ -1006,11 +1010,11 @@ runTwee globals (TSTPFlags tstp) horn precedence config0 flags@MainFlags{..} lat
   forM_ axioms $ \Axiom{..} ->
     say $ show $ nest 2 $
       describeEquation "Axiom"
-        (show axiom_number) (Just axiom_name) axiom_eqn
+        (show axiom_number) (Just axiom_name) axiom_vars axiom_eqn
   forM_ goals $ \Goal{..} ->
     say $ show $ nest 2 $
       describeEquation "Goal"
-        (show goal_number) (Just goal_name) goal_eqn
+        (show goal_number) (Just goal_name) Nothing goal_eqn
   line
 
   state <-
@@ -1122,6 +1126,11 @@ runTwee globals (TSTPFlags tstp) horn precedence config0 flags@MainFlags{..} lat
       putStrLn ""
   
     when (tstp && flags_formal_proof) $ do
+      forM_ (pres_goals pres) $ \ProvedGoal{..} ->
+        unless (pg_witness_hint == emptySubst) $ do
+          let varName x = fromJust (Map.lookup x (fromJust pg_vars))
+          let answer = intercalate ", " [varName x ++ "->" ++ prettyShow t | (x, t) <- substToList pg_witness_hint]
+          putStrLn $ "% SZS answers Tuple [[" ++ answer ++ "]|_] for " ++ pg_name
       putStrLn "% SZS output start CNFRefutation"
       print $ pPrintProof $
         presentToJukebox ctx (curry toEquation)
