@@ -23,7 +23,7 @@ prop_reducesWith_correct model (Pair t u) sub =
   counterexample ("Model: " ++ prettyShow model) $
   counterexample ("Subst: " ++ prettyShow sub) $
   conjoin $ do
-    let cp = CriticalPair (t :=: u) Nothing (axiom (Axiom 0 "dummy" (t :=: u)))
+    let cp = CriticalPair (t :=: u) Nothing (axiom (Axiom 0 "dummy" Nothing (t :=: u)))
     r@Rule{lhs = t', rhs = u'} <- map (flip orient (certify (cp_proof cp))) (map cp_eqn (split cp))
     return $
       counterexample ("LHS:   " ++ prettyShow t') $
