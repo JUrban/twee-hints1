@@ -630,7 +630,7 @@ makeContext hints prob = run (hints, prob) $ \(_, prob) -> do
 flattenGoals :: Int -> Bool -> Bool -> Bool -> Int -> [Jukebox.Term] -> Problem Clause -> Problem Clause
 flattenGoals backwardsGoal flattenNonGround flattenAll full depthMod hints prob =
   run (hints, prob) $ \(_, prob) -> do
-    let ts = usort $ extraTerms prob
+    let ts = filter depthOk $ usort $ extraTerms prob
     cs <- mapM define ts
     return (prob ++ cs)
   where
