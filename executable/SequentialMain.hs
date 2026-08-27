@@ -1099,7 +1099,7 @@ runTwee globals (TSTPFlags tstp) horn precedence config0 flags@MainFlags{..} lat
            where
             go Input{source = Unknown} = []
             go Input{source = Inference _ _ _ inps} = concatMap (go . inputValue) inps
-            go inp@Input{source = FromFile _ _} = [inp]
+            go inp@Input{source = FromFile _ _ _} = [inp]
 
       when flags_explain_encoding $ do
         putStrLn "Take the following subset of the input axioms:"
