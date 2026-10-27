@@ -54,6 +54,7 @@ data MainFlags =
   MainFlags {
     flags_proof :: Bool,
     flags_proof_on_saturation :: Bool,
+    flags_proof_all_rules :: Bool,
     flags_trace :: Maybe (String, String),
     flags_formal_proof :: Bool,
     flags_explain_encoding :: Bool,
@@ -90,6 +91,11 @@ parseMainFlags = do
     expert $
     inGroup "Output options" $
     bool "proof-on-saturation" ["Produce proofs of all rewrite rules on saturation (off by default)."]
+    False
+  flags_proof_all_rules <-
+    expert $
+    inGroup "Output options" $
+    bool "proof-all-rules" ["Produce proofs of all rewrite rules (off by default)."]
     False
   flags_trace <-
     expert $
@@ -1064,7 +1070,14 @@ runTwee globals (TSTPFlags tstp) horn precedence config0 flags@MainFlags{..} lat
           (cfg_proof_presentation config){cfg_all_lemmas = True}
         | otherwise =
           cfg_proof_presentation config
-      pres = present cfg_present [] $ map (eliminateDefinitionsFromGoal defs) $ solutions state
+      score rule =
+        (KBO.size (lhs rule), lhs rule,
+         KBO.size (rhs rule), rhs rule)
+      actives =
+        sortBy (comparing (score . active_rule)) $
+        IntMap.elems (st_active_set state)
+      lemmas = if flags_proof_all_rules then map active_proof actives else []
+      pres = present cfg_present lemmas $ map (eliminateDefinitionsFromGoal defs) $ solutions state
 
     case flags_dump_proof of
       Nothing -> return ()
