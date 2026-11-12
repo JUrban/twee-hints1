@@ -147,12 +147,13 @@ class Loop:
             ax = set(givenlib.key(l, r, sig) for l, r in givenlib.axioms(name))
             pos = set(givenlib.key(l, r, sig) for l, r in L + G)
             rows = []
-            for idx, (l, r) in enumerate(givenlib.parse_given(out)):
-                if l == r:
+            for idx, x in enumerate(givenlib.parse_given_parents(out)):
+                if x is None or x[0] == x[1]:
                     continue
+                l, r, p1, p2 = x
                 k = givenlib.key(l, r, sig)
                 lab = -1 if k in ax else (1 if k in pos else 0)
-                rows.append(f'{lab}\t{idx}\t{k[0]}\t{k[1]}\n')
+                rows.append(f'{lab}\t{idx}\t{k[0]}\t{k[1]}\t{p1}\t{p2}\n')
             with open(os.path.join(self.dir, 'given', name), 'w') as gf:
                 gf.writelines(rows)
             res = hs

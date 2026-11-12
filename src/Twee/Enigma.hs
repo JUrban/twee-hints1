@@ -6,11 +6,13 @@
 -- @hints/enigfeats.py@, which produces the training data.
 {-# LANGUAGE BangPatterns, RecordWildCards #-}
 module Twee.Enigma(
-  Tree, Forest, parseForest, predictRaw,
+  Tree, Forest, parseForest, parseForestBin, predictRaw,
   eqnFeatures, RuleModel(..), ruleModelRow, ruleModelRaw) where
 
 import Data.Array.Unboxed
 import Data.Bits
+import Data.Char(isDigit)
+import Data.Ratio((%))
 import Data.List
 import qualified Data.Map.Strict as Map
 import Data.Map.Strict(Map)
@@ -19,6 +21,9 @@ import Data.IntMap.Strict(IntMap)
 import qualified Data.Set as Set
 import Data.Set(Set)
 import Twee.Base
+import qualified Data.ByteString.Lazy as BL
+import Data.Binary.Get
+import Control.Monad(replicateM)
 import Data.Intern(unintern)
 
 data Tree =
@@ -44,7 +49,7 @@ parseForest str = map mk (blocks (lines str))
       | otherwise = blocks ls
     mk b =
       let kv = Map.fromList [ (k, drop 1 v) | x <- b, let (k, v) = break (== '=') x, not (null v) ]
-          ints k = maybe [] (map read . words) (Map.lookup k kv) :: [Int]
+          ints k = maybe [] (map readI . words) (Map.lookup k kv) :: [Int]
           dbls k = maybe [] (map readD . words) (Map.lookup k kv) :: [Double]
           arr :: IArray UArray e => [e] -> UArray Int e
           arr xs = listArray (0, length xs - 1) xs
@@ -55,21 +60,39 @@ parseForest str = map mk (blocks (lines str))
            t_left = arr (ints "left_child"),
            t_right = arr (ints "right_child"),
            t_leaf = arr (dbls "leaf_value") }
-    readD s = case s of
-      "inf" -> 1/0
-      "-inf" -> -1/0
-      ('+':r) -> readD r
-      _ | '.' `elem` s || 'e' `elem` s || 'E' `elem` s -> read (fixup s)
-        | otherwise -> fromIntegral (read s :: Integer)
-    -- Haskell's read does not accept "1e-35" without a leading digit
-    -- dot form issues like ".5" or "5."; normalise those.
-    fixup s =
-      let (sign, r) = case s of ('-':t) -> ("-", t); _ -> ("", s)
-          r1 = if "." `isPrefixOf` r then '0':r else r
-          (m, e) = break (`elem` "eE") r1
-          m1 = if "." `isSuffixOf` m then m ++ "0" else m
-          m2 = if '.' `elem` m1 then m1 else m1 ++ ".0"
-      in sign ++ m2 ++ e
+    readI ('-':r) = negate (readI r)
+    readI r = foldl' (\ !n c -> n * 10 + (fromEnum c - 48)) 0 r
+    readD ('-':r) = negate (readD r)
+    readD ('+':r) = readD r
+    readD "inf" = 1/0
+    readD r =
+      let (ip, r1) = span isDigit r
+          (fp, r2) = case r1 of ('.':t) -> span isDigit t; _ -> ("", r1)
+          ex = case r2 of
+                 (c:t) | c == 'e' || c == 'E' -> readI (dropWhile (== '+') t)
+                 _ -> 0
+          mant = foldl' (\ !n c -> n * 10 + toInteger (fromEnum c - 48)) 0 (ip ++ fp) :: Integer
+          e = ex - length fp
+      in if e >= 0 then fromInteger (mant * 10 ^ e) else fromRational (mant % (10 ^ negate e))
+
+-- | Parse the binary forest format written by hints/lgb2bin.py.
+parseForestBin :: BL.ByteString -> Forest
+parseForestBin = runGet $ do
+  n <- getInt32le
+  replicateM (fromIntegral n) $ do
+    ns <- fromIntegral <$> getInt32le
+    nl <- fromIntegral <$> getInt32le
+    let ints k = map fromIntegral <$> replicateM k getInt32le
+        arr :: IArray UArray e => Int -> [e] -> UArray Int e
+        arr k xs = listArray (0, k - 1) xs
+    sf <- ints ns
+    th <- replicateM ns getDoublele
+    dt <- ints ns
+    lc <- ints ns
+    rc <- ints ns
+    lv <- replicateM nl getDoublele
+    return Tree { t_feat = arr ns sf, t_thr = arr ns th, t_dt = arr ns dt,
+                  t_left = arr ns lc, t_right = arr ns rc, t_leaf = arr nl lv }
 
 -- | Raw score (sum of leaf values) of a forest on a sparse feature vector.
 predictRaw :: Forest -> IntMap Double -> Double
@@ -144,11 +167,12 @@ data RuleModel f =
     rm_name      :: f -> String,
     rm_threshold :: Double,          -- on the raw score
     rm_penalty   :: Float,
-    rm_debug     :: Bool }
+    rm_debug     :: Bool,
+    rm_parents   :: Bool }           -- the vocabulary has a "p:" block
 
 -- | The feature row of a rule (equation) added as the idx-th rule.
-ruleModelRow :: RuleModel f -> Int -> Term f -> Term f -> IntMap Double
-ruleModelRow RuleModel{..} idx t u =
+ruleModelRow :: RuleModel f -> Int -> Term f -> Term f -> [(Term f, Term f)] -> IntMap Double
+ruleModelRow RuleModel{..} idx t u parents =
   let hf = eqnFeatures rm_name t u
       sh = [ k | k <- Map.keys hf, k `Set.member` rm_gkeys ]
       cnt c = fromIntegral (length (filter ((== c) . head) sh))
@@ -157,7 +181,9 @@ ruleModelRow RuleModel{..} idx t u =
         [(0, cnt 'V'), (1, cnt 'H'), (2, cnt 'C' / fromIntegral (max 1 ncs)),
          (3, log (1 + fromIntegral idx))]
       cs = [ (i, v) | (k, v) <- Map.toList hf, Just i <- [Map.lookup ("c:" ++ k) rm_vocab] ]
-  in IntMap.fromList (fixed ++ cs ++ rm_goal)
+      pf = Map.unionsWith (+) [ eqnFeatures rm_name pt pu | rm_parents, (pt, pu) <- parents ]
+      ps = [ (i, v) | (k, v) <- Map.toList pf, Just i <- [Map.lookup ("p:" ++ k) rm_vocab] ]
+  in IntMap.fromList (fixed ++ cs ++ ps ++ rm_goal)
 
-ruleModelRaw :: RuleModel f -> Int -> Term f -> Term f -> Double
-ruleModelRaw rm idx t u = predictRaw (rm_forest rm) (ruleModelRow rm idx t u)
+ruleModelRaw :: RuleModel f -> Int -> Term f -> Term f -> [(Term f, Term f)] -> Double
+ruleModelRaw rm idx t u parents = predictRaw (rm_forest rm) (ruleModelRow rm idx t u parents)

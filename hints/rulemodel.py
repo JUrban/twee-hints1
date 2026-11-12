@@ -18,12 +18,19 @@ import enigfeats, hintsel
 
 NFIX = 4  # ovlV, ovlH, ovlC, logidx
 
-def load(path):
-    rows = []
+def load(path, parents=False):
+    """Rows (label, idx, lhs, rhs); with parents=True also the parents'
+    equations as a fifth element (list of (lhs, rhs))."""
+    rows = []; byidx = {}; par = []
     for line in open(path):
-        lab, idx, l, r = line.rstrip('\n').split('\t')
-        rows.append((int(lab), int(idx), l, r))
-    return rows
+        f = line.rstrip('\n').split('\t')
+        lab, idx, l, r = int(f[0]), int(f[1]), f[2], f[3]
+        byidx[idx] = (l, r)
+        rows.append((lab, idx, l, r))
+        par.append((int(f[4]), int(f[5])) if len(f) >= 6 else (0, 0))
+    if not parents:
+        return rows
+    return [x + ([byidx[p - 1] for p in ps if p > 0 and p - 1 in byidx],) for x, ps in zip(rows, par)]
 
 def goal_feats(name):
     f = collections.Counter()
@@ -35,20 +42,30 @@ def goal_feats(name):
     return f
 
 class RuleModel:
-    def __init__(self):
+    def __init__(self, parents=False):
         self.vocab = enigfeats.Vocab()
         self.model = None
+        self.parents = parents
 
     def rows(self, name, items):
-        """items: list of (idx, lhs, rhs). Returns CSR parts."""
+        """items: list of (idx, lhs, rhs[, parents]). Returns CSR parts."""
         g = goal_feats(name)
         gcols = [(self.vocab.get('g:' + k), v) for k, v in g.items()]
         gcols = [(i, v) for i, v in gcols if i is not None]
         gkeys = set(k for k in g if k[0] in 'VHC')
         data, ind, ptr = [], [], [0]
-        for idx, l, r in items:
+        for it in items:
+            idx, l, r = it[:3]
             hf = enigfeats.features(l, r)
             cols = {}
+            if self.parents and len(it) > 3:
+                pf = collections.Counter()
+                for pl, pr in it[3]:
+                    pf.update(enigfeats.features(pl, pr))
+                for k, v in pf.items():
+                    i = self.vocab.get('p:' + k)
+                    if i is not None:
+                        cols[NFIX + i] = v
             sh = [k for k in hf if k in gkeys]
             cols[0] = sum(1 for k in sh if k[0] == 'V')
             cols[1] = sum(1 for k in sh if k[0] == 'H')
@@ -79,7 +96,7 @@ class RuleModel:
         parts, ys = [], []
         for n in names:
             path = givendir[n] if isinstance(givendir, dict) else os.path.join(givendir, n)
-            rows = [x for x in load(path) if x[0] >= 0]
+            rows = [x for x in load(path, self.parents) if x[0] >= 0]
             pos = [x for x in rows if x[0] == 1]
             neg = [x for x in rows if x[0] == 0]
             if not pos:
@@ -87,7 +104,7 @@ class RuleModel:
             if len(neg) > negmax:
                 neg = rnd.sample(neg, negmax)
             sel = pos + neg
-            parts.append(self.rows(n, [(i, l, r) for _, i, l, r in sel]))
+            parts.append(self.rows(n, [x[1:] for x in sel]))
             ys.extend(x[0] for x in sel)
         self.vocab.frozen = True
         X = self.matrix(parts)
@@ -127,6 +144,7 @@ def main():
     ap.add_argument('--leaves', type=int, default=63)
     ap.add_argument('--negmax', type=int, default=400)
     ap.add_argument('--all', action='store_true')
+    ap.add_argument('--parents', action='store_true', help='add the parents\' features (p: block)')
     ap.add_argument('--test-origs', help='comma-separated originals to hold out')
     ap.add_argument('--save'); ap.add_argument('--vocab')
     a = ap.parse_args()
@@ -144,17 +162,17 @@ def main():
     train = [n for n in names if n.split('__goal_')[0] not in test_o]
     test = [n for n in names if n.split('__goal_')[0] in test_o]
     print('test originals', sorted(test_o))
-    m = RuleModel()
+    m = RuleModel(a.parents)
     print('train', m.train(paths, train, a.negmax, a.rounds, a.leaves, a.seed))
     if a.save:
         m.save(a.save, a.vocab or a.save + '.vocab')
     random.shuffle(test)
     aucs = []; stats = collections.defaultdict(list)
     for n in test[:a.ntest]:
-        rows = [x for x in load(paths[n]) if x[0] >= 0]
+        rows = [x for x in load(paths[n], a.parents) if x[0] >= 0]
         if len(rows) < 20 or not any(x[0] == 1 for x in rows):
             continue
-        y = np.array([x[0] for x in rows]); s = m.predict(n, [(i, l, r) for _, i, l, r in rows])
+        y = np.array([x[0] for x in rows]); s = m.predict(n, [x[1:] for x in rows])
         v = auc(y, s)
         if v is not None:
             aucs.append(v)

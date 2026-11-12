@@ -195,6 +195,48 @@ mbol_com, nil3_15) that are unsolved at 2 s, run at 8 s:
 mbol_com gets 0 with the model, against 4 without. Its theory is unlike
 the 7 training originals. Next step: train on many more originals.
 
+### More training data, and ProofWatch
+
+* **Model rm2** is trained on 30 more training originals (12,414 problems;
+  7059 solved at 2 s without guidance) plus dev10's 7 training originals.
+  On the 3 held-out originals: AUC 0.975 (0.969 before). At threshold 0.1
+  it keeps 99.5% of proof rules and rejects 61.6% of the others. Online on
+  the 345: 65 solved at threshold 0.1 and 69 at 0.2, both with kNN hints.
+  mbol_com is still weak (0–2 against 4). The union of all variants is 93.
+* **ProofWatch** (`--eqhint-watch F`). Each hint carries the neighbour
+  proofs it comes from, as a 4th column of the hints file. Its factor moves
+  from F to its own factor (0.01) as its best source proof gets matched.
+  With F = 0.3, on the same 345 with rm2: 67 solved, against 69 without
+  (+2/−4). This setting does not help.
+
+### Fixes after the first holdout run, and tuning
+
+The first holdout loop (H1: rm3, threshold 0.2, penalty 2, text model)
+solved 3132 at 2 s against 3049 for plain twee. But it lost 123 problems
+that plain twee solves, many in under 0.1 s. Two causes:
+
+* **Loading the text model** took about 0.25 s per run, because Haskell's
+  `read` is slow on about 100k numbers. `lgb2bin.py` now writes a binary
+  forest. It loads in 0.07 s and gives identical predictions.
+* **Repeated deferral.** The same equation, reached through different
+  critical pairs, was deferred up to 18 times. Each equation is now
+  deferred at most once.
+
+Tuning on dev (all 818 goals of the 3 held-out dev10 originals, 2 s, rm2):
+
+| setting | solved |
+|---|---|
+| plain | 473 |
+| threshold 0.1, penalty 2 | 498 (+27/−2) |
+| threshold 0.1, penalty 3 | 499 (+29/−3) |
+| threshold 0.2, penalty 1.5 | 490 |
+| threshold 0.2, penalty 2 | 488 |
+| threshold 0.05, penalty 2 | 488 |
+| threshold 0.5, penalty 1.2 | 476 |
+
+Parent features (ENIGMA's parental blocks, or a cheap Deepire substitute)
+reach AUC 0.971 against 0.969 without them, so they are left off for now.
+
 ## 2c. Long runs: stall cutoff and checkpoints
 
 * `--eqhint-stall N` gives up when no new rule has matched a hint for N

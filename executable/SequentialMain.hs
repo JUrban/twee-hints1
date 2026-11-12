@@ -1092,11 +1092,12 @@ runTwee globals (TSTPFlags tstp) horn precedence config0 flags@MainFlags{..} lat
     case flags_rule_model of
       Nothing -> return Nothing
       Just mfile -> do
-        mstr <- readFile mfile
+        forest <-
+          if ".bin" `isSuffixOf` mfile then parseForestBin <$> BS.readFile mfile
+          else parseForest <$> readFile mfile
         vstr <- maybe (return "") readFile flags_rule_vocab
         gstr <- maybe (return "") readFile flags_rule_goal
         let
-          forest = parseForest mstr
           vocab = Map.fromList [ (k, read c) | l <- lines vstr, (c, '\t':k) <- [break (== '\t') l] ]
           gls = [ (a, b) | l <- lines gstr, (a, '\t':b) <- [break (== '\t') l] ]
           gcols = [ (read a, read b) | (a, b) <- gls, a /= "K" ]
@@ -1109,7 +1110,8 @@ runTwee globals (TSTPFlags tstp) horn precedence config0 flags@MainFlags{..} lat
         return $! length forest `seq` Map.size vocab `seq` Just RuleModel {
           rm_forest = forest, rm_vocab = vocab, rm_goal = gcols, rm_gkeys = gkeys,
           rm_name = conName, rm_threshold = log (p / (1 - p)), rm_penalty = flags_rule_penalty,
-          rm_debug = flags_rule_debug }
+          rm_debug = flags_rule_debug,
+          rm_parents = any ("p:" `isPrefixOf`) (Map.keys vocab) }
   let
     config = config1 { cfg_rule_model = ruleModel }
 
@@ -1336,7 +1338,8 @@ runTwee globals (TSTPFlags tstp) horn precedence config0 flags@MainFlags{..} lat
     putStrLn "HINTS-END"
     when (cfg_log_given config) $ do
       putStrLn "GIVEN-BEGIN"
-      forM_ (reverse (st_given state)) $ \eqn ->
+      forM_ (reverse (st_given state)) $ \(eqn, p1, p2) -> do
+        putStrLn ("% parents " ++ show p1 ++ " " ++ show p2)
         putStrLn (showEqn (fromMaybe eqn (expandGoalConsts (st_eqhints state) eqn)))
       putStrLn "GIVEN-END"
 

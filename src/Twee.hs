@@ -107,9 +107,10 @@ data State f =
     st_queue          :: !(Queue Batch),
     st_hints          :: {-# UNPACK #-} !(Hints f),
     st_eqhints        :: !(EqHints f),
-    st_given          :: [Equation f],
+    st_given          :: [(Equation f, Int, Int)],
+    st_cur_parents    :: !(Int, Int),
     st_cur_passive    :: !(Maybe Passive),
-    st_deferred       :: !(Set.Set (Id, Id, How)),
+    st_deferred       :: !(Set.Set (Equation f)),
     st_ndeferred      :: !Int,
     st_next_active    :: {-# UNPACK #-} !Id,
     st_considered     :: {-# UNPACK #-} !Int64,
@@ -204,6 +205,7 @@ initialState Config{..} =
         hints_next = 0 },
     st_eqhints = emptyEqHints,
     st_given = [],
+    st_cur_parents = (0, 0),
     st_cur_passive = Nothing,
     st_deferred = Set.empty,
     st_ndeferred = 0,
@@ -545,7 +547,7 @@ addActive config state@State{..} active0 =
       message (NewActive mscore active) $
       addActiveOnly config state{st_next_active = st_next_active+1} active
     logGiven st
-      | cfg_log_given config = st{st_given = unorient active_rule : st_given}
+      | cfg_log_given config = st{st_given = (unorient active_rule, fst st_cur_parents, snd st_cur_parents) : st_given}
       | otherwise = st
   in if subsumed (st_joinable, st_complete) st_rules (unorient active_rule) then
     state
@@ -656,10 +658,14 @@ considerUsing rules config@Config{..} state@State{..} info cp0 =
     Left (cp, model)
       | Just rm <- cfg_rule_model,
         Just p <- st_cur_passive,
-        let key = (passive_rule1 p, passive_rule2 p, passive_how p),
+        let key = canonicalise (cp_eqn cp),
         not (key `Set.member` st_deferred),
         let t :=: u = fromMaybe (cp_eqn cp) (expandGoalConsts st_eqhints (cp_eqn cp)),
-        let raw = ruleModelRaw rm (fromIntegral st_next_active - 1) t u,
+        let expand e = fromMaybe e (expandGoalConsts st_eqhints e),
+        let parents = [ (pt, pu) | rm_parents rm, r <- [passive_rule1 p, passive_rule2 p],
+                                   Just a <- [IntMap.lookup (fromIntegral r) st_active_set],
+                                   let pt :=: pu = expand (unorient (active_rule a)) ],
+        let raw = ruleModelRaw rm (fromIntegral st_next_active - 1) t u parents,
         (if rm_debug rm then Debug.Trace.trace ("RULEPRED " ++ show raw ++ " " ++ show (st_next_active - 1) ++ " " ++ prettyShow (t :=: u)) else id) (raw < rm_threshold rm) ->
         state {
           st_cur_passive = Nothing,
@@ -1389,7 +1395,9 @@ complete1 config@Config{..} state
         case dequeue config state of
           (Nothing, state) -> (False, state)
           (Just (info, overlap, _, _, passive), state) ->
-            (True, (consider config state{st_cur_passive = Just passive} info overlap){st_cur_passive = Nothing})
+            (True, (consider config state{st_cur_passive = Just passive,
+                                          st_cur_parents = (fromIntegral (passive_rule1 passive), fromIntegral (passive_rule2 passive))}
+                      info overlap){st_cur_passive = Nothing, st_cur_parents = (0, 0)})
       Just (ReadShowBinary g) -> -- random mode
         let (g1, g2) = Random.split g in
         let state' = state { st_random_seed = Just (ReadShowBinary g2) } in

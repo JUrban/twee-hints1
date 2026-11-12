@@ -26,12 +26,32 @@ def axioms(name):
             out.append(e)
     return out
 
-def parse_given(text):
+def parse_given_parents(text):
+    """[(lhs, rhs, parent1, parent2)] from --print-given output; parents are
+    rule numbers (the rule logged at position k has number k+1), 0 = none."""
     i = text.find('GIVEN-BEGIN'); j = text.find('GIVEN-END')
     if i < 0 or j < 0:
         return []
-    return [e for m in hintlib._hintre.finditer(text[i + 11:j] + 'HINTS-')
-            for e in [hintlib._split_eq(m.group(1))] if e]
+    block = text[i + 11:j]
+    out = []
+    if '% parents' not in block:
+        return [(l, r, 0, 0) for m in hintlib._hintre.finditer(block + 'HINTS-')
+                for e in [hintlib._split_eq(m.group(1))] if e for l, r in [e]]
+    for chunk in block.split('% parents ')[1:]:
+        head, _, rest = chunk.partition('\n')
+        p1, p2 = (int(x) for x in head.split()[:2])
+        a = rest.find('(hint, axiom,'); b = rest.rfind(').')
+        if a < 0 or b < 0:
+            continue
+        e = hintlib._split_eq(rest[a + 13:b])
+        if e:
+            out.append((e[0], e[1], p1, p2))
+        else:
+            out.append(None)
+    return out
+
+def parse_given(text):
+    return [(x[0], x[1]) if x else ('', '') for x in parse_given_parents(text)]
 
 def run(name, a):
     cmd = [a.twee, os.path.join(hintlib.PROB, name + '.p'), '--quiet', '--no-proof',
@@ -52,12 +72,13 @@ def run(name, a):
     pos = set(key(l, r, sig) for l, r in lemmas + goals)
     ax = set(key(l, r, sig) for l, r in axioms(name))
     rows = []
-    for idx, (l, r) in enumerate(parse_given(out)):
-        if l == r:
+    for idx, x in enumerate(parse_given_parents(out)):
+        if x is None or x[0] == x[1]:
             continue
+        l, r, p1, p2 = x
         k = key(l, r, sig)
         lab = -1 if k in ax else (1 if k in pos else 0)
-        rows.append(f'{lab}\t{idx}\t{k[0]}\t{k[1]}\n')
+        rows.append(f'{lab}\t{idx}\t{k[0]}\t{k[1]}\t{p1}\t{p2}\n')
     return name, rows
 
 def main():
