@@ -237,6 +237,32 @@ Tuning on dev (all 818 goals of the 3 held-out dev10 originals, 2 s, rm2):
 Parent features (ENIGMA's parental blocks, or a cheap Deepire substitute)
 reach AUC 0.971 against 0.969 without them, so they are left off for now.
 
+## 2e. Holdout evaluation (AIM60k `holdout.names`, 5880 problems)
+
+The README reserves the holdout split for reporting. Nothing below is
+trained or tuned on it:
+
+* Model rm3 is trained on the 30 extra training originals plus dev10,
+  with every holdout problem removed (`given/train_only`).
+* The hint pool starts as the proofs of those training problems
+  (`hints/train_pool`, 8562). The loop then adds the holdout problems it
+  solves itself, as a Veroff loop would.
+* Threshold and penalty were tuned on dev originals.
+
+All runs use 20 processes in parallel on a 112-core machine.
+
+| system | 2 s | after the 8 s round(s) |
+|---|---|---|
+| E 2.6, 1 s (README) | 1853 | |
+| Prover9, 1 s (README) | 1911 | |
+| H0: twee, plain (2 s, then 8 s on the unsolved) | 3049 | **3385** |
+| H3: twee + rule model | 3105 (+126/−70) | (stopped after 2 s) |
+| H2: twee + rule model + kNN hints, loop 2, 2, 8, 8 s | 3177 (+190/−62) → round 1: 3221 | (running) |
+
+Most problems the model loses at 2 s are boundary cases solved by plain
+twee in 1–2 s. The model's overhead is now about 6% of throughput, after a
+binary model file, a dense feature array and hashed feature names.
+
 ## 2c. Long runs: stall cutoff and checkpoints
 
 * `--eqhint-stall N` gives up when no new rule has matched a hint for N
@@ -262,25 +288,32 @@ reach AUC 0.971 against 0.969 without them, so they are left off for now.
 
 ## 3. Assessment
 
-* Hint guidance works mechanically. Self-replay is 15× faster.
-* Transfer between goals is the weak point. About 25–30% of a proof's
-  lemmas occur in no other proof, and irrelevant hints cost time.
-* The hard remaining goals are late goals whose neighbours in the original
-  proof are unsolved too. The chain of hints breaks there.
+* **Hints work mechanically.** Self-replay with a problem's own proof is
+  15× faster.
+* **Transferred hints help, modestly.**
+  * Selection is capped. kNN recall@100 is about 0.82–0.84, and learned
+    rerankers (LightGBM on ENIGMA features, or the rule model) add at most
+    0.01.
+  * At 2–8 s on dev10, the hint loop gives +17 over plain twee at the same
+    final limit.
+  * With the rule model on holdout at 2 s, hints add +106/−34.
+* **The ENIGMA-style rule model is the biggest single gain so far.** It
+  reaches AUC 0.975 on held-out originals and adds +5–6% at 2 s on unseen
+  originals, more on the hard subset at 8 s (+36%). It is complementary to
+  hints.
+* **ProofWatch boosting, parent features, reranking hints with the rule
+  model:** neutral so far.
+* **Long runs.** Plain twee at 60 s solves 26 of 59 hard problems that no
+  8 s setting solved. Much of the remaining headroom is time, which is
+  where hints are expected to help most (Veroff). The long-run comparisons
+  are below.
 
 ## 4. Next steps
 
-* Compare a hint loop with increasing time limits (2 s → 8 s → 30 s)
-  against a no-hint baseline given the same extra time. This is the fair
-  measure.
-* Per-hint factors from kNN scores. More relevant hints should get
-  stronger boosts.
-* Requeue together with kNN hints, with the budget tuned.
-* Scale up to more originals and the full benchmark.
-* The Prover9-new branches deal with very large hint banks: millions of
-  hints in the Josef runs, packed and compiled matchers, and a
-  generalised-hash subsumption table. At our pool sizes (≤ 10^4) matching
-  cost is not the bottleneck, so none of that is ported yet. Their
-  generalised hash (precomputing hint generalisations) is the obvious way
-  to add subsumption matching ("critical pair is more general than the
-  hint") if it turns out to matter.
+* Long runs on hard problems: hints, goal-statement hints, the stall
+  cutoff, resuming from checkpoints with new hints.
+* ENIGMA loop: retrain the rule model on data from guided runs, including
+  the newly solved harder problems.
+* A full run on all public problems.
+* Generalisation matching ("critical pair more general than a hint"), as in
+  Prover9-new's generalized hint hash.

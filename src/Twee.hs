@@ -94,7 +94,8 @@ data Config f =
     cfg_log_given                 :: Bool,
     cfg_rule_model                :: Maybe (RuleModel f),
     cfg_eqhint_stall              :: Int,
-    cfg_eqhint_watch              :: Float }
+    cfg_eqhint_watch              :: Float,
+    cfg_eqhint_generalise         :: Bool }
 
 -- | The prover state.
 data State f =
@@ -162,7 +163,8 @@ defaultConfig =
     cfg_log_given = False,
     cfg_rule_model = Nothing,
     cfg_eqhint_stall = 0,
-    cfg_eqhint_watch = 0 }
+    cfg_eqhint_watch = 0,
+    cfg_eqhint_generalise = False }
 
 -- | Compute cfg_score_cp from the CP configuration.
 {-# INLINE scoreCP #-}
@@ -1042,6 +1044,23 @@ addEqHintFull state (eqn, w, gs) =
        Just n | not (null gs), n < trackBase ->
          state' { st_eqhints = eh { eh_hgroups = IntMap.insertWith (\new old -> usort (new ++ old)) n gs (eh_hgroups eh) } }
        _ -> state'
+
+-- | Also match critical pairs that generalise a hint by one step: one
+-- non-root, non-variable subterm replaced by a fresh variable (a cheap
+-- form of Prover9's subsumption matching, cf. generalized-hint-hash).
+{-# INLINEABLE addEqHintGeneralisations #-}
+addEqHintGeneralisations :: Function f => State f -> State f
+addEqHintGeneralisations state =
+  state { st_eqhints = eh { eh_map = m', eh_fps = fps' } }
+  where
+    eh = st_eqhints state
+    gens = [ (n, g) | (n, eqn) <- IntMap.toList (eh_live eh), n < trackBase, g <- generalisations eqn ]
+    m' = foldl' (\m (n, g) -> insertEqHintForms n g m) (eh_map eh) gens
+    fps' = foldl' (\f (_, g) -> IntSet.insert (eqnFingerprint g) f) (eh_fps eh) gens
+    generalisations eqn@(t :=: u) =
+      let x = build (var (V (1 + maximum (0 : [ v | V v <- vars eqn ]))))
+          gen w = [ build (replacePosition p x (Twee.Base.singleton w)) | p <- [1 .. len w - 1], isApp (at w p) ]
+      in [ t' :=: u | t' <- gen t ] ++ [ t :=: u' | u' <- gen u ]
 
 -- | Count the hints of each group (after all hints are added).
 finishEqHintGroups :: State f -> State f

@@ -492,6 +492,10 @@ parseConfig = do
     bool "eqhint-consider"
       ["Match equation hints against the rule a critical pair would become, if its symbols match a hint (on by default)."]
       True
+  cfg_eqhint_generalise <-
+    expert $
+    inGroup "Critical pair weighting heuristics" $
+    bool "eqhint-generalise" ["Also match critical pairs that generalise a hint (one subterm replaced by a variable)."] False
   cfg_eqhint_watch <-
     expert $
     inGroup "Critical pair weighting heuristics" $
@@ -1158,7 +1162,8 @@ runTwee globals (TSTPFlags tstp) horn precedence config0 flags@MainFlags{..} lat
   trackHints <- readHintFile flags_track_hints
   let
     withHints0 = foldl' (addHint config) (initialState config) [toTerm (varNums h) h | h <- hints']
-    withHints1 = finishEqHintGroups $
+    withHints1 = (if cfg_eqhint_generalise config then addEqHintGeneralisations else id) $
+      finishEqHintGroups $
       foldl' addEqHintFull withHints0 ([ (toEquation h, Nothing, []) | h <- eqHints' ] ++ fileHints)
     -- Goal constants for hint matching: flattening constants and skolems.
     nullaryFuns t = [ f | App f Nil <- Twee.Base.subterms t ]
