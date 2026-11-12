@@ -35,6 +35,7 @@ import Jukebox.Tools.EncodeTypes
 import Jukebox.TPTP.Print
 import Jukebox.Tools.HornToUnit
 import qualified Data.IntMap.Strict as IntMap
+import qualified Data.IntSet as IntSet
 import System.IO
 import System.Exit
 import qualified Data.Set as Set
@@ -78,7 +79,9 @@ data MainFlags =
     flags_funweight :: Float,
     flags_dump_proof :: Maybe FilePath,
     flags_dump_state :: Maybe FilePath,
-    flags_stitch :: Maybe FilePath }
+    flags_stitch :: Maybe FilePath,
+    flags_print_hints :: Bool,
+    flags_hints_file :: Maybe FilePath }
 
 parseMainFlags :: OptionParser MainFlags
 parseMainFlags = do
@@ -206,6 +209,18 @@ parseMainFlags = do
     flag "stitch"
       ["Path to 'stitch' tool for discovering abstractions (disabled by default)."]
       Nothing (Just <$> argFile)
+  flags_hints_file <-
+    expert $
+    inGroup "Critical pair weighting heuristics" $
+    flag "hints-file"
+      ["File of equation hints, one 'lhs<TAB>rhs' per line, in TPTP term syntax (none by default)."]
+      Nothing (Just <$> argFile)
+  flags_print_hints <-
+    expert $
+    inGroup "Output options" $
+    bool "print-hints"
+      ["On success, print all lemmas of the raw proof as hints (off by default)."]
+      False
 
   return MainFlags{..}
 
@@ -403,6 +418,36 @@ parseConfig = do
     expert $
     inGroup "Critical pair weighting heuristics" $
     defaultFlag "hint-skel-factor" "Size factor of hint skeletons" cfg_hint_skel_factor argNum
+  cfg_eqhint_factor <-
+    expert $
+    inGroup "Critical pair weighting heuristics" $
+    defaultFlag "eqhint-factor" "Score factor for critical pairs matching an equation hint" cfg_eqhint_factor argNum
+  cfg_eqhint_weight <-
+    expert $
+    inGroup "Critical pair weighting heuristics" $
+    defaultFlag "eqhint-weight" "Score added to critical pairs matching an equation hint" cfg_eqhint_weight argNum
+  cfg_eqhint_normalise <-
+    expert $
+    inGroup "Critical pair weighting heuristics" $
+    bool "eqhint-normalise"
+      ["Keep equation hints normalised by the oriented rules (on by default)."]
+      True
+  cfg_eqhint_fullnorm <-
+    expert $
+    inGroup "Critical pair weighting heuristics" $
+    bool "eqhint-fullnorm"
+      ["Also match equation hints after normalising critical pairs with all rules (off by default)."]
+      False
+  cfg_eqhint_consider <-
+    expert $
+    inGroup "Critical pair weighting heuristics" $
+    bool "eqhint-consider"
+      ["Match equation hints against the rule a critical pair would become, if its symbols match a hint (on by default)."]
+      True
+  cfg_eqhint_debug <-
+    expert $
+    inGroup "Debugging options" $
+    bool "eqhint-debug" ["Trace critical pairs that match equation hints (off by default)."] False
   cfg_print_score <-
     expert $
     inGroup "Output options" $
@@ -590,6 +635,35 @@ isIfeq fun =
 jukeboxFunction :: TweeContext -> Constant -> Jukebox.Function
 jukeboxFunction TweeContext{..} Constant{..} = Map.findWithDefault undefined con_id ctx_funs
 jukeboxFunction TweeContext{..} Minimal = ctx_minimal
+
+-- A raw parsed hint term.
+data HTerm = HVar String | HApp String [HTerm]
+
+hVars :: HTerm -> [String]
+hVars (HVar x) = [x]
+hVars (HApp _ ts) = concatMap hVars ts
+
+parseHTerm :: String -> Maybe (HTerm, String)
+parseHTerm s0 =
+  case span (\c -> isAlphaNum c || c == '_') (dropWhile isSpace s0) of
+    ([], _) -> Nothing
+    (nm@(c:_), rest)
+      | isUpper c -> Just (HVar nm, rest)
+      | otherwise ->
+        case dropWhile isSpace rest of
+          '(':rest' -> do
+            (args, rest'') <- parseArgs rest'
+            return (HApp nm args, rest'')
+          _ -> Just (HApp nm [], rest)
+  where
+    parseArgs s = do
+      (t, r) <- parseHTerm s
+      case dropWhile isSpace r of
+        ',':r' -> do
+          (ts, r'') <- parseArgs r'
+          return (t:ts, r'')
+        ')':r' -> return ([t], r')
+        _ -> Nothing
 
 tweeTerm :: MainFlags -> HornFlags -> TweeContext -> (Jukebox.Variable -> Int) -> (Jukebox.Function -> Precedence) -> Jukebox.Term -> Term Constant
 tweeTerm flags horn ctx varNum prec t = build (tm t)
@@ -845,8 +919,13 @@ runTwee globals (TSTPFlags tstp) horn precedence config0 flags@MainFlags{..} lat
             Renaming xss xs ->
               Renaming (map (map toLower) xss) (map toLower xs)
       | otherwise = x
-    (hints', prettyObligs) = prettyNames (mapName lowercaseSkolem (hints, obligs2))
-    ctx = makeContext hints' prettyObligs
+    (hintsAll', prettyObligs) = prettyNames (mapName lowercaseSkolem (hints, obligs2))
+    isEqHint (h :@: [_, _]) = base (name h) == "$hinteq"
+    isEqHint _ = False
+    eqHintFlags = map isEqHint hints
+    hints' = [ h | (h, False) <- zip hintsAll' eqHintFlags ]
+    eqHints' = [ (t, u) | (_ :@: [t, u], True) <- zip hintsAll' eqHintFlags ]
+    ctx = makeContext hintsAll' prettyObligs
     prob = addNarrowing flags_equals_transformation ctx prettyObligs
 
   (unsortedAxioms0, goals0) <-
@@ -945,8 +1024,35 @@ runTwee globals (TSTPFlags tstp) horn precedence config0 flags@MainFlags{..} lat
     -}
     config = config0 { cfg_eliminate_axioms = if flags_flatten_regeneralise then defs else [] }
 
+  fileHints <-
+    case flags_hints_file of
+      Nothing -> return []
+      Just file -> do
+        str <- readFile file
+        let
+          funMap = Map.fromList [ (base (name f), f) | f <- reverse (Map.elems (ctx_funs ctx)) ]
+          conv vm (HVar x) = Just (var (V (vm Map.! x)))
+          conv vm (HApp f ts) = do
+            jf <- Map.lookup f funMap
+            Control.Monad.guard (Jukebox.arity jf == length ts)
+            us <- mapM (conv vm) ts
+            return (app (Sym (tweeConstant flags horn ctx (prec jf) jf)) us)
+          parseLine l =
+            case break (== '\t') l of
+              (a, '\t':b) -> do
+                (t, ra) <- parseHTerm a
+                (u, rb) <- parseHTerm b
+                Control.Monad.guard (all isSpace ra && all isSpace rb)
+                let vm = Map.fromList (zip (usort (hVars t ++ hVars u)) [0..])
+                t' <- conv vm t
+                u' <- conv vm u
+                return (build t' :=: build u')
+              _ -> Nothing
+          hs = mapMaybe parseLine (lines str)
+        return $! length hs `seq` hs
   let
-    withHints = foldl' (addHint config) (initialState config) [toTerm (varNums h) h | h <- hints']
+    withHints0 = foldl' (addHint config) (initialState config) [toTerm (varNums h) h | h <- hints']
+    withHints = foldl' addEqHint withHints0 (map toEquation eqHints' ++ fileHints)
     withGoals = foldl' (addGoal config) withHints goals
     withAxioms = foldl' (addAxiom config) withGoals axioms
     withBackwardsGoal = foldn rewriteGoalsBackwards withAxioms flags_backwards_goal
@@ -987,6 +1093,10 @@ runTwee globals (TSTPFlags tstp) horn precedence config0 flags@MainFlags{..} lat
       step "interreduce" []
     traceMsg (Status n) =
       step "status" [pPrint n]
+    traceMsg (HintMatched n active) =
+      step "hint" [pPrint n, pPrint (active_id active)]
+    traceMsg _ =
+      step "other" []
 
     traceActive Active{active_top = Nothing, ..} =
       traceApp "rule" [pPrint active_id, traceEqn (unorient active_rule)]
@@ -1062,6 +1172,34 @@ runTwee globals (TSTPFlags tstp) horn precedence config0 flags@MainFlags{..} lat
     Nothing -> return ()
     Just dumpStateFile ->
       BS.writeFile dumpStateFile (encode state)
+
+  let EqHints{..} = st_eqhints state
+  when (eh_next > 0) $
+    putStrLn $ "HINTSTATS hints=" ++ show eh_next ++ " live=" ++ show (IntMap.size eh_live) ++
+      " joined=" ++ show eh_joined ++ " matched=" ++ show (IntSet.size eh_matched) ++
+      " forms=" ++ show (Map.size eh_map) ++ " rules=" ++ show (st_next_active state)
+
+  when (solved state && flags_print_hints) $ do
+    let
+      sols = map (eliminateDefinitionsFromGoal defs) (solutions state)
+      lemmaEqns = map equation (allLemmas (map (derivation . pg_proof) sols))
+      goalEqns = [ equation (pg_proof g) | g <- sols ]
+      showEqn (t :=: u) =
+        showProblem
+          [Input Nothing "hint" (Jukebox.Ax Jukebox.Axiom) Unknown $
+             toForm $ clause [Pos (jukeboxTerm ctx t Jukebox.:=: jukeboxTerm ctx u)]]
+    putStrLn "HINTS-BEGIN"
+    forM_ lemmaEqns $ \eqn -> putStrLn (showEqn eqn)
+    putStrLn "HINTS-GOAL"
+    forM_ goalEqns $ \eqn -> putStrLn (showEqn eqn)
+    putStrLn "HINTS-AUX"
+    forM_ (allLemmas (map (derivation . pg_proof) sols)) $ \p -> do
+      let ts = stepTerms (derivation p)
+          n = length ts
+          k = snd (maximum [ (KBO.size t, i) | (i, t) <- zip [0..] ts ])
+          pairs = [ (ts !! i, ts !! j) | i <- [0..k-1], j <- [k+1..n-1], (i, j) /= (0, n-1) ]
+      forM_ (take 30 pairs) $ \(t, u) -> putStrLn (showEqn (t :=: u))
+    putStrLn "HINTS-END"
 
   when (solved state && flags_proof) $ later $ do
     let
@@ -1321,6 +1459,8 @@ main = do
   where
     getHint Input{what = Clause (Bind _ [Pos (Tru (hint :@: [t]))])}
       | base (name hint) == "$hint" = Left t
+    getHint Input{what = Clause (Bind _ [Pos (Tru t@(hint :@: [_, _]))])}
+      | base (name hint) == "$hinteq" = Left t
     getHint c = Right c
     combine horn config main encode prove later prob0 = do
       let prob1 = if flags_hint_goals main then hintGoals prob0 else prob0

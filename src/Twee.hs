@@ -41,11 +41,13 @@ import Data.PackedSequence(PackedSequence)
 import qualified Data.PackedSequence as PackedSequence
 import Test.QuickCheck.Gen hiding (sample)
 import Test.QuickCheck.Random
---import Debug.Trace
+import qualified Debug.Trace
 import Twee.Generate
 import qualified System.Random as Random
 import GHC.Generics
 import Data.Binary.Sharing
+import Data.Bits
+import Data.Hashable(hash)
 
 ----------------------------------------------------------------------
 -- * Configuration and prover state.
@@ -78,6 +80,12 @@ data Config f =
     cfg_always_complete           :: Bool,
     cfg_hint_skel_cost            :: Float,
     cfg_hint_skel_factor          :: Float,
+    cfg_eqhint_factor             :: Float,
+    cfg_eqhint_weight             :: Float,
+    cfg_eqhint_normalise          :: Bool,
+    cfg_eqhint_fullnorm           :: Bool,
+    cfg_eqhint_debug              :: Bool,
+    cfg_eqhint_consider           :: Bool,
     cfg_print_score               :: Bool }
 
 -- | The prover state.
@@ -90,6 +98,7 @@ data State f =
     st_goals          :: ![Goal f],
     st_queue          :: !(Queue Batch),
     st_hints          :: {-# UNPACK #-} !(Hints f),
+    st_eqhints        :: !(EqHints f),
     st_next_active    :: {-# UNPACK #-} !Id,
     st_considered     :: {-# UNPACK #-} !Int64,
     st_simplified_at  :: {-# UNPACK #-} !Id,
@@ -129,6 +138,12 @@ defaultConfig =
     cfg_always_complete = False,
     cfg_hint_skel_cost = 1,
     cfg_hint_skel_factor = 0,
+    cfg_eqhint_factor = 0.01,
+    cfg_eqhint_weight = 0,
+    cfg_eqhint_normalise = True,
+    cfg_eqhint_fullnorm = False,
+    cfg_eqhint_debug = False,
+    cfg_eqhint_consider = True,
     cfg_print_score = False }
 
 -- | Compute cfg_score_cp from the CP configuration.
@@ -170,6 +185,7 @@ initialState Config{..} =
         hints_list = [],
         hints_index = Index.empty,
         hints_next = 0 },
+    st_eqhints = emptyEqHints,
     st_next_active = 1,
     st_considered = 0,
     st_simplified_at = 1,
@@ -195,6 +211,8 @@ data Message f =
   | NewEquation !(Equation f)
     -- | A new hint was added.
   | NewHint !(Rule f) !HintKind
+    -- | A new rule matched an equation hint.
+  | HintMatched !Int !(Active f)
     -- | A rule was deleted.
   | DeleteActive !(Active f)
     -- | The CP queue was simplified.
@@ -217,6 +235,8 @@ instance Function f => Pretty (Message f) where
  --   $$ case cp_top (active_cp rule) of { Just t -> text "  (normal forms of term" <+> pPrint t <#> text ")"; Nothing -> pPrintEmpty }
   pPrint (NewEquation eqn) =
     text "  (hard)" <+> pPrint eqn
+  pPrint (HintMatched n active) =
+    text "  (matched hint" <+> pPrint n <#> text ")" <+> pPrint active
   pPrint (NewHint rule kind) =
     text "  (" <#> pPrint kind <+> text "hint)" <+> pPrint rule
   pPrint (DeleteActive rule) =
@@ -341,9 +361,9 @@ instance Queue.Batch Batch where
 
 {-# INLINEABLE makePassive #-}
 makePassive :: Function f => Config f -> State f -> Overlap (Active f) f -> Passive
-makePassive config@Config{..} State{..} Overlap{..} =
+makePassive config@Config{..} state@State{..} Overlap{..} =
   Passive {
-    passive_score = scoreCP config depth st_hints overlap_eqn,
+    passive_score = eqHintScore config state overlap_top overlap_eqn (scoreCP config depth st_hints overlap_eqn),
     passive_rule1 = active_id overlap_rule1,
     passive_rule2 = active_id overlap_rule2,
     passive_how   = overlap_how }
@@ -374,7 +394,8 @@ simplifyPassive config@Config{..} state@State{..} passive = do
       passive_score passive `min`
 #endif
       -- XXX factor out depth calculation
-      scoreCP config (Depth (succ (getDepth (the r1) `max` getDepth (the r2)))) st_hints (overlap_eqn overlap) }
+      eqHintScore config state (overlap_top overlap) (overlap_eqn overlap)
+        (scoreCP config (Depth (succ (getDepth (the r1) `max` getDepth (the r2)))) st_hints (overlap_eqn overlap)) }
 
 -- | Check if we should renormalise the queue.
 {-# INLINEABLE shouldSimplifyQueue #-}
@@ -425,6 +446,7 @@ dequeue config@Config{..} state@State{..} =
             cp <- makeCriticalPair overlap,
             Just newPassive <- simplifyPassive config state passive ->
               if passive_score newPassive <= passive_score passive then
+                (if cfg_eqhint_debug && passive_score passive < 1 then Debug.Trace.trace ("DEQ " ++ show (passive_score passive) ++ " at " ++ show st_next_active ++ ": " ++ prettyShow (cp_eqn cp)) else id) $
                 return ((combineInfo (active_info rule1) (active_info rule2), cp, rule1, rule2), n+1, queue)
               else
                 deq (n+1) (Queue.insert (passive_rule1 newPassive) [newPassive] queue)
@@ -498,6 +520,7 @@ addActive config state@State{..} active0 =
       | cfg_print_score config = Just (activeScore config state active)
       | otherwise = Nothing
     state' =
+      recordEqHintMatch active $
       message (NewActive mscore active) $
       addActiveOnly config state{st_next_active = st_next_active+1} active
   in if subsumed (st_joinable, st_complete) st_rules (unorient active_rule) then
@@ -897,6 +920,154 @@ addHintRulePairs config rule active state =
 addHintHintsPairs :: Function f => Config f -> Rule f -> State f -> State f
 addHintHintsPairs _ _ state = state
 
+----------------------------------------------------------------------
+-- Equation hints (Veroff-style).
+--
+-- A hint is an equation. A critical pair whose (simplified) equation is
+-- a variant of a hint, in either orientation, gets a very low score, so
+-- that it is selected almost at once. Hints are kept normalised with
+-- respect to the oriented rules (like Prover9's back_demod_hints), and
+-- every normal form a hint has had is remembered, since queued critical
+-- pairs were simplified at different times.
+----------------------------------------------------------------------
+
+data EqHints f =
+  EqHints {
+    -- canonical variants (both orientations) of all forms of all hints
+    eh_map       :: !(Map (Equation f) Int),
+    -- current form of each live (not yet joinable) hint
+    eh_live      :: !(IntMap (Equation f)),
+    -- hints that a new rule has matched
+    eh_matched   :: !IntSet,
+    -- number of hints added
+    eh_next      :: !Int,
+    -- hints that became joinable by normalisation
+    eh_joined    :: !Int,
+    -- value of st_next_active when hints were last normalised
+    eh_norm_at   :: !Id,
+    -- fingerprints of all forms of all hints
+    eh_fps       :: !IntSet }
+  deriving (Generic, Binary)
+
+emptyEqHints :: EqHints f
+emptyEqHints = EqHints Map.empty IntMap.empty IntSet.empty 0 0 0 IntSet.empty
+
+-- | Add an equation hint.
+{-# INLINEABLE addEqHint #-}
+addEqHint :: Function f => State f -> Equation f -> State f
+addEqHint state@State{st_eqhints = eh@EqHints{..}} eqn
+  | eqn_lhs eqn == eqn_rhs eqn = state
+  | canonicalise eqn `Map.member` eh_map = state
+  | otherwise =
+    state {
+      st_eqhints = eh {
+        eh_map = insertEqHintForms eh_next eqn eh_map,
+        eh_fps = IntSet.insert (eqnFingerprint eqn) eh_fps,
+        eh_live = IntMap.insert eh_next eqn eh_live,
+        eh_next = eh_next + 1 } }
+
+insertEqHintForms :: Function f => Int -> Equation f -> Map (Equation f) Int -> Map (Equation f) Int
+insertEqHintForms n (t :=: u) m =
+  Map.insertWith (\_ old -> old) (canonicalise (t :=: u)) n $
+  Map.insertWith (\_ old -> old) (canonicalise (u :=: t)) n m
+
+-- | Look up an equation among the hints.
+{-# INLINE lookupEqHint #-}
+lookupEqHint :: Function f => EqHints f -> Equation f -> Maybe Int
+lookupEqHint EqHints{..} eqn
+  | Map.null eh_map = Nothing
+  | otherwise = Map.lookup (canonicalise eqn) eh_map
+
+-- | Adjust the score of a critical pair if it matches a hint.
+{-# INLINE eqHintScore #-}
+eqHintScore :: Function f => Config f -> State f -> Term f -> Equation f -> Float -> Float
+eqHintScore config@Config{..} state top eqn s
+  | Map.null (eh_map eh) = s
+  | Just n <- lookupEqHint eh eqn = dbg n "cheap" hinted
+  | cfg_eqhint_consider,
+    eqnFingerprint eqn `IntSet.member` eh_fps eh,
+    n:_ <- mapMaybe (lookupEqHint eh) (considerForms config state top eqn) = dbg n "consider" hinted
+  | cfg_eqhint_fullnorm,
+    Just n <- lookupEqHint eh (fullNormEqn state eqn) = dbg n "full" hinted
+  | otherwise = s
+  where
+    eh = st_eqhints state
+    hinted = cfg_eqhint_weight + s * cfg_eqhint_factor
+    dbg n kind x
+      | cfg_eqhint_debug = Debug.Trace.trace ("HINTCP " ++ show n ++ " " ++ kind ++ " at " ++ show (st_next_active state) ++ ": " ++ prettyShow eqn) x
+      | otherwise = x
+
+-- | The rules that 'consider' would make from a critical pair
+-- (without ground joining).
+{-# INLINEABLE considerForms #-}
+considerForms :: Function f => Config f -> State f -> Term f -> Equation f -> [Equation f]
+considerForms Config{..} State{..} top eqn =
+  case allSteps cfg_join (st_joinable, st_complete) st_rules cp of
+    Nothing -> []
+    Just cp' -> map cp_eqn (split cp')
+  where
+    cp = CriticalPair { cp_eqn = eqn, cp_top = Just top, cp_proof = Proof.Refl (eqn_lhs eqn) }
+
+-- | A hash of the multiset of symbols of an equation; invariant under
+-- orientation, variable renaming and permutative rewriting.
+{-# INLINEABLE eqnFingerprint #-}
+eqnFingerprint :: Function f => Equation f -> Int
+eqnFingerprint (t :=: u) = go t + go u
+  where
+    go x = sum (map sym (subterms x))
+    sym (App f _) = mix (hash f)
+    sym _ = 0x5bd1e995
+    mix :: Int -> Int
+    mix z0 =
+      let z1 = (z0 `xor` (z0 `shiftR` 30)) * (-4658895280553007687)
+          z2 = (z1 `xor` (z1 `shiftR` 27)) * (-7723592293110705685)
+      in z2 `xor` (z2 `shiftR` 31)
+
+-- | Normalise both sides of an equation with all rules (ordered rewriting).
+{-# INLINEABLE fullNormEqn #-}
+fullNormEqn :: Function f => State f -> Equation f -> Equation f
+fullNormEqn State{..} (t :=: u) = nf t :=: nf u
+  where
+    nf x = result x (normaliseWith (const True) (rewrite reduces (index_all st_rules)) x)
+
+-- | Record that a new active rule matched a hint.
+{-# INLINEABLE recordEqHintMatch #-}
+recordEqHintMatch :: Function f => Active f -> State f -> State f
+recordEqHintMatch active state@State{st_eqhints = eh}
+  | Map.null (eh_map eh) = state
+  | otherwise =
+    case lookupEqHint eh (unorient (active_rule active)) of
+      Nothing -> state
+      Just n ->
+        message (HintMatched n active) $
+        state { st_eqhints = eh { eh_matched = IntSet.insert n (eh_matched eh) } }
+
+-- | Normalise all live hints with respect to the oriented rules.
+{-# INLINEABLE normaliseEqHints #-}
+normaliseEqHints :: Function f => State f -> State f
+normaliseEqHints state@State{st_eqhints = eh@EqHints{..}, ..}
+  | IntMap.null eh_live || eh_norm_at == st_next_active = state
+  | otherwise =
+    state {
+      st_eqhints = eh {
+        eh_live = live', eh_map = map', eh_joined = eh_joined + joined,
+        eh_norm_at = st_next_active,
+        eh_fps = foldl' (flip IntSet.insert) eh_fps (map eqnFingerprint (IntMap.elems live')) } }
+  where
+    idx = index_oriented st_rules
+    (live', map', joined) = IntMap.foldlWithKey' step (IntMap.empty, eh_map, 0 :: Int) eh_live
+    step (live, m, j) n eqn@(t :=: u)
+      | t' == u' = (live, m, j+1)
+      | t' == t && u' == u = (IntMap.insert n eqn live, addFull m, j)
+      | otherwise = (IntMap.insert n (t' :=: u') live, addFull (insertEqHintForms n (t' :=: u') m), j)
+      where
+        t' = simplify idx t
+        u' = simplify idx u
+        full@(t'' :=: u'') = fullNormEqn state (t' :=: u')
+        addFull m
+          | t'' == u'' = m
+          | otherwise = insertEqHintForms n full m
+
 -- Apply hints to a term.
 applyHints :: Function f => Hints f -> Term f -> Term f
 applyHints Hints{..} t =
@@ -982,6 +1153,10 @@ complete Output{..} config@Config{..} state =
        newTask 1 0.02 $ do
           state <- StateM.get
           StateM.put $! recomputeGoals config state,
+       newTask 0.02 0.05 $ do
+          when cfg_eqhint_normalise $ do
+            state <- StateM.get
+            StateM.put $! normaliseEqHints state,
        newTask 60 0.01 $ do
           State{..} <- StateM.get
           let !n = Queue.size st_queue

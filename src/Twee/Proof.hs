@@ -8,7 +8,7 @@ module Twee.Proof(
   lemma, autoSubst, simpleLemma, axiom, symm, trans, cong, congPath,
 
   -- * Analysing proofs
-  simplify, steps, stepTerms, usedLemmas, usedAxioms, usedLemmasAndSubsts, usedAxiomsAndSubsts,
+  simplify, steps, stepTerms, usedLemmas, allLemmas, usedAxioms, usedLemmasAndSubsts, usedAxiomsAndSubsts,
   groundAxiomsAndSubsts, eliminateDefinitions, eliminateDefinitionsFromGoal,
   simplifyProof, generaliseProof,
 
