@@ -21,6 +21,42 @@ def goal_of_problem(name):
     l, r = body.split(' = ') if ' = ' in body else body.split('=')
     return l.strip(), r.strip()
 
+def goal_lits(name):
+    """Literals of the conjecture as (positive, lhs, rhs) triples."""
+    txt = open(os.path.join(PROB, name + '.p')).read()
+    i = txt.index(',conjecture,')
+    body = txt[i + len(',conjecture,'):txt.rindex(').')]
+    body = re.sub(r'!\s*\[[^\]]*\]\s*:\s*', '', body).strip()
+    while body.startswith('(') and body.endswith(')'):
+        body = body[1:-1].strip()
+    out = []
+    for lit in body.split('|'):
+        lit = lit.strip()
+        pos = not lit.startswith('~')
+        lit = lit.lstrip('~').strip()
+        while lit.startswith('(') and lit.endswith(')'):
+            lit = lit[1:-1].strip()
+        if '!=' in lit:
+            pos = not pos; l, r = lit.split('!=')
+        else:
+            l, r = lit.split('=')
+        out.append((pos, l.strip(), r.strip()))
+    return out
+
+def goal_features(name, depth, fallback=None):
+    """Term-shape features of all literals of the conjecture."""
+    try:
+        lits = goal_lits(name)
+    except Exception:
+        if fallback is None:
+            raise
+        l, r = fallback.split('\t')
+        lits = [(True, l, r)]
+    F = set()
+    for _, l, r in lits:
+        F |= feats.features(l, r, depth)
+    return F
+
 class KNN:
     def __init__(self, hintdir, names=None, depth=3):
         self.hints = {}
@@ -38,11 +74,7 @@ class KNN:
 
     def add(self, name, hint_lines):
         self.hints[name] = hint_lines
-        try:
-            l, r = goal_of_problem(name)
-        except Exception:
-            l, r = hint_lines[-1].split('\t')
-        self.feats[name] = feats.features(l, r, self.depth)
+        self.feats[name] = goal_features(name, self.depth, hint_lines[-1])
         self._idf = None
 
     def idf(self):
@@ -52,11 +84,10 @@ class KNN:
             self._idf = {x: math.log((n + 1) / c) for x, c in df.items()}
         return self._idf
 
-    def select(self, name, k=30, topn=100, exclude_self=True, same_orig=False):
+    def select(self, name, k=30, topn=100, exclude_self=True, same_orig=False, scores=False):
         idf = self.idf()
         try:
-            l, r = goal_of_problem(name)
-            F = feats.features(l, r, self.depth)
+            F = goal_features(name, self.depth)
         except Exception:
             F = self.feats.get(name, set())
         o = name.split('__goal_')[0]
@@ -76,4 +107,6 @@ class KNN:
         for s, m in sims[:k]:
             for h in self.hints[m]:
                 sc[h] += s
+        if scores:
+            return sc.most_common(topn)
         return [h for h, _ in sc.most_common(topn)]

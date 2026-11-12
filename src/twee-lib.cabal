@@ -63,6 +63,7 @@ library
     Twee.Rule.Index
     Twee.Term
     Twee.Task
+    Twee.Enigma
     Twee.Utils
     Twee.Term.Core
     Data.Intern
@@ -78,6 +79,7 @@ library
     -- base >= 4.11 for Semigroup in Prelude
     base >= 4.11 && < 5,
     containers,
+    array,
     transformers,
     dlist,
     pretty >= 1.1.2.0,

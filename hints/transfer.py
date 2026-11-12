@@ -30,8 +30,15 @@ def select(name, strategy, solved_by_orig, lines, hintdir):
         if _knn is None:
             import hintsel as sel
             _knn = sel.KNN(hintdir)
-        _, k, n = strategy.split(':')
-        return _knn.select(name, int(k), int(n), same_orig=strategy.startswith('knno'))
+        parts = strategy.split(':')
+        k, n = int(parts[1]), int(parts[2])
+        sc = _knn.select(name, k, n, same_orig=strategy.startswith('knno'), scores=True)
+        if len(parts) > 3 and sc:
+            # factor mode: hints scored r = s/max; factor = lo + (hi-lo)*(1-r)
+            lo, hi = float(parts[3]), float(parts[4])
+            m = sc[0][1]
+            return [f'{h}\t{lo + (hi - lo) * (1 - v / m):.4f}' for h, v in sc]
+        return [h for h, _ in sc]
     cands = [m for m in solved_by_orig.get(orig_of(name), []) if m != name]
     L = lines[name]
     if strategy.startswith('near:'):

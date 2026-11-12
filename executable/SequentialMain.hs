@@ -6,6 +6,7 @@ import Control.Monad
 import Data.Char
 import Data.Either
 import Twee hiding (message)
+import Twee.Enigma
 import Twee.Base hiding (char, lookup, vars, ground)
 --import qualified Twee.Base as Twee
 import Twee.Rule(lhs, rhs, unorient)
@@ -80,10 +81,17 @@ data MainFlags =
     flags_funweight :: Float,
     flags_dump_proof :: Maybe FilePath,
     flags_dump_state :: Maybe FilePath,
+    flags_load_state :: Maybe FilePath,
     flags_stitch :: Maybe FilePath,
     flags_print_hints :: Bool,
     flags_hints_file :: Maybe FilePath,
-    flags_track_hints :: Maybe FilePath }
+    flags_track_hints :: Maybe FilePath,
+    flags_rule_model :: Maybe FilePath,
+    flags_rule_vocab :: Maybe FilePath,
+    flags_rule_goal :: Maybe FilePath,
+    flags_rule_threshold :: Double,
+    flags_rule_penalty :: Float,
+    flags_rule_debug :: Bool }
 
 parseMainFlags :: OptionParser MainFlags
 parseMainFlags = do
@@ -205,6 +213,12 @@ parseMainFlags = do
     flag "dump-state"
       ["Dump prover state to this file on termination (off by default)."]
       Nothing (Just <$> argFile)
+  flags_load_state <-
+    expert $
+    inGroup "Debugging options" $
+    flag "load-state"
+      ["Resume from a state written by --dump-state for the same problem; hints given now replace the old ones."]
+      Nothing (Just <$> argFile)
   flags_stitch <-
     expert $
     inGroup "Critical pair weighting heuristics" $
@@ -229,6 +243,32 @@ parseMainFlags = do
     bool "print-hints"
       ["On success, print all lemmas of the raw proof as hints (off by default)."]
       False
+  flags_rule_model <-
+    expert $
+    inGroup "Critical pair weighting heuristics" $
+    flag "rule-model"
+      ["LightGBM model (text) predicting whether a new rule is useful; rules predicted useless are deferred once."]
+      Nothing (Just <$> argFile)
+  flags_rule_vocab <-
+    expert $
+    inGroup "Critical pair weighting heuristics" $
+    flag "rule-vocab" ["Feature vocabulary of --rule-model (column<TAB>name lines)."] Nothing (Just <$> argFile)
+  flags_rule_goal <-
+    expert $
+    inGroup "Critical pair weighting heuristics" $
+    flag "rule-goal" ["Goal features for --rule-model (column<TAB>value lines, and K<TAB>feature lines for overlap)."] Nothing (Just <$> argFile)
+  flags_rule_threshold <-
+    expert $
+    inGroup "Critical pair weighting heuristics" $
+    flag "rule-threshold" ["Defer new rules whose predicted probability is below this (default 0.1)."] 0.1 argNum
+  flags_rule_penalty <-
+    expert $
+    inGroup "Critical pair weighting heuristics" $
+    flag "rule-penalty" ["Score factor for deferred rules (default 2)."] 2 argNum
+  flags_rule_debug <-
+    expert $
+    inGroup "Debugging options" $
+    bool "rule-debug" ["Trace the predictions of --rule-model."] False
 
   return MainFlags{..}
 
@@ -452,6 +492,10 @@ parseConfig = do
     bool "eqhint-consider"
       ["Match equation hints against the rule a critical pair would become, if its symbols match a hint (on by default)."]
       True
+  cfg_eqhint_stall <-
+    expert $
+    inGroup "Critical pair weighting heuristics" $
+    defaultFlag "eqhint-stall" "Give up when no rule has matched a hint for this many rules (0 = never)" cfg_eqhint_stall argNum
   cfg_eqhint_requeue <-
     expert $
     inGroup "Critical pair weighting heuristics" $
@@ -460,6 +504,10 @@ parseConfig = do
     expert $
     inGroup "Debugging options" $
     bool "eqhint-debug" ["Trace critical pairs that match equation hints (off by default)."] False
+  cfg_log_given <-
+    expert $
+    inGroup "Output options" $
+    bool "print-given" ["On success, print every rule that was added (after --print-hints output)."] False
   cfg_print_score <-
     expert $
     inGroup "Output options" $
@@ -1034,7 +1082,32 @@ runTwee globals (TSTPFlags tstp) horn precedence config0 flags@MainFlags{..} lat
         pos :: Int -> Float
         pos n = if n <= 0 then 1 else fromIntegral n+1
     -}
-    config = config0 { cfg_eliminate_axioms = if flags_flatten_regeneralise then defs else [] }
+    config1 = config0 { cfg_eliminate_axioms = if flags_flatten_regeneralise then defs else [] }
+
+  ruleModel <-
+    case flags_rule_model of
+      Nothing -> return Nothing
+      Just mfile -> do
+        mstr <- readFile mfile
+        vstr <- maybe (return "") readFile flags_rule_vocab
+        gstr <- maybe (return "") readFile flags_rule_goal
+        let
+          forest = parseForest mstr
+          vocab = Map.fromList [ (k, read c) | l <- lines vstr, (c, '\t':k) <- [break (== '\t') l] ]
+          gls = [ (a, b) | l <- lines gstr, (a, '\t':b) <- [break (== '\t') l] ]
+          gcols = [ (read a, read b) | (a, b) <- gls, a /= "K" ]
+          gkeys = Set.fromList [ b | ("K", b) <- gls ]
+          p = flags_rule_threshold
+          conName Constant{..} = con_name
+          conName Minimal = "?"
+          conName (Skolem _) = "?"
+          conName (Hint _ _) = "?"
+        return $! length forest `seq` Map.size vocab `seq` Just RuleModel {
+          rm_forest = forest, rm_vocab = vocab, rm_goal = gcols, rm_gkeys = gkeys,
+          rm_name = conName, rm_threshold = log (p / (1 - p)), rm_penalty = flags_rule_penalty,
+          rm_debug = flags_rule_debug }
+  let
+    config = config1 { cfg_rule_model = ruleModel }
 
   let
     readHintFile Nothing = return []
@@ -1167,10 +1240,20 @@ runTwee globals (TSTPFlags tstp) horn precedence config0 flags@MainFlags{..} lat
         (show goal_number) (Just goal_name) Nothing goal_eqn
   line
 
+  startState <-
+    case flags_load_state of
+      Nothing -> return withBackwardsGoal
+      Just file -> do
+        loaded <- decode <$> BS.readFile file
+        let eh = (st_eqhints withHints) { eh_last_match = fromIntegral (st_next_active loaded) }
+            st1 = loaded { st_eqhints = eh, st_cur_passive = Nothing }
+            st2 | Map.null (eh_map eh) = st1
+                | otherwise = simplifyQueue config (normaliseEqHints st1)
+        return $! st_next_active st2 `seq` st2
   state <-
     case flags_stitch of
       Nothing -> do
-        complete output config withBackwardsGoal
+        complete output config startState
       Just stitch -> do
         let
           (timeout, final_timeout) =
@@ -1235,6 +1318,11 @@ runTwee globals (TSTPFlags tstp) horn precedence config0 flags@MainFlags{..} lat
           pairs = [ (ts !! i, ts !! j) | i <- [0..k-1], j <- [k+1..n-1], (i, j) /= (0, n-1) ]
       forM_ (take 30 pairs) $ \(t, u) -> putStrLn (showEqn (t :=: u))
     putStrLn "HINTS-END"
+    when (cfg_log_given config) $ do
+      putStrLn "GIVEN-BEGIN"
+      forM_ (reverse (st_given state)) $ \eqn ->
+        putStrLn (showEqn (fromMaybe eqn (expandGoalConsts (st_eqhints state) eqn)))
+      putStrLn "GIVEN-END"
 
   when (solved state && flags_proof) $ later $ do
     let

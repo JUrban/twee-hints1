@@ -26,6 +26,11 @@ def run_one(name, a):
             hf = p
     if hf:
         cmd += ['--hints-file', hf]
+    for spec in a.per:
+        flag, d = spec.split(':', 1)
+        p = os.path.join(d, name)
+        if os.path.exists(p):
+            cmd += ['--' + flag, p]
     if a.rts:
         cmd += ['+RTS'] + a.rts.split() + ['-RTS']
     t0 = time.time()
@@ -61,6 +66,8 @@ def main():
     ap.add_argument('--hints-dir')
     ap.add_argument('--hints-file')
     ap.add_argument('--keep-all', action='store_true')
+    ap.add_argument('--per', action='append', default=[],
+                    help='FLAG:DIR adds --FLAG DIR/<name> when that file exists')
     a = ap.parse_args()
     names = [l.strip() for l in open(a.names) if l.strip()]
     os.makedirs(os.path.join(a.outdir, 'out'), exist_ok=True)

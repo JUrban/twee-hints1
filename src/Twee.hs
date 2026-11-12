@@ -3,6 +3,8 @@
 module Twee where
 
 import Twee.Base
+import Twee.Enigma
+import qualified Data.Set as Set
 import Twee.Rule hiding (normalForms)
 import qualified Twee.Rule as Rule
 import Twee.Equation
@@ -88,7 +90,10 @@ data Config f =
     cfg_eqhint_debug              :: Bool,
     cfg_eqhint_consider           :: Bool,
     cfg_eqhint_requeue            :: Double,
-    cfg_print_score               :: Bool }
+    cfg_print_score               :: Bool,
+    cfg_log_given                 :: Bool,
+    cfg_rule_model                :: Maybe (RuleModel f),
+    cfg_eqhint_stall              :: Int }
 
 -- | The prover state.
 data State f =
@@ -101,6 +106,10 @@ data State f =
     st_queue          :: !(Queue Batch),
     st_hints          :: {-# UNPACK #-} !(Hints f),
     st_eqhints        :: !(EqHints f),
+    st_given          :: [Equation f],
+    st_cur_passive    :: !(Maybe Passive),
+    st_deferred       :: !(Set.Set (Id, Id, How)),
+    st_ndeferred      :: !Int,
     st_next_active    :: {-# UNPACK #-} !Id,
     st_considered     :: {-# UNPACK #-} !Int64,
     st_simplified_at  :: {-# UNPACK #-} !Id,
@@ -147,7 +156,10 @@ defaultConfig =
     cfg_eqhint_debug = False,
     cfg_eqhint_consider = True,
     cfg_eqhint_requeue = 0,
-    cfg_print_score = False }
+    cfg_print_score = False,
+    cfg_log_given = False,
+    cfg_rule_model = Nothing,
+    cfg_eqhint_stall = 0 }
 
 -- | Compute cfg_score_cp from the CP configuration.
 {-# INLINE scoreCP #-}
@@ -189,6 +201,10 @@ initialState Config{..} =
         hints_index = Index.empty,
         hints_next = 0 },
     st_eqhints = emptyEqHints,
+    st_given = [],
+    st_cur_passive = Nothing,
+    st_deferred = Set.empty,
+    st_ndeferred = 0,
     st_next_active = 1,
     st_considered = 0,
     st_simplified_at = 1,
@@ -429,7 +445,7 @@ enqueue state rule passives =
 --   * ignoring CPs that are too big
 --   * putting back any CPs whose score got bigger since they were enqueued
 {-# INLINEABLE dequeue #-}
-dequeue :: Function f => Config f -> State f -> (Maybe (Info, CriticalPair f, Active f, Active f), State f)
+dequeue :: Function f => Config f -> State f -> (Maybe (Info, CriticalPair f, Active f, Active f, Passive), State f)
 dequeue config@Config{..} state@State{..} =
   case deq 0 st_queue of
     -- Explicitly make the queue empty, in case it e.g. contained a
@@ -450,7 +466,7 @@ dequeue config@Config{..} state@State{..} =
             Just newPassive <- simplifyPassive config state passive ->
               if passive_score newPassive <= passive_score passive then
                 (if cfg_eqhint_debug && passive_score passive < 1 then Debug.Trace.trace ("DEQ " ++ show (passive_score passive) ++ " at " ++ show st_next_active ++ ": " ++ prettyShow (cp_eqn cp)) else id) $
-                return ((combineInfo (active_info rule1) (active_info rule2), cp, rule1, rule2), n+1, queue)
+                return ((combineInfo (active_info rule1) (active_info rule2), cp, rule1, rule2, newPassive), n+1, queue)
               else
                 deq (n+1) (Queue.insert (passive_rule1 newPassive) [newPassive] queue)
 
@@ -526,11 +542,14 @@ addActive config state@State{..} active0 =
       recordEqHintMatch active $
       message (NewActive mscore active) $
       addActiveOnly config state{st_next_active = st_next_active+1} active
+    logGiven st
+      | cfg_log_given config = st{st_given = unorient active_rule : st_given}
+      | otherwise = st
   in if subsumed (st_joinable, st_complete) st_rules (unorient active_rule) then
     state
   else
     normaliseGoals config $
-    enqueueRule state' active
+    enqueueRule (logGiven state') active
   where
     enqueueRule state rule =
       sample (length passives) passives $
@@ -627,14 +646,27 @@ considerUsing rules config@Config{..} state@State{..} info cp0 =
   case joinCriticalPair cfg_join (st_joinable, st_complete) rules Nothing cp of
     Right (mcp, cps) ->
       let
-        state' = foldl' (\state cp -> considerUsing rules config state info cp) state cps
+        state' = foldl' (\state cp -> considerUsing rules config state info cp) state{st_cur_passive = Nothing} cps
       in case mcp of
         Just cp -> addJoinable state' (cp_eqn cp)
         Nothing -> state'
 
-    Left (cp, model) ->
+    Left (cp, model)
+      | Just rm <- cfg_rule_model,
+        Just p <- st_cur_passive,
+        let key = (passive_rule1 p, passive_rule2 p, passive_how p),
+        not (key `Set.member` st_deferred),
+        let t :=: u = fromMaybe (cp_eqn cp) (expandGoalConsts st_eqhints (cp_eqn cp)),
+        let raw = ruleModelRaw rm (fromIntegral st_next_active - 1) t u,
+        (if rm_debug rm then Debug.Trace.trace ("RULEPRED " ++ show raw ++ " " ++ show (st_next_active - 1) ++ " " ++ prettyShow (t :=: u)) else id) (raw < rm_threshold rm) ->
+        state {
+          st_cur_passive = Nothing,
+          st_deferred = Set.insert key st_deferred,
+          st_ndeferred = st_ndeferred + 1,
+          st_queue = Queue.insert (passive_rule1 p) [p{passive_score = passive_score p * rm_penalty rm}] st_queue }
+      | otherwise ->
       generaliseCP cp $
-      foldl' (\state cp -> addCP config model state info cp) state (split cp)
+      foldl' (\state cp -> addCP config model state info cp) state{st_cur_passive = Nothing} (split cp)
 
   where
     generaliseCP cp state
@@ -958,6 +990,7 @@ data EqHints f =
     eh_ntracked :: !Int,
     -- number of matched hints at the last hint-triggered queue simplification
     eh_requeued_at :: !Int,
+    eh_last_match :: !Int,
     -- per-hint score factors (overriding cfg_eqhint_factor)
     eh_factor :: !(IntMap Float) }
   deriving (Generic, Binary)
@@ -978,7 +1011,7 @@ addTrackedHint state eqn =
   in state'{st_eqhints = eh'{eh_next = n, eh_ntracked = eh_ntracked eh + 1}}
 
 emptyEqHints :: EqHints f
-emptyEqHints = EqHints Map.empty IntMap.empty IntSet.empty 0 0 0 IntSet.empty IntMap.empty IntMap.empty 0 0 IntMap.empty
+emptyEqHints = EqHints Map.empty IntMap.empty IntSet.empty 0 0 0 IntSet.empty IntMap.empty IntMap.empty 0 0 0 IntMap.empty
 
 -- | Add an equation hint with its own score factor.
 {-# INLINEABLE addEqHintWithFactor #-}
@@ -1135,7 +1168,8 @@ recordEqHintMatch active state@State{st_eqhints = eh}
       Nothing -> state
       Just n ->
         message (HintMatched n active) $
-        state { st_eqhints = eh { eh_matched = IntSet.insert n (eh_matched eh) } }
+        state { st_eqhints = eh { eh_matched = IntSet.insert n (eh_matched eh),
+                                  eh_last_match = if n < trackBase then fromIntegral (active_id active) else eh_last_match eh } }
 
 -- | Normalise all live hints with respect to the oriented rules.
 {-# INLINEABLE normaliseEqHints #-}
@@ -1296,13 +1330,17 @@ complete1 config@Config{..} state
   | st_considered state >= cfg_max_critical_pairs =
     (False, state)
   | solved state && not cfg_always_complete = (False, state)
+  | cfg_eqhint_stall > 0,
+    not (Map.null (eh_map (st_eqhints state))),
+    fromIntegral (st_next_active state) - eh_last_match (st_eqhints state) > cfg_eqhint_stall =
+    (False, state)
   | otherwise =
     case st_random_seed state of
       Nothing -> -- normal mode
         case dequeue config state of
           (Nothing, state) -> (False, state)
-          (Just (info, overlap, _, _), state) ->
-            (True, consider config state info overlap)
+          (Just (info, overlap, _, _, passive), state) ->
+            (True, (consider config state{st_cur_passive = Just passive} info overlap){st_cur_passive = Nothing})
       Just (ReadShowBinary g) -> -- random mode
         let (g1, g2) = Random.split g in
         let state' = state { st_random_seed = Just (ReadShowBinary g2) } in
