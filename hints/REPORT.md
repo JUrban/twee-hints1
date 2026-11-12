@@ -307,6 +307,25 @@ relevant hints exist. Model rm3 never saw these problems.
   CPU-efficient, so it would suit a loop with many problems only with a
   much larger N.
 
+### Checkpoints: hints arriving late
+
+On the same 59 hard problems:
+
+* Plain twee runs 30 s and dumps its state (19 solved; about 16 MB per
+  state).
+* The 40 unsolved are resumed for 30 s more:
+  * without hints: +8, giving 27 (one plain 60 s run gives 26), so resume
+    is a true continuation;
+  * with the kNN hints: +9, giving 28, the same as hints from the start
+    for 60 s.
+
+Hints that arrive late do as well as hints from the start here.
+`loop.py --resume` builds a checkpointed Veroff loop on this. Unsolved runs
+dump their state, and the next round resumes them with the current hints,
+so search time accumulates across rounds instead of being redone. Cost: a
+19 MB state loads in about 1 s and dumps in about 2 s. That is fine for
+rounds of 30 s or more, but about 40% overhead for 8 s rounds.
+
 ## 2d. Prover9-new branches: what was ported
 
 | branch | what it does | decision |

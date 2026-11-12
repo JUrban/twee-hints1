@@ -34,6 +34,7 @@ class Loop:
         os.makedirs(os.path.join(self.dir, 'hints'), exist_ok=True)
         os.makedirs(os.path.join(self.dir, 'tmp'), exist_ok=True)
         os.makedirs(os.path.join(self.dir, 'given'), exist_ok=True)
+        os.makedirs(os.path.join(self.dir, 'states'), exist_ok=True)
         self.model = None  # (model, vocab, goaldir) of the current round
         self.names = [l.strip() for l in open(a.set) if l.strip()]
         self.sig = {}
@@ -105,6 +106,11 @@ class Loop:
                    a.model_args.split()
         if hints and a.stall:
             cmd += ['--eqhint-stall', str(a.stall)]
+        spath = os.path.join(self.dir, 'states', name + '.bin')
+        if a.resume:
+            if os.path.exists(spath):
+                cmd += ['--load-state', spath]
+            cmd += ['--dump-state', spath + '.tmp']
         if hints:
             hpath = os.path.join(self.dir, 'tmp', name + '.hints')
             with open(hpath, 'w') as f:
@@ -122,6 +128,13 @@ class Loop:
         if hints:
             os.unlink(hpath)
         ok = 'HINTS-END' in out
+        if a.resume:
+            if ok:
+                for p in (spath, spath + '.tmp'):
+                    if os.path.exists(p):
+                        os.unlink(p)
+            elif os.path.exists(spath + '.tmp'):
+                os.replace(spath + '.tmp', spath)
         stats = ''
         for line in out.splitlines():
             if line.startswith('HINTSTATS'):
@@ -233,6 +246,8 @@ def main():
     ap.add_argument('--model-fixed', help='MODEL,VOCAB: use this rule model in every round (no retraining)')
     ap.add_argument('--hints-extra', help='more hint dirs (comma-separated) for the kNN pool')
     ap.add_argument('--hints-from-start', action='store_true', help='use --hints-extra already in round 0')
+    ap.add_argument('--resume', action='store_true',
+                    help='checkpointed loop: unsolved runs dump their state and the next round resumes it with the new hints')
     ap.add_argument('-j', type=int, default=20)
     ap.add_argument('--twee', default='/project/bin/twee')
     ap.add_argument('--args', default='--no-flatten-goal')
