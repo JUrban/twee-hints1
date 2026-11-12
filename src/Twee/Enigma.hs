@@ -7,12 +7,15 @@
 {-# LANGUAGE BangPatterns, RecordWildCards #-}
 module Twee.Enigma(
   Tree, Forest, parseForest, parseForestBin, predictRaw,
-  eqnFeatures, RuleModel(..), ruleModelRow, ruleModelRaw) where
+  eqnFeatures, eqnFeaturesH, RuleModel(..), mkRuleModel, ruleModelRow, ruleModelRaw) where
 
 import Data.Array.Unboxed
 import Data.Array.ST(runSTUArray, newArray, writeArray)
 import Data.Array.Base(unsafeAt)
 import Data.Bits
+import Data.Word(Word64)
+import qualified Data.IntSet as IntSet
+import Data.IntSet(IntSet)
 import Data.Char(isDigit)
 import Data.Ratio((%))
 import Data.List
@@ -170,6 +173,78 @@ eqnFeatures name tl tr =
        ("Lvarside", if isV tl || isV tr then 1 else 0)]
   in Map.union (Map.fromList [ (k, fromIntegral v) | (k, v) <- stats ]) f3
 
+-- FNV-1a hashes of feature names, computed without building the strings.
+fnvStart :: Word64
+fnvStart = 14695981039346656037
+
+fnvStep :: Word64 -> Char -> Word64
+fnvStep h c = (h `xor` fromIntegral (fromEnum c)) * 1099511628211
+
+fnvStr :: Word64 -> String -> Word64
+fnvStr = foldl' fnvStep
+
+-- hash of prefix ++ intercalate [sep] xs
+fnvJoin :: Word64 -> Char -> [String] -> Word64
+fnvJoin h _ [] = h
+fnvJoin h sep (x:xs) = foldl' (\h' y -> fnvStr (fnvStep h' sep) y) (fnvStr h x) xs
+
+hkey :: String -> Int
+hkey = fromIntegral . fnvStr fnvStart
+
+-- | eqnFeatures with hashed names: all features, and the V, H and C keys.
+eqnFeaturesH :: (f -> String) -> Term f -> Term f -> (IntMap Double, IntSet, IntSet, IntSet)
+eqnFeaturesH name tl tr =
+  let
+    symName (Var _) = "*"
+    symName (App f _) = name (unintern f)
+    hV = fnvStep fnvStart 'V'
+    hH = fnvStep fnvStart 'H'
+    hC = fnvStep fnvStart 'C'
+    hD = fnvStep fnvStart 'D'
+    ins k = IntMap.insertWith (+) (fromIntegral k) 1
+    walk path d (fs, ds, vs, !len, !dep, !wid) t =
+      let s = symName t
+          path' = s:path
+          len' = len + 1
+          vs' = case t of Var (V x) -> IntMap.insertWith (+) x (1::Int) vs; _ -> vs
+          args = case t of App _ ts -> unpack ts; _ -> []
+          (fs1, ds1, vs1, len1, dep1, wid1) =
+            case args of
+              [] -> (fs, ds, vs', len', max dep d, wid + 1)
+              _ ->
+                let fsH = ins (fnvJoin hH '.' (s : map symName args)) fs
+                in foldl' (walk path' (d + 1)) (fsH, ds, vs', len', dep, wid) args
+          fs2 = case path' of
+                  (a:b:rest) ->
+                    let f2 = ins (fnvJoin hV '|' [b, a]) fs1
+                    in case rest of
+                         (c:_) -> ins (fnvJoin hV '|' [c, b, a]) f2
+                         [] -> f2
+                  _ -> fs1
+          (fs3, ds3) = case t of
+            Var _ -> (fs2, ds1)
+            _ -> (ins (fnvStr hC s) fs2, Map.insertWith max s d ds1)
+      in (fs3, ds3, vs1, len1, dep1, wid1)
+    (f1, d1, v1, len1, dep1, wid1) =
+      walk ["="] (1 :: Int) (walk ["="] 1 (IntMap.empty, Map.empty, IntMap.empty, 1 :: Int, 0, 0 :: Int) tl) tr
+    f2 = ins (fnvJoin hH '.' ("=" : sort [symName tl, symName tr])) f1
+    dfs = IntMap.fromList [ (fromIntegral (fnvStr hD s), fromIntegral d) | (s, d) <- Map.toList d1 ]
+    vocc = sum (IntMap.elems v1)
+    isV (Var _) = True
+    isV _ = False
+    stats =
+      [("Llen", len1), ("Ldepth", dep1), ("Lwidth", wid1),
+       ("Lvars", IntMap.size v1), ("Lvocc", vocc),
+       ("Lvuniq", length (filter (== 1) (IntMap.elems v1))),
+       ("Lvshared", length (filter (> 1) (IntMap.elems v1))),
+       ("Lfuncs", Map.size d1), ("Lfocc", len1 - 1 - vocc),
+       ("Lsizediff", abs (len tl - len tr)),
+       ("Lvarside", if isV tl || isV tr then 1 else 0)]
+    syms = Map.keys d1
+    cKeys = IntSet.fromList [ fromIntegral (fnvStr hC s) | s <- syms ]
+    allF = IntMap.unions [IntMap.fromList [ (hkey k, fromIntegral v) | (k, v) <- stats ], dfs, f2]
+  in (allF, IntSet.empty, IntSet.empty, cKeys)
+
 data RuleModel f =
   RuleModel {
     rm_forest    :: Forest,
@@ -180,11 +255,40 @@ data RuleModel f =
     rm_threshold :: Double,          -- on the raw score
     rm_penalty   :: Float,
     rm_debug     :: Bool,
-    rm_parents   :: Bool }           -- the vocabulary has a "p:" block
+    rm_parents   :: Bool,            -- the vocabulary has a "p:" block
+    rm_hvocab_c  :: IntMap Int,      -- hashed "c:" vocabulary
+    rm_hvocab_p  :: IntMap Int,      -- hashed "p:" vocabulary
+    rm_hgoal_v   :: IntSet,          -- hashed goal V/H/C features, by kind
+    rm_hgoal_h   :: IntSet,
+    rm_hgoal_c   :: IntSet }
+
+-- | Fill in the hashed fields from rm_vocab and rm_gkeys.
+mkRuleModel :: RuleModel f -> RuleModel f
+mkRuleModel rm =
+  rm { rm_hvocab_c = IntMap.fromList [ (hkey k, i) | (pk, i) <- Map.toList (rm_vocab rm), Just k <- [stripPrefix "c:" pk] ],
+       rm_hvocab_p = IntMap.fromList [ (hkey k, i) | (pk, i) <- Map.toList (rm_vocab rm), Just k <- [stripPrefix "p:" pk] ],
+       rm_hgoal_v = kind 'V', rm_hgoal_h = kind 'H', rm_hgoal_c = kind 'C' }
+  where
+    kind c = IntSet.fromList [ hkey k | k@(c':_) <- Set.toList (rm_gkeys rm), c' == c ]
 
 -- | The feature row of a rule (equation) added as the idx-th rule.
 ruleModelRow :: RuleModel f -> Int -> Term f -> Term f -> [(Term f, Term f)] -> IntMap Double
 ruleModelRow RuleModel{..} idx t u parents =
+  let (hf, _, _, ckeys) = eqnFeaturesH rm_name t u
+      inG = IntMap.keysSet hf
+      cnt g = fromIntegral (IntSet.size (IntSet.intersection inG g))
+      fixed =
+        [(0, cnt rm_hgoal_v), (1, cnt rm_hgoal_h),
+         (2, cnt rm_hgoal_c / fromIntegral (max 1 (IntSet.size ckeys))),
+         (3, log (1 + fromIntegral idx))]
+      cs = [ (i, v) | (k, v) <- IntMap.toList hf, Just i <- [IntMap.lookup k rm_hvocab_c] ]
+      pf = IntMap.unionsWith (+) [ let (f, _, _, _) = eqnFeaturesH rm_name pt pu in f | rm_parents, (pt, pu) <- parents ]
+      ps = [ (i, v) | (k, v) <- IntMap.toList pf, Just i <- [IntMap.lookup k rm_hvocab_p] ]
+  in IntMap.fromList (fixed ++ cs ++ ps ++ rm_goal)
+
+-- | The row computed with string feature names (reference implementation).
+ruleModelRowS :: RuleModel f -> Int -> Term f -> Term f -> [(Term f, Term f)] -> IntMap Double
+ruleModelRowS RuleModel{..} idx t u parents =
   let hf = eqnFeatures rm_name t u
       sh = [ k | k <- Map.keys hf, k `Set.member` rm_gkeys ]
       cnt c = fromIntegral (length (filter ((== c) . head) sh))

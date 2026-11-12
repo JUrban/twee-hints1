@@ -1107,11 +1107,13 @@ runTwee globals (TSTPFlags tstp) horn precedence config0 flags@MainFlags{..} lat
           conName Minimal = "?"
           conName (Skolem _) = "?"
           conName (Hint _ _) = "?"
-        return $! length forest `seq` Map.size vocab `seq` Just RuleModel {
+        return $! length forest `seq` Map.size vocab `seq` Just $ mkRuleModel RuleModel {
           rm_forest = forest, rm_vocab = vocab, rm_goal = gcols, rm_gkeys = gkeys,
           rm_name = conName, rm_threshold = log (p / (1 - p)), rm_penalty = flags_rule_penalty,
           rm_debug = flags_rule_debug,
-          rm_parents = any ("p:" `isPrefixOf`) (Map.keys vocab) }
+          rm_parents = any ("p:" `isPrefixOf`) (Map.keys vocab),
+          rm_hvocab_c = IntMap.empty, rm_hvocab_p = IntMap.empty,
+          rm_hgoal_v = IntSet.empty, rm_hgoal_h = IntSet.empty, rm_hgoal_c = IntSet.empty }
   let
     config = config1 { cfg_rule_model = ruleModel }
 
