@@ -107,10 +107,25 @@ class Loop:
             res = hs
         return name, ok, dt, stats, res
 
+    def hints_for(self, n, pools, knn):
+        a = self.a
+        if a.pool.startswith('knn'):
+            _, k, topn = a.pool.split(':')
+            return [tuple(h.split('\t')) for h in knn.select(n, int(k), int(topn))]
+        key = orig_of(n) if a.pool == 'original' else 'all'
+        return pools.get(key, [])[:a.max_hints]
+
     def round(self, rnd):
         a = self.a
         todo = [n for n in self.names if n not in self.solved]
-        pools = self.build_pools() if rnd > 0 else {}
+        pools = {}
+        knn = None
+        if rnd > 0:
+            if a.pool.startswith('knn'):
+                import hintsel
+                knn = hintsel.KNN(os.path.join(self.dir, 'hints'), list(self.solved))
+            else:
+                pools = self.build_pools()
         rdir = os.path.join(self.dir, 'r%d' % rnd)
         os.makedirs(rdir, exist_ok=True)
         t0 = time.time(); new = 0
@@ -119,8 +134,7 @@ class Loop:
              ThreadPoolExecutor(a.j) as ex:
             futs = []
             for n in todo:
-                key = orig_of(n) if a.pool == 'original' else 'all'
-                hints = pools.get(key, [])[:a.max_hints] if rnd > 0 else []
+                hints = self.hints_for(n, pools, knn) if rnd > 0 else []
                 if rnd > 0 and not hints and not a.rerun_unhinted:
                     continue
                 futs.append(ex.submit(self.run_one, n, hints, rnd))
@@ -158,7 +172,17 @@ def main():
     ap.add_argument('--max-hints', type=int, default=100000)
     ap.add_argument('--aux', action='store_true')
     ap.add_argument('--rerun-unhinted', action='store_true')
+    ap.add_argument('--init', help='import round-0 results (solved.tsv and hints) of another loop dir')
     a = ap.parse_args()
+    if a.init and not os.path.exists(os.path.join(a.dir, 'solved.tsv')):
+        import shutil
+        os.makedirs(os.path.join(a.dir, 'hints'), exist_ok=True)
+        with open(os.path.join(a.dir, 'solved.tsv'), 'w') as f:
+            for l in open(os.path.join(a.init, 'solved.tsv')):
+                if l.split('\t')[1] == '0':
+                    f.write(l)
+                    n = l.split('\t')[0]
+                    shutil.copy(os.path.join(a.init, 'hints', n), os.path.join(a.dir, 'hints', n))
     lp = Loop(a)
     with open(os.path.join(a.dir, 'config.json'), 'w') as f:
         json.dump(vars(a), f, indent=1)

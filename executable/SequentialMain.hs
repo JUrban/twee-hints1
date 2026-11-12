@@ -40,6 +40,7 @@ import System.IO
 import System.Exit
 import qualified Data.Set as Set
 import qualified Data.Intern as Intern
+import Data.Intern(symId)
 import System.Console.ANSI
 import Data.Symbol
 import Twee.Profile
@@ -81,7 +82,8 @@ data MainFlags =
     flags_dump_state :: Maybe FilePath,
     flags_stitch :: Maybe FilePath,
     flags_print_hints :: Bool,
-    flags_hints_file :: Maybe FilePath }
+    flags_hints_file :: Maybe FilePath,
+    flags_track_hints :: Maybe FilePath }
 
 parseMainFlags :: OptionParser MainFlags
 parseMainFlags = do
@@ -214,6 +216,12 @@ parseMainFlags = do
     inGroup "Critical pair weighting heuristics" $
     flag "hints-file"
       ["File of equation hints, one 'lhs<TAB>rhs' per line, in TPTP term syntax (none by default)."]
+      Nothing (Just <$> argFile)
+  flags_track_hints <-
+    expert $
+    inGroup "Debugging options" $
+    flag "track-hints"
+      ["File of equations (as for --hints-file) to report when a rule matches them, without changing the search."]
       Nothing (Just <$> argFile)
   flags_print_hints <-
     expert $
@@ -444,6 +452,10 @@ parseConfig = do
     bool "eqhint-consider"
       ["Match equation hints against the rule a critical pair would become, if its symbols match a hint (on by default)."]
       True
+  cfg_eqhint_requeue <-
+    expert $
+    inGroup "Critical pair weighting heuristics" $
+    defaultFlag "eqhint-requeue" "Fraction of time for re-simplifying the queue after new rules match hints" cfg_eqhint_requeue argNum
   cfg_eqhint_debug <-
     expert $
     inGroup "Debugging options" $
@@ -1024,10 +1036,9 @@ runTwee globals (TSTPFlags tstp) horn precedence config0 flags@MainFlags{..} lat
     -}
     config = config0 { cfg_eliminate_axioms = if flags_flatten_regeneralise then defs else [] }
 
-  fileHints <-
-    case flags_hints_file of
-      Nothing -> return []
-      Just file -> do
+  let
+    readHintFile Nothing = return []
+    readHintFile (Just file) = do
         str <- readFile file
         let
           funMap = Map.fromList [ (base (name f), f) | f <- reverse (Map.elems (ctx_funs ctx)) ]
@@ -1050,9 +1061,29 @@ runTwee globals (TSTPFlags tstp) horn precedence config0 flags@MainFlags{..} lat
               _ -> Nothing
           hs = mapMaybe parseLine (lines str)
         return $! length hs `seq` hs
+  fileHints <- readHintFile flags_hints_file
+  trackHints <- readHintFile flags_track_hints
   let
     withHints0 = foldl' (addHint config) (initialState config) [toTerm (varNums h) h | h <- hints']
-    withHints = foldl' addEqHint withHints0 (map toEquation eqHints' ++ fileHints)
+    withHints1 = foldl' addEqHint withHints0 (map toEquation eqHints' ++ fileHints)
+    -- Goal constants for hint matching: flattening constants and skolems.
+    nullaryFuns t = [ f | App f Nil <- Twee.Base.subterms t ]
+    flatDefs =
+      [ (symId f, d)
+      | ax <- defs, (c, d) <- [(eqn_lhs (axiom_eqn ax), eqn_rhs (axiom_eqn ax))],
+        App f Nil <- [c] ]
+    flatSyms = IntSet.fromList (map fst flatDefs)
+    axiomSyms = IntSet.fromList
+      [ symId f | ax <- axioms, ax `notElem` defs, t <- terms (axiom_eqn ax), App f _ <- Twee.Base.subterms t ]
+    skolemSyms = IntSet.fromList
+      [ symId f
+      | t <- concatMap (terms . goal_eqn) goals ++ map snd flatDefs,
+        f <- nullaryFuns t,
+        not (symId f `IntSet.member` axiomSyms), not (symId f `IntSet.member` flatSyms) ]
+    terms (t :=: u) = [t, u]
+    goalConsts =
+      IntMap.fromList ([ (f, Just d) | (f, d) <- flatDefs ] ++ [ (f, Nothing) | f <- IntSet.toList skolemSyms ])
+    withHints = foldl' addTrackedHint (setEqHintGoalConsts withHints1 goalConsts) trackHints
     withGoals = foldl' (addGoal config) withHints goals
     withAxioms = foldl' (addAxiom config) withGoals axioms
     withBackwardsGoal = foldn rewriteGoalsBackwards withAxioms flags_backwards_goal
@@ -1174,9 +1205,10 @@ runTwee globals (TSTPFlags tstp) horn precedence config0 flags@MainFlags{..} lat
       BS.writeFile dumpStateFile (encode state)
 
   let EqHints{..} = st_eqhints state
-  when (eh_next > 0) $
+  when (eh_next > 0 || eh_ntracked > 0) $
     putStrLn $ "HINTSTATS hints=" ++ show eh_next ++ " live=" ++ show (IntMap.size eh_live) ++
-      " joined=" ++ show eh_joined ++ " matched=" ++ show (IntSet.size eh_matched) ++
+      " joined=" ++ show eh_joined ++ " matched=" ++ show (IntSet.size (fst (IntSet.split trackBase eh_matched))) ++
+      " tracked=" ++ show eh_ntracked ++ " trackmatched=" ++ show (IntSet.size (snd (IntSet.split (trackBase-1) eh_matched))) ++
       " forms=" ++ show (Map.size eh_map) ++ " rules=" ++ show (st_next_active state)
 
   when (solved state && flags_print_hints) $ do

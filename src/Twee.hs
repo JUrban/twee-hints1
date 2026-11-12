@@ -48,6 +48,7 @@ import GHC.Generics
 import Data.Binary.Sharing
 import Data.Bits
 import Data.Hashable(hash)
+import Data.Intern(symId)
 
 ----------------------------------------------------------------------
 -- * Configuration and prover state.
@@ -86,6 +87,7 @@ data Config f =
     cfg_eqhint_fullnorm           :: Bool,
     cfg_eqhint_debug              :: Bool,
     cfg_eqhint_consider           :: Bool,
+    cfg_eqhint_requeue            :: Double,
     cfg_print_score               :: Bool }
 
 -- | The prover state.
@@ -144,6 +146,7 @@ defaultConfig =
     cfg_eqhint_fullnorm = False,
     cfg_eqhint_debug = False,
     cfg_eqhint_consider = True,
+    cfg_eqhint_requeue = 0,
     cfg_print_score = False }
 
 -- | Compute cfg_score_cp from the CP configuration.
@@ -946,11 +949,72 @@ data EqHints f =
     -- value of st_next_active when hints were last normalised
     eh_norm_at   :: !Id,
     -- fingerprints of all forms of all hints
-    eh_fps       :: !IntSet }
+    eh_fps       :: !IntSet,
+    -- goal constants: flattening constants (with their definitions)
+    -- and skolem constants (Nothing), keyed by symbol id
+    eh_goalconsts :: !(IntMap (Maybe (Term f))),
+    -- fingerprint contributions of goal constants
+    eh_gcfps :: !(IntMap Int),
+    eh_ntracked :: !Int,
+    -- number of matched hints at the last hint-triggered queue simplification
+    eh_requeued_at :: !Int }
   deriving (Generic, Binary)
 
+-- | Hints numbered from here on are only tracked (reported when a rule
+-- matches them), they do not change scores.
+trackBase :: Int
+trackBase = 1000000
+
+-- | Add a tracked hint (see 'trackBase').
+{-# INLINEABLE addTrackedHint #-}
+addTrackedHint :: Function f => State f -> Equation f -> State f
+addTrackedHint state eqn =
+  let eh = st_eqhints state
+      n = eh_next eh
+      state' = addEqHint state{st_eqhints = eh{eh_next = trackBase + eh_ntracked eh}} eqn
+      eh' = st_eqhints state'
+  in state'{st_eqhints = eh'{eh_next = n, eh_ntracked = eh_ntracked eh + 1}}
+
 emptyEqHints :: EqHints f
-emptyEqHints = EqHints Map.empty IntMap.empty IntSet.empty 0 0 0 IntSet.empty
+emptyEqHints = EqHints Map.empty IntMap.empty IntSet.empty 0 0 0 IntSet.empty IntMap.empty IntMap.empty 0 0
+
+-- | Tell the hint matcher about goal constants.
+setEqHintGoalConsts :: Function f => State f -> IntMap (Maybe (Term f)) -> State f
+setEqHintGoalConsts state gcs =
+  state { st_eqhints = (st_eqhints state) { eh_goalconsts = gcs, eh_gcfps = fps } }
+  where
+    -- definitions are ground and mention only skolems and ordinary symbols
+    fps = IntMap.map fp gcs
+    fp Nothing = varFingerprint
+    fp (Just d) = termFingerprint skolemFps d
+    skolemFps = IntMap.map (const varFingerprint) (IntMap.filter isNothing gcs)
+
+-- | Replace goal constants: flattening constants by their definitions,
+-- skolem constants by fresh variables. Returns Nothing if there are none.
+{-# INLINEABLE expandGoalConsts #-}
+expandGoalConsts :: Function f => EqHints f -> Equation f -> Maybe (Equation f)
+expandGoalConsts EqHints{..} eqn@(t :=: u)
+  | IntMap.null eh_goalconsts = Nothing
+  | not (any isGoal (subterms t) || any isGoal (subterms u)) = Nothing
+  | otherwise = Just (build (ex t) :=: build (ex u))
+  where
+    isGoal (App f Nil) = IntMap.member (symId f) eh_goalconsts
+    isGoal _ = False
+    base = 1 + maximum (0 : [ x | V x <- vars eqn ])
+    ex (Var x) = var x
+    ex (App f ts) =
+      case IntMap.lookup (symId f) eh_goalconsts of
+        Just (Just d) | Nil <- ts -> ex d
+        Just Nothing | Nil <- ts -> var (V (base + symId f))
+        _ -> app f (map ex (unpack ts))
+
+-- | Look up an equation among the hints, also after expanding goal constants.
+{-# INLINEABLE lookupEqHintG #-}
+lookupEqHintG :: Function f => EqHints f -> Equation f -> Maybe Int
+lookupEqHintG eh eqn =
+  case lookupEqHint eh eqn of
+    Just n -> Just n
+    Nothing -> expandGoalConsts eh eqn >>= lookupEqHint eh
 
 -- | Add an equation hint.
 {-# INLINEABLE addEqHint #-}
@@ -983,12 +1047,12 @@ lookupEqHint EqHints{..} eqn
 eqHintScore :: Function f => Config f -> State f -> Term f -> Equation f -> Float -> Float
 eqHintScore config@Config{..} state top eqn s
   | Map.null (eh_map eh) = s
-  | Just n <- lookupEqHint eh eqn = dbg n "cheap" hinted
+  | not (goalFingerprint eh eqn `IntSet.member` eh_fps eh) = s
+  | Just n <- lookupEqHintG eh eqn, n < trackBase = dbg n "cheap" hinted
   | cfg_eqhint_consider,
-    eqnFingerprint eqn `IntSet.member` eh_fps eh,
-    n:_ <- mapMaybe (lookupEqHint eh) (considerForms config state top eqn) = dbg n "consider" hinted
+    n:_ <- filter (< trackBase) (mapMaybe (lookupEqHintG eh) (considerForms config state top eqn)) = dbg n "consider" hinted
   | cfg_eqhint_fullnorm,
-    Just n <- lookupEqHint eh (fullNormEqn state eqn) = dbg n "full" hinted
+    Just n <- lookupEqHintG eh (fullNormEqn state eqn), n < trackBase = dbg n "full" hinted
   | otherwise = s
   where
     eh = st_eqhints state
@@ -1012,16 +1076,34 @@ considerForms Config{..} State{..} top eqn =
 -- orientation, variable renaming and permutative rewriting.
 {-# INLINEABLE eqnFingerprint #-}
 eqnFingerprint :: Function f => Equation f -> Int
-eqnFingerprint (t :=: u) = go t + go u
+eqnFingerprint (t :=: u) = termFingerprint IntMap.empty t + termFingerprint IntMap.empty u
+
+-- | Fingerprint of a term; symbols in the table contribute the given
+-- value instead (used for goal constants).
+{-# INLINE termFingerprint #-}
+termFingerprint :: IntMap Int -> Term f -> Int
+termFingerprint tbl t = go 0 (Twee.Base.singleton t)
   where
-    go x = sum (map sym (subterms x))
-    sym (App f _) = mix (hash f)
-    sym _ = 0x5bd1e995
-    mix :: Int -> Int
-    mix z0 =
-      let z1 = (z0 `xor` (z0 `shiftR` 30)) * (-4658895280553007687)
-          z2 = (z1 `xor` (z1 `shiftR` 27)) * (-7723592293110705685)
-      in z2 `xor` (z2 `shiftR` 31)
+    go !acc Nil = acc
+    go !acc ConsSym{hd = Var _, rest = ts} = go (acc + varFingerprint) ts
+    go !acc ConsSym{hd = App f _, rest = ts} =
+      let !k = symId f in
+      go (acc + IntMap.findWithDefault (symFingerprint k) k tbl) ts
+
+varFingerprint :: Int
+varFingerprint = 0x5bd1e995
+
+{-# INLINE symFingerprint #-}
+symFingerprint :: Int -> Int
+symFingerprint z0 =
+  let z1 = (z0 `xor` (z0 `shiftR` 30)) * (-4658895280553007687)
+      z2 = (z1 `xor` (z1 `shiftR` 27)) * (-7723592293110705685)
+  in z2 `xor` (z2 `shiftR` 31)
+
+-- | Fingerprint of an equation after expanding goal constants.
+{-# INLINE goalFingerprint #-}
+goalFingerprint :: EqHints f -> Equation f -> Int
+goalFingerprint EqHints{..} (t :=: u) = termFingerprint eh_gcfps t + termFingerprint eh_gcfps u
 
 -- | Normalise both sides of an equation with all rules (ordered rewriting).
 {-# INLINEABLE fullNormEqn #-}
@@ -1036,7 +1118,7 @@ recordEqHintMatch :: Function f => Active f -> State f -> State f
 recordEqHintMatch active state@State{st_eqhints = eh}
   | Map.null (eh_map eh) = state
   | otherwise =
-    case lookupEqHint eh (unorient (active_rule active)) of
+    case lookupEqHintG eh (unorient (active_rule active)) of
       Nothing -> state
       Just n ->
         message (HintMatched n active) $
@@ -1157,6 +1239,14 @@ complete Output{..} config@Config{..} state =
           when cfg_eqhint_normalise $ do
             state <- StateM.get
             StateM.put $! normaliseEqHints state,
+       newTask 0.05 cfg_eqhint_requeue $ do
+          state <- StateM.get
+          let eh = st_eqhints state
+          when (cfg_eqhint_requeue > 0 && IntSet.size (eh_matched eh) /= eh_requeued_at eh) $ do
+            lift $ output_message SimplifyQueue
+            let state' = normaliseEqHints state
+            StateM.put $! (simplifyQueue config state') {
+              st_eqhints = (st_eqhints state') { eh_requeued_at = IntSet.size (eh_matched eh) } },
        newTask 60 0.01 $ do
           State{..} <- StateM.get
           let !n = Queue.size st_queue
