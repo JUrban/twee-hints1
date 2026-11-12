@@ -10,6 +10,8 @@ module Twee.Enigma(
   eqnFeatures, RuleModel(..), ruleModelRow, ruleModelRaw) where
 
 import Data.Array.Unboxed
+import Data.Array.ST(runSTUArray, newArray, writeArray)
+import Data.Array.Base(unsafeAt)
 import Data.Bits
 import Data.Char(isDigit)
 import Data.Ratio((%))
@@ -96,9 +98,19 @@ parseForestBin = runGet $ do
 
 -- | Raw score (sum of leaf values) of a forest on a sparse feature vector.
 predictRaw :: Forest -> IntMap Double -> Double
-predictRaw forest x = foldl' (\ !s t -> s + evalTree t) 0 forest
+predictRaw forest x = predictDense forest (dense x)
   where
-    val f = IntMap.findWithDefault 0 f x
+    n = if IntMap.null x then 1 else fst (IntMap.findMax x) + 1
+    dense m = runSTUArray $ do
+      a <- newArray (0, n - 1) 0
+      mapM_ (\(i, v) -> writeArray a i v) (IntMap.toList m)
+      return a
+
+predictDense :: Forest -> UArray Int Double -> Double
+predictDense forest x = foldl' (\ !s t -> s + evalTree t) 0 forest
+  where
+    (_, hi) = bounds x
+    val f = if f <= hi then unsafeAt x f else 0
     evalTree t
       | snd (bounds (t_feat t)) < 0 = t_leaf t ! 0
       | otherwise = go 0

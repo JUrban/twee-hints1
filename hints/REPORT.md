@@ -249,6 +249,17 @@ reach AUC 0.971 against 0.969 without them, so they are left off for now.
   2.3 s from scratch. Long runs can be continued with new hints instead of
   being restarted, as with Prover9-new's checkpoints.
 
+## 2d. Prover9-new branches: what was ported
+
+| branch | what it does | decision |
+|---|---|---|
+| packed-fast, better-packed, faster-packed-fallback, adaptive-hint-mask-filter, lazy-hash-gate | fast matching against very large hint banks (millions of hints, Josef runs): packed matchers, 64-bit checklists, bit tables | not ported. With ≤ 10^3 hints per run, matching costs about 7% of twee's throughput after the fingerprint prefilter, which plays the same role. |
+| experimental-generalized-hint-hash | subsumption matching by hashing precomputed hint generalisations | not ported yet. This is the way to add "critical pair more general than a hint" matches; twee currently matches variants only, plus consider-emulation. A more general rule makes the hint joinable, but the pair that produced the rule gets no boost. Worth trying if transfer hints turn out to be too specific. |
+| proof-parent-guidance, proof-recipe-replay | replay a known proof's parent graph | covered by self-replay with own-proof hints (15× faster). Not useful for new problems. |
+| target-directed-inference | hash-guided inference toward targets | the branch reports a no-go; not ported. |
+| long-run-scalability, ancestor store, compact indexing, checkpoints | memory and restart for runs with 10^5+ given clauses | checkpoints ported as `--load-state` (twee already had `--dump-state`). Twee's AIM runs are far from those memory limits. |
+| (master) back_demod_hints, sos back-demodulation | re-simplify hints and queued clauses | ported as `--eqhint-normalise` and `--eqhint-requeue`. |
+
 ## 3. Assessment
 
 * Hint guidance works mechanically. Self-replay is 15× faster.
