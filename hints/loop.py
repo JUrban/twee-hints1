@@ -13,6 +13,9 @@ import argparse, collections, json, os, subprocess, sys, time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import hintlib
+import given as givenlib
+
+VENV_PY = '/project/hintwork/venv/bin/python'
 
 PROB = hintlib.PROB
 
@@ -30,6 +33,8 @@ class Loop:
         self.dir = a.dir
         os.makedirs(os.path.join(self.dir, 'hints'), exist_ok=True)
         os.makedirs(os.path.join(self.dir, 'tmp'), exist_ok=True)
+        os.makedirs(os.path.join(self.dir, 'given'), exist_ok=True)
+        self.model = None  # (model, vocab, goaldir) of the current round
         self.names = [l.strip() for l in open(a.set) if l.strip()]
         self.sig = {}
         self.solved = {}   # name -> (round, time)
@@ -60,11 +65,46 @@ class Loop:
                 cnt[key][h] += 1
         return {k: [h for h, _ in c.most_common()] for k, c in cnt.items()}
 
+    def timeout(self, rnd):
+        ts = [float(x) for x in str(self.a.timeout).split(',')]
+        return ts[min(rnd, len(ts) - 1)]
+
+    def train_model(self, rnd):
+        """Train the rule model on all given logs so far; write goal files for the unsolved."""
+        a = self.a
+        mdir = os.path.join(self.dir, 'models'); os.makedirs(mdir, exist_ok=True)
+        m = os.path.join(mdir, 'r%d.txt' % rnd); v = m + '.vocab'
+        dirs = [os.path.join(self.dir, 'given')] + (a.given_extra.split(',') if a.given_extra else [])
+        t0 = time.time()
+        if a.model_fixed:
+            m, v = a.model_fixed.split(',')
+        else:
+          subprocess.run([VENV_PY, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'rulemodel.py'),
+                        ','.join(dirs), '--all', '--ntest', '0', '--save', m, '--vocab', v],
+                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                       env=dict(os.environ, OMP_NUM_THREADS='8'))
+        import rulemodel
+        vocab = {}
+        for line in open(v):
+            c, k = line.rstrip('\n').split('\t'); vocab[k] = int(c)
+        gdir = os.path.join(self.dir, 'goals', 'r%d' % rnd); os.makedirs(gdir, exist_ok=True)
+        for n in self.names:
+            if n not in self.solved:
+                rulemodel.write_goalfile(n, vocab, os.path.join(gdir, n))
+        self.model = (m, v, gdir)
+        print(f'  round {rnd}: trained rule model {time.time()-t0:.0f}s', file=sys.stderr, flush=True)
+
     def run_one(self, name, hints, rnd):
         a = self.a
         path = os.path.join(PROB, name + '.p')
-        cmd = [a.twee, path, '--max-time', str(a.timeout), '--no-colour', '--quiet',
-               '--no-proof', '--print-hints'] + a.args.split()
+        cmd = [a.twee, path, '--max-time', str(self.timeout(rnd)), '--no-colour', '--quiet',
+               '--no-proof', '--print-hints', '--print-given'] + a.args.split()
+        if self.model:
+            m, v, gdir = self.model
+            cmd += ['--rule-model', m, '--rule-vocab', v, '--rule-goal', os.path.join(gdir, name)] + \
+                   a.model_args.split()
+        if hints and a.stall:
+            cmd += ['--eqhint-stall', str(a.stall)]
         if hints:
             hpath = os.path.join(self.dir, 'tmp', name + '.hints')
             with open(hpath, 'w') as f:
@@ -74,7 +114,7 @@ class Loop:
         t0 = time.time()
         try:
             p = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                               timeout=a.timeout + 30)
+                               timeout=self.timeout(rnd) + 30)
             out = p.stdout.decode('utf8', 'replace')
         except subprocess.TimeoutExpired as e:
             out = (e.stdout or b'').decode('utf8', 'replace') + '\nKILLED\n'
@@ -104,6 +144,17 @@ class Loop:
                     if k[0] == k[1] or k in seen:
                         continue
                     seen.add(k); hs.append(k)
+            ax = set(givenlib.key(l, r, sig) for l, r in givenlib.axioms(name))
+            pos = set(givenlib.key(l, r, sig) for l, r in L + G)
+            rows = []
+            for idx, (l, r) in enumerate(givenlib.parse_given(out)):
+                if l == r:
+                    continue
+                k = givenlib.key(l, r, sig)
+                lab = -1 if k in ax else (1 if k in pos else 0)
+                rows.append(f'{lab}\t{idx}\t{k[0]}\t{k[1]}\n')
+            with open(os.path.join(self.dir, 'given', name), 'w') as gf:
+                gf.writelines(rows)
             res = hs
         return name, ok, dt, stats, res
 
@@ -120,12 +171,21 @@ class Loop:
         todo = [n for n in self.names if n not in self.solved]
         pools = {}
         knn = None
-        if rnd > 0:
+        hinted = rnd > 0 or (a.hints_extra and a.hints_from_start)
+        if hinted:
             if a.pool.startswith('knn'):
                 import hintsel
                 knn = hintsel.KNN(os.path.join(self.dir, 'hints'), list(self.solved))
+                for d in (a.hints_extra.split(',') if a.hints_extra else []):
+                    for f in os.listdir(d):
+                        if f not in knn.hints:
+                            L = [l.rstrip('\n') for l in open(os.path.join(d, f)) if '\t' in l]
+                            if L:
+                                knn.add(f, L)
             else:
                 pools = self.build_pools()
+        if a.model and (rnd > 0 or a.given_extra or a.model_fixed):
+            self.train_model(rnd)
         rdir = os.path.join(self.dir, 'r%d' % rnd)
         os.makedirs(rdir, exist_ok=True)
         t0 = time.time(); new = 0
@@ -134,7 +194,7 @@ class Loop:
              ThreadPoolExecutor(a.j) as ex:
             futs = []
             for n in todo:
-                hints = self.hints_for(n, pools, knn) if rnd > 0 else []
+                hints = self.hints_for(n, pools, knn) if hinted else []
                 if rnd > 0 and not hints and not a.rerun_unhinted:
                     continue
                 futs.append(ex.submit(self.run_one, n, hints, rnd))
@@ -164,7 +224,14 @@ def main():
     ap.add_argument('dir')
     ap.add_argument('--rounds', type=int, default=4)
     ap.add_argument('--start', type=int, default=0)
-    ap.add_argument('--timeout', type=float, default=2)
+    ap.add_argument('--timeout', default='2', help='seconds, or a list per round: 2,8,30')
+    ap.add_argument('--model', action='store_true', help='train and use the ENIGMA rule model')
+    ap.add_argument('--model-args', default='--rule-threshold 0.1 --rule-penalty 2')
+    ap.add_argument('--given-extra', help='more given dirs (comma-separated) for training')
+    ap.add_argument('--stall', type=int, default=0, help='--eqhint-stall for hinted runs')
+    ap.add_argument('--model-fixed', help='MODEL,VOCAB: use this rule model in every round (no retraining)')
+    ap.add_argument('--hints-extra', help='more hint dirs (comma-separated) for the kNN pool')
+    ap.add_argument('--hints-from-start', action='store_true', help='use --hints-extra already in round 0')
     ap.add_argument('-j', type=int, default=20)
     ap.add_argument('--twee', default='/project/bin/twee')
     ap.add_argument('--args', default='--no-flatten-goal')

@@ -80,7 +80,9 @@ aa1_45_c Ka_eq_aK3 aK2_eq_aK3_b`. All runs use 20 processes in parallel.
 | twee 2 s, no hints | 1753 / 1771 (two runs) |
 | twee 2 s `--no-flatten-goal` | 1176 |
 | loop L1: 2 s, pool = all proofs of the same original | 1771 → 1833 → 1835 → 1836 |
-| loop L2: 2 s, kNN pool (30 neighbours, 100 hints) | 1771 → 1836 → ... |
+| loop L2: 2 s, kNN pool (30 neighbours, 100 hints) | 1771 → 1836 → 1845 → 1848 |
+| L2 continued at 8 s (two rounds) | → 1944 → 1955 |
+| no hints: 2 s, then 8 s on the unsolved | 1771 → 1928 |
 
 ### Self-replay: a problem rerun with hints from its own twee proof
 
@@ -121,6 +123,89 @@ first and delayed the real proof's lemmas by about 230 rules.
 kNN by goal-statement similarity (idf-weighted Jaccard on term shapes of
 depth ≤ 3) across all originals does better: recall 0.74 and precision 0.26
 at 100 hints. With 400 hints, recall is 0.81.
+
+### Hints against extra time
+
+Plain twee at 2 s and then 8 s on what is left solves 1928. The hint loop
+with the same final limit solves 1945 after its first 8 s round. Hints add
+only +17 at these limits; the union is 1958. Most dev10 goals are solved
+early or not at all, so at 2–8 s there is little room for hints. Hints
+should matter more in long runs that would otherwise lose their way (see
+the stall cutoff below).
+
+### Learned hint ranking (ENIGMA features, LightGBM)
+
+`lgbsel.py` reranks the kNN candidates with LightGBM. A row has pair
+features (kNN score, frequency) plus ENIGMA-style features of the hint and
+of the goal. Training and testing are on different originals.
+
+| hints | recall@100 | precision@100 |
+|---|---|---|
+| kNN | 0.838 | 0.154 |
+| LightGBM rerank | 0.849 | 0.156 |
+| all 600 kNN candidates | 0.856 | |
+
+Reranking gains little, because kNN candidates already cap recall at 0.856.
+The missing lemmas are in no neighbour's proof.
+
+## 2b. ENIGMA for twee: a learned rule filter
+
+ENIGMA's "enigmatic" featurizer (E prover, ai4reason `enigma` branch,
+`che_enigmaticvectors.c`) is ported for unit equations:
+
+* vertical walks of length 2–3 from the `=` root (variables as `*`)
+* horizontal features `f.head(arg1)...`
+* symbol counts and symbol max depths
+* length statistics
+* the conjecture as a separate goal block
+* overlap counts between rule and goal, and log(rule number)
+
+Python (`enigfeats.py`) and Haskell (`src/Twee/Enigma.hs`) compute the same
+features. On test rules, twee's raw scores equal LightGBM's exactly.
+
+**Training data.** `--print-given` logs every rule added. `given.py` labels
+each rule: 1 if it is a proof lemma, 0 otherwise, -1 for axioms. Round 0 of
+dev10 gives 1771 runs, with 26.7k positive and 605k negative rules.
+
+**Offline**, on 3 held-out originals (253 problems):
+
+* AUC 0.969.
+* At threshold 0.1, 97.9% of proof rules are kept and 68.5% of the others
+  are rejected.
+* The rules up to the proof shrink to 36%.
+
+**In twee** (`--rule-model M --rule-vocab V --rule-goal G`), a critical
+pair that would become a new rule is first scored. If the predicted
+probability is below the threshold, the pair goes back into the queue once,
+with its score times the penalty (default 2). Hint-boosted pairs come back
+at once, because their scores are tiny.
+
+The test set is the 345 problems of the held-out originals (aa1_45_c,
+mbol_com, nil3_15) that are unsolved at 2 s, run at 8 s:
+
+| system | solved |
+|---|---|
+| twee, no guidance | 42 |
+| hint loop, all rounds (2 s ×3 + 8 s) | 46 |
+| rule model, threshold 0.1 | 57 |
+| rule model, threshold 0.2 | 40 |
+| rule model + kNN hints (100) | **68** |
+| union of all runs | 83 |
+
+mbol_com gets 0 with the model, against 4 without. Its theory is unlike
+the 7 training originals. Next step: train on many more originals.
+
+## 2c. Long runs: stall cutoff and checkpoints
+
+* `--eqhint-stall N` gives up when no new rule has matched a hint for N
+  rules. This is Veroff's practice of stopping lost jobs. `HINTSTATS` now
+  reports `lastmatch` and `maxgap`, the largest gap between matches, to
+  calibrate N on solved runs.
+* `--load-state F` resumes a run saved with `--dump-state`, with the hints
+  given now. On the new state it re-normalises the hints and re-scores the
+  queue. A 1 s run dumped (1.5 MB) and resumed solves in 1.4 s, against
+  2.3 s from scratch. Long runs can be continued with new hints instead of
+  being restarted, as with Prover9-new's checkpoints.
 
 ## 3. Assessment
 

@@ -73,11 +73,13 @@ class RuleModel:
                               np.array(ptr, dtype=np.int64)), shape=(len(ptr) - 1, ncol))
 
     def train(self, givendir, names, negmax=400, rounds=200, leaves=63, seed=1):
+        """givendir: a directory, or a dict name -> path."""
         import lightgbm as lgb
         rnd = random.Random(seed)
         parts, ys = [], []
         for n in names:
-            rows = [x for x in load(os.path.join(givendir, n)) if x[0] >= 0]
+            path = givendir[n] if isinstance(givendir, dict) else os.path.join(givendir, n)
+            rows = [x for x in load(path) if x[0] >= 0]
             pos = [x for x in rows if x[0] == 1]
             neg = [x for x in rows if x[0] == 0]
             if not pos:
@@ -125,23 +127,31 @@ def main():
     ap.add_argument('--leaves', type=int, default=63)
     ap.add_argument('--negmax', type=int, default=400)
     ap.add_argument('--all', action='store_true')
+    ap.add_argument('--test-origs', help='comma-separated originals to hold out')
     ap.add_argument('--save'); ap.add_argument('--vocab')
     a = ap.parse_args()
-    names = sorted(os.listdir(a.givendir))
+    paths = {}
+    for d in a.givendir.split(','):
+        if os.path.isdir(d):
+            for n in os.listdir(d):
+                paths[n] = os.path.join(d, n)
+    names = sorted(paths)
     origs = sorted(set(n.split('__goal_')[0] for n in names))
     random.seed(a.seed); random.shuffle(origs)
     test_o = set() if a.all else set(origs[:max(1, len(origs) // 3)])
+    if a.test_origs:
+        test_o = set(a.test_origs.split(','))
     train = [n for n in names if n.split('__goal_')[0] not in test_o]
     test = [n for n in names if n.split('__goal_')[0] in test_o]
     print('test originals', sorted(test_o))
     m = RuleModel()
-    print('train', m.train(a.givendir, train, a.negmax, a.rounds, a.leaves, a.seed))
+    print('train', m.train(paths, train, a.negmax, a.rounds, a.leaves, a.seed))
     if a.save:
         m.save(a.save, a.vocab or a.save + '.vocab')
     random.shuffle(test)
     aucs = []; stats = collections.defaultdict(list)
     for n in test[:a.ntest]:
-        rows = [x for x in load(os.path.join(a.givendir, n)) if x[0] >= 0]
+        rows = [x for x in load(paths[n]) if x[0] >= 0]
         if len(rows) < 20 or not any(x[0] == 1 for x in rows):
             continue
         y = np.array([x[0] for x in rows]); s = m.predict(n, [(i, l, r) for _, i, l, r in rows])

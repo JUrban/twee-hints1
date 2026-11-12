@@ -93,7 +93,8 @@ data Config f =
     cfg_print_score               :: Bool,
     cfg_log_given                 :: Bool,
     cfg_rule_model                :: Maybe (RuleModel f),
-    cfg_eqhint_stall              :: Int }
+    cfg_eqhint_stall              :: Int,
+    cfg_eqhint_watch              :: Float }
 
 -- | The prover state.
 data State f =
@@ -159,7 +160,8 @@ defaultConfig =
     cfg_print_score = False,
     cfg_log_given = False,
     cfg_rule_model = Nothing,
-    cfg_eqhint_stall = 0 }
+    cfg_eqhint_stall = 0,
+    cfg_eqhint_watch = 0 }
 
 -- | Compute cfg_score_cp from the CP configuration.
 {-# INLINE scoreCP #-}
@@ -991,6 +993,12 @@ data EqHints f =
     -- number of matched hints at the last hint-triggered queue simplification
     eh_requeued_at :: !Int,
     eh_last_match :: !Int,
+    eh_max_gap :: !Int,
+    -- ProofWatch: the source proofs (groups) of each hint, the number of
+    -- hints of each group, and how many of them have been matched
+    eh_hgroups :: !(IntMap [Int]),
+    eh_gsize :: !(IntMap Int),
+    eh_gdone :: !(IntMap Int),
     -- per-hint score factors (overriding cfg_eqhint_factor)
     eh_factor :: !(IntMap Float) }
   deriving (Generic, Binary)
@@ -1011,7 +1019,38 @@ addTrackedHint state eqn =
   in state'{st_eqhints = eh'{eh_next = n, eh_ntracked = eh_ntracked eh + 1}}
 
 emptyEqHints :: EqHints f
-emptyEqHints = EqHints Map.empty IntMap.empty IntSet.empty 0 0 0 IntSet.empty IntMap.empty IntMap.empty 0 0 0 IntMap.empty
+emptyEqHints = EqHints {
+  eh_map = Map.empty, eh_live = IntMap.empty, eh_matched = IntSet.empty, eh_next = 0,
+  eh_joined = 0, eh_norm_at = 0, eh_fps = IntSet.empty, eh_goalconsts = IntMap.empty,
+  eh_gcfps = IntMap.empty, eh_ntracked = 0, eh_requeued_at = 0, eh_last_match = 0,
+  eh_max_gap = 0, eh_hgroups = IntMap.empty, eh_gsize = IntMap.empty, eh_gdone = IntMap.empty,
+  eh_factor = IntMap.empty }
+
+-- | Add a hint with an optional factor and the proofs (groups) it comes from.
+{-# INLINEABLE addEqHintFull #-}
+addEqHintFull :: Function f => State f -> (Equation f, Maybe Float, [Int]) -> State f
+addEqHintFull state (eqn, w, gs) =
+  let state' = addEqHintWithFactor state (eqn, w)
+      eh = st_eqhints state'
+  in case lookupEqHint eh eqn of
+       Just n | not (null gs), n < trackBase ->
+         state' { st_eqhints = eh { eh_hgroups = IntMap.insertWith (\new old -> usort (new ++ old)) n gs (eh_hgroups eh) } }
+       _ -> state'
+
+-- | Count the hints of each group (after all hints are added).
+finishEqHintGroups :: State f -> State f
+finishEqHintGroups state =
+  let eh = st_eqhints state
+  in state { st_eqhints = eh { eh_gsize = IntMap.fromListWith (+) [ (g, 1) | gs <- IntMap.elems (eh_hgroups eh), g <- gs ] } }
+
+-- | ProofWatch completion of a hint: the best completion ratio of its groups.
+hintCompletion :: EqHints f -> Int -> Maybe Float
+hintCompletion EqHints{..} n = do
+  gs <- IntMap.lookup n eh_hgroups
+  guard (not (null gs))
+  return $ maximum
+    [ fromIntegral (IntMap.findWithDefault 0 g eh_gdone) / fromIntegral (max 1 (IntMap.findWithDefault 1 g eh_gsize))
+    | g <- gs ]
 
 -- | Add an equation hint with its own score factor.
 {-# INLINEABLE addEqHintWithFactor #-}
@@ -1102,7 +1141,12 @@ eqHintScore config@Config{..} state top eqn s
   | otherwise = s
   where
     eh = st_eqhints state
-    hinted n = cfg_eqhint_weight + s * IntMap.findWithDefault cfg_eqhint_factor n (eh_factor eh)
+    hinted n = cfg_eqhint_weight + s * factor n
+    factor n
+      | cfg_eqhint_watch > 0, Just c <- hintCompletion eh n =
+        cfg_eqhint_watch * (base n / cfg_eqhint_watch) ** c
+      | otherwise = base n
+    base n = IntMap.findWithDefault cfg_eqhint_factor n (eh_factor eh)
     dbg n kind x
       | cfg_eqhint_debug = Debug.Trace.trace ("HINTCP " ++ show n ++ " " ++ kind ++ " at " ++ show (st_next_active state) ++ ": " ++ prettyShow eqn) x
       | otherwise = x
@@ -1169,7 +1213,12 @@ recordEqHintMatch active state@State{st_eqhints = eh}
       Just n ->
         message (HintMatched n active) $
         state { st_eqhints = eh { eh_matched = IntSet.insert n (eh_matched eh),
-                                  eh_last_match = if n < trackBase then fromIntegral (active_id active) else eh_last_match eh } }
+                                  eh_gdone =
+                                    if n < trackBase && not (IntSet.member n (eh_matched eh))
+                                    then foldl' (\m g -> IntMap.insertWith (+) g 1 m) (eh_gdone eh) (IntMap.findWithDefault [] n (eh_hgroups eh))
+                                    else eh_gdone eh,
+                                  eh_last_match = if n < trackBase then fromIntegral (active_id active) else eh_last_match eh,
+                                  eh_max_gap = if n < trackBase then max (eh_max_gap eh) (fromIntegral (active_id active) - eh_last_match eh) else eh_max_gap eh } }
 
 -- | Normalise all live hints with respect to the oriented rules.
 {-# INLINEABLE normaliseEqHints #-}

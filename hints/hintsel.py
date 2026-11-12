@@ -84,7 +84,7 @@ class KNN:
             self._idf = {x: math.log((n + 1) / c) for x, c in df.items()}
         return self._idf
 
-    def select(self, name, k=30, topn=100, exclude_self=True, same_orig=False, scores=False):
+    def select(self, name, k=30, topn=100, exclude_self=True, same_orig=False, scores=False, groups=False):
         idf = self.idf()
         try:
             F = goal_features(name, self.depth)
@@ -104,9 +104,14 @@ class KNN:
             sims.append((i / u, m))
         sims.sort(reverse=True)
         sc = collections.Counter()
-        for s, m in sims[:k]:
+        grp = collections.defaultdict(list)
+        for j, (s, m) in enumerate(sims[:k]):
             for h in self.hints[m]:
                 sc[h] += s
+                if not grp[h] or grp[h][-1] != j:
+                    grp[h].append(j)
+        if groups:
+            return [(h, grp[h]) for h, _ in sc.most_common(topn)]
         if scores:
             return sc.most_common(topn)
         return [h for h, _ in sc.most_common(topn)]

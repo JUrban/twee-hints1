@@ -492,6 +492,10 @@ parseConfig = do
     bool "eqhint-consider"
       ["Match equation hints against the rule a critical pair would become, if its symbols match a hint (on by default)."]
       True
+  cfg_eqhint_watch <-
+    expert $
+    inGroup "Critical pair weighting heuristics" $
+    defaultFlag "eqhint-watch" "ProofWatch: score factor of hints whose source proofs are not yet started; it moves to the hint's own factor as its best proof completes (0 = off)" cfg_eqhint_watch argNum
   cfg_eqhint_stall <-
     expert $
     inGroup "Critical pair weighting heuristics" $
@@ -1121,19 +1125,28 @@ runTwee globals (TSTPFlags tstp) horn precedence config0 flags@MainFlags{..} lat
             Control.Monad.guard (Jukebox.arity jf == length ts)
             us <- mapM (conv vm) ts
             return (app (Sym (tweeConstant flags horn ctx (prec jf) jf)) us)
+          splitTabs str = case break (== '\t') str of
+            (x, '\t':rest) -> x : splitTabs rest
+            (x, _) -> [x]
+          splitCommas str = case break (== ',') str of
+            (x, ',':rest) -> x : splitCommas rest
+            (x, _) -> [x]
           parseLine l =
-            case break (== '\t') l of
-              (a, '\t':b0) -> do
-                let (b, w) = case break (== '\t') b0 of
-                               (b', '\t':ws) | [(x, _)] <- reads ws -> (b', Just (x :: Float))
-                               (b', _) -> (b', Nothing)
+            case splitTabs l of
+              (a:b:rest) -> do
+                let w = case rest of
+                          (ws:_) | [(x, _)] <- reads ws -> Just (x :: Float)
+                          _ -> Nothing
+                    gs = case rest of
+                           (_:g:_) -> [ x | c <- splitCommas g, [(x, "")] <- [reads c] ] :: [Int]
+                           _ -> []
                 (t, ra) <- parseHTerm a
                 (u, rb) <- parseHTerm b
                 Control.Monad.guard (all isSpace ra && all isSpace rb)
                 let vm = Map.fromList (zip (usort (hVars t ++ hVars u)) [0..])
                 t' <- conv vm t
                 u' <- conv vm u
-                return (build t' :=: build u', w)
+                return (build t' :=: build u', w, gs)
               _ -> Nothing
           hs = mapMaybe parseLine (lines str)
         return $! length hs `seq` hs
@@ -1141,7 +1154,8 @@ runTwee globals (TSTPFlags tstp) horn precedence config0 flags@MainFlags{..} lat
   trackHints <- readHintFile flags_track_hints
   let
     withHints0 = foldl' (addHint config) (initialState config) [toTerm (varNums h) h | h <- hints']
-    withHints1 = foldl' addEqHintWithFactor withHints0 ([ (toEquation h, Nothing) | h <- eqHints' ] ++ fileHints)
+    withHints1 = finishEqHintGroups $
+      foldl' addEqHintFull withHints0 ([ (toEquation h, Nothing, []) | h <- eqHints' ] ++ fileHints)
     -- Goal constants for hint matching: flattening constants and skolems.
     nullaryFuns t = [ f | App f Nil <- Twee.Base.subterms t ]
     flatDefs =
@@ -1159,7 +1173,7 @@ runTwee globals (TSTPFlags tstp) horn precedence config0 flags@MainFlags{..} lat
     terms (t :=: u) = [t, u]
     goalConsts =
       IntMap.fromList ([ (f, Just d) | (f, d) <- flatDefs ] ++ [ (f, Nothing) | f <- IntSet.toList skolemSyms ])
-    withHints = foldl' addTrackedHint (setEqHintGoalConsts withHints1 goalConsts) (map fst trackHints)
+    withHints = foldl' addTrackedHint (setEqHintGoalConsts withHints1 goalConsts) [ e | (e, _, _) <- trackHints ]
     withGoals = foldl' (addGoal config) withHints goals
     withAxioms = foldl' (addAxiom config) withGoals axioms
     withBackwardsGoal = foldn rewriteGoalsBackwards withAxioms flags_backwards_goal
@@ -1295,7 +1309,9 @@ runTwee globals (TSTPFlags tstp) horn precedence config0 flags@MainFlags{..} lat
     putStrLn $ "HINTSTATS hints=" ++ show eh_next ++ " live=" ++ show (IntMap.size eh_live) ++
       " joined=" ++ show eh_joined ++ " matched=" ++ show (IntSet.size (fst (IntSet.split trackBase eh_matched))) ++
       " tracked=" ++ show eh_ntracked ++ " trackmatched=" ++ show (IntSet.size (snd (IntSet.split (trackBase-1) eh_matched))) ++
-      " forms=" ++ show (Map.size eh_map) ++ " rules=" ++ show (st_next_active state)
+      " forms=" ++ show (Map.size eh_map) ++ " rules=" ++ show (st_next_active state) ++
+      " lastmatch=" ++ show eh_last_match ++ " maxgap=" ++ show eh_max_gap ++
+      " deferred=" ++ show (st_ndeferred state)
 
   when (solved state && flags_print_hints) $ do
     let
