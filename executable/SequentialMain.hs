@@ -1050,14 +1050,17 @@ runTwee globals (TSTPFlags tstp) horn precedence config0 flags@MainFlags{..} lat
             return (app (Sym (tweeConstant flags horn ctx (prec jf) jf)) us)
           parseLine l =
             case break (== '\t') l of
-              (a, '\t':b) -> do
+              (a, '\t':b0) -> do
+                let (b, w) = case break (== '\t') b0 of
+                               (b', '\t':ws) | [(x, _)] <- reads ws -> (b', Just (x :: Float))
+                               (b', _) -> (b', Nothing)
                 (t, ra) <- parseHTerm a
                 (u, rb) <- parseHTerm b
                 Control.Monad.guard (all isSpace ra && all isSpace rb)
                 let vm = Map.fromList (zip (usort (hVars t ++ hVars u)) [0..])
                 t' <- conv vm t
                 u' <- conv vm u
-                return (build t' :=: build u')
+                return (build t' :=: build u', w)
               _ -> Nothing
           hs = mapMaybe parseLine (lines str)
         return $! length hs `seq` hs
@@ -1065,7 +1068,7 @@ runTwee globals (TSTPFlags tstp) horn precedence config0 flags@MainFlags{..} lat
   trackHints <- readHintFile flags_track_hints
   let
     withHints0 = foldl' (addHint config) (initialState config) [toTerm (varNums h) h | h <- hints']
-    withHints1 = foldl' addEqHint withHints0 (map toEquation eqHints' ++ fileHints)
+    withHints1 = foldl' addEqHintWithFactor withHints0 ([ (toEquation h, Nothing) | h <- eqHints' ] ++ fileHints)
     -- Goal constants for hint matching: flattening constants and skolems.
     nullaryFuns t = [ f | App f Nil <- Twee.Base.subterms t ]
     flatDefs =
@@ -1083,7 +1086,7 @@ runTwee globals (TSTPFlags tstp) horn precedence config0 flags@MainFlags{..} lat
     terms (t :=: u) = [t, u]
     goalConsts =
       IntMap.fromList ([ (f, Just d) | (f, d) <- flatDefs ] ++ [ (f, Nothing) | f <- IntSet.toList skolemSyms ])
-    withHints = foldl' addTrackedHint (setEqHintGoalConsts withHints1 goalConsts) trackHints
+    withHints = foldl' addTrackedHint (setEqHintGoalConsts withHints1 goalConsts) (map fst trackHints)
     withGoals = foldl' (addGoal config) withHints goals
     withAxioms = foldl' (addAxiom config) withGoals axioms
     withBackwardsGoal = foldn rewriteGoalsBackwards withAxioms flags_backwards_goal

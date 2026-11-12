@@ -957,7 +957,9 @@ data EqHints f =
     eh_gcfps :: !(IntMap Int),
     eh_ntracked :: !Int,
     -- number of matched hints at the last hint-triggered queue simplification
-    eh_requeued_at :: !Int }
+    eh_requeued_at :: !Int,
+    -- per-hint score factors (overriding cfg_eqhint_factor)
+    eh_factor :: !(IntMap Float) }
   deriving (Generic, Binary)
 
 -- | Hints numbered from here on are only tracked (reported when a rule
@@ -976,7 +978,18 @@ addTrackedHint state eqn =
   in state'{st_eqhints = eh'{eh_next = n, eh_ntracked = eh_ntracked eh + 1}}
 
 emptyEqHints :: EqHints f
-emptyEqHints = EqHints Map.empty IntMap.empty IntSet.empty 0 0 0 IntSet.empty IntMap.empty IntMap.empty 0 0
+emptyEqHints = EqHints Map.empty IntMap.empty IntSet.empty 0 0 0 IntSet.empty IntMap.empty IntMap.empty 0 0 IntMap.empty
+
+-- | Add an equation hint with its own score factor.
+{-# INLINEABLE addEqHintWithFactor #-}
+addEqHintWithFactor :: Function f => State f -> (Equation f, Maybe Float) -> State f
+addEqHintWithFactor state (eqn, Nothing) = addEqHint state eqn
+addEqHintWithFactor state (eqn, Just w) =
+  let n = eh_next (st_eqhints state)
+      state' = addEqHint state eqn
+      eh = st_eqhints state'
+  in if eh_next eh == n then state'
+     else state' { st_eqhints = eh { eh_factor = IntMap.insert n w (eh_factor eh) } }
 
 -- | Tell the hint matcher about goal constants.
 setEqHintGoalConsts :: Function f => State f -> IntMap (Maybe (Term f)) -> State f
@@ -1048,15 +1061,15 @@ eqHintScore :: Function f => Config f -> State f -> Term f -> Equation f -> Floa
 eqHintScore config@Config{..} state top eqn s
   | Map.null (eh_map eh) = s
   | not (goalFingerprint eh eqn `IntSet.member` eh_fps eh) = s
-  | Just n <- lookupEqHintG eh eqn, n < trackBase = dbg n "cheap" hinted
+  | Just n <- lookupEqHintG eh eqn, n < trackBase = dbg n "cheap" (hinted n)
   | cfg_eqhint_consider,
-    n:_ <- filter (< trackBase) (mapMaybe (lookupEqHintG eh) (considerForms config state top eqn)) = dbg n "consider" hinted
+    n:_ <- filter (< trackBase) (mapMaybe (lookupEqHintG eh) (considerForms config state top eqn)) = dbg n "consider" (hinted n)
   | cfg_eqhint_fullnorm,
-    Just n <- lookupEqHintG eh (fullNormEqn state eqn), n < trackBase = dbg n "full" hinted
+    Just n <- lookupEqHintG eh (fullNormEqn state eqn), n < trackBase = dbg n "full" (hinted n)
   | otherwise = s
   where
     eh = st_eqhints state
-    hinted = cfg_eqhint_weight + s * cfg_eqhint_factor
+    hinted n = cfg_eqhint_weight + s * IntMap.findWithDefault cfg_eqhint_factor n (eh_factor eh)
     dbg n kind x
       | cfg_eqhint_debug = Debug.Trace.trace ("HINTCP " ++ show n ++ " " ++ kind ++ " at " ++ show (st_next_active state) ++ ": " ++ prettyShow eqn) x
       | otherwise = x
