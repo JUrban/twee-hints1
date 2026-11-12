@@ -60,6 +60,11 @@ def run(name, a):
         hf = os.path.join(a.hints_dir, name)
         if os.path.exists(hf):
             cmd += ['--hints-file', hf]
+    for spec in a.per:
+        flag, d = spec.split(':', 1)
+        p = os.path.join(d, name)
+        if os.path.exists(p):
+            cmd += ['--' + flag, p]
     try:
         out = subprocess.run(['timeout', str(a.timeout)] + cmd, capture_output=True,
                              text=True).stdout
@@ -89,6 +94,7 @@ def main():
     ap.add_argument('-j', type=int, default=10)
     ap.add_argument('--args', default='')
     ap.add_argument('--hints-dir')
+    ap.add_argument('--per', action='append', default=[], help='FLAG:DIR adds --FLAG DIR/<name>')
     a = ap.parse_args()
     os.makedirs(a.outdir, exist_ok=True)
     names = [l.split()[0] for l in open(a.names) if l.strip()]

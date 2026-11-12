@@ -257,7 +257,12 @@ All runs use 20 processes in parallel on a 112-core machine.
 | Prover9, 1 s (README) | 1911 | |
 | H0: twee, plain (2 s, then 8 s on the unsolved) | 3049 | **3385** |
 | H3: twee + rule model | 3105 (+126/−70) | (stopped after 2 s) |
-| H2: twee + rule model + kNN hints, loop 2, 2, 8, 8 s | 3177 (+190/−62) → round 1: 3221 | (running) |
+| H2: twee + rule model + kNN hints, loop 2, 2, 8, 8 s | 3177 (+190/−62) → round 1: 3221 | round 2: 3505 → round 3: **3551** |
+
+Against H0 at the same final limit, H2 gains 195 and loses 29; the union
+is 3580 (+4.9% over plain twee). Round 3 runs 8 s again, with hints
+refreshed from the loop's own new proofs, and adds 46. That is the hint
+loop's own contribution at a fixed time limit.
 
 Most problems the model loses at 2 s are boundary cases solved by plain
 twee in 1–2 s. The model's overhead is now about 6% of throughput, after a
