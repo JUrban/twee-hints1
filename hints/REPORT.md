@@ -275,6 +275,33 @@ binary model file, a dense feature array and hashed feature names.
   2.3 s from scratch. Long runs can be continued with new hints instead of
   being restarted, as with Prover9-new's checkpoints.
 
+### Long runs on hard problems (60 s)
+
+The set has 59 dev10 goals, 6 per original, that no 2 s or 8 s setting
+solved. Each has solved goals shortly before it in the original proof, so
+relevant hints exist. Model rm3 never saw these problems.
+
+| setting (60 s) | solved | CPU total |
+|---|---|---|
+| plain | 26 | 2682 s |
+| kNN hints (100) | 28 | 2623 s |
+| hints = statements of solved earlier goals of the same original (50–213) | 26 | 2494 s |
+| hints = all earlier goal statements, solved or not | 29 | 2403 s |
+| rule model | 36 | 2110 s |
+| rule model + kNN hints | 36 | 2116 s |
+| rule model + earlier-goal hints + kNN hints | **37** | 1920 s |
+| rule model + kNN hints + `--eqhint-stall 2000` | 18 | 777 s |
+
+* In long runs the rule model gives +10. Hints give +2 to +3 without the
+  model and +0 to +1 with it.
+* Earlier goal statements are the lines of the original Prover9 proof,
+  close to Veroff's sketches. They help a little (+3), mostly when unsolved
+  goals are included as hints too.
+* A stall cutoff of 2000 rules is far too aggressive for 60 s runs, which
+  reach about 20k rules: it loses half the solutions. It is about 35% more
+  CPU-efficient, so it would suit a loop with many problems only with a
+  much larger N.
+
 ## 2d. Prover9-new branches: what was ported
 
 | branch | what it does | decision |
