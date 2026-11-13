@@ -89,7 +89,7 @@ class RuleModel:
         return sp.csr_matrix((np.array(data, dtype=np.float32), np.array(ind, dtype=np.int64),
                               np.array(ptr, dtype=np.int64)), shape=(len(ptr) - 1, ncol))
 
-    def train(self, givendir, names, negmax=400, rounds=200, leaves=63, seed=1):
+    def train(self, givendir, names, negmax=400, rounds=200, leaves=63, seed=1, threads=8):
         """givendir: a directory, or a dict name -> path."""
         import lightgbm as lgb
         rnd = random.Random(seed)
@@ -112,7 +112,7 @@ class RuleModel:
         y = np.array(ys)
         params = dict(objective='binary', learning_rate=0.1, num_leaves=leaves,
                       min_data_in_leaf=20, feature_fraction=0.5, bagging_fraction=0.8,
-                      bagging_freq=1, verbose=-1, num_threads=8,
+                      bagging_freq=1, verbose=-1, num_threads=threads,
                       scale_pos_weight=float((y == 0).sum()) / max(1, (y == 1).sum()))
         self.model = lgb.train(params, lgb.Dataset(X, y), rounds)
         return X.shape, int(y.sum())
@@ -143,6 +143,7 @@ def main():
     ap.add_argument('--rounds', type=int, default=200)
     ap.add_argument('--leaves', type=int, default=63)
     ap.add_argument('--negmax', type=int, default=400)
+    ap.add_argument('--threads', type=int, default=8)
     ap.add_argument('--all', action='store_true')
     ap.add_argument('--parents', action='store_true', help='add the parents\' features (p: block)')
     ap.add_argument('--test-origs', help='comma-separated originals to hold out')
@@ -163,7 +164,7 @@ def main():
     test = [n for n in names if n.split('__goal_')[0] in test_o]
     print('test originals', sorted(test_o))
     m = RuleModel(a.parents)
-    print('train', m.train(paths, train, a.negmax, a.rounds, a.leaves, a.seed))
+    print('train', m.train(paths, train, a.negmax, a.rounds, a.leaves, a.seed, a.threads))
     if a.save:
         m.save(a.save, a.vocab or a.save + '.vocab')
     random.shuffle(test)

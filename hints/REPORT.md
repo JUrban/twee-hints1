@@ -279,6 +279,9 @@ binary model file, a dense feature array and hashed feature names.
     8 for rm4 at 8 s (4 different each), too few to tell.
   * On the 345 hard dev goals (`ho3_unsolved`, 8 s, model only, no hints):
     rm3 60, rm4 **63** (+4/−1).
+  Both rm3 and rm4 were trained on the solved goals of these three
+  originals (not on the 345 themselves), so this compares the two models
+  in the setting of a loop over one batch, not on unseen originals.
   rm4 is used from here on. A second turn of the loop needs more hard
   proofs than one 4 s pass gives.
 * **Generalisation matching** (`--eqhint-generalise`, after Prover9-new's
@@ -341,7 +344,9 @@ Those 59 were chosen to have solved goals shortly before them.
 
 The set has 59 dev10 goals, 6 per original, that no 2 s or 8 s setting
 solved. Each has solved goals shortly before it in the original proof, so
-relevant hints exist. Model rm3 never saw these problems.
+relevant hints exist. Model rm3 never saw these problems, but it was
+trained on the easier, solved goals of the same originals (dev10 is part
+of its training data).
 
 | setting (60 s) | solved | CPU total |
 |---|---|---|
