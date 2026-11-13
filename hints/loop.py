@@ -216,7 +216,7 @@ class Loop:
             import lemmas
             self.lemma_src = lemmas.by_original(self.solved)  # proven before this round
             if a.lemma_knn:
-                self.lemma_index = lemmas.LemmaIndex(sorted(self.solved))
+                self.lemma_index = lemmas.LemmaIndex(sorted(self.solved), subsets=a.lemma_subsets)
         rdir = os.path.join(self.dir, 'r%d' % rnd)
         os.makedirs(rdir, exist_ok=True)
         t0 = time.time(); new = 0
@@ -292,6 +292,8 @@ def main():
                     help='rounds > 0: add up to N proven sibling goals (nearest below) as axioms')
     ap.add_argument('--lemma-knn', type=int, default=0,
                     help='rounds > 0: also add up to K proven goals with the same axioms (any original) most similar to the goal')
+    ap.add_argument('--lemma-subsets', action='store_true',
+                    help='--lemma-knn may also use problems whose axioms are a subset of the target\'s')
     ap.add_argument('--init', help='import round-0 results (solved.tsv and hints) of another loop dir')
     a = ap.parse_args()
     if a.init and not os.path.exists(os.path.join(a.dir, 'solved.tsv')):

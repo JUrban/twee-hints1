@@ -596,6 +596,36 @@ That is part of the ±3 noise on 345 problems (section 2f).
   the overhead of the rule model and of hint matching. That overhead
   should be reported on its own, measured on a quiet machine.
 
+## 2l. Axiom groups: lemmas and hints across originals
+
+Lemma import (2g) used only proven siblings of the same original, because
+those have the same axioms. But originals share axioms too.
+
+* **Facts** (all 51,784 public problems):
+  * The 129 originals use 68 distinct axiom sets. Axioms are constant
+    within an original.
+  * The largest groups of identical axioms have 15 originals (7,116 and
+    7,200 goals), 13 (5,426) and 6 (3,557).
+  * 66 of the 68 axiom sets have strict subsets among the others (127
+    pairs). A theorem of a weaker theory holds in the stronger one. For
+    example, mbol_KK_a has 279 goals with the same axioms, but 12,873
+    goals of weaker theories.
+  * Exact duplicates are common: 5,842 groups of identical axioms and
+    goal across originals, covering 16,048 problems; 41,578 problems are
+    distinct. The loop already solves them together: only 24 unsolved
+    problems have a solved duplicate.
+  * Only 15% of the kNN hint neighbours (from `train_pool`) of the ho3u
+    targets have the target's axioms (median 4 of 30).
+* **Tools.**
+  * `lemmas.py --knn K [--subsets] --pool F` adds the K proven goals
+    most similar to the target goal (idf-weighted Jaccard on term-shape
+    features), taken from problems with the same axioms, or with subset
+    axioms when `--subsets` is given, from any original.
+  * `loop.py --lemma-knn K` does the same inside the loop.
+  * `hintsel.py knnfiles ... --subsets` restricts hint neighbours to
+    subset theories.
+* **Results:** see the abstract-time battery below.
+
 ## 2c. Long runs: stall cutoff and checkpoints
 
 * `--eqhint-stall N` gives up when no new rule has matched a hint for N
