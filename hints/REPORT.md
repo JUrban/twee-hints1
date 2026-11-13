@@ -949,6 +949,44 @@ on 14 cores (twee-e20, kill after 15× the limit, CPU cap 400 s).
   failures (median 7.5 s wall).
 * Round 2 (20 abstract s) is running.
 
+## 2p. One search for many goals, and the gap to the nearest proof
+
+* **Multi-goal search** (twee-e21 `--multi-goal`, `loop.py --multi W`).
+  All goals of an original have the same axioms, and twee's completion
+  does not depend on the goal. So one search can serve several goals: the
+  goals become skolemised negated conjectures of one problem, twee prints
+  `SOLVEDGOAL` for each goal it proves and goes on until all are proved.
+  A window of W consecutive unsolved goals gets the union of their lemmas
+  and W times the budget.
+* **It loses to separate runs.** On the 189 aK2_eq_aK3_a goals (20 s per
+  goal, 100 s per window of 5): 21 against 28 for separate online runs on
+  the first 33 goals (stopped there). On one window of 10 nil3_31 goals
+  at 200 s: 4 against 5. A separate run for goal k+1 starts with goal k as
+  an axiom, so its overlaps are among the first critical pairs. In the
+  joint search goal k is only joinable. It never becomes a rule, so its
+  consequences come late or never. Restarting with the new lemma is what
+  makes the sibling chain work.
+* **Success falls off with the distance to the nearest proof below.** In
+  the full-benchmark round 2 (20 s, after failing at 5 s), by the gap in
+  goal numbers to the nearest sibling proven before the run:
+
+  | gap | runs | solved |
+  |---|---|---|
+  | 1 | 537 | 58% |
+  | 2–3 | 176 | 42% |
+  | 4–10 | 66 | 26% |
+  | more than 10 | 5 | 0 |
+
+  So the loop advances along each original's proof, and a hard goal
+  blocks the goals after it. Conditional goals are not a weak spot: 83%
+  of them are solved overall, against 68% of the unconditional ones.
+* **Cascade scheduling** (`loop.py --cascade T0,T1,...`), written from
+  this. In place of rounds, a goal is retried at T0 as soon as a sibling
+  at most `--retry-gap` places below it gets proved. Otherwise the goal
+  right after a proof (`--frontier 1`) is deepened to the next budget
+  level, resuming its saved state. A few workers stay free for the
+  retries, so a new proof's consequences run at once. Not yet evaluated.
+
 ## 2c. Long runs: stall cutoff and checkpoints
 
 * `--eqhint-stall N` gives up when no new rule has matched a hint for N

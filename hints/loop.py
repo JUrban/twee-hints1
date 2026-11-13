@@ -101,8 +101,12 @@ class Loop:
         self.model = (m, v, gdir)
         print(f'  round {rnd}: trained rule model {time.time()-t0:.0f}s', file=sys.stderr, flush=True)
 
-    def run_one(self, name, hints, rnd):
+    def run_one(self, name, hints, rnd, budget=None, resume=None, max_cpu=None):
+        """One twee run. BUDGET (default: the round's timeout), RESUME (default --resume)
+        and MAX_CPU (replaces --max-cpu in --args) are for --cascade."""
         a = self.a
+        T = budget if budget is not None else self.timeout(rnd)
+        resume = a.resume if resume is None else resume
         path = os.path.join(PROB, name + '.p')
         if (a.lemmas or a.lemma_knn) and rnd > 0 and self.lemma_src:
             import lemmas
@@ -114,8 +118,12 @@ class Loop:
                 path = os.path.join(self.dir, 'tmp', name + '.p')
                 with open(path, 'w') as f:
                     f.write(txt)
-        cmd = [a.twee, path, '--max-time', str(self.timeout(rnd)), '--no-colour', '--quiet',
-               '--no-proof', '--print-hints', '--print-given'] + a.args.split()
+        args = a.args.split()
+        if max_cpu is not None:
+            args = [x for i, x in enumerate(args) if x != '--max-cpu' and (i == 0 or args[i - 1] != '--max-cpu')]
+            args += ['--max-cpu', str(max_cpu)]
+        cmd = [a.twee, path, '--max-time', str(T), '--no-colour', '--quiet',
+               '--no-proof', '--print-hints', '--print-given'] + args
         if self.model:
             m, v, gdir = self.model
             cmd += ['--rule-model', m, '--rule-vocab', v, '--rule-goal', os.path.join(gdir, name)] + \
@@ -123,7 +131,7 @@ class Loop:
         if hints and a.stall:
             cmd += ['--eqhint-stall', str(a.stall)]
         spath = os.path.join(self.dir, 'states', name + '.bin')
-        if a.resume:
+        if resume:
             if os.path.exists(spath):
                 cmd += ['--load-state', spath]
             cmd += ['--dump-state', spath + '.tmp']
@@ -136,7 +144,7 @@ class Loop:
         t0 = time.time()
         try:
             p = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                               timeout=self.timeout(rnd) * (a.wall_factor if "--abstract-time" in self.a.args else 1) + 30)
+                               timeout=T * (a.wall_factor if "--abstract-time" in self.a.args else 1) + 30)
             out = p.stdout.decode('utf8', 'replace')
         except subprocess.TimeoutExpired as e:
             out = (e.stdout or b'').decode('utf8', 'replace') + '\nKILLED\n'
@@ -149,7 +157,7 @@ class Loop:
         if hints:
             os.unlink(hpath)
         ok = 'HINTS-END' in out
-        if a.resume:
+        if resume:
             if ok:
                 for p in (spath, spath + '.tmp'):
                     if os.path.exists(p):
@@ -300,6 +308,123 @@ class Loop:
                 return h
             hs = [fac(h) for h in hs]
         return hs
+
+    def cascade(self):
+        """--cascade T0,T1,..: frontier deepening instead of rounds (pool original, online).
+
+        A goal is retried at T0 whenever its sibling-lemma context (the nearest proven
+        siblings, as lemmas.py picks them) has changed since its last attempt (a sibling
+        nearer to it got proved) and it is at most --retry-gap places after a proven
+        sibling. Otherwise the frontier is deepened: goals at most
+        --frontier places after a proven sibling (in the set's goal order) run at the next
+        budget level, resuming the saved state of their previous level (budget T[L] - T[L-1]).
+        Deepening jobs leave --reserve workers free for the retries. --cascade-start L: the
+        unsolved goals count as tried up to level L in their current context (e.g. 0 after a
+        round at T0)."""
+        import bisect, lemmas
+        a = self.a
+        rnd = a.start
+        T = [float(x) for x in a.cascade.split(',')]
+        pools = self.build_pools(); cnt = self.pool_cnt
+        if a.model:
+            self.train_model(rnd)
+        self.lemma_src = {o: set(v) for o, v in lemmas.by_original(self.solved).items()}
+        if a.lemma_knn:
+            self.lemma_index = lemmas.LemmaIndex(sorted(self.solved), subsets=a.lemma_subsets)
+        byo = collections.defaultdict(list)   # the set's goals and the proven goals of their originals
+        for n in set(self.names) | set(self.solved):
+            if '__goal_' in n:
+                byo[orig_of(n)].append(n)
+        origs = {orig_of(n) for n in self.names}
+        byo = {o: L for o, L in byo.items() if o in origs}
+        for o in byo:
+            byo[o].sort(key=lambda n: lemmas.split(n)[1])
+        srt = {}   # original -> sorted proven goal numbers (dropped when a proof arrives)
+        def ctx(n):
+            o, k = lemmas.split(n)
+            if o not in srt:
+                srt[o] = sorted(self.lemma_src.get(o, ()))
+            pr = srt[o]
+            i = bisect.bisect_left(pr, k)
+            below = pr[max(0, i - a.lemmas):i]
+            above = pr[i:i + a.lemmas] if a.lemma_after else []
+            return tuple(below + above)
+        def gaps():
+            """unsolved goal -> places after the nearest proven goal below it (in the set)."""
+            g = {}
+            for o, L in byo.items():
+                last = None
+                for i, n in enumerate(L):
+                    if n in self.solved:
+                        last = i
+                    else:
+                        g[n] = (i - last) if last is not None else 10**6
+            return g
+        att = {n: (ctx(n), a.cascade_start) for n in self.names if n not in self.solved}
+        running = {}   # future -> (name, level)
+        rdir = os.path.join(self.dir, 'r%d' % rnd); os.makedirs(rdir, exist_ok=True)
+        t0 = time.time(); new = 0; done_n = 0
+        with open(os.path.join(rdir, 'results.tsv'), 'a') as rf, \
+             open(os.path.join(self.dir, 'solved.tsv'), 'a') as sf, \
+             ThreadPoolExecutor(a.j) as ex:
+            while True:
+                busy = {n for n, _ in running.values()}
+                if time.time() - t0 < a.cascade_hours * 3600:
+                    g = gaps()
+                    retry = sorted((g[n], lemmas.split(n)[1], n) for n in att
+                                   if n not in busy and ctx(n) != att[n][0] and g[n] <= a.retry_gap)
+                    deep_running = collections.Counter(orig_of(n) for n, l in running.values() if l > 0)
+                    deep = sorted((att[n][1] + 1, deep_running[orig_of(n)], g[n], lemmas.split(n)[1], n) for n in att
+                                  if n not in busy and ctx(n) == att[n][0] and att[n][1] + 1 < len(T)
+                                  and g[n] <= a.frontier)
+                    while len(running) < a.j and (retry or deep):
+                        if retry:
+                            n = retry.pop(0)[-1]; lev = 0
+                            att[n] = (ctx(n), 0)
+                            fut = ex.submit(self.run_one, n, self.hints_for(n, pools, None), rnd,
+                                            T[0], False, a.cascade_cpu * T[0])
+                        else:
+                            if sum(1 for _, l in running.values() if l > 0) >= a.j - a.reserve:
+                                break
+                            lev, _, _, _, n = deep.pop(0)
+                            if any(m == n for m, _ in running.values()):
+                                continue
+                            att[n] = (ctx(n), lev)
+                            sp = os.path.join(self.dir, 'states', n + '.bin')
+                            b = T[lev] - T[lev - 1] if os.path.exists(sp) else T[lev]
+                            fut = ex.submit(self.run_one, n, self.hints_for(n, pools, None), rnd,
+                                            b, True, a.cascade_cpu * b)
+                        running[fut] = (n, lev)
+                if not running:
+                    break
+                fin, _ = wait(list(running), return_when=FIRST_COMPLETED)
+                for f in fin:
+                    n0, lev = running.pop(f)
+                    n, ok, dt, stats, hs = f.result()
+                    done_n += 1
+                    rf.write(f'{n}\t{"THM" if ok else "NO"}\t{dt:.2f}\t{stats}\tL{lev}\n'); rf.flush()
+                    if ok:
+                        new += 1
+                        att.pop(n, None)
+                        self.solved[n] = (rnd, dt)
+                        sf.write(f'{n}\t{rnd}\t{dt:.2f}\n'); sf.flush()
+                        with open(os.path.join(self.dir, 'hints', n), 'w') as hf:
+                            for l, r in hs:
+                                hf.write(f'{l}\t{r}\n')
+                        key = self.pool_key(n)
+                        cnt[key].update(hs)
+                        pools[key] = [h for h, _ in cnt[key].most_common()]
+                        o, k = lemmas.split(n)
+                        self.lemma_src[o] = self.lemma_src.get(o, set()) | {k}
+                        srt.pop(o, None)
+                    if done_n % 50 == 0:
+                        print(f'  cascade: {done_n} runs, new={new}, {len(running)} running, '
+                              f'{time.time()-t0:.0f}s', file=sys.stderr, flush=True)
+        msg = f'cascade: {done_n} runs new {new} total {len(self.solved)}/{len(self.names)} {time.time()-t0:.0f}s'
+        print(msg, file=sys.stderr, flush=True)
+        with open(os.path.join(self.dir, 'log.txt'), 'a') as lf:
+            lf.write(msg + '\n')
+        return new
 
     def round(self, rnd):
         a = self.a
@@ -459,6 +584,17 @@ def main():
     ap.add_argument('--multi', type=int, default=0,
                     help='windows of up to N consecutive unconditional goals of one original run as one '
                          'twee --multi-goal search, with all their lemmas and N times the budget')
+    ap.add_argument('--cascade', default='',
+                    help='T0,T1,...: frontier deepening instead of rounds (see Loop.cascade), from round --start')
+    ap.add_argument('--cascade-start', type=int, default=0,
+                    help='--cascade: unsolved goals count as tried up to this level in their current context')
+    ap.add_argument('--cascade-hours', type=float, default=1e9, help='--cascade: no new runs after this many hours')
+    ap.add_argument('--cascade-cpu', type=float, default=10, help='--cascade: --max-cpu per abstract second of budget')
+    ap.add_argument('--retry-gap', type=int, default=6,
+                    help='--cascade: retry a goal with a changed context only if at most this many places after a proven sibling')
+    ap.add_argument('--frontier', type=int, default=1,
+                    help='--cascade: deepen goals at most this many places after a proven sibling')
+    ap.add_argument('--reserve', type=int, default=3, help='--cascade: workers kept free of deepening runs')
     ap.add_argument('--give-up', type=int, default=0,
                     help='skip the rest of an original in this round after N consecutive failures (with --online: goal order)')
     ap.add_argument('--keep-out', action='store_true', help='save each run\'s output in DIR/rN/out/<name> (for stallsim.py)')
@@ -476,6 +612,9 @@ def main():
     lp = Loop(a)
     with open(os.path.join(a.dir, 'config.json'), 'w') as f:
         json.dump(vars(a), f, indent=1)
+    if a.cascade:
+        lp.cascade()
+        return
     for r in range(a.start, a.start + a.rounds):
         if lp.round(r) == 0 and r > 0:
             break
