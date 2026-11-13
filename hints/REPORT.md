@@ -1075,7 +1075,7 @@ rounds of 30 s or more, but about 40% overhead for 8 s rounds.
      goals become axioms (sound, CASC LTB-style, reported separately). In
      goal order, each proof feeds the next runs at once (+25% over fixed
      pools). Success depends on how near the last proof is: 58% at a gap
-     of 1 goal at 20 s, 26% at 4–10, none beyond (2p). The loop advances
+     of 1 goal at 20 s, 26% at 4–10, 0 of 5 beyond (2p). The loop advances
      along each original's proof.
   2. **The ENIGMA-style rule filter** (+5–6% at 2 s, +36% on hard dev
      goals at 8 s, +11 of 300 hard holdout goals at 60 s).
@@ -1102,9 +1102,10 @@ rounds of 30 s or more, but about 40% overhead for 8 s rounds.
   * Checkpoints: resuming now takes new lemmas (the signature bug fixed in
     twee-e20). A resume of a big state costs minutes, mostly re-scoring the
     saved queue against new hints (2m).
-  * Giving an original up after 30 failures in a row keeps 99.9% of the
-    5 s round's proofs (replayed: after 10 failures 84.5% for 46% of the
-    time).
+  * Giving an original up after 30 failures in a row lost no proofs in
+    replays of the sets/u3 runs. In the full 5 s round, which used it,
+    giving up after 10 would have kept 84.5% of the proofs for 46% of the
+    time.
 
 ## 4. Next steps
 
