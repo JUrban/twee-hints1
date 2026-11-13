@@ -320,7 +320,7 @@ class Loop:
         budget level, resuming the saved state of their previous level (budget T[L] - T[L-1]).
         Deepening jobs leave --reserve workers free for the retries. --cascade-start L: the
         unsolved goals count as tried up to level L in their current context (e.g. 0 after a
-        round at T0)."""
+        round at T0); -1: untried."""
         import bisect, lemmas
         a = self.a
         rnd = a.start
@@ -360,7 +360,9 @@ class Loop:
                     else:
                         g[n] = (i - last) if last is not None else 10**6
             return g
-        att = {n: (ctx(n), a.cascade_start) for n in self.names if n not in self.solved}
+        # --cascade-start -1: nothing tried yet, so the goals near a proof all get a T0 run first
+        att = {n: ((ctx(n), a.cascade_start) if a.cascade_start >= 0 else (None, -1))
+               for n in self.names if n not in self.solved}
         running = {}   # future -> (name, level)
         rdir = os.path.join(self.dir, 'r%d' % rnd); os.makedirs(rdir, exist_ok=True)
         t0 = time.time(); new = 0; done_n = 0
