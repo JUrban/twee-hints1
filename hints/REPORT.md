@@ -738,7 +738,10 @@ Each run also has a 1,200 s CPU cap.
   abstract cost (`newTaskCost`); hint normalisation charges live/100
   critical pairs. With that, 1,994 hints cost +11% instead of +43%
   (twee-e19). The other tasks cost about 7% more under the abstract
-  clock than under real-time scheduling, which is acceptable.
+  clock than under real-time scheduling, which is acceptable. Rarer
+  normalisation does not weaken the guidance: 12 round-1 proofs rerun
+  with e19 take the same or fewer critical pairs (251k in all, against
+  285k) and match nearly the same number of hints.
 * **Whole pool 48, kNN 40, no hints 36** (same 300 abstract s, same
   model and lemmas). The whole pool solves 13 that the no-hint run
   misses (and misses 1 it solves); kNN only 5. The two hint versions
