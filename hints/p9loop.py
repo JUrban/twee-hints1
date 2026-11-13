@@ -22,10 +22,11 @@ skolem constants c1, c2, ... generalised to variables.
           pooling its hints. expand = prooftrans expand (each rewrite step
           becomes a separate step: demodulation-free); direct = LADR's
           directproof (a direct, forward proof, also expanded: SFDF).
+          Each conversion's seconds and hint counts go to DIR/convert.tsv.
 --init    take round 0 (r0.tsv and hints) from another loop dir.
 Rows of rN.tsv: name, THM/NO, seconds, given clauses.
 """
-import argparse, collections, os, re, shutil, subprocess, sys, time
+import argparse, collections, os, re, shutil, subprocess, sys, threading, time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 LADR = '/project/AIM60k/problems/ladr'
@@ -125,6 +126,7 @@ def main():
 
     def convert(name, out):
         """Hints of the proof in OUT after prooftrans expand / directproof (linear time)."""
+        t0 = time.time()
         tp = os.path.join(a.dir, 'tmp', name + '.out')
         with open(tp, 'w') as f:
             f.write(out)
@@ -135,10 +137,13 @@ def main():
         except subprocess.TimeoutExpired:
             conv = ''
         os.unlink(tp)
+        hs = proof_hints(conv)
+        with lock:
+            cf.write(f'{name}\t{time.time() - t0:.3f}\t{len(proof_hints(out))}\t{len(hs)}\n'); cf.flush()
         if os.environ.get('P9LOOP_KEEP'):
             with open(os.path.join(a.dir, 'tmp', name + '.conv'), 'w') as f:
                 f.write(conv)
-        return proof_hints(conv)
+        return hs
 
     def run(name, hints, budget):
         files = [os.path.join(LADR, name)]
@@ -160,6 +165,9 @@ def main():
         return res
 
     log = open(os.path.join(a.dir, 'log.txt'), 'a')
+    # conversions: name, seconds (write + convert + parse), hints before, hints after
+    cf = open(os.path.join(a.dir, 'convert.tsv'), 'a') if a.convert else None
+    lock = threading.Lock()
     sf = open(os.path.join(a.dir, 'sfdf.tsv'), 'a') if a.sfdf else None
 
     def record(n, hs, st, conv):
