@@ -1,9 +1,28 @@
 -- | A module which can run housekeeping tasks every so often.
-module Twee.Task(Task, newTask, checkTask) where
+module Twee.Task(Task, newTask, checkTask, useAbstractTime, setAbstractTime) where
 
 import System.CPUTime
+import System.IO.Unsafe
 import Data.IORef
 import Control.Monad.IO.Class
+
+-- | An abstract clock, in picoseconds like getCPUTime. When it is set,
+-- tasks and timeouts follow it instead of CPU time, so that runs do not
+-- depend on machine load.
+{-# NOINLINE abstractClock #-}
+abstractClock :: IORef (Maybe Integer)
+abstractClock = unsafePerformIO (newIORef Nothing)
+
+-- | Switch to the abstract clock, starting at the given time.
+useAbstractTime :: MonadIO m => Integer -> m ()
+useAbstractTime t = liftIO $ writeIORef abstractClock (Just t)
+
+-- | Advance the abstract clock (no effect unless it is in use).
+setAbstractTime :: MonadIO m => Integer -> m ()
+setAbstractTime t = liftIO $ modifyIORef' abstractClock (fmap (const t))
+
+getClock :: IO Integer
+getClock = readIORef abstractClock >>= maybe getCPUTime return
 
 data TaskData m a =
   TaskData {
@@ -29,17 +48,17 @@ newtype Task m a = Task (IORef (TaskData m a))
 -- percentage of time that should be spent on the task.
 newTask :: MonadIO m => Double -> Double -> m a -> m (Task m a)
 newTask freq budget what = liftIO $ do
-  now <- getCPUTime
+  now <- getClock
   Task <$> newIORef (TaskData now now 0 freq budget what)
 
 -- | Run a task if it's time to run it.
 checkTask :: MonadIO m => Task m a -> m (Maybe a)
 checkTask (Task ref) = do
   task@TaskData{..} <- liftIO $ readIORef ref
-  now <- liftIO getCPUTime
+  now <- liftIO getClock
   if not (taskDue now task) then return Nothing else do
     res <- task_what
-    after <- liftIO getCPUTime
+    after <- liftIO getClock
     liftIO $ writeIORef ref task {
       task_last = after,
       task_spent = task_spent + (after-now) }

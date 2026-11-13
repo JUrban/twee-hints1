@@ -501,6 +501,66 @@ Controls on the round-0 failures, 8 s each:
   the limit, not its use of hints. Prover9 was run with defaults; Veroff's
   tuned settings might do better.
 
+## 2j. Skolem-free hints, and conditional goals
+
+Veroff turns each proof into a strictly forward, demodulation-free (SFDF)
+proof before using it as hints. He iterates Prover9 until the proof no
+longer uses the denial, so the hints contain no skolems and carry over to
+other problems.
+
+* **Twee gets skolem-free hints without this work.** Completion never
+  draws inferences from the negated goal; the goal is only rewritten.
+  Every proof lemma therefore follows from the axioms plus the flattening
+  definitions, which are conservative. Eliminating the definitions and
+  replacing the skolems by variables gives general lemmas.
+  * Check: 40 random solved problems, all 814 of their pool hints posed as
+    conjectures from the problem's axioms. 807 were proved by twee within
+    15 s, and one more within 90 s.
+  * The other 6 are false, e.g. `m(X0,X1) = m(X2,X3)`.
+* **The hole: conditional goals.**
+  * 9,052 of the 51,784 public problems (17%) have goals of the form
+    `A = B → C = D`.
+  * The hypothesis becomes a ground clause with skolems. Lemmas derived
+    from it, and the conclusion itself, hold only for those skolems.
+  * Generalising them gave the 6 false hints.
+  * In 300 solved conditional problems, 27% of the hints depended on the
+    hypothesis.
+  * Proofs stayed sound: hints only steer the search, and lemma import
+    takes only unit-equation goals. The pools got noise, however.
+* **Fix (twee-e14).**
+  * `--print-hints` traces each lemma's derivation, and lemmas and goals
+    that use a hypothesis go into a new `HINTS-HYP` section.
+  * Pools skip that section, while rule-model labels still count those
+    lemmas as proof lemmas.
+  * `cleanpool.py` cleans existing pools. It removed 19% of the hints of
+    the conditional problems in `train_pool` (2,965 hints) and 3% in
+    `tr30_g1_pool`.
+* **Effect.** HOCU4_RESULT
+* **Demodulation-free hints do not fit twee.** Twee normalises every
+  critical pair before it can match a hint, so unnormalised intermediate
+  steps would never match. Twee's counterpart of SFDF robustness:
+  * back-demodulated hints, with every form a hint has had remembered;
+  * requeue of the passive queue.
+
+  Self-replay goes from 2,283 to 334 rules with them (section 2).
+* **The Prover9 control (2i) did not use SFDF hints.** `p9loop.py` drops
+  the denial-side clauses instead.
+  * Of 120 Prover9 proofs in those families, 99 were already strictly
+    forward; the other 21 had 27 denial-side steps.
+  * 327 of the 734 steps used demodulation, so SFDF hints might help
+    Prover9 somewhat.
+  * The two families have unit goals, so the hypothesis problem does not
+    affect them. On conditional goals, `p9loop.py`'s skolem
+    generalisation would have the same flaw.
+* **A cheaper reorientation than iterating the prover.**
+  * A twee proof is already a chain of single rewrite steps per lemma and
+    for the goal. Each prefix `s = t_i` follows from `s = t_{i-1}` by one
+    paramodulation.
+  * So an SFDF derivation can be read off the proof in linear time, with
+    no search; the same holds for Prover9's denial chain read backwards.
+  * For a conditional goal, "forward" means from the axioms plus the
+    hypotheses, which is what the dependency trace marks.
+
 ## 2c. Long runs: stall cutoff and checkpoints
 
 * `--eqhint-stall N` gives up when no new rule has matched a hint for N

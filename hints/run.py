@@ -4,12 +4,13 @@
 usage: run.py NAMES_FILE OUTDIR [--twee BIN] [--timeout S] [-j N]
               [--hints-dir DIR] [--args "..."]
 
-Writes OUTDIR/results.tsv (name, status, seconds) and OUTDIR/out/<name>.out
+Writes OUTDIR/results.tsv (name, status, seconds, critical pairs considered)
+and OUTDIR/out/<name>.out
 (the full twee output, only for solved problems unless --keep-all).
 With --hints-dir, passes DIR/<name> as --hints-file when it exists
 (or a single global file with --hints-file).
 """
-import argparse, os, subprocess, sys, time
+import argparse, os, re, subprocess, sys, time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 PROB = '/project/AIM60k/problems/tptp'
@@ -36,7 +37,7 @@ def run_one(name, a):
     t0 = time.time()
     try:
         p = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                           timeout=a.timeout + 10)
+                           timeout=a.timeout * a.wall_factor + 10)
         out = p.stdout.decode('utf8', 'replace')
     except subprocess.TimeoutExpired as e:
         out = (e.stdout or b'').decode('utf8', 'replace') + '\nKILLED\n'
@@ -52,7 +53,8 @@ def run_one(name, a):
     if st == 'THM' or a.keep_all:
         with open(os.path.join(a.outdir, 'out', name + '.out'), 'w') as f:
             f.write(out)
-    return name, st, dt
+    m = re.search(r'^WORK considered=(\d+)', out, re.M)
+    return name, st, dt, (m.group(1) if m else '')
 
 def main():
     ap = argparse.ArgumentParser()
@@ -60,6 +62,8 @@ def main():
     ap.add_argument('outdir')
     ap.add_argument('--twee', default='/project/bin/twee')
     ap.add_argument('--timeout', type=float, default=2)
+    ap.add_argument('--wall-factor', type=float, default=1,
+                    help='wall-clock safety limit = timeout * F + 10 s; use about 5 with --abstract-time')
     ap.add_argument('-j', type=int, default=20)
     ap.add_argument('--args', default='')
     ap.add_argument('--rts', default='')
@@ -81,8 +85,8 @@ def main():
     with open(res, 'a') as rf, ThreadPoolExecutor(a.j) as ex:
         futs = [ex.submit(run_one, n, a) for n in todo]
         for f in as_completed(futs):
-            n, st, dt = f.result()
-            rf.write(f'{n}\t{st}\t{dt:.2f}\n'); rf.flush()
+            n, st, dt, work = f.result()
+            rf.write(f'{n}\t{st}\t{dt:.2f}\t{work}\n'); rf.flush()
             k += 1; nthm += st == 'THM'
             if k % 200 == 0:
                 print(f'{k}/{len(todo)} thm={nthm} {time.time()-t0:.0f}s', file=sys.stderr, flush=True)

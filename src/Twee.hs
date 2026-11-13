@@ -64,6 +64,8 @@ data Config f =
     cfg_max_cp_depth              :: Int,
     cfg_max_rules                 :: Int,
     cfg_max_time                  :: Maybe Double,
+    -- | Critical pairs considered per abstract second; 0 = use CPU time.
+    cfg_abstract_time             :: Int,
     cfg_simplify                  :: Bool,
     cfg_renormalise_percent       :: Int,
     cfg_cp_sample_size            :: Int,
@@ -133,6 +135,7 @@ defaultConfig =
     cfg_max_cp_depth = maxBound,
     cfg_max_rules = maxBound,
     cfg_max_time = Nothing,
+    cfg_abstract_time = 0,
     cfg_simplify = True,
     cfg_renormalise_percent = 5,
     cfg_renormalise_threshold = 20,
@@ -1336,6 +1339,8 @@ data Output m f =
 complete :: (Function f, MonadIO m) => Output m f -> Config f -> State f -> m (State f)
 complete Output{..} config@Config{..} state =
   flip StateM.execStateT state $ do
+    let clock st = fromIntegral (st_considered st) * 10^(12::Int) `div` fromIntegral cfg_abstract_time
+    when (cfg_abstract_time > 0) $ useAbstractTime (clock state)
     tasks <- sequence
       [newTask 10 (fromIntegral cfg_renormalise_percent / 100) $ do
          state <- StateM.get
@@ -1383,6 +1388,7 @@ complete Output{..} config@Config{..} state =
     let
       loop = do
         progress <- StateM.state (complete1 config)
+        when (cfg_abstract_time > 0) $ StateM.get >>= setAbstractTime . clock
         when cfg_always_simplify $ do
           lift $ output_message Interreduce
           state <- StateM.get

@@ -290,6 +290,9 @@ parseConfig = do
   cfg_max_time <-
     inGroup "Resource limits" $
     flag "max-time" ["Give up after running for this long in seconds (unlimited by default)."] Nothing (Just <$> argNum)
+  cfg_abstract_time <-
+    inGroup "Resource limits" $
+    flag "abstract-time" ["Count time in critical pairs considered: this many make one second, for --max-time and housekeeping tasks (0 = CPU time, the default). Runs then do not depend on machine load."] 0 argNum
   cfg_simplify <-
     expert $
     inGroup "Completion heuristics" $
@@ -1326,6 +1329,7 @@ runTwee globals (TSTPFlags tstp) horn precedence config0 flags@MainFlags{..} lat
     Just dumpStateFile ->
       BS.writeFile dumpStateFile (encode state)
 
+  putStrLn $ "WORK considered=" ++ show (st_considered state) ++ " rules=" ++ show (fromIntegral (st_next_active state) :: Int)
   let EqHints{..} = st_eqhints state
   when (eh_next > 0 || eh_ntracked > 0) $
     putStrLn $ "HINTSTATS hints=" ++ show eh_next ++ " live=" ++ show (IntMap.size eh_live) ++
