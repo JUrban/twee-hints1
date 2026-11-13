@@ -666,6 +666,10 @@ those have the same axioms. But originals share axioms too.
     nearly double what rm4 solves (+91%), and add 40% over the old lemma
     import.
   * On this broad set the theory block is flat (94 vs 92).
+  * **Noise floor.** rm4 with `--abstract-time` 1990 and 2010 instead of
+    2000 (budget ±0.5%, task timing shifted) solves 93 and 95. At most 3
+    problems flip, and none of rm4's 92 is lost. Differences of 10 or more
+    on r1sim are real.
 
 ## 2c. Long runs: stall cutoff and checkpoints
 
