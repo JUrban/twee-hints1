@@ -908,6 +908,14 @@ goals failed in every variant):
   every proof and saves 15% (whole pool, cut short) to 50% (kNN variants)
   of the time. After 20 failures it loses 14 of 272. So
   `loop.py --give-up 30`.
+* **Hint signals at 5 s do not say which runs need 20 s.** Replayed on
+  the whole-pool online runs: of the 517 runs unsolved at 5 s
+  (10k critical pairs), 482 had matched a hint within the last 1 s, and
+  18–20% of those were solved by 20 s. Runs with longer gaps did no
+  worse or better (16% for 2–5k CPs). The number of late matches and
+  the pool size do not separate them either (15–26% per quartile). So
+  at short limits there is no Veroff stall rule to prune the next round,
+  and the 20 s round reruns every unsolved goal (with the give-up rule).
 
 **Full benchmark, Veroff style (running).** `abs/unleash.sh` runs every
 goal the benchmark loop left unsolved: 18,064 of 51,784, starting from
