@@ -509,7 +509,7 @@ class Loop:
             for k, r in enumerate(results()):
                 futs.append(None)
                 n, ok, dt, stats, hs = r
-                rf.write(f'{n}\t{"THM" if ok else "NO"}\t{dt:.2f}\t{stats}\n'); rf.flush()
+                rf.write(f'{n}\t{"THM" if ok else "NO"}\t{dt:.2f}\t{stats}\tt={time.time()-t0:.0f}\n'); rf.flush()
                 streak[orig_of(n)] = 0 if ok else streak[orig_of(n)] + 1
                 if ok:
                     new += 1
