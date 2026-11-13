@@ -758,8 +758,12 @@ Each run also has a 1,200 s CPU cap.
   pools (4,109 and 3,494 hints): 900 abstract s, stall gap 60 s, CPU cap
   3,600 s, states kept for later rounds. Round 1 kept no states, so these
   are fresh runs.
-  * 11 of the 20 were solved within the first 40 minutes, 4 of them in
-    under 15k critical pairs, where round 1 failed at 230k–520k.
+  * **13 of the 20 solved (61 of 68 after two rounds).** By per-run
+    limit: 7 by 60 abstract s, 9 by 120, 12 by 300, 13 by 600. Four
+    took under 15k critical pairs, where round 1 failed at 230k–520k.
+    All 7 unsolved hit the 3,600 s CPU cap, at only 222–445 abstract s,
+    and 6 of them were still on hints at a 60 s gap. Their saved states
+    take 0.3–1.1 GB each.
   * Both new inputs matter. With the new lemmas and no hints, goal_353
     and goal_354 fall in under 500 critical pairs; the big pool costs
     5k there. The others need the hints: goal_357 takes 9.1k without
