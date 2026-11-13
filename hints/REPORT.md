@@ -771,13 +771,6 @@ Each run also has a 1,200 s CPU cap.
 * **48% of the new proofs' lemmas were already in the pool** (8,196
   lemmas in 48 proofs; per-proof quartiles 52, 64 and 72%). The other
   ~4,300 are new and roughly double the pools for round 2.
-* **Round 3 (invalid, redone as round 4).** The 7 unsolved resumed their
-  states with the round-2 proofs: +1 (nil3_30__goal_370). But the resumed
-  aK2_eq_aK3_d runs matched only 1–9 hints, against about 1,260 in round
-  2. Their problems had new lemmas, which hit the signature bug above
-  (twee-e20 fixes it; a polluted state also resumes correctly). Five runs
-  stopped exactly 120k critical pairs (the 60 s stall gap) after resuming.
-  Round 4 repeats the round with e20 from the round-3 states.
 * **Round 2** runs the 20 unsolved with the round-1 proofs added to the
   pools (4,109 and 3,494 hints): 900 abstract s, stall gap 60 s, CPU cap
   3,600 s, states kept for later rounds. Round 1 kept no states, so these
@@ -796,6 +789,27 @@ Each run also has a 1,200 s CPU cap.
   * Critical pairs get expensive on these problems. goal_336 without
     hints made only 270 critical pairs per CPU second (18.7k rules), so
     the abstract clock understates the real cost of long runs.
+* **Round 3 (invalid, redone as round 4).** The 7 unsolved resumed their
+  states with the round-2 proofs: +1 (nil3_30__goal_370). But the resumed
+  aK2_eq_aK3_d runs matched only 1–9 hints, against about 1,260 in round
+  2. Their problems had new lemmas, which hit the signature bug above
+  (twee-e20 fixes it; a polluted state also resumes correctly). Five runs
+  stopped exactly 120k critical pairs (the 60 s stall gap) after resuming.
+  Round 4 repeats the round with e20 from the round-3 states.
+* **Round 4 (round 3 redone with twee-e20): +2, 64 of 68.** The 6
+  unsolved resumed their round-3 states with the same new lemmas and
+  pools. Now the hints reach the saved search: each resumed run makes
+  24–209 new hint matches (2 for goal_371), most within 10k critical
+  pairs of the resume, as the new lemmas join. aK2_eq_aK3_d__goal_332
+  is proved 24k critical pairs after the resume and nil3_30__goal_371
+  after 4k (12 and 2 abstract s). Resuming costs CPU: the two proofs
+  took 737 and 1,183 CPU s for those few critical pairs, so most of it
+  goes to loading the 0.3–1 GB state and adding the lemmas to 48k–100k
+  rules (not profiled). Of the 4 unsolved, three stopped exactly 120k
+  critical pairs after their last match (the 60 s stall gap), at +162k
+  to +549k, and goal_360 hit the CPU cap 93k after its last match.
+  Hints from proofs of siblings keep feeding these runs, but each
+  resume gives a short burst of matches, not a long hint-led run.
 
 **Prover9 long runs (`long/P1`, `long/P0`).** fam2_long has 40 fam2
 goals that the short loop left unsolved, run at 3000 given clauses.
