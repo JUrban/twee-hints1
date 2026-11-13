@@ -743,6 +743,20 @@ Each run also has a 1,200 s CPU cap.
   pools: 900 abstract s, stall gap 60 s, CPU cap 3,600 s, states kept
   for later rounds.
 
+**Prover9 long runs (`long/P1`, `long/P0`).** fam2_long has 40 fam2
+goals that the short loop left unsolved, run at 3000 given clauses.
+Hints are all proof steps of the solved siblings (`p9_long.sh`).
+
+* With hints 18, without 16 (both 13, hints only 5, no hints only 3), at
+  the same CPU (9,560 vs 9,490 s). Proofs come late: median 997 givens
+  with hints, 583 without. The short loop's 150–220 givens never get
+  there.
+* Prover9 picks hint matchers in bursts (`(H,` given clauses). Many
+  solved runs have gaps of more than 750 givens without one, and a 750
+  limit would keep 7 of the 18. The unsolved runs keep matching until
+  late (last match at 2,047–2,949 givens). So for Prover9, "still on
+  hints" does not separate the runs that will succeed from the rest.
+
 ## 2n. Prover9: SFDF reorientation of proofs
 
 Veroff turns each proof into a strictly forward, demodulation-free
