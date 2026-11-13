@@ -1060,57 +1060,63 @@ rounds of 30 s or more, but about 40% overhead for 8 s rounds.
 
 ## 3. Assessment
 
-* **Overall.** On all 51,784 public problems at 4 s per problem, the loop
-  (rule model + kNN hints, then lemma import) solves 33,249 against 31,060
-  for plain twee (+7.0%), with 13% less CPU. On the clean holdout part the
-  gain is +6.7% (3417 vs 3203). Problems are solved about twice as fast in
-  the 1–2 s range. On hard holdout problems at 60 s it is +27% (56 vs 44).
-* **Where the gain comes from**, largest first:
-  1. **The ENIGMA-style rule filter.** It defers rules that LightGBM on
-     ENIGMA features predicts are not proof steps. It gives +5–6% at 2 s,
-     +36% on hard dev goals at 8 s, and +11 of 300 hard holdout goals at
-     60 s.
-  2. **Lemma import.** Proven sibling goals become axioms. It triples the
-     second round's yield on the full benchmark and gives +12/−6 of 300 at
-     60 s. It uses AIM60k's structure (the goals of one original share
-     axioms and are steps of one proof), so it is reported separately. It
-     is sound, and allowed in a CASC LTB-style batch.
-  3. **kNN hints.** They help at short limits (+106/−34 at 2 s on holdout
-     with the model) and little at long ones.
-* **Hints in long runs: a negative result for twee.** With the model, none
-  of these help on hard problems beyond noise (±3 on 345):
-  * kNN hints, goal statements, ProofWatch;
-  * one-step generalisation matching;
-  * sketches and chained sketches (Veroff), with up to 400 hints.
+*Rewritten 13 Nov evening; earlier conclusions are corrected where noted.*
 
-  The reason shows in HINTSTATS: hints match early, and solved runs end a
-  median of about 1000 rules after their last match. Transferred hints
-  cover the part of a proof that twee finds anyway; the late, hard part is
-  specific to the problem. For the same reason a Veroff stall cutoff does
-  not separate lost runs from good ones: unsolved runs have similar gaps.
-  Self-replay (own proof as hints, 15× faster) shows that the mechanism
-  itself works when the hints are right.
-* **ENIGMA loop.** One turn with hard guided proofs gives +3 (rm4, within
-  noise). A second turn with 2.7k medium guided proofs does worse (rm5).
-  More data alone does not improve the model.
+* **Overall.** On all 51,784 public problems at 4 s per problem, the
+  first loop (rule model + kNN hints, then lemma import) solves 33,249
+  against 31,060 for plain twee (+7.0%), with 13% less CPU (holdout 3417
+  vs 3203). The Veroff-style online loop then runs everything left in goal
+  order: its first round (5 abstract s) brings the total to 36,057 (+16.1%
+  over plain; holdout 3,747), and a 20 s round is running (2o). On the
+  hardest goals of two families, long runs with whole-original pools
+  solve 64 of 68 over four rounds (2m).
+* **Where the gain comes from**, largest first:
+  1. **The sibling chain: lemma import, run online.** Proven sibling
+     goals become axioms (sound, CASC LTB-style, reported separately). In
+     goal order, each proof feeds the next runs at once (+25% over fixed
+     pools). Success depends on how near the last proof is: 58% at a gap
+     of 1 goal at 20 s, 26% at 4–10, none beyond (2p). The loop advances
+     along each original's proof.
+  2. **The ENIGMA-style rule filter** (+5–6% at 2 s, +36% on hard dev
+     goals at 8 s, +11 of 300 hard holdout goals at 60 s).
+  3. **Hints from all of an original's proofs.** At 20 s and longer, the
+     whole-original pool beats kNN-selected hints (60 vs 55 of 189 online;
+     48 vs 40 of 68 at 300 s, against 36 without hints).
+* **Hints in long runs: corrected.** The earlier negative result came
+  from small hint lists (kNN, 100 hints): those runs stop matching after a
+  few seconds because the list is used up. With pools of 2,000–6,000 hints
+  the runs keep matching until late, and the pool adds 12 of 68 over no
+  hints at 300 s. A hint's precision rises with the number of sibling
+  proofs it comes from (0.8% from one proof, 51% from 20 or more), but
+  weaker boosts for rare hints do not help (60 = 60).
+* **What did not help** (each within noise or worse): sketches and
+  chained sketches; kNN/goal-statement/ProofWatch hints on top of the
+  model; more model data or capacity (rm5, rm4b); portfolios; P9 SFDF
+  reorientation (2n); multi-goal search, which lacks the restart with the
+  new lemma (2p); a stall rule at short limits (hint signals at 5 s do not
+  predict 20 s success, 2o).
 * **Engineering.**
-  * The rule model costs about 6% of twee's throughput (binary model,
-    dense arrays, hashed features).
-  * kNN selection is a sparse matrix product (6 ms per problem over a
-    9k pool).
-  * Checkpoints (`--load-state`) continue runs exactly, with new hints.
+  * Abstract time (critical pairs) makes runs deterministic and
+    comparable. Real CP rates fall to 50–300 per CPU second on runs with
+    40k–110k rules, so long runs cost far more than their abstract time.
+  * Checkpoints: resuming now takes new lemmas (the signature bug fixed in
+    twee-e20). A resume of a big state costs minutes, mostly re-scoring the
+    saved queue against new hints (2m).
+  * Giving an original up after 30 failures in a row keeps 99.9% of the
+    5 s round's proofs (replayed: after 10 failures 84.5% for 46% of the
+    time).
 
 ## 4. Next steps
 
-* Lemma import with checkpoints: resume a saved run with new proven
-  lemmas added as axioms, so lemma rounds do not restart the search.
-* More loop rounds on the full benchmark (lemma closure), and
-  lemma-selection by relevance rather than goal-number distance.
-* The model: more capacity, or training only on hard proofs; thresholds
-  per run length (0.2 looked slightly better at 20 s, within noise).
-* Hints that cover the late part of proofs. One source is sketches whose
-  assumptions are themselves sketched or proven, iterated until the
-  chains close. Another is Prover9-style degradation of hint boosts.
+* **Cascade scheduling** (2p, being tested on sets/u3 against a plain
+  80 s round): retry goals right after each new proof, deepen only the
+  frontier, resume saved states.
+* **Lemmas from both sides** (`--lemma-after`, being tested): the nearest
+  proven siblings above a goal as well as below.
+* After round 2 of the full loop: the better of cascade or rounds, with
+  long frontier runs (V2 style: 300–900 abstract s, whole pools, resume).
+* Cheaper resume: re-score only the part of the saved queue that can
+  match the new hints.
 
 ## 5. How to run the best system
 
