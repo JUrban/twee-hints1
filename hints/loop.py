@@ -248,8 +248,11 @@ class Loop:
              ThreadPoolExecutor(a.j) as ex:
             knn_new = []   # online: proofs not yet in the kNN index (it is rebuilt in batches)
             knn_t = [time.time()]
+            streak = collections.Counter()   # --give-up: consecutive failures per original (in completion order)
             def jobs():
                 for n in todo:
+                    if a.give_up and streak[orig_of(n)] >= a.give_up:
+                        continue
                     if a.online and knn is not None and knn_new and (len(knn_new) >= 50 or time.time() - knn_t[0] > 120):
                         for m, L in knn_new:
                             knn.add(m, L)
@@ -277,6 +280,7 @@ class Loop:
                 futs.append(None)
                 n, ok, dt, stats, hs = r
                 rf.write(f'{n}\t{"THM" if ok else "NO"}\t{dt:.2f}\t{stats}\n'); rf.flush()
+                streak[orig_of(n)] = 0 if ok else streak[orig_of(n)] + 1
                 if ok:
                     new += 1
                     self.solved[n] = (rnd, dt)
@@ -339,6 +343,8 @@ def main():
     ap.add_argument('--online', action='store_true',
                     help='each proof joins the pools (and the sibling lemmas) at once, for the runs not yet started; '
                          'goals run in goal-number order and only -j runs are queued')
+    ap.add_argument('--give-up', type=int, default=0,
+                    help='skip the rest of an original in this round after N consecutive failures (with --online: goal order)')
     ap.add_argument('--keep-out', action='store_true', help='save each run\'s output in DIR/rN/out/<name> (for stallsim.py)')
     ap.add_argument('--init', help='import round-0 results (solved.tsv and hints) of another loop dir')
     a = ap.parse_args()
