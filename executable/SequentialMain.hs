@@ -679,12 +679,18 @@ data TweeContext =
     ctx_equals  :: Jukebox.Function,
     ctx_type    :: Type,
     ctx_funs    :: Map Int Jukebox.Function,
-    ctx_ids     :: Map Jukebox.Function Int }
+    ctx_ids     :: Map Jukebox.Function Int,
+    -- Symbols of a state loaded with --load-state, by name and arity. The
+    -- current problem reuses them, so that the saved rules, the new axioms
+    -- and the hints share one signature (precedence and ids depend on the
+    -- problem text, which changes when lemmas are added).
+    ctx_saved   :: Map (String, Int) Constant }
 
 -- Convert back and forth between Twee and Jukebox.
 tweeConstant :: MainFlags -> HornFlags -> TweeContext -> Precedence -> Jukebox.Function -> Constant
 tweeConstant MainFlags{..} flags TweeContext{..} prec fun
   | fun == ctx_minimal = Minimal
+  | Just c <- Map.lookup (base (name fun), Jukebox.arity fun) ctx_saved = c
   | otherwise =
     Constant {
       con_prec = prec,
@@ -713,7 +719,12 @@ isIfeq fun =
   hasLabel "ifeq" (name fun)
 
 jukeboxFunction :: TweeContext -> Constant -> Jukebox.Function
-jukeboxFunction TweeContext{..} Constant{..} = Map.findWithDefault undefined con_id ctx_funs
+jukeboxFunction TweeContext{..} Constant{..} =
+  case Map.lookup con_id ctx_funs of
+    Just f | base (name f) == con_name -> f
+    _ -> -- a symbol of a loaded state, whose id is from the saved run
+      head ([ f | f <- Map.elems ctx_funs, base (name f) == con_name, Jukebox.arity f == con_arity ] ++
+            [error ("jukeboxFunction: " ++ con_name)])
 jukeboxFunction TweeContext{..} Minimal = ctx_minimal
 
 -- A raw parsed hint term.
@@ -785,7 +796,8 @@ makeContext hints prob = run (hints, prob) $ \(_, prob) -> do
     ctx_equals = equals,
     ctx_type = ty,
     ctx_funs = Map.fromList (zip [0..] allFuns),
-    ctx_ids = Map.fromList (zip allFuns [0..]) }
+    ctx_ids = Map.fromList (zip allFuns [0..]),
+    ctx_saved = Map.empty }
 
 flattenGoals :: Int -> Bool -> Bool -> Bool -> Int -> [Jukebox.Term] -> Problem Clause -> Problem Clause
 flattenGoals backwardsGoal flattenNonGround flattenAll full depthMod hints prob =
@@ -982,6 +994,19 @@ identifyProblem TweeContext{..} prob =
 
 runTwee :: GlobalFlags -> TSTPFlags -> HornFlags -> [String] -> Config Constant -> MainFlags -> (IO () -> IO ()) -> [Jukebox.Term] -> Problem Clause -> IO Answer
 runTwee globals (TSTPFlags tstp) horn precedence config0 flags@MainFlags{..} later hints obligs = {-# SCC runTwee #-} do
+  -- A state to resume is decoded first: the problem must reuse its symbols.
+  savedState <-
+    case flags_load_state of
+      Nothing -> return Nothing
+      Just file -> Just . decode <$> BS.readFile file
+  let
+    savedSyms :: Map (String, Int) Constant
+    savedSyms =
+      case savedState of
+        Nothing -> Map.empty
+        Just st -> Map.fromList
+          [ ((con_name c, con_arity c), c)
+          | Sym c@Constant{} <- funs (map axiom_eqn (st_axioms st)) ++ funs (map goal_eqn (st_goals st)) ]
   let
     -- Encode whatever needs encoding in the problem
     obligs1
@@ -1005,7 +1030,7 @@ runTwee globals (TSTPFlags tstp) horn precedence config0 flags@MainFlags{..} lat
     eqHintFlags = map isEqHint hints
     hints' = [ h | (h, False) <- zip hintsAll' eqHintFlags ]
     eqHints' = [ (t, u) | (_ :@: [t, u], True) <- zip hintsAll' eqHintFlags ]
-    ctx = makeContext hintsAll' prettyObligs
+    ctx = (makeContext hintsAll' prettyObligs) { ctx_saved = savedSyms }
     prob = addNarrowing flags_equals_transformation ctx prettyObligs
 
   (unsortedAxioms0, goals0) <-
@@ -1284,12 +1309,16 @@ runTwee globals (TSTPFlags tstp) horn precedence config0 flags@MainFlags{..} lat
   startState <-
     case flags_load_state of
       Nothing -> return withBackwardsGoal
-      Just file -> do
-        loaded0 <- decode <$> BS.readFile file
+      Just _ -> do
+        let loaded0 = fromJust savedState
         -- Axioms of the problem that the saved run did not have (e.g.
         -- lemmas proven since) are added to the resumed state.
-        let known = Set.fromList (map axiom_name (st_axioms loaded0))
-            newAxioms = [ ax | ax <- axioms, axiom_name ax `Set.notMember` known ]
+        -- An axiom is known if the saved run has the same equation (in the
+        -- saved signature, which the problem now shares). Names are not
+        -- enough: kNN lemmas are numbered by rank, and states saved before
+        -- the shared signature hold copies in a foreign one.
+        let known = map axiom_eqn (st_axioms loaded0)
+            newAxioms = [ ax | ax <- axioms, axiom_eqn ax `notElem` known ]
             loaded = foldl' (addAxiom config) loaded0 newAxioms
         unless (null newAxioms) $
           say $ "Resumed with " ++ show (length newAxioms) ++ " new axioms"
