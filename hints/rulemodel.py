@@ -32,13 +32,25 @@ def load(path, parents=False):
         return rows
     return [x + ([byidx[p - 1] for p in ps if p > 0 and p - 1 in byidx],) for x, ps in zip(rows, par)]
 
+THEORY = False  # add the 't:' block: features summed over the problem's axioms (ENIGMA's theory block)
+
 def goal_feats(name):
+    """Per-problem constant features: the goal block, and with THEORY the
+    theory block (keys prefixed 'T', so they become 'g:T...' columns)."""
     f = collections.Counter()
     lits = hintsel.goal_lits(name)
     for pos, l, r in lits:
         for k, v in enigfeats.features(l, r).items():
             f[('' if pos else 'n') + k] += v
     f['Llits'] = len(lits)
+    if THEORY:
+        import given
+        axs = given.axioms(name)
+        for l, r in axs:
+            for k, v in enigfeats.features(l, r).items():
+                if k[0] in 'VHC':
+                    f['T' + k] += v
+        f['TLaxioms'] = len(axs)
     return f
 
 class RuleModel:
@@ -144,11 +156,14 @@ def main():
     ap.add_argument('--leaves', type=int, default=63)
     ap.add_argument('--negmax', type=int, default=400)
     ap.add_argument('--threads', type=int, default=8)
+    ap.add_argument('--theory', action='store_true', help='add the theory block (axiom features)')
     ap.add_argument('--all', action='store_true')
     ap.add_argument('--parents', action='store_true', help='add the parents\' features (p: block)')
     ap.add_argument('--test-origs', help='comma-separated originals to hold out')
     ap.add_argument('--save'); ap.add_argument('--vocab')
     a = ap.parse_args()
+    global THEORY
+    THEORY = a.theory
     paths = {}
     for d in a.givendir.split(','):
         if os.path.isdir(d):
@@ -202,6 +217,10 @@ def write_goalfile(name, vocab, path):
                 f.write(f'K\t{k}\n')
 
 def goalfiles_main(argv):
+    global THEORY
+    if '--theory' in argv:
+        THEORY = True
+        argv = [x for x in argv if x != '--theory']
     vocab_path, names_path, outdir = argv
     vocab = {}
     for line in open(vocab_path):

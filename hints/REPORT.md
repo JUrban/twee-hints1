@@ -461,6 +461,39 @@ No time-sliced portfolio beats the guided run alone. Plain for 15 s
 followed by the guided setting for 45 s solves 50, and rm4 for 40 s
 followed by lemmas for 20 s solves 56.
 
+## 2i. Control: a Prover9 hint loop on two families
+
+Prover9-new (master, built from `/project/Prover9-new`, default settings)
+in the same loop as twee (`p9loop.py`). The families are aa1_15 (198
+goals) and aK2_eq_aK3_q (273 goals), 471 problems, with rounds of 2, 2, 2
+and 8 s. Hints are the positive proof steps of all solved goals of the
+same original, with skolems generalised to variables (Veroff's practice).
+They are given as `formulas(hints)`, about 10 per proof. twee runs plain,
+without the model, with the same pool (`--pool original`).
+
+| | round 0, 2 s | +2 s, hints | +2 s, hints | +8 s, hints |
+|---|---|---|---|---|
+| Prover9 | 240 | 248 | 270 | **288** |
+| twee | 347 | 361 | 362 | **376** |
+
+Controls on the round-0 failures, 8 s each:
+
+| control | Prover9 | twee |
+|---|---|---|
+| no hints | +3 of 231 (243) | +20 of 124 (367) |
+| hints = statements of all earlier goals of the original, solved or not | +11 | |
+
+* **Prover9 is a good hint user.** Without hints, four times the time
+  gives it almost nothing (+3). Proof-step hints from solved siblings give
+  +48, a 19% gain, and the gain grows as the pool grows (+8, then +22).
+  Goal statements alone are much weaker hints (+11) than proof steps.
+* **Twee gains less from hints:** +29 from the loop against +20 from the
+  same time without hints.
+* **In absolute terms twee without hints (367) is far ahead of Prover9
+  with the hint loop (288).** Prover9's base search on these problems is
+  the limit, not its use of hints. Prover9 was run with defaults; Veroff's
+  tuned settings might do better.
+
 ## 2c. Long runs: stall cutoff and checkpoints
 
 * `--eqhint-stall N` gives up when no new rule has matched a hint for N
