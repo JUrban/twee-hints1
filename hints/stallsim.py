@@ -26,6 +26,18 @@ def parse(path):
         log = [int(x.split(':')[0]) for x in m.group(1).split()]
     return 'RESULT: Theorem' in txt, work, log
 
+def parse_p9(path):
+    """Prover9 output: work = given clauses, log = givens selected as hint matchers (H)."""
+    log, work = [], 0
+    for line in open(path, errors='replace'):
+        if line.startswith('given #'):
+            k = int(line[7:line.index(' ', 7)])
+            work = k
+            if '(H,' in line:
+                log.append(k)
+    txt_ok = 'THEOREM PROVED' in open(path, errors='replace').read()
+    return txt_ok, work, log
+
 def stall_point(log, G, end):
     """First critical-pair count at which G pass without a new match."""
     last = 0
@@ -40,7 +52,11 @@ def main():
     ap.add_argument('dir'); ap.add_argument('dir0', nargs='?')
     ap.add_argument('--rate', type=int, default=2000)
     ap.add_argument('--gaps', default='5,10,20,30,60,120')
+    ap.add_argument('--p9', action='store_true', help='Prover9 outputs; work and gaps in given clauses (use --rate 1)')
     a = ap.parse_args()
+    global parse
+    if a.p9:
+        parse = parse_p9
     runs = {n: parse(os.path.join(a.dir, 'out', n)) for n in sorted(os.listdir(os.path.join(a.dir, 'out')))
             if not n.endswith('.tmp')}
     runs = {n: r for n, r in runs.items() if r[1] is not None}
