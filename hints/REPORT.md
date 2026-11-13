@@ -980,6 +980,17 @@ on 14 cores (twee-e20, kill after 15× the limit, CPU cap 400 s).
   So the loop advances along each original's proof, and a hard goal
   blocks the goals after it. Conditional goals are not a weak spot: 83%
   of them are solved overall, against 68% of the unconditional ones.
+* **Lemmas from both sides** (`loop.py --lemma-after`). The nearest
+  proven siblings above a goal are lemmas too. They are proven before the
+  run, so every proof still expands to one from the axioms. Test set: the
+  222 goals of sets/u3 that the online whole-pool run left unsolved and
+  that have a proven sibling at most 10 above (20 s, from that run's
+  proofs). With lemmas from both sides 67 of 222 are solved. On a random
+  74 of them: 26 against 20 for the same rerun with lemmas from below only
+  (+6/−0). So most of the 67 come from rerunning with the full set of
+  proofs below: with 3 originals on 5 cores, goal k+1 had often started
+  before goal k was proved (the full benchmark interleaves 129 originals,
+  so this rarely happens there). Lemmas from above add about 30% on top.
 * **Cascade scheduling** (`loop.py --cascade T0,T1,...`), written from
   this. In place of rounds, a goal is retried at T0 as soon as a sibling
   at most `--retry-gap` places below it gets proved. Otherwise the goal
@@ -1112,8 +1123,8 @@ rounds of 30 s or more, but about 40% overhead for 8 s rounds.
 * **Cascade scheduling** (2p, being tested on sets/u3 against a plain
   80 s round): retry goals right after each new proof, deepen only the
   frontier, resume saved states.
-* **Lemmas from both sides** (`--lemma-after`, being tested): the nearest
-  proven siblings above a goal as well as below.
+* **Lemmas from both sides** (`--lemma-after`): +6/−0 on 74 (2p); used
+  from the full loop's next round on.
 * After round 2 of the full loop: the better of cascade or rounds, with
   long frontier runs (V2 style: 300–900 abstract s, whole pools, resume).
 * Cheaper resume: re-score only the part of the saved queue that can
