@@ -1258,6 +1258,24 @@ recordEqHintMatch active state@State{st_eqhints = eh}
                                   eh_log = if new then (st_considered state, fromIntegral (active_id active)) : eh_log eh else eh_log eh } }
         where new = n < trackBase && not (IntSet.member n (eh_matched eh))
 
+-- | After --load-state: count the hints that rules of the loaded state
+-- already match as matched (silently, not in eh_log), and restart the stall
+-- clock at the loaded critical-pair count. Otherwise a later rule matching
+-- such a hint would count as new, and --eqhint-stall-cps would fire at once.
+{-# INLINEABLE markResumedHints #-}
+markResumedHints :: Function f => State f -> State f
+markResumedHints state@State{st_eqhints = eh0}
+  | Map.null (eh_map eh0) = state
+  | otherwise = state { st_eqhints = eh1 { eh_last_new_cp = st_considered state } }
+  where
+    eh1 = foldl' mark eh0 (IntMap.elems (st_active_set state))
+    mark eh active =
+      case lookupEqHintG eh (unorient (active_rule active)) of
+        Just n | n < trackBase, not (IntSet.member n (eh_matched eh)) ->
+          eh { eh_matched = IntSet.insert n (eh_matched eh),
+               eh_gdone = foldl' (\m g -> IntMap.insertWith (+) g 1 m) (eh_gdone eh) (IntMap.findWithDefault [] n (eh_hgroups eh)) }
+        _ -> eh
+
 -- | Normalise all live hints with respect to the oriented rules.
 {-# INLINEABLE normaliseEqHints #-}
 normaliseEqHints :: Function f => State f -> State f

@@ -1289,7 +1289,7 @@ runTwee globals (TSTPFlags tstp) horn precedence config0 flags@MainFlags{..} lat
         unless (null newAxioms) $
           say $ "Resumed with " ++ show (length newAxioms) ++ " new axioms"
         let eh = (st_eqhints withHints) { eh_last_match = fromIntegral (st_next_active loaded) }
-            st1 = loaded { st_eqhints = eh, st_cur_passive = Nothing }
+            st1 = markResumedHints loaded { st_eqhints = eh, st_cur_passive = Nothing }
             st2 | Map.null (eh_map eh) = st1
                 | otherwise = simplifyQueue config (normaliseEqHints st1)
         return $! st_next_active st2 `seq` st2
