@@ -739,9 +739,22 @@ Each run also has a 1,200 s CPU cap.
   critical pairs. With that, 1,994 hints cost +11% instead of +43%
   (twee-e19). The other tasks cost about 7% more under the abstract
   clock than under real-time scheduling, which is acceptable.
-* **Round 2 (queued)** runs the 19 with the round-1 proofs added to the
-  pools: 900 abstract s, stall gap 60 s, CPU cap 3,600 s, states kept
-  for later rounds.
+* **Whole pool 48, kNN 40, no hints 36** (same 300 abstract s, same
+  model and lemmas). The whole pool solves 13 that the no-hint run
+  misses (and misses 1 it solves); kNN only 5. The two hint versions
+  differ in how long the runs stay on hints. kNN runs stop matching
+  early: the last new match came at a median of 3 abstract s, in solved
+  and unsolved runs alike. With a 60 s gap, 34 kNN runs are solved and
+  only 1 unsolved run is still on hints. The whole-pool runs keep
+  matching until late: unsolved runs' last matches came at 131–228 s.
+  So the stall signal is only informative with a large pool.
+* **48% of the new proofs' lemmas were already in the pool** (8,196
+  lemmas in 48 proofs; per-proof quartiles 52, 64 and 72%). The other
+  ~4,300 are new and roughly double the pools for round 2.
+* **Round 2** runs the 20 unsolved with the round-1 proofs added to the
+  pools (4,109 and 3,494 hints): 900 abstract s, stall gap 60 s, CPU cap
+  3,600 s, states kept for later rounds. Round 1 kept no states, so these
+  are fresh runs.
 
 **Prover9 long runs (`long/P1`, `long/P0`).** fam2_long has 40 fam2
 goals that the short loop left unsolved, run at 3000 given clauses.

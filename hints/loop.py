@@ -202,6 +202,9 @@ class Loop:
     def round(self, rnd):
         a = self.a
         todo = [n for n in self.names if n not in self.solved]
+        if a.online:
+            # earlier goals of each original first: their proofs feed the later ones in the same round
+            todo.sort(key=lambda n: (int(n.rsplit('__goal_', 1)[1]) if '__goal_' in n else 0, n))
         pools = {}
         knn = None
         hinted = rnd > 0 or (a.hints_extra and a.hints_from_start)
@@ -217,6 +220,11 @@ class Loop:
                                 knn.add(f, L)
             else:
                 pools = self.build_pools()
+                if a.online:
+                    cnt = collections.defaultdict(collections.Counter)
+                    for n in self.solved:
+                        for h in self.hints_of(n):
+                            cnt[orig_of(n) if a.pool == 'original' else 'all'][h] += 1
         if a.model and (rnd > 0 or a.given_extra or a.model_fixed):
             self.train_model(rnd)
         if a.lemmas or a.lemma_knn:
@@ -230,8 +238,14 @@ class Loop:
         with open(os.path.join(rdir, 'results.tsv'), 'w') as rf, \
              open(os.path.join(self.dir, 'solved.tsv'), 'a') as sf, \
              ThreadPoolExecutor(a.j) as ex:
+            knn_new = []   # online: proofs not yet in the kNN index (it is rebuilt in batches)
+            knn_t = [time.time()]
             def jobs():
                 for n in todo:
+                    if a.online and knn is not None and knn_new and (len(knn_new) >= 50 or time.time() - knn_t[0] > 120):
+                        for m, L in knn_new:
+                            knn.add(m, L)
+                        knn_new.clear(); knn_t[0] = time.time()
                     hints = self.hints_for(n, pools, knn) if hinted else []
                     if rnd > 0 and not hints and not a.rerun_unhinted:
                         continue
@@ -240,7 +254,7 @@ class Loop:
                 # at most 4*j runs queued, so results are written as they come
                 pending = set(); it = jobs()
                 while True:
-                    while len(pending) < 4 * a.j:
+                    while len(pending) < (a.j if a.online else 4 * a.j):
                         nxt = next(it, None)
                         if nxt is None:
                             break
@@ -262,6 +276,18 @@ class Loop:
                     with open(os.path.join(self.dir, 'hints', n), 'w') as hf:
                         for l, r in hs:
                             hf.write(f'{l}\t{r}\n')
+                    if a.online and hinted:
+                        # the new proof joins the pools for the runs not yet started
+                        if knn is not None:
+                            if hs:
+                                knn_new.append((n, [f'{l}\t{r}' for l, r in hs]))
+                        elif a.pool in ('original', 'all'):
+                            key = orig_of(n) if a.pool == 'original' else 'all'
+                            cnt[key].update(hs)
+                            pools[key] = [h for h, _ in cnt[key].most_common()]
+                        if getattr(self, 'lemma_src', None) is not None and '__goal_' in n:
+                            o, k = lemmas.split(n)
+                            self.lemma_src[o] = self.lemma_src.get(o, set()) | {k}  # copy: workers read it
                 if (k + 1) % 200 == 0:
                     print(f'  round {rnd}: {k+1}/{len(todo)} new={new} {time.time()-t0:.0f}s',
                           file=sys.stderr, flush=True)
@@ -303,6 +329,9 @@ def main():
                     help='rule model with the ENIGMA theory block (rulemodel.py --theory; e.g. models/rm4t)')
     ap.add_argument('--lemma-subsets', action='store_true',
                     help='--lemma-knn may also use problems whose axioms are a subset of the target\'s')
+    ap.add_argument('--online', action='store_true',
+                    help='each proof joins the pools (and the sibling lemmas) at once, for the runs not yet started; '
+                         'goals run in goal-number order and only -j runs are queued')
     ap.add_argument('--keep-out', action='store_true', help='save each run\'s output in DIR/rN/out/<name> (for stallsim.py)')
     ap.add_argument('--init', help='import round-0 results (solved.tsv and hints) of another loop dir')
     a = ap.parse_args()
