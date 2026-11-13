@@ -468,7 +468,7 @@ in the same loop as twee (`p9loop.py`). The families are aa1_15 (198
 goals) and aK2_eq_aK3_q (273 goals), 471 problems, with rounds of 2, 2, 2
 and 8 s. Hints are the positive proof steps of all solved goals of the
 same original, with skolems generalised to variables (Veroff's practice).
-They are given as `formulas(hints)`, about 10 per proof. twee runs plain,
+They are given as `formulas(hints)`, about 14 per proof. twee runs plain,
 without the model, with the same pool (`--pool original`).
 
 | | round 0, 2 s | +2 s, hints | +2 s, hints | +8 s, hints |
