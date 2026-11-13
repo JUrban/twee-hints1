@@ -462,6 +462,11 @@ parseConfig = do
     bool "complete"
       ["Don't stop until the rewrite system is confluent"]
       False
+  cfg_multi_goal <-
+    inGroup "Input and clausifier options" $
+    bool "multi-goal"
+      ["With several negated conjectures: print SOLVEDGOAL for each goal as it is proved, stop when all are (or at the limits)"]
+      False
   cfg_hint_skel_cost <-
     expert $
     inGroup "Critical pair weighting heuristics" $

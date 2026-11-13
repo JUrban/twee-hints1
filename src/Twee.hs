@@ -34,6 +34,7 @@ import Data.Int
 import Control.Monad
 import Control.Monad.IO.Class
 import System.CPUTime (getCPUTime)
+import Data.IORef
 import Control.Monad.Trans.Class
 import qualified Control.Monad.Trans.State.Strict as StateM
 import qualified Data.IntSet as IntSet
@@ -84,6 +85,9 @@ data Config f =
     cfg_random_mode_simple        :: Bool,
     cfg_random_mode_best_of       :: Int,
     cfg_always_complete           :: Bool,
+    -- several goals in one run: report each one as it is proved
+    -- (SOLVEDGOAL lines), go on until all are proved
+    cfg_multi_goal                :: Bool,
     cfg_hint_skel_cost            :: Float,
     cfg_hint_skel_factor          :: Float,
     cfg_eqhint_factor             :: Float,
@@ -157,6 +161,7 @@ defaultConfig =
     cfg_random_mode_best_of = 1,
     cfg_random_mode_simple = False,
     cfg_always_complete = False,
+    cfg_multi_goal = False,
     cfg_hint_skel_cost = 1,
     cfg_hint_skel_factor = 0,
     cfg_eqhint_factor = 0.01,
@@ -1425,7 +1430,23 @@ complete Output{..} config@Config{..} state =
           task <- newTask timeout 100 (return ())
           return $ fmap isJust (checkTask task)
 
+    reported <- liftIO (newIORef (IntSet.empty, -1 :: Int))
     let
+      -- --multi-goal: after each new rule, report the goals it proved
+      checkGoals
+        | not cfg_multi_goal = return False
+        | otherwise = do
+            st <- StateM.get
+            (rep, lastN) <- liftIO (readIORef reported)
+            let n = fromIntegral (st_next_active st) :: Int
+            if n == lastN then return False else do
+              let new = [ g | g <- st_goals st, not (IntSet.member (goal_number g) rep),
+                              not (Map.null (Map.intersection (goal_lhs g) (goal_rhs g))) ]
+                  rep' = foldl' (flip IntSet.insert) rep (map goal_number new)
+              forM_ new $ \g -> liftIO $ putStrLn $
+                "SOLVEDGOAL " ++ goal_name g ++ " considered=" ++ show (st_considered st) ++ " rules=" ++ show n
+              liftIO (writeIORef reported (rep', n))
+              return (not (null (st_goals st)) && IntSet.size rep' >= length (st_goals st))
       loop = do
         progress <- StateM.state (complete1 config)
         when (cfg_abstract_time > 0) $ StateM.get >>= setAbstractTime . clock
@@ -1443,7 +1464,8 @@ complete Output{..} config@Config{..} state =
         overCpu <- if cfg_max_cpu > 0
           then liftIO $ fmap (\t -> fromIntegral t / 1e12 >= cfg_max_cpu) getCPUTime
           else return False
-        when (progress && not timedOut && not overCpu) loop
+        allDone <- checkGoals
+        when (progress && not timedOut && not overCpu && not allDone) loop
 
     loop
 
@@ -1454,7 +1476,7 @@ complete1 config@Config{..} state
     (False, state)
   | st_considered state >= cfg_max_critical_pairs =
     (False, state)
-  | solved state && not cfg_always_complete = (False, state)
+  | solved state && not cfg_always_complete && not cfg_multi_goal = (False, state)
   | cfg_eqhint_stall_cps > 0,
     not (Map.null (eh_map (st_eqhints state))),
     st_considered state - eh_last_new_cp (st_eqhints state) > cfg_eqhint_stall_cps =

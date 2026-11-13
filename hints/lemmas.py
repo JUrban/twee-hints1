@@ -33,6 +33,26 @@ def conjecture(name):
     m = re.search(r'fof\(\w+,\s*conjecture,\s*(.*)\)\.\s*$', txt, re.S)
     return m.group(1).strip() if m else None
 
+def negated_goal(name, tag):
+    """The conjecture of NAME as a skolemised negated_conjecture body (constants
+    sk<TAG>x<i>), or None unless it is a universally quantified unit equation."""
+    f = conjecture(name)
+    if not f or not unit_eq(f):
+        return None
+    vs = []
+    while True:
+        q = re.match(r'!\s*\[([^\]]*)\]\s*:\s*(.*)$', f, re.S)
+        if not q:
+            break
+        vs += [v.strip() for v in q.group(1).split(',')]
+        f = q.group(2).strip()
+    while f.startswith('(') and f.endswith(')'):
+        f = f[1:-1].strip()
+    for i, v in enumerate(vs):
+        f = re.sub(r'\b%s\b' % re.escape(v), f'sk{tag}x{i}', f)
+    l, r = f.split('=')
+    return f'{l.strip()} != {r.strip()}'
+
 def unit_eq(f):
     body = re.sub(r'!\s*\[[^\]]*\]\s*:\s*', '', f)
     return not any(c in body for c in ('|', '~', '=>', '&', '!=')) and body.count('=') == 1

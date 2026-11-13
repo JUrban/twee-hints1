@@ -9,7 +9,7 @@ the proofs it finds to the pool.
 usage: loop.py SET DIR [--rounds N] [--timeout S] [-j N] [--twee BIN]
                [--args "..."] [--pool original|all] [--aux]
 """
-import argparse, collections, json, os, subprocess, sys, time
+import argparse, collections, json, os, re, subprocess, sys, time
 from concurrent.futures import ThreadPoolExecutor, as_completed, wait, FIRST_COMPLETED
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import hintlib
@@ -195,6 +195,87 @@ class Loop:
             os.unlink(path)
         return name, ok, dt, stats, res
 
+    def run_multi(self, names, hints, rnd):
+        """--multi: one twee --multi-goal run for a window of unconditional goals of one
+        original, with the union of their lemmas and the budget of all of them. Returns one
+        result per goal; the window's hints go with its first proved goal."""
+        a = self.a
+        import lemmas
+        lines = [l for l in open(os.path.join(PROB, names[0] + '.p'))
+                 if l.startswith(('cnf(', 'fof(')) and 'conjecture' not in l]
+        lem = {}
+        if (a.lemmas or a.lemma_knn) and rnd > 0 and self.lemma_src:
+            for n in names:
+                if a.lemma_knn:
+                    txt, _ = lemmas.lemma_problem_knn(n, self.lemma_src, a.lemmas, self.lemma_index, a.lemma_knn)
+                else:
+                    txt, _ = lemmas.lemma_problem(n, self.lemma_src, a.lemmas)
+                for m in re.finditer(r'^fof\(lemma_\w+,axiom,(.*)\)\.\s*$', txt, re.M):
+                    lem.setdefault(m.group(1).strip(), len(lem))
+        lines += [f'fof(lemma_{i},axiom,{f}).\n' for f, i in lem.items()]
+        lines += [f'cnf({n},negated_conjecture,{lemmas.negated_goal(n, lemmas.split(n)[1])}).\n' for n in names]
+        path = os.path.join(self.dir, 'tmp', names[0] + '.multi.p')
+        with open(path, 'w') as f:
+            f.writelines(lines)
+        T = self.timeout(rnd) * len(names)
+        args = a.args.split()
+        for i in range(len(args) - 1):
+            if args[i] == '--max-cpu':
+                args[i + 1] = str(float(args[i + 1]) * len(names))
+        cmd = [a.twee, path, '--max-time', str(T), '--no-colour', '--quiet', '--no-proof',
+               '--print-hints', '--multi-goal'] + args
+        if self.model:
+            m, v, gdir = self.model
+            cmd += ['--rule-model', m, '--rule-vocab', v, '--rule-goal', os.path.join(gdir, names[0])] + \
+                   a.model_args.split()
+        if hints:
+            hpath = os.path.join(self.dir, 'tmp', names[0] + '.multi.hints')
+            with open(hpath, 'w') as f:
+                for h in hints:
+                    f.write('\t'.join(h) + '\n')
+            cmd += ['--hints-file', hpath]
+        t0 = time.time()
+        try:
+            p = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                               timeout=T * (a.wall_factor if "--abstract-time" in a.args else 1) + 30)
+            out = p.stdout.decode('utf8', 'replace')
+        except subprocess.TimeoutExpired as e:
+            out = (e.stdout or b'').decode('utf8', 'replace') + '\nKILLED\n'
+        dt = time.time() - t0
+        if a.keep_out:
+            od = os.path.join(self.dir, 'r%d' % rnd, 'out'); os.makedirs(od, exist_ok=True)
+            with open(os.path.join(od, names[0] + '.multi'), 'w') as f:
+                f.write(f'WINDOW {" ".join(names)}\n' + out)
+        if hints:
+            os.unlink(hpath)
+        os.unlink(path)
+        got = {}
+        stats = ''
+        for line in out.splitlines():
+            if line.startswith('SOLVEDGOAL '):
+                w = line.split()
+                got[w[1]] = w[2]
+            elif line.startswith('HINTSTATS'):
+                stats = line
+        hs = []
+        if got and 'HINTS-END' in out:
+            L, G = hintlib.extract_hints(out)
+            sig = self.signature(names[0])
+            seen = set()
+            for l, r in L + G:
+                k = canon_key(l, r, sig)
+                if l == r or k[0] == k[1] or k in seen:
+                    continue
+                seen.add(k); hs.append(k)
+        res, first = [], True
+        for n in names:
+            if n in got:
+                res.append((n, True, dt, f'MULTI {len(names)} {got[n]} {stats}', hs if first else []))
+                first = False
+            else:
+                res.append((n, False, dt, f'MULTI {len(names)} {stats}', None))
+        return res
+
     def hints_for(self, n, pools, knn):
         a = self.a
         if a.pool.startswith('knn'):
@@ -258,8 +339,21 @@ class Loop:
             knn_new = []   # online: proofs not yet in the kNN index (it is rebuilt in batches)
             knn_t = [time.time()]
             streak = collections.Counter()   # --give-up: consecutive failures per original (in completion order)
-            def jobs():
+            units = [[n] for n in todo]
+            if a.multi > 1:
+                # windows of up to MULTI consecutive unconditional goals of one original (goal order)
+                import lemmas
+                units, cur = [], {}
                 for n in todo:
+                    if '__goal_' not in n or lemmas.negated_goal(n, 0) is None:
+                        units.append([n]); continue
+                    o = orig_of(n)
+                    if o not in cur or len(cur[o]) >= a.multi:
+                        cur[o] = []; units.append(cur[o])
+                    cur[o].append(n)
+            def jobs():
+                for u in units:
+                    n = u[0]
                     if a.give_up and streak[orig_of(n)] >= a.give_up:
                         continue
                     if a.online and knn is not None and knn_new and (len(knn_new) >= 50 or time.time() - knn_t[0] > 120):
@@ -269,7 +363,7 @@ class Loop:
                     hints = self.hints_for(n, pools, knn) if hinted else []
                     if rnd > 0 and not hints and not a.rerun_unhinted:
                         continue
-                    yield n, hints
+                    yield u, hints
             def results():
                 # at most 4*j runs queued, so results are written as they come
                 pending = set(); it = jobs()
@@ -278,12 +372,14 @@ class Loop:
                         nxt = next(it, None)
                         if nxt is None:
                             break
-                        pending.add(ex.submit(self.run_one, nxt[0], nxt[1], rnd))
+                        u = nxt[0]
+                        pending.add(ex.submit(self.run_multi, u, nxt[1], rnd) if len(u) > 1 else
+                                    ex.submit(lambda n=u[0], h=nxt[1]: [self.run_one(n, h, rnd)]))
                     if not pending:
                         return
                     done, pending = wait(pending, return_when=FIRST_COMPLETED)
                     for f in done:
-                        yield f.result()
+                        yield from f.result()
             futs = []
             for k, r in enumerate(results()):
                 futs.append(None)
@@ -357,6 +453,9 @@ def main():
                          'from 2-4 factor 0.05, the rest the default (--eqhint-factor, 0.01)')
     ap.add_argument('--wall-factor', type=float, default=5,
                     help='with --abstract-time: kill a run after FACTOR * timeout + 30 wall seconds')
+    ap.add_argument('--multi', type=int, default=0,
+                    help='windows of up to N consecutive unconditional goals of one original run as one '
+                         'twee --multi-goal search, with all their lemmas and N times the budget')
     ap.add_argument('--give-up', type=int, default=0,
                     help='skip the rest of an original in this round after N consecutive failures (with --online: goal order)')
     ap.add_argument('--keep-out', action='store_true', help='save each run\'s output in DIR/rN/out/<name> (for stallsim.py)')
