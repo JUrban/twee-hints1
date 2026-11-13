@@ -127,7 +127,7 @@ class Loop:
         t0 = time.time()
         try:
             p = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                               timeout=self.timeout(rnd) + 30)
+                               timeout=self.timeout(rnd) * (5 if "--abstract-time" in self.a.args else 1) + 30)
             out = p.stdout.decode('utf8', 'replace')
         except subprocess.TimeoutExpired as e:
             out = (e.stdout or b'').decode('utf8', 'replace') + '\nKILLED\n'

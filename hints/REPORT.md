@@ -535,7 +535,18 @@ other problems.
   * `cleanpool.py` cleans existing pools. It removed 19% of the hints of
     the conditional problems in `train_pool` (2,965 hints) and 3% in
     `tr30_g1_pool`.
-* **Effect.** HOCU4_RESULT
+* **Effect: none measurable.**
+  * Test set: the 310 conditional holdout problems that plain twee does
+    not solve in 4 s. Settings: rm4 + kNN hints (30 neighbours, 100 hints)
+    from `train_pool` + `tr30_g1_pool`, 8,000 critical pairs each
+    (`--abstract-time 2000 --max-time 4`).
+  * rm4 alone solves 11. With the old pools it solves 17, and with the
+    cleaned pools also 17: the same 17 problems.
+  * The time-limited version of this test (4 s on a loaded machine) gave
+    20 against 18. The two extra solutions of the old pools were finished
+    at 4.0–4.1 s, so they were load noise (see section 2k).
+  * kNN hints do help on conditional problems (+6 of 310). The false
+    generalised hints were noise, not harm, at this budget.
 * **Demodulation-free hints do not fit twee.** Twee normalises every
   critical pair before it can match a hint, so unnormalised intermediate
   steps would never match. Twee's counterpart of SFDF robustness:
@@ -560,6 +571,30 @@ other problems.
     no search; the same holds for Prover9's denial chain read backwards.
   * For a conditional goal, "forward" means from the axioms plus the
     hypotheses, which is what the dependency trace marks.
+
+## 2k. Abstract time
+
+Earlier comparisons in this report used time limits on a shared machine.
+The load from other jobs was up to about 22 on the 20 CPUs. Both the
+`--max-time` limit and twee's housekeeping tasks (hint normalisation,
+requeue, interreduction) follow CPU time, so results depended on the load.
+That is part of the ±3 noise on 345 problems (section 2f).
+
+* **Implementation (twee-e15).** `--abstract-time N` makes the clock count
+  critical pairs considered, with N of them per second. Both `--max-time`
+  and the task scheduling follow this clock.
+* **Determinism.** Runs now repeat exactly: two problems, 6 runs each,
+  gave identical results and counts.
+* **Calibration.** On 60 holdout problems twee considers a median of 1,800
+  critical pairs per CPU second (quartiles 1,700 and 2,300). So
+  `--abstract-time 2000` keeps the old budgets roughly comparable.
+* **Reporting.** Twee prints `WORK considered=N rules=M`, and `run.py`
+  stores it as a fourth column. `run.py --wall-factor 5` (and `loop.py`
+  when its args contain `--abstract-time`) allows the wall-clock safety
+  limit to be exceeded.
+* **Real time is a cost, measured separately.** Abstract time leaves out
+  the overhead of the rule model and of hint matching. That overhead
+  should be reported on its own, measured on a quiet machine.
 
 ## 2c. Long runs: stall cutoff and checkpoints
 
