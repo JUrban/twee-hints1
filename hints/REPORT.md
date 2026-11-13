@@ -671,6 +671,96 @@ those have the same axioms. But originals share axioms too.
     problems flip, and none of rm4's 92 is lost. Differences of 10 or more
     on r1sim are real.
 
+## 2m. Long runs: how long do runs stay on hints?
+
+Veroff keeps a hinted run going while it keeps matching hints, with gaps
+of up to about a minute, and stops it when it falls off. With abstract
+time a run is deterministic, so `stallsim.py` replays every stall limit
+from one long run. twee-e16 prints `HINTLOG`, the critical-pair count of
+each hint's first match. A run with stall limit G stops at the first gap
+of G without a new match; the proof counts if it came before that.
+
+**fam_long:** 60 problems, the first 30 goals of aK2_eq_aK3_d and of
+nil3_30 that the full-benchmark loop left unsolved. Each run gets 120
+abstract s (240k critical pairs), rm4t, 3 sibling lemmas plus 10
+subset-kNN lemmas, and kNN hints (median 144, at most 200).
+
+| stall limit (abstract s) | 5 | 10 | 20 | 30 | 45 | 60 | none |
+|---|---|---|---|---|---|---|---|
+| solved (with hints) | 33 | 37 | 43 | 49 | 51 | 52 | 52 |
+| work (abstract h) | 0.09 | 0.13 | 0.19 | 0.22 | 0.25 | 0.27 | 0.30 |
+
+* **No hints: 51, with hints: 52.** This set is too easy at 120 s to
+  show a hint effect.
+* **A 60 s gap loses nothing and saves 10% of the work; 30 s loses 3 and
+  saves 27%.** Short limits lose many: proofs often come long after the
+  last new match. Proofs came at quartiles 1, 4, 20 and 78 s; the last
+  new matches of solved runs at 0.7, 2.3, 9.7 and 43.5 s.
+* **Runs fall off the hints because the hints run out.** The 3 unsolved
+  runs had matched 41 of 76, 50 of 76 and 106 of 200 hints. With small
+  kNN lists the stall signal means "list used up", not "search lost".
+  Veroff's lists are large, so the next test uses whole-original pools.
+* **Five runs got no result.** They are the same five with and without
+  hints. Their rate fell below 300 critical pairs per CPU second late in
+  the run, so 120 abstract s took more than the 780 s wall limit, and the
+  kill lost all output. `--max-cpu S` (twee-e18) is a real-CPU safety
+  limit that stops like `--max-time`, prints `CPULIMIT` and keeps the
+  output. Counting critical pairs is deterministic, but it is not
+  constant work per unit: late critical pairs on big rule sets cost more.
+* `--load-state` now counts hints that the loaded rules already match as
+  matched, and restarts the stall clock at the loaded count (twee-e17).
+  Before, a resumed run counted old matches as new, and
+  `--eqhint-stall-cps` fired at once.
+
+**Harder eval (queued):** `sets/v2_hard` has the 8 fam_long failures
+plus the next 30 unsolved goals of each original (68). Each run gets 300
+abstract s with rm4t and lemmas, in three versions: hints from the whole
+original pool (about 2,000 hints, all lemmas of the solved siblings, most
+frequent first), kNN hints, and no hints (`abs/v2.sh`, `loop.py
+--keep-out`).
+
+## 2n. Prover9: SFDF reorientation of proofs
+
+Veroff turns each proof into a strictly forward, demodulation-free
+(SFDF) proof before using its steps as hints. `p9loop.py` now does this
+without search:
+
+* `--convert expand`: `prooftrans expand` writes each rewrite step as its
+  own step, so the proof is demodulation-free.
+* `--convert direct`: LADR's `directproof` gives a direct, forward,
+  expanded proof.
+
+Both are linear time: 9 ms per proof (279 proofs, 2.4 s in all). The
+search-based conversion (rerun the problem with its own proof as hints
+under `set(restrict_denials)` and no demodulation) converted only 2 of
+34 proofs, at about 20 s each.
+
+The loop runs on fam2 (aa1_15 and aK2_eq_aK3_q, 471 problems). Budgets
+are in given clauses, so the runs are deterministic. Round 0 (150 givens,
+no hints) solves 237 in every version.
+
+| hints | hinted search | round 1 (150) | round 2 (150) | round 3 (220) | total |
+|---|---|---|---|---|---|
+| original proof steps | default | +26 | +9 | +11 | **283** |
+| `prooftrans expand` (2.2× as many) | default | +26 | +9 | +7 | 279 |
+| `directproof` (2.6× as many) | default | +26 | +9 | +7 | 279 |
+| original proof steps | SFDF settings | +1 | +0 | +0 | 238 |
+| `directproof` | SFDF settings | +3 | +0 | +0 | 240 |
+| `directproof` | SFDF settings, 1500 givens | +3 | | | 240 |
+
+* **In the default search the extra steps never match.** Round 1 is
+  byte-identical in all three versions (same given counts on all 234
+  problems). Prover9 matches hints against kept clauses, and with
+  demodulation on only the normal form is kept. The intermediate
+  equations that expansion adds never appear. In round 3, where the runs
+  differ, the longer lists lose 4.
+* **The SFDF search can match them, but it is far weaker here:** +3 even
+  at 1500 givens (280 s per round, against 81 s for the default round 1).
+* What Veroff gets from SFDF proofs our hints already have: only positive
+  steps, nothing derived from the denial, skolems generalised. For twee
+  this holds by construction (2j). For Prover9 the expanded proof only
+  adds steps that the guided search never keeps.
+
 ## 2c. Long runs: stall cutoff and checkpoints
 
 * `--eqhint-stall N` gives up when no new rule has matched a hint for N
