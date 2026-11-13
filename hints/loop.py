@@ -402,7 +402,7 @@ class Loop:
                     n0, lev = running.pop(f)
                     n, ok, dt, stats, hs = f.result()
                     done_n += 1
-                    rf.write(f'{n}\t{"THM" if ok else "NO"}\t{dt:.2f}\t{stats}\tL{lev}\n'); rf.flush()
+                    rf.write(f'{n}\t{"THM" if ok else "NO"}\t{dt:.2f}\t{stats}\tL{lev}\tt={time.time()-t0:.0f}\n'); rf.flush()
                     if ok:
                         new += 1
                         att.pop(n, None)
