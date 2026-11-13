@@ -334,7 +334,18 @@ help. Hints add nothing on top.
 On the 345 hard goals of the three dev originals at 8 s, lemmas come from
 the 473 goals plain twee solves at 2 s, and every goal gets three. rm4
 solves 63 and rm4 + 3 lemmas 68 (+10/−5): a smaller gain than on the 59.
-Those 59 were chosen to have solved goals shortly before them.
+Those 59 were chosen to have solved goals shortly before them. With 6
+lemmas: 70 (+6/−4 against 3), within noise.
+
+* **Which lemmas are used.** Most proofs that had lemmas use at least one
+  (46 of 56 on the hard holdout set below), and not only the nearest: the
+  third nearest is used most often there (29).
+* **Lemmas into a resumed run** (`--load-state` now adds the problem's new
+  axioms). This does not work. The lemma becomes a rule, but its
+  consequences go into a large queue scored like everything else. One goal
+  that 3 lemmas solve in 0.4 s from scratch takes 3.5 s when resumed from a
+  2 s state, the same as resuming without the lemmas. Restarting with the
+  lemmas is better, so lemma rounds restart.
 
 ### Sketches (Veroff): hints from proofs under extra assumptions
 
@@ -420,6 +431,9 @@ proven in the full-benchmark runs.
 
 The union with plain is 61. On unseen originals at long times, the model
 and the lemmas each give about +6 to +9 net, and together +12.
+No time-sliced portfolio beats the guided run alone. Plain for 15 s
+followed by the guided setting for 45 s solves 50, and rm4 for 40 s
+followed by lemmas for 20 s solves 56.
 
 ## 2c. Long runs: stall cutoff and checkpoints
 
@@ -545,3 +559,33 @@ rounds of 30 s or more, but about 40% overhead for 8 s rounds.
 * Hints that cover the late part of proofs. One source is sketches whose
   assumptions are themselves sketched or proven, iterated until the
   chains close. Another is Prover9-style degradation of hint boosts.
+
+## 5. How to run the best system
+
+Build twee from this branch (`cabal build exe:twee`). The commands below
+are run in `/project/hintwork`, with `venv` holding lightgbm.
+
+1. **Training data.** Given-rule logs of solved training problems:
+   `given.py NAMES OUTDIR --twee BIN --timeout 2`. Rows are label, index,
+   rule, and parents.
+2. **Rule model.**
+   `rulemodel.py DIR1,DIR2 --all --save M.txt --vocab M.vocab`, then
+   `lgb2bin.py M.txt M.bin`.
+3. **The loop** (round 0: model + kNN hints from training proofs; later
+   rounds: hints and 3 proven sibling lemmas from the loop's own proofs):
+
+       loop.py NAMES LOOPDIR --rounds 2 --timeout 2,2 -j 12 --twee BIN \
+         --pool knn:30:100 --args= --model --model-fixed M.bin,M.vocab \
+         --model-args "--rule-threshold 0.1 --rule-penalty 2" \
+         --hints-extra hints/train_pool,hints/tr30_g1_pool --hints-from-start \
+         --lemmas 3
+
+   Leave out `--lemmas` for hints only. `summary.py LABEL=LOOPDIR ...`
+   counts solved problems per part.
+4. **Single long runs:**
+
+       twee P.p --max-time 60 --rule-model M.bin --rule-vocab M.vocab \
+         --rule-goal G --hints-file H
+
+   `G` comes from `rulemodel.py goalfiles`, `H` from
+   `hintsel.py knnfiles`, and `P.p` with lemmas from `lemmas.py`.
