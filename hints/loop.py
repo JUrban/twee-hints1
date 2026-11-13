@@ -135,7 +135,7 @@ class Loop:
         t0 = time.time()
         try:
             p = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                               timeout=self.timeout(rnd) * (5 if "--abstract-time" in self.a.args else 1) + 30)
+                               timeout=self.timeout(rnd) * (a.wall_factor if "--abstract-time" in self.a.args else 1) + 30)
             out = p.stdout.decode('utf8', 'replace')
         except subprocess.TimeoutExpired as e:
             out = (e.stdout or b'').decode('utf8', 'replace') + '\nKILLED\n'
@@ -343,6 +343,8 @@ def main():
     ap.add_argument('--online', action='store_true',
                     help='each proof joins the pools (and the sibling lemmas) at once, for the runs not yet started; '
                          'goals run in goal-number order and only -j runs are queued')
+    ap.add_argument('--wall-factor', type=float, default=5,
+                    help='with --abstract-time: kill a run after FACTOR * timeout + 30 wall seconds')
     ap.add_argument('--give-up', type=int, default=0,
                     help='skip the rest of an original in this round after N consecutive failures (with --online: goal order)')
     ap.add_argument('--keep-out', action='store_true', help='save each run\'s output in DIR/rN/out/<name> (for stallsim.py)')
