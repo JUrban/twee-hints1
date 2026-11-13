@@ -817,9 +817,10 @@ Each run also has a 1,200 s CPU cap.
   `RESUMETIME`): loading takes about 130 s, normalising the hints 5 s,
   and re-scoring the saved queue against the new hints 333 s (each queued
   pair is rebuilt and rewritten). `--no-resume-requeue` skips the
-  re-scoring; whether guidance suffers without it is not yet tested. Of the 4 unsolved, three stopped exactly 120k
-  critical pairs after their last match (the 60 s stall gap), at +162k
-  to +549k, and goal_360 hit the CPU cap 93k after its last match.
+  re-scoring; whether guidance suffers without it is not yet tested.
+  Of the 4 unsolved, three stopped exactly 120k critical pairs after
+  their last match (the 60 s stall gap), at +162k to +549k, and goal_360
+  hit the CPU cap 93k after its last match.
   Hints from proofs of siblings keep feeding these runs, but each
   resume gives a short burst of matches, not a long hint-led run.
 
