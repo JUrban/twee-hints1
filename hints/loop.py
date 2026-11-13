@@ -107,9 +107,9 @@ class Loop:
         if (a.lemmas or a.lemma_knn) and rnd > 0 and self.lemma_src:
             import lemmas
             if a.lemma_knn:
-                txt, nl = lemmas.lemma_problem_knn(name, self.lemma_src, a.lemmas, self.lemma_index, a.lemma_knn)
+                txt, nl = lemmas.lemma_problem_knn(name, self.lemma_src, a.lemmas, self.lemma_index, a.lemma_knn, a.lemma_after)
             else:
-                txt, nl = lemmas.lemma_problem(name, self.lemma_src, a.lemmas)
+                txt, nl = lemmas.lemma_problem(name, self.lemma_src, a.lemmas, a.lemma_after)
             if nl:
                 path = os.path.join(self.dir, 'tmp', name + '.p')
                 with open(path, 'w') as f:
@@ -207,9 +207,9 @@ class Loop:
         if (a.lemmas or a.lemma_knn) and rnd > 0 and self.lemma_src:
             for n in names:
                 if a.lemma_knn:
-                    txt, _ = lemmas.lemma_problem_knn(n, self.lemma_src, a.lemmas, self.lemma_index, a.lemma_knn)
+                    txt, _ = lemmas.lemma_problem_knn(n, self.lemma_src, a.lemmas, self.lemma_index, a.lemma_knn, a.lemma_after)
                 else:
-                    txt, _ = lemmas.lemma_problem(n, self.lemma_src, a.lemmas)
+                    txt, _ = lemmas.lemma_problem(n, self.lemma_src, a.lemmas, a.lemma_after)
                 for m in re.finditer(r'^fof\(lemma_\w+,axiom,(.*)\)\.\s*$', txt, re.M):
                     lem.setdefault(m.group(1).strip(), len(lem))
         lines += [f'fof(lemma_{i},axiom,{f}).\n' for f, i in lem.items()]
@@ -443,6 +443,9 @@ def main():
                     help='rounds > 0: also add up to K proven goals with the same axioms (any original) most similar to the goal')
     ap.add_argument('--model-theory', action='store_true',
                     help='rule model with the ENIGMA theory block (rulemodel.py --theory; e.g. models/rm4t)')
+    ap.add_argument('--lemma-after', action='store_true',
+                    help='sibling lemmas are the nearest proven goals above N as well as below (all proven '
+                         'before the run, so still well-founded)')
     ap.add_argument('--lemma-subsets', action='store_true',
                     help='--lemma-knn may also use problems whose axioms are a subset of the target\'s')
     ap.add_argument('--online', action='store_true',
