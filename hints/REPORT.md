@@ -998,6 +998,53 @@ on 14 cores (twee-e20, kill after 15× the limit, CPU cap 400 s).
   level, resuming its saved state. A few workers stay free for the
   retries, so a new proof's consequences run at once. Not yet evaluated.
 
+## 2q. Ablation: ENIGMA, hints and lemmas
+
+The user asked how far the ENIGMA guidance gets, alone or with hints. The
+test set is the 189 aK2_eq_aK3_a goals of sets/u3 (one hard original).
+Each goal gets 20 abstract s, in an online loop that starts from the
+proofs of loops/V2base and uses 5 workers. Only the guidance changes:
+
+* **ENIGMA** is the rm4t rule filter: LightGBM with the theory block,
+  threshold 0.1, penalty 2.
+* **Hints** come from the whole-original pool, online.
+* **Lemmas** are the 3 nearest proven siblings plus 10 subset-kNN lemmas.
+
+| variant | ENIGMA | hints | lemmas | solved /189 | wall s, all 189 runs |
+|---|---|---|---|---|---|
+| full (U3po) | yes | yes | yes | **60** | 9,866 |
+| U3xh | – | yes | yes | 59 | 14,979 |
+| U3xm | yes | – | yes | 58 | 10,064 |
+| U3xl | – | – | yes | 49 | 16,372 |
+| U3x0 (plain twee) | – | – | – | 28 | 18,151 |
+
+The wall seconds are indicative only, because the machine was shared.
+Every run had the same CP budget, so a lower total means that more runs
+end early with a proof.
+
+All variants together solve 68 goals. The full system misses 8 of them,
+and no single variant solves more than 6 that the full system misses.
+
+**Reading.**
+
+* Lemma import is the biggest single step: 28 → 49.
+* On top of lemmas, ENIGMA and hints each add about 10, but together they
+  add only 11. They mostly find the same proofs. Each solves 6–7 goals
+  the other misses, which is noise at this size.
+* ENIGMA is about 1.5× cheaper than hints for the same result. Its runs
+  find proofs earlier (mean 18 against 23 wall s per solved goal), and the
+  failing runs do not pay for hint matching.
+* The full system is the cheapest of all.
+
+The variants without lemmas are queued (abs/abl2.sh): U3ym is ENIGMA only,
+U3yh hints only, U3yb ENIGMA plus hints. They separate the guidance
+effects from the sibling-chain effect. Earlier no-lemma data, on other
+sets, points the same way:
+
+* Hard holdout 300 at 60 s: plain 44, rm4 53, rm4 plus lemmas plus kNN
+  hints 56.
+* ho3u: rm4 81, rm4t 87.
+
 ## 2c. Long runs: stall cutoff and checkpoints
 
 * `--eqhint-stall N` gives up when no new rule has matched a hint for N
