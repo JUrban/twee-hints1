@@ -76,6 +76,7 @@ class KNN:
         self.hints[name] = hint_lines
         self.feats[name] = goal_features(name, self.depth, hint_lines[-1])
         self._idf = None
+        self._index = None
 
     def idf(self):
         if self._idf is None:
@@ -84,25 +85,56 @@ class KNN:
             self._idf = {x: math.log((n + 1) / c) for x, c in df.items()}
         return self._idf
 
+    def index(self):
+        """Sparse matrix of the pool's features (rows = solved problems)."""
+        if getattr(self, '_index', None) is None:
+            import numpy as np, scipy.sparse as sp
+            idf = self.idf()
+            names = list(self.feats)
+            col = {x: i for i, x in enumerate(idf)}
+            ind, ptr = [], [0]
+            for m in names:
+                ind.extend(col[x] for x in self.feats[m]); ptr.append(len(ind))
+            X = sp.csr_matrix((np.ones(len(ind)), np.array(ind, dtype=np.int64), np.array(ptr, dtype=np.int64)),
+                              shape=(len(names), len(col)))
+            w = np.array([idf[x] for x in col])
+            self._index = (names, col, X, w, X @ w, {m: i for i, m in enumerate(names)})
+        return self._index
+
+    def neighbours(self, name, F, exclude_self=True, same_orig=False):
+        """(similarity, name) of the pool problems sharing a feature with F,
+        best first; the same as the plain loop over self.feats, vectorised."""
+        import numpy as np
+        names, col, X, w, wG, pos = self.index()
+        cs = [col[x] for x in F if x in col]
+        if not cs:
+            return []
+        q = np.zeros(X.shape[1]); q[cs] = w[cs]
+        I = X @ q
+        S = I / (q.sum() + wG - I)
+        S[I == 0] = -1
+        if exclude_self and name in pos:
+            S[pos[name]] = -1
+        if same_orig:
+            o = name.split('__goal_')[0]
+            S[[i for i, m in enumerate(names) if m.split('__goal_')[0] != o]] = -1
+        return S, names
+
     def select(self, name, k=30, topn=100, exclude_self=True, same_orig=False, scores=False, groups=False):
-        idf = self.idf()
+        import numpy as np
         try:
             F = goal_features(name, self.depth)
         except Exception:
             F = self.feats.get(name, set())
-        o = name.split('__goal_')[0]
+        r = self.neighbours(name, F, exclude_self, same_orig)
         sims = []
-        for m, G in self.feats.items():
-            if exclude_self and m == name:
-                continue
-            if same_orig and m.split('__goal_')[0] != o:
-                continue
-            i = sum(idf.get(x, 0) for x in F & G)
-            if i == 0:
-                continue
-            u = sum(idf.get(x, 0) for x in F | G)
-            sims.append((i / u, m))
-        sims.sort(reverse=True)
+        if r:
+            S, names = r
+            good = np.flatnonzero(S > -1)
+            if len(good) > k:
+                thr = np.partition(S[good], len(good) - k)[len(good) - k]
+                good = good[S[good] >= thr]
+            sims = sorted(((S[i], names[i]) for i in good), reverse=True)
         sc = collections.Counter()
         grp = collections.defaultdict(list)
         for j, (s, m) in enumerate(sims[:k]):

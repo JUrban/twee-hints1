@@ -10,7 +10,7 @@ usage: loop.py SET DIR [--rounds N] [--timeout S] [-j N] [--twee BIN]
                [--args "..."] [--pool original|all] [--aux]
 """
 import argparse, collections, json, os, subprocess, sys, time
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor, as_completed, wait, FIRST_COMPLETED
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import hintlib
 import given as givenlib
@@ -206,14 +206,30 @@ class Loop:
         with open(os.path.join(rdir, 'results.tsv'), 'w') as rf, \
              open(os.path.join(self.dir, 'solved.tsv'), 'a') as sf, \
              ThreadPoolExecutor(a.j) as ex:
+            def jobs():
+                for n in todo:
+                    hints = self.hints_for(n, pools, knn) if hinted else []
+                    if rnd > 0 and not hints and not a.rerun_unhinted:
+                        continue
+                    yield n, hints
+            def results():
+                # at most 4*j runs queued, so results are written as they come
+                pending = set(); it = jobs()
+                while True:
+                    while len(pending) < 4 * a.j:
+                        nxt = next(it, None)
+                        if nxt is None:
+                            break
+                        pending.add(ex.submit(self.run_one, nxt[0], nxt[1], rnd))
+                    if not pending:
+                        return
+                    done, pending = wait(pending, return_when=FIRST_COMPLETED)
+                    for f in done:
+                        yield f.result()
             futs = []
-            for n in todo:
-                hints = self.hints_for(n, pools, knn) if hinted else []
-                if rnd > 0 and not hints and not a.rerun_unhinted:
-                    continue
-                futs.append(ex.submit(self.run_one, n, hints, rnd))
-            for k, f in enumerate(as_completed(futs)):
-                n, ok, dt, stats, hs = f.result()
+            for k, r in enumerate(results()):
+                futs.append(None)
+                n, ok, dt, stats, hs = r
                 rf.write(f'{n}\t{"THM" if ok else "NO"}\t{dt:.2f}\t{stats}\n'); rf.flush()
                 if ok:
                     new += 1
@@ -223,7 +239,7 @@ class Loop:
                         for l, r in hs:
                             hf.write(f'{l}\t{r}\n')
                 if (k + 1) % 200 == 0:
-                    print(f'  round {rnd}: {k+1}/{len(futs)} new={new} {time.time()-t0:.0f}s',
+                    print(f'  round {rnd}: {k+1}/{len(todo)} new={new} {time.time()-t0:.0f}s',
                           file=sys.stderr, flush=True)
         msg = (f'round {rnd}: ran {len(futs)} new {new} total {len(self.solved)}/{len(self.names)} '
                f'{time.time()-t0:.0f}s')
