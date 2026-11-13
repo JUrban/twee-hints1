@@ -1267,7 +1267,14 @@ runTwee globals (TSTPFlags tstp) horn precedence config0 flags@MainFlags{..} lat
     case flags_load_state of
       Nothing -> return withBackwardsGoal
       Just file -> do
-        loaded <- decode <$> BS.readFile file
+        loaded0 <- decode <$> BS.readFile file
+        -- Axioms of the problem that the saved run did not have (e.g.
+        -- lemmas proven since) are added to the resumed state.
+        let known = Set.fromList (map axiom_name (st_axioms loaded0))
+            newAxioms = [ ax | ax <- axioms, axiom_name ax `Set.notMember` known ]
+            loaded = foldl' (addAxiom config) loaded0 newAxioms
+        unless (null newAxioms) $
+          say $ "Resumed with " ++ show (length newAxioms) ++ " new axioms"
         let eh = (st_eqhints withHints) { eh_last_match = fromIntegral (st_next_active loaded) }
             st1 = loaded { st_eqhints = eh, st_cur_passive = Nothing }
             st2 | Map.null (eh_map eh) = st1
