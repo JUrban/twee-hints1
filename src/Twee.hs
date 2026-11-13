@@ -1371,6 +1371,11 @@ complete :: (Function f, MonadIO m) => Output m f -> Config f -> State f -> m (S
 complete Output{..} config@Config{..} state =
   flip StateM.execStateT state $ do
     let clock st = fromIntegral (st_considered st) * 10^(12::Int) `div` fromIntegral cfg_abstract_time
+        -- picoseconds of abstract time for work worth this many critical pairs
+        abstractCost :: Double -> Integer
+        abstractCost cps
+          | cfg_abstract_time > 0 = round (cps * 1e12 / fromIntegral cfg_abstract_time)
+          | otherwise = 0
     when (cfg_abstract_time > 0) $ useAbstractTime (clock state)
     tasks <- sequence
       [newTask 10 (fromIntegral cfg_renormalise_percent / 100) $ do
@@ -1392,10 +1397,14 @@ complete Output{..} config@Config{..} state =
        newTask 1 0.02 $ do
           state <- StateM.get
           StateM.put $! recomputeGoals config state,
-       newTask 0.02 0.05 $ do
-          when cfg_eqhint_normalise $ do
+       newTaskCost 0.02 0.05 $ do
+          if cfg_eqhint_normalise then do
             state <- StateM.get
-            StateM.put $! normaliseEqHints state,
+            StateM.put $! normaliseEqHints state
+            -- abstract cost: normalising one hint ~ 1/100 of a considered critical pair
+            let live = IntMap.size (eh_live (st_eqhints state))
+            return ((), abstractCost (fromIntegral live / 100))
+          else return ((), 0),
        newTask 0.05 cfg_eqhint_requeue $ do
           state <- StateM.get
           let eh = st_eqhints state

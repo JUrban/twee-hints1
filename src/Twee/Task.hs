@@ -1,5 +1,5 @@
 -- | A module which can run housekeeping tasks every so often.
-module Twee.Task(Task, newTask, checkTask, useAbstractTime, setAbstractTime) where
+module Twee.Task(Task, newTask, newTaskCost, checkTask, useAbstractTime, setAbstractTime) where
 
 import System.CPUTime
 import System.IO.Unsafe
@@ -36,8 +36,8 @@ data TaskData m a =
     task_frequency :: !Double,
     -- What proportion of our time should we spend on the task?
     task_budget :: !Double,
-    -- The task itself
-    task_what :: m a }
+    -- The task itself, with its abstract cost in picoseconds (see newTaskCost)
+    task_what :: m (a, Integer) }
 
 -- | A task which runs in the monad @m@ and produces a value of type @a@.
 newtype Task m a = Task (IORef (TaskData m a))
@@ -47,7 +47,15 @@ newtype Task m a = Task (IORef (TaskData m a))
 -- task should run, at most. The second argument is the maximum
 -- percentage of time that should be spent on the task.
 newTask :: MonadIO m => Double -> Double -> m a -> m (Task m a)
-newTask freq budget what = liftIO $ do
+newTask freq budget what = newTaskCost freq budget (fmap (\x -> (x, 0)) what)
+
+-- | A task that also reports its cost in abstract picoseconds. The abstract
+-- clock does not move while a task runs, so without a cost the budget of a
+-- task never binds in abstract time and it runs at its full frequency,
+-- however expensive it is. The cost is charged to the task only when the
+-- abstract clock is in use, and keeps runs deterministic.
+newTaskCost :: MonadIO m => Double -> Double -> m (a, Integer) -> m (Task m a)
+newTaskCost freq budget what = liftIO $ do
   now <- getClock
   Task <$> newIORef (TaskData now now 0 freq budget what)
 
@@ -57,11 +65,12 @@ checkTask (Task ref) = do
   task@TaskData{..} <- liftIO $ readIORef ref
   now <- liftIO getClock
   if not (taskDue now task) then return Nothing else do
-    res <- task_what
+    (res, cost) <- task_what
     after <- liftIO getClock
+    abstract <- liftIO $ fmap (maybe False (const True)) (readIORef abstractClock)
     liftIO $ writeIORef ref task {
       task_last = after,
-      task_spent = task_spent + (after-now) }
+      task_spent = task_spent + (after-now) + (if abstract then cost else 0) }
     return (Just res)
 
 -- Check if a task should be run now.
