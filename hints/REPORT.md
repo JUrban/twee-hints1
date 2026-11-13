@@ -336,6 +336,27 @@ the 473 goals plain twee solves at 2 s, and every goal gets three. rm4
 solves 63 and rm4 + 3 lemmas 68 (+10/−5): a smaller gain than on the 59.
 Those 59 were chosen to have solved goals shortly before them.
 
+### Sketches (Veroff): hints from proofs under extra assumptions
+
+Veroff's sketches are proofs found with extra assumptions; their steps then
+serve as hints for the real problem. Here the extra assumptions are the
+nearest sibling goals below N, proven or not (`sketch.py`). That is
+unsound as a proof but sound as a source of hints.
+
+* On the 59 at 5 s, with rm4: 15 sketch problems are proven with 3 assumed
+  siblings, and 19 with 10. Six of those goals are unsolved by rm4 + 3
+  proven lemmas at 20 s.
+* The real run (rm4 + 3 proven lemmas, 20 s) with these sketch hints: 28,
+  the same as without them. The 6 stay unsolved. A sketch covers only the
+  stretch from the assumed siblings to the goal. Deriving the assumed
+  siblings is the hard part, and it is not covered.
+* **Chained sketches.** Sketch every unsolved dev10 goal (389 of 1204
+  proven at 5 s with 10 assumed siblings). The hints for goal N are then
+  the sketch hints of N and of the sketched siblings in [N−30, N], nearest
+  first, at most 400 (`chainhints.py`, 154 on average). Result: 29
+  against 28 (+2/−1), within noise. Only a third of the links have
+  sketches, so the chains have gaps.
+
 ## 2c. Long runs: stall cutoff and checkpoints
 
 * `--eqhint-stall N` gives up when no new rule has matched a hint for N
