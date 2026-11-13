@@ -853,6 +853,54 @@ no hints) solves 237 in every version.
   this holds by construction (2j). For Prover9 the expanded proof only
   adds steps that the guided search never keeps.
 
+## 2o. Online pools on the unsolved frontier
+
+`sets/u3`: all 996 goals of three originals (R1dist_to_aa1,
+aK2_eq_aK3_a, nil3_31) that the 4 s benchmark loop left unsolved (after
+round 2 and the fam_long runs). Each run gets 20 abstract s, with rm4t,
+3 nearest sibling lemmas and 10 subset-kNN lemmas, and twee-e19, on 5 cores
+per variant.
+
+* **Online pools** (`loop.py --online`). Each proof joins the hint pool
+  and the sibling-lemma source as soon as it is found, for the runs not
+  yet started. Goals run in goal-number order, and only `-j` runs are
+  queued. Before this, the pools were fixed for the whole round.
+* **Tiered pool** (`--pool tier:K:TOPN:F`). The kNN hints get the full
+  boost, and the rest of the original's pool gets the weaker factor F.
+  This was meant to avoid the cost of a big pool at short limits (2a).
+
+On the first 189 aK2_eq_aK3_a goals, which every variant ran (all later
+goals failed in every variant):
+
+| variant | solved | wall s |
+|---|---|---|
+| kNN hints (30 neighbours, 100 hints), fixed pool | 44 | 10,744 |
+| kNN hints, online | 55 | 9,422 |
+| whole-original pool, online | 60 | 9,866 |
+| tiered pool (kNN + rest at 0.3), online | 61 | 10,209 |
+
+* **Online pools give +25% (44 to 55) at the same cost.** Proofs of
+  earlier goals reach later goals within the round.
+* **A whole-original pool adds about 10% more (60–61).** At 20 s, unlike
+  2 s (2a), the big pool no longer hurts. The tiered pool is as good as
+  the whole pool, but it needs the kNN index rebuilt as proofs arrive.
+  So the full-benchmark run uses the whole pool.
+* **Whole pool, online, all three originals:** 272 of the first 695 goals,
+  against 0 for the 4 s loop.
+* **The tail is hopeless at 20 s.** In goal order each original has a
+  mixed zone, then only failures. The longest run of failures before a
+  later success was 27 (R1dist_to_aa1); elsewhere 17–21. Replayed on the
+  online runs, giving up an original after 30 consecutive failures keeps
+  every proof and saves 15% (whole pool, cut short) to 50% (kNN variants)
+  of the time. After 20 failures it loses 14 of 272. So
+  `loop.py --give-up 30`.
+
+**Full benchmark, Veroff style (running).** `abs/unleash.sh` runs every
+goal the benchmark loop left unsolved: 18,064 of 51,784, starting from
+its 33,720 proofs. The loop uses online whole-original pools, gives an
+original up after 30 failures, and has rounds of 5 and then 20 abstract s
+on 14 cores (twee-e20, kill after 15× the limit, CPU cap 400 s).
+
 ## 2c. Long runs: stall cutoff and checkpoints
 
 * `--eqhint-stall N` gives up when no new rule has matched a hint for N
