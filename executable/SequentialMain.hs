@@ -503,6 +503,10 @@ parseConfig = do
     expert $
     inGroup "Critical pair weighting heuristics" $
     defaultFlag "eqhint-watch" "ProofWatch: score factor of hints whose source proofs are not yet started; it moves to the hint's own factor as its best proof completes (0 = off)" cfg_eqhint_watch argNum
+  cfg_eqhint_stall_cps <-
+    expert $
+    inGroup "Critical pair weighting heuristics" $
+    defaultFlag "eqhint-stall-cps" "Give up after this many critical pairs considered without a new hint match (0 = never); with --abstract-time N, N per second" cfg_eqhint_stall_cps argNum
   cfg_eqhint_stall <-
     expert $
     inGroup "Critical pair weighting heuristics" $
@@ -1331,6 +1335,9 @@ runTwee globals (TSTPFlags tstp) horn precedence config0 flags@MainFlags{..} lat
 
   putStrLn $ "WORK considered=" ++ show (st_considered state) ++ " rules=" ++ show (fromIntegral (st_next_active state) :: Int)
   let EqHints{..} = st_eqhints state
+  -- First matches of hints: critical pairs considered and rule number.
+  when (eh_next > 0) $
+    putStrLn $ "HINTLOG " ++ unwords [ show c ++ ":" ++ show r | (c, r) <- reverse eh_log ]
   when (eh_next > 0 || eh_ntracked > 0) $
     putStrLn $ "HINTSTATS hints=" ++ show eh_next ++ " live=" ++ show (IntMap.size eh_live) ++
       " joined=" ++ show eh_joined ++ " matched=" ++ show (IntSet.size (fst (IntSet.split trackBase eh_matched))) ++

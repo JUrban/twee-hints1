@@ -96,6 +96,8 @@ data Config f =
     cfg_log_given                 :: Bool,
     cfg_rule_model                :: Maybe (RuleModel f),
     cfg_eqhint_stall              :: Int,
+    -- | Give up after this many critical pairs without a new hint match (0 = never).
+    cfg_eqhint_stall_cps          :: Int64,
     cfg_eqhint_watch              :: Float,
     cfg_eqhint_generalise         :: Bool }
 
@@ -166,6 +168,7 @@ defaultConfig =
     cfg_log_given = False,
     cfg_rule_model = Nothing,
     cfg_eqhint_stall = 0,
+    cfg_eqhint_stall_cps = 0,
     cfg_eqhint_watch = 0,
     cfg_eqhint_generalise = False }
 
@@ -1005,6 +1008,10 @@ data EqHints f =
     eh_requeued_at :: !Int,
     eh_last_match :: !Int,
     eh_max_gap :: !Int,
+    -- critical pairs considered when a hint was last matched for the first
+    -- time, and the log of first matches (critical pairs, rule), newest first
+    eh_last_new_cp :: !Int64,
+    eh_log :: [(Int64, Int)],
     -- ProofWatch: the source proofs (groups) of each hint, the number of
     -- hints of each group, and how many of them have been matched
     eh_hgroups :: !(IntMap [Int]),
@@ -1034,7 +1041,7 @@ emptyEqHints = EqHints {
   eh_map = Map.empty, eh_live = IntMap.empty, eh_matched = IntSet.empty, eh_next = 0,
   eh_joined = 0, eh_norm_at = 0, eh_fps = IntSet.empty, eh_goalconsts = IntMap.empty,
   eh_gcfps = IntMap.empty, eh_ntracked = 0, eh_requeued_at = 0, eh_last_match = 0,
-  eh_max_gap = 0, eh_hgroups = IntMap.empty, eh_gsize = IntMap.empty, eh_gdone = IntMap.empty,
+  eh_max_gap = 0, eh_last_new_cp = 0, eh_log = [], eh_hgroups = IntMap.empty, eh_gsize = IntMap.empty, eh_gdone = IntMap.empty,
   eh_factor = IntMap.empty }
 
 -- | Add a hint with an optional factor and the proofs (groups) it comes from.
@@ -1246,7 +1253,10 @@ recordEqHintMatch active state@State{st_eqhints = eh}
                                     then foldl' (\m g -> IntMap.insertWith (+) g 1 m) (eh_gdone eh) (IntMap.findWithDefault [] n (eh_hgroups eh))
                                     else eh_gdone eh,
                                   eh_last_match = if n < trackBase then fromIntegral (active_id active) else eh_last_match eh,
-                                  eh_max_gap = if n < trackBase then max (eh_max_gap eh) (fromIntegral (active_id active) - eh_last_match eh) else eh_max_gap eh } }
+                                  eh_max_gap = if n < trackBase then max (eh_max_gap eh) (fromIntegral (active_id active) - eh_last_match eh) else eh_max_gap eh,
+                                  eh_last_new_cp = if new then st_considered state else eh_last_new_cp eh,
+                                  eh_log = if new then (st_considered state, fromIntegral (active_id active)) : eh_log eh else eh_log eh } }
+        where new = n < trackBase && not (IntSet.member n (eh_matched eh))
 
 -- | Normalise all live hints with respect to the oriented rules.
 {-# INLINEABLE normaliseEqHints #-}
@@ -1410,6 +1420,10 @@ complete1 config@Config{..} state
   | st_considered state >= cfg_max_critical_pairs =
     (False, state)
   | solved state && not cfg_always_complete = (False, state)
+  | cfg_eqhint_stall_cps > 0,
+    not (Map.null (eh_map (st_eqhints state))),
+    st_considered state - eh_last_new_cp (st_eqhints state) > cfg_eqhint_stall_cps =
+    (False, state)
   | cfg_eqhint_stall > 0,
     not (Map.null (eh_map (st_eqhints state))),
     fromIntegral (st_next_active state) - eh_last_match (st_eqhints state) > cfg_eqhint_stall =
