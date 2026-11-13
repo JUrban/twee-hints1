@@ -282,8 +282,16 @@ binary model file, a dense feature array and hashed feature names.
   Both rm3 and rm4 were trained on the solved goals of these three
   originals (not on the 345 themselves), so this compares the two models
   in the setting of a loop over one batch, not on unseen originals.
-  rm4 is used from here on. A second turn of the loop needs more hard
-  proofs than one 4 s pass gives.
+  rm4 is used from here on.
+* **Run-to-run noise.** Twee's background tasks are time-based, so runs
+  differ. rm4 repeated on the 345 gives 61 against 63 (+0/−2). Differences
+  of ±3 there are noise.
+* **A second turn (rm5)** adds the 2687 training-split problems that the
+  full-benchmark loop (below) solved with rm4 in 0.3–2 s, giving 2.7M rows
+  and 290k positives. It does worse on the 345: 58 against 61–63 for rm4
+  (+2/−7). More guided proofs of medium difficulty do not help as they
+  are. The model may need more capacity or a retuned threshold for the
+  larger data; rm4 stays.
 * **Generalisation matching** (`--eqhint-generalise`, after Prover9-new's
   generalized hint hash). Each hint is also stored with its one-step
   generalisations (one proper non-variable subterm of one side replaced
