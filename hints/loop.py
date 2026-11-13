@@ -340,14 +340,14 @@ class Loop:
         for o in byo:
             byo[o].sort(key=lambda n: lemmas.split(n)[1])
         srt = {}   # original -> sorted proven goal numbers (dropped when a proof arrives)
-        def ctx(n):
+        def ctx(n, after=None):
             o, k = lemmas.split(n)
             if o not in srt:
                 srt[o] = sorted(self.lemma_src.get(o, ()))
             pr = srt[o]
             i = bisect.bisect_left(pr, k)
             below = pr[max(0, i - a.lemmas):i]
-            above = pr[i:i + a.lemmas] if a.lemma_after else []
+            above = pr[i:i + a.lemmas] if (a.lemma_after if after is None else after) else []
             return tuple(below + above)
         def gaps():
             """unsolved goal -> places after the nearest proven goal below it (in the set)."""
@@ -361,7 +361,10 @@ class Loop:
                         g[n] = (i - last) if last is not None else 10**6
             return g
         # --cascade-start -1: nothing tried yet, so the goals near a proof all get a T0 run first
-        att = {n: ((ctx(n), a.cascade_start) if a.cascade_start >= 0 else (None, -1))
+        # --cascade-was-below: the earlier attempts had lemmas from below only, so with
+        # --lemma-after exactly the goals that now get lemmas from above are retried
+        att = {n: ((ctx(n, False if a.cascade_was_below else None), a.cascade_start) if a.cascade_start >= 0
+                   else (None, -1))
                for n in self.names if n not in self.solved}
         running = {}   # future -> (name, level)
         rdir = os.path.join(self.dir, 'r%d' % rnd); os.makedirs(rdir, exist_ok=True)
@@ -590,6 +593,8 @@ def main():
                     help='T0,T1,...: frontier deepening instead of rounds (see Loop.cascade), from round --start')
     ap.add_argument('--cascade-start', type=int, default=0,
                     help='--cascade: unsolved goals count as tried up to this level in their current context')
+    ap.add_argument('--cascade-was-below', action='store_true',
+                    help='--cascade with --lemma-after: earlier attempts used lemmas from below only')
     ap.add_argument('--cascade-hours', type=float, default=1e9, help='--cascade: no new runs after this many hours')
     ap.add_argument('--cascade-cpu', type=float, default=10, help='--cascade: --max-cpu per abstract second of budget')
     ap.add_argument('--retry-gap', type=int, default=6,
