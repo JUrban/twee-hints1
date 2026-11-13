@@ -137,6 +137,11 @@ class Loop:
         except subprocess.TimeoutExpired as e:
             out = (e.stdout or b'').decode('utf8', 'replace') + '\nKILLED\n'
         dt = time.time() - t0
+        if a.keep_out:
+            od = os.path.join(self.dir, 'r%d' % rnd, 'out'); os.makedirs(od, exist_ok=True)
+            i, j = out.find('GIVEN-BEGIN'), out.find('GIVEN-END')
+            with open(os.path.join(od, name), 'w') as f:
+                f.write(out[:i] + out[j:] if 0 <= i < j else out)  # without the given rules
         if hints:
             os.unlink(hpath)
         ok = 'HINTS-END' in out
@@ -298,6 +303,7 @@ def main():
                     help='rule model with the ENIGMA theory block (rulemodel.py --theory; e.g. models/rm4t)')
     ap.add_argument('--lemma-subsets', action='store_true',
                     help='--lemma-knn may also use problems whose axioms are a subset of the target\'s')
+    ap.add_argument('--keep-out', action='store_true', help='save each run\'s output in DIR/rN/out/<name> (for stallsim.py)')
     ap.add_argument('--init', help='import round-0 results (solved.tsv and hints) of another loop dir')
     a = ap.parse_args()
     if a.init and not os.path.exists(os.path.join(a.dir, 'solved.tsv')):

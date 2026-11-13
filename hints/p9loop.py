@@ -23,6 +23,8 @@ skolem constants c1, c2, ... generalised to variables.
           becomes a separate step: demodulation-free); direct = LADR's
           directproof (a direct, forward proof, also expanded: SFDF).
           Each conversion's seconds and hint counts go to DIR/convert.tsv.
+--hinted-sfdf: run the hinted rounds with the SFDF settings as well, so
+          the intermediate steps of an expanded proof can be kept and match.
 --init    take round 0 (r0.tsv and hints) from another loop dir.
 Rows of rN.tsv: name, THM/NO, seconds, given clauses.
 """
@@ -80,6 +82,8 @@ def main():
     ap.add_argument('--sfdf', type=int, default=0)
     ap.add_argument('--init')
     ap.add_argument('--convert', choices=['expand', 'direct'])
+    ap.add_argument('--hinted-sfdf', action='store_true',
+                    help='run the hinted rounds with the SFDF settings too (no demodulation, denial only at the end)')
     ap.add_argument('-j', type=int, default=3)
     ap.add_argument('--prover9', default='/project/bin/prover9-new')
     a = ap.parse_args()
@@ -152,7 +156,7 @@ def main():
             hp = os.path.join(a.dir, 'tmp', name + '.hints')
             write_hints(hp, hints)
             files.append(hp)
-        out, dt = prover9(files, budget)
+        out, dt = prover9(files, budget, SFDF_OPTS if hints and a.hinted_sfdf else '')
         if hp:
             os.unlink(hp)
         ok = 'THEOREM PROVED' in out
