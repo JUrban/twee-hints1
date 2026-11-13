@@ -647,6 +647,25 @@ those have the same axioms. But originals share axioms too.
   * Lemmas chosen by goal similarity from the whole axiom group help:
     +10 with 13 lemmas.
   * The theory block (rm4t) gives +6, confirming 2f.
+* **Results on r1sim**, a simulated loop round:
+  * Set: 1,000 random problems (116 originals) that plain twee does not
+    solve in 4 s.
+  * Lemma pool: the 31,060 problems plain twee solves in 4 s.
+  * Budget: 8,000 critical pairs each (4 abstract s).
+
+  | setting | solved |
+  |---|---|
+  | rm4 | 92 |
+  | rm4t | 94 |
+  | rm4 + 3 nearest siblings (old lemma import) | 126 |
+  | rm4 + 6 kNN lemmas, subset theories | 150 |
+  | rm4 + 3 nearest + 3 kNN, subset theories | 166 |
+  | rm4 + 3 nearest + 10 kNN, subset theories | **176** |
+
+  * Relevance-chosen lemmas from the target's own and weaker theories
+    nearly double what rm4 solves (+91%), and add 40% over the old lemma
+    import.
+  * On this broad set the theory block is flat (94 vs 92).
 
 ## 2c. Long runs: stall cutoff and checkpoints
 
