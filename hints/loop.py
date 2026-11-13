@@ -81,10 +81,12 @@ class Loop:
             m, v = a.model_fixed.split(',')
         else:
           subprocess.run([VENV_PY, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'rulemodel.py'),
-                        ','.join(dirs), '--all', '--ntest', '0', '--save', m, '--vocab', v],
+                        ','.join(dirs), '--all', '--ntest', '0', '--save', m, '--vocab', v
+                       ] + (['--theory'] if a.model_theory else []),
                        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
                        env=dict(os.environ, OMP_NUM_THREADS='8'))
         import rulemodel
+        rulemodel.THEORY = a.model_theory
         vocab = {}
         for line in open(v):
             c, k = line.rstrip('\n').split('\t'); vocab[k] = int(c)
@@ -292,6 +294,8 @@ def main():
                     help='rounds > 0: add up to N proven sibling goals (nearest below) as axioms')
     ap.add_argument('--lemma-knn', type=int, default=0,
                     help='rounds > 0: also add up to K proven goals with the same axioms (any original) most similar to the goal')
+    ap.add_argument('--model-theory', action='store_true',
+                    help='rule model with the ENIGMA theory block (rulemodel.py --theory; e.g. models/rm4t)')
     ap.add_argument('--lemma-subsets', action='store_true',
                     help='--lemma-knn may also use problems whose axioms are a subset of the target\'s')
     ap.add_argument('--init', help='import round-0 results (solved.tsv and hints) of another loop dir')
