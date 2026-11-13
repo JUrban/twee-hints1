@@ -624,7 +624,29 @@ those have the same axioms. But originals share axioms too.
   * `loop.py --lemma-knn K` does the same inside the loop.
   * `hintsel.py knnfiles ... --subsets` restricts hint neighbours to
     subset theories.
-* **Results:** see the abstract-time battery below.
+* **Results on ho3u** (345 problems, 16,000 critical pairs each =
+  8 abstract s, deterministic). Lemmas from the same axiom group only (no
+  `--subsets`); the kNN pool is everything plain twee solves in 4 s on the
+  full benchmark, plus the 473 solved ho3 siblings:
+
+  | setting | solved |
+  |---|---|
+  | plain | 70 |
+  | rm4 | 81 |
+  | rm4t (theory block) | 87 |
+  | rm4 + 3 nearest siblings (old lemma import) | 77 |
+  | rm4 + 6 nearest siblings | 78 |
+  | rm4t + 3 nearest siblings | 83 |
+  | rm4 + 3 nearest + 3 group-kNN lemmas | 83 |
+  | rm4 + 6 group-kNN lemmas | 85 |
+  | rm4 + 3 nearest + 10 group-kNN lemmas | **91** |
+
+  * In abstract time the old lemma import does not help on ho3u (77 vs
+    81: 7 problems lost, 3 gained). Its gains in the time-limited runs
+    were within the load noise.
+  * Lemmas chosen by goal similarity from the whole axiom group help:
+    +10 with 13 lemmas.
+  * The theory block (rm4t) gives +6, confirming 2f.
 
 ## 2c. Long runs: stall cutoff and checkpoints
 
