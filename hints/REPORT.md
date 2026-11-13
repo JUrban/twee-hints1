@@ -712,12 +712,36 @@ subset-kNN lemmas, and kNN hints (median 144, at most 200).
   Before, a resumed run counted old matches as new, and
   `--eqhint-stall-cps` fired at once.
 
-**Harder eval (queued):** `sets/v2_hard` has the 8 fam_long failures
-plus the next 30 unsolved goals of each original (68). Each run gets 300
-abstract s with rm4t and lemmas, in three versions: hints from the whole
-original pool (about 2,000 hints, all lemmas of the solved siblings, most
-frequent first), kNN hints, and no hints (`abs/v2.sh`, `loop.py
---keep-out`).
+**Harder eval:** `sets/v2_hard` has the 8 fam_long failures plus the
+next 30 unsolved goals of each original (68). Each run gets 300 abstract s
+with rm4t and lemmas, in three versions (`abs/v2.sh`, `loop.py
+--keep-out`):
+
+* hints from the whole original pool, all lemmas of the solved siblings,
+  most frequent first (1,994 hints for aK2_eq_aK3_d, 1,693 for nil3_30);
+* kNN hints;
+* no hints.
+
+Each run also has a 1,200 s CPU cap.
+
+* **Whole pool (V2p): 48 of 68.** This includes 3 of the 8 that kNN
+  hints left unsolved at 120 s; nil3_30__goal_360 is proved at 60 s.
+* **All 19 unsolved runs hit the CPU cap** at 115–261 abstract s, and all
+  were still on hints. They had matched 520–690 hints, the last one near
+  the end of each run. Per gap limit up to 60 s, 47–48 are solved, and
+  all 19 failures count as "keep going" in Veroff's terms.
+* **Large pools were expensive.** In the same search (hint score made
+  neutral), 20 hints cost +2% CPU, 144 hints +4%, and 1,994 hints +53%.
+  The cause was the abstract clock: it does not move while a
+  housekeeping task runs, so task budgets never bound and hint
+  normalisation ran every 40 critical pairs. Tasks can now report an
+  abstract cost (`newTaskCost`); hint normalisation charges live/100
+  critical pairs. With that, 1,994 hints cost +11% instead of +43%
+  (twee-e19). The other tasks cost about 7% more under the abstract
+  clock than under real-time scheduling, which is acceptable.
+* **Round 2 (queued)** runs the 19 with the round-1 proofs added to the
+  pools: 900 abstract s, stall gap 60 s, CPU cap 3,600 s, states kept
+  for later rounds.
 
 ## 2n. Prover9: SFDF reorientation of proofs
 
