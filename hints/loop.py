@@ -98,6 +98,13 @@ class Loop:
     def run_one(self, name, hints, rnd):
         a = self.a
         path = os.path.join(PROB, name + '.p')
+        if a.lemmas and rnd > 0 and self.lemma_src:
+            import lemmas
+            txt, nl = lemmas.lemma_problem(name, self.lemma_src, a.lemmas)
+            if nl:
+                path = os.path.join(self.dir, 'tmp', name + '.p')
+                with open(path, 'w') as f:
+                    f.write(txt)
         cmd = [a.twee, path, '--max-time', str(self.timeout(rnd)), '--no-colour', '--quiet',
                '--no-proof', '--print-hints', '--print-given'] + a.args.split()
         if self.model:
@@ -157,7 +164,7 @@ class Loop:
                     if k[0] == k[1] or k in seen:
                         continue
                     seen.add(k); hs.append(k)
-            ax = set(givenlib.key(l, r, sig) for l, r in givenlib.axioms(name))
+            ax = set(givenlib.key(l, r, sig) for l, r in givenlib.axioms(name, path))
             pos = set(givenlib.key(l, r, sig) for l, r in L + G)
             rows = []
             for idx, x in enumerate(givenlib.parse_given_parents(out)):
@@ -170,6 +177,8 @@ class Loop:
             with open(os.path.join(self.dir, 'given', name), 'w') as gf:
                 gf.writelines(rows)
             res = hs
+        if path.startswith(os.path.join(self.dir, 'tmp')):
+            os.unlink(path)
         return name, ok, dt, stats, res
 
     def hints_for(self, n, pools, knn):
@@ -200,6 +209,9 @@ class Loop:
                 pools = self.build_pools()
         if a.model and (rnd > 0 or a.given_extra or a.model_fixed):
             self.train_model(rnd)
+        if a.lemmas:
+            import lemmas
+            self.lemma_src = lemmas.by_original(self.solved)  # proven before this round
         rdir = os.path.join(self.dir, 'r%d' % rnd)
         os.makedirs(rdir, exist_ok=True)
         t0 = time.time(); new = 0
@@ -271,6 +283,8 @@ def main():
     ap.add_argument('--max-hints', type=int, default=100000)
     ap.add_argument('--aux', action='store_true')
     ap.add_argument('--rerun-unhinted', action='store_true')
+    ap.add_argument('--lemmas', type=int, default=0,
+                    help='rounds > 0: add up to N proven sibling goals (nearest below) as axioms')
     ap.add_argument('--init', help='import round-0 results (solved.tsv and hints) of another loop dir')
     a = ap.parse_args()
     if a.init and not os.path.exists(os.path.join(a.dir, 'solved.tsv')):

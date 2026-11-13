@@ -17,8 +17,8 @@ def key(l, r, sig):
     b = hintlib.generalize(r, l, sig)
     return min(a, (b[1], b[0]))
 
-def axioms(name):
-    txt = open(os.path.join(hintlib.PROB, name + '.p')).read()
+def axioms(name, path=None):
+    txt = open(path or os.path.join(hintlib.PROB, name + '.p')).read()
     out = []
     for m in re.finditer(r'(?:fof|cnf)\(\s*[^,]*,\s*axiom\s*,(.*?)\)\.\s*$', txt, re.S | re.M):
         e = hintlib._split_eq(m.group(1))

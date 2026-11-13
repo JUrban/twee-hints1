@@ -15,7 +15,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 PROB = '/project/AIM60k/problems/tptp'
 
 def run_one(name, a):
-    cmd = [a.twee, os.path.join(PROB, name + '.p'), '--max-time', str(a.timeout),
+    cmd = [a.twee, os.path.join(a.prob_dir, name + '.p'), '--max-time', str(a.timeout),
            '--no-colour'] + a.args.split()
     hf = None
     if a.hints_file:
@@ -63,6 +63,7 @@ def main():
     ap.add_argument('-j', type=int, default=20)
     ap.add_argument('--args', default='')
     ap.add_argument('--rts', default='')
+    ap.add_argument('--prob-dir', default=PROB, help='directory of NAME.p files (e.g. from lemmas.py)')
     ap.add_argument('--hints-dir')
     ap.add_argument('--hints-file')
     ap.add_argument('--keep-all', action='store_true')
