@@ -98,9 +98,12 @@ class Loop:
     def run_one(self, name, hints, rnd):
         a = self.a
         path = os.path.join(PROB, name + '.p')
-        if a.lemmas and rnd > 0 and self.lemma_src:
+        if (a.lemmas or a.lemma_knn) and rnd > 0 and self.lemma_src:
             import lemmas
-            txt, nl = lemmas.lemma_problem(name, self.lemma_src, a.lemmas)
+            if a.lemma_knn:
+                txt, nl = lemmas.lemma_problem_knn(name, self.lemma_src, a.lemmas, self.lemma_index, a.lemma_knn)
+            else:
+                txt, nl = lemmas.lemma_problem(name, self.lemma_src, a.lemmas)
             if nl:
                 path = os.path.join(self.dir, 'tmp', name + '.p')
                 with open(path, 'w') as f:
@@ -209,9 +212,11 @@ class Loop:
                 pools = self.build_pools()
         if a.model and (rnd > 0 or a.given_extra or a.model_fixed):
             self.train_model(rnd)
-        if a.lemmas:
+        if a.lemmas or a.lemma_knn:
             import lemmas
             self.lemma_src = lemmas.by_original(self.solved)  # proven before this round
+            if a.lemma_knn:
+                self.lemma_index = lemmas.LemmaIndex(sorted(self.solved))
         rdir = os.path.join(self.dir, 'r%d' % rnd)
         os.makedirs(rdir, exist_ok=True)
         t0 = time.time(); new = 0
@@ -285,6 +290,8 @@ def main():
     ap.add_argument('--rerun-unhinted', action='store_true')
     ap.add_argument('--lemmas', type=int, default=0,
                     help='rounds > 0: add up to N proven sibling goals (nearest below) as axioms')
+    ap.add_argument('--lemma-knn', type=int, default=0,
+                    help='rounds > 0: also add up to K proven goals with the same axioms (any original) most similar to the goal')
     ap.add_argument('--init', help='import round-0 results (solved.tsv and hints) of another loop dir')
     a = ap.parse_args()
     if a.init and not os.path.exists(os.path.join(a.dir, 'solved.tsv')):

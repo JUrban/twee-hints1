@@ -11,10 +11,16 @@ lemmas.py NAMES SOLVED OUTDIR [-m M] [--after]
   OUTDIR  gets OUTDIR/<name>.p: the problem plus up to M lemmas, the
           proven siblings with the nearest goal numbers below N (with
           --after also above N). Only unit equations are used.
+  --knn K adds up to K more lemmas: the proven goals most similar to the
+          target goal (idf-weighted Jaccard on term-shape features) among
+          all problems with the same axioms, from any original.
+  --pool F[,F...] extra files of proven problems for --knn.
 """
-import argparse, collections, os, re
+import argparse, collections, hashlib, math, os, pickle, re, sys
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 PROB = '/project/AIM60k/problems/tptp'
+CACHE = '/project/hintwork/abs/goalinfo.pkl'
 
 def split(name):
     o, n = name.rsplit('__goal_', 1)
@@ -53,18 +59,116 @@ def lemma_problem(name, solved, m, after=False):
         txt += f'fof(lemma_goal_{j},axiom,{f}).\n'
     return txt, len(lem)
 
+_axkey = {}
+def axiom_key(name):
+    """Hash of the sorted axiom lines: problems with equal keys have the same axioms."""
+    if name not in _axkey:
+        ax = sorted(l.strip() for l in open(os.path.join(PROB, name + '.p'))
+                    if l.startswith(('cnf(', 'fof(')) and 'conjecture' not in l)
+        _axkey[name] = hashlib.md5('\n'.join(ax).encode()).hexdigest()
+    return _axkey[name]
+
+def goal_info(names):
+    """name -> (axiom key, goal features), cached on disk."""
+    import hintsel
+    info = pickle.load(open(CACHE, 'rb')) if os.path.exists(CACHE) else {}
+    new = [n for n in names if n not in info]
+    for n in new:
+        try:
+            F = frozenset(hintsel.goal_features(n, 3))
+        except Exception:
+            F = frozenset()
+        info[n] = (axiom_key(n), F)
+    if new:
+        os.makedirs(os.path.dirname(CACHE), exist_ok=True)
+        pickle.dump(info, open(CACHE + '.tmp', 'wb')); os.replace(CACHE + '.tmp', CACHE)
+    return info
+
+class LemmaIndex:
+    """Proven unit-equation goals grouped by axiom set, for similarity search."""
+    def __init__(self, solved_names):
+        names = [n for n in solved_names if unit_eq(conjecture(n) or '~')]
+        self.info = goal_info(names)
+        self.groups = collections.defaultdict(list)
+        for n in names:
+            self.groups[self.info[n][0]].append(n)
+        self._idf = {}
+
+    def idf(self, key):
+        if key not in self._idf:
+            g = self.groups[key]
+            df = collections.Counter(x for n in g for x in self.info[n][1])
+            self._idf[key] = {x: math.log((len(g) + 1) / c) for x, c in df.items()}
+        return self._idf[key]
+
+    def select(self, name, k, exclude=()):
+        """The K proven goals with the same axioms most similar to NAME's goal."""
+        if name not in self.info:  # targets: in memory only, no cache write
+            import hintsel
+            try:
+                F = frozenset(hintsel.goal_features(name, 3))
+            except Exception:
+                F = frozenset()
+            self.info[name] = (axiom_key(name), F)
+        key, F = self.info[name]
+        idf = self.idf(key)
+        wF = sum(idf.get(x, 0) for x in F)
+        conj = conjecture(name)
+        scored = []
+        for m in self.groups.get(key, ()):
+            if m == name or m in exclude:
+                continue
+            G = self.info[m][1]
+            inter = sum(idf[x] for x in F & G)
+            if inter <= 0:
+                continue
+            union = wF + sum(idf[x] for x in G) - inter
+            scored.append((inter / union, m))
+        scored.sort(key=lambda x: (-x[0], x[1]))
+        out, seen = [], {conj}
+        for _, m in scored:
+            f = conjecture(m)
+            if f in seen:
+                continue
+            seen.add(f); out.append(m)
+            if len(out) >= k:
+                break
+        return out
+
+def lemma_problem_knn(name, solved, m, index, k, after=False):
+    """lemma_problem plus up to K lemmas from INDEX (same axioms, any original)."""
+    txt, n = lemma_problem(name, solved, m, after)
+    have = set(re.findall(r'fof\(lemma_goal_(\d+),', txt))
+    o, _ = split(name)
+    extra = index.select(name, k, exclude={f'{o}__goal_{j}' for j in have})
+    for i, x in enumerate(extra):
+        txt += f'fof(lemma_knn_{i},axiom,{conjecture(x)}).\n'
+    return txt, n + len(extra)
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('names'); ap.add_argument('solved'); ap.add_argument('outdir')
     ap.add_argument('-m', type=int, default=10)
     ap.add_argument('--after', action='store_true')
+    ap.add_argument('--knn', type=int, default=0)
+    ap.add_argument('--pool', default='')
     a = ap.parse_args()
-    solved = by_original(line.split()[0] for line in open(a.solved) if line.strip())
+    solved_names = [line.split()[0] for line in open(a.solved) if line.strip()]
+    solved = by_original(solved_names)
+    index = None
+    if a.knn:
+        pool = set(solved_names)
+        for f in filter(None, a.pool.split(',')):
+            pool |= {line.split()[0] for line in open(f) if line.strip()}
+        index = LemmaIndex(sorted(pool))
     os.makedirs(a.outdir, exist_ok=True)
     tot = 0
     for line in open(a.names):
         name = line.split()[0]
-        txt, n = lemma_problem(name, solved, a.m, a.after)
+        if index:
+            txt, n = lemma_problem_knn(name, solved, a.m, index, a.knn, a.after)
+        else:
+            txt, n = lemma_problem(name, solved, a.m, a.after)
         with open(os.path.join(a.outdir, name + '.p'), 'w') as out:
             out.write(txt)
         tot += n
