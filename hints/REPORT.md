@@ -459,7 +459,7 @@ The union with plain is 61. On unseen originals at long times, the model
 and the lemmas each give about +6 to +9 net, and together +12.
 **A final 60 s round on all remaining holdout problems.** It covers the
 2366 holdout problems that no 4–6 s run solved (rm4, 3 lemmas, kNN hints,
-2.0 CPU hours of wall time on 18 cores) and solves 399. That brings
+2 hours on 18 cores) and solves 399. That brings
 holdout to **3913 of 5880 (66.5%)**. The count includes 40 problems
 solved only by the plain 4 s run. For comparison, plain twee at 2 s and
 then 8 s solved 3385.
