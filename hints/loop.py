@@ -64,6 +64,7 @@ class Loop:
             key = self.pool_key(n)
             for h in self.hints_of(n):
                 cnt[key][h] += 1
+        self.pool_cnt = cnt
         return {k: [h for h, _ in c.most_common()] for k, c in cnt.items()}
 
     def pool_key(self, n):
@@ -205,7 +206,19 @@ class Loop:
             near = [tuple(h.split('\t')) for h in knn.select(n, int(k), int(topn))]
             seen = set(near)
             return near + [(l, r, f) for l, r in pools.get(self.pool_key(n), []) if (l, r) not in seen][:a.max_hints]
-        return pools.get(self.pool_key(n), [])[:a.max_hints]
+        hs = pools.get(self.pool_key(n), [])[:a.max_hints]
+        if a.freq_factors:
+            # weaker boosts for hints from few sibling proofs (their precision is far lower)
+            steps = sorted((int(c), f) for c, f in (x.split(':') for x in a.freq_factors.split(',')))
+            cnt = self.pool_cnt[self.pool_key(n)]
+            def fac(h):
+                c = cnt[h]
+                for m, f in steps:
+                    if c <= m:
+                        return h + (f,)
+                return h
+            hs = [fac(h) for h in hs]
+        return hs
 
     def round(self, rnd):
         a = self.a
@@ -228,11 +241,7 @@ class Loop:
                                 knn.add(f, L)
             if not a.pool.startswith('knn'):
                 pools = self.build_pools()
-                if a.online:
-                    cnt = collections.defaultdict(collections.Counter)
-                    for n in self.solved:
-                        for h in self.hints_of(n):
-                            cnt[self.pool_key(n)][h] += 1
+                cnt = self.pool_cnt   # updated online
         if a.model and (rnd > 0 or a.given_extra or a.model_fixed):
             self.train_model(rnd)
         if a.lemmas or a.lemma_knn:
@@ -343,6 +352,9 @@ def main():
     ap.add_argument('--online', action='store_true',
                     help='each proof joins the pools (and the sibling lemmas) at once, for the runs not yet started; '
                          'goals run in goal-number order and only -j runs are queued')
+    ap.add_argument('--freq-factors', default='',
+                    help='pool hints by frequency: "1:0.2,4:0.05" gives hints from 1 sibling proof factor 0.2, '
+                         'from 2-4 factor 0.05, the rest the default (--eqhint-factor, 0.01)')
     ap.add_argument('--wall-factor', type=float, default=5,
                     help='with --abstract-time: kill a run after FACTOR * timeout + 30 wall seconds')
     ap.add_argument('--give-up', type=int, default=0,
