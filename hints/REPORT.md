@@ -10,10 +10,18 @@ in `/project/hintwork` (not in git).
 | plain twee, 4 s | 31,060 | 3203 | 28.1 |
 | loop, 2 + 2 s | **33,249** (+7.0%) | **3417** (+6.7%) | 24.5 |
 | the loop, a third 2 s round | 33,668 | 3473 | 35.0 |
+| + Veroff-style online loop, 5 abstract s round (2o)\* | **36,057** (+16.1% over plain) | 3747 | +18.9 |
+
+\* Starts from 33,720 proofs: the third round plus 52 from long runs on
+two families (2m). Its time is the summed wall time of the runs, close
+to their CPU time.
 
 The loop's first round is twee with a learned ENIGMA-style rule filter
 plus kNN hints from training proofs. Its second round adds hints from its
-own proofs and proven sibling goals as lemmas. On hard holdout problems
+own proofs and proven sibling goals as lemmas. The online loop then runs
+every goal left in goal order. Each new proof joins its original's hint
+pool and the lemma source for the next runs at once, and an original is
+given up after 30 failures in a row (2o). On hard holdout problems
 at 60 s, it solves 56 against 44 for plain twee. Section 3 says where the
 gains come from, and why hints from other problems help little in long
 runs. Section 5 has the commands.
@@ -917,11 +925,19 @@ goals failed in every variant):
   at short limits there is no Veroff stall rule to prune the next round,
   and the 20 s round reruns every unsolved goal (with the give-up rule).
 
-**Full benchmark, Veroff style (running).** `abs/unleash.sh` runs every
+**Full benchmark, Veroff style.** `abs/unleash.sh` runs every
 goal the benchmark loop left unsolved: 18,064 of 51,784, starting from
 its 33,720 proofs. The loop uses online whole-original pools, gives an
 original up after 30 failures, and has rounds of 5 and then 20 abstract s
 on 14 cores (twee-e20, kill after 15× the limit, CPU cap 400 s).
+
+* **Round 1 (5 abstract s): +2,337, to 36,057 of 51,784** (holdout
+  3,475 to 3,747 of 5,880). The give-up rule ran 10,079 of the 18,064
+  goals and skipped the rest. All 129 originals gained (most:
+  R1dist_to_aa1 +48, aK2eq_1234 +46). The round took 82 minutes on 14
+  cores: 2.1 h of run time on proofs (median 2.4 s wall) and 16.8 h on
+  failures (median 7.5 s wall).
+* Round 2 (20 abstract s) is running.
 
 ## 2c. Long runs: stall cutoff and checkpoints
 
