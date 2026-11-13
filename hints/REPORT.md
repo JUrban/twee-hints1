@@ -812,8 +812,12 @@ Each run also has a 1,200 s CPU cap.
   is proved 24k critical pairs after the resume and nil3_30__goal_371
   after 4k (12 and 2 abstract s). Resuming costs CPU: the two proofs
   took 737 and 1,183 CPU s for those few critical pairs, so most of it
-  goes to loading the 0.3–1 GB state and adding the lemmas to 48k–100k
-  rules (not profiled). Of the 4 unsolved, three stopped exactly 120k
+  goes to resuming itself. Measured on nil3_30__goal_355 (477 MB state,
+  111k rules, 19.4M queued critical pairs, 3,787 hints, twee-e22
+  `RESUMETIME`): loading takes about 130 s, normalising the hints 5 s,
+  and re-scoring the saved queue against the new hints 333 s (each queued
+  pair is rebuilt and rewritten). `--no-resume-requeue` skips the
+  re-scoring; whether guidance suffers without it is not yet tested. Of the 4 unsolved, three stopped exactly 120k
   critical pairs after their last match (the 60 s stall gap), at +162k
   to +549k, and goal_360 hit the CPU cap 93k after its last match.
   Hints from proofs of siblings keep feeding these runs, but each

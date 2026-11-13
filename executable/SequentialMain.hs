@@ -37,6 +37,7 @@ import Jukebox.TPTP.Print
 import Jukebox.Tools.HornToUnit
 import qualified Data.IntMap.Strict as IntMap
 import qualified Data.IntSet as IntSet
+import qualified Data.BatchedQueue as Queue
 import System.IO
 import System.CPUTime (getCPUTime)
 import System.Exit
@@ -83,6 +84,7 @@ data MainFlags =
     flags_dump_proof :: Maybe FilePath,
     flags_dump_state :: Maybe FilePath,
     flags_load_state :: Maybe FilePath,
+    flags_resume_requeue :: Bool,
     flags_stitch :: Maybe FilePath,
     flags_print_hints :: Bool,
     flags_hints_file :: Maybe FilePath,
@@ -220,6 +222,12 @@ parseMainFlags = do
     flag "load-state"
       ["Resume from a state written by --dump-state for the same problem; hints given now replace the old ones."]
       Nothing (Just <$> argFile)
+  flags_resume_requeue <-
+    expert $
+    inGroup "Debugging options" $
+    bool "resume-requeue"
+      ["With --load-state and hints: re-score the whole saved queue against the new hints (costly for big states)."]
+      True
   flags_stitch <-
     expert $
     inGroup "Critical pair weighting heuristics" $
@@ -1322,16 +1330,26 @@ runTwee globals (TSTPFlags tstp) horn precedence config0 flags@MainFlags{..} lat
         -- saved signature, which the problem now shares). Names are not
         -- enough: kNN lemmas are numbered by rank, and states saved before
         -- the shared signature hold copies in a foreign one.
+        let cpu = fmap (\t -> fromIntegral t / 1e12 :: Double) getCPUTime
+        c0 <- cpu
+        c1 <- st_next_active loaded0 `seq` Queue.size (st_queue loaded0) `seq` cpu
         let known = map axiom_eqn (st_axioms loaded0)
             newAxioms = [ ax | ax <- axioms, axiom_eqn ax `notElem` known ]
             loaded = foldl' (addAxiom config) loaded0 newAxioms
         unless (null newAxioms) $
           say $ "Resumed with " ++ show (length newAxioms) ++ " new axioms"
+        c2 <- st_next_active loaded `seq` Queue.size (st_queue loaded) `seq` cpu
         let eh = (st_eqhints withHints) { eh_last_match = fromIntegral (st_next_active loaded) }
             st1 = markResumedHints loaded { st_eqhints = eh, st_cur_passive = Nothing }
-            st2 | Map.null (eh_map eh) = st1
-                | otherwise = simplifyQueue config (normaliseEqHints st1)
-        return $! st_next_active st2 `seq` st2
+            st1' | Map.null (eh_map eh) = st1
+                 | otherwise = normaliseEqHints st1
+        c3 <- IntMap.size (eh_live (st_eqhints st1')) `seq` IntSet.size (eh_matched (st_eqhints st1')) `seq` cpu
+        let st2 | Map.null (eh_map eh) || not flags_resume_requeue = st1'
+                | otherwise = simplifyQueue config st1'
+        c4 <- st_next_active st2 `seq` Queue.size (st_queue st2) `seq` cpu
+        putStrLn $ "RESUMETIME load=" ++ show (c1 - c0) ++ " axioms=" ++ show (c2 - c1) ++
+          " hints=" ++ show (c3 - c2) ++ " queue=" ++ show (c4 - c3) ++ " passive=" ++ show (Queue.size (st_queue st2))
+        return $! st2
   state <-
     case flags_stitch of
       Nothing -> do
