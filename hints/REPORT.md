@@ -292,6 +292,9 @@ binary model file, a dense feature array and hashed feature names.
   (+2/−7). More guided proofs of medium difficulty do not help as they
   are. The model may need more capacity or a retuned threshold for the
   larger data; rm4 stays.
+* **More capacity (rm4b):** rm4's data with 400 trees of 127 leaves (four
+  times the model). On the 345: 65 against 61–63 (+9/−7), within noise.
+  Loading takes 0.15 s instead of 0.07 s. Not worth it at short limits.
 * **Generalisation matching** (`--eqhint-generalise`, after Prover9-new's
   generalized hint hash). Each hint is also stored with its one-step
   generalisations (one proper non-variable subterm of one side replaced
@@ -396,6 +399,9 @@ Every system gets at most 4 s per problem:
 * Round 0 alone, at half the time limit, already solves more than plain
   twee at 4 s.
 * Lemmas triple what round 1 adds (1297 against 425 new), at the same CPU.
+* **A third round** (2 s, lemmas and hints from rounds 0–1) adds 419,
+  giving **33,668** (holdout 3473, +8.4% over plain 4 s), with up to 6 s
+  per problem.
 * **Speed.** Problems solved within a time, holdout only:
 
   | within | plain | loop round 0 |
