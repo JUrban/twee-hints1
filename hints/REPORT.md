@@ -666,6 +666,11 @@ those have the same axioms. But originals share axioms too.
     nearly double what rm4 solves (+91%), and add 40% over the old lemma
     import.
   * On this broad set the theory block is flat (94 vs 92).
+  * **kNN hints on top of the lemmas: +18** (battery 6). rm4 + 3
+    nearest + 10 kNN lemmas solves 176. With kNN hints (30 neighbours,
+    100 hints) it solves 194 from a pool of all solved problems, and 191
+    from a pool limited to the target's own and weaker theories. rm4t
+    with the same lemmas solves 180.
   * **Noise floor.** rm4 with `--abstract-time` 1990 and 2010 instead of
     2000 (budget ±0.5%, task timing shifted) solves 93 and 95. At most 3
     problems flip, and none of rm4's 92 is lost. Differences of 10 or more
