@@ -268,6 +268,26 @@ Most problems the model loses at 2 s are boundary cases solved by plain
 twee in 1–2 s. The model's overhead is now about 6% of throughput, after a
 binary model file, a dense feature array and hashed feature names.
 
+## 2f. The ENIGMA loop, and generalisation matching
+
+* **ENIGMA loop.** Guided runs (rm3, kNN hints, 4 s) on the 5355 training
+  problems that plain twee leaves unsolved at 2 s solved 757 of them.
+  Their given-rule logs (`given/tr30_g1`) are added to the training data
+  of model rm4. These are harder proofs than the plain 2 s ones, from the
+  guided search the model has to work in.
+  * On 600 random holdout problems still unsolved after H2: 8 for rm3 and
+    8 for rm4 at 8 s (4 different each), too few to tell.
+  * On the 345 hard dev goals (`ho3_unsolved`, 8 s, model only, no hints):
+    rm3 60, rm4 **63** (+4/−1).
+  rm4 is used from here on. A second turn of the loop needs more hard
+  proofs than one 4 s pass gives.
+* **Generalisation matching** (`--eqhint-generalise`, after Prover9-new's
+  generalized hint hash). Each hint is also stored with its one-step
+  generalisations (one proper non-variable subterm of one side replaced
+  by a fresh variable), so a critical pair more general than a
+  hint gets the hint's boost. On the 345 with rm2 and kNN hints at 8 s:
+  68 against 69 without it. Neutral, left off.
+
 ## 2c. Long runs: stall cutoff and checkpoints
 
 * `--eqhint-stall N` gives up when no new rule has matched a hint for N
@@ -331,7 +351,7 @@ rounds of 30 s or more, but about 40% overhead for 8 s rounds.
 | branch | what it does | decision |
 |---|---|---|
 | packed-fast, better-packed, faster-packed-fallback, adaptive-hint-mask-filter, lazy-hash-gate | fast matching against very large hint banks (millions of hints, Josef runs): packed matchers, 64-bit checklists, bit tables | not ported. With ≤ 10^3 hints per run, matching costs about 7% of twee's throughput after the fingerprint prefilter, which plays the same role. |
-| experimental-generalized-hint-hash | subsumption matching by hashing precomputed hint generalisations | not ported yet. This is the way to add "critical pair more general than a hint" matches; twee currently matches variants only, plus consider-emulation. A more general rule makes the hint joinable, but the pair that produced the rule gets no boost. Worth trying if transfer hints turn out to be too specific. |
+| experimental-generalized-hint-hash | subsumption matching by hashing precomputed hint generalisations | ported in a simple form as `--eqhint-generalise` (one-step generalisations of each hint go into the hint map). Neutral on the hard dev set (68 vs 69, section 2f). |
 | proof-parent-guidance, proof-recipe-replay | replay a known proof's parent graph | covered by self-replay with own-proof hints (15× faster). Not useful for new problems. |
 | target-directed-inference | hash-guided inference toward targets | the branch reports a no-go; not ported. |
 | long-run-scalability, ancestor store, compact indexing, checkpoints | memory and restart for runs with 10^5+ given clauses | checkpoints ported as `--load-state` (twee already had `--dump-state`). Twee's AIM runs are far from those memory limits. |
