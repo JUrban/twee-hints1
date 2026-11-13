@@ -758,6 +758,16 @@ Each run also has a 1,200 s CPU cap.
   pools (4,109 and 3,494 hints): 900 abstract s, stall gap 60 s, CPU cap
   3,600 s, states kept for later rounds. Round 1 kept no states, so these
   are fresh runs.
+  * 11 of the 20 were solved within the first 40 minutes, 4 of them in
+    under 15k critical pairs, where round 1 failed at 230k–520k.
+  * Both new inputs matter. With the new lemmas and no hints, goal_353
+    and goal_354 fall in under 500 critical pairs; the big pool costs
+    5k there. The others need the hints: goal_357 takes 9.1k without
+    them against 6.2k, nil3_30__goal_381 51k against 14k, and goal_336
+    and goal_284 fail at 60 s against 31k and 80k with hints.
+  * Critical pairs get expensive on these problems. goal_336 without
+    hints made only 270 critical pairs per CPU second (18.7k rules), so
+    the abstract clock understates the real cost of long runs.
 
 **Prover9 long runs (`long/P1`, `long/P0`).** fam2_long has 40 fam2
 goals that the short loop left unsolved, run at 3000 given clauses.
