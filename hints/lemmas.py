@@ -15,6 +15,8 @@ lemmas.py NAMES SOLVED OUTDIR [-m M] [--after]
           target goal (idf-weighted Jaccard on term-shape features) among
           all problems with the same axioms, from any original.
   --pool F[,F...] extra files of proven problems for --knn.
+  --subsets: --knn may also use problems whose axioms are a subset of the
+          target's (theorems of a weaker theory), not only equal ones.
 """
 import argparse, collections, hashlib, math, os, pickle, re, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -84,19 +86,49 @@ def goal_info(names):
         pickle.dump(info, open(CACHE + '.tmp', 'wb')); os.replace(CACHE + '.tmp', CACHE)
     return info
 
+_axset = {}
+def axiom_set(name):
+    """The axioms of NAME's original as a set of clause bodies (names dropped)."""
+    o, _ = split(name)
+    if o not in _axset:
+        out = set()
+        for l in open(os.path.join(PROB, name + '.p')):
+            if l.startswith(('cnf(', 'fof(')) and 'conjecture' not in l:
+                out.add(re.sub(r'\s+', '', l.split(',', 2)[2].rsplit(')', 1)[0]))
+        _axset[o] = frozenset(out)
+    return _axset[o]
+
 class LemmaIndex:
-    """Proven unit-equation goals grouped by axiom set, for similarity search."""
-    def __init__(self, solved_names):
+    """Proven unit-equation goals grouped by axiom set, for similarity search.
+    With subsets=True, a target may use the goals of every problem whose axioms
+    are a subset of its own (theorems of a weaker theory hold in the stronger)."""
+    def __init__(self, solved_names, subsets=False):
         names = [n for n in solved_names if unit_eq(conjecture(n) or '~')]
         self.info = goal_info(names)
+        self.subsets = subsets
         self.groups = collections.defaultdict(list)
+        self.sets = {}
         for n in names:
-            self.groups[self.info[n][0]].append(n)
+            k = self.info[n][0]
+            self.groups[k].append(n)
+            if k not in self.sets:
+                self.sets[k] = axiom_set(n)
         self._idf = {}
+        self._cands = {}
 
-    def idf(self, key):
+    def candidates(self, key, name):
+        if key not in self._cands:
+            if self.subsets:
+                S = axiom_set(name)
+                ks = [k for k, A in self.sets.items() if A <= S]
+            else:
+                ks = [key] if key in self.groups else []
+            self._cands[key] = [m for k in ks for m in self.groups[k]]
+        return self._cands[key]
+
+    def idf(self, key, name=None):
         if key not in self._idf:
-            g = self.groups[key]
+            g = self.candidates(key, name)
             df = collections.Counter(x for n in g for x in self.info[n][1])
             self._idf[key] = {x: math.log((len(g) + 1) / c) for x, c in df.items()}
         return self._idf[key]
@@ -111,11 +143,11 @@ class LemmaIndex:
                 F = frozenset()
             self.info[name] = (axiom_key(name), F)
         key, F = self.info[name]
-        idf = self.idf(key)
+        idf = self.idf(key, name)
         wF = sum(idf.get(x, 0) for x in F)
         conj = conjecture(name)
         scored = []
-        for m in self.groups.get(key, ()):
+        for m in self.candidates(key, name):
             if m == name or m in exclude:
                 continue
             G = self.info[m][1]
@@ -152,6 +184,7 @@ def main():
     ap.add_argument('--after', action='store_true')
     ap.add_argument('--knn', type=int, default=0)
     ap.add_argument('--pool', default='')
+    ap.add_argument('--subsets', action='store_true', help='--knn also from problems whose axioms are a subset')
     a = ap.parse_args()
     solved_names = [line.split()[0] for line in open(a.solved) if line.strip()]
     solved = by_original(solved_names)
@@ -160,7 +193,7 @@ def main():
         pool = set(solved_names)
         for f in filter(None, a.pool.split(',')):
             pool |= {line.split()[0] for line in open(f) if line.strip()}
-        index = LemmaIndex(sorted(pool))
+        index = LemmaIndex(sorted(pool), subsets=a.subsets)
     os.makedirs(a.outdir, exist_ok=True)
     tot = 0
     for line in open(a.names):

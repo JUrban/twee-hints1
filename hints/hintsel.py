@@ -101,6 +101,15 @@ class KNN:
             self._index = (names, col, X, w, X @ w, {m: i for i, m in enumerate(names)})
         return self._index
 
+    def axiom_mask(self, name):
+        """Boolean mask of pool problems whose axioms are a subset of NAME's."""
+        import numpy as np, lemmas
+        names = self.index()[0]
+        if not hasattr(self, '_axs'):
+            self._axs = [lemmas.axiom_set(m) for m in names]
+        S = lemmas.axiom_set(name)
+        return np.array([A <= S for A in self._axs])
+
     def neighbours(self, name, F, exclude_self=True, same_orig=False):
         """(similarity, name) of the pool problems sharing a feature with F,
         best first; the same as the plain loop over self.feats, vectorised."""
@@ -120,7 +129,10 @@ class KNN:
             S[[i for i, m in enumerate(names) if m.split('__goal_')[0] != o]] = -1
         return S, names
 
-    def select(self, name, k=30, topn=100, exclude_self=True, same_orig=False, scores=False, groups=False):
+    def select(self, name, k=30, topn=100, exclude_self=True, same_orig=False, scores=False, groups=False,
+               subsets=False):
+        """subsets: only neighbours whose axioms are a subset of NAME's, so
+        that their proof lemmas are theorems of NAME's theory."""
         import numpy as np
         try:
             F = goal_features(name, self.depth)
@@ -130,6 +142,8 @@ class KNN:
         sims = []
         if r:
             S, names = r
+            if subsets:
+                S = np.where(self.axiom_mask(name), S, -1)
             good = np.flatnonzero(S > -1)
             if len(good) > k:
                 thr = np.partition(S[good], len(good) - k)[len(good) - k]
@@ -149,8 +163,10 @@ class KNN:
         return [h for h, _ in sc.most_common(topn)]
 
 def knnfiles_main(argv):
-    """hintsel.py knnfiles POOLDIR[,POOLDIR...] NAMES OUTDIR [K TOPN]:
+    """hintsel.py knnfiles POOLDIR[,POOLDIR...] NAMES OUTDIR [K TOPN] [--subsets]:
     write the kNN hints of each problem in NAMES to OUTDIR/<name>."""
+    subsets = '--subsets' in argv
+    argv = [x for x in argv if x != '--subsets']
     pools, names_path, outdir = argv[:3]
     k, topn = (int(argv[3]), int(argv[4])) if len(argv) > 4 else (30, 100)
     knn = None
@@ -166,7 +182,7 @@ def knnfiles_main(argv):
     os.makedirs(outdir, exist_ok=True)
     for line in open(names_path):
         n = line.split()[0]
-        hs = knn.select(n, k, topn)
+        hs = knn.select(n, k, topn, subsets=subsets)
         if hs:
             with open(os.path.join(outdir, n), 'w') as f:
                 f.write('\n'.join(hs) + '\n')
