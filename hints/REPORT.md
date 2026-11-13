@@ -357,6 +357,54 @@ unsound as a proof but sound as a source of hints.
   against 28 (+2/−1), within noise. Only a third of the links have
   sketches, so the chains have gaps.
 
+## 2h. The full public benchmark (all 51,784 problems, 4 s per problem)
+
+Every system gets at most 4 s per problem:
+
+* plain twee: one 4 s run, 8 in parallel;
+* the loop:
+  * round 0: 2 s with rm4 and kNN hints from the start. The pool is the
+    training-split proofs (`train_pool` 8562, `tr30_g1_pool` 757).
+  * round 1: 2 s on the unsolved, with the pool extended by the loop's own
+    round-0 proofs. 12 in parallel.
+* the loop + lemmas: the same round 0, then round 1 with 3 proven siblings
+  as axioms as well (section 2g).
+
+| system | train | devel | holdout | all | CPU h |
+|---|---|---|---|---|---|
+| E 2.6, 1 s (README) | | | | 18,369 | |
+| Prover9, 1 s (README) | | | | 18,973 | |
+| twee, plain, 4 s | 25,416 | 2,441 | 3,203 | 31,060 | 28.1 |
+| loop, round 0 only (2 s) | 26,144 | 2,551 | 3,257 | 31,952 | 13.5 |
+| loop, 2 + 2 s | 26,493 | 2,578 | 3,306 | 32,377 (+4.2%) | 24.8 |
+| loop + lemmas, 2 + 2 s | 27,190 | 2,642 | **3,417** | **33,249 (+7.0%)** | 24.5 |
+
+* Against plain 4 s, the loop with lemmas gains 2530 and loses 341, of
+  which 247 plain twee solves in 2–4 s. On holdout it is +265/−51. The
+  union of the two is 33,590.
+* Round 0 alone, at half the time limit, already solves more than plain
+  twee at 4 s.
+* Lemmas triple what round 1 adds (1297 against 425 new), at the same CPU.
+* **Speed.** Problems solved within a time, holdout only:
+
+  | within | plain | loop round 0 |
+  |---|---|---|
+  | 0.25 s | 2309 | 2697 |
+  | 0.5 s | 2541 | 2924 |
+  | 1 s | 2776 | 3067 |
+  | 2 s | 3005 | 3248 |
+
+  Within 1 s the loop solves more than plain twee within 2 s.
+* **What is clean.** On the train split, rm4 and the kNN pool contain
+  proofs of many of these very problems' siblings (and rm4 of many 2 s
+  proofs of the problems themselves), so the train and devel columns are
+  optimistic. Holdout is clean as the README defines it:
+  * no holdout problem is in any training data or pool;
+  * its originals are unseen, except the 1160 late goals moved from
+    training originals in step 2 of the split;
+  * the loop learns from holdout only what it proves itself during the
+    loop.
+
 ## 2c. Long runs: stall cutoff and checkpoints
 
 * `--eqhint-stall N` gives up when no new rule has matched a hint for N

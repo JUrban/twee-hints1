@@ -2,7 +2,7 @@
 """Solved counts per AIM60k part for run.py dirs (results.tsv) and loop.py
 dirs (solved.tsv, r*/results.tsv).
 
-summary.py LABEL=DIR ...   (DIR/results.tsv or a loop dir)
+summary.py LABEL=DIR[+DIR] ...   (DIR/results.tsv or a loop dir)
 Prints, per system, the solved problems in train/devel/holdout/all, the CPU
 seconds over all runs, and pairwise gains against the first system.
 """
@@ -30,14 +30,21 @@ def load(d):
             cpu += float(x[2])
             if x[1] == 'THM':
                 solved.add(x[0])
+    sp = os.path.join(d, 'solved.tsv')  # a loop started with --init lists the imported round too
+    if os.path.exists(sp):
+        solved |= set(l.split('\t')[0] for l in open(sp) if l.strip())
     return solved, cpu
 
 def main():
     parts = part_of()
     systems = []
     for arg in sys.argv[1:]:
-        label, d = arg.split('=', 1)
-        systems.append((label, *load(d)))
+        label, ds = arg.split('=', 1)
+        solved, cpu = set(), 0.0
+        for d in ds.split('+'):  # DIR+DIR: union, CPU added (e.g. an --init loop and its source's round 0)
+            s1, c1 = load(d)
+            solved |= s1; cpu += c1
+        systems.append((label, solved, cpu))
     print(f'{"system":30} {"train":>7} {"devel":>7} {"holdout":>7} {"all":>7} {"CPU h":>7}')
     for label, s, cpu in systems:
         c = {p: sum(1 for n in s if parts.get(n) == p) for p in ('train', 'devel', 'holdout')}

@@ -147,3 +147,29 @@ class KNN:
         if scores:
             return sc.most_common(topn)
         return [h for h, _ in sc.most_common(topn)]
+
+def knnfiles_main(argv):
+    """hintsel.py knnfiles POOLDIR[,POOLDIR...] NAMES OUTDIR [K TOPN]:
+    write the kNN hints of each problem in NAMES to OUTDIR/<name>."""
+    pools, names_path, outdir = argv[:3]
+    k, topn = (int(argv[3]), int(argv[4])) if len(argv) > 4 else (30, 100)
+    knn = None
+    for d in pools.split(','):
+        if knn is None:
+            knn = KNN(d)
+        else:
+            for f in os.listdir(d):
+                if f not in knn.hints:
+                    L = [l.rstrip('\n') for l in open(os.path.join(d, f)) if '\t' in l]
+                    if L:
+                        knn.add(f, L)
+    os.makedirs(outdir, exist_ok=True)
+    for line in open(names_path):
+        n = line.split()[0]
+        hs = knn.select(n, k, topn)
+        if hs:
+            with open(os.path.join(outdir, n), 'w') as f:
+                f.write('\n'.join(hs) + '\n')
+
+if __name__ == '__main__' and sys.argv[1:2] == ['knnfiles']:
+    knnfiles_main(sys.argv[2:])
