@@ -61,10 +61,13 @@ class Loop:
         """pool key -> list of (l, r), most frequent first."""
         cnt = collections.defaultdict(collections.Counter)
         for n in self.solved:
-            key = orig_of(n) if self.a.pool == 'original' else 'all'
+            key = self.pool_key(n)
             for h in self.hints_of(n):
                 cnt[key][h] += 1
         return {k: [h for h, _ in c.most_common()] for k, c in cnt.items()}
+
+    def pool_key(self, n):
+        return 'all' if self.a.pool == 'all' else orig_of(n)
 
     def timeout(self, rnd):
         ts = [float(x) for x in str(self.a.timeout).split(',')]
@@ -126,8 +129,8 @@ class Loop:
         if hints:
             hpath = os.path.join(self.dir, 'tmp', name + '.hints')
             with open(hpath, 'w') as f:
-                for l, r in hints:
-                    f.write(f'{l}\t{r}\n')
+                for h in hints:
+                    f.write('\t'.join(h) + '\n')
             cmd += ['--hints-file', hpath]
         t0 = time.time()
         try:
@@ -196,8 +199,13 @@ class Loop:
         if a.pool.startswith('knn'):
             _, k, topn = a.pool.split(':')
             return [tuple(h.split('\t')) for h in knn.select(n, int(k), int(topn))]
-        key = orig_of(n) if a.pool == 'original' else 'all'
-        return pools.get(key, [])[:a.max_hints]
+        if a.pool.startswith('tier'):
+            # kNN hints at the full boost, then the rest of the original's pool at a weaker factor F
+            _, k, topn, f = a.pool.split(':')
+            near = [tuple(h.split('\t')) for h in knn.select(n, int(k), int(topn))]
+            seen = set(near)
+            return near + [(l, r, f) for l, r in pools.get(self.pool_key(n), []) if (l, r) not in seen][:a.max_hints]
+        return pools.get(self.pool_key(n), [])[:a.max_hints]
 
     def round(self, rnd):
         a = self.a
@@ -209,7 +217,7 @@ class Loop:
         knn = None
         hinted = rnd > 0 or (a.hints_extra and a.hints_from_start)
         if hinted:
-            if a.pool.startswith('knn'):
+            if a.pool.startswith(('knn', 'tier')):
                 import hintsel
                 knn = hintsel.KNN(os.path.join(self.dir, 'hints'), list(self.solved))
                 for d in (a.hints_extra.split(',') if a.hints_extra else []):
@@ -218,13 +226,13 @@ class Loop:
                             L = [l.rstrip('\n') for l in open(os.path.join(d, f)) if '\t' in l]
                             if L:
                                 knn.add(f, L)
-            else:
+            if not a.pool.startswith('knn'):
                 pools = self.build_pools()
                 if a.online:
                     cnt = collections.defaultdict(collections.Counter)
                     for n in self.solved:
                         for h in self.hints_of(n):
-                            cnt[orig_of(n) if a.pool == 'original' else 'all'][h] += 1
+                            cnt[self.pool_key(n)][h] += 1
         if a.model and (rnd > 0 or a.given_extra or a.model_fixed):
             self.train_model(rnd)
         if a.lemmas or a.lemma_knn:
@@ -278,11 +286,10 @@ class Loop:
                             hf.write(f'{l}\t{r}\n')
                     if a.online and hinted:
                         # the new proof joins the pools for the runs not yet started
-                        if knn is not None:
-                            if hs:
-                                knn_new.append((n, [f'{l}\t{r}' for l, r in hs]))
-                        elif a.pool in ('original', 'all'):
-                            key = orig_of(n) if a.pool == 'original' else 'all'
+                        if knn is not None and hs:
+                            knn_new.append((n, [f'{l}\t{r}' for l, r in hs]))
+                        if not a.pool.startswith('knn'):
+                            key = self.pool_key(n)
                             cnt[key].update(hs)
                             pools[key] = [h for h, _ in cnt[key].most_common()]
                         if getattr(self, 'lemma_src', None) is not None and '__goal_' in n:

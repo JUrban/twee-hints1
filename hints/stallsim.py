@@ -53,6 +53,7 @@ def main():
     ap.add_argument('--rate', type=int, default=2000)
     ap.add_argument('--gaps', default='5,10,20,30,60,120')
     ap.add_argument('--p9', action='store_true', help='Prover9 outputs; work and gaps in given clauses (use --rate 1)')
+    ap.add_argument('--limits', help='also replay per-problem time limits (abstract s, comma-separated)')
     ap.add_argument('--on-hints', type=float, help='only print the unsolved runs still on hints at the end for this gap (s): the ones to extend')
     a = ap.parse_args()
     global parse
@@ -99,6 +100,13 @@ def main():
                 if not ok and sp is None:
                     on += 1
         print(f'{g:>6}  {s:>6}  {cost / R / 3600:7.2f}  {on}')
+    if a.limits:
+        print('limit(s)  solved  work(h)')
+        for t in a.limits.split(','):
+            T = float(t) * R
+            s = sum(1 for ok, work, _ in runs.values() if ok and work <= T)
+            cost = sum(min(work, T) for _, work, _ in runs.values())
+            print(f'{t:>8}  {s:>6}  {cost / R / 3600:7.2f}')
     # when did solved and unsolved runs make their last new match?
     def last(log): return log[-1] / R if log else 0
     sl = sorted(last(r[2]) for r in runs.values() if r[0])
