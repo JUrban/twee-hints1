@@ -3,6 +3,21 @@
 Branch `hints` of the twee repo. Scripts are in `hints/`. Runs and data are
 in `/project/hintwork` (not in git).
 
+**Summary.** On all 51,784 public AIM60k problems, with 4 s per problem:
+
+| system | solved | holdout | CPU h |
+|---|---|---|---|
+| plain twee, 4 s | 31,060 | 3203 | 28.1 |
+| loop, 2 + 2 s | **33,249** (+7.0%) | **3417** (+6.7%) | 24.5 |
+| the loop, a third 2 s round | 33,668 | 3473 | 35.0 |
+
+The loop's first round is twee with a learned ENIGMA-style rule filter
+plus kNN hints from training proofs. Its second round adds hints from its
+own proofs and proven sibling goals as lemmas. On hard holdout problems
+at 60 s, it solves 56 against 44 for plain twee. Section 3 says where the
+gains come from, and why hints from other problems help little in long
+runs. Section 5 has the commands.
+
 ## 1. What is implemented
 
 ### Equation hints in twee (`src/Twee.hs`, `executable/SequentialMain.hs`)
@@ -66,6 +81,11 @@ in `/project/hintwork` (not in git).
 * `feats.py`: term-shape features.
 * `diag2.py`: replay diagnosis, showing which hint was late and its parents.
 * `mkhints.py`: generalised hint files from a twee proof.
+* `given.py`: given-rule logs labelled for training (`--print-given`).
+* `rulemodel.py`, `enigfeats.py`, `lgb2bin.py`: the ENIGMA rule model
+  (section 2b).
+* `lemmas.py`: lemma import (2g). `sketch.py`, `chainhints.py`: sketches.
+* `summary.py`: solved problems per AIM60k part.
 
 ## 2. Results so far
 
