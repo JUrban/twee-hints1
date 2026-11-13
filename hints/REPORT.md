@@ -1,4 +1,4 @@
-# Hint guidance for twee: interim report
+# Hint guidance for twee: report
 
 Branch `hints` of the twee repo. Scripts are in `hints/`. Runs and data are
 in `/project/hintwork` (not in git).
@@ -405,6 +405,22 @@ Every system gets at most 4 s per problem:
   * the loop learns from holdout only what it proves itself during the
     loop.
 
+### Long runs on hard holdout problems (60 s)
+
+The set is 300 random holdout problems that neither plain twee at 4 s nor
+the loop (2 + 2 s) solved. Lemmas are 3 proven siblings, from everything
+proven in the full-benchmark runs.
+
+| setting (60 s) | solved | vs plain | CPU h |
+|---|---|---|---|
+| plain | 44 | | 4.7 |
+| rm4 | 53 | +11/−2 | 4.5 |
+| plain + 3 lemmas | 50 | +12/−6 | 4.5 |
+| rm4 + 3 lemmas + kNN hints | **56** (+27%) | +17/−5 | 4.4 |
+
+The union with plain is 61. On unseen originals at long times, the model
+and the lemmas each give about +6 to +9 net, and together +12.
+
 ## 2c. Long runs: stall cutoff and checkpoints
 
 * `--eqhint-stall N` gives up when no new rule has matched a hint for N
@@ -478,32 +494,54 @@ rounds of 30 s or more, but about 40% overhead for 8 s rounds.
 
 ## 3. Assessment
 
-* **Hints work mechanically.** Self-replay with a problem's own proof is
-  15× faster.
-* **Transferred hints help, modestly.**
-  * Selection is capped. kNN recall@100 is about 0.82–0.84, and learned
-    rerankers (LightGBM on ENIGMA features, or the rule model) add at most
-    0.01.
-  * At 2–8 s on dev10, the hint loop gives +17 over plain twee at the same
-    final limit.
-  * With the rule model on holdout at 2 s, hints add +106/−34.
-* **The ENIGMA-style rule model is the biggest single gain so far.** It
-  reaches AUC 0.975 on held-out originals and adds +5–6% at 2 s on unseen
-  originals, more on the hard subset at 8 s (+36%). It is complementary to
-  hints.
-* **ProofWatch boosting, parent features, reranking hints with the rule
-  model:** neutral so far.
-* **Long runs.** Plain twee at 60 s solves 26 of 59 hard problems that no
-  8 s setting solved. Much of the remaining headroom is time, which is
-  where hints are expected to help most (Veroff). The long-run comparisons
-  are below.
+* **Overall.** On all 51,784 public problems at 4 s per problem, the loop
+  (rule model + kNN hints, then lemma import) solves 33,249 against 31,060
+  for plain twee (+7.0%), with 13% less CPU. On the clean holdout part the
+  gain is +6.7% (3417 vs 3203). Problems are solved about twice as fast in
+  the 1–2 s range. On hard holdout problems at 60 s it is +27% (56 vs 44).
+* **Where the gain comes from**, largest first:
+  1. **The ENIGMA-style rule filter.** It defers rules that LightGBM on
+     ENIGMA features predicts are not proof steps. It gives +5–6% at 2 s,
+     +36% on hard dev goals at 8 s, and +11 of 300 hard holdout goals at
+     60 s.
+  2. **Lemma import.** Proven sibling goals become axioms. It triples the
+     second round's yield on the full benchmark and gives +12/−6 of 300 at
+     60 s. It uses AIM60k's structure (the goals of one original share
+     axioms and are steps of one proof), so it is reported separately. It
+     is sound, and allowed in a CASC LTB-style batch.
+  3. **kNN hints.** They help at short limits (+106/−34 at 2 s on holdout
+     with the model) and little at long ones.
+* **Hints in long runs: a negative result for twee.** With the model, none
+  of these help on hard problems beyond noise (±3 on 345):
+  * kNN hints, goal statements, ProofWatch;
+  * one-step generalisation matching;
+  * sketches and chained sketches (Veroff), with up to 400 hints.
+
+  The reason shows in HINTSTATS: hints match early, and solved runs end a
+  median of about 1000 rules after their last match. Transferred hints
+  cover the part of a proof that twee finds anyway; the late, hard part is
+  specific to the problem. For the same reason a Veroff stall cutoff does
+  not separate lost runs from good ones: unsolved runs have similar gaps.
+  Self-replay (own proof as hints, 15× faster) shows that the mechanism
+  itself works when the hints are right.
+* **ENIGMA loop.** One turn with hard guided proofs gives +3 (rm4, within
+  noise). A second turn with 2.7k medium guided proofs does worse (rm5).
+  More data alone does not improve the model.
+* **Engineering.**
+  * The rule model costs about 6% of twee's throughput (binary model,
+    dense arrays, hashed features).
+  * kNN selection is a sparse matrix product (6 ms per problem over a
+    9k pool).
+  * Checkpoints (`--load-state`) continue runs exactly, with new hints.
 
 ## 4. Next steps
 
-* Long runs on hard problems: hints, goal-statement hints, the stall
-  cutoff, resuming from checkpoints with new hints.
-* ENIGMA loop: retrain the rule model on data from guided runs, including
-  the newly solved harder problems.
-* A full run on all public problems.
-* Generalisation matching ("critical pair more general than a hint"), as in
-  Prover9-new's generalized hint hash.
+* Lemma import with checkpoints: resume a saved run with new proven
+  lemmas added as axioms, so lemma rounds do not restart the search.
+* More loop rounds on the full benchmark (lemma closure), and
+  lemma-selection by relevance rather than goal-number distance.
+* The model: more capacity, or training only on hard proofs; thresholds
+  per run length (0.2 looked slightly better at 20 s, within noise).
+* Hints that cover the late part of proofs. One source is sketches whose
+  assumptions are themselves sketched or proven, iterated until the
+  chains close. Another is Prover9-style degradation of hint boosts.
