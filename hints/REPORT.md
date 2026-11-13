@@ -288,6 +288,43 @@ binary model file, a dense feature array and hashed feature names.
   hint gets the hint's boost. On the 345 with rm2 and kNN hints at 8 s:
   68 against 69 without it. Neutral, left off.
 
+## 2g. Lemma import: proven sibling goals as axioms
+
+All goals `X__goal_N` of one original `X` have the same axioms (checked).
+A sibling goal that twee has proven is therefore a theorem of the theory
+and a sound extra axiom for the others. This is what CASC's LTB division
+allows within a batch: conjectures proven earlier may be used later. It
+leans on the batch structure more than hints do, so it is reported
+separately from the hint results.
+
+* `lemmas.py` adds the statements of up to M proven siblings, those with
+  the nearest goal numbers below N (unit equations only), to the problem.
+* `loop.py --lemmas M` does this in rounds after the first, with lemmas
+  proven in earlier rounds only. So the chain of lemma proofs is
+  well-founded, and each final proof can be expanded into one from the
+  axioms. In the training logs, lemma axioms are labelled as axioms.
+
+On the 59 hard dev goals at 20 s (lemmas from the 1966 dev10 problems
+solved at 2–8 s):
+
+| setting (20 s) | solved |
+|---|---|
+| plain (the 60 s run, solved within 20 s) | 12 |
+| plain + 10 lemmas | 21 |
+| rm4 | 19 |
+| rm4 + 3 lemmas | **28** |
+| rm4 + 10 lemmas | 27 |
+| rm4 + 30 lemmas | 26 |
+| rm4 + 10 lemmas + kNN hints | 27 |
+
+Lemmas and the rule model add up. Three lemmas are enough, and more do not
+help. Hints add nothing on top.
+
+On the 345 hard goals of the three dev originals at 8 s, lemmas come from
+the 473 goals plain twee solves at 2 s, and every goal gets three. rm4
+solves 63 and rm4 + 3 lemmas 68 (+10/−5): a smaller gain than on the 59.
+Those 59 were chosen to have solved goals shortly before them.
+
 ## 2c. Long runs: stall cutoff and checkpoints
 
 * `--eqhint-stall N` gives up when no new rule has matched a hint for N
