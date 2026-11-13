@@ -363,12 +363,24 @@ lemmas: 70 (+6/−4 against 3), within noise.
 * **Which lemmas are used.** Most proofs that had lemmas use at least one
   (46 of 56 on the hard holdout set below), and not only the nearest: the
   third nearest is used most often there (29).
-* **Lemmas into a resumed run** (`--load-state` now adds the problem's new
-  axioms). This does not work. The lemma becomes a rule, but its
-  consequences go into a large queue scored like everything else. One goal
-  that 3 lemmas solve in 0.4 s from scratch takes 3.5 s when resumed from a
-  2 s state, the same as resuming without the lemmas. Restarting with the
-  lemmas is better, so lemma rounds restart.
+* **Lemmas into a resumed run** (`--load-state` adds the problem's new
+  axioms). *Corrected 13 Nov:* the first test said this does not work, but
+  that was a bug. A saved state stores each symbol with its precedence and
+  id, and both depend on the problem text. A problem with new lemmas
+  therefore got a second signature under the same names, and its lemmas
+  and hints could never reach the saved rules. twee-e20 makes the problem
+  reuse the saved symbols and recognises new axioms by equation, not name.
+  Redone on three goals that 13 lemmas solve (2 s states, 4k critical
+  pairs):
+
+  | goal | resumed, old binary | resumed, e20 (after resume) | fresh with lemmas | fresh without |
+  |---|---|---|---|---|
+  | aK2_eq_aK3_d__goal_353 | fails (+40k) | 134 | 288 | fails at 40k |
+  | aK2_eq_aK3_d__goal_354 | fails (+40k) | 55 | 456 | fails at 40k |
+  | aK2_eq_aK3_d__goal_357 | fails (+40k) | 13.6k | 12.9k | fails at 40k |
+
+  So resumed runs now take new lemmas about as well as fresh runs, and lemma
+  rounds can continue saved searches instead of restarting them.
 
 ### Sketches (Veroff): hints from proofs under extra assumptions
 
@@ -759,6 +771,13 @@ Each run also has a 1,200 s CPU cap.
 * **48% of the new proofs' lemmas were already in the pool** (8,196
   lemmas in 48 proofs; per-proof quartiles 52, 64 and 72%). The other
   ~4,300 are new and roughly double the pools for round 2.
+* **Round 3 (invalid, redone as round 4).** The 7 unsolved resumed their
+  states with the round-2 proofs: +1 (nil3_30__goal_370). But the resumed
+  aK2_eq_aK3_d runs matched only 1–9 hints, against about 1,260 in round
+  2. Their problems had new lemmas, which hit the signature bug above
+  (twee-e20 fixes it; a polluted state also resumes correctly). Five runs
+  stopped exactly 120k critical pairs (the 60 s stall gap) after resuming.
+  Round 4 repeats the round with e20 from the round-3 states.
 * **Round 2** runs the 20 unsolved with the round-1 proofs added to the
   pools (4,109 and 3,494 hints): 900 abstract s, stall gap 60 s, CPU cap
   3,600 s, states kept for later rounds. Round 1 kept no states, so these
