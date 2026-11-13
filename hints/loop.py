@@ -165,7 +165,7 @@ class Loop:
                         continue
                     seen.add(k); hs.append(k)
             ax = set(givenlib.key(l, r, sig) for l, r in givenlib.axioms(name, path))
-            pos = set(givenlib.key(l, r, sig) for l, r in L + G)
+            pos = set(givenlib.key(l, r, sig) for l, r in L + G + hintlib.extract_hyp(out))
             rows = []
             for idx, x in enumerate(givenlib.parse_given_parents(out)):
                 if x is None or x[0] == x[1]:

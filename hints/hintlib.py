@@ -49,12 +49,23 @@ def extract_hints(text):
         return parse(text[i + 11:j]), parse(text[j + 10:k])
     return parse(text[i + 11:j]), parse(text[j + 10:a])
 
-def extract_aux(text):
-    a = text.find('HINTS-AUX')
-    k = text.find('HINTS-END')
-    if a < 0 or k < 0:
+def _section(text, start, ends):
+    a = text.find(start)
+    if a < 0:
         return []
-    return [e for m in _hintre.finditer(text[a + 9:k]) for e in [_split_eq(m.group(1))] if e]
+    k = min([x for x in (text.find(e, a) for e in ends) if x >= 0] or [-1])
+    if k < 0:
+        return []
+    return [e for m in _hintre.finditer(text[a + len(start):k]) for e in [_split_eq(m.group(1))] if e]
+
+def extract_aux(text):
+    return _section(text, 'HINTS-AUX', ('HINTS-HYP', 'HINTS-END'))
+
+def extract_hyp(text):
+    """Lemmas and goals that depend on a hypothesis of a conditional conjecture
+    (twee-e14 and later). True only for the skolems: use for labels, never as
+    generalised hints."""
+    return _section(text, 'HINTS-HYP', ('HINTS-END',))
 
 _ident = re.compile(r"[a-z][A-Za-z0-9_]*|'[^']*'")
 

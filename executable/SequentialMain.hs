@@ -1062,6 +1062,12 @@ runTwee globals (TSTPFlags tstp) horn precedence config0 flags@MainFlags{..} lat
     axioms =
       [ Axiom n pre_name (Just (equationVars pre_eqn)) (toEquation pre_eqn)
       | (n, PreEquation{..}) <- zip [1..] axioms0 ]
+    -- Hypotheses of a conditional conjecture: positive unit clauses from the
+    -- negated conjecture. They hold only for the skolem constants.
+    hyps =
+      [ axiom
+      | (axiom, PreEquation{..}) <- zip axioms axioms0,
+        Input{kind = Jukebox.Ax NegatedConjecture} <- [pre_form] ]
     defs =
       [ axiom
       | (axiom, PreEquation{..}) <- zip axioms axioms0,
@@ -1332,8 +1338,20 @@ runTwee globals (TSTPFlags tstp) horn precedence config0 flags@MainFlags{..} lat
   when (solved state && flags_print_hints) $ do
     let
       sols = map (eliminateDefinitionsFromGoal defs) (solutions state)
-      lemmaEqns = map equation (allLemmas (map (derivation . pg_proof) sols))
-      goalEqns = [ equation (pg_proof g) | g <- sols ]
+      lems = allLemmas (map (derivation . pg_proof) sols)
+      -- A lemma that depends (transitively) on a hypothesis is only true for
+      -- the skolems, so it must not be generalised into a hint. allLemmas
+      -- lists dependencies first; unknown lemmas count as dependent.
+      hypNums = Set.fromList (map axiom_number hyps)
+      usesHyp m d =
+        any ((`Set.member` hypNums) . axiom_number) (usedAxioms d) ||
+        any (\q -> Map.findWithDefault True q m) (usedLemmas d)
+      hypDep = foldl' (\m p -> Map.insert p (usesHyp m (derivation p)) m) Map.empty lems
+      (hypLems, fwdLems) = partition (\p -> Map.findWithDefault True p hypDep) lems
+      lemmaEqns = map equation fwdLems
+      (hypGoals, fwdGoals) = partition (usesHyp hypDep . derivation . pg_proof) sols
+      goalEqns = [ equation (pg_proof g) | g <- fwdGoals ]
+      hypEqns = map equation hypLems ++ [ equation (pg_proof g) | g <- hypGoals ]
       showEqn (t :=: u) =
         showProblem
           [Input Nothing "hint" (Jukebox.Ax Jukebox.Axiom) Unknown $
@@ -1343,12 +1361,16 @@ runTwee globals (TSTPFlags tstp) horn precedence config0 flags@MainFlags{..} lat
     putStrLn "HINTS-GOAL"
     forM_ goalEqns $ \eqn -> putStrLn (showEqn eqn)
     putStrLn "HINTS-AUX"
-    forM_ (allLemmas (map (derivation . pg_proof) sols)) $ \p -> do
+    forM_ fwdLems $ \p -> do
       let ts = stepTerms (derivation p)
           n = length ts
           k = snd (maximum [ (KBO.size t, i) | (i, t) <- zip [0..] ts ])
           pairs = [ (ts !! i, ts !! j) | i <- [0..k-1], j <- [k+1..n-1], (i, j) /= (0, n-1) ]
       forM_ (take 30 pairs) $ \(t, u) -> putStrLn (showEqn (t :=: u))
+    -- Lemmas and goals that use a hypothesis: for labelling only, never
+    -- generalised.
+    putStrLn "HINTS-HYP"
+    forM_ hypEqns $ \eqn -> putStrLn (showEqn eqn)
     putStrLn "HINTS-END"
     when (cfg_log_given config) $ do
       putStrLn "GIVEN-BEGIN"

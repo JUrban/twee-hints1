@@ -74,7 +74,7 @@ def run(name, a):
         return name, None
     sig = hintlib.problem_signature(name)
     lemmas, goals = hintlib.extract_hints(out)
-    pos = set(key(l, r, sig) for l, r in lemmas + goals)
+    pos = set(key(l, r, sig) for l, r in lemmas + goals + hintlib.extract_hyp(out))
     ax = set(key(l, r, sig) for l, r in axioms(name))
     rows = []
     for idx, x in enumerate(parse_given_parents(out)):
