@@ -916,6 +916,11 @@ goals failed in every variant):
   every proof and saves 15% (whole pool, cut short) to 50% (kNN variants)
   of the time. After 20 failures it loses 14 of 272. So
   `loop.py --give-up 30`.
+* **Frequency-weighted boosts do not help.** A hint from 20 or more
+  sibling proofs is right half the time, one from a single proof 0.8%
+  (2m). Weaker boosts for rare hints (`--freq-factors 1:0.2,4:0.05`:
+  factor 0.2 for hints from 1 proof, 0.05 for 2–4, 0.01 above) solve 60
+  of the 189, the same as the uniform pool (+5/−5), in 19% more run time.
 * **Hint signals at 5 s do not say which runs need 20 s.** Replayed on
   the whole-pool online runs: of the 517 runs unsolved at 5 s
   (10k critical pairs), 482 had matched a hint within the last 1 s, and
