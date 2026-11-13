@@ -33,6 +33,7 @@ import Data.Map(Map)
 import Data.Int
 import Control.Monad
 import Control.Monad.IO.Class
+import System.CPUTime (getCPUTime)
 import Control.Monad.Trans.Class
 import qualified Control.Monad.Trans.State.Strict as StateM
 import qualified Data.IntSet as IntSet
@@ -98,6 +99,7 @@ data Config f =
     cfg_eqhint_stall              :: Int,
     -- | Give up after this many critical pairs without a new hint match (0 = never).
     cfg_eqhint_stall_cps          :: Int64,
+    cfg_max_cpu                   :: Double,
     cfg_eqhint_watch              :: Float,
     cfg_eqhint_generalise         :: Bool }
 
@@ -169,6 +171,7 @@ defaultConfig =
     cfg_rule_model = Nothing,
     cfg_eqhint_stall = 0,
     cfg_eqhint_stall_cps = 0,
+    cfg_max_cpu = 0,
     cfg_eqhint_watch = 0,
     cfg_eqhint_generalise = False }
 
@@ -1426,7 +1429,12 @@ complete Output{..} config@Config{..} state =
         StateM.put (clearMessages state)
         mapM_ checkTask tasks
         timedOut <- checkTimeout
-        when (progress && not timedOut) loop
+        -- a real-CPU safety limit (with --abstract-time, some runs get very
+        -- slow per critical pair); it stops like a time-out, with full output
+        overCpu <- if cfg_max_cpu > 0
+          then liftIO $ fmap (\t -> fromIntegral t / 1e12 >= cfg_max_cpu) getCPUTime
+          else return False
+        when (progress && not timedOut && not overCpu) loop
 
     loop
 

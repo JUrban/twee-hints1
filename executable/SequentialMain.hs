@@ -38,6 +38,7 @@ import Jukebox.Tools.HornToUnit
 import qualified Data.IntMap.Strict as IntMap
 import qualified Data.IntSet as IntSet
 import System.IO
+import System.CPUTime (getCPUTime)
 import System.Exit
 import qualified Data.Set as Set
 import qualified Data.Intern as Intern
@@ -507,6 +508,10 @@ parseConfig = do
     expert $
     inGroup "Critical pair weighting heuristics" $
     defaultFlag "eqhint-stall-cps" "Give up after this many critical pairs considered without a new hint match (0 = never); with --abstract-time N, N per second" cfg_eqhint_stall_cps argNum
+  cfg_max_cpu <-
+    expert $
+    inGroup "Critical pair weighting heuristics" $
+    defaultFlag "max-cpu" "Real-CPU safety limit in seconds (0 = none); it stops the run like --max-time and prints CPULIMIT; for runs in abstract time" cfg_max_cpu argNum
   cfg_eqhint_stall <-
     expert $
     inGroup "Critical pair weighting heuristics" $
@@ -1328,11 +1333,13 @@ runTwee globals (TSTPFlags tstp) horn precedence config0 flags@MainFlags{..} lat
 
   line
 
+  cpuEnd <- getCPUTime
   case flags_dump_state of
     Nothing -> return ()
     Just dumpStateFile ->
       BS.writeFile dumpStateFile (encode state)
 
+  when (cfg_max_cpu config > 0 && fromIntegral cpuEnd / 1e12 >= cfg_max_cpu config) $ putStrLn "CPULIMIT"
   putStrLn $ "WORK considered=" ++ show (st_considered state) ++ " rules=" ++ show (fromIntegral (st_next_active state) :: Int)
   let EqHints{..} = st_eqhints state
   -- First matches of hints: critical pairs considered and rule number.
