@@ -1427,6 +1427,65 @@ for the lemmas-only arm.
 * Different orderings derive largely different matchers. In a 1 s smoke
   test of one goal, the default ordering found 204 and another found 528.
 
+**Test 2: the cascade's frontier** (sets/fr100: 100 goals the full loop
+left unsolved at 20 s whose nearest lower sibling is proven; every arm
+starts from the full loop's 40,961 proofs, production config, 2 workers
+each):
+
+| arm | solved after rounds 1 / 2 / 3 / 4 | wall (sum over runs) |
+|---|---|---|
+| resume, saved queue re-scored (BRS) | 9 / 17 / 23 / – | 5.3 h for 3 rounds |
+| resume, queue kept as saved (BRSn, `--no-resume-requeue`) | 9 / 18 / 27 / 29 | 4.1 h for 3, 5.3 h for 4 |
+| P9loop, matcher lemmas + a new ordering each round (BP9) | 9 / 16 / 18 / 18 | 4.1 h |
+| Bigloop, 2 orderings per goal and round (BBL) | 14 / 19 | 4.2 h |
+
+All four arms solved 33 goals together. Six of them only BRSn solved;
+BP9 and BBL each solved one goal no other arm did; BRS solved none on
+its own.
+
+* **Keep searching, do not restart.** On goals right next to a proof,
+  continuing the saved search beats restarting with matcher lemmas: 27
+  against 18 at the same 4.1 h. The P9 arm stalls after round 2 (BP9 adds
+  nothing in round 4), as in test 1.
+* **Skip the re-scoring.** Re-scoring the saved queue against the new hints
+  costs 20–55 s per resume and buys nothing: BRS solves 23 where BRSn
+  solves 27 in less time. The full loop now resumes with
+  `--no-resume-requeue` (round 5 continued at 19:35).
+* **Orderings do add something.** In BBL's round 1, a second ordering per
+  goal solves 14 against 9 for one run, but at twice the wall time. At
+  equal time, resume is still ahead (18 at 2.9 h against 14 at 2.6 h).
+  Orderings are a candidate for goals whose resume has stalled, not a
+  replacement for it.
+
+## 2x. A resume bug that grew one run to 100 GB (14 Nov)
+
+A resumed run of the full loop grew to 100 GB before the user killed it.
+
+**The cause.** Twee numbers its symbols when it interns them, and it
+numbers them afresh when it loads a saved state. The saved state also
+holds the hint matcher's tables of goal constants, and these are keyed by
+the *old* numbers. Resume added the new axioms (lemmas proven since the
+save) while those stale tables were still in place, and only then put in
+the current run's tables. With the stale tables, a goal constant could
+look up a definition that contains itself. Scoring one critical pair
+(hint lookup after expanding goal constants) then never stopped.
+
+**The fix** (17ffcd3).
+
+* The current run's hint tables go in, normalised, before the new axioms
+  are added.
+* Goal-constant definitions whose expansion is cyclic or longer than 1,000
+  symbols are dropped from hint matching.
+* twee is built with a default heap limit (`-with-rtsopts=-M6g`, 110d93a).
+  A run that would grow past 6 GB stops with "Heap exhausted" (exit 251).
+  `loop.py` then marks the run HEAP and deletes its saved state.
+* A watchdog (`abs/memwatch.py 7 45`) kills any twee over 7 GB and, while
+  all twee processes together use more than 45 GB, the largest one.
+
+**Check.** The saved state plus one lemma used to exhaust any heap; it
+now proves its goal in 1.9 s at 190 MB. Fresh and resumed hinted runs on
+six current goals do the same work as before, counted in critical pairs.
+
 ## 2c. Long runs: stall cutoff and checkpoints
 
 * `--eqhint-stall N` gives up when no new rule has matched a hint for N
@@ -1555,25 +1614,24 @@ rounds of 30 s or more, but about 40% overhead for 8 s rounds.
 
 ## 4. Next steps
 
-*Updated 14 Nov, 16:45.*
+*Updated 14 Nov, 19:40.*
 
 * **Done since the last update:** 6 sibling lemmas won (2r) and run in
   the full loop's cascade round 4. rm6t and rm7t brought no online gain
   (2r); the planned rm7t online test was cancelled because its training
   data held proofs of the test goals. Long runs are 1.8–2.0× cheaper in
   CPU (2v).
-* **P9loop / Bigloop against resume** at the cascade's next level (2w):
-  100 frontier goals, 80 abstract s each, as resume (with and without
-  re-scoring the saved queue), as P9loop with orderings, and as Bigloop.
-  If restarts with matcher lemmas match resume at lower wall time, the
-  cascade's deepening switches to them (`--cascade` with `--p9loop`,
-  ready).
+* **P9loop / Bigloop against resume** (2w, test 2): resume wins on the
+  frontier (27 against 18–19 at equal time), and resuming without
+  re-scoring the queue beats re-scoring (27 against 23). The full loop
+  now resumes without re-scoring. Orderings are kept in reserve for goals
+  whose resume has stalled.
+* **A resume bug** grew one run to 100 GB; it is fixed, and every run now
+  has a 6 GB heap limit (2x).
 * **In-loop retraining:** the ENIGMA-plus-hints loop (EHL) beats hints
   alone after round 1 (963 against 944 of 1,934). FHL, the same loop with
   the round-0 model kept fixed (the production setting), decides whether
   the full loop should retrain its model between rounds.
-* Cheaper resume: re-scoring the saved queue costs about 20 µs per queued
-  pair. It goes if the no-requeue arm does as well.
 
 ## 5. How to run the best system
 
