@@ -1042,7 +1042,8 @@ proofs of loops/V2base and uses 5 workers. Only the guidance changes:
 
 | variant | ENIGMA | hints | lemmas | solved /189 | wall s, all 189 runs |
 |---|---|---|---|---|---|
-| full (U3po) | yes | yes | yes | **60** | 9,866 |
+| full (U3po, run with the other two originals of sets/u3) | yes | yes | yes | **60** | 9,866 |
+| full (U3xf, these 189 alone, like all rows below) | yes | yes | yes | 58 | 10,506 |
 | U3xh | – | yes | yes | 59 | 14,979 |
 | U3xm | yes | – | yes | 58 | 10,064 |
 | U3xl | – | – | yes | 49 | 16,372 |
@@ -1055,8 +1056,7 @@ The wall seconds are indicative only, because the machine was shared.
 Every run had the same CP budget, so a lower total means that more runs
 end early with a proof.
 
-All eight variants together solve 70 goals; the full system misses 10 of
-them.
+All nine runs together solve 70 goals; U3po misses 10 of them.
 
 **Reading.**
 
@@ -1069,7 +1069,11 @@ them.
 * **Lemma import is worth as much as ENIGMA and hints together**
   (49 = 49).
 * **With lemmas, ENIGMA and hints overlap.** Each adds about 10 on top of
-  lemmas, but together they add only 11. Hints and lemmas carry the same
+  lemmas, but together they add only 9–11: the full system on these 189
+  goals alone (U3xf) solves 58, the same as ENIGMA plus lemmas. U3po (60)
+  ran them interleaved with two other originals, so on 5 workers goal k+1
+  less often started before goal k was proved. That ordering effect is
+  as large as the second guide. Hints and lemmas carry the same
   information, the sibling proofs: hints as steps, lemmas as finished
   results. Once the lemmas are there, the hints mostly point to steps
   that are no longer needed. ENIGMA's knowledge is general, learned from
