@@ -1551,7 +1551,7 @@ used:
 deepening by proof-line distance. It also admits goals within R lines for
 retries and within F lines for deepening. Every gap-1 goal still deepens:
 the late goals, 55 lines apart, block the rest of their chains. The full
-loop runs with `--line-gaps 21,13` from 21:15. Admission barely changes
+loop runs with `--line-gaps 21,13` from 20:58. Admission barely changes
 (1,407 goals against 1,406 deepen, because the dense early parts are
 solved). The gain is in the order: near goals (36%) run before far ones
 (12%).
@@ -1688,7 +1688,7 @@ rounds of 30 s or more, but about 40% overhead for 8 s rounds.
 
 ## 4. Next steps
 
-*Updated 14 Nov, 21:15.*
+*Updated 14 Nov, 20:58.*
 
 * **Done since the last update:** 6 sibling lemmas won (2r) and run in
   the full loop's cascade round 4. rm6t and rm7t brought no online gain
@@ -1706,7 +1706,7 @@ rounds of 30 s or more, but about 40% overhead for 8 s rounds.
   u3n150. The full loop runs without it from 20:15.
 * **Proof-line distance** (2z): it predicts success (32% within 13 lines
   against 12% beyond 34; by goal gap 22% / 12%). The cascade orders its
-  work by it from 21:15.
+  work by it from 20:58.
 * **In-loop retraining** adds nothing online (2u): with the model kept
   fixed, FHL solves 970 after round 1, against 963 for EHL, which
   retrains. The full loop keeps rm4t fixed.
