@@ -532,8 +532,8 @@ class Loop:
                             cnt[key].update(hs)
                             pools[key] = [h for h, _ in cnt[key].most_common()]
                         if getattr(self, 'lemma_src', None) is not None and '__goal_' in n:
-                            o, k = lemmas.split(n)
-                            self.lemma_src[o] = self.lemma_src.get(o, set()) | {k}  # copy: workers read it
+                            o, gk = lemmas.split(n)
+                            self.lemma_src[o] = self.lemma_src.get(o, set()) | {gk}  # copy: workers read it
                 if (k + 1) % 200 == 0:
                     print(f'  round {rnd}: {k+1}/{len(todo)} new={new} {time.time()-t0:.0f}s',
                           file=sys.stderr, flush=True)
