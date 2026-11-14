@@ -347,8 +347,11 @@ class Loop:
             pr = srt[o]
             i = bisect.bisect_left(pr, k)
             below = pr[max(0, i - a.lemmas):i]
-            above = pr[i:i + a.lemmas] if (a.lemma_after if after is None else after) else []
-            return tuple(below + above)
+            if not (a.lemma_after if after is None else after):
+                return tuple(below)
+            # as lemmas.lemma_problem: the a.lemmas nearest proven siblings on either side
+            near = sorted(below + pr[i:i + a.lemmas], key=lambda j: (abs(k - j), j))[:a.lemmas]
+            return tuple(sorted(near))
         def gaps():
             """unsolved goal -> places after the nearest proven goal below it (in the set)."""
             g = {}
