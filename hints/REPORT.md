@@ -1264,15 +1264,19 @@ AUC on the proofs' rules:
 | EL: rule model retrained each round, no hints, reruns all | 920 | 941 | 943 | 947 | 6.1 h |
 | HL: hints from the loop's proofs, no model | 905 | 944 | 951 | 953 | 7.9 h |
 | EHL: both (retrained model + hints), reruns all | 920 | 963 | **971** | (stopped) | 6.5 h |
-| FHL: hints + EHL's round-0 model kept fixed (production setting) | 920 | PENDING | | | |
+| FHL: hints + EHL's round-0 model kept fixed (production setting) | 920 | **970** | PENDING | | |
 
 * The ENIGMA loop alone gains little after its first retraining (+21,
   then +2 and +4); the hint loop gains more (+39, +7, +2).
 * The combination solves 971 after two rounds, as many as EL and HL
   together (973), with 11 that neither solves, and at less CPU than the
   hint loop (the model makes runs cheaper).
-* Whether the gain over HL comes from the retraining or just from having
-  a model at all is what FHL measures.
+* **Retraining adds nothing online.** With the round-0 model kept fixed
+  and only the unsolved goals rerun, round 1 solves 970, against 963 with
+  retraining (11 only in FHL, 4 only in EHL), at 2.31 h of CPU against
+  2.50 h. The gain over HL comes from having a model at all, not from
+  training it on the loop's proofs. The same was seen with rm6t and rm7t
+  (2r), so the full loop keeps the fixed rm4t.
 
 ## 2v. Long runs slow down: overlap index and interreduction filter (user's question, 14 Nov)
 
