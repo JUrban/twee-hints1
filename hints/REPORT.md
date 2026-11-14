@@ -1128,6 +1128,41 @@ with the u3 originals held out. Alone (no hints, no lemmas, aK2 189) it
 solves 40, against 42 for rm4t, so the new proofs do not improve the
 filter. The full-system test is running.
 
+## 2s. Frequent hints as axioms: no gain, and false hints in old pools
+
+`loop.py --hint-axioms K:F` adds the K most frequent pool hints that
+occur in at least F sibling proofs to the problem as axioms. Pool hints
+are consequences of the axioms and proven lemmas, so the proofs stay
+sound.
+
+Test set: nil3_31, 150 goals, at 20 s, on top of 6 lemmas (baseline
+76).
+
+| hint axioms | solved |
+|---|---|
+| none | 76 |
+| 10, each from at least 20 proofs | 72 (+1/−5) |
+| 45, each from at least 10 proofs, all verified as theorems | 73 (+3/−6) |
+
+The high-precision hints are more useful as hints. As axioms they add
+critical pairs from the start and crowd the search.
+
+**False hints in the pools.** The first 45-axiom run solved all 150 goals
+in 28 s. One of its "hints" was `X0 = X1`, which occurs in 1,422 proof
+hint files of loops/V2base (and so of loops/UL). They are proofs of
+conditional goals such as `X0 = X1 ⇒ …`, made before the HINTS-HYP fix
+(twee-e14, 2j). There, the hypothesis with its skolems generalised was
+logged as a hint.
+
+As a hint this was harmless. Twee matches hints by variant (canonical
+form), not by instance, so `X0 = X1` only matches the critical pair
+`X = Y`. The other false generalised hypotheses are wasted hint entries
+in the same way.
+
+As an axiom it is unsound, so `--hint-axioms` now counts only proofs of
+unconditional goals. The 45 top nil3_31 hints from those all prove from
+the axioms in under 10 s each.
+
 ## 2c. Long runs: stall cutoff and checkpoints
 
 * `--eqhint-stall N` gives up when no new rule has matched a hint for N
