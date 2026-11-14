@@ -38,8 +38,15 @@ def load(path):
     pr = [(pos.get(a - 1, -1) if a > 0 else -1, pos.get(b - 1, -1) if b > 0 else -1) for a, b in par]
     return np.array(lab, dtype=np.int8), keys, np.array(pr, dtype=np.int64).reshape(-1, 2)
 
+import zlib
+NB = 1 << 18
+def hashed(feats):
+    """(ids, weights) of a feature dict: crc32 buckets, log(1 + count) weights."""
+    ids = [zlib.crc32(k.encode()) % NB for k in feats]
+    return ids, [math.log1p(v) for v in feats.values()]
+
 class Problem:
-    __slots__ = ('name', 'lab', 'leaf', 'par', 'level', 'gfeat')
+    __slots__ = ('name', 'lab', 'leaf', 'par', 'level', 'gfeat', 'fid', 'fw', 'foff')
 
 def prepare(name, path, vocab, keep_keys=False):
     lab, keys, par = load(path)
@@ -54,15 +61,25 @@ def prepare(name, path, vocab, keep_keys=False):
         else:
             level[i] = 1 + max(level[a] if a >= 0 else 0, level[b] if b >= 0 else 0)
     p.leaf = leaf; p.level = level
-    p.gfeat = None
+    p.gfeat = None; p.fid = None
     return p, (keys if keep_keys else None)
 
+def add_feats(p, keys):
+    import enigfeats
+    fid, fw, foff = [], [], []
+    for k in keys:
+        l, r = k.split('\t')
+        i, w = hashed(enigfeats.features(l, r))
+        foff.append(len(fid)); fid.extend(i); fw.extend(w)
+    p.fid = np.array(fid, dtype=np.int64); p.fw = np.array(fw, dtype=np.float32); p.foff = np.array(foff, dtype=np.int64)
+
 class Deepire(torch.nn.Module):
-    def __init__(self, nvocab, dim, ngoal=0):
+    def __init__(self, nvocab, dim, ngoal=0, feats=False):
         super().__init__()
         self.emb = torch.nn.Embedding(nvocab, dim)
         self.comb = torch.nn.Linear(2 * dim, dim)
         self.goal = torch.nn.EmbeddingBag(ngoal, dim, mode='sum') if ngoal else None
+        self.feat = torch.nn.EmbeddingBag(NB, dim, mode='sum') if feats else None
         self.out = torch.nn.Sequential(torch.nn.Linear(dim * (2 if ngoal else 1), dim), torch.nn.ReLU(),
                                        torch.nn.Linear(dim, 1))
 
@@ -76,9 +93,18 @@ class Deepire(torch.nn.Module):
         leaf = torch.from_numpy(np.concatenate(leaf)); par = torch.from_numpy(np.concatenate(par))
         level = torch.from_numpy(np.concatenate(level))
         n = off; dim = self.emb.embedding_dim
+        if self.feat is not None:
+            fid, fw, foff, base = [], [], [], 0
+            for p in probs:
+                fid.append(p.fid); fw.append(p.fw); foff.append(p.foff + base); base += len(p.fid)
+            F = self.feat(torch.from_numpy(np.concatenate(fid)), torch.from_numpy(np.concatenate(foff)),
+                          per_sample_weights=torch.from_numpy(np.concatenate(fw)))
+        else:
+            F = torch.zeros(n, dim)
         H = torch.zeros(n, dim)
         is_leaf = leaf >= 0
-        H = H.index_put((is_leaf.nonzero().squeeze(1),), torch.tanh(self.emb(leaf[is_leaf])))
+        li = is_leaf.nonzero().squeeze(1)
+        H = H.index_put((li,), torch.tanh(self.emb(leaf[is_leaf]) + F[li]))
         none = torch.tanh(self.emb.weight[NONE])
         for L in range(1, int(level.max()) + 1 if n else 1):
             idx = (level == L).nonzero().squeeze(1)
@@ -87,11 +113,11 @@ class Deepire(torch.nn.Module):
             a = par[idx, 0]; b = par[idx, 1]
             ea = torch.where((a >= 0).unsqueeze(1), H[a.clamp(min=0)], none)
             eb = torch.where((b >= 0).unsqueeze(1), H[b.clamp(min=0)], none)
-            h = torch.tanh(self.comb(torch.cat([ea + eb, ea * eb], 1)))
+            h = torch.tanh(self.comb(torch.cat([ea + eb, ea * eb], 1)) + F[idx])
             H = H.index_put((idx,), h)
         if self.goal is not None:
             gi = torch.from_numpy(np.concatenate(gidx))
-            G = torch.stack([self.goal(torch.tensor(p.gfeat[0], dtype=torch.long).unsqueeze(0),
+            G = torch.stack([self.goal(torch.tensor(p.gfeat[0], dtype=torch.long), torch.tensor([0]),
                                        per_sample_weights=torch.tensor(p.gfeat[1], dtype=torch.float32)).squeeze(0)
                              if len(p.gfeat[0]) else torch.zeros(dim) for p in probs])
             H = torch.cat([H, G[gi]], 1)
@@ -118,6 +144,7 @@ def main():
     ap.add_argument('--max-problems', type=int, default=0)
     ap.add_argument('--ntest', type=int, default=300)
     ap.add_argument('--goal', action='store_true', help='add a projection of the goal\'s ENIGMA features')
+    ap.add_argument('--feats', action='store_true', help='hybrid: add a hashed bag of each rule\'s own ENIGMA features')
     ap.add_argument('--compare-lgb', help='MODEL.txt,MODEL.vocab: LightGBM rule model to score the same test rules')
     ap.add_argument('--theory', action='store_true', help='--compare-lgb model uses the theory block')
     ap.add_argument('--threads', type=int, default=5)
@@ -146,33 +173,26 @@ def main():
             if line.startswith('-1\t'):
                 f = line.split('\t'); cnt[f[2] + '\t' + f[3]] += 1
     vocab = {k: 3 + i for i, k in enumerate(k for k, c in cnt.most_common() if c >= a.min_ax)}
-    gvocab = {}
     def gfeat(n):
         import rulemodel
-        g = rulemodel.goal_feats(n)
-        ids, ws = [], []
-        for k, v in g.items():
-            if k not in gvocab:
-                gvocab[k] = len(gvocab)
-            ids.append(gvocab[k]); ws.append(float(v))
-        return ids, ws
+        return hashed(rulemodel.goal_feats(n))
     def prep(names):
         out = []
         for n in names:
-            p, _ = prepare(n, paths[n], vocab)
+            p, keys = prepare(n, paths[n], vocab, keep_keys=a.feats)
             if (p.lab == 1).sum() == 0 or len(p.lab) < 2:
                 continue
             if a.goal:
                 p.gfeat = gfeat(n)
+            if a.feats:
+                add_feats(p, keys)
             out.append(p)
         return out
     tr = prep(train); te = prep(test)
     print(f'train {len(tr)} problems {sum(len(p.lab) for p in tr)} rules, test {len(te)}; '
           f'axiom vocab {len(vocab)}; loaded in {time.time()-t0:.0f}s', flush=True)
     npos = sum(int((p.lab == 1).sum()) for p in tr); nneg = sum(int((p.lab == 0).sum()) for p in tr)
-    model = Deepire(3 + len(vocab), a.dim, (len(gvocab) + 1) if a.goal else 0)
-    if a.goal:
-        gvocab_frozen = dict(gvocab)
+    model = Deepire(3 + len(vocab), a.dim, NB if a.goal else 0, a.feats)
     opt = torch.optim.Adam(model.parameters(), lr=a.lr)
     lossf = torch.nn.BCEWithLogitsLoss(pos_weight=torch.tensor(nneg / max(1, npos)))
     def evaluate(probs):

@@ -1216,12 +1216,21 @@ AUC on the proofs' rules:
   term features. They are somewhat complementary: fusion adds +0.011.
   Only 6,746 training logs have parent columns; the older train_only
   logs do not.
+* **Hybrid neural model** (`deepire.py --feats --goal`): the derivation
+  embedding plus hashed bags of the rule's and the goal's ENIGMA
+  features, trained on 2,500 problems for 6 epochs. AUC 0.814, still
+  rising, against 0.885 for rm7t on the same test. Rank fusion with rm7t
+  adds nothing (0.885 at weight 0.1, lower above). At this data size,
+  LightGBM on ENIGMA features stays the better model, and the
+  derivation history adds no usable signal on top of the retrained
+  model.
 * **The online ENIGMA loop** (`loop.py --rerun-solved`, abs/el.sh) is
   running on all 1,934 goals of these 3 originals at 5 abstract s, without
   lemmas. Each round retrains on base data plus the loop's shortest proof
   per problem, then reruns every goal. Round 0, with a base-trained model
-  like rm4t, solves 920. The hint loop (HL) and the combination (EHL)
-  follow.
+  like rm4t, solves 920. Round 1, retrained with those proofs, solves 936
+  of them on its own (+21 new, −5 lost), bringing the total to 941. The
+  hint loop (HL) and the combination (EHL) follow.
 
 ## 2c. Long runs: stall cutoff and checkpoints
 
