@@ -1192,6 +1192,37 @@ out longer and make the rule set smaller. On nil3_31, 150 goals at 20 s
 with 6 lemmas: penalty 2 solves 76, 5 solves 77 and 20 solves 75. Wall
 time does not change. Penalty 2 stays.
 
+## 2u. ENIGMA-style looping and a Deepire-style model (user's question, 14 Nov)
+
+**Offline, in the loop setting.** The test set is the 298 proofs of
+nil3_31, aK2_eq_aK3_a and R1dist_to_aa1 goals that the full loop found
+in rounds 1–4. These are later goals of originals whose earlier goals
+are solved. Training gets every other given log, including the other
+proofs of the same originals, as an ENIGMA loop would. Mean per-problem
+AUC on the proofs' rules:
+
+| model | AUC |
+|---|---|
+| rm4t (base data: train_only + tr30_g1) | 0.850 |
+| **rm7t: LightGBM retrained with the loop's proofs** (negmax 150, 34 GB, 24 min) | **0.882** |
+| Deepire-style, derivation only (`deepire.py`, d = 32, 4 epochs, 2 min) | 0.765 |
+| rank fusion rm4t + 0.5 × Deepire | 0.861 |
+
+* **Retraining on the loop's own proofs helps offline:** +0.03 AUC on
+  later goals of the same originals. rm6t gained nothing (2r), but it
+  held these originals out of training entirely.
+* **Deepire-style embeddings** (axiom equations as learned leaves; a rule's
+  embedding computed from its two parents) are weaker than the ENIGMA
+  term features. They are somewhat complementary: fusion adds +0.011.
+  Only 6,746 training logs have parent columns; the older train_only
+  logs do not.
+* **The online ENIGMA loop** (`loop.py --rerun-solved`, abs/el.sh) is
+  running on all 1,934 goals of these 3 originals at 5 abstract s, without
+  lemmas. Each round retrains on base data plus the loop's shortest proof
+  per problem, then reruns every goal. Round 0, with a base-trained model
+  like rm4t, solves 920. The hint loop (HL) and the combination (EHL)
+  follow.
+
 ## 2c. Long runs: stall cutoff and checkpoints
 
 * `--eqhint-stall N` gives up when no new rule has matched a hint for N
