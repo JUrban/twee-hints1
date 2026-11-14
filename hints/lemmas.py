@@ -103,7 +103,7 @@ def goal_info(names):
         info[n] = (axiom_key(n), F)
     if new:
         os.makedirs(os.path.dirname(CACHE), exist_ok=True)
-        pickle.dump(info, open(CACHE + '.tmp', 'wb')); os.replace(CACHE + '.tmp', CACHE)
+        tmp = CACHE + '.tmp%d' % os.getpid(); pickle.dump(info, open(tmp, 'wb')); os.replace(tmp, CACHE)
     return info
 
 _axset = {}
