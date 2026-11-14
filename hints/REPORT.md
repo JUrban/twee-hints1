@@ -1130,6 +1130,32 @@ with the u3 originals held out. Alone (no hints, no lemmas, aK2 189) it
 solves 40, against 42 for rm4t, so the new proofs do not improve the
 filter. The full-system test is running.
 
+**Which lemmas proofs use (14 Nov, twee-e31 `USEDAXIOMS`).** 60 goals the
+full loop solved in round 4 were rerun at 20 s on a snapshot of all
+40,961 proofs, offered the 20 nearest proven siblings plus 10 kNN lemmas.
+All 60 were solved, each proof using 7.6 lemmas on average. A proof uses
+about 20% of the siblings it is offered, almost regardless of distance:
+
+| sibling | offered | used |
+|---|---|---|
+| before, 1–3 goals away | 120 | 30% |
+| before, 4–6 | 132 | 27% |
+| before, 7–10 | 173 | 17% |
+| before, 11+ | 296 | 19% |
+| after, 1–3 | 115 | 20% |
+| after, 4–10 | 245 | 20% |
+| after, 11+ | 119 | 16% |
+
+All ten kNN ranks are used, 13–28 times each. Lemmas act as shortcuts to
+whatever is available, not as a specific needed step. With 6 nearest
+siblings instead of 20, on the same snapshot, 58 of the 60 are solved,
+median 3.4 s against 2.7 s; 20 lemmas give fewer rules in only 18 of 58.
+The large difference is with the original round-4 runs (median 9.7 s):
+the same goals are about 3× faster now because more of their neighbours
+are proven. More lemmas at a time add little (as with 10 against 6
+above); a richer context does, which is what the cascade's retries on
+new nearby proofs exploit.
+
 ## 2s. Frequent hints as axioms: no gain, and false hints in old pools
 
 `loop.py --hint-axioms K:F` adds the K most frequent pool hints that
