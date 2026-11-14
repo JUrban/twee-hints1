@@ -160,6 +160,7 @@ def main():
     ap.add_argument('--all', action='store_true')
     ap.add_argument('--parents', action='store_true', help='add the parents\' features (p: block)')
     ap.add_argument('--test-origs', help='comma-separated originals to hold out')
+    ap.add_argument('--test-names', help='file of problems to hold out (their originals stay in training: the loop setting)')
     ap.add_argument('--save'); ap.add_argument('--vocab')
     a = ap.parse_args()
     global THEORY
@@ -175,8 +176,12 @@ def main():
     test_o = set() if a.all else set(origs[:max(1, len(origs) // 3)])
     if a.test_origs:
         test_o = set(a.test_origs.split(','))
-    train = [n for n in names if n.split('__goal_')[0] not in test_o]
-    test = [n for n in names if n.split('__goal_')[0] in test_o]
+    test_n = set()
+    if a.test_names:
+        test_o = set() if not a.test_origs else test_o
+        test_n = set(l.split()[0] for l in open(a.test_names))
+    train = [n for n in names if n.split('__goal_')[0] not in test_o and n not in test_n]
+    test = [n for n in names if n.split('__goal_')[0] in test_o or n in test_n]
     print('test originals', sorted(test_o))
     m = RuleModel(a.parents)
     print('train', m.train(paths, train, a.negmax, a.rounds, a.leaves, a.seed, a.threads))
