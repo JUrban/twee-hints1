@@ -260,7 +260,7 @@ class Loop:
             # P9loop's term orderings: attempt k of a goal (rounds from --start, or the number of
             # its earlier p9 attempts) uses ordering k mod N; ordering 0 is twee's default
             # (Bigloop, --p9-parallel P: the P runs of a round take orderings attempt*P .. attempt*P+P-1)
-            k = (self.p9_attempt(name, rnd) * max(1, a.p9_parallel) + variant) % a.p9_orders
+            k = (self.p9_attempt(name, rnd) * max(1, a.p9_parallel) + variant + a.p9_order_offset) % a.p9_orders
             if k:
                 cmd += ['--precedence', ','.join(self.p9_precedence(orig_path, k))]
         if self.model:
@@ -813,6 +813,8 @@ def main():
                     help='T0,T1,...: frontier deepening instead of rounds (see Loop.cascade), from round --start')
     ap.add_argument('--cascade-start', type=int, default=0,
                     help='--cascade: unsolved goals count as tried up to this level in their current context')
+    ap.add_argument('--p9-order-offset', type=int, default=0,
+                    help='--p9-orders: shift the ordering index (e.g. 1: a single round runs ordering 1, not the default)')
     ap.add_argument('--line-gaps', default='',
                     help='R,F: --cascade also retries goals at most R proof lines after a proven sibling, '
                          'deepens goals at most F lines after one, and orders both by proof lines')
