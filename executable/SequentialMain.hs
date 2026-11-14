@@ -1473,6 +1473,9 @@ runTwee globals (TSTPFlags tstp) horn precedence config0 flags@MainFlags{..} lat
     putStrLn "HINTS-HYP"
     forM_ hypEqns $ \eqn -> putStrLn (showEqn eqn)
     putStrLn "HINTS-END"
+    -- the input axioms (and lemmas given as axioms) the proof uses, by name
+    putStrLn $ "USEDAXIOMS " ++ unwords (Set.toList (Set.fromList
+      [ axiom_name ax | d <- map derivation lems ++ map (derivation . pg_proof) sols, ax <- usedAxioms d ]))
     when (cfg_log_given config) $ do
       putStrLn "GIVEN-BEGIN"
       forM_ (reverse (st_given state)) $ \(eqn, p1, p2) -> do
