@@ -1434,12 +1434,12 @@ each):
 
 | arm | solved after rounds 1 / 2 / 3 / 4 | wall (sum over runs) |
 |---|---|---|
-| resume, saved queue re-scored (BRS) | 9 / 17 / 23 / – | 5.3 h for 3 rounds |
+| resume, saved queue re-scored (BRS) | 9 / 17 / 23 / 26 | 5.3 h for 3, 7.8 h for 4 |
 | resume, queue kept as saved (BRSn, `--no-resume-requeue`) | 9 / 18 / 27 / 29 | 4.1 h for 3, 5.3 h for 4 |
 | P9loop, matcher lemmas + a new ordering each round (BP9) | 9 / 16 / 18 / 18 | 4.1 h |
 | Bigloop, 2 orderings per goal and round (BBL) | 14 / 19 | 4.2 h |
 
-All four arms solved 33 goals together. Six of them only BRSn solved;
+All four arms solved 33 goals together. Four of them only BRSn solved;
 BP9 and BBL each solved one goal no other arm did; BRS solved none on
 its own.
 
@@ -1448,8 +1448,8 @@ its own.
   against 18 at the same 4.1 h. The P9 arm stalls after round 2 (BP9 adds
   nothing in round 4), as in test 1.
 * **Skip the re-scoring.** Re-scoring the saved queue against the new hints
-  costs 20–55 s per resume and buys nothing: BRS solves 23 where BRSn
-  solves 27 in less time. The full loop now resumes with
+  costs 20–55 s per resume and buys nothing: after four rounds BRS
+  solves 26 in 7.8 h, BRSn 29 in 5.3 h. The full loop now resumes with
   `--no-resume-requeue` (round 5 continued at 19:35).
 * **Orderings do add something.** In BBL's round 1, a second ordering per
   goal solves 14 against 9 for one run, but at twice the wall time. At
