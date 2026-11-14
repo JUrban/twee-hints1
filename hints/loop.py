@@ -45,10 +45,15 @@ class Loop:
         self.sig = {}
         self.solved = {}   # name -> (round, time)
         sp = os.path.join(self.dir, 'solved.tsv')
+        self.solved_off = 0   # (--sync reads the rows appended after this offset)
         if os.path.exists(sp):
-            for l in open(sp):
-                n, r, t = l.split('\t')[:3]
-                self.solved[n] = (int(r), float(t))
+            with open(sp) as f:
+                for l in f.readlines():
+                    if not l.endswith('\n'):
+                        break
+                    self.solved_off += len(l.encode())
+                    n, r, t = l.split('\t')[:3]
+                    self.solved[n] = (int(r), float(t))
 
     def p9_lemmas(self, name):
         """--p9loop: the hint matchers of this goal's earlier failed runs (TPTP formulas, in
@@ -608,10 +613,43 @@ class Loop:
         def grown(n):
             return a.retry_hints and psz(n) >= hp[n] * a.retry_hints
         t0 = time.time(); new = 0; done_n = 0
+        def add_proof(n, rnd, dt, hs):
+            att.pop(n, None)
+            self.solved[n] = (rnd, dt)
+            key = self.pool_key(n)
+            cnt[key].update(hs)
+            self.count_uncond(n, hs)
+            pools[key] = [h for h, _ in cnt[key].most_common()]
+            o, k = lemmas.split(n)
+            self.lemma_src[o] = self.lemma_src.get(o, set()) | {k}
+            srt.pop(o, None)
+        # --sync: proofs that other processes (climb.py --live, merge.py) append to solved.tsv
+        # after writing their hints file join the pools and lemmas as if found here
+        sync_f = open(os.path.join(self.dir, 'solved.tsv'), 'rb')
+        sync_f.seek(self.solved_off); sync_t = 0; nsync = 0
+        def sync():
+            nonlocal nsync
+            while True:
+                pos = sync_f.tell()
+                line = sync_f.readline().decode('utf8', 'replace')
+                if not line.endswith('\n'):   # (none, or a row still being written: read it next time)
+                    sync_f.seek(pos)
+                    break
+                w = line.rstrip('\n').split('\t')
+                if len(w) < 2 or w[0] in self.solved:
+                    continue
+                hp_ = os.path.join(self.dir, 'hints', w[0])
+                if not os.path.exists(hp_):
+                    continue
+                hs = [tuple(x.rstrip('\n').split('\t')[:2]) for x in open(hp_) if '\t' in x]
+                add_proof(w[0], rnd, float(w[2]) if len(w) > 2 else 0.0, hs)
+                nsync += 1
         with open(os.path.join(rdir, 'results.tsv'), 'a') as rf, \
              open(os.path.join(self.dir, 'solved.tsv'), 'a') as sf, \
              ThreadPoolExecutor(a.j) as ex:
             while True:
+                if a.sync and time.time() - sync_t >= a.sync:
+                    sync(); sync_t = time.time()
                 busy = {n for n, _ in running.values()}
                 if time.time() - t0 < a.cascade_hours * 3600:
                     g = gaps()
@@ -654,24 +692,19 @@ class Loop:
                     n, ok, dt, stats, hs = f.result()
                     done_n += 1
                     rf.write(f'{n}\t{"THM" if ok else "NO"}\t{dt:.2f}\t{stats}\tL{lev}\tt={time.time()-t0:.0f}\n'); rf.flush()
-                    if ok:
+                    if ok and n in self.solved:
+                        pass   # (synced from another process meanwhile: keep its row and hints)
+                    elif ok:
                         new += 1
-                        att.pop(n, None)
-                        self.solved[n] = (rnd, dt)
-                        sf.write(f'{n}\t{rnd}\t{dt:.2f}\n'); sf.flush()
                         with open(os.path.join(self.dir, 'hints', n), 'w') as hf:
                             for l, r in hs:
                                 hf.write(f'{l}\t{r}\n')
-                        key = self.pool_key(n)
-                        cnt[key].update(hs)
-                        self.count_uncond(n, hs)
-                        pools[key] = [h for h, _ in cnt[key].most_common()]
-                        o, k = lemmas.split(n)
-                        self.lemma_src[o] = self.lemma_src.get(o, set()) | {k}
-                        srt.pop(o, None)
+                        sf.write(f'{n}\t{rnd}\t{dt:.2f}\n'); sf.flush()
+                        add_proof(n, rnd, dt, hs)
                     if done_n % 50 == 0:
                         print(f'  cascade: {done_n} runs, new={new}, {len(running)} running, '
-                              f'{time.time()-t0:.0f}s', file=sys.stderr, flush=True)
+                              f'{time.time()-t0:.0f}s' + (f', synced={nsync}' if a.sync else ''),
+                              file=sys.stderr, flush=True)
         msg = f'cascade: {done_n} runs new {new} total {len(self.solved)}/{len(self.names)} {time.time()-t0:.0f}s'
         print(msg, file=sys.stderr, flush=True)
         with open(os.path.join(self.dir, 'log.txt'), 'a') as lf:
@@ -892,6 +925,9 @@ def make_parser():
                     help='--p9loop: also take the matchers of unconditional sibling goals at most this many places away')
     ap.add_argument('--p9-max', type=int, default=0, help='--p9loop: at most this many lemmas, the most recently derived (0 = all)')
     ap.add_argument('--init', help='import round-0 results (solved.tsv and hints) of another loop dir')
+    ap.add_argument('--sync', type=float, default=0,
+                    help='--cascade: every S seconds, take in the proofs other processes appended to '
+                         'solved.tsv (after writing hints/NAME), e.g. climb.py --live or merge.py')
     return ap
 
 def init_dir(a):
