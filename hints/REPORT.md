@@ -1257,8 +1257,22 @@ AUC on the proofs' rules:
   lemmas. Each round retrains on base data plus the loop's shortest proof
   per problem, then reruns every goal. Round 0, with a base-trained model
   like rm4t, solves 920. Round 1, retrained with those proofs, solves 936
-  of them on its own (+21 new, −5 lost), bringing the total to 941. The
-  hint loop (HL) and the combination (EHL) follow.
+  of them on its own (+21 new, −5 lost), bringing the total to 941.
+
+| loop on sets/e3 (1,934 goals), 5 abstract s, no lemmas | round 0 | +round 1 | +round 2 | +round 3 | CPU (wall-sum, rounds 0–2) |
+|---|---|---|---|---|---|
+| EL: rule model retrained each round, no hints, reruns all | 920 | 941 | 943 | 947 | 6.1 h |
+| HL: hints from the loop's proofs, no model | 905 | 944 | 951 | 953 | 7.9 h |
+| EHL: both (retrained model + hints), reruns all | 920 | 963 | **971** | (stopped) | 6.5 h |
+| FHL: hints + EHL's round-0 model kept fixed (production setting) | 920 | PENDING | | | |
+
+* The ENIGMA loop alone gains little after its first retraining (+21,
+  then +2 and +4); the hint loop gains more (+39, +7, +2).
+* The combination solves 971 after two rounds, as many as EL and HL
+  together (973), with 11 that neither solves, and at less CPU than the
+  hint loop (the model makes runs cheaper).
+* Whether the gain over HL comes from the retraining or just from having
+  a model at all is what FHL measures.
 
 ## 2v. Long runs slow down: overlap index and interreduction filter (user's question, 14 Nov)
 
