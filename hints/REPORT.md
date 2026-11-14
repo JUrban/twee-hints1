@@ -1091,6 +1091,43 @@ Earlier no-lemma data, on other sets, points the same way:
   hints 56.
 * ho3u: rm4 81, rm4t 87.
 
+## 2r. How many sibling lemmas
+
+Twenty abstract s per goal, online from loops/V2base, rm4t plus the
+whole-original pool plus 10 subset-kNN lemmas. Only the number of
+nearest proven siblings imported as axioms changes.
+
+| siblings | aK2_eq_aK3_a, 189 goals | nil3_31, first 150 unsolved goals |
+|---|---|---|
+| 3 nearest below | 58 (U3xf) | 62 |
+| **6 nearest below** | **64** (+8/−2) | **76** (+16/−2) |
+| 10 nearest below | – | 74 |
+| 6 nearest on either side (`--lemma-after`) | – | 76 |
+| 3 below, 20 subset-kNN lemmas in place of 10 | 59 | – |
+
+Six siblings beat three on both originals, by 10% and 23%, at less time.
+Ten are no better than six. Lemmas from above do not change the result
+here, where few goals above are proven. The retry test of 2p, where many
+were, gave +6/−0. Extra subset-kNN lemmas add nothing.
+
+The full loop's round 3 (cascade, 3 lemmas, from 06:03) found 738 proofs
+in 2,481 first-level runs, bringing the total to 39,746. It was then
+restarted at 08:35 as round 4, with 6 lemmas from either side
+(abs/ul4.sh, `--cascade-start -1`): every unsolved goal near a proof
+gets a 20 s run in its new context first.
+
+Two cascade fixes went in with the restart:
+
+* The lemma context is now the N nearest proven siblings on either side,
+  the same ones lemma_problem picks.
+* A retry starts fresh but saves its state, so a later deepening
+  continues that search, not an older one.
+
+**Retrained model rm6t:** rm4t's data plus the full loop's 5,303 proofs,
+with the u3 originals held out. Alone (no hints, no lemmas, aK2 189) it
+solves 40, against 42 for rm4t, so the new proofs do not improve the
+filter. The full-system test is running.
+
 ## 2c. Long runs: stall cutoff and checkpoints
 
 * `--eqhint-stall N` gives up when no new rule has matched a hint for N
