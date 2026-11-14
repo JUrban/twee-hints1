@@ -194,7 +194,7 @@ def lemma_problem_knn(name, solved, m, index, k, after=False):
     o, _ = split(name)
     extra = index.select(name, k, exclude={f'{o}__goal_{j}' for j in have})
     for i, x in enumerate(extra):
-        txt += f'fof(lemma_knn_{i},axiom,{conjecture(x)}).\n'
+        txt += f'fof(lemma_knn_{i}_{x},axiom,{conjecture(x)}).\n'   # (source goal in the name: USEDAXIOMS)
     return txt, n + len(extra)
 
 def main():
