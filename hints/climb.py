@@ -141,6 +141,9 @@ def main():
                          'associativity of binary operations, derived operations trivial')
     ap.add_argument('--freq', type=int, default=0,
                     help='also assume the K most frequent equations of the original\'s proofs (unconditional goals)')
+    ap.add_argument('--knn', type=int, default=0,
+                    help='also assume the K unproven goals of other originals (axioms a subset of the '
+                         'target\'s) most similar to the target: lines of Prover9 proofs, so true')
     ap.add_argument('--fill', type=float, default=0,
                     help='Veroff\'s gap filling: after each sketch proof, one twee --multi-goal run of this '
                          'many seconds tries to prove the proof\'s lemmas that depend on the assumptions, without '
@@ -166,6 +169,8 @@ def main():
     if a.lemma_knn:
         lp.lemma_index = lemmas.LemmaIndex(sorted(lp.solved), subsets=a.lemma_subsets)
     cands = {}
+    if c.knn:
+        uidx = lemmas.LemmaIndex(sorted(n for n in gl if n not in lp.solved), subsets=True)
     # equation counts over the proofs of unconditional goals of the targets' originals (--freq):
     # a conditional goal's hypotheses become false 'hints' like X0 = X1 when generalised
     ucnt = collections.defaultdict(collections.Counter)
@@ -199,6 +204,11 @@ def main():
             f = lemmas.conjecture(f'{o}__goal_{j}')
             if f and lemmas.unit_eq(f):   # (a conditional goal's statement is not an equation)
                 res[f'assume_goal_{j}'] = f
+        if c.knn:
+            with lock:
+                near = uidx.select(t, c.knn, exclude={f'{o}__goal_{j}' for j in allgoals.get(o, ())})
+            for i, m in enumerate(near):
+                res[f'assume_knn_{i}'] = lemmas.conjecture(m)
         if c.laws:
             res.update(laws(t))
         if c.freq:

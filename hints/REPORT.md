@@ -1620,8 +1620,55 @@ production context: lemmas, kNN lemmas, hint pools and the rule model.
   Otherwise the climb ends with a real run that has all the sketch hints.
   If even the full set S fails, its time is doubled.
 
-First test (CL1, running): sets/sg1, M = 8, up to 6 sketch runs of 5 s,
-then a real run of 20 s. The comparison is S20.
+**First test (CL1, siblings only):** sets/sg1, M = 8, up to 6 sketch runs
+of 5 s, then a real run of 20 s. The comparison is S20. CL1 was stopped
+after 7 goals and 982 s on 2 threads.
+
+* It found 1 real proof (c_344). S20 solves that goal too.
+* There were sketch proofs for 5 of the 7 goals. Often one sibling is
+  enough: j_294 follows from goal_292 in 2 s, j_363 from goal_367, c_369
+  from goal_353. The 20 s real runs still failed. The steps from the
+  sibling to the target are the easy part, and the hints cover only that
+  part. The hard part is the sibling itself, which is stalled as well.
+* When no sibling set helped, the budget doubling cost a lot: b_364
+  reached 547 s in a single run. The doubled budget is now capped at
+  4 × the sketch time.
+
+**Laws (user's remark, "frequent extra axioms like commutativity").**
+`--laws` adds Veroff-style simplifying laws over the axioms' signature.
+They may be false.
+
+* Commutativity of each binary operation.
+* Associativity of each binary operation that no axiom defines.
+* Each defined operation (an axiom f(X1..Xn) = s) equal to a constant or
+  to its first argument.
+
+A law with which twee proves X = Y in 2 s collapses the theory and is
+dropped. For the AIM signature, 6 of 18 collapse: t = e, l = e, r = e,
+a = x, k = x and comm(t). `--freq K` adds the K most frequent equations of
+the original's unconditional proofs. These are true.
+
+The laws make every sketch trivial. A single law, such as l(X,Y,Z) = X or
+comm(ld), proves the target in 0.3 s with a dozen hints, and the climb
+never reaches the empty set. **The descent alone gives few, short hints.**
+
+**Gap filling (Veroff 2001, "proof sketches").** Veroff does not stop at a
+sketch proof. The steps of the sketch that use the extra assumption become
+targets of their own. twee-e37's `--print-hints` lists the lemmas that
+depend, transitively, on axioms named `assume_*` (HINTS-ASSUMED).
+`climb.py --fill S` (b506481) works as follows:
+
+* After each sketch proof, one `--multi-goal` run of S s tries to prove
+  those lemmas without the assumptions.
+* It uses the true lemmas so far and the sketch hints.
+* The proven lemmas become axioms `true_i` of all later runs on the
+  original's goals.
+* A final proof that uses true lemmas is a chain of real proofs. It is
+  also tried once without them.
+
+In the smoke test (b_364), the sketch proofs had 7–27 dependent lemmas.
+Each 3 s check proved 0–7 of them, giving 18 true lemmas after 8 sketches.
+The 10 s real run still failed.
 
 ## 2c. Long runs: stall cutoff and checkpoints
 
