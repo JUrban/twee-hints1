@@ -537,6 +537,16 @@ class Loop:
                for n in self.names if n not in self.solved}
         running = {}   # future -> (name, level)
         rdir = os.path.join(self.dir, 'r%d' % rnd); os.makedirs(rdir, exist_ok=True)
+        if a.cascade_continue and os.path.exists(os.path.join(rdir, 'results.tsv')):
+            # a restarted round: the levels this round already tried (in the current context)
+            k0 = 0
+            for line in open(os.path.join(rdir, 'results.tsv')):
+                f = line.rstrip('\n').split('\t')
+                if len(f) >= 5 and f[0] in att and f[4][:1] == 'L' and f[4][1:].isdigit():
+                    lev = int(f[4][1:])
+                    if lev > att[f[0]][1]:
+                        att[f[0]] = (ctx(f[0]), lev); k0 += 1
+            print(f'  cascade: continuing round {rnd}, {k0} level updates from its results', flush=True)
         t0 = time.time(); new = 0; done_n = 0
         with open(os.path.join(rdir, 'results.tsv'), 'a') as rf, \
              open(os.path.join(self.dir, 'solved.tsv'), 'a') as sf, \
@@ -786,6 +796,8 @@ def main():
                     help='T0,T1,...: frontier deepening instead of rounds (see Loop.cascade), from round --start')
     ap.add_argument('--cascade-start', type=int, default=0,
                     help='--cascade: unsolved goals count as tried up to this level in their current context')
+    ap.add_argument('--cascade-continue', action='store_true',
+                    help='--cascade: a restarted round; goals count as tried at the levels its results.tsv shows')
     ap.add_argument('--cascade-was-below', action='store_true',
                     help='--cascade with --lemma-after: earlier attempts used lemmas from below only')
     ap.add_argument('--cascade-hours', type=float, default=1e9, help='--cascade: no new runs after this many hours')
