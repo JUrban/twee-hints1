@@ -117,4 +117,4 @@ library
       Data.Primitive.Checked
   if flag(profile)
     cpp-options: -DPROFILE
-    build-depends: symbol, hashable, unordered-containers, rdtsc
+    build-depends: symbol, hashable, unordered-containers, QuickCheck

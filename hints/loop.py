@@ -167,6 +167,8 @@ class Loop:
                 for h in hints:
                     f.write('\t'.join(h) + '\n')
             cmd += ['--hints-file', hpath]
+        if os.environ.get('LOOP_PRINT_CMD'):
+            print('CMD', ' '.join(cmd), file=sys.stderr, flush=True)
         t0 = time.time()
         try:
             p = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
@@ -180,7 +182,7 @@ class Loop:
             i, j = out.find('GIVEN-BEGIN'), out.find('GIVEN-END')
             with open(os.path.join(od, name), 'w') as f:
                 f.write(out[:i] + out[j:] if 0 <= i < j else out)  # without the given rules
-        if hints:
+        if hints and not os.environ.get('LOOP_KEEP_TMP'):
             os.unlink(hpath)
         ok = 'HINTS-END' in out
         if resume:

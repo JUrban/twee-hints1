@@ -5,7 +5,7 @@ module Twee.Profile(stamp, stampWith, stampM, stampGen, stampGen', profile) wher
 #ifdef PROFILE
 import System.IO.Unsafe
 import Data.IORef
-import System.CPUTime.Rdtsc
+import GHC.Clock (getMonotonicTimeNSec)
 import Data.List
 import Data.Ord
 import Text.Printf
@@ -49,7 +49,7 @@ eventLog = unsafePerformIO (newIORef (State HashMap.empty 0 (Running 0 0 0) []))
 enter :: IO (HashMap Symbol Record)
 enter = do
   State{..} <- readIORef eventLog
-  tsc <- rdtsc
+  tsc <- getMonotonicTimeNSec
   let !running = Running tsc 0 0
   writeIORef eventLog (State st_map st_overhead running (st_running:st_stack))
   return st_map
@@ -57,7 +57,7 @@ enter = do
 {-# NOINLINE exit #-}
 exit :: HashMap Symbol Record -> Symbol -> IO ()
 exit old_st str = do
-  tsc <- rdtsc
+  tsc <- getMonotonicTimeNSec
   State st_map st_overhead Running{..} st_stack <- readIORef eventLog
   str `pseq` do
     let cumulative = tsc - run_started - run_overhead
@@ -72,7 +72,7 @@ exit old_st str = do
     case st_stack of
       [] -> error "mismatched enter/exit"
       Running{..}:st_stack -> m `pseq` do
-        tsc' <- rdtsc
+        tsc' <- getMonotonicTimeNSec
         let overhead = tsc' - tsc
             run =
               Running run_started
