@@ -526,8 +526,9 @@ class Loop:
                             att[n] = (ctx(n), 0)
                             # fresh in the new context; its state replaces any older one, so deepening
                             # continues this search
+                            # (--p9loop: no states; the goal's matcher lemmas carry over instead)
                             fut = ex.submit(self.run_one, n, self.hints_for(n, pools, None), rnd,
-                                            T[0], 'fresh', a.cascade_cpu * T[0])
+                                            T[0], False if a.p9loop else 'fresh', a.cascade_cpu * T[0])
                         else:
                             if sum(1 for _, l in running.values() if l > 0) >= a.j - a.reserve:
                                 break
@@ -536,9 +537,11 @@ class Loop:
                                 continue
                             att[n] = (ctx(n), lev)
                             sp = os.path.join(self.dir, 'states', n + '.bin')
-                            b = T[lev] - T[lev - 1] if os.path.exists(sp) else T[lev]
+                            # --p9loop (P9loop deepening): a fresh run of the level's increment, with the
+                            # matcher lemmas of the goal's earlier runs and its next ordering, not a resume
+                            b = T[lev] - T[lev - 1] if (a.p9loop or os.path.exists(sp)) else T[lev]
                             fut = ex.submit(self.run_one, n, self.hints_for(n, pools, None), rnd,
-                                            b, True, a.cascade_cpu * b)
+                                            b, not a.p9loop, a.cascade_cpu * b)
                         running[fut] = (n, lev)
                 if not running:
                     break
