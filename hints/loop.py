@@ -9,7 +9,7 @@ the proofs it finds to the pool.
 usage: loop.py SET DIR [--rounds N] [--timeout S] [-j N] [--twee BIN]
                [--args "..."] [--pool original|all] [--aux]
 """
-import argparse, collections, json, os, re, subprocess, sys, time
+import argparse, collections, json, os, random, re, subprocess, sys, time
 from concurrent.futures import ThreadPoolExecutor, as_completed, wait, FIRST_COMPLETED
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import hintlib
@@ -77,6 +77,23 @@ class Loop:
             with open(os.path.join(self.dir, 'p9lem', name), 'a') as fh:
                 fh.writelines(f + '\n' for f in new)
         return len(new)
+
+    def p9_attempt(self, name, rnd):
+        if not self.a.cascade:
+            return rnd - self.a.start
+        p = os.path.join(self.dir, 'p9lem', name + '.attempts')
+        return int(open(p).read()) if os.path.exists(p) else 0
+
+    def p9_precedence(self, path, k):
+        """Ordering k > 0: a fixed pseudo-random permutation of the problem's function symbols."""
+        syms = set()
+        for line in open(path):
+            m = re.match(r'\s*(?:cnf|fof)\(\s*[^,]+,\s*[^,]+,(.*)', line)
+            if m:
+                syms |= set(re.findall(r'\b([a-z][A-Za-z0-9_]*)\b', m.group(1)))
+        syms = sorted(syms)
+        random.Random(1000003 * k + 17).shuffle(syms)
+        return syms
 
     def signature(self, name):
         o = orig_of(name)
@@ -203,6 +220,12 @@ class Loop:
                '--no-proof', '--print-hints', '--print-given'] + args
         if a.p9loop:
             cmd += ['--print-hint-matchers']
+        if a.p9_orders > 1:
+            # P9loop's term orderings: attempt k of a goal (rounds from --start, or the number of
+            # its earlier p9 attempts) uses ordering k mod N; ordering 0 is twee's default
+            k = self.p9_attempt(name, rnd) % a.p9_orders
+            if k:
+                cmd += ['--precedence', ','.join(self.p9_precedence(orig_path, k))]
         if self.model:
             m, v, gdir = self.model
             cmd += ['--rule-model', m, '--rule-vocab', v, '--rule-goal', os.path.join(gdir, name)] + \
@@ -720,6 +743,8 @@ def main():
     ap.add_argument('--keep-out', action='store_true', help='save each run\'s output in DIR/rN/out/<name> (for stallsim.py)')
     ap.add_argument('--p9loop', action='store_true',
                     help="Veroff's P9loop: the hint matchers of a goal's failed runs become lemmas (axioms) of its later runs")
+    ap.add_argument('--p9-orders', type=int, default=1,
+                    help='--p9loop: cycle through this many term orderings (KBO precedences) over a goal\'s attempts')
     ap.add_argument('--p9-max', type=int, default=0, help='--p9loop: at most this many lemmas, the most recently derived (0 = all)')
     ap.add_argument('--init', help='import round-0 results (solved.tsv and hints) of another loop dir')
     a = ap.parse_args()
