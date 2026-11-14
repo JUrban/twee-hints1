@@ -1297,6 +1297,12 @@ carry over:
 | speedup | 1.7× | 1.8× | 1.8× |
 | interreduction CPU, old → new | 14 → 4 s | 59 → 10 s | 201 → 24 s |
 
+Continued to 360 abstract s (22.7M queued pairs, 1.4 GB), the new twee
+settles at 3.2–3.5 s of CPU per abstract second between 120 and 360 s,
+with no further growth. The old run reached 1,837 s of CPU by 230
+abstract s; the new one used 911 s there (2.0×). The queue renormalisation passes
+(126 s at 80 abstract s, 282 s at 240 abstract s) add about 25% on top.
+
 Six solved problems at up to 60 abstract s: 1.05–2.6× less CPU. Real
 workload (sets/u3n150, 20 abstract s, online, 6 lemmas; N3l6 with e22
 solved 76): on the first 97 goals e27 solves 69 against 68, in 18% less
