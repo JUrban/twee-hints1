@@ -247,6 +247,14 @@ class Loop:
             path = os.path.join(self.dir, 'tmp', tag + '.p')
             with open(path, 'w') as f:
                 f.write(txt)
+        extra = getattr(self, 'extra_axioms', {}).get(name)
+        if extra:
+            # (climb.py) assumed statements: extra axioms (label, TPTP formula) of this run
+            txt = open(path).read().rstrip('\n') + '\n' + ''.join(
+                f'fof({lab}, axiom, {f}).\n' for lab, f in extra)
+            path = os.path.join(self.dir, 'tmp', tag + '.p')
+            with open(path, 'w') as f:
+                f.write(txt)
         args = a.args.split()
         if max_cpu is not None:
             args = [x for i, x in enumerate(args) if x != '--max-cpu' and (i == 0 or args[i - 1] != '--max-cpu')]
@@ -298,6 +306,11 @@ class Loop:
         if hints and not os.environ.get('LOOP_KEEP_TMP'):
             os.unlink(hpath)
         ok = 'HINTS-END' in out
+        if ok and hasattr(self, 'used'):
+            # (climb.py) the axiom and lemma names the proof uses
+            for line in out.splitlines():
+                if line.startswith('USEDAXIOMS'):
+                    self.used[tag] = set(line.split()[1:])
         heap = 'Heap exhausted' in out   # (twee's default heap limit, -M6g, or +RTS -M in --args)
         if heap and resume and os.path.exists(spath):
             # a resumed state that ran out of heap (seen: a saved state plus one new lemma axiom
@@ -788,7 +801,7 @@ class Loop:
             lf.write(msg + '\n')
         return new
 
-def main():
+def make_parser():
     ap = argparse.ArgumentParser()
     ap.add_argument('set')
     ap.add_argument('dir')
@@ -878,7 +891,9 @@ def main():
                     help='--p9loop: also take the matchers of unconditional sibling goals at most this many places away')
     ap.add_argument('--p9-max', type=int, default=0, help='--p9loop: at most this many lemmas, the most recently derived (0 = all)')
     ap.add_argument('--init', help='import round-0 results (solved.tsv and hints) of another loop dir')
-    a = ap.parse_args()
+    return ap
+
+def init_dir(a):
     if a.init and not os.path.exists(os.path.join(a.dir, 'solved.tsv')):
         import shutil
         os.makedirs(os.path.join(a.dir, 'hints'), exist_ok=True)
@@ -888,6 +903,10 @@ def main():
                     f.write(l)
                     n = l.split('\t')[0]
                     shutil.copy(os.path.join(a.init, 'hints', n), os.path.join(a.dir, 'hints', n))
+
+def main():
+    a = make_parser().parse_args()
+    init_dir(a)
     lp = Loop(a)
     with open(os.path.join(a.dir, 'config.json'), 'w') as f:
         json.dump(vars(a), f, indent=1)
