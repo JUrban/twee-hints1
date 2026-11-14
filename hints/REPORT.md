@@ -1670,6 +1670,41 @@ In the smoke test (b_364), the sketch proofs had 7–27 dependent lemmas.
 Each 3 s check proved 0–7 of them, giving 18 true lemmas after 8 sketches.
 The 10 s real run still failed.
 
+`--knn K` adds true assumptions: the K unproven goals of other originals
+most similar to the target, from problems whose axioms are a subset of
+the target's. These are lines of Prover9 proofs, so every lemma that
+depends on them is true too.
+
+**Results on sets/sg1** (32 stalled goals; up to 12 sketch runs of 5 s,
+then 20 s real; CPU includes the fill runs):
+
+| arm | solved | CPU s | proofs per CPU-hour |
+|---|---|---|---|
+| fresh 20 s (S20) | 4 | ~1,000 | 14 |
+| fresh 80 s (SD, stopped at 23 goals) | 7 | 3,158 | 8.0 |
+| fresh 80 s, ordering 1 (SO) | 8 | 5,898 | 4.9 |
+| CL2: siblings + laws + freq, no fill | 4 | 1,458 | 9.9 |
+| CL3: CL2 + fill 3 s | 5 | 3,013 | 6.0 |
+| CL4: siblings + kNN (true only) + fill 3 s | 6 | 3,618 | 6.0 |
+
+* **CL2 adds nothing.** It solves exactly the S20 four.
+* **Gap filling finds a goal no fresh run solved.** That goal is
+  mbol_lem1_393, in both CL3 and CL4. CL3's 302 checks proved 369 of
+  3,377 dependent lemmas; CL4's 150 checks proved 220 of 1,975.
+* **3 of CL4's 6 are chain proofs.** These are t_358, 1243_332 and
+  mbol_393. They use 1–4 true lemmas, and one run without the lemmas
+  fails at 20 s. With laws, the final proof was always also found
+  without them, in 2–10 s; the sketch and fill hints alone carry it.
+* **Fresh 80 s solves goals no climb did.** j_294 and t_283 fall to fresh
+  80 s runs only. The union of all arms is 9 of 32.
+* **The climb is not cheaper than fresh 80 s, but it reaches other
+  goals.** In CL4, failing sketches cost 1,257 s, failing final runs
+  866 s, fills 677 s and successful sketches 574 s.
+
+A larger test is running: sets/sg3, 64 goals of the current loop that
+failed L1 (snapshot loops/ULsK, 41,996 proofs). The arms are CL5 (the
+CL4 config) and F3 (fresh 80 s).
+
 ## 2c. Long runs: stall cutoff and checkpoints
 
 * `--eqhint-stall N` gives up when no new rule has matched a hint for N
@@ -1821,7 +1856,7 @@ rounds of 30 s or more, but about 40% overhead for 8 s rounds.
   longer resume (20 s fresh 14 proofs per CPU-hour, resume to 320 s 0 of
   13). The cascade retries goals whose hint pool has grown 25%
   (`--retry-hints 1.25`, from 22:28).
-* **Sketch climbing** (2ab): `climb.py`, first test running.
+* **Sketch climbing** (2ab): `climb.py`. Laws alone add nothing; gap filling (`--fill`) plus true assumptions (siblings, `--knn`) matches fresh 80 s per CPU-hour and reaches other goals. A 64-goal test is running.
 * **In-loop retraining** adds nothing online (2u): with the model kept
   fixed, FHL solves 970 after round 1, against 963 for EHL, which
   retrains. The full loop keeps rm4t fixed.

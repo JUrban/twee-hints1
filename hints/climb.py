@@ -183,6 +183,7 @@ def main():
                     ucnt[lp.pool_key(n)].update((h[0], h[1]) for h in lp.hints_of(n))
     sketch = collections.defaultdict(list)   # original -> sketch hints (canonical pairs), oldest first
     true = collections.defaultdict(dict)     # original -> {TPTP formula: label} of lemmas --fill proved
+    tkey = {}                                # (original, label) -> the true lemma as a canonical hint pair
     checked = collections.defaultdict(set)   # original -> dependent lemmas --fill tried
     fo = open(os.path.join(c.dir, 'fill.tsv'), 'a')
     seen = collections.defaultdict(set)
@@ -239,7 +240,10 @@ def main():
         used = lp.used.pop(t, set()) if ok else set()
         deps = lp.assumed.pop(t, [])
         U = {x for x in used if x.startswith('assume_')}
-        nt = sum(1 for x in used if x.startswith('true_'))
+        ut = sorted(x for x in used if x.startswith('true_'))
+        nt = len(ut)
+        if ok:
+            last_true[t] = [tkey[(o, x)] for x in ut if (o, x) in tkey]
         if ok and res:
             with lock:
                 for h in res:
@@ -305,6 +309,7 @@ def main():
             for i, (l, r, vs, f) in enumerate(todo):
                 if f'dep_{i}' in got and f not in true[o] and len(true[o]) < c.true_max:
                     true[o][f] = f'true_{len(true[o])}'; new.append(f)
+                    tkey[(o, true[o][f])] = loop.canon_key(l, r, sig)
             if got and 'HINTS-END' in o_:
                 L, G = hintlib.extract_hints(o_)
                 for l, r in L + G:
@@ -319,6 +324,8 @@ def main():
             os.unlink(x)
 
     cap = c.max_sketch_time or 4 * c.sketch_time
+
+    last_true = {}   # target -> the true lemmas its last proof used (canonical pairs)
 
     def a_cpu(b):
         return 10 * b
@@ -378,7 +385,8 @@ def main():
                 if not direct:
                     out.write(f'{t}\tchain\t0\tTHM\t0\t0\t\t\t0\t{nt}\n'); out.flush()
                 with open(os.path.join(c.dir, 'hints', t), 'w') as hf:
-                    for l, r in real:
+                    # (a chain proof: the true lemmas it used are hints too)
+                    for l, r in list(real) + ([] if direct else [k for k in last_true.get(t, []) if k not in real]):
                         hf.write(f'{l}\t{r}\n')
         return t, real is not None, runs
 
