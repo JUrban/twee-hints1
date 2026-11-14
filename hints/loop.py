@@ -298,6 +298,11 @@ class Loop:
         if hints and not os.environ.get('LOOP_KEEP_TMP'):
             os.unlink(hpath)
         ok = 'HINTS-END' in out
+        heap = 'Heap exhausted' in out   # (twee's default heap limit, -M6g, or +RTS -M in --args)
+        if heap and resume and os.path.exists(spath):
+            # a resumed state that ran out of heap (seen: a saved state plus one new lemma axiom
+            # exploding) would do it again at the next level, so the goal starts over
+            os.unlink(spath)
         if a.p9loop and not ok:
             nnew = self.p9_collect(name, out, orig_path)
             out += f'\nP9LEMMAS used={len(p9)} new={nnew}\n'
@@ -318,6 +323,8 @@ class Loop:
         for line in out.splitlines():
             if line.startswith('HINTSTATS'):
                 stats = line
+        if heap:
+            stats += ' HEAP'
         if a.p9loop:
             stats += f' P9 used={len(p9)}' + (f' new={nnew}' if not ok else '') + \
                 (f' v={variant} ord={k}' if a.p9_orders > 1 else '')

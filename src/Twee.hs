@@ -1241,14 +1241,32 @@ addEqHintWithFactor state (eqn, Just w) =
 
 -- | Tell the hint matcher about goal constants.
 setEqHintGoalConsts :: Function f => State f -> IntMap (Maybe (Term f)) -> State f
-setEqHintGoalConsts state gcs =
+setEqHintGoalConsts state gcs0 =
   state { st_eqhints = (st_eqhints state) { eh_goalconsts = gcs, eh_gcfps = fps } }
   where
+    -- Definitions are expanded recursively ('expandGoalConsts'), so a cyclic
+    -- one would never stop and shared nesting could blow up: keep only the
+    -- definitions whose full expansion is acyclic and small.
+    gcs = IntMap.filterWithKey (\f d -> isNothing d || isJust (expSize (IntSet.singleton f) 0 [d])) gcs0
+    expSize _ n [] = Just n
+    expSize seen n (Nothing:ds) = expSize seen n ds
+    expSize seen n (Just d:ds) = do
+      n' <- foldM (sym seen) n (subterms d)
+      expSize seen n' ds
+    sym seen n (App f Nil)
+      | Just (Just d) <- IntMap.lookup (symId f) gcs0 =
+        if symId f `IntSet.member` seen then Nothing
+        else expSize (IntSet.insert (symId f) seen) n [Just d]
+    sym _ n _ = if n >= maxGoalConstSize then Nothing else Just (n+1)
     -- definitions are ground and mention only skolems and ordinary symbols
     fps = IntMap.map fp gcs
     fp Nothing = varFingerprint
     fp (Just d) = termFingerprint skolemFps d
     skolemFps = IntMap.map (const varFingerprint) (IntMap.filter isNothing gcs)
+
+-- | The biggest expansion of a goal constant kept for hint matching.
+maxGoalConstSize :: Int
+maxGoalConstSize = 1000
 
 -- | Replace goal constants: flattening constants by their definitions,
 -- skolem constants by fresh variables. Returns Nothing if there are none.

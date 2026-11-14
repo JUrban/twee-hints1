@@ -1366,11 +1366,21 @@ runTwee globals (TSTPFlags tstp) horn precedence config0 flags@MainFlags{..} lat
         c1 <- st_next_active loaded0 `seq` Queue.size (st_queue loaded0) `seq` cpu
         let known = map axiom_eqn (st_axioms loaded0)
             newAxioms = [ ax | ax <- axioms, axiom_eqn ax `notElem` known ]
-            loaded = foldl' (addAxiom config) loaded0 newAxioms
+            -- The saved hint tables must not be used: they are keyed by
+            -- symbol ids of the saved run, which are assigned afresh when the
+            -- state is re-interned. (Stale goal-constant ids made the new
+            -- axioms' critical pairs expand a constant into a definition
+            -- containing itself, and a resumed run grew to 100 GB.) So the
+            -- hints of this run go in before the new axioms are added.
+            ehNew = st_eqhints withHints
+            base0 = loaded0 { st_eqhints = ehNew }
+            base1 | Map.null (eh_map ehNew) = base0
+                  | otherwise = normaliseEqHints base0
+            loaded = foldl' (addAxiom config) base1 newAxioms
         unless (null newAxioms) $
           say $ "Resumed with " ++ show (length newAxioms) ++ " new axioms"
         c2 <- st_next_active loaded `seq` Queue.size (st_queue loaded) `seq` cpu
-        let eh = (st_eqhints withHints) { eh_last_match = fromIntegral (st_next_active loaded) }
+        let eh = (st_eqhints loaded) { eh_last_match = fromIntegral (st_next_active loaded) }
             st1 = markResumedHints loaded { st_eqhints = eh, st_cur_passive = Nothing }
             st1' | Map.null (eh_map eh) = st1
                  | otherwise = normaliseEqHints st1
