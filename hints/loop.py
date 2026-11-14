@@ -518,17 +518,34 @@ class Loop:
             # as lemmas.lemma_problem: the a.lemmas nearest proven siblings on either side
             near = sorted(below + pr[i:i + a.lemmas], key=lambda j: (abs(k - j), j))[:a.lemmas]
             return tuple(sorted(near))
+        # --line-gaps R,F: distances in lines of the original Prover9 proof (AIM60k's LADR files
+        # name each goal's proof line). The goals were picked in stripes 3..55 lines apart, so a
+        # gap of one goal can be 3 lines or 55; success falls with the line distance (UL r5:
+        # L0 retries 32% within 13 lines, 12% beyond 21).
+        gl = {}
+        if a.line_gaps:
+            R, F = (int(x) for x in a.line_gaps.split(','))
+            for l in open(a.goal_lines):
+                n, x = l.split()
+                gl[n] = int(x)
         def gaps():
-            """unsolved goal -> places after the nearest proven goal below it (in the set)."""
+            """unsolved goal -> (places after the nearest proven goal below it (in the set),
+            proof lines after it (with --line-gaps; else the places again))."""
             g = {}
             for o, L in byo.items():
                 last = None
                 for i, n in enumerate(L):
                     if n in self.solved:
                         last = i
+                    elif last is None:
+                        g[n] = (10**6, 10**6)
                     else:
-                        g[n] = (i - last) if last is not None else 10**6
+                        g[n] = (i - last, gl[n] - gl[L[last]] if gl else i - last)
             return g
+        def may_retry(n, g):
+            return g[n][0] <= a.retry_gap or (gl and g[n][1] <= R)
+        def may_deepen(n, g):
+            return g[n][0] <= a.frontier or (gl and g[n][1] <= F)
         # --cascade-start -1: nothing tried yet, so the goals near a proof all get a T0 run first
         # --cascade-was-below: the earlier attempts had lemmas from below only, so with
         # --lemma-after exactly the goals that now get lemmas from above are retried
@@ -555,12 +572,12 @@ class Loop:
                 busy = {n for n, _ in running.values()}
                 if time.time() - t0 < a.cascade_hours * 3600:
                     g = gaps()
-                    retry = sorted((g[n], lemmas.split(n)[1], n) for n in att
-                                   if n not in busy and ctx(n) != att[n][0] and g[n] <= a.retry_gap)
+                    retry = sorted((g[n][1], lemmas.split(n)[1], n) for n in att
+                                   if n not in busy and ctx(n) != att[n][0] and may_retry(n, g))
                     deep_running = collections.Counter(orig_of(n) for n, l in running.values() if l > 0)
-                    deep = sorted((att[n][1] + 1, deep_running[orig_of(n)], g[n], lemmas.split(n)[1], n) for n in att
+                    deep = sorted((att[n][1] + 1, deep_running[orig_of(n)], g[n][1], lemmas.split(n)[1], n) for n in att
                                   if n not in busy and ctx(n) == att[n][0] and att[n][1] + 1 < len(T)
-                                  and g[n] <= a.frontier)
+                                  and may_deepen(n, g))
                     while len(running) < a.j and (retry or deep):
                         if retry:
                             n = retry.pop(0)[-1]; lev = 0
@@ -796,6 +813,11 @@ def main():
                     help='T0,T1,...: frontier deepening instead of rounds (see Loop.cascade), from round --start')
     ap.add_argument('--cascade-start', type=int, default=0,
                     help='--cascade: unsolved goals count as tried up to this level in their current context')
+    ap.add_argument('--line-gaps', default='',
+                    help='R,F: --cascade also retries goals at most R proof lines after a proven sibling, '
+                         'deepens goals at most F lines after one, and orders both by proof lines')
+    ap.add_argument('--goal-lines', default='/project/hintwork/abs/goal_lines.tsv',
+                    help='goal name -> line of the original proof (from AIM60k/problems/ladr)')
     ap.add_argument('--cascade-continue', action='store_true',
                     help='--cascade: a restarted round; goals count as tried at the levels its results.tsv shows')
     ap.add_argument('--cascade-was-below', action='store_true',
