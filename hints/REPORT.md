@@ -1628,10 +1628,14 @@ rounds of 30 s or more, but about 40% overhead for 8 s rounds.
   whose resume has stalled.
 * **A resume bug** grew one run to 100 GB; it is fixed, and every run now
   has a 6 GB heap limit (2x).
-* **In-loop retraining:** the ENIGMA-plus-hints loop (EHL) beats hints
-  alone after round 1 (963 against 944 of 1,934). FHL, the same loop with
-  the round-0 model kept fixed (the production setting), decides whether
-  the full loop should retrain its model between rounds.
+* **In-loop retraining** adds nothing online (2u): with the model kept
+  fixed, FHL solves 970 after round 1, against 963 for EHL, which
+  retrains. The full loop keeps rm4t fixed.
+* **Next:** watch the full loop's deepening (round 5, 80 s by resume,
+  without re-scoring the queue). For goals whose resume stalls at
+  320–960 s, try a restart with a new ordering plus matcher lemmas
+  instead of a longer resume. Also look at the hardest originals,
+  where the frontier is far from any proof (gap > 3).
 
 ## 5. How to run the best system
 
