@@ -1532,19 +1532,25 @@ rounds of 30 s or more, but about 40% overhead for 8 s rounds.
 
 ## 4. Next steps
 
-* **Cascade scheduling** won against a plain 80 s round (90 vs 69 in 2 h
-  on sets/u3, 2p). Round 3 of the full loop runs it with lemmas from
-  both sides (20/80/320/960 s levels, from 14 Nov 06:03).
-* **More sibling lemmas:** 6 nearest siblings instead of 3 gave 64 against
-  58 of 189 (+8/−2). 20 subset-kNN lemmas instead of 10 gave 59 (noise).
-  Being checked on 150 nil3_31 goals; if it holds, the full loop switches
-  to 6.
-* **Retrained rule model rm6t:** rm4t's data plus the full loop's 5,303
-  proofs. AUC 0.926 on the held-out u3 originals. Being tested alone and
-  in the full system on u3a189. Training peaked at 55 GB RSS, so the next
-  retrain needs a lower --negmax or a subsample.
-* Cheaper resume: re-score only the part of the saved queue that can
-  match the new hints.
+*Updated 14 Nov, 16:45.*
+
+* **Done since the last update:** 6 sibling lemmas won (2r) and run in
+  the full loop's cascade round 4. rm6t and rm7t brought no online gain
+  (2r); the planned rm7t online test was cancelled because its training
+  data held proofs of the test goals. Long runs are 1.8–2.0× cheaper in
+  CPU (2v).
+* **P9loop / Bigloop against resume** at the cascade's next level (2w):
+  100 frontier goals, 80 abstract s each, as resume (with and without
+  re-scoring the saved queue), as P9loop with orderings, and as Bigloop.
+  If restarts with matcher lemmas match resume at lower wall time, the
+  cascade's deepening switches to them (`--cascade` with `--p9loop`,
+  ready).
+* **In-loop retraining:** the ENIGMA-plus-hints loop (EHL) beats hints
+  alone after round 1 (963 against 944 of 1,934). FHL, the same loop with
+  the round-0 model kept fixed (the production setting), decides whether
+  the full loop should retrain its model between rounds.
+* Cheaper resume: re-scoring the saved queue costs about 20 µs per queued
+  pair. It goes if the no-requeue arm does as well.
 
 ## 5. How to run the best system
 
