@@ -60,12 +60,26 @@ class Loop:
     def build_pools(self):
         """pool key -> list of (l, r), most frequent first."""
         cnt = collections.defaultdict(collections.Counter)
+        self.pool_cnt_u = collections.defaultdict(collections.Counter)
         for n in self.solved:
             key = self.pool_key(n)
-            for h in self.hints_of(n):
+            hs = self.hints_of(n)
+            for h in hs:
                 cnt[key][h] += 1
+            self.count_uncond(n, hs)
         self.pool_cnt = cnt
         return {k: [h for h, _ in c.most_common()] for k, c in cnt.items()}
+
+    def count_uncond(self, n, hs):
+        """Pool counts from proofs of unconditional goals only (--hint-axioms): a conditional
+        goal's hypotheses have skolems that hint generalisation turns into variables, so
+        their proofs can carry false 'hints' such as X0 = X1 (runs before twee-e14)."""
+        if not self.a.hint_axioms or '__goal_' not in n:
+            return
+        import lemmas
+        f = lemmas.conjecture(n)
+        if f and lemmas.unit_eq(f):
+            self.pool_cnt_u[self.pool_key(n)].update((l, r) for l, r, *_ in hs)
 
     def pool_key(self, n):
         return 'all' if self.a.pool == 'all' else orig_of(n)
@@ -122,8 +136,8 @@ class Loop:
             # the K most frequent pool hints that come from at least F sibling proofs, as axioms
             # (pool hints are skolem-free consequences of the axioms and proven lemmas: sound)
             k, fmin = (int(x) for x in a.hint_axioms.split(':'))
-            cnt = getattr(self, 'pool_cnt', {}).get(self.pool_key(name), {})
-            ax = [h[:2] for h in (hints or []) if cnt.get(h[:2], 0) >= fmin][:k]
+            cnt = self.pool_cnt_u.get(self.pool_key(name), collections.Counter())
+            ax = [h for h, c in cnt.most_common() if c >= fmin][:k]
             if ax:
                 txt = open(path).read().rstrip('\n') + '\n' + ''.join(
                     f'cnf(hint_axiom_{i}, axiom, {l} = {r}).\n' for i, (l, r) in enumerate(ax))
@@ -435,6 +449,7 @@ class Loop:
                                 hf.write(f'{l}\t{r}\n')
                         key = self.pool_key(n)
                         cnt[key].update(hs)
+                        self.count_uncond(n, hs)
                         pools[key] = [h for h, _ in cnt[key].most_common()]
                         o, k = lemmas.split(n)
                         self.lemma_src[o] = self.lemma_src.get(o, set()) | {k}
@@ -547,6 +562,7 @@ class Loop:
                         if not a.pool.startswith('knn'):
                             key = self.pool_key(n)
                             cnt[key].update(hs)
+                            self.count_uncond(n, hs)
                             pools[key] = [h for h, _ in cnt[key].most_common()]
                         if getattr(self, 'lemma_src', None) is not None and '__goal_' in n:
                             o, gk = lemmas.split(n)
