@@ -43,6 +43,9 @@ import Twee.Profile
 import qualified Twee.FPIndex as FP
 import Data.Bits
 import Data.Ord
+import Debug.Trace(trace)
+import System.IO.Unsafe(unsafePerformIO)
+import System.Environment(lookupEnv)
 import Data.PackedSequence(PackedSequence)
 import qualified Data.PackedSequence as PackedSequence
 import Test.QuickCheck.Gen hiding (sample)
@@ -110,6 +113,9 @@ data Config f =
     cfg_progress                  :: Double,
     -- | Find overlap partners with a fingerprint index (same overlaps, same order).
     cfg_overlap_index             :: Bool,
+    -- | Interreduce an old active only if a rule added since the last
+    -- interreduction matches one of its subterms (backward demodulation).
+    cfg_interreduce_filter        :: Bool,
     cfg_eqhint_watch              :: Float,
     cfg_eqhint_generalise         :: Bool }
 
@@ -187,6 +193,7 @@ defaultConfig =
     cfg_max_cpu = 0,
     cfg_progress = 0,
     cfg_overlap_index = True,
+    cfg_interreduce_filter = True,
     cfg_eqhint_watch = 0,
     cfg_eqhint_generalise = False }
 
@@ -1446,7 +1453,47 @@ applyHints Hints{..} t =
 {-# INLINEABLE interreduce #-}
 interreduce :: Function f => Config f -> State f -> State f
 interreduce _ state@State{..} | st_simplified_at == st_next_active = state
-interreduce config@Config{..} state =
+interreduce config@Config{..} state
+  | cfg_interreduce_filter =
+  let
+    since = st_simplified_at state
+    -- the rules of the actives added since the last interreduction
+    newRules st lo hi =
+      [ (lhs r, r)
+      | n <- [lo..hi-1],
+        Just a <- [IntMap.lookup (fromIntegral n) (st_active_set st)],
+        r <- activeRules a ]
+    -- An old active, irreducible at the last interreduction, can only
+    -- change if a new rule rewrites it (a backward demodulation check;
+    -- ground joining via a new rule applied to a successor is ignored).
+    touched idx Active{..} =
+      or [ not (Prelude.null (Index.matches u idx))
+         | t <- [lhs active_rule, rhs active_rule], u <- subterms t ]
+    step (!st, !idx) active
+      | active_id active >= since || touched idx active =
+        let st' = interreduce1 config st active
+            idx' | st_next_active st' == st_next_active st = idx
+                 | otherwise =
+                   foldl' (\i (t, r) -> Index.insert t r i) idx
+                     (newRules st' (st_next_active st) (st_next_active st'))
+        in (st', idx')
+      | debugFilter =
+        let st' = interreduce1 config st active
+            same = st_next_active st' == st_next_active st &&
+                   fmap active_model (IntMap.lookup (fromIntegral (active_id active)) (st_active_set st')) ==
+                   Just (active_model active)
+        in if same then (st, idx) else trace ("MISSED " ++ show (active_id active) ++ " " ++ prettyShow (canonicalise (active_rule active)) ++ " next " ++ show (st_next_active st, st_next_active st') ++ " present " ++ show (IntMap.member (fromIntegral (active_id active)) (st_active_set st'))) (st, idx)
+      | otherwise = (st, idx)
+    debugFilter = unsafePerformIO (fmap isJust (lookupEnv "TWEE_DEBUG_FILTER"))
+    (state', _) =
+      foldl' step
+        -- Clear out st_joinable, since we don't know which
+        -- equations have made use of each active.
+        (state { st_joinable = Index.empty, st_complete = Index.empty },
+         Index.fromList (newRules state since (st_next_active state)))
+        (IntMap.elems (st_active_set state))
+    in state' { st_joinable = st_joinable state, st_complete = st_complete state, st_simplified_at = st_next_active state' }
+  | otherwise =
   let
     state' =
       foldl' (interreduce1 config)

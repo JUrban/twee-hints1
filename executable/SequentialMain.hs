@@ -529,6 +529,10 @@ parseConfig = do
     expert $
     inGroup "Critical pair weighting heuristics" $
     bool "overlap-index" ["Find overlap partners with a fingerprint index (default: true). The same critical pairs are made in the same order."] True
+  cfg_interreduce_filter <-
+    expert $
+    inGroup "Critical pair weighting heuristics" $
+    bool "interreduce-filter" ["Interreduce an old rule only if a rule added since the last interreduction rewrites one of its subterms (default: true)."] True
   cfg_progress <-
     expert $
     inGroup "Critical pair weighting heuristics" $
