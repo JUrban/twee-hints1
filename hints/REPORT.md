@@ -1387,8 +1387,12 @@ from all of N3x6's proofs, production config, 4 rounds of 20 abstract s):
 | arm | solved after rounds 1 / 2 / 3 / 4 | wall per goal and round |
 |---|---|---|
 | P9loop, matcher lemmas only | 1 / 3 / 3 / 3 | 39–43 s |
-| P9loop, lemmas + a new ordering each round | 1 / 1 / 2 / PENDING | 40–57 s |
-| resume (continue the saved run) | 1 / 3 / PENDING | 55 s, then 115 s |
+| P9loop, lemmas + a new ordering each round | 1 / 1 / 2 / 2 | 40–57 s |
+| resume (continue the saved run) | 1 / 3 / stopped | 55 s, then 115 s |
+
+The resume arm was stopped after round 2 to stay within the CPU budget.
+Its round 2 took 4,418 s of wall time with 2 workers, against 1,413 s
+for the lemmas-only arm.
 
 * All arms solve the same goals (400, 323, 341); these goals are hard
   and four 20 s rounds add only 2.
