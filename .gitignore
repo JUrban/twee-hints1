@@ -3,3 +3,4 @@ executable/Main
 stack.yaml.lock
 dist-newstyle
 __pycache__/
+dist-prof/
