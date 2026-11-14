@@ -40,6 +40,8 @@ import qualified Control.Monad.Trans.State.Strict as StateM
 import qualified Data.IntSet as IntSet
 import Data.IntSet(IntSet)
 import Twee.Profile
+import qualified Twee.FPIndex as FP
+import Data.Bits
 import Data.Ord
 import Data.PackedSequence(PackedSequence)
 import qualified Data.PackedSequence as PackedSequence
@@ -104,6 +106,10 @@ data Config f =
     -- | Give up after this many critical pairs without a new hint match (0 = never).
     cfg_eqhint_stall_cps          :: Int64,
     cfg_max_cpu                   :: Double,
+    -- | Print a PROGRESS line every this many (abstract) seconds (0 = never).
+    cfg_progress                  :: Double,
+    -- | Find overlap partners with a fingerprint index (same overlaps, same order).
+    cfg_overlap_index             :: Bool,
     cfg_eqhint_watch              :: Float,
     cfg_eqhint_generalise         :: Bool }
 
@@ -113,6 +119,8 @@ data State f =
     st_axioms         :: ![Axiom f],
     st_rules          :: !(RuleIndex f (Rule f)),
     st_active_set     :: !(IntMap (Active f)),
+    -- Fingerprint indexes of st_active_set (not saved: rebuilt on load)
+    st_overlaps       :: !OverlapIndex,
     st_joinable       :: !(Index f (Equation f)),
     st_goals          :: ![Goal f],
     st_queue          :: !(Queue Batch),
@@ -177,6 +185,8 @@ defaultConfig =
     cfg_eqhint_stall = 0,
     cfg_eqhint_stall_cps = 0,
     cfg_max_cpu = 0,
+    cfg_progress = 0,
+    cfg_overlap_index = True,
     cfg_eqhint_watch = 0,
     cfg_eqhint_generalise = False }
 
@@ -211,6 +221,7 @@ initialState Config{..} =
     st_axioms = [],
     st_rules = RuleIndex.empty,
     st_active_set = IntMap.empty,
+    st_overlaps = emptyOverlapIndex,
     st_joinable = Index.empty,
     st_goals = [],
     st_queue = Queue.empty,
@@ -327,7 +338,12 @@ messages state = reverse (st_messages_rev state)
 makePassives :: Function f => Config f -> State f -> Active f -> [Passive]
 -- don't generate critical pairs when in random mode
 makePassives Config{cfg_random_mode = True} _ _ = []
-makePassives config@Config{..} state@State{..} rule =
+makePassives config@Config{..} state@State{..} rule
+  | cfg_overlap_index && cfg_max_cp_depth == maxBound =
+  stampWith "make critical pair" length
+  [ makePassive config state overlap
+  | overlap <- indexedOverlaps state rule ]
+  | otherwise =
 -- XXX factor out depth calculation
   stampWith "make critical pair" length
   [ makePassive config state overlap
@@ -336,6 +352,109 @@ makePassives config@Config{..} state@State{..} rule =
   where
     rules = IntMap.elems st_active_set
     ok rule = the rule < Depth cfg_max_cp_depth
+
+-- | Fingerprint indexes of the active rules, for finding overlap partners
+-- without trying every active rule (Schulz's fingerprint indexing).
+data OverlapIndex =
+  OverlapIndex {
+    -- the left-hand side of each direction of each active (key: id*2 + direction)
+    oi_lhs    :: !FP.FPIndex,
+    -- each overlap position of each direction (key: (id*2 + direction) * 2^20 + position)
+    oi_pos    :: !FP.FPIndex,
+    -- multisets of the lowest and highest variable of each active's rule
+    -- (to rename a new rule apart exactly as 'overlaps' does)
+    oi_minvar :: !(IntMap Int),
+    oi_maxvar :: !(IntMap Int) }
+
+instance Binary OverlapIndex where
+  put _ = return ()
+  get = return emptyOverlapIndex
+
+emptyOverlapIndex :: OverlapIndex
+emptyOverlapIndex = OverlapIndex FP.empty FP.empty IntMap.empty IntMap.empty
+
+-- The directions of an active: direction bit, overlap positions, left-hand side.
+activeDirections :: Active f -> [(Int, Positions f, Term f)]
+activeDirections Active{..} =
+  case active_positions of
+    ForwardsPos p -> [(0, p, lhs active_rule)]
+    BothPos p q -> [(0, p, lhs active_rule), (1, q, rhs active_rule)]
+
+positionList :: Positions f -> [Int]
+positionList NilP = []
+positionList (ConsP n ps) = n:positionList ps
+
+overlapIndexUpdate :: Bool -> Active f -> OverlapIndex -> OverlapIndex
+overlapIndexUpdate ins active@Active{..} OverlapIndex{..} =
+  OverlapIndex {
+    oi_lhs = foldl' (\idx (d, _, t) -> op (FP.fingerprint t) (key d) idx) oi_lhs dirs,
+    oi_pos = foldl' (\idx (d, ps, t) ->
+                       foldl' (\idx n -> op (FP.fingerprint (t `at` n)) (key d `shiftL` 20 .|. n) idx) idx (positionList ps))
+                    oi_pos dirs,
+    oi_minvar = count x1 oi_minvar,
+    oi_maxvar = count x2 oi_maxvar }
+  where
+    dirs = activeDirections active
+    key d = fromIntegral active_id * 2 + d
+    op | ins = FP.insert
+       | otherwise = FP.delete
+    (V x1, V x2) = boundLists (terms active_rule)
+    count x m
+      | ins = IntMap.insertWith (+) x 1 m
+      | otherwise = IntMap.update (\k -> if k <= 1 then Nothing else Just (k-1)) x m
+
+-- | Rebuild the overlap index (after loading a saved state).
+rebuildOverlapIndex :: State f -> State f
+rebuildOverlapIndex state =
+  state { st_overlaps = foldl' (flip (overlapIndexUpdate True)) emptyOverlapIndex (IntMap.elems (st_active_set state)) }
+
+-- | The overlaps of a new active with the active set (which includes it),
+-- the same ones and in the same order as 'overlaps', but only rules whose
+-- fingerprints are compatible are tried.
+{-# INLINEABLE indexedOverlaps #-}
+indexedOverlaps :: forall f. Function f => State f -> Active f -> [Overlap (Active f) f]
+indexedOverlaps State{..} r1 =
+  [ o
+  | (d1i, k2, part, n) <- sortCands cands,
+    Just r2 <- [IntMap.lookup (k2 `shiftR` 1) st_active_set],
+    let d1 = toEnum d1i
+        d2 = toEnum (k2 .&. 1)
+        eq1 = dirEqn r1' d1
+        eq2 = dirEqn (the r2) d2,
+    Just o <- [if part == 0
+               then overlapAt' (How n d1 d2) r1 r2 eq1 eq2 >>= simplifyOverlap idx
+               else overlapAt' (How n d2 d1) r2 r1 eq2 eq1 >>= simplifyOverlap idx] ]
+  where
+    idx = index_oriented st_rules
+    OverlapIndex{..} = st_overlaps
+    bnd = (V (maybe maxBound fst (IntMap.lookupMin oi_minvar)),
+           V (maybe minBound fst (IntMap.lookupMax oi_maxvar)))
+    r1' :: Rule f
+    r1' = renameAvoidingBound bnd (the r1)
+    dirEqn :: Rule f -> Direction -> Equation f
+    dirEqn rule Forwards = lhs rule :=: rhs rule
+    dirEqn rule Backwards = rhs rule :=: lhs rule
+    -- (direction of r1, id*2 + direction of r2, 0: r2 into r1 / 1: r1 into r2, position)
+    cands :: [(Int, Int, Int, Int)]
+    cands =
+      [ (d1, k2, 0, n)
+      | (d1, ps, _) <- activeDirections r1,
+        let t = dirLhs d1,
+        n <- positionList ps,
+        k2 <- IntSet.toList (FP.query (FP.fingerprint (t `at` n)) oi_lhs) ] ++
+      [ (d1, k `shiftR` 20, 1, k .&. (bit 20 - 1))
+      | (d1, _, _) <- activeDirections r1,
+        k <- IntSet.toList (FP.query (FP.fingerprint (dirLhs d1)) oi_pos) ]
+    dirLhs 0 = lhs r1'
+    dirLhs _ = rhs r1'
+    sortCands = sort
+
+renameAvoidingBound :: (Var, Var) -> Rule f -> Rule f
+renameAvoidingBound (V x1, V x2) y
+  | x2 < y1 || y2 < x1 = y
+  | otherwise = subst (\(V x) -> var (V (x-y1+x2+1))) y
+  where
+    (V y1, V y2) = boundLists (terms y)
 
 data Passive =
   Passive {
@@ -619,6 +738,7 @@ addActiveOnly config state@State{..} active@Active{..} =
   addHintsRulePairs config active $
   state {
     st_rules = foldl' insertRule st_rules (activeRules active),
+    st_overlaps = overlapIndexUpdate True active st_overlaps,
     st_active_set = IntMap.insert (fromIntegral active_id) active st_active_set }
   where
     insertRule rules rule =
@@ -641,6 +761,7 @@ deleteActive :: Function f => State f -> Active f -> State f
 deleteActive state@State{..} active@Active{..} =
   state {
     st_rules = foldl' deleteRule st_rules (activeRules active),
+    st_overlaps = overlapIndexUpdate False active st_overlaps,
     st_active_set = IntMap.delete (fromIntegral active_id) st_active_set }
   where
     deleteRule rules rule =
@@ -1343,7 +1464,7 @@ interreduce1 config@Config{..} state active@Active{..} =
   case
     joinCriticalPair cfg_join
       (Index.empty, Index.empty) -- (st_joinable state)
-      (st_rules (deleteActive state active))
+      (foldl' (\rules rule -> RuleIndex.delete (lhs rule) rule rules) (st_rules state) (activeRules active))
       (Just active_model) (active_cp active)
   of
     Right (_, cps) ->
@@ -1382,8 +1503,32 @@ complete Output{..} config@Config{..} state =
           | cfg_abstract_time > 0 = round (cps * 1e12 / fromIntegral cfg_abstract_time)
           | otherwise = 0
     when (cfg_abstract_time > 0) $ useAbstractTime (clock state)
+    -- real CPU spent in the housekeeping tasks (for --progress)
+    tQueue <- liftIO (newIORef 0)
+    tInter <- liftIO (newIORef 0)
+    tGoals <- liftIO (newIORef 0)
+    tHints <- liftIO (newIORef 0)
+    let timed :: MonadIO n => IORef Integer -> n a -> n a
+        timed ref act = do
+          t0 <- liftIO getCPUTime
+          x <- act
+          t1 <- liftIO getCPUTime
+          liftIO (modifyIORef' ref (+ (t1 - t0)))
+          return x
+        progressLine = do
+          st <- StateM.get
+          cpu <- liftIO getCPUTime
+          ts <- liftIO (mapM readIORef [tQueue, tInter, tGoals, tHints])
+          let s x = show (fromIntegral (x `div` 10^(9::Int)) / 1000 :: Double)
+          liftIO $ putStrLn $ unwords $
+            ["PROGRESS", "cps=" ++ show (st_considered st),
+             "rules=" ++ show (fromIntegral (st_next_active st) :: Int),
+             "active=" ++ show (IntMap.size (st_active_set st)),
+             "queue=" ++ show (Queue.size (st_queue st)),
+             "cpu=" ++ s cpu] ++
+            zipWith (\n x -> n ++ "=" ++ s x) ["t_queue", "t_inter", "t_goals", "t_hints"] ts
     tasks <- sequence
-      [newTask 10 (fromIntegral cfg_renormalise_percent / 100) $ do
+      [newTask 10 (fromIntegral cfg_renormalise_percent / 100) $ timed tQueue $ do
          state <- StateM.get
          when (shouldSimplifyQueue config state) $ do
            lift $ output_message SimplifyQueue
@@ -1394,15 +1539,15 @@ complete Output{..} config@Config{..} state =
            let !state' = checkCompleteness config state
            lift $ output_message (NotComplete (st_not_complete state'))
            StateM.put $! state',
-       newTask 1 0.05 $ do
+       newTask 1 0.05 $ timed tInter $ do
          when cfg_simplify $ do
            lift $ output_message Interreduce
            state <- StateM.get
            StateM.put $! simplifySample $! interreduce config state,
-       newTask 1 0.02 $ do
+       newTask 1 0.02 $ timed tGoals $ do
           state <- StateM.get
           StateM.put $! recomputeGoals config state,
-       newTaskCost 0.02 0.05 $ do
+       newTaskCost 0.02 0.05 $ timed tHints $ do
           if cfg_eqhint_normalise then do
             state <- StateM.get
             StateM.put $! normaliseEqHints state
@@ -1410,7 +1555,7 @@ complete Output{..} config@Config{..} state =
             let live = IntMap.size (eh_live (st_eqhints state))
             return ((), abstractCost (fromIntegral live / 100))
           else return ((), 0),
-       newTask 0.05 cfg_eqhint_requeue $ do
+       newTask 0.05 cfg_eqhint_requeue $ timed tQueue $ do
           state <- StateM.get
           let eh = st_eqhints state
           when (cfg_eqhint_requeue > 0 && IntSet.size (eh_matched eh) /= eh_requeued_at eh) $ do
@@ -1421,7 +1566,9 @@ complete Output{..} config@Config{..} state =
        newTask 60 0.01 $ do
           State{..} <- StateM.get
           let !n = Queue.size st_queue
-          lift $ output_message (Status n)]
+          lift $ output_message (Status n),
+       newTask (if cfg_progress > 0 then cfg_progress else 1e9) 1 $
+          when (cfg_progress > 0) progressLine]
 
     checkTimeout <-
       case cfg_max_time of

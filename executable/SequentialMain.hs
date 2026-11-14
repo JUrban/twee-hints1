@@ -525,6 +525,14 @@ parseConfig = do
     expert $
     inGroup "Critical pair weighting heuristics" $
     defaultFlag "max-cpu" "Real-CPU safety limit in seconds (0 = none); it stops the run like --max-time and prints CPULIMIT; for runs in abstract time" cfg_max_cpu argNum
+  cfg_overlap_index <-
+    expert $
+    inGroup "Critical pair weighting heuristics" $
+    bool "overlap-index" ["Find overlap partners with a fingerprint index (default: true). The same critical pairs are made in the same order."] True
+  cfg_progress <-
+    expert $
+    inGroup "Critical pair weighting heuristics" $
+    defaultFlag "progress" "Print a PROGRESS line (critical pairs, rules, CPU time, CPU of housekeeping tasks) every this many seconds, abstract with --abstract-time (0 = never)" cfg_progress argNum
   cfg_eqhint_stall <-
     expert $
     inGroup "Critical pair weighting heuristics" $
@@ -1323,7 +1331,7 @@ runTwee globals (TSTPFlags tstp) horn precedence config0 flags@MainFlags{..} lat
     case flags_load_state of
       Nothing -> return withBackwardsGoal
       Just _ -> do
-        let loaded0 = fromJust savedState
+        let loaded0 = rebuildOverlapIndex (fromJust savedState)
         -- Axioms of the problem that the saved run did not have (e.g.
         -- lemmas proven since) are added to the resumed state.
         -- An axiom is known if the saved run has the same equation (in the

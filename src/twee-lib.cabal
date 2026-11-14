@@ -51,6 +51,7 @@ library
     Twee.Constraints
     Twee.CP
     Twee.Equation
+    Twee.FPIndex
     Twee.Generate
     Twee.Index
     Twee.Join
