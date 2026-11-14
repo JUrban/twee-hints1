@@ -116,6 +116,10 @@ data Config f =
     -- | Interreduce an old active only if a rule added since the last
     -- interreduction matches one of its subterms (backward demodulation).
     cfg_interreduce_filter        :: Bool,
+    -- | With --abstract-time: renormalising the queue costs this many
+    -- critical pairs per queued pair (0 = free, the old behaviour), so that
+    -- its CPU budget (--normalise-queue-percent) binds.
+    cfg_queue_cost                :: Double,
     cfg_eqhint_watch              :: Float,
     cfg_eqhint_generalise         :: Bool }
 
@@ -194,6 +198,7 @@ defaultConfig =
     cfg_progress = 0,
     cfg_overlap_index = True,
     cfg_interreduce_filter = True,
+    cfg_queue_cost = 0,
     cfg_eqhint_watch = 0,
     cfg_eqhint_generalise = False }
 
@@ -1575,11 +1580,13 @@ complete Output{..} config@Config{..} state =
              "cpu=" ++ s cpu] ++
             zipWith (\n x -> n ++ "=" ++ s x) ["t_queue", "t_inter", "t_goals", "t_hints"] ts
     tasks <- sequence
-      [newTask 10 (fromIntegral cfg_renormalise_percent / 100) $ timed tQueue $ do
+      [newTaskCost 10 (fromIntegral cfg_renormalise_percent / 100) $ timed tQueue $ do
          state <- StateM.get
-         when (shouldSimplifyQueue config state) $ do
+         if shouldSimplifyQueue config state then do
            lift $ output_message SimplifyQueue
-           StateM.put $! simplifyQueue config state,
+           StateM.put $! simplifyQueue config state
+           return ((), abstractCost (fromIntegral (Queue.size (st_queue state)) * cfg_queue_cost))
+         else return ((), 0),
        newTask 1 0.02 $ do
          when cfg_complete_subsets $ do
            state <- StateM.get

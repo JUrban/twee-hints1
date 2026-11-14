@@ -533,6 +533,10 @@ parseConfig = do
     expert $
     inGroup "Critical pair weighting heuristics" $
     bool "interreduce-filter" ["Interreduce an old rule only if a rule added since the last interreduction rewrites one of its subterms (default: true)."] True
+  cfg_queue_cost <-
+    expert $
+    inGroup "Critical pair weighting heuristics" $
+    defaultFlag "queue-cost" "With --abstract-time: renormalising the queue costs this many critical pairs per queued pair (0 = free), so its CPU budget binds" cfg_queue_cost argNum
   cfg_progress <-
     expert $
     inGroup "Critical pair weighting heuristics" $
