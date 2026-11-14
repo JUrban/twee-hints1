@@ -1486,6 +1486,44 @@ look up a definition that contains itself. Scoring one critical pair
 now proves its goal in 1.9 s at 190 MB. Fresh and resumed hinted runs on
 six current goals do the same work as before, counted in critical pairs.
 
+## 2y. Consider-emulation costs a quarter of the CPU (14 Nov)
+
+**Profile.** Twee's stamp profiler (`twee-e32prof`) on one failing
+nil3_15 goal, 30 abstract s, production config (3,088 hints). It made 16.4M
+`simplify` calls and 202M index lookups. Without consider-emulation
+(`--no-eqhint-consider`, 1b) it makes 10.9M calls and the total time drops
+by 16%, profiler overhead included. With today's large pools, many critical
+pairs have the symbol fingerprint of some hint form, and each of them goes
+through `allSteps`.
+
+| consider-emulation | CPU (nil3_15 / lra2aa, 30 abstract s) | hints matched |
+|---|---|---|
+| on, all hints (default) | 67.9 s / 57.6 s | 973 / 1,608 |
+| only for hints no rule has matched yet (`--eqhint-consider-open`, new) | 48.0 s / 50.7 s | 971 / 1,608 |
+| off | 46.4 s / 46.4 s | 981 / 1,602 |
+
+With `--eqhint-debug`, it adds 8 and 20 distinct hints over 8,811 and
+26,697 plain matches.
+
+**Solving** (sets/u3n150, 20 s, 6 lemmas, online, as N3x6):
+
+| arm | solved | wall (sum over runs) |
+|---|---|---|
+| on (N3x6) | 77 | 4,405 s (another time, other load) |
+| off (N3c) | 76 | 3,023 s |
+| open hints only (N3o) | 74 | 3,504 s |
+
+The three arms solve 79 goals between them. Most differences come from
+sibling lemmas. For example, N3c and N3o prove goal 341, and its lemma then
+gives goal 400 a 4 s proof. Only about three goals differ directly, which
+is within noise. On the goals all three solve, the median wall time is
+6.1, 4.2 and 4.7 s.
+
+**Decision.** The full loop runs with `--no-eqhint-consider` from 20:15
+(round 5 continued). This buys about 30% more runs per hour, at the cost
+of at most a few goals per hundred. Rewriting `simplifyOutermost` so that
+it does not rebuild unchanged terms was 0–5% slower and was reverted.
+
 ## 2c. Long runs: stall cutoff and checkpoints
 
 * `--eqhint-stall N` gives up when no new rule has matched a hint for N
@@ -1614,7 +1652,7 @@ rounds of 30 s or more, but about 40% overhead for 8 s rounds.
 
 ## 4. Next steps
 
-*Updated 14 Nov, 19:40.*
+*Updated 14 Nov, 20:20.*
 
 * **Done since the last update:** 6 sibling lemmas won (2r) and run in
   the full loop's cascade round 4. rm6t and rm7t brought no online gain
@@ -1628,6 +1666,8 @@ rounds of 30 s or more, but about 40% overhead for 8 s rounds.
   whose resume has stalled.
 * **A resume bug** grew one run to 100 GB; it is fixed, and every run now
   has a 6 GB heap limit (2x).
+* **Consider-emulation off** (2y): about 30% less CPU, 76 against 77 on
+  u3n150. The full loop runs without it from 20:15.
 * **In-loop retraining** adds nothing online (2u): with the model kept
   fixed, FHL solves 970 after round 1, against 963 for EHL, which
   retrains. The full loop keeps rm4t fixed.
