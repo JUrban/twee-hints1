@@ -39,6 +39,7 @@ class Loop:
             os.makedirs(os.path.join(self.dir, 'p9lem'), exist_ok=True)
         import threading
         self.p9_lock = threading.Lock()
+        self.p9_uncond = {}
         self.model = None  # (model, vocab, goaldir) of the current round
         self.names = [l.strip() for l in open(a.set) if l.strip()]
         self.sig = {}
@@ -215,6 +216,29 @@ class Loop:
                     f.write(txt)
         orig_path = os.path.join(PROB, name + '.p')
         p9 = self.p9_lemmas(name) if a.p9loop else []
+        if a.p9loop and a.p9_share and '__goal_' in name:
+            # Bigloop-style sharing between siblings: matchers of the failed runs of goals at most
+            # P9_SHARE places away. Only from unconditional goals (a universally quantified unit
+            # equation): twee never infers from their negated goal, so their matchers are theorems
+            # of the shared axioms and proven lemmas. (A conditional goal's hypotheses are axioms
+            # of its run, so its matchers can depend on them.) The goal's own matchers come last,
+            # so --p9-max keeps them first.
+            import lemmas
+            o, k = lemmas.split(name)
+            seen, extra = set(p9), []
+            for dd in range(1, a.p9_share + 1):
+                for j in (k - dd, k + dd):
+                    m = f'{o}__goal_{j}'
+                    if m not in self.p9_uncond:
+                        try:
+                            self.p9_uncond[m] = lemmas.unit_eq(lemmas.conjecture(m) or '~')
+                        except OSError:
+                            self.p9_uncond[m] = False
+                    if self.p9_uncond[m]:
+                        for f in self.p9_lemmas(m):
+                            if f not in seen:
+                                seen.add(f); extra.append(f)
+            p9 = extra + p9
         if a.p9_max and len(p9) > a.p9_max:
             p9 = p9[-a.p9_max:]   # the most recently derived
         if p9:
@@ -774,6 +798,8 @@ def main():
     ap.add_argument('--p9-parallel', type=int, default=1,
                     help='Veroff\'s Bigloop: P runs of each goal per round at once, each with its own ordering '
                          '(needs --p9-orders >= P), sharing one lemma pool (their matchers join it after the round\'s runs)')
+    ap.add_argument('--p9-share', type=int, default=0,
+                    help='--p9loop: also take the matchers of unconditional sibling goals at most this many places away')
     ap.add_argument('--p9-max', type=int, default=0, help='--p9loop: at most this many lemmas, the most recently derived (0 = all)')
     ap.add_argument('--init', help='import round-0 results (solved.tsv and hints) of another loop dir')
     a = ap.parse_args()
