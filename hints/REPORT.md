@@ -1355,6 +1355,55 @@ slower), and skipping the copy that `simplify` builds of normal forms
 together with a lazy overlap top term (exact, but within the ±15% timing
 noise of the loaded machine).
 
+## 2w. Veroff's P9loop and Bigloop in twee (user's question, 14 Nov)
+
+**What Veroff does** (AITP 2026 slides). A P9loop reruns the *target*
+theorem over and over. At the end of each failed run, every derived
+clause that matches a hint (a *hint matcher*) is kept, and all later runs
+get these as extra input lemmas. The runs cycle through settings,
+mainly term orderings: 36 per P9loop in the NIL3 proof. A Bigloop runs
+several P9loops at once, all sharing one lemma pool. In the NIL3 proof,
+1,155 of 3,594 steps were Bigloop lemmas, and 25 of 60 output files
+contributed.
+
+**In twee.**
+
+* `--print-hint-matchers` (twee-e30) prints every rule that matches a hint
+  as a TPTP formula (`HINTMATCHER n fof(...)`).
+* `loop.py --p9loop` keeps a goal's matchers in `DIR/p9lem/<goal>` and adds
+  them as axioms to its later runs. They are consequences of the problem's
+  axioms and lemmas, so they are sound; matchers with a skolem of a
+  conditional goal are dropped. `--p9-max N` keeps only the most recent N.
+* `--p9-orders N` gives attempt k its own KBO precedence (`--precedence`, a
+  seeded shuffle of the problem's symbols; attempt 1 = twee's default).
+  Hint matching is by variant in either orientation, so hints and matchers
+  carry over between orderings.
+* `--p9-parallel P` is Bigloop: P runs of each goal per round at once, each
+  with its own ordering, all adding to the one lemma pool.
+
+**Test 1: the 73 nil3_31 goals the 20 s system left unsolved** (sets/u3n73,
+from all of N3x6's proofs, production config, 4 rounds of 20 abstract s):
+
+| arm | solved after rounds 1 / 2 / 3 / 4 | wall per goal and round |
+|---|---|---|
+| P9loop, matcher lemmas only | 1 / 3 / 3 / 3 | 39–43 s |
+| P9loop, lemmas + a new ordering each round | 1 / 1 / 2 / PENDING | 40–57 s |
+| resume (continue the saved run) | 1 / 3 / PENDING | 55 s, then 115 s |
+
+* All arms solve the same goals (400, 323, 341); these goals are hard
+  and four 20 s rounds add only 2.
+* After round 2, the matcher lemmas reach the same hint coverage as
+  resuming: 2,220 of 3,728 hints joined and 1,508 live, against 2,214 and
+  1,514. They do it in half the wall time, because a fresh run on a small
+  state is cheaper per critical pair than continuing a big one. A resume
+  also re-scores the whole saved queue first, which costs 20–55 s here.
+* Lemmas pile up: about 880 per goal after round 1 and 1,440 after round
+  2. New matchers then dry up (about 115 per run in round 3). Each run
+  matches fewer hints itself (945 in round 1, about 730 later), because
+  many hints are already joinable from the lemmas.
+* Different orderings derive largely different matchers. In a 1 s smoke
+  test of one goal, the default ordering found 204 and another found 528.
+
 ## 2c. Long runs: stall cutoff and checkpoints
 
 * `--eqhint-stall N` gives up when no new rule has matched a hint for N

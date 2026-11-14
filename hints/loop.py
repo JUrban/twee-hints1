@@ -277,6 +277,12 @@ class Loop:
         if a.p9loop and not ok:
             nnew = self.p9_collect(name, out, orig_path)
             out += f'\nP9LEMMAS used={len(p9)} new={nnew}\n'
+        if a.p9loop and a.cascade:   # the goal's attempt count (its next ordering)
+            with self.p9_lock:
+                ap = os.path.join(self.dir, 'p9lem', name + '.attempts')
+                n0 = int(open(ap).read()) if os.path.exists(ap) else 0
+                with open(ap, 'w') as fh:
+                    fh.write(str(n0 + 1))
         if resume:
             if ok:
                 for p in (spath, spath + '.tmp'):
