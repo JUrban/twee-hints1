@@ -11,6 +11,7 @@ in `/project/hintwork` (not in git).
 | loop, 2 + 2 s | **33,249** (+7.0%) | **3417** (+6.7%) | 24.5 |
 | the loop, a third 2 s round | 33,668 | 3473 | 35.0 |
 | + Veroff-style online loop, 5 abstract s round (2o)\* | **36,057** (+16.1% over plain) | 3747 | +18.9 |
+| + its 20 abstract s round (2o)\* | **39,008** (+25.6% over plain) | 4196 | +167.8 |
 
 \* Starts from 33,720 proofs: the third round plus 52 from long runs on
 two families (2m). Its time is the summed wall time of the runs, close
@@ -947,7 +948,14 @@ on 14 cores (twee-e20, kill after 15× the limit, CPU cap 400 s).
   R1dist_to_aa1 +48, aK2eq_1234 +46). The round took 82 minutes on 14
   cores: 2.1 h of run time on proofs (median 2.4 s wall) and 16.8 h on
   failures (median 7.5 s wall).
-* Round 2 (20 abstract s) is running.
+* **Round 2 (20 abstract s): +2,951, to 39,008** (holdout 4,196, +449).
+  The give-up rule ran 10,405 of the 15,727 unsolved goals. 125 of the
+  129 originals gained; the most were R1dist_to_aa1 +113,
+  mbol_aa1sqrd_to_aa1 +81 and nslm_to_aa1 +77. The round took 12 h on 14
+  cores: 16 h of run time on proofs and 152 h on failures. At 20 abstract
+  s a failing run takes about 53 s wall, because the CP rate falls on
+  hard runs.
+* Round 3 uses the cascade (2p) and runs from 06:03 on 14 Nov.
 
 ## 2p. One search for many goals, and the gap to the nearest proof
 
