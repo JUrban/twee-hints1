@@ -1488,6 +1488,19 @@ runTwee globals (TSTPFlags tstp) horn precedence config0 flags@MainFlags{..} lat
     -- generalised.
     putStrLn "HINTS-HYP"
     forM_ hypEqns $ \eqn -> putStrLn (showEqn eqn)
+    -- Lemmas that depend (transitively) on an input axiom named assume_* (an
+    -- extra, possibly false assumption of a proof sketch), each after a line
+    -- naming those assumptions; dependencies first.
+    let isAsm ax = "assume_" `isPrefixOf` axiom_name ax
+        asmOf m d = Set.unions (Set.fromList [ axiom_name ax | ax <- usedAxioms d, isAsm ax ] :
+                                [ Map.findWithDefault Set.empty q m | q <- usedLemmas d ])
+        asmDep = foldl' (\m p -> Map.insert p (asmOf m (derivation p)) m) Map.empty lems
+    putStrLn "HINTS-ASSUMED"
+    forM_ fwdLems $ \p -> do
+      let as = Map.findWithDefault Set.empty p asmDep
+      unless (Set.null as) $ do
+        putStrLn ("% assumes " ++ unwords (Set.toList as))
+        putStrLn (showEqn (equation p))
     putStrLn "HINTS-END"
     -- the input axioms (and lemmas given as axioms) the proof uses, by name
     putStrLn $ "USEDAXIOMS " ++ unwords (Set.toList (Set.fromList

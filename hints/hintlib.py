@@ -65,7 +65,30 @@ def extract_hyp(text):
     """Lemmas and goals that depend on a hypothesis of a conditional conjecture
     (twee-e14 and later). True only for the skolems: use for labels, never as
     generalised hints."""
-    return _section(text, 'HINTS-HYP', ('HINTS-END',))
+    return _section(text, 'HINTS-HYP', ('HINTS-ASSUMED', 'HINTS-END'))
+
+def extract_assumed(text):
+    """Lemmas that depend on input axioms named assume_* (twee-e37 and later): a list of
+    (frozenset of assumption names, (lhs, rhs)), dependencies first."""
+    a = text.find('HINTS-ASSUMED')
+    k = text.find('HINTS-END', a)
+    if a < 0 or k < 0:
+        return []
+    res, asm, cur = [], None, []
+    for line in text[a + 13:k].splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        if line.startswith('% assumes'):
+            asm = frozenset(line.split()[2:]); cur = []
+            continue
+        cur.append(line)
+        if line.endswith(').'):
+            m = _cnf.match(' '.join(cur)); cur = []
+            e = _split_eq(m.group(1)) if m else None
+            if e and asm:
+                res.append((asm, e))
+    return res
 
 _ident = re.compile(r"[a-z][A-Za-z0-9_]*|'[^']*'")
 

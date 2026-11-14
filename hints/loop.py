@@ -311,6 +311,7 @@ class Loop:
             for line in out.splitlines():
                 if line.startswith('USEDAXIOMS'):
                     self.used[tag] = set(line.split()[1:])
+            self.assumed[tag] = hintlib.extract_assumed(out)
         heap = 'Heap exhausted' in out   # (twee's default heap limit, -M6g, or +RTS -M in --args)
         if heap and resume and os.path.exists(spath):
             # a resumed state that ran out of heap (seen: a saved state plus one new lemma axiom

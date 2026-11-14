@@ -26,7 +26,7 @@ and DIR/hints/<goal> as loop.py does.
 import argparse, collections, os, re, subprocess, sys, threading, time
 from concurrent.futures import ThreadPoolExecutor
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-import loop, lemmas
+import hintlib, loop, lemmas
 
 
 VAR = re.compile(r'\bX\d+\b')
@@ -52,8 +52,9 @@ def parse_term(toks, i):
     return (t if t[0].isupper() else (t, [])), i + 1
 
 
-TWEE = '/project/bin/twee-e22'
+TWEE = '/project/bin/twee-e37'
 _laws = {}
+_laws_lock = threading.Lock()
 def laws(t):
     """Simplifying laws over the axioms' signature (Veroff's sketch assumptions, possibly false):
     commutativity of binary operations, associativity of the binary operations the axioms do not
@@ -85,8 +86,13 @@ def laws(t):
                 and len(set(lhs[1])) == len(lhs[1]) and lhs[0] not in syms(rhs):
             defined.add(lhs[0])
     key = (tuple(sorted(ar.items())), tuple(sorted(consts)), tuple(sorted(defined)))
-    if key in _laws:
+    with _laws_lock:
+        if key not in _laws:
+            _laws[key] = _make_laws(path, ar, consts, defined)
         return _laws[key]
+
+
+def _make_laws(path, ar, consts, defined):
     res = {}
     for f, n in sorted(ar.items()):
         if n == 2:
@@ -116,7 +122,6 @@ def laws(t):
         if 'Theorem' not in o:
             keep[lab] = f
     print(f'laws: {len(keep)} of {len(res)} kept, collapsing: {sorted(short(x) for x in res if x not in keep)}', flush=True)
-    _laws[key] = keep
     return keep
 
 
@@ -126,6 +131,9 @@ def main():
     ap.add_argument('--m', type=int, default=8, help='candidate assumptions per target')
     ap.add_argument('--sketch-time', type=float, default=5)
     ap.add_argument('--final-time', type=float, default=20)
+    ap.add_argument('--max-sketch-time', type=float, default=None,
+                    help='cap of the doubled sketch budget (default 4 x --sketch-time); a top set that fails '
+                         'at the cap ends the climb')
     ap.add_argument('--runs', type=int, default=8, help='sketch runs per target (before the final run)')
     ap.add_argument('--side', default='both', choices=['both', 'below', 'after'])
     ap.add_argument('--laws', action='store_true',
@@ -133,6 +141,12 @@ def main():
                          'associativity of binary operations, derived operations trivial')
     ap.add_argument('--freq', type=int, default=0,
                     help='also assume the K most frequent equations of the original\'s proofs (unconditional goals)')
+    ap.add_argument('--fill', type=float, default=0,
+                    help='Veroff\'s gap filling: after each sketch proof, one twee --multi-goal run of this '
+                         'many seconds tries to prove the proof\'s lemmas that depend on the assumptions, without '
+                         'them; the proven ones become axioms (true lemmas) of the later runs on the original\'s goals')
+    ap.add_argument('--fill-max', type=int, default=40, help='dependent lemmas per --fill check')
+    ap.add_argument('--true-max', type=int, default=60, help='true lemmas (from --fill) per original')
     ap.add_argument('-j', type=int, default=2)
     ap.add_argument('--goal-lines', default='/project/hintwork/abs/goal_lines.tsv')
     argv = sys.argv[1:]
@@ -142,7 +156,7 @@ def main():
     a = loop.make_parser().parse_args([c.set, c.dir] + rest)
     loop.init_dir(a)
     lp = loop.Loop(a)
-    lp.used = {}; lp.extra_axioms = {}
+    lp.used = {}; lp.extra_axioms = {}; lp.assumed = {}
     gl = {l.split()[0]: int(l.split()[1]) for l in open(c.goal_lines)}
     allgoals = lemmas.by_original(gl)
     pools = lp.build_pools()
@@ -163,6 +177,9 @@ def main():
                 if f and lemmas.unit_eq(f):
                     ucnt[lp.pool_key(n)].update((h[0], h[1]) for h in lp.hints_of(n))
     sketch = collections.defaultdict(list)   # original -> sketch hints (canonical pairs), oldest first
+    true = collections.defaultdict(dict)     # original -> {TPTP formula: label} of lemmas --fill proved
+    checked = collections.defaultdict(set)   # original -> dependent lemmas --fill tried
+    fo = open(os.path.join(c.dir, 'fill.tsv'), 'a')
     seen = collections.defaultdict(set)
     lock = threading.Lock()
     out = open(os.path.join(c.dir, 'climb.tsv'), 'a')
@@ -197,10 +214,12 @@ def main():
                 i += 1
         return res
 
-    def run(t, S, budget, tag):
+    def run(t, S, budget, tag, with_true=True):
         o, _ = lemmas.split(t)
         cand = cands[t]
-        lp.extra_axioms[t] = [(x, cand[x]) for x in sorted(S)]
+        with lock:
+            tl = [(lab, f) for f, lab in true[o].items()] if with_true else []
+        lp.extra_axioms[t] = tl + [(x, cand[x]) for x in sorted(S)]
         with lock:
             hs = list(sketch[o])
         # sketch hints first: hints_for keeps the pool's order and a cap applies to the tail
@@ -208,7 +227,9 @@ def main():
         n, ok, dt, stats, res = lp.run_one(t, hints, 1, budget, False, a_cpu(budget))
         lp.extra_axioms.pop(t, None)
         used = lp.used.pop(t, set()) if ok else set()
+        deps = lp.assumed.pop(t, [])
         U = {x for x in used if x.startswith('assume_')}
+        nt = sum(1 for x in used if x.startswith('true_'))
         if ok and res:
             with lock:
                 for h in res:
@@ -216,9 +237,78 @@ def main():
                         seen[o].add(h); sketch[o].append(h)
         with lock:
             out.write(f'{t}\t{tag}\t{len(S)}\t{"THM" if ok else "NO"}\t{len(U) if ok else -1}\t{dt:.2f}\t'
-                      f'{",".join(short(x) for x in sorted(S))}\t{",".join(short(x) for x in sorted(U))}\t{len(hs)}\n')
+                      f'{",".join(short(x) for x in sorted(S))}\t{",".join(short(x) for x in sorted(U))}\t{len(hs)}\t{nt}\n')
             out.flush()
-        return ok, U, res
+        if ok and U and c.fill:
+            fill(t, deps, tag)
+        return ok, U, res, nt
+
+    def fill(t, deps, tag):
+        """Veroff's gap filling: prove the sketch proof's assumption-dependent lemmas without the
+        assumptions (with the true lemmas so far and the sketch hints); the proven ones become
+        true lemmas of the original."""
+        o, _ = lemmas.split(t)
+        with lock:
+            todo = []
+            for asm, (l, r) in deps:
+                vs = sorted(set(VAR.findall(l + ' ' + r)) | set(re.findall(r'\b[A-Z][A-Za-z0-9_]*\b', l + ' ' + r)))
+                f = (f'! [{",".join(vs)}] : ' if vs else '') + f'{l} = {r}'
+                if f in true[o] or f in checked[o]:
+                    continue
+                checked[o].add(f); todo.append((l, r, vs, f))
+            todo = todo[:c.fill_max]
+            tl = list(true[o].items())
+            hs = list(sketch[o])
+        if not todo:
+            return
+        path = os.path.join(lemmas.PROB, t + '.p')
+        lines = [x for x in open(path) if x.startswith(('cnf(', 'fof(')) and 'conjecture' not in x]
+        lines += [f'fof({lab}, axiom, {f}).\n' for f, lab in tl]
+        for i, (l, r, vs, f) in enumerate(todo):
+            sub = {v: f'skd{i}_{v.lower()}' for v in vs}
+            g = lambda x: re.sub(r'\b[A-Z][A-Za-z0-9_]*\b', lambda m: sub[m.group(0)], x)
+            lines.append(f'cnf(dep_{i}, negated_conjecture, {g(l)} != {g(r)}).\n')
+        tmp = os.path.join(c.dir, 'tmp', f'{t}.fill.p')
+        with open(tmp, 'w') as fh:
+            fh.writelines(lines)
+        hints = hs + [h for h in lp.hints_for(t, pools, None) if h not in seen[o]]
+        hp = tmp + '.hints'
+        with open(hp, 'w') as fh:
+            for h in hints:
+                fh.write('\t'.join(h) + '\n')
+        cmd = [a.twee, tmp, '--max-time', str(c.fill), '--no-colour', '--quiet', '--no-proof', '--print-hints',
+               '--multi-goal', '--hints-file', hp, '--max-cpu', str(a_cpu(c.fill))] + a.args.split()
+        if lp.model:
+            m, v, gdir = lp.model
+            cmd += ['--rule-model', m, '--rule-vocab', v, '--rule-goal', os.path.join(gdir, t)] + a.model_args.split()
+        t0 = time.time()
+        try:
+            o_ = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                                timeout=c.fill * a.wall_factor + 30).stdout.decode('utf8', 'replace')
+        except subprocess.TimeoutExpired as e:
+            o_ = (e.stdout or b'').decode('utf8', 'replace')
+        dt = time.time() - t0
+        got = {line.split()[1] for line in o_.splitlines() if line.startswith('SOLVEDGOAL ')}
+        new = []
+        sig = lp.signature(t)
+        with lock:
+            for i, (l, r, vs, f) in enumerate(todo):
+                if f'dep_{i}' in got and f not in true[o] and len(true[o]) < c.true_max:
+                    true[o][f] = f'true_{len(true[o])}'; new.append(f)
+            if got and 'HINTS-END' in o_:
+                L, G = hintlib.extract_hints(o_)
+                for l, r in L + G:
+                    if 'skd' in l or 'skd' in r:
+                        continue
+                    k = loop.canon_key(l, r, sig)
+                    if k[0] != k[1] and k not in seen[o]:
+                        seen[o].add(k); sketch[o].insert(0, k)   # real hints before the sketch's
+            fo.write(f'{t}\t{tag}\t{len(deps)}\t{len(todo)}\t{len(got)}\t{len(new)}\t{len(true[o])}\t{dt:.2f}\n')
+            fo.flush()
+        for x in (tmp, hp):
+            os.unlink(x)
+
+    cap = c.max_sketch_time or 4 * c.sketch_time
 
     def a_cpu(b):
         return 10 * b
@@ -229,7 +319,7 @@ def main():
         queue = [frozenset(S0)] if S0 else []
         tried = set(); runs = 0; real = None
         bt = c.sketch_time; anyproof = False
-        banned = set(); minU = None
+        banned = set(); minU = None; nt = 0
         while runs < c.runs:
             if not queue and minU:
                 # stuck at minU (no smaller set proves T): ban its assumptions and climb again from
@@ -245,12 +335,14 @@ def main():
             if S in tried:
                 continue
             tried.add(S)
-            ok, U, res = run(t, S, bt, f's{runs}')
+            ok, U, res, nt = run(t, S, bt, f's{runs}')
             runs += 1
             if ok and not U:
                 real = res; break
             if not ok and not anyproof:
-                # even the top of the lattice is too hard: retry it with twice the time
+                # even the top of the lattice is too hard: retry it with twice the time, up to the cap
+                if bt * 2 > cap:
+                    break
                 bt *= 2; tried.discard(S); queue.append(S)
             if ok:
                 anyproof = True
@@ -261,12 +353,20 @@ def main():
                                                   -abs(int(x[12:]) - lemmas.split(t)[1]) if x.startswith('assume_goal_') else 0)):
                     queue.append(frozenset(U - {u}))
         if real is None:
-            ok, U, res = run(t, frozenset(), c.final_time, 'final')
+            ok, U, res, nt = run(t, frozenset(), c.final_time, 'final')
             if ok:
                 real = res
+        direct = real is not None and not nt
+        if real is not None and nt:
+            # a proof with true lemmas (--fill): also try one without them, with all the hints
+            ok, _, res, _ = run(t, frozenset(), c.final_time, 'direct', with_true=False)
+            if ok:
+                direct = True; real = res
         if real is not None:
             with lock:
                 sf.write(f'{t}\t1\t0\n'); sf.flush()
+                if not direct:
+                    out.write(f'{t}\tchain\t0\tTHM\t0\t0\t\t\t0\t{nt}\n'); out.flush()
                 with open(os.path.join(c.dir, 'hints', t), 'w') as hf:
                     for l, r in real:
                         hf.write(f'{l}\t{r}\n')
