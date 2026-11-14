@@ -1038,30 +1038,42 @@ proofs of loops/V2base and uses 5 workers. Only the guidance changes:
 | U3xh | – | yes | yes | 59 | 14,979 |
 | U3xm | yes | – | yes | 58 | 10,064 |
 | U3xl | – | – | yes | 49 | 16,372 |
+| U3yb | yes | yes | – | 49 | 11,805 |
+| U3ym | yes | – | – | 42 | 10,501 |
+| U3yh | – | yes | – | 37 | 15,063 |
 | U3x0 (plain twee) | – | – | – | 28 | 18,151 |
 
 The wall seconds are indicative only, because the machine was shared.
 Every run had the same CP budget, so a lower total means that more runs
 end early with a proof.
 
-All variants together solve 68 goals. The full system misses 8 of them,
-and no single variant solves more than 6 that the full system misses.
+All eight variants together solve 70 goals; the full system misses 10 of
+them.
 
 **Reading.**
 
-* Lemma import is the biggest single step: 28 → 49.
-* On top of lemmas, ENIGMA and hints each add about 10, but together they
-  add only 11. They mostly find the same proofs. Each solves 6–7 goals
-  the other misses, which is noise at this size.
-* ENIGMA is about 1.5× cheaper than hints for the same result. Its runs
-  find proofs earlier (mean 18 against 23 wall s per solved goal), and the
-  failing runs do not pay for hint matching.
-* The full system is the cheapest of all.
+* **Without lemmas, ENIGMA and hints add up.** ENIGMA alone gives +14,
+  hints alone +9, and the two together +21 (28 → 49). ENIGMA plus hints
+  solves every goal that hints alone solve, and 12 more.
+* **ENIGMA is the stronger and cheaper guide.** Alone it beats hints
+  alone (42 against 37) at about 70% of the wall time. Its failing runs
+  do not pay for hint matching, and its proofs come earlier.
+* **Lemma import is worth as much as ENIGMA and hints together**
+  (49 = 49).
+* **With lemmas, ENIGMA and hints overlap.** Each adds about 10 on top of
+  lemmas, but together they add only 11. Hints and lemmas carry the same
+  information, the sibling proofs: hints as steps, lemmas as finished
+  results. Once the lemmas are there, the hints mostly point to steps
+  that are no longer needed. ENIGMA's knowledge is general, learned from
+  other problems, so it adds most where sibling information is missing,
+  and at less cost.
+* The full system is the cheapest of all variants.
+* The 10 goals that only some variant solves show the variance at 20 s.
+  The search order changes with the guidance, so a cheap portfolio over
+  variants could pick up a few of them. Earlier portfolio tests were
+  within noise.
 
-The variants without lemmas are queued (abs/abl2.sh): U3ym is ENIGMA only,
-U3yh hints only, U3yb ENIGMA plus hints. They separate the guidance
-effects from the sibling-chain effect. Earlier no-lemma data, on other
-sets, points the same way:
+Earlier no-lemma data, on other sets, points the same way:
 
 * Hard holdout 300 at 60 s: plain 44, rm4 53, rm4 plus lemmas plus kNN
   hints 56.
