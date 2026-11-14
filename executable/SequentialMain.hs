@@ -516,6 +516,12 @@ parseConfig = do
     bool "eqhint-consider"
       ["Match equation hints against the rule a critical pair would become, if its symbols match a hint (on by default)."]
       True
+  cfg_eqhint_consider_open <-
+    expert $
+    inGroup "Critical pair weighting heuristics" $
+    bool "eqhint-consider-open"
+      ["Consider-emulation only for critical pairs with the fingerprint of a hint no rule has matched yet (off by default)."]
+      False
   cfg_eqhint_generalise <-
     expert $
     inGroup "Critical pair weighting heuristics" $

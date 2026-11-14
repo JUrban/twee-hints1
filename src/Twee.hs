@@ -101,6 +101,9 @@ data Config f =
     cfg_eqhint_fullnorm           :: Bool,
     cfg_eqhint_debug              :: Bool,
     cfg_eqhint_consider           :: Bool,
+    -- | Consider-emulation only for critical pairs whose fingerprint is that of
+    -- a hint no rule has matched yet.
+    cfg_eqhint_consider_open      :: Bool,
     cfg_eqhint_requeue            :: Double,
     cfg_print_score               :: Bool,
     cfg_log_given                 :: Bool,
@@ -188,6 +191,7 @@ defaultConfig =
     cfg_eqhint_fullnorm = False,
     cfg_eqhint_debug = False,
     cfg_eqhint_consider = True,
+    cfg_eqhint_consider_open = False,
     cfg_eqhint_requeue = 0,
     cfg_print_score = False,
     cfg_log_given = False,
@@ -1159,8 +1163,19 @@ data EqHints f =
     eh_gsize :: !(IntMap Int),
     eh_gdone :: !(IntMap Int),
     -- per-hint score factors (overriding cfg_eqhint_factor)
-    eh_factor :: !(IntMap Float) }
+    eh_factor :: !(IntMap Float),
+    -- fingerprints of the current forms of the live hints no rule has matched
+    -- (recomputed when hints are normalised; not saved with the state)
+    eh_open :: !OpenFps }
   deriving (Generic, Binary)
+
+-- | Not serialised (zero bytes), so states saved before the field existed
+-- still load. Nothing: not computed yet (use all fingerprints).
+newtype OpenFps = OpenFps (Maybe IntSet)
+
+instance Binary OpenFps where
+  put _ = return ()
+  get = return (OpenFps Nothing)
 
 -- | Hints numbered from here on are only tracked (reported when a rule
 -- matches them), they do not change scores.
@@ -1182,7 +1197,7 @@ emptyEqHints = EqHints {
   eh_map = Map.empty, eh_live = IntMap.empty, eh_matched = IntSet.empty, eh_next = 0,
   eh_joined = 0, eh_norm_at = 0, eh_fps = IntSet.empty, eh_goalconsts = IntMap.empty,
   eh_gcfps = IntMap.empty, eh_ntracked = 0, eh_requeued_at = 0, eh_last_match = 0,
-  eh_max_gap = 0, eh_last_new_cp = 0, eh_log = [], eh_hgroups = IntMap.empty, eh_gsize = IntMap.empty, eh_gdone = IntMap.empty,
+  eh_max_gap = 0, eh_last_new_cp = 0, eh_log = [], eh_hgroups = IntMap.empty, eh_gsize = IntMap.empty, eh_gdone = IntMap.empty, eh_open = OpenFps Nothing,
   eh_factor = IntMap.empty }
 
 -- | Add a hint with an optional factor and the proofs (groups) it comes from.
@@ -1329,12 +1344,16 @@ eqHintScore config@Config{..} state top eqn s
   | not (goalFingerprint eh eqn `IntSet.member` eh_fps eh) = s
   | Just n <- lookupEqHintG eh eqn, n < trackBase = dbg n "cheap" (hinted n)
   | cfg_eqhint_consider,
+    open,
     n:_ <- filter (< trackBase) (mapMaybe (lookupEqHintG eh) (considerForms config state top eqn)) = dbg n "consider" (hinted n)
   | cfg_eqhint_fullnorm,
     Just n <- lookupEqHintG eh (fullNormEqn state eqn), n < trackBase = dbg n "full" (hinted n)
   | otherwise = s
   where
     eh = st_eqhints state
+    open
+      | cfg_eqhint_consider_open, OpenFps (Just fs) <- eh_open eh = goalFingerprint eh eqn `IntSet.member` fs
+      | otherwise = True
     hinted n = cfg_eqhint_weight + s * factor n
     factor n
       | cfg_eqhint_watch > 0, Just c <- hintCompletion eh n =
@@ -1445,7 +1464,9 @@ normaliseEqHints state@State{st_eqhints = eh@EqHints{..}, ..}
       st_eqhints = eh {
         eh_live = live', eh_map = map', eh_joined = eh_joined + joined,
         eh_norm_at = st_next_active,
-        eh_fps = foldl' (flip IntSet.insert) eh_fps (map eqnFingerprint (IntMap.elems live')) } }
+        eh_fps = foldl' (flip IntSet.insert) eh_fps (map eqnFingerprint (IntMap.elems live')),
+        eh_open = OpenFps (Just (IntSet.fromList
+          [ eqnFingerprint e | (n, e) <- IntMap.toList live', n < trackBase, not (IntSet.member n eh_matched) ])) } }
   where
     idx = index_oriented st_rules
     (live', map', joined) = IntMap.foldlWithKey' step (IntMap.empty, eh_map, 0 :: Int) eh_live
