@@ -996,7 +996,29 @@ on 14 cores (twee-e20, kill after 15× the limit, CPU cap 400 s).
   at most `--retry-gap` places below it gets proved. Otherwise the goal
   right after a proof (`--frontier 1`) is deepened to the next budget
   level, resuming its saved state. A few workers stay free for the
-  retries, so a new proof's consequences run at once. Not yet evaluated.
+  retries, so a new proof's consequences run at once.
+* **The cascade wins.** The test set is sets/u3: 724 goals left unsolved
+  after the online 20 s run, starting from its proofs (loops/U3poI). Both
+  schedules get 5 workers for 2 h wall.
+  * The cascade (20, 80 and 320 s levels; every goal near a proof first
+    gets a 20 s run) proves **90** goals with 336 runs on 248 goals.
+  * One online round at 80 s (give-up after 30 failures) proves **69**
+    with 117 runs.
+  * They share 58 proofs; the cascade alone has 32, the round alone 11.
+
+  Proofs over time:
+
+  | wall s | 600 | 1800 | 3600 | 5400 | 7200 |
+  |---|---|---|---|---|---|
+  | cascade | 27 | 57 | 64 | 77 | 90 |
+  | 80 s round | 10 | 18 | 40 | 58 | 69 |
+
+  The cascade is ahead from the start, and it was still gaining at the
+  end (7 proofs in the last 10 min). Short runs on the goals right after
+  new proofs pay off more than long runs in goal order. Only 30 of its
+  336 runs reached the 80 s level, and 16 of those succeeded. Round 3 of
+  the full benchmark therefore uses the cascade (abs/ul3.sh: 20, 80,
+  320 and 960 s, with lemmas from above).
 
 ## 2q. Ablation: ENIGMA, hints and lemmas
 
