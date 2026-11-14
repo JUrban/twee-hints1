@@ -39,8 +39,8 @@ flag parallel
   manual: True
 
 flag rtsopts
-  description: Enable -rtsopts (e.g. for setting maximum memory use.)
-  default: False
+  description: Enable -rtsopts (e.g. for setting maximum memory use), with a default heap limit of 6 GB.
+  default: True
   manual: True
 
 common executable-stuff
@@ -65,7 +65,7 @@ common executable-stuff
     ghc-options: -optl -static
 
   if flag(rtsopts)
-    ghc-options: -rtsopts
+    ghc-options: -rtsopts "-with-rtsopts=-M6g"
 
 executable twee
   import: executable-stuff
