@@ -564,6 +564,35 @@ class Loop:
                     if lev > att[f[0]][1]:
                         att[f[0]] = (ctx(f[0]), lev); k0 += 1
             print(f'  cascade: continuing round {rnd}, {k0} level updates from its results', flush=True)
+        # --retry-hints G: also retry (fresh, at T0) a goal whose original's hint pool has grown by
+        # the factor G since its last fresh run. Resuming does not use new hints well (the saved
+        # queue was scored without them): on 32 gap-1 goals that failed L1, resuming to 320 s
+        # proved 0/13, a fresh 80 s run 8/32, mostly goals whose pool had grown by 25% or more.
+        hp = {}   # goal -> size of its pool at its last fresh run
+        def psz(n):
+            return len(pools.get(self.pool_key(n), ()))
+        if a.retry_hints:
+            # history: hints= of each goal's last fresh run, relative to the latest run of its pool
+            lastL0, latest = {}, {}
+            for r in range(1, rnd + 1):
+                p = os.path.join(self.dir, 'r%d' % r, 'results.tsv')
+                if not os.path.exists(p):
+                    continue
+                for line in open(p):
+                    f = line.rstrip('\n').split('\t')
+                    m = re.search(r'hints=(\d+)', f[3]) if len(f) >= 4 else None
+                    if not m:
+                        continue
+                    h = int(m.group(1)); latest[self.pool_key(f[0])] = h
+                    if (f[4] if len(f) >= 5 and f[4][:1] == 'L' else 'L0') == 'L0':
+                        lastL0[f[0]] = h
+            for n in att:
+                k = self.pool_key(n)
+                hp[n] = psz(n) * lastL0[n] / latest[k] if n in lastL0 and latest.get(k) else psz(n)
+            print(f'  cascade: hint pools grown by {a.retry_hints}x since the last fresh run: '
+                  f'{sum(1 for n in att if psz(n) >= hp[n] * a.retry_hints)} goals', flush=True)
+        def grown(n):
+            return a.retry_hints and psz(n) >= hp[n] * a.retry_hints
         t0 = time.time(); new = 0; done_n = 0
         with open(os.path.join(rdir, 'results.tsv'), 'a') as rf, \
              open(os.path.join(self.dir, 'solved.tsv'), 'a') as sf, \
@@ -573,15 +602,17 @@ class Loop:
                 if time.time() - t0 < a.cascade_hours * 3600:
                     g = gaps()
                     retry = sorted((g[n][1], lemmas.split(n)[1], n) for n in att
-                                   if n not in busy and ctx(n) != att[n][0] and may_retry(n, g))
+                                   if n not in busy and (ctx(n) != att[n][0] or grown(n)) and may_retry(n, g))
                     deep_running = collections.Counter(orig_of(n) for n, l in running.values() if l > 0)
                     deep = sorted((att[n][1] + 1, deep_running[orig_of(n)], g[n][1], lemmas.split(n)[1], n) for n in att
                                   if n not in busy and ctx(n) == att[n][0] and att[n][1] + 1 < len(T)
-                                  and may_deepen(n, g))
+                                  and may_deepen(n, g) and not grown(n))
                     while len(running) < a.j and (retry or deep):
                         if retry:
                             n = retry.pop(0)[-1]; lev = 0
                             att[n] = (ctx(n), 0)
+                            if a.retry_hints:
+                                hp[n] = psz(n)
                             # fresh in the new context; its state replaces any older one, so deepening
                             # continues this search
                             # (--p9loop: no states; the goal's matcher lemmas carry over instead)
@@ -813,6 +844,8 @@ def main():
                     help='T0,T1,...: frontier deepening instead of rounds (see Loop.cascade), from round --start')
     ap.add_argument('--cascade-start', type=int, default=0,
                     help='--cascade: unsolved goals count as tried up to this level in their current context')
+    ap.add_argument('--retry-hints', type=float, default=0,
+                    help='G: --cascade also retries goals whose hint pool grew by the factor G since their last fresh run')
     ap.add_argument('--p9-order-offset', type=int, default=0,
                     help='--p9-orders: shift the ordering index (e.g. 1: a single round runs ordering 1, not the default)')
     ap.add_argument('--line-gaps', default='',
