@@ -131,8 +131,8 @@ class Loop:
         if hints and a.stall:
             cmd += ['--eqhint-stall', str(a.stall)]
         spath = os.path.join(self.dir, 'states', name + '.bin')
-        if resume:
-            if os.path.exists(spath):
+        if resume:   # True: continue the saved state; 'fresh': start over but save (replaces the old state)
+            if resume != 'fresh' and os.path.exists(spath):
                 cmd += ['--load-state', spath]
             cmd += ['--dump-state', spath + '.tmp']
         if hints:
@@ -389,8 +389,10 @@ class Loop:
                         if retry:
                             n = retry.pop(0)[-1]; lev = 0
                             att[n] = (ctx(n), 0)
+                            # fresh in the new context; its state replaces any older one, so deepening
+                            # continues this search
                             fut = ex.submit(self.run_one, n, self.hints_for(n, pools, None), rnd,
-                                            T[0], False, a.cascade_cpu * T[0])
+                                            T[0], 'fresh', a.cascade_cpu * T[0])
                         else:
                             if sum(1 for _, l in running.values() if l > 0) >= a.j - a.reserve:
                                 break
