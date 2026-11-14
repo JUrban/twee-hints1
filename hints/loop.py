@@ -98,11 +98,19 @@ class Loop:
         if a.model_fixed:
             m, v = a.model_fixed.split(',')
         else:
-          subprocess.run([VENV_PY, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'rulemodel.py'),
-                        ','.join(dirs), '--all', '--ntest', '0', '--save', m, '--vocab', v
+          here = os.path.dirname(os.path.abspath(__file__))
+          subprocess.run([VENV_PY, os.path.join(here, 'rulemodel.py'),
+                        ','.join(dirs), '--all', '--ntest', '0', '--save', m, '--vocab', v,
+                        '--negmax', str(a.model_negmax), '--threads', str(a.model_threads)
                        ] + (['--theory'] if a.model_theory else []),
                        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
-                       env=dict(os.environ, OMP_NUM_THREADS='8'))
+                       env=dict(os.environ, OMP_NUM_THREADS=str(a.model_threads)))
+          # binary forest: loads in 0.07 s instead of 0.25 s
+          mb = m[:-4] + '.bin'
+          subprocess.run([VENV_PY, os.path.join(here, 'lgb2bin.py'), m, mb],
+                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+          if os.path.exists(mb):
+              m = mb
         import rulemodel
         rulemodel.THEORY = a.model_theory
         vocab = {}
@@ -110,7 +118,7 @@ class Loop:
             c, k = line.rstrip('\n').split('\t'); vocab[k] = int(c)
         gdir = os.path.join(self.dir, 'goals', 'r%d' % rnd); os.makedirs(gdir, exist_ok=True)
         for n in self.names:
-            if n not in self.solved:
+            if n not in self.solved or a.rerun_solved:
                 rulemodel.write_goalfile(n, vocab, os.path.join(gdir, n))
         self.model = (m, v, gdir)
         print(f'  round {rnd}: trained rule model {time.time()-t0:.0f}s', file=sys.stderr, flush=True)
@@ -224,8 +232,14 @@ class Loop:
                 k = givenlib.key(l, r, sig)
                 lab = -1 if k in ax else (1 if k in pos else 0)
                 rows.append(f'{lab}\t{idx}\t{k[0]}\t{k[1]}\t{p1}\t{p2}\n')
-            with open(os.path.join(self.dir, 'given', name), 'w') as gf:
-                gf.writelines(rows)
+            gp = os.path.join(self.dir, 'given', name)
+            npos = sum(1 for x in rows if x[0] == '1')
+            old = -1
+            if os.path.exists(gp):   # solved before (--rerun-solved): keep the shorter proof's log
+                old = sum(1 for x in open(gp) if x[0] == '1')
+            if old < 0 or npos < old:
+                with open(gp, 'w') as gf:
+                    gf.writelines(rows)
             res = hs
         if path.startswith(os.path.join(self.dir, 'tmp')) and not os.environ.get('LOOP_KEEP_TMP'):
             os.unlink(path)
@@ -467,7 +481,7 @@ class Loop:
 
     def round(self, rnd):
         a = self.a
-        todo = [n for n in self.names if n not in self.solved]
+        todo = [n for n in self.names if n not in self.solved or (a.rerun_solved and rnd > 0)]
         if a.online:
             # earlier goals of each original first: their proofs feed the later ones in the same round
             todo.sort(key=lambda n: (int(n.rsplit('__goal_', 1)[1]) if '__goal_' in n else 0, n))
@@ -550,7 +564,14 @@ class Loop:
                 n, ok, dt, stats, hs = r
                 rf.write(f'{n}\t{"THM" if ok else "NO"}\t{dt:.2f}\t{stats}\tt={time.time()-t0:.0f}\n'); rf.flush()
                 streak[orig_of(n)] = 0 if ok else streak[orig_of(n)] + 1
-                if ok:
+                if ok and n in self.solved:
+                    # --rerun-solved: solved again; keep the shorter proof's hints
+                    hp = os.path.join(self.dir, 'hints', n)
+                    if not os.path.exists(hp) or len(hs) < sum(1 for _ in open(hp)):
+                        with open(hp, 'w') as hf:
+                            for l, r in hs:
+                                hf.write(f'{l}\t{r}\n')
+                elif ok:
                     new += 1
                     self.solved[n] = (rnd, dt)
                     sf.write(f'{n}\t{rnd}\t{dt:.2f}\n'); sf.flush()
@@ -589,6 +610,11 @@ def main():
     ap.add_argument('--model', action='store_true', help='train and use the ENIGMA rule model')
     ap.add_argument('--model-args', default='--rule-threshold 0.1 --rule-penalty 2')
     ap.add_argument('--given-extra', help='more given dirs (comma-separated) for training')
+    ap.add_argument('--model-negmax', type=int, default=400, help='negative rules per problem when training (memory)')
+    ap.add_argument('--model-threads', type=int, default=8)
+    ap.add_argument('--rerun-solved', action='store_true',
+                    help='ENIGMA-style loop: rounds > 0 rerun the solved problems too; the shorter proof\'s given log '
+                         'and hints are kept, so the next model trains on new and shorter proofs')
     ap.add_argument('--stall', type=int, default=0, help='--eqhint-stall for hinted runs')
     ap.add_argument('--model-fixed', help='MODEL,VOCAB: use this rule model in every round (no retraining)')
     ap.add_argument('--hints-extra', help='more hint dirs (comma-separated) for the kNN pool')
