@@ -1164,14 +1164,15 @@ rounds of 30 s or more, but about 40% overhead for 8 s rounds.
 
 ## 3. Assessment
 
-*Rewritten 13 Nov evening; earlier conclusions are corrected where noted.*
+*Rewritten 13 Nov evening, updated 14 Nov morning; earlier conclusions are corrected where noted.*
 
 * **Overall.** On all 51,784 public problems at 4 s per problem, the
   first loop (rule model + kNN hints, then lemma import) solves 33,249
   against 31,060 for plain twee (+7.0%), with 13% less CPU (holdout 3417
   vs 3203). The Veroff-style online loop then runs everything left in goal
   order: its first round (5 abstract s) brings the total to 36,057 (+16.1%
-  over plain; holdout 3,747), and a 20 s round is running (2o). On the
+  over plain; holdout 3,747), its second (20 s) to 39,008 (+25.6%;
+  holdout 4,196), and a cascade round is running (2o, 2p). On the
   hardest goals of two families, long runs with whole-original pools
   solve 64 of 68 over four rounds (2m).
 * **Where the gain comes from**, largest first:
@@ -1182,7 +1183,11 @@ rounds of 30 s or more, but about 40% overhead for 8 s rounds.
      of 1 goal at 20 s, 26% at 4–10, 0 of 5 beyond (2p). The loop advances
      along each original's proof.
   2. **The ENIGMA-style rule filter** (+5–6% at 2 s, +36% on hard dev
-     goals at 8 s, +11 of 300 hard holdout goals at 60 s).
+     goals at 8 s, +11 of 300 hard holdout goals at 60 s). In the 20 s
+     ablation (2q) it is the strongest single guide: 42 of 189 against
+     37 for hints and 28 for plain twee, at about 60% of plain's time.
+     Without lemmas, ENIGMA and hints add up (49). With lemmas they
+     overlap, and either one alone gives the full gain (58–59).
   3. **Hints from all of an original's proofs.** At 20 s and longer, the
      whole-original pool beats kNN-selected hints (60 vs 55 of 189 online;
      48 vs 40 of 68 at 300 s, against 36 without hints).
@@ -1213,13 +1218,17 @@ rounds of 30 s or more, but about 40% overhead for 8 s rounds.
 
 ## 4. Next steps
 
-* **Cascade scheduling** (2p, being tested on sets/u3 against a plain
-  80 s round): retry goals right after each new proof, deepen only the
-  frontier, resume saved states.
-* **Lemmas from both sides** (`--lemma-after`): +6/−0 on 74 (2p); used
-  from the full loop's next round on.
-* After round 2 of the full loop: the better of cascade or rounds, with
-  long frontier runs (V2 style: 300–900 abstract s, whole pools, resume).
+* **Cascade scheduling** won against a plain 80 s round (90 vs 69 in 2 h
+  on sets/u3, 2p). Round 3 of the full loop runs it with lemmas from
+  both sides (20/80/320/960 s levels, from 14 Nov 06:03).
+* **More sibling lemmas:** 6 nearest siblings instead of 3 gave 64 against
+  58 of 189 (+8/−2). 20 subset-kNN lemmas instead of 10 gave 59 (noise).
+  Being checked on 150 nil3_31 goals; if it holds, the full loop switches
+  to 6.
+* **Retrained rule model rm6t:** rm4t's data plus the full loop's 5,303
+  proofs. AUC 0.926 on the held-out u3 originals. Being tested alone and
+  in the full system on u3a189. Training peaked at 55 GB RSS, so the next
+  retrain needs a lower --negmax or a subsample.
 * Cheaper resume: re-score only the part of the saved queue that can
   match the new hints.
 
