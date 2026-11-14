@@ -277,6 +277,13 @@ def main():
             return
         path = os.path.join(lemmas.PROB, t + '.p')
         lines = [x for x in open(path) if x.startswith(('cnf(', 'fof(')) and 'conjecture' not in x]
+        if (a.lemmas or a.lemma_knn) and lp.lemma_src:
+            # the target's lemmas (proven siblings, kNN goals), as in its own runs
+            if a.lemma_knn:
+                txt, _ = lemmas.lemma_problem_knn(t, lp.lemma_src, a.lemmas, lp.lemma_index, a.lemma_knn, a.lemma_after)
+            else:
+                txt, _ = lemmas.lemma_problem(t, lp.lemma_src, a.lemmas, a.lemma_after)
+            lines += [x + '\n' for x in txt.splitlines() if x.startswith('fof(lemma_')]
         lines += [f'fof({lab}, axiom, {f}).\n' for f, lab in tl]
         for i, (l, r, vs, f) in enumerate(todo):
             sub = {v: f'skd{i}_{v.lower()}' for v in vs}
