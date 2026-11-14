@@ -1524,6 +1524,42 @@ is within noise. On the goals all three solve, the median wall time is
 of at most a few goals per hundred. Rewriting `simplifyOutermost` so that
 it does not rebuild unchanged terms was 0–5% slower and was reverted.
 
+## 2z. Distance in proof lines, not goal numbers (user's remark, 14 Nov)
+
+A goal's name gives its position among the goals selected from the
+original's Prover9 proof. Its LADR file also gives the proof line
+(`% goal_313 line_1531`). The original proofs themselves are not in
+AIM60k or Prover9-new, so the parents of a step are unknown. Goals were
+picked in stripes 3, 5, 8, 13, 21, 34 and 55 lines apart. A gap of one
+goal is therefore anywhere from 3 to 55 proof lines.
+
+The table replays the full loop's round 5 in order and measures each run's
+distance to the nearest proven goal below it at the time of the run. Line
+distance predicts success much better than the goal-index gap the cascade
+used:
+
+| distance to nearest proven goal below | L0 retries (20 s) | L1 (resume to 80 s) |
+|---|---|---|
+| ≤ 8 lines | 9/29 (31%) | 36/100 (36%) |
+| 9–13 lines | 69/216 (32%) | 125/495 (25%) |
+| 14–21 lines | 36/172 (21%) | 47/296 (16%) |
+| 22–34 lines | 29/219 (13%) | 37/155 (24%) |
+| 35–144 lines | 41/356 (12%) | 11/75 (15%) |
+| index gap 1 / 2 / 3 | 22% / 12% / 14% | 23% / 17% / 40% (5 runs) |
+
+`loop.py --line-gaps R,F` (6b76a1b) orders the cascade's retries and
+deepening by proof-line distance. It also admits goals within R lines for
+retries and within F lines for deepening. Every gap-1 goal still deepens:
+the late goals, 55 lines apart, block the rest of their chains. The full
+loop runs with `--line-gaps 21,13` from 21:15. Admission barely changes
+(1,407 goals against 1,406 deepen, because the dense early parts are
+solved). The gain is in the order: near goals (36%) run before far ones
+(12%).
+
+The full loop's rate (round 5, about 16 workers): 129 proofs/h with
+re-scoring off (19:35–20:13), and 203/h with consider-emulation also off
+(20:15–20:57).
+
 ## 2c. Long runs: stall cutoff and checkpoints
 
 * `--eqhint-stall N` gives up when no new rule has matched a hint for N
@@ -1652,7 +1688,7 @@ rounds of 30 s or more, but about 40% overhead for 8 s rounds.
 
 ## 4. Next steps
 
-*Updated 14 Nov, 20:20.*
+*Updated 14 Nov, 21:15.*
 
 * **Done since the last update:** 6 sibling lemmas won (2r) and run in
   the full loop's cascade round 4. rm6t and rm7t brought no online gain
@@ -1668,6 +1704,9 @@ rounds of 30 s or more, but about 40% overhead for 8 s rounds.
   has a 6 GB heap limit (2x).
 * **Consider-emulation off** (2y): about 30% less CPU, 76 against 77 on
   u3n150. The full loop runs without it from 20:15.
+* **Proof-line distance** (2z): it predicts success (32% within 13 lines
+  against 12% beyond 34; by goal gap 22% / 12%). The cascade orders its
+  work by it from 21:15.
 * **In-loop retraining** adds nothing online (2u): with the model kept
   fixed, FHL solves 970 after round 1, against 963 for EHL, which
   retrains. The full loop keeps rm4t fixed.
