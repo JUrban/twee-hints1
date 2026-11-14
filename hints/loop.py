@@ -118,6 +118,18 @@ class Loop:
                 path = os.path.join(self.dir, 'tmp', name + '.p')
                 with open(path, 'w') as f:
                     f.write(txt)
+        if a.hint_axioms and rnd > 0:
+            # the K most frequent pool hints that come from at least F sibling proofs, as axioms
+            # (pool hints are skolem-free consequences of the axioms and proven lemmas: sound)
+            k, fmin = (int(x) for x in a.hint_axioms.split(':'))
+            cnt = getattr(self, 'pool_cnt', {}).get(self.pool_key(name), {})
+            ax = [h[:2] for h in (hints or []) if cnt.get(h[:2], 0) >= fmin][:k]
+            if ax:
+                txt = open(path).read().rstrip('\n') + '\n' + ''.join(
+                    f'cnf(hint_axiom_{i}, axiom, {l} = {r}).\n' for i, (l, r) in enumerate(ax))
+                path = os.path.join(self.dir, 'tmp', name + '.p')
+                with open(path, 'w') as f:
+                    f.write(txt)
         args = a.args.split()
         if max_cpu is not None:
             args = [x for i, x in enumerate(args) if x != '--max-cpu' and (i == 0 or args[i - 1] != '--max-cpu')]
@@ -199,7 +211,7 @@ class Loop:
             with open(os.path.join(self.dir, 'given', name), 'w') as gf:
                 gf.writelines(rows)
             res = hs
-        if path.startswith(os.path.join(self.dir, 'tmp')):
+        if path.startswith(os.path.join(self.dir, 'tmp')) and not os.environ.get('LOOP_KEEP_TMP'):
             os.unlink(path)
         return name, ok, dt, stats, res
 
@@ -581,6 +593,8 @@ def main():
     ap.add_argument('--lemma-after', action='store_true',
                     help='sibling lemmas are the nearest proven goals above N as well as below (all proven '
                          'before the run, so still well-founded)')
+    ap.add_argument('--hint-axioms', default='',
+                    help='K:F: also add the K most frequent pool hints that occur in >= F sibling proofs as axioms')
     ap.add_argument('--lemma-subsets', action='store_true',
                     help='--lemma-knn may also use problems whose axioms are a subset of the target\'s')
     ap.add_argument('--online', action='store_true',
