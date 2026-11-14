@@ -1232,6 +1232,95 @@ AUC on the proofs' rules:
   of them on its own (+21 new, −5 lost), bringing the total to 941. The
   hint loop (HL) and the combination (EHL) follow.
 
+## 2v. Long runs slow down: overlap index and interreduction filter (user's question, 14 Nov)
+
+**How much slower.** `twee --progress N` (twee-e23) prints a PROGRESS line
+every N abstract seconds. Each line gives critical pairs, rules, active
+rules, queue size and CPU, plus the CPU of the housekeeping tasks. The
+test is the profiled nil3_1K goal in the full configuration (rm4t, 2,743
+hints), run for 640 abstract s, on the loaded machine (load 35–40 on 112
+cores). The nominal rate is 2,000 critical pairs per abstract second.
+
+| abstract s | rules | queued pairs | CPU per abstract s (old twee) | of which interreduction | of which queue renormalisation |
+|---|---|---|---|---|---|
+| 0–10 | 3.7k | 0.3M | 3.0 s | 0.2 s | 0.5 s |
+| 20–30 | 8.2k | 1.4M | 8.4 s | 0.7 s | 2.9 s (one pass) |
+| 50–70 | 14k | 4.3M | 6.8 s | 1.2 s | 0 |
+| 120–130 | 20k | 6.9M | 26 s | 2.0 s | 17.7 s (one pass, 177 s) |
+| 170–190 | 26k | 11.5M | 8.6 s | 2.3 s | 0 |
+
+So a long run costs 3–9 s of CPU per abstract second, against 1–3 s at the
+start. On top of that come queue renormalisation passes that each cost
+about 25 µs per queued pair. Under the abstract clock two housekeeping
+tasks were free and so ran without limit. Interreduction ran every
+abstract second over all active rules. The queue was renormalised
+whenever the critical-pair sample went stale. Together they took 33% of
+the CPU by 130 abstract s; with CPU time, twee caps each at 5%. At 20
+abstract s, the wall time of the full loop's runs grows with the rule
+count, from 52 s per run (2–4k rules) to 104 s (12–14k rules).
+
+**Profile at 60 abstract s** (12.9k rules): trying overlaps 18%, index
+lookups 18%, building terms 15%, `simplify` 13% (profiler overhead
+excluded). Twee looked for overlap partners by trying every active
+rule at every position, so each new rule cost time linear in the active
+set, before any critical pair was normalised.
+
+**What the Prover9 branches suggest, and what was done.** The
+Prover9-new long-run work is mostly about memory (compact clause and
+passive stores, mmap ancestor stores, about 80% less RAM) and fast
+matching against 10^5 hints. Twee's runs do not need either: 0.4 GB at
+60 abstract s, and hint matching is a hash lookup. Two indexing ideas do
+carry over:
+
+1. **Index the partners for inference** (Prover9's paramodulation
+   indexes; here Schulz's fingerprint indexing). twee-e24,
+   `Twee/FPIndex.hs`, samples 8 positions of each term. It keeps two
+   tries, one of rule left-hand sides and one of the subterms at every
+   overlap position. The candidates are sorted back into the old loop
+   order, and the renaming bound comes from a multiset of per-rule
+   variable bounds instead of a scan over all rules. **The output is
+   byte-identical** (given lists and proofs on 6 solved problems, all
+   counts on a 30k-pair guided run, and a resumed state).
+   `--no-overlap-index` turns it off.
+2. **Backward demodulation for interreduction** (Prover9's back-demod
+   index). twee-e26 re-checks an old active only if a rule added since
+   the last interreduction matches one of its subterms. This is nearly
+   exact: `TWEE_DEBUG_FILTER=1` found two misses in a 6k-pair run (a
+   ground-joinability and a model change). 4 of 6 test problems stay
+   byte-identical; the other two differ by 1 rule in about 3,000.
+   `--no-interreduce-filter` turns it off.
+
+| long guided run, CPU | 30 abs s | 70 abs s | 150 abs s |
+|---|---|---|---|
+| old (e23) | 150 s | 411 s | 1,148 s |
+| new (e26) | 87 s | 232 s | 623 s |
+| speedup | 1.7× | 1.8× | 1.8× |
+| interreduction CPU, old → new | 14 → 4 s | 59 → 10 s | 201 → 24 s |
+
+Six solved problems at up to 60 abstract s: 1.05–2.6× less CPU. Real
+workload (sets/u3n150, 20 abstract s, online, 6 lemmas; N3l6 with e22
+solved 76): on the first 97 goals e27 solves 69 against 68, in 18% less
+wall time, on a busier machine.
+
+The state file format is unchanged; the index is rebuilt on load. Since
+13:39 the path `/project/bin/twee-e22` holds the e27 code (the original is
+`twee-e22.orig`). The running full-loop cascade and the HL/EHL runs
+therefore use it, and the deep cascade levels get the speedup.
+
+**Queue renormalisation** is the remaining long-run cost. One pass
+renormalises every queued pair from scratch: twee stores only the
+parents and position, so there is no normal form to filter. That makes
+it as costly as making all those pairs again. `--queue-cost K` (e27)
+charges a pass K critical pairs per queued pair, so that its 5% budget
+binds as it does in CPU-time mode. An honest K is about 0.008. Whether
+renormalising less often hurts hint guidance (queued pairs can become
+hint matches) needs a deep-run test; the default stays 0.
+
+Also tried, no gain: larger GHC allocation areas (`-A16m`/`-A64m` were
+slower), and skipping the copy that `simplify` builds of normal forms
+together with a lazy overlap top term (exact, but within the ±15% timing
+noise of the loaded machine).
+
 ## 2c. Long runs: stall cutoff and checkpoints
 
 * `--eqhint-stall N` gives up when no new rule has matched a hint for N
@@ -1302,6 +1391,7 @@ rounds of 30 s or more, but about 40% overhead for 8 s rounds.
 | target-directed-inference | hash-guided inference toward targets | the branch reports a no-go; not ported. |
 | long-run-scalability, ancestor store, compact indexing, checkpoints | memory and restart for runs with 10^5+ given clauses | checkpoints ported as `--load-state` (twee already had `--dump-state`). Twee's AIM runs are far from those memory limits. |
 | (master) back_demod_hints, sos back-demodulation | re-simplify hints and queued clauses | ported as `--eqhint-normalise` and `--eqhint-requeue`. |
+| long-run-scalability, mature-back-index-cpu, adaptive-back-index-crossover (indexing side) | paramodulation and back-demodulation indexes that stay cheap as the clause set grows | ported in twee's terms (2v): a fingerprint index for overlap partners (exact, 1.8× on long runs) and a backward-demodulation filter for interreduction. |
 
 ## 3. Assessment
 
