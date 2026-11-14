@@ -1560,6 +1560,69 @@ The full loop's rate (round 5, about 16 workers): 129 proofs/h with
 re-scoring off (19:35–20:13), and 203/h with consider-emulation also off
 (20:15–20:57).
 
+## 2aa. Stalled goals: run fresh with the new hints, do not resume (14 Nov)
+
+The test set is sets/sg1: 32 gap-1 goals that failed L1 (resume to 80
+abstract s) in the full loop's round 5. All arms run from the snapshot
+loops/ULsJ (41,473 proofs) in the production config.
+
+| arm | solved | proofs per CPU-hour |
+|---|---|---|
+| resume to 320 s (+240), as the cascade's L2 (SG1) | 0 of 13 run (stopped) | 0 |
+| fresh 80 s, another term ordering (SO) | 8 / 32 | 5.9 |
+| fresh 80 s, default ordering (SD) | 4 of 11 run so far | 12 |
+| fresh 20 s, default ordering (S20) | 4 / 32 | 14 |
+| for comparison: gap-2 goals, L0 state resumed to 80 s (SG2) | 5 / 48 | 2.8 |
+
+None of these goals had a new sibling lemma since its last fresh run, so
+the cascade never retried them. Their hint pools had grown, though, by up
+to 75%. Success follows that growth:
+
+| pool growth since the last fresh run | S20 | SO |
+|---|---|---|
+| < 10% | 0/12 | 1/10 |
+| 10–25% | 1/11 | 3/13 |
+| ≥ 25% | 3/9 | 4/9 |
+
+* **Resuming does not use new hints.** The saved queue was scored without
+  them. `--no-resume-requeue` saves the re-scoring (2w), so a resumed run
+  only sees the new hints in the critical pairs it creates later.
+* **The ordering is not the main effect.** SD solves as well as SO, at an
+  equal or better rate.
+* **`loop.py --retry-hints G`** (4a34404) also retries a goal, fresh at
+  T0, when its original's hint pool has grown by the factor G since its
+  last fresh run. On a restart, the growth is read from the `hints=` of
+  each goal's last fresh run in the round results. Such goals are retried
+  instead of deepened. The full loop runs with `--retry-hints 1.25` from
+  22:28. 1,633 unsolved goals qualify, most of them far from a proof.
+
+## 2ab. Sketch climbing (user's suggestion, 14 Nov)
+
+The idea: make a hard goal easy with extra assumptions, then climb the
+lattice of assumption sets down to the empty set. Hints from every solved
+sketch guide the next ones. The earlier test (2g, sketches) used one
+fixed set of assumed siblings below the goal and gained nothing. For a
+gap-1 goal, every sibling below it is already proven, so that version
+assumed nothing new.
+
+`climb.py` (1e46a74) implements the climb on top of `loop.py`'s
+production context: lemmas, kNN lemmas, hint pools and the rule model.
+
+* **Candidate assumptions:** the M nearest unproven siblings of the target,
+  by proof line, on either side. They are lines of the same Prover9 proof,
+  so they are true.
+* **Each sketch run:** the target with an assumption set S as extra axioms.
+  twee reports the axioms the proof used (USEDAXIOMS), giving the used
+  set U. The proof's steps become sketch hints of the original, shared by
+  all its targets and placed before the pool hints. The sets U − {u} are
+  queued next, smallest first.
+* **End of the climb:** a proof that uses no assumption is a real proof.
+  Otherwise the climb ends with a real run that has all the sketch hints.
+  If even the full set S fails, its time is doubled.
+
+First test (CL1, running): sets/sg1, M = 8, up to 6 sketch runs of 5 s,
+then a real run of 20 s. The comparison is S20.
+
 ## 2c. Long runs: stall cutoff and checkpoints
 
 * `--eqhint-stall N` gives up when no new rule has matched a hint for N
@@ -1688,7 +1751,7 @@ rounds of 30 s or more, but about 40% overhead for 8 s rounds.
 
 ## 4. Next steps
 
-*Updated 14 Nov, 20:58.*
+*Updated 14 Nov, 22:30.*
 
 * **Done since the last update:** 6 sibling lemmas won (2r) and run in
   the full loop's cascade round 4. rm6t and rm7t brought no online gain
@@ -1707,6 +1770,11 @@ rounds of 30 s or more, but about 40% overhead for 8 s rounds.
 * **Proof-line distance** (2z): it predicts success (32% within 13 lines
   against 12% beyond 34; by goal gap 22% / 12%). The cascade orders its
   work by it from 20:58.
+* **Stalled goals** (2aa): a fresh run with the current hints beats a
+  longer resume (20 s fresh 14 proofs per CPU-hour, resume to 320 s 0 of
+  13). The cascade retries goals whose hint pool has grown 25%
+  (`--retry-hints 1.25`, from 22:28).
+* **Sketch climbing** (2ab): `climb.py`, first test running.
 * **In-loop retraining** adds nothing online (2u): with the model kept
   fixed, FHL solves 970 after round 1, against 963 for EHL, which
   retrains. The full loop keeps rm4t fixed.
