@@ -1163,6 +1163,35 @@ As an axiom it is unsound, so `--hint-axioms` now counts only proofs of
 unconditional goals. The 45 top nil3_31 hints from those all prove from
 the axioms in under 10 s each.
 
+## 2t. Where twee's time goes, and the rule penalty
+
+**Profile.** twee-e22 built with `-f profile` (Twee.Profile now uses GHC's
+monotonic clock instead of rdtsc). The test run is one failing
+nil3_1K goal at 20 abstract s (40k critical pairs considered) in the full
+configuration. Its share of the time, excluding the profiler's own
+overhead:
+
+| phase | share |
+|---|---|
+| making critical pairs (6,115 new rules against the active set) | 51% |
+| … of which normalising both sides of each new pair (8.2M `simplify` calls) | 41% |
+| considering the 27k dequeued pairs (normalisation, joining) | 22% |
+| the rest | 27% |
+
+Without hints or the model, the same run takes 67 s against 49–53 s. The
+model keeps fewer rules, which saves more than it costs. Hint matching
+and logging the given rules cost about 8%. Ground joining is cheap here:
+limiting it changes nothing.
+
+So the cost per abstract second grows with the square of the number of
+rules. Twee normalises every new critical pair at creation, by design,
+and changing that would be a large redesign.
+
+**Rule penalty.** Larger deferral penalties would keep low-scored rules
+out longer and make the rule set smaller. On nil3_31, 150 goals at 20 s
+with 6 lemmas: penalty 2 solves 76, 5 solves 77 and 20 solves 75. Wall
+time does not change. Penalty 2 stays.
+
 ## 2c. Long runs: stall cutoff and checkpoints
 
 * `--eqhint-stall N` gives up when no new rule has matched a hint for N
