@@ -12,6 +12,8 @@ in `/project/hintwork` (not in git).
 | the loop, a third 2 s round | 33,668 | 3473 | 35.0 |
 | + Veroff-style online loop, 5 abstract s round (2o)\* | **36,057** (+16.1% over plain) | 3747 | +18.9 |
 | + its 20 abstract s round (2o)\* | **39,008** (+25.6% over plain) | 4196 | +167.8 |
+| + cascade round, 3 lemmas (2p) | 39,746 | 4291 | +33.7 |
+| + cascade round, 6 lemmas (2r), running: 6,582 runs by 16:30, 14 Nov | **40,960** (+31.9% over plain) | 4447 | +105.2 |
 
 \* Starts from 33,720 proofs: the third round plus 52 from long runs on
 two families (2m). Its time is the summed wall time of the runs, close

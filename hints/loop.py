@@ -37,6 +37,8 @@ class Loop:
         os.makedirs(os.path.join(self.dir, 'states'), exist_ok=True)
         if a.p9loop:
             os.makedirs(os.path.join(self.dir, 'p9lem'), exist_ok=True)
+        import threading
+        self.p9_lock = threading.Lock()
         self.model = None  # (model, vocab, goaldir) of the current round
         self.names = [l.strip() for l in open(a.set) if l.strip()]
         self.sig = {}
@@ -51,7 +53,14 @@ class Loop:
         """--p9loop: the hint matchers of this goal's earlier failed runs (TPTP formulas, in
         the order they were derived; the latest run's last)."""
         p = os.path.join(self.dir, 'p9lem', name)
-        return [l.rstrip('\n') for l in open(p)] if os.path.exists(p) else []
+        if not os.path.exists(p):
+            return []
+        seen, out = set(), []   # (parallel --p9-parallel runs may append the same matcher)
+        for l in open(p):
+            l = l.rstrip('\n')
+            if l not in seen:
+                seen.add(l); out.append(l)
+        return out
 
     def p9_collect(self, name, out, path):
         """--p9loop (Veroff's P9loop): keep the hint matchers that a failed run derived, as
@@ -74,7 +83,7 @@ class Loop:
                 continue
             seen.add(f); new.append(f)
         if new:
-            with open(os.path.join(self.dir, 'p9lem', name), 'a') as fh:
+            with self.p9_lock, open(os.path.join(self.dir, 'p9lem', name), 'a') as fh:
                 fh.writelines(f + '\n' for f in new)
         return len(new)
 
@@ -173,10 +182,12 @@ class Loop:
         self.model = (m, v, gdir)
         print(f'  round {rnd}: trained rule model {time.time()-t0:.0f}s', file=sys.stderr, flush=True)
 
-    def run_one(self, name, hints, rnd, budget=None, resume=None, max_cpu=None):
+    def run_one(self, name, hints, rnd, budget=None, resume=None, max_cpu=None, variant=0):
         """One twee run. BUDGET (default: the round's timeout), RESUME (default --resume)
-        and MAX_CPU (replaces --max-cpu in --args) are for --cascade."""
+        and MAX_CPU (replaces --max-cpu in --args) are for --cascade. VARIANT: which of the
+        --p9-parallel runs of this goal in this round (Bigloop)."""
         a = self.a
+        tag = name + (f'.v{variant}' if variant else '')   # tmp file names
         T = budget if budget is not None else self.timeout(rnd)
         resume = a.resume if resume is None else resume
         path = os.path.join(PROB, name + '.p')
@@ -187,7 +198,7 @@ class Loop:
             else:
                 txt, nl = lemmas.lemma_problem(name, self.lemma_src, a.lemmas, a.lemma_after)
             if nl:
-                path = os.path.join(self.dir, 'tmp', name + '.p')
+                path = os.path.join(self.dir, 'tmp', tag + '.p')
                 with open(path, 'w') as f:
                     f.write(txt)
         if a.hint_axioms and rnd > 0:
@@ -199,7 +210,7 @@ class Loop:
             if ax:
                 txt = open(path).read().rstrip('\n') + '\n' + ''.join(
                     f'cnf(hint_axiom_{i}, axiom, {l} = {r}).\n' for i, (l, r) in enumerate(ax))
-                path = os.path.join(self.dir, 'tmp', name + '.p')
+                path = os.path.join(self.dir, 'tmp', tag + '.p')
                 with open(path, 'w') as f:
                     f.write(txt)
         orig_path = os.path.join(PROB, name + '.p')
@@ -209,7 +220,7 @@ class Loop:
         if p9:
             txt = open(path).read().rstrip('\n') + '\n' + ''.join(
                 f'fof(p9lemma_{i}, axiom, {f}).\n' for i, f in enumerate(p9))
-            path = os.path.join(self.dir, 'tmp', name + '.p')
+            path = os.path.join(self.dir, 'tmp', tag + '.p')
             with open(path, 'w') as f:
                 f.write(txt)
         args = a.args.split()
@@ -220,10 +231,12 @@ class Loop:
                '--no-proof', '--print-hints', '--print-given'] + args
         if a.p9loop:
             cmd += ['--print-hint-matchers']
+        k = 0
         if a.p9_orders > 1:
             # P9loop's term orderings: attempt k of a goal (rounds from --start, or the number of
             # its earlier p9 attempts) uses ordering k mod N; ordering 0 is twee's default
-            k = self.p9_attempt(name, rnd) % a.p9_orders
+            # (Bigloop, --p9-parallel P: the P runs of a round take orderings attempt*P .. attempt*P+P-1)
+            k = (self.p9_attempt(name, rnd) * max(1, a.p9_parallel) + variant) % a.p9_orders
             if k:
                 cmd += ['--precedence', ','.join(self.p9_precedence(orig_path, k))]
         if self.model:
@@ -238,7 +251,7 @@ class Loop:
                 cmd += ['--load-state', spath]
             cmd += ['--dump-state', spath + '.tmp']
         if hints:
-            hpath = os.path.join(self.dir, 'tmp', name + '.hints')
+            hpath = os.path.join(self.dir, 'tmp', tag + '.hints')
             with open(hpath, 'w') as f:
                 for h in hints:
                     f.write('\t'.join(h) + '\n')
@@ -256,7 +269,7 @@ class Loop:
         if a.keep_out:
             od = os.path.join(self.dir, 'r%d' % rnd, 'out'); os.makedirs(od, exist_ok=True)
             i, j = out.find('GIVEN-BEGIN'), out.find('GIVEN-END')
-            with open(os.path.join(od, name), 'w') as f:
+            with open(os.path.join(od, tag), 'w') as f:
                 f.write(out[:i] + out[j:] if 0 <= i < j else out)  # without the given rules
         if hints and not os.environ.get('LOOP_KEEP_TMP'):
             os.unlink(hpath)
@@ -276,7 +289,8 @@ class Loop:
             if line.startswith('HINTSTATS'):
                 stats = line
         if a.p9loop:
-            stats += f' P9 used={len(p9)}' + (f' new={nnew}' if not ok else '')
+            stats += f' P9 used={len(p9)}' + (f' new={nnew}' if not ok else '') + \
+                (f' v={variant} ord={k}' if a.p9_orders > 1 else '')
         res = None
         if ok:
             L, G = hintlib.extract_hints(out)
@@ -624,8 +638,11 @@ class Loop:
                         if nxt is None:
                             break
                         u = nxt[0]
-                        pending.add(ex.submit(self.run_multi, u, nxt[1], rnd) if len(u) > 1 else
-                                    ex.submit(lambda n=u[0], h=nxt[1]: [self.run_one(n, h, rnd)]))
+                        if len(u) > 1:
+                            pending.add(ex.submit(self.run_multi, u, nxt[1], rnd))
+                        else:
+                            for v in range(max(1, a.p9_parallel)):   # Bigloop: P runs of the goal at once
+                                pending.add(ex.submit(lambda n=u[0], h=nxt[1], v=v: [self.run_one(n, h, rnd, variant=v)]))
                     if not pending:
                         return
                     done, pending = wait(pending, return_when=FIRST_COMPLETED)
@@ -745,6 +762,9 @@ def main():
                     help="Veroff's P9loop: the hint matchers of a goal's failed runs become lemmas (axioms) of its later runs")
     ap.add_argument('--p9-orders', type=int, default=1,
                     help='--p9loop: cycle through this many term orderings (KBO precedences) over a goal\'s attempts')
+    ap.add_argument('--p9-parallel', type=int, default=1,
+                    help='Veroff\'s Bigloop: P runs of each goal per round at once, each with its own ordering '
+                         '(needs --p9-orders >= P), sharing one lemma pool (their matchers join it after the round\'s runs)')
     ap.add_argument('--p9-max', type=int, default=0, help='--p9loop: at most this many lemmas, the most recently derived (0 = all)')
     ap.add_argument('--init', help='import round-0 results (solved.tsv and hints) of another loop dir')
     a = ap.parse_args()
