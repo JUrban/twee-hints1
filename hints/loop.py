@@ -35,6 +35,8 @@ class Loop:
         os.makedirs(os.path.join(self.dir, 'tmp'), exist_ok=True)
         os.makedirs(os.path.join(self.dir, 'given'), exist_ok=True)
         os.makedirs(os.path.join(self.dir, 'states'), exist_ok=True)
+        if a.p9loop:
+            os.makedirs(os.path.join(self.dir, 'p9lem'), exist_ok=True)
         self.model = None  # (model, vocab, goaldir) of the current round
         self.names = [l.strip() for l in open(a.set) if l.strip()]
         self.sig = {}
@@ -44,6 +46,37 @@ class Loop:
             for l in open(sp):
                 n, r, t = l.split('\t')[:3]
                 self.solved[n] = (int(r), float(t))
+
+    def p9_lemmas(self, name):
+        """--p9loop: the hint matchers of this goal's earlier failed runs (TPTP formulas, in
+        the order they were derived; the latest run's last)."""
+        p = os.path.join(self.dir, 'p9lem', name)
+        return [l.rstrip('\n') for l in open(p)] if os.path.exists(p) else []
+
+    def p9_collect(self, name, out, path):
+        """--p9loop (Veroff's P9loop): keep the hint matchers that a failed run derived, as
+        lemmas for this goal's later runs. Matchers are consequences of the problem's axioms
+        (and of the lemmas given to the run), so they are sound lemmas for the same problem;
+        any with a symbol that is not in the problem (a skolem of a conditional goal) is dropped."""
+        syms = set(re.findall(r'\b([a-z][A-Za-z0-9_]*)\s*\(', open(path).read())) | \
+            set(re.findall(r'\b([a-z][A-Za-z0-9_]*)\b', open(path).read()))
+        old = self.p9_lemmas(name)
+        seen = set(old)
+        new = []
+        for line in out.splitlines():
+            if not line.startswith('HINTMATCHER '):
+                continue
+            m = re.match(r'HINTMATCHER \d+ fof\(lemma, axiom, (.*)\)\.\s*$', line)
+            if not m:
+                continue
+            f = m.group(1)
+            if f in seen or not set(re.findall(r'\b([a-z][A-Za-z0-9_]*)\b', f)) <= syms:
+                continue
+            seen.add(f); new.append(f)
+        if new:
+            with open(os.path.join(self.dir, 'p9lem', name), 'a') as fh:
+                fh.writelines(f + '\n' for f in new)
+        return len(new)
 
     def signature(self, name):
         o = orig_of(name)
@@ -152,12 +185,24 @@ class Loop:
                 path = os.path.join(self.dir, 'tmp', name + '.p')
                 with open(path, 'w') as f:
                     f.write(txt)
+        orig_path = os.path.join(PROB, name + '.p')
+        p9 = self.p9_lemmas(name) if a.p9loop else []
+        if a.p9_max and len(p9) > a.p9_max:
+            p9 = p9[-a.p9_max:]   # the most recently derived
+        if p9:
+            txt = open(path).read().rstrip('\n') + '\n' + ''.join(
+                f'fof(p9lemma_{i}, axiom, {f}).\n' for i, f in enumerate(p9))
+            path = os.path.join(self.dir, 'tmp', name + '.p')
+            with open(path, 'w') as f:
+                f.write(txt)
         args = a.args.split()
         if max_cpu is not None:
             args = [x for i, x in enumerate(args) if x != '--max-cpu' and (i == 0 or args[i - 1] != '--max-cpu')]
             args += ['--max-cpu', str(max_cpu)]
         cmd = [a.twee, path, '--max-time', str(T), '--no-colour', '--quiet',
                '--no-proof', '--print-hints', '--print-given'] + args
+        if a.p9loop:
+            cmd += ['--print-hint-matchers']
         if self.model:
             m, v, gdir = self.model
             cmd += ['--rule-model', m, '--rule-vocab', v, '--rule-goal', os.path.join(gdir, name)] + \
@@ -193,6 +238,9 @@ class Loop:
         if hints and not os.environ.get('LOOP_KEEP_TMP'):
             os.unlink(hpath)
         ok = 'HINTS-END' in out
+        if a.p9loop and not ok:
+            nnew = self.p9_collect(name, out, orig_path)
+            out += f'\nP9LEMMAS used={len(p9)} new={nnew}\n'
         if resume:
             if ok:
                 for p in (spath, spath + '.tmp'):
@@ -204,6 +252,8 @@ class Loop:
         for line in out.splitlines():
             if line.startswith('HINTSTATS'):
                 stats = line
+        if a.p9loop:
+            stats += f' P9 used={len(p9)}' + (f' new={nnew}' if not ok else '')
         res = None
         if ok:
             L, G = hintlib.extract_hints(out)
@@ -668,6 +718,9 @@ def main():
     ap.add_argument('--give-up', type=int, default=0,
                     help='skip the rest of an original in this round after N consecutive failures (with --online: goal order)')
     ap.add_argument('--keep-out', action='store_true', help='save each run\'s output in DIR/rN/out/<name> (for stallsim.py)')
+    ap.add_argument('--p9loop', action='store_true',
+                    help="Veroff's P9loop: the hint matchers of a goal's failed runs become lemmas (axioms) of its later runs")
+    ap.add_argument('--p9-max', type=int, default=0, help='--p9loop: at most this many lemmas, the most recently derived (0 = all)')
     ap.add_argument('--init', help='import round-0 results (solved.tsv and hints) of another loop dir')
     a = ap.parse_args()
     if a.init and not os.path.exists(os.path.join(a.dir, 'solved.tsv')):
@@ -686,8 +739,8 @@ def main():
         lp.cascade()
         return
     for r in range(a.start, a.start + a.rounds):
-        if lp.round(r) == 0 and r > 0:
-            break
+        if lp.round(r) == 0 and r > 0 and not a.p9loop and not a.resume:
+            break   # (--p9loop and --resume runs change between rounds even without new proofs)
 
 if __name__ == '__main__':
     main()

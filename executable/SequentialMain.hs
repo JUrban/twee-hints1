@@ -87,6 +87,7 @@ data MainFlags =
     flags_resume_requeue :: Bool,
     flags_stitch :: Maybe FilePath,
     flags_print_hints :: Bool,
+    flags_print_hint_matchers :: Bool,
     flags_hints_file :: Maybe FilePath,
     flags_track_hints :: Maybe FilePath,
     flags_rule_model :: Maybe FilePath,
@@ -251,6 +252,12 @@ parseMainFlags = do
     inGroup "Output options" $
     bool "print-hints"
       ["On success, print all lemmas of the raw proof as hints (off by default)."]
+      False
+  flags_print_hint_matchers <-
+    expert $
+    inGroup "Output options" $
+    bool "print-hint-matchers"
+      ["Print each rule that matches a hint, as it is added (a HINTMATCHER line with a TPTP clause), for Veroff's P9loop: the matchers of a failed run become lemmas of the next."]
       False
   flags_rule_model <-
     expert $
@@ -1281,7 +1288,15 @@ runTwee globals (TSTPFlags tstp) horn precedence config0 flags@MainFlags{..} lat
     output = Output {
       output_message = \msg -> do
         say (prettyShow msg)
-        sayTrace (show (traceMsg msg)) }
+        sayTrace (show (traceMsg msg))
+        case msg of
+          HintMatched n active | flags_print_hint_matchers && n < trackBase ->
+            let t :=: u = unorient (active_rule active) in
+            putStrLn $ "HINTMATCHER " ++ show n ++ " " ++
+              concat (lines (showProblem
+                [Input Nothing "lemma" (Jukebox.Ax Jukebox.Axiom) Unknown $
+                   toForm $ clause [Pos (jukeboxTerm ctx t Jukebox.:=: jukeboxTerm ctx u)]]))
+          _ -> return () }
 
     traceMsg (NewActive _ active) =
       step "add" [traceActive active]
