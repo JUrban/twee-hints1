@@ -2427,6 +2427,20 @@ snapshot ULsV at 11:57, fresh 20 s, production context):
 This also retests the tier pool, whose earlier negative came from the
 invalid snapshot.
 
+* **Later goals as hints** (`loop.py --hint-after 10`): the statements of
+  the next 10 unsolved unit goals of the original. They are unproven, so
+  hints only. 0 of 30 heads.
+* **Twee settings on stalled goals, retested** (`abs/var_test.sh`, from
+  ULsV, 36 goals Prover9's worker failed). The earlier portfolio
+  negative also came from the invalid snapshot. Every arm proves 0:
+  * the control;
+  * `--no-flatten-goal`;
+  * `--flatten-goal-lightly`;
+  * `--flip-ordering`;
+  * `--kbo-weight0`.
+
+  On these goals only unfolding (2af) has proved anything.
+
 **Fresh runs against resumes.** The last 1,500 UL27 runs:
 
 | level | proved | runs | rate | CPU-hours | proofs per CPU-hour |
