@@ -215,7 +215,7 @@ class Loop:
         cp = os.path.join(self.dir, 'genctx', name)
         if not os.path.exists(cp):
             return hints
-        cmd = [a.gen_python, os.path.join(HERE, 'gen.py'), 'hints', cp, name, '--load', a.gen_model,
+        cmd = [a.gen_python, os.path.join(HERE, a.gen_script), 'hints', cp, name, '--load', a.gen_model,
                '--n', str(a.gen_n), '--threads', '1', '--ctx', str(a.gen_ctx), '--temp', str(a.gen_temp)]
         t0 = time.time()
         try:
@@ -1121,6 +1121,7 @@ def make_parser():
     ap.add_argument('--gen-ctx', type=int, default=256)
     ap.add_argument('--gen-temp', type=float, default=1.0)
     ap.add_argument('--gen-python', default='/project/hintwork/venv/bin/python3')
+    ap.add_argument('--gen-script', default='gen.py', help='gen.py, or gencopy.py (the copy-action model)')
     ap.add_argument('--model-negmax', type=int, default=400, help='negative rules per problem when training (memory)')
     ap.add_argument('--model-threads', type=int, default=8)
     ap.add_argument('--rerun-solved', action='store_true',
