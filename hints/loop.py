@@ -670,9 +670,16 @@ class Loop:
                     deep = sorted((att[n][1] + 1, deep_running[orig_of(n)], g[n][1], lemmas.split(n)[1], n) for n in att
                                   if n not in busy and ctx(n) == att[n][0] and att[n][1] + 1 < len(T)
                                   and may_deepen(n, g) and not grown(n))
-                    while len(running) < a.j and (retry or deep):
-                        if retry:
-                            n = retry.pop(0)[-1]; lev = 0
+                    far = []
+                    if a.far_retry and len(running) + len(retry) + len(deep) < a.j:
+                        # --far-retry: idle slots retry (fresh) the goals beyond the retry gaps too,
+                        # nearest first, after everything else
+                        far = sorted((g[n][1], lemmas.split(n)[1], n) for n in att
+                                     if n not in busy and (ctx(n) != att[n][0] or grown(n))
+                                     and not may_retry(n, g))[:a.j]
+                    while len(running) < a.j and (retry or deep or far):
+                        if retry or (far and not deep):
+                            n = (retry or far).pop(0)[-1]; lev = 0
                             att[n] = (ctx(n), 0)
                             if a.retry_hints:
                                 hp[n] = psz(n)
@@ -940,6 +947,9 @@ def make_parser():
                     help='--p9loop: also take the matchers of unconditional sibling goals at most this many places away')
     ap.add_argument('--p9-max', type=int, default=0, help='--p9loop: at most this many lemmas, the most recently derived (0 = all)')
     ap.add_argument('--init', help='import round-0 results (solved.tsv and hints) of another loop dir')
+    ap.add_argument('--far-retry', action='store_true',
+                    help='--cascade: slots with nothing else to run retry goals beyond the retry gaps '
+                         '(fresh at T0, nearest first) when their context or pool changed')
     ap.add_argument('--fresh-first', action='store_true',
                     help='--cascade-continue: goals without a T0 (fresh) run in the round get one first')
     ap.add_argument('--sync', type=float, default=0,
