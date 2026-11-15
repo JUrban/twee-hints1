@@ -1706,8 +1706,12 @@ failed L1 (snapshot loops/ULsK, 41,996 proofs).
 
 * CL5, the CL4 config, solved 10/64 in 6,817 CPU s: **5.3 proofs per
   CPU-hour**.
-* F3, fresh 80 s, was at 8/43 in 6,678 s (4.3 per CPU-hour) when this
-  was written. Final numbers are below.
+* F3, fresh 80 s, solved 12/64 in 9,919 s: 4.4 per CPU-hour.
+* **CL5's 10 are a subset of F3's 12.** On sg3 the climb is only cheaper
+  per proof; it reaches no goal that fresh 80 s misses.
+* Fresh 20 s was the cheapest arm on sg1 (14 per CPU-hour), and the
+  climb ends with a fresh 20 s run. So the right control for the climb
+  is fresh 20 s in the same context.
 
 **The loop's own deepening is worse.** After the restart at 23:56, UL10's
 runs gave these yields:
