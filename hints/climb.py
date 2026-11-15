@@ -152,11 +152,26 @@ def main():
     ap.add_argument('--true-max', type=int, default=60, help='true lemmas (from --fill) per original')
     ap.add_argument('-j', type=int, default=2)
     ap.add_argument('--goal-lines', default='/project/hintwork/abs/goal_lines.tsv')
+    ap.add_argument('--live', metavar='LOOPDIR',
+                    help='side worker of a running loop.py --cascade --sync: climb its stalled goals (a failed '
+                         'deepening run L1+ is the goal\'s last result in its latest round, unsolved), nearest '
+                         'proven goal below first; real proofs go into LOOPDIR (hints, then a solved.tsv row). '
+                         'DIR gets a copy of LOOPDIR\'s solved.tsv and a link to its hints. SET is ignored.')
+    ap.add_argument('--refresh', type=float, default=1800, help='--live: seconds between context refreshes')
+    ap.add_argument('--exclude', default='', help='--live: comma-separated goal list files to skip')
     argv = sys.argv[1:]
     i = argv.index('--') if '--' in argv else len(argv)
     c = ap.parse_args(argv[:i])
     rest = argv[i + 1:]   # loop.py options for the production context
     a = loop.make_parser().parse_args([c.set, c.dir] + rest)
+    if c.live and not os.path.exists(os.path.join(c.dir, 'solved.tsv')):
+        os.makedirs(c.dir, exist_ok=True)
+        os.symlink(os.path.abspath(os.path.join(c.live, 'hints')), os.path.join(c.dir, 'hints'))
+        with open(os.path.join(c.dir, 'solved.tsv'), 'w') as f:
+            for l in open(os.path.join(c.live, 'solved.tsv')):
+                w = l.split('\t')
+                if len(w) >= 3 and l.endswith('\n'):
+                    f.write(f'{w[0]}\t0\t{w[2].strip()}\n')
     loop.init_dir(a)
     lp = loop.Loop(a)
     lp.used = {}; lp.extra_axioms = {}; lp.assumed = {}
@@ -169,8 +184,9 @@ def main():
     if a.lemma_knn:
         lp.lemma_index = lemmas.LemmaIndex(sorted(lp.solved), subsets=a.lemma_subsets)
     cands = {}
+    ix = {}
     if c.knn:
-        uidx = lemmas.LemmaIndex(sorted(n for n in gl if n not in lp.solved), subsets=True)
+        ix['u'] = lemmas.LemmaIndex(sorted(n for n in gl if n not in lp.solved), subsets=True)
     # equation counts over the proofs of unconditional goals of the targets' originals (--freq):
     # a conditional goal's hypotheses become false 'hints' like X0 = X1 when generalised
     ucnt = collections.defaultdict(collections.Counter)
@@ -207,7 +223,7 @@ def main():
                 res[f'assume_goal_{j}'] = f
         if c.knn:
             with lock:
-                near = uidx.select(t, c.knn, exclude={f'{o}__goal_{j}' for j in allgoals.get(o, ())})
+                near = ix['u'].select(t, c.knn, exclude={f'{o}__goal_{j}' for j in allgoals.get(o, ())})
             for i, m in enumerate(near):
                 res[f'assume_knn_{i}'] = lemmas.conjecture(m)
         if c.laws:
@@ -397,6 +413,9 @@ def main():
                         hf.write(f'{l}\t{r}\n')
         return t, real is not None, runs
 
+    if c.live:
+        live(c, a, lp, gl, pools, ix, climb, out)
+        return
     todo = [n for n in lp.names if n not in lp.solved]
     t0 = time.time(); nsolved = 0
     with ThreadPoolExecutor(c.j) as ex:
@@ -404,6 +423,80 @@ def main():
             nsolved += ok
             print(f'{t} {"THM" if ok else "NO"} sketch-runs={runs} total={nsolved} {time.time()-t0:.0f}s', flush=True)
     print(f'climb: {nsolved}/{len(todo)} {time.time()-t0:.0f}s', flush=True)
+
+
+def live(c, a, lp, gl, pools, ix, climb, out):
+    """--live: climb the stalled goals of the running loop c.live, as they come."""
+    import glob
+    from concurrent.futures import wait, FIRST_COMPLETED
+    D = c.live
+    skip = set()
+    for f in filter(None, c.exclude.split(',')):
+        skip |= {l.strip() for l in open(f) if l.strip()}
+    out.flush()
+    climbed = {l.split('\t')[0] for l in open(os.path.join(c.dir, 'climb.tsv'))}
+    def dst():
+        S, R = set(), 0
+        for l in open(os.path.join(D, 'solved.tsv')):
+            w = l.split('\t')
+            if len(w) >= 2 and l.endswith('\n'):
+                S.add(w[0]); R = max(R, int(w[1]))
+        return S, R
+    def stalled(S, busy):
+        rfs = sorted(glob.glob(os.path.join(D, 'r*', 'results.tsv')), key=lambda p: int(p.split('/')[-2][1:]))
+        last = {}
+        for l in open(rfs[-1]):
+            w = l.rstrip('\n').split('\t')
+            if len(w) >= 5:
+                last[w[0]] = (w[1], w[4])
+        by = lemmas.by_original(S)
+        def dist(n):   # proof lines to the nearest proven goal below
+            o, k = lemmas.split(n)
+            below = [j for j in by.get(o, ()) if j < k and f'{o}__goal_{j}' in gl]
+            return gl[n] - gl[f'{o}__goal_{max(below)}'] if below and n in gl else 10 ** 6
+        res = [n for n, (ok, lev) in last.items() if ok == 'NO' and lev != 'L0' and n not in S
+               and n not in climbed and n not in skip and n not in busy]
+        return sorted(res, key=lambda n: (dist(n), n))
+    def refresh(S):
+        new = [n for n in S if n not in lp.solved]
+        for n in new:
+            lp.solved[n] = (0, 0.0)
+        if new:
+            t1 = time.time()
+            pools.clear(); pools.update(lp.build_pools())
+            lp.lemma_src = {o: set(v) for o, v in lemmas.by_original(lp.solved).items()}
+            if a.lemma_knn:
+                lp.lemma_index = lemmas.LemmaIndex(sorted(lp.solved), subsets=a.lemma_subsets)
+            if c.knn:
+                ix['u'] = lemmas.LemmaIndex(sorted(n for n in gl if n not in lp.solved), subsets=True)
+            print(f'live: refreshed with {len(new)} new proofs of {D} in {time.time()-t1:.0f}s', flush=True)
+    t0 = time.time(); nsolved = 0; last_refresh = time.time()
+    with ThreadPoolExecutor(c.j) as ex:
+        running = {}
+        while True:
+            S, R = dst()
+            if time.time() - last_refresh >= c.refresh:
+                refresh(S); last_refresh = time.time()
+            busy = set(running.values())
+            todo = stalled(S, busy)
+            while len(running) < c.j and todo:
+                t = todo.pop(0)
+                running[ex.submit(climb, t)] = t
+            if not running:
+                time.sleep(60); continue
+            fin, _ = wait(list(running), return_when=FIRST_COMPLETED)
+            for f in fin:
+                running.pop(f)
+                t, ok, runs = f.result()
+                climbed.add(t)
+                S, R = dst()
+                if ok and t not in S:
+                    # (the hints file is already in place: DIR/hints links to D/hints)
+                    with open(os.path.join(D, 'solved.tsv'), 'a') as sf:
+                        sf.write(f'{t}\t{R}\t0\n')
+                    nsolved += 1
+                print(f'{t} {"THM" if ok else "NO"} sketch-runs={runs} total={nsolved} '
+                      f'{time.time()-t0:.0f}s', flush=True)
 
 
 if __name__ == '__main__':
