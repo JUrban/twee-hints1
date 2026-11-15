@@ -192,7 +192,7 @@ def auc(y, s):
     return (rk[y == 1].sum() - P * (P + 1) / 2) / (P * N)
 
 
-def evaluate(model, P, names, a, limit=None):
+def evaluate(model, P, names, a, limit=None, per=None):
     model.eval(); aucs = []
     with torch.no_grad():
         for n in names[:limit]:
@@ -208,6 +208,8 @@ def evaluate(model, P, names, a, limit=None):
             v = auc(y, s)
             if v is not None:
                 aucs.append(v)
+                if per is not None:
+                    per.write(f'{n}\t{v:.4f}\n'); per.flush()
     model.train()
     return float(np.mean(aucs)), len(aucs)
 
@@ -228,6 +230,7 @@ def main():
     ap.add_argument('--eval-n', type=int, default=100)
     ap.add_argument('--threads', type=int, default=4)
     ap.add_argument('--seed', type=int, default=1)
+    ap.add_argument('--per', help='eval: write each test problem\'s AUC to this file')
     ap.add_argument('--max-train', type=int, default=0, help='use at most N training problems')
     a = ap.parse_args()
     torch.set_num_threads(a.threads); torch.manual_seed(a.seed); rnd = random.Random(a.seed)
@@ -238,7 +241,7 @@ def main():
     if a.load:
         model.load_state_dict(torch.load(a.load))
     if a.cmd == 'eval':
-        v, k = evaluate(model, P, test, a)
+        v, k = evaluate(model, P, test, a, a.eval_n or None, open(a.per, 'w') if a.per else None)
         print(f'AUC {v:.3f} over {k} problems', flush=True)
         return
     train = sorted(set(P) - set(test))

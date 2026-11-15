@@ -2077,8 +2077,17 @@ given/ultest) are hard proofs that neither rm4t nor rm7t saw.
 rulemodel.py's new `--load M.txt,V --test-only` mode evaluates a saved
 model on exactly those. rm4t: AUC 0.846.
 
+* **rm7t** (base data plus loops/UL/given at 14 Nov 11:00, rounds 1–3):
+  AUC **0.897**, better than rm4t on 341 of the 400 problems.
 * **rm8h** (`abs/rm8h.sh`): rm4t's base data plus the 2,875 other
-  round 4–5 logs (given/ul45), negmax 150 — training.
+  round 4–5 logs (given/ul45), negmax 150: AUC **0.894** (26 GB, 22 min).
+  The long proofs add nothing over rm7t's in-loop data from rounds 1–3.
+  What helps offline is training on proofs of the same originals.
+
+Calibration differs. At threshold 0.1, rm4t keeps 93.2% of proof rules
+and defers 35.1% of the others; rm7t keeps 97.7% and defers 24.5%; rm8h
+keeps 98.8% and defers 15.4%. At the production threshold the better
+models therefore filter less.
 * **GNN** (`gnn.py`, after Chvalovský, Korovin, Piepenbrock and Urban,
   LPAR 2023): a name-independent graph network with dynamic samples,
   CPU torch. Each sample is a problem cut at a random point, with the
@@ -2092,8 +2101,44 @@ model on exactly those. rm4t: AUC 0.846.
     with its preceding rules as context, giving a per-problem AUC like
     rulemodel.py's.
   * A 200-step smoke test reached AUC 0.726 on 5 test problems. The main
-    run (8,000 steps, 6 threads, models/gnn1.log) started 08:00, with
-    production cut to 12 workers (UL22).
+    run (6 threads, models/gnn1.log, 08:00) reached AUC **0.809** on 100
+    test problems at step 2,000 and **0.802** at step 4,000. Its training
+    loss kept falling (0.49 to 0.38), so it was stopped at step 4,000
+    (models/gnn1.pt). At this size, 32,000 samples and about 25 CPU
+    minutes, it is below both LightGBM models.
+    The iProver results came with much longer training, and with the GNN
+    scoring every generated clause for given-clause selection. Here a
+    model only defers a rule once, at double cost (below).
+
+**Online, paired** (`abs/mab.sh`; snapshot loops/ULsT = UL minus the 400
+test goals, so each is unsolved, and the context is the same for every
+arm; fresh 20 s, production L0 settings, no `--online`):
+
+| model, threshold | proved of 400 | only this arm | work on shared proofs |
+|---|---|---|---|
+| rm4t, 0.1 (production) | 271 | 8 | 1 |
+| rm7t, 0.1 | 273 | 10 | 0.98 (geometric mean; median 1.00) |
+
+`abs/mabcmp.py` compares the arms. The +0.05 AUC gives nothing online at
+the production threshold. rm7t at threshold 0.2 has rm4t's proof-rule
+loss (91.6% kept) and defers 47.6% of the others. That arm and its
+control, rm4t at 0.2, are running (loops/MB_rm7t_t2, MB_rm4t_t2).
+
+**Prover9 on stalled goals** (`p9twee.py`): a LADR problem with
+prolog-style variables, so TPTP names and twee hints need no
+translation. It holds:
+
+* the axioms, plus 6 proven siblings on either side as assumptions;
+* the conjecture;
+* the original's whole twee pool as `formulas(hints)`.
+
+The first hit is aK2_eq_aK3_r__goal_241, a goal every twee variant failed
+(settings, pools, models, the climber and 80 s runs). Prover9 proved it
+in 44 s with 320 given clauses. The proof has 448 steps at level 64, with
+clauses up to weight 1027, and 277 of its steps are hint matchers. The
+proof's positive steps become the goal's twee hints, minus steps with the
+goal's skolem constants. The run on all 72 stalled goals at 60 s
+(loops/P9T) is in progress.
 
 ## 2c. Long runs: stall cutoff and checkpoints
 

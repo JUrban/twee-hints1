@@ -164,6 +164,7 @@ def main():
     ap.add_argument('--save'); ap.add_argument('--vocab')
     ap.add_argument('--load', help='MODEL.txt,VOCAB: evaluate this model on the test problems, no training')
     ap.add_argument('--test-only', action='store_true', help='with --test-names: evaluate on exactly those')
+    ap.add_argument('--per', help='write each test problem\'s AUC to this file')
     a = ap.parse_args()
     global THEORY
     THEORY = a.theory
@@ -202,7 +203,7 @@ def main():
     if a.save:
         m.save(a.save, a.vocab or a.save + '.vocab')
     random.shuffle(test)
-    aucs = []; stats = collections.defaultdict(list)
+    aucs = []; per = []; stats = collections.defaultdict(list)
     for n in test[:a.ntest]:
         rows = [x for x in load(paths[n], a.parents) if x[0] >= 0]
         if len(rows) < 20 or not any(x[0] == 1 for x in rows):
@@ -211,12 +212,15 @@ def main():
         v = auc(y, s)
         if v is not None:
             aucs.append(v)
+            per.append((n, v))
         last = max(i for i, x in enumerate(rows) if x[0] == 1) + 1
         for t in (0.05, 0.1, 0.2, 0.3, 0.5):
             keep = s >= t
             stats[t].append((keep[y == 1].mean(), 1 - keep[y == 0].mean(),
                              keep[:last].sum() / last))
     print(f'AUC {np.mean(aucs):.3f} over {len(aucs)} problems')
+    if a.per:
+        open(a.per, 'w').write(''.join(f'{n}\t{v:.4f}\n' for n, v in per))
     for t, L in sorted(stats.items()):
         A = np.array(L)
         print(f'threshold {t}: positives kept {A[:,0].mean():.3f}, negatives rejected {A[:,1].mean():.3f}, '
