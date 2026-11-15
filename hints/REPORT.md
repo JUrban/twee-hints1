@@ -2856,7 +2856,71 @@ order with `--chain`, 1 worker.
   their rank, weakened goal, step). The labels are proved, nontrivial
   (an assumption used, at least 30 proof steps) and credit (the share of
   the target's real proof found in the sketch's proof).
-* The policy model waits for these labels to accumulate.
+* In its first 1.6 hours (to 23:43), 202 climbs gave 6 proofs:
+  1243b_445, gen_495, 1243_342, aa1_45_c_285, aa2_12_355 and
+  aa_instances_4_289.
+
+## 2ak. Learning the lattice moves (user, 15 Nov: "what are the best steps in the lattice given a problem")
+
+The climb walks a lattice of (assumptions, goal) nodes. Going up adds
+assumptions: a stronger theory's axioms and lemmas, siblings, kNN goals
+of other originals, one more axiom, or a weaker goal (an instance of the
+conjecture). Going down drops assumptions from the sketch's used set.
+Until now the order of the queued moves was fixed by hand: the real goal
+before weaker ones, fewer assumptions first.
+
+**What the logged moves say** (climb.tsv of the FUDs arm and the live
+climber, 1,346 moves on 100 targets):
+
+| move (assumption kinds) | moves | proved | nontrivial |
+|---|---:|---:|---:|
+| theory + siblings + kNN | 552 | 43% | 9% |
+| siblings + kNN, weaker goal | 203 | 100% | 11% |
+| theory + siblings + kNN, weaker goal | 139 | 100% | 11% |
+| siblings + kNN | 116 | 30% | 16% |
+| theory + kNN | 71 | 52% | 41% |
+| kNN | 61 | 51% | 25% |
+| kNN, weaker goal | 53 | 100% | 40% |
+| siblings only | 45 | 4% | 0% |
+| theory only | 43 | 28% | 28% |
+
+* Nontrivial = proved, used an assumption, at least 30 steps.
+* Weaker goals always prove. Siblings alone almost never help.
+* A stronger theory with kNN goals but without the siblings gives the
+  most nontrivial sketches.
+
+**The pieces (commits 57a0b00 to 25d0e6c):**
+
+* `latticedata.py` gives one row per move. Its features are shared
+  with climb.py (`move_features`).
+* Labels:
+  * nontrivial;
+  * credit, the share of the target's real proof found in the sketch
+    (only when the target is proved);
+  * realized, the share of the sketch's non-axiom steps that the real
+    final run derived as given rules, proved or not. Realization is the
+    dense one: Korovin's concretisation measured on the search.
+    climb.py saves the final run's given rules (`realized/<t>`) for it.
+* `latticepolicy.py train` fits a logistic model with a split by
+  target. On nontrivial: held-out AUC 0.654. The largest weights are
+  siblings (negative), the number of stronger theories (positive) and
+  theory lemmas (negative).
+* `climb.py --move-model M` samples the next move by softmax over the
+  scores (`--move-temp`, default 1), with `--move-eps` (0.1) uniformly
+  random moves.
+
+**First test** (abs/fam4.sh, FUD2's config on the next 24 unsolved
+1243b goals, policy lattice1): 1 of 24 (goal 455) in 2,410 CPU s,
+against the fixed order's 1 of 24 (the same goal) in 2,498 CPU s. A
+draw: one proof per arm can't tell them apart. 4 of the 24 targets were
+in the policy's training rows; the live climber had visited them.
+
+**A/B in the live climber (23:50, abs/clu2.sh).**
+
+* `--move-ab`: targets with an odd crc32 of the name sample by the
+  policy, the others take the fixed order.
+* The comparison is proofs per CPU over many stalled production goals.
+* The policy is retrained on the realization labels as they accumulate.
 
 ## 2c. Long runs: stall cutoff and checkpoints
 
