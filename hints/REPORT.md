@@ -2044,6 +2044,57 @@ UL21 (`abs/ul21.sh`, 07:36) goes back to level order:
 * `--cascade 10,80,320` without `--head-first`;
 * the 80 s resumes first (16–20%), then the 320 s runs.
 
+## 2ad. Retraining the guidance on hard proofs, and a GNN (user's questions, 15 Nov)
+
+**Is ENIGMA retrained?** No. Production has used rm4t, fixed, since
+round 4, because three earlier tests found no online gain from
+retraining:
+
+* rm6t (2r) did not help;
+* rm7t (+0.03 offline AUC, 2u) did not help;
+* the online ENIGMA loop on sets/e3 lost, 971 against 987 with the
+  round-0 model kept fixed (2u).
+
+Those tests used easier goals and short runs. The user notes that the
+later long proofs should be worth more for training than the many easy
+ones. Rounds 4–5 have 3,274 given logs; round 5's median log is 203 KB,
+against 51 KB in round 1.
+
+**Stalled goals again** (sets/st79u: 73 unsolved goals of st79, snapshot
+ULsM refreshed at 07:35, fresh 20 s, 2 workers each):
+
+| variant | proved |
+|---|---|
+| base (rm4t, own original's pool) | 0 of 64 |
+| `--pool tier:20:500:0.1` (kNN hints from other originals, then own pool) | 0 of 62 |
+| `--pool knn:20:1000` | 0 of 73 |
+| rm7t | 0 of 34 |
+
+Neither hints from other originals nor rm7t move these goals at 20 s.
+
+**Offline test set.** The 400 newest round-5 given logs (sets/ultest,
+given/ultest) are hard proofs that neither rm4t nor rm7t saw.
+rulemodel.py's new `--load M.txt,V --test-only` mode evaluates a saved
+model on exactly those. rm4t: AUC 0.846.
+
+* **rm8h** (`abs/rm8h.sh`): rm4t's base data plus the 2,875 other
+  round 4–5 logs (given/ul45), negmax 150 — training.
+* **GNN** (`gnn.py`, after Chvalovský, Korovin, Piepenbrock and Urban,
+  LPAR 2023): a name-independent graph network with dynamic samples,
+  CPU torch. Each sample is a problem cut at a random point, with the
+  axioms, the goal and the last 512 rules added as context, and the next
+  128 rules to score.
+  * The graph has nodes for equations (axiom, goal, context or query),
+    terms, variables and symbols; symbols are typed by arity only.
+  * Messages pass along the left-side, right-side, symbol and argument
+    edges, with mean aggregation; d = 32, 8 layers.
+  * Evaluation scores every added rule of a test problem, chunk by chunk,
+    with its preceding rules as context, giving a per-problem AUC like
+    rulemodel.py's.
+  * A 200-step smoke test reached AUC 0.726 on 5 test problems. The main
+    run (8,000 steps, 6 threads, models/gnn1.log) started 08:00, with
+    production cut to 12 workers (UL22).
+
 ## 2c. Long runs: stall cutoff and checkpoints
 
 * `--eqhint-stall N` gives up when no new rule has matched a hint for N

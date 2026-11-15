@@ -162,6 +162,8 @@ def main():
     ap.add_argument('--test-origs', help='comma-separated originals to hold out')
     ap.add_argument('--test-names', help='file of problems to hold out (their originals stay in training: the loop setting)')
     ap.add_argument('--save'); ap.add_argument('--vocab')
+    ap.add_argument('--load', help='MODEL.txt,VOCAB: evaluate this model on the test problems, no training')
+    ap.add_argument('--test-only', action='store_true', help='with --test-names: evaluate on exactly those')
     a = ap.parse_args()
     global THEORY
     THEORY = a.theory
@@ -184,7 +186,19 @@ def main():
     test = [n for n in names if n.split('__goal_')[0] in test_o or n in test_n]
     print('test originals', sorted(test_o))
     m = RuleModel(a.parents)
-    print('train', m.train(paths, train, a.negmax, a.rounds, a.leaves, a.seed, a.threads))
+    if a.load:
+        import lightgbm as lgb
+        mp, vp = a.load.split(',')
+        for line in open(vp):
+            i, k = line.rstrip('\n').split('\t', 1)
+            m.vocab.idx[k] = int(i) - NFIX
+        m.vocab.frozen = True
+        m.model = lgb.Booster(model_file=mp)
+        m.ncol = m.model.num_feature()
+    else:
+        print('train', m.train(paths, train, a.negmax, a.rounds, a.leaves, a.seed, a.threads))
+    if a.test_only:
+        test = sorted(test_n & set(names))
     if a.save:
         m.save(a.save, a.vocab or a.save + '.vocab')
     random.shuffle(test)
