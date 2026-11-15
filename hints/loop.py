@@ -575,14 +575,25 @@ class Loop:
         rdir = os.path.join(self.dir, 'r%d' % rnd); os.makedirs(rdir, exist_ok=True)
         if a.cascade_continue and os.path.exists(os.path.join(rdir, 'results.tsv')):
             # a restarted round: the levels this round already tried (in the current context)
-            k0 = 0
+            k0 = 0; fresh = set()
             for line in open(os.path.join(rdir, 'results.tsv')):
                 f = line.rstrip('\n').split('\t')
                 if len(f) >= 5 and f[0] in att and f[4][:1] == 'L' and f[4][1:].isdigit():
                     lev = int(f[4][1:])
+                    if lev == 0:
+                        fresh.add(f[0])
                     if lev > att[f[0]][1]:
                         att[f[0]] = (ctx(f[0]), lev); k0 += 1
             print(f'  cascade: continuing round {rnd}, {k0} level updates from its results', flush=True)
+            if a.fresh_first:
+                # a goal with no fresh run in this round only resumed states of earlier rounds and
+                # contexts (--cascade-start 0): a fresh T0 run first (on 97 goals that failed L1 this
+                # way, fresh 20 s proved 28/63 of those without one, 8/34 of the others)
+                nf = 0
+                for n in att:
+                    if n not in fresh:
+                        att[n] = (None, -1); nf += 1
+                print(f'  cascade: --fresh-first: {nf} goals without a fresh run in round {rnd}', flush=True)
         # --retry-hints G: also retry (fresh, at T0) a goal whose original's hint pool has grown by
         # the factor G since its last fresh run. Resuming does not use new hints well (the saved
         # queue was scored without them): on 32 gap-1 goals that failed L1, resuming to 320 s
@@ -929,6 +940,8 @@ def make_parser():
                     help='--p9loop: also take the matchers of unconditional sibling goals at most this many places away')
     ap.add_argument('--p9-max', type=int, default=0, help='--p9loop: at most this many lemmas, the most recently derived (0 = all)')
     ap.add_argument('--init', help='import round-0 results (solved.tsv and hints) of another loop dir')
+    ap.add_argument('--fresh-first', action='store_true',
+                    help='--cascade-continue: goals without a T0 (fresh) run in the round get one first')
     ap.add_argument('--sync', type=float, default=0,
                     help='--cascade: every S seconds, take in the proofs other processes appended to '
                          'solved.tsv (after writing hints/NAME), e.g. climb.py --live or merge.py')

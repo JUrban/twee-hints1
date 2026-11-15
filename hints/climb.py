@@ -449,17 +449,21 @@ def live(c, a, lp, gl, pools, ix, climb, out):
         return S, R
     def stalled(S, busy):
         rfs = sorted(glob.glob(os.path.join(D, 'r*', 'results.tsv')), key=lambda p: int(p.split('/')[-2][1:]))
-        last = {}
+        last, fresh = {}, set()
         for l in open(rfs[-1]):
             w = l.rstrip('\n').split('\t')
             if len(w) >= 5:
                 last[w[0]] = (w[1], w[4])
+                if w[4] == 'L0':
+                    fresh.add(w[0])
         by = lemmas.by_original(S)
         def dist(n):   # proof lines to the nearest proven goal below
             o, k = lemmas.split(n)
             below = [j for j in by.get(o, ()) if j < k and f'{o}__goal_{j}' in gl]
             return gl[n] - gl[f'{o}__goal_{max(below)}'] if below and n in gl else 10 ** 6
-        res = [n for n, (ok, lev) in last.items() if ok == 'NO' and lev != 'L0' and n not in S
+        # (only after a fresh run in the latest round failed too: fresh 20 s in the current context
+        # proved 36/95 of the climber's first targets at 49 proofs/CPU-h, the climber 31/102 at 15)
+        res = [n for n, (ok, lev) in last.items() if ok == 'NO' and lev != 'L0' and n in fresh and n not in S
                and n not in climbed and n not in skip and n not in busy]
         return sorted(res, key=lambda n: (dist(n), n))
     def refresh(S):
