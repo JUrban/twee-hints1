@@ -197,6 +197,36 @@ class LemmaIndex:
             self._idf[key] = {x: math.log((len(g) + 1) / c) for x, c in df.items()}
         return self._idf[key]
 
+    def select_in(self, name, k, B, A, exclude=()):
+        """The K proven goals most similar to NAME's goal among those of theories within axiom set B
+        but not within A (climb.py --theories: theorems of a stronger theory B for a sketch of NAME)."""
+        if name not in self.info:
+            import hintsel
+            try:
+                F = frozenset(hintsel.goal_features(name, 3))
+            except Exception:
+                F = frozenset()
+            self.info[name] = (axiom_key(name), F)
+        F = self.info[name][1]
+        scored = []
+        for kk, S in self.sets.items():
+            if S <= B and not S <= A:
+                for m in self.groups[kk]:
+                    if m in exclude:
+                        continue
+                    G = self.info[m][1]
+                    if F and G:
+                        scored.append((len(F & G) / len(F | G), m))
+        scored.sort(key=lambda x: (-x[0], x[1]))
+        out, seen = [], set()
+        for _, m in scored:
+            f = lemma_form(m)
+            if f and f not in seen:
+                seen.add(f); out.append(m)
+                if len(out) >= k:
+                    break
+        return out
+
     def select(self, name, k, exclude=(), eq=None):
         """The K proven goals with the same axioms most similar to NAME's goal
         (EQ: (lhs, rhs) of another goal over NAME's axioms, a cut, instead)."""

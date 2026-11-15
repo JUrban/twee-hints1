@@ -33,6 +33,8 @@ VAR = re.compile(r'\bX\d+\b')
 _tok = re.compile(r"[A-Za-z][A-Za-z0-9_]*|[(),=]")
 
 
+HERE = os.path.dirname(os.path.abspath(__file__))
+
 def short(x):
     return x[len('assume_'):]
 
@@ -125,6 +127,55 @@ def _make_laws(path, ar, consts, defined):
     return keep
 
 
+_thy = {}
+_thy_lock = threading.Lock()
+def theories(t, k, info=None):
+    """(--theories, user's suggestion 15 Nov: assume a stronger theory, e.g. Bol loops for loops) the extra
+    axioms of the K originals' theories that strictly contain T's axioms, fewest extra axioms first, one
+    group per distinct theory: [{label: TPTP formula}]. Stronger theories are mathematically relevant and
+    consistent, so they should not trivialise a sketch the way laws do."""
+    A = lemmas.axiom_set(t)
+    with _thy_lock:
+        if not _thy:
+            for f in sorted(os.listdir(lemmas.PROB)):
+                o = f.rpartition('__goal_')[0]
+                if o and o not in _thy:
+                    _thy[o] = f[:-2]
+    groups = {}
+    for o, n in _thy.items():
+        B = lemmas.axiom_set(n)
+        if A < B and B not in groups:
+            extra = []
+            for l in open(os.path.join(lemmas.PROB, n + '.p')):
+                if l.startswith(('cnf(', 'fof(')) and 'conjecture' not in l:
+                    body = l.split(',', 2)[2].rsplit(')', 1)[0].strip()
+                    if re.sub(r'\s+', '', body) in A:
+                        continue
+                    if l.startswith('cnf('):
+                        vs = sorted(set(re.findall(r'\b[A-Z][A-Za-z0-9_]*\b', body)))
+                        body = (f'! [{",".join(vs)}] : ({body})' if vs else body)
+                    extra.append(body)
+            groups[B] = [0.0, len(extra), o, extra]
+    if info and groups:
+        # rank by the most similar solved goal of the theory (INFO: name -> (axiom key, goal features))
+        import hintsel
+        try:
+            F = frozenset(hintsel.goal_features(t, 3))
+        except Exception:
+            F = frozenset()
+        bo = {o: lemmas.axiom_set(n) for o, n in _thy.items()}
+        for m, (_, G) in info.items():
+            B = bo.get(m.rpartition('__goal_')[0])
+            if B in groups and F and G:
+                sim = len(F & G) / len(F | G)
+                if sim > -groups[B][0]:
+                    groups[B][0] = -sim
+    out = []
+    byB = {id(v): B for B, v in groups.items()}
+    for j, v in enumerate(sorted(groups.values(), key=lambda x: (x[0], x[1], x[2]))[:k]):
+        out.append((byB[id(v)], {f'assume_thy_{j}_{i}': f for i, f in enumerate(v[3])}))
+    return out
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('set'); ap.add_argument('dir')
@@ -148,6 +199,16 @@ def main():
                     help='Veroff\'s gap filling: after each sketch proof, one twee --multi-goal run of this '
                          'many seconds tries to prove the proof\'s lemmas that depend on the assumptions, without '
                          'them; the proven ones become axioms (true lemmas) of the later runs on the original\'s goals')
+    ap.add_argument('--theories', type=int, default=0,
+                    help="assume the extra axioms of up to K stronger theories (other originals' axiom sets that "
+                         "strictly contain the target's), one theory at a time")
+    ap.add_argument('--theory-lemmas', type=int, default=10, help='--theories: proven goals of the stronger theory as assumptions too')
+    ap.add_argument('--gen-assume', type=int, default=0, help='assume the generator\'s K most sampled equations, one at a time')
+    ap.add_argument('--gen-ctx-dir', default='/project/hintwork/loops/GC1A/genctx')
+    ap.add_argument('--gen-model', default='/project/hintwork/models/gc1_4000.pt')
+    ap.add_argument('--gen-python', default='/project/hintwork/venv/bin/python3')
+    ap.add_argument('--gen-n', type=int, default=400)
+    ap.add_argument('--gen-temp', type=float, default=0.7)
     ap.add_argument('--min-sketch-steps', type=int, default=0,
                     help='a sketch proof that uses laws and has fewer steps bans those laws for the target '
                          '(the climb restarts from the top without them): laws that trivialise give no hints')
@@ -236,6 +297,44 @@ def main():
                 res[f'assume_knn_{i}'] = lemmas.conjecture(m)
         if c.laws:
             res.update(laws(t))
+        if c.gen_assume:
+            # (--gen-assume, user 15 Nov: dream up new axioms with the generator) its K most sampled
+            # equations for T, from T's saved context (--gen-ctx-dir), each tried alone; possibly false
+            cp = os.path.join(c.gen_ctx_dir, t)
+            if os.path.exists(cp):
+                cmd = [c.gen_python, os.path.join(HERE, 'gencopy.py'), 'hints', cp, t, '--load', c.gen_model,
+                       '--n', str(c.gen_n), '--threads', '1', '--temp', str(c.gen_temp), '--counts', '1']
+                try:
+                    p_ = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, timeout=300)
+                    rows = [x.split('\t') for x in p_.stdout.decode().splitlines()]
+                except subprocess.TimeoutExpired:
+                    rows = []
+                gl_ = []
+                for w in rows:
+                    if len(w) < 2:
+                        continue
+                    vs = sorted(set(VAR.findall(w[0] + ' ' + w[1])), key=lambda v: int(v[1:]))
+                    f = (f'! [{",".join(vs)}] : ' if vs else '') + f'{w[0]} = {w[1]}'
+                    if f == lemmas.conjecture(t):
+                        continue
+                    lab = f'assume_gen_{len(gl_)}'
+                    res[lab] = f; gl_.append(frozenset([lab]))
+                    if len(gl_) >= c.gen_assume:
+                        break
+                tgroups[t] = tgroups.get(t, []) + gl_
+        if c.theories:
+            li = getattr(lp, 'lemma_index', None)
+            groups = theories(t, c.theories, li.info if li is not None else None)
+            A = lemmas.axiom_set(t)
+            for j, (B, g) in enumerate(groups):
+                if li is not None and c.theory_lemmas:
+                    # theorems of B: its originals' proven goals most similar to T (true in B only)
+                    for i, m in enumerate(li.select_in(t, c.theory_lemmas, B, A)):
+                        f = lemmas.lemma_form(m)
+                        if f:
+                            g[f'assume_thy_{j}_lem{i}'] = f
+                res.update(g)
+            tgroups[t] = tgroups.get(t, []) + [frozenset(g) for _, g in groups]
         if c.freq:
             cnt = ucnt.get(lp.pool_key(t), collections.Counter())
             i = 0
@@ -361,10 +460,16 @@ def main():
     def a_cpu(b):
         return 10 * b
 
+    tgroups = {}
+
     def climb(t):
         cands[t] = candidates(t)
         S0 = list(cands[t])
         queue = [frozenset(S0)] if S0 else []
+        if tgroups.get(t):
+            # one stronger theory (or generated equation) at a time (with the other assumptions, if any)
+            other = frozenset(x for x in S0 if not x.startswith(('assume_thy_', 'assume_gen_')))
+            queue = [g | other for g in tgroups[t]]
         tried = set(); runs = 0; real = None
         bt = c.sketch_time; anyproof = False
         banned = set(); minU = None; nt = 0
@@ -388,7 +493,7 @@ def main():
             if ok and not U:
                 real = res; break
             if ok and c.min_sketch_steps and len(res or ()) < c.min_sketch_steps:
-                L = {u for u in U if u.startswith('assume_law_')}
+                L = {u for u in U if u.startswith(('assume_law_', 'assume_thy_', 'assume_gen_'))}
                 if L:
                     # (--min-sketch-steps) a law that makes the sketch trivial gives a dozen hints:
                     # ban the laws it used and start again from the top without them
@@ -396,6 +501,8 @@ def main():
                     rest = frozenset(S0) - banned
                     queue = [rest] if rest and rest not in tried else []
                     continue
+            if not ok and not anyproof and tgroups.get(t) and queue:
+                continue   # (--theories) the next theory first
             if not ok and not anyproof:
                 # even the top of the lattice is too hard: retry it with twice the time, up to the cap
                 if bt * 2 > cap:
