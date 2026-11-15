@@ -204,6 +204,9 @@ def main():
                          "strictly contain the target's), one theory at a time")
     ap.add_argument('--chain', action='store_true', help='--updown: a proof becomes a sibling lemma and hints of the later targets at once')
     ap.add_argument('--updown', action='store_true', help='climb up (theory unions, weaker goals) when no sketch proves the target, then down')
+    ap.add_argument('--move-model', help='--updown: a latticepolicy.py model orders the moves (softmax sampling)')
+    ap.add_argument('--move-temp', type=float, default=1.0)
+    ap.add_argument('--move-eps', type=float, default=0.1, help='--move-model: share of uniformly random moves')
     ap.add_argument('--up-single', action='store_true', help='--updown: going up also adds one assumption at a time')
     ap.add_argument('--up-levels', type=int, default=2, help='--up-single: levels of one-more-axiom')
     ap.add_argument('--up-beam', type=int, default=2, help='--up-single: failed sets extended per level')
@@ -589,6 +592,11 @@ def main():
         out += [inst({v: 'e'}) for v in vs]
         return list(dict.fromkeys(out))
 
+    policy = None
+    if c.move_model:
+        import json, math, random, latticedata, latticepolicy
+        policy = json.load(open(c.move_model))
+
     def climb2(t):
         """(--updown, user 15 Nov; Hernandez-Korovin IJCAR 2018 over-approximation) start at each
         stronger theory (or generated equation); when none proves T, go up: unions of the theories and
@@ -637,8 +645,19 @@ def main():
                     if groups:
                         queue.append((groups[0] | other, gv))
                 continue
-            queue.sort(key=lambda n: (n[1] is not None, len(n[0])))
-            S, g = queue.pop(0)
+            if policy is None:
+                queue.sort(key=lambda n: (n[1] is not None, len(n[0])))
+                S, g = queue.pop(0)
+            else:
+                # (--move-model) the learned policy: softmax over the moves' scores, some random moves
+                if random.random() < c.move_eps:
+                    i_ = random.randrange(len(queue))
+                else:
+                    sc = [latticepolicy.score(policy, [latticedata.move_features(t, sorted(n[0] - banned), n[1], runs)[k]
+                                                        for k in policy['features']]) / c.move_temp for n in queue]
+                    mx = max(sc); ws = [math.exp(x - mx) for x in sc]
+                    i_ = random.choices(range(len(queue)), weights=ws)[0]
+                S, g = queue.pop(i_)
             S = frozenset(S) - banned
             if (S, g) in tried or (not S and g is None):
                 continue

@@ -69,6 +69,26 @@ def goal_shape(t):
         len(set(VAR.findall(s))), len(lits)
 
 
+FEATURES = ['step', 'goal_size', 'goal_vars', 'goal_lits', 'axioms', 'theories', 'n_assume', 'n_sib', 'n_knn',
+            'n_thyax', 'n_thylem', 'n_law', 'n_gen', 'n_thy', 'thy_rank', 'weak_merge', 'weak_unit']
+
+
+def move_features(t, S, goal, step):
+    """Features of the lattice move (target T, assumption labels S with or without 'assume_', the weakened
+    goal or '' / None, the number of runs on T before it): the same in training rows and in climb.py."""
+    S = [x[7:] if x.startswith('assume_') else x for x in S]
+    size, nv, nl = goal_shape(t)
+    weak = 'none' if not goal else ('unit' if re.search(r'\be\b', goal) and len(VAR.findall(goal)) < nv else 'merge')
+    ks = collections.Counter(kind(x) for x in S)
+    thys = sorted({int(x.split('_')[1]) for x in S if x.startswith('thy_')})
+    nax, nthy = n_theories(t)
+    return {'step': step, 'goal_size': size, 'goal_vars': nv, 'goal_lits': nl, 'axioms': nax, 'theories': nthy,
+            'n_assume': len(S), 'n_sib': ks['sib'], 'n_knn': ks['knn'], 'n_thyax': ks['thyax'],
+            'n_thylem': ks['thylem'], 'n_law': ks['law'], 'n_gen': ks['gen'],
+            'n_thy': len(thys), 'thy_rank': thys[0] if thys else -1,
+            'weak_merge': int(weak == 'merge'), 'weak_unit': int(weak == 'unit')}
+
+
 def rows_of(d, min_steps):
     real = {}
     for l in open(os.path.join(d, 'climb.tsv')):
@@ -92,28 +112,19 @@ def rows_of(d, min_steps):
                 elif not x.startswith('#') and '\t' in x:
                     a, b = x.rstrip('\n').split('\t')[:2]
                     proof.append(canon(a, b))
-        weak = 'none' if not goal else ('unit' if re.search(r'\be\b', goal) and
-                                        len(VAR.findall(goal)) < goal_shape(t)[1] else 'merge')
-        ks = collections.Counter(kind(x) for x in S)
-        thys = sorted({int(x.split('_')[1]) for x in S if x.startswith('thy_')})
         credit = ''
         hp = os.path.join(d, 'hints', t)
         if real.get(t) and os.path.exists(hp) and ok and os.path.exists(sp):
             rp = {canon(*x.rstrip('\n').split('\t')[:2]) for x in open(hp) if '\t' in x}
             credit = f'{len(rp & set(proof)) / max(1, len(rp)):.3f}'
-        size, nv, nl = goal_shape(t)
-        nax, nthy = n_theories(t)
-        yield {
-            'dir': os.path.basename(d.rstrip('/')), 'target': t, 'tag': tag, 'step': step[t],
-            'goal_size': size, 'goal_vars': nv, 'goal_lits': nl, 'axioms': nax, 'theories': nthy,
-            'n_assume': len(S), 'n_sib': ks['sib'], 'n_knn': ks['knn'], 'n_thyax': ks['thyax'],
-            'n_thylem': ks['thylem'], 'n_law': ks['law'], 'n_gen': ks['gen'],
-            'n_thy': len(thys), 'thy_rank': thys[0] if thys else -1, 'weak': weak,
+        row = {'dir': os.path.basename(d.rstrip('/')), 'target': t, 'tag': tag}
+        row.update(move_features(t, S, goal, step[t]))
+        yield dict(row, **{
             'proved': int(ok), 'used': len(U), 'steps': len(proof),
             'nontrivial': int(ok and bool(U) and len(proof) >= min_steps) if os.path.exists(sp) or not ok else '',
             'credit': credit,
             'target_proved': int(bool(real.get(t))),
-        }
+        })
         step[t] += 1
 
 
