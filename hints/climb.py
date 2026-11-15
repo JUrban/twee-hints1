@@ -129,7 +129,7 @@ def _make_laws(path, ar, consts, defined):
 
 _thy = {}
 _thy_lock = threading.Lock()
-def theories(t, k, info=None):
+def theories(t, k, info=None, explore=0, meta=None):
     """(--theories, user's suggestion 15 Nov: assume a stronger theory, e.g. Bol loops for loops) the extra
     axioms of the K originals' theories that strictly contain T's axioms, fewest extra axioms first, one
     group per distinct theory: [{label: TPTP formula}]. Stronger theories are mathematically relevant and
@@ -172,8 +172,18 @@ def theories(t, k, info=None):
                     groups[B][0] = -sim
     out = []
     byB = {id(v): B for B, v in groups.items()}
-    for j, v in enumerate(sorted(groups.values(), key=lambda x: (x[0], x[1], x[2]))[:k]):
+    ranked = sorted(groups.values(), key=lambda x: (x[0], x[1], x[2]))
+    # (--theory-explore R) the last R of the K slots take theories drawn at random from the rest, seeded by
+    # the target, so the logs cover more than the heuristic's top (data for learning the theory choice)
+    R = min(explore, max(0, len(ranked) - (k - explore)), k)
+    head, rest = ranked[:k - R], ranked[k - R:]
+    import random as _r
+    pick = head + _r.Random(t).sample(rest, R) if R else ranked[:k]
+    for j, v in enumerate(pick):
         out.append((byB[id(v)], {f'assume_thy_{j}_{i}': f for i, f in enumerate(v[3])}))
+        if meta is not None:
+            meta.append((j, v[2], -v[0], v[1], int(j >= k - R and R > 0), ranked.index(v), len(ranked),
+                         ' & '.join(v[3])))
     return out
 
 def main():
@@ -206,6 +216,8 @@ def main():
     ap.add_argument('--updown', action='store_true', help='climb up (theory unions, weaker goals) when no sketch proves the target, then down')
     ap.add_argument('--move-model', help='--updown: a latticepolicy.py model orders the moves (softmax sampling)')
     ap.add_argument('--move-temp', type=float, default=1.0)
+    ap.add_argument('--theory-explore', type=int, default=0,
+                    help='--theories K: the last R slots go to random other stronger theories (seeded by target)')
     ap.add_argument('--move-ab', action='store_true', help='--move-model only on targets of odd crc32 (A/B test)')
     ap.add_argument('--move-eps', type=float, default=0.1, help='--move-model: share of uniformly random moves')
     ap.add_argument('--up-single', action='store_true', help='--updown: going up also adds one assumption at a time')
@@ -335,7 +347,10 @@ def main():
                 tgroups[t] = tgroups.get(t, []) + gl_
         if c.theories:
             li = getattr(lp, 'lemma_index', None)
-            groups = theories(t, c.theories, li.info if li is not None else None)
+            meta = []
+            groups = theories(t, c.theories, li.info if li is not None else None, c.theory_explore, meta)
+            with lock, open(os.path.join(c.dir, 'theories.tsv'), 'a') as f_:   # (for learning the theory choice)
+                f_.writelines('\t'.join(map(str, (t,) + m_)) + '\n' for m_ in meta)
             A = lemmas.axiom_set(t)
             for j, (B, g) in enumerate(groups):
                 if li is not None and c.theory_lemmas:
