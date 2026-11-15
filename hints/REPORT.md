@@ -1739,6 +1739,39 @@ that failed L1, and the climb yields twice as much per CPU-hour.
   its round.
 * `merge.py` merged the 5 earlier probe proofs (S20, SD, SO, CL3) into UL.
 
+**Control: fresh 20 s beats the live climber on its own targets (01:28).**
+The climber's first 102 targets were rerun fresh at 20 s, as UL's L0
+(FV). The context was a UL snapshot without the climber's proofs,
+loops/ULsL.
+
+| arm | solved | CPU s | proofs per CPU-hour |
+|---|---|---|---|
+| live climber (CLV) | 29–31 | 7,657 | 15 |
+| fresh 20 s (FV) | 36 | 2,861 | 45 |
+
+27 goals were solved by both, 2 by the climber only and 9 by FV only.
+The snapshot is 20 minutes newer and includes UL proofs the climber
+helped produce, but that cannot explain a 3× gap.
+
+**The cause is in the loop, not the climb.** Round 5 started with
+`--cascade-start 0`, which marks every goal as freshly tried. 63 of the
+97 targets had no fresh run in round 5 at all; they only resumed states
+saved in earlier rounds and contexts. Fresh 20 s proved 28 of those 63
+and 8 of the other 34, whatever their pool growth.
+
+The same holds for the sg3 test: CL5's proofs were a subset of fresh
+80 s. The climb's apparent advantage was mostly its final fresh run.
+
+**Changes (d2625d2).**
+
+* `loop.py --fresh-first`: with `--cascade-continue`, goals without a
+  fresh run in the round get a T0 run first. 8,634 goals qualify; the
+  retry gap rules and the line-distance order still apply.
+* UL12 (`abs/ul12.sh`) runs it on 16 workers and made 18 new proofs in
+  its first 108 s.
+* The climber is now a filler (`--cpus 20`, up to 8). It takes only
+  goals whose fresh run in the latest round failed as well.
+
 ## 2c. Long runs: stall cutoff and checkpoints
 
 * `--eqhint-stall N` gives up when no new rule has matched a hint for N
