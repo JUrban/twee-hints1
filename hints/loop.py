@@ -9,7 +9,7 @@ the proofs it finds to the pool.
 usage: loop.py SET DIR [--rounds N] [--timeout S] [-j N] [--twee BIN]
                [--args "..."] [--pool original|all] [--aux]
 """
-import argparse, collections, json, os, random, re, subprocess, sys, time
+import argparse, collections, json, math, os, random, re, subprocess, sys, time
 from concurrent.futures import ThreadPoolExecutor, as_completed, wait, FIRST_COMPLETED
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import hintlib
@@ -623,8 +623,28 @@ class Loop:
                   f'{sum(1 for n in att if psz(n) >= hp[n] * a.retry_hints)} goals', flush=True)
         def grown(n):
             return a.retry_hints and psz(n) >= hp[n] * a.retry_hints
+        # --sched-model M: order the fresh runs by a model's predicted success (schedmodel.py on
+        # schedfeats.py features). Above all it weighs whether the nearest proven goal below
+        # changed since the goal's last failed fresh run (UL r5: 43% then, 11-15% otherwise,
+        # at any distance); on the last 40% of r5 its top quarter proved 43% vs 29% by distance.
+        SM = H = None; sc = {}; over = collections.Counter(); startctx = {}; calib = [0.0, 0, 0]
+        if a.sched_model:
+            import schedfeats, schedmodel
+            SM = schedmodel.load_model(a.sched_model)
+            gl_ = gl or {l.split()[0]: int(l.split()[1]) for l in open(a.goal_lines)}
+            H = schedfeats.History(self.names, gl_, c6='nfail_c6' in SM['feats'])
+            t_ = time.time(); H.replay(self.dir); H.R.set_solved(self.solved)
+            lmin = math.log(a.sched_pmin / (1 - a.sched_pmin))
+            print(f'  cascade: --sched-model: history replayed in {time.time()-t_:.0f}s', flush=True)
+        def score(n):
+            o = orig_of(n); v = sc.get(n)
+            if v is None or v[0] != over[o]:
+                v = sc[n] = (over[o], schedmodel.score(SM, H.feats(n)[0]))
+            return v[1]
         t0 = time.time(); new = 0; done_n = 0
         def add_proof(n, rnd, dt, hs):
+            if H:
+                H.add(n); over[orig_of(n)] += 1
             att.pop(n, None)
             self.solved[n] = (rnd, dt)
             key = self.pool_key(n)
@@ -664,14 +684,21 @@ class Loop:
                 busy = {n for n, _ in running.values()}
                 if time.time() - t0 < a.cascade_hours * 3600:
                     g = gaps()
-                    retry = sorted((g[n][1], lemmas.split(n)[1], n) for n in att
-                                   if n not in busy and (ctx(n) != att[n][0] or grown(n)) and may_retry(n, g))
+                    if SM:
+                        cand = {n: score(n) for n in att
+                                if n not in busy and (ctx(n) != att[n][0] or grown(n))}
+                        retry = sorted((-v, n) for n, v in cand.items() if v >= lmin)
+                    else:
+                        retry = sorted((g[n][1], lemmas.split(n)[1], n) for n in att
+                                       if n not in busy and (ctx(n) != att[n][0] or grown(n)) and may_retry(n, g))
                     deep_running = collections.Counter(orig_of(n) for n, l in running.values() if l > 0)
                     deep = sorted((att[n][1] + 1, deep_running[orig_of(n)], g[n][1], lemmas.split(n)[1], n) for n in att
                                   if n not in busy and ctx(n) == att[n][0] and att[n][1] + 1 < len(T)
                                   and may_deepen(n, g) and not grown(n))
                     far = []
-                    if a.far_retry and len(running) + len(retry) + len(deep) < a.j:
+                    if SM and a.far_retry and len(running) + len(retry) + len(deep) < a.j:
+                        far = sorted((-v, n) for n, v in cand.items() if v < lmin)[:a.j]
+                    elif a.far_retry and len(running) + len(retry) + len(deep) < a.j:
                         # --far-retry: idle slots retry (fresh) the goals beyond the retry gaps too,
                         # nearest first, after everything else
                         far = sorted((g[n][1], lemmas.split(n)[1], n) for n in att
@@ -702,6 +729,8 @@ class Loop:
                             fut = ex.submit(self.run_one, n, self.hints_for(n, pools, None), rnd,
                                             b, not a.p9loop, a.cascade_cpu * b)
                         running[fut] = (n, lev)
+                        if H and lev == 0:   # (its context and predicted success, for observe())
+                            startctx[n] = (H.feats(n)[1], 1 / (1 + math.exp(-score(n))))
                 if not running:
                     if a.sync and time.time() - t0 < a.cascade_hours * 3600:
                         # nothing to run: wait for proofs from the side workers (new contexts)
@@ -713,6 +742,11 @@ class Loop:
                     n0, lev = running.pop(f)
                     n, ok, dt, stats, hs = f.result()
                     done_n += 1
+                    if H:
+                        c_, p_ = startctx.pop(n, (None, 0.0)) if lev == 0 else (None, 0.0)
+                        H.observe(n, ok, 'L%d' % lev, c_); over[orig_of(n)] += 1
+                        if lev == 0:
+                            calib[0] += p_; calib[1] += 1; calib[2] += ok
                     rf.write(f'{n}\t{"THM" if ok else "NO"}\t{dt:.2f}\t{stats}\tL{lev}\tt={time.time()-t0:.0f}\n'); rf.flush()
                     if ok and n in self.solved:
                         pass   # (synced from another process meanwhile: keep its row and hints)
@@ -725,7 +759,8 @@ class Loop:
                         add_proof(n, rnd, dt, hs)
                     if done_n % 50 == 0:
                         print(f'  cascade: {done_n} runs, new={new}, {len(running)} running, '
-                              f'{time.time()-t0:.0f}s' + (f', synced={nsync}' if a.sync else ''),
+                              f'{time.time()-t0:.0f}s' + (f', synced={nsync}' if a.sync else '')
+                              + (f', fresh {calib[2]}/{calib[1]} (predicted {calib[0]:.0f})' if H else ''),
                               file=sys.stderr, flush=True)
         msg = f'cascade: {done_n} runs new {new} total {len(self.solved)}/{len(self.names)} {time.time()-t0:.0f}s'
         print(msg, file=sys.stderr, flush=True)
@@ -955,6 +990,12 @@ def make_parser():
     ap.add_argument('--sync', type=float, default=0,
                     help='--cascade: every S seconds, take in the proofs other processes appended to '
                          'solved.tsv (after writing hints/NAME), e.g. climb.py --live or merge.py')
+    ap.add_argument('--sched-model',
+                    help='--cascade: order the fresh runs by this model\'s predicted success '
+                         '(schedmodel.py train), any distance; below --sched-pmin they wait for --far-retry')
+    ap.add_argument('--sched-pmin', type=float, default=0.06,
+                    help='--sched-model: fresh runs predicted below this go after the resumes (default 0.06: '
+                         'an L1 resume proves ~17%% in 3x the time of a fresh run)')
     return ap
 
 def init_dir(a):
