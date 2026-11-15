@@ -13,7 +13,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import hintlib, lemmas
 
 FEATS = ['lgap', 'ggap', 'agap', 'nfail', 'nfail_ctx', 'grow', 'orate', 'ofrac',
-         'size', 'nvars', 'hints', 'nolow', 'nfail_c6', 'dctx', 'lg_new']
+         'size', 'nvars', 'hints', 'nolow', 'nfail_c6', 'dctx', 'lg_new', 'p_matched', 'p_ratio', 'p_deferred', 'p_rules', 'p_since', 'p_maxgap']
 
 
 def orig_of(n):
@@ -30,6 +30,15 @@ def goal_size(name, cache={}):
                 v = len(set(re.findall(r'\bX\d+\b', body)))
         cache[name] = (s, v)
     return cache[name]
+
+
+def parse_stats(s):
+    """twee's HINTSTATS line -> dict (rules=Id {unId = N} -> rules=N)"""
+    d = {k: int(v) for k, v in re.findall(r'(\w+)=(\d+)', s)}
+    m = re.search(r'unId = (\d+)', s)
+    if m:
+        d['rules'] = int(m.group(1))
+    return d
 
 
 class Replay:
@@ -90,6 +99,7 @@ class History:
         self.orecent = collections.defaultdict(lambda: collections.deque(maxlen=30))
         self.tot = collections.Counter(orig_of(n) for n in names)
         self.rows = []                          # (features, label) of fresh runs, for retraining
+        self.laststats = {}                     # name -> HINTSTATS of its last run
         self.keep = lambda r: r >= 3            # rounds whose fresh runs replay() keeps in rows
 
     def feats(self, n, hints=0):
@@ -106,12 +116,20 @@ class History:
         # a new context's gain falls with the distance (rounds 3-5: 59% within 13 lines,
         # 27% at 41-80, 15% at 161-320; with an old one 19%, 11%, 8%)
         x['lg_new'] = lg if x['nfail_ctx'] == 0 else -1
+        # the goal's last run (for a resume: the run it continues): how far did it get with its hints?
+        st = self.laststats.get(n, {})
+        r_ = st.get('rules', 0)
+        x.update(p_matched=st.get('matched', 0), p_ratio=st.get('matched', 0) / max(1, st.get('hints', 1)),
+                 p_deferred=st.get('deferred', 0), p_rules=r_,
+                 p_since=(r_ - st.get('lastmatch', 0)) / max(1, r_), p_maxgap=st.get('maxgap', 0))
         return x, (below, c6, lg)
 
-    def observe(self, n, ok, lev, ctx=None, x=None):
+    def observe(self, n, ok, lev, ctx=None, x=None, stats=None):
         """a finished run of n (ctx, x: feats(n) when it started; default: ctx now, no row)"""
         if x is not None and lev == 'L0':
             self.rows.append((x, int(ok)))
+        if stats:
+            self.laststats[n] = parse_stats(stats)
         if lev == 'L0':
             below, c6, lg = ctx if ctx else self.feats(n)[1]
             self.orecent[orig_of(n)].append(int(ok))
@@ -156,7 +174,7 @@ class History:
                         out.write(f'{r}\t{n}\t{int(ok)}\t' + '\t'.join(
                             f'{x[h]:.4g}' if isinstance(x[h], float) else str(x[h]) for h in FEATS) + '\n')
                         nrows += 1
-                self.observe(n, ok, lev, ctx)
+                self.observe(n, ok, lev, ctx, stats=f[3])
         self.R.set_solved(w[0] for w in srows)
         return nrows
 
