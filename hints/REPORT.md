@@ -2367,18 +2367,31 @@ by default).
 lemmas, 10 kNN lemmas, the original's pool, rm4t; snapshots of UL at
 10:24 and 10:44):
 
-| goals | folded | all unfolded | only t unfolded |
-|---|---:|---:|---:|
-| the 9 Prover9 proved (sets/p9l9) | 2 | **7** | 3 |
-| the first 10 of 231 that Prover9 failed (sets/p9no40) | 0 (stalled) | **3** | |
-| random frontier goals (sets/unf80) | 0 (stalled) | 1 of 28 (0 of 25 without rm4t) | |
+| goals | folded | folded + lemma instances | all unfolded | only t unfolded |
+|---|---:|---:|---:|---:|
+| the 9 Prover9 proved (sets/p9l9) | 2 | 3 | **7** | 3 |
+| the first 10 of 231 that Prover9 failed (sets/p9no40) | 0 | 0 | **3** | |
+| random frontier goals (sets/unf80), first 28 | 1 | 1 | 1 (0 of 25 without rm4t) | |
+| sets/lf116 (p9no40 + unf80), 111 run | 4 | 4 | | |
+
+The folded column is a control in the same snapshot (loops/LF_ctl).
+Without it, "stalled" overstates the gains: the 4 folded proofs on
+lf116 come from context that has arrived since production's last try
+of these goals.
 
 * Unfolding is not a better representation in general: on random
-  frontier goals it proves almost nothing.
+  frontier goals it gains nothing.
 * It works on the goals Prover9's worker picks: the stalled goals
   nearest to a proof, in proof lines. There it proves goals both Prover9
   and folded twee fail.
 * Unfolding everything beats unfolding only t (7 against 3).
+* **Folded lemma instances** (`loop.py --lemma-fold 8`,
+  `unfold.lemma_fold_text`) add, for each lemma subterm that unifies
+  with a definition's body, the lemma under the unifier, folded. Goal
+  212's missing critical pair is one of these, and 212 then takes
+  2,000 critical pairs. Elsewhere they gain nothing: the same 4 of 111 on
+  lf116 as the control, with 1.5 times the work. Most unfolded proofs
+  need more than one such step.
 * The 4 new proofs were merged into UL.
 
 **In production since 11:18: an unfolded-twee side worker**
@@ -2390,6 +2403,10 @@ cycle:
 2. takes 24 of p9twee's targets, nearest first;
 3. runs one `loop.py --unfold` round on them;
 4. merges the proofs into UL.
+
+Its first two cycles proved 8 of 48 goals in 27 minutes on 4 workers,
+about 4.5 proofs per CPU-hour. Production makes about 4 per CPU-hour
+(UL27: 54 in 79 minutes on 10 workers).
 
 
 ## 2c. Long runs: stall cutoff and checkpoints

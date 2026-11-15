@@ -177,7 +177,163 @@ def unfold_eq(line, defs):
     items, _ = parse_seq(tokens(line), 0, ())
     return render(expand(items, defs))
 
+# --- folded instances of lemmas, for folded runs (15 Nov) ---
+# Goal 212 needs sibling 209 with X0 = X2: then 209's ld(X2,m(X1,X2)) folds to t(X1,X2). Twee
+# reaches that critical pair (209 with the t rule) late or never. fold_instances adds such
+# instances: for each non-variable subterm of a lemma that unifies with a definition's body, the
+# lemma under the unifier, folded by the definitions.
+
+def to_term(items):
+    x = items[0]
+    if isinstance(x, str):
+        return x
+    if x[0] == '(':
+        return to_term(x[1])
+    return (x[0], [to_term(a) for a in x[1]])
+
+def is_var(t):
+    return isinstance(t, str) and t[:1].isupper()
+
+def eq_of(body):
+    """(lhs, rhs) trees of a unit equation body (with or without a ! [..] : prefix), else None."""
+    items, _ = parse_seq(tokens(body), 0, ())
+    while True:
+        while len(items) == 1 and isinstance(items[0], tuple) and items[0][0] == '(':
+            items = items[0][1]
+        if len(items) >= 3 and items[0] == '!' and isinstance(items[1], tuple) and items[1][0] == '[' and items[2] == ':':
+            items = items[3:]
+            continue
+        break
+    if len(items) != 3 or items[1] != '=':
+        return None
+    return to_term([items[0]]), to_term([items[2]])
+
+def walk(t, s):
+    while is_var(t) and t in s:
+        t = s[t]
+    return t
+
+def occurs(v, t, s):
+    t = walk(t, s)
+    if t == v:
+        return True
+    return isinstance(t, tuple) and any(occurs(v, a, s) for a in t[1])
+
+def unify(a, b, s):
+    a, b = walk(a, s), walk(b, s)
+    if a == b:
+        return s
+    if is_var(a):
+        if occurs(a, b, s):
+            return None
+        s = dict(s); s[a] = b
+        return s
+    if is_var(b):
+        return unify(b, a, s)
+    if isinstance(a, str) or isinstance(b, str) or a[0] != b[0] or len(a[1]) != len(b[1]):
+        return None
+    for x, y in zip(a[1], b[1]):
+        s = unify(x, y, s)
+        if s is None:
+            return None
+    return s
+
+def resolve(t, s):
+    t = walk(t, s)
+    return (t[0], [resolve(a, s) for a in t[1]]) if isinstance(t, tuple) else t
+
+def match(p, t, s):
+    if is_var(p):
+        if p in s:
+            return s if s[p] == t else None
+        s = dict(s); s[p] = t
+        return s
+    if isinstance(p, str) or not isinstance(t, tuple):
+        return s if p == t else None
+    if p[0] != t[0] or len(p[1]) != len(t[1]):
+        return None
+    for x, y in zip(p[1], t[1]):
+        s = match(x, y, s)
+        if s is None:
+            return None
+    return s
+
+def fold(t, rules):
+    if isinstance(t, tuple):
+        t = (t[0], [fold(a, rules) for a in t[1]])
+        for f, params, pat in rules:
+            s = match(pat, t, {})
+            if s is not None:
+                return fold((f, [s[p] for p in params]), rules)
+    return t
+
+def show(t):
+    return t if isinstance(t, str) else f'{t[0]}({",".join(show(a) for a in t[1])})'
+
+def subterms(t):
+    if isinstance(t, tuple):
+        yield t
+        for a in t[1]:
+            yield from subterms(a)
+
+def canon(l, r):
+    ren = {}
+    def go(t):
+        if is_var(t):
+            ren.setdefault(t, f'X{len(ren)}')
+            return ren[t]
+        return (t[0], [go(a) for a in t[1]]) if isinstance(t, tuple) else t
+    return show(go(l)), show(go(r))
+
+def fold_rules(defs):
+    rules = []
+    for (f, n), (params, rhs) in defs.items():
+        ren = {p: f'Def{i}' for i, p in enumerate(params)}
+        pat = to_term(subst(rhs, {p: [v] for p, v in ren.items()}))
+        rules.append((f, [ren[p] for p in params], pat))
+    return rules
+
+def fold_instances(l, r, rules):
+    """Instances of the lemma l = r where a subterm meets a definition body, folded."""
+    base = canon(fold(l, rules), fold(r, rules))
+    out, seen = [], {base, base[::-1]}
+    for u in list(subterms(l)) + list(subterms(r)):
+        for f, params, pat in rules:
+            s = unify(u, pat, {})
+            if s is None or not any(not k.startswith('Def') for k in s):
+                continue          # no unifier, or only the pattern is instantiated (plain folding)
+            l2, r2 = fold(resolve(l, s), rules), fold(resolve(r, s), rules)
+            if l2 == r2:
+                continue
+            c = canon(l2, r2)
+            if c in seen:
+                continue
+            seen.add(c); seen.add(c[::-1]); out.append(c)
+    return out
+
+def lemma_fold_text(text, prefixes=('lemma_',), limit=8):
+    """Folded instances of the problem's lemma axioms (names starting with PREFIXES), as cnf axioms."""
+    rules = fold_rules(problem_defs(text))
+    if not rules:
+        return ''
+    out, seen = [], set()
+    for g in formulas(text):
+        if not g[0] or g[2] != 'axiom' or not g[1].startswith(prefixes):
+            continue
+        e = eq_of(g[3])
+        if not e:
+            continue
+        for c in fold_instances(e[0], e[1], rules)[:limit]:
+            if c not in seen:
+                seen.add(c)
+                out.append(f'cnf(lemma_fold_{len(out)},axiom,{c[0]} = {c[1]}).')
+    return ''.join(x + '\n' for x in out)
+
 def main():
+    if sys.argv[1] == '--fold':
+        txt = open(sys.argv[2]).read()
+        print(lemma_fold_text(txt), end='')
+        return
     if sys.argv[1] == '--hints':
         _, _, src, dst, _, p = sys.argv[:6]
         defs = problem_defs(open(p).read())

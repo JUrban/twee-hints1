@@ -207,6 +207,17 @@ class Loop:
                 path = os.path.join(self.dir, 'tmp', tag + '.p')
                 with open(path, 'w') as f:
                     f.write(txt)
+        if a.lemma_fold and rnd > 0:
+            # (unfold.py) folded instances of the lemma axioms: where a lemma subterm unifies with a
+            # definition's body, the lemma under the unifier, folded (twee reaches these critical
+            # pairs of a lemma with a definition rule late or never; goal 212 of aK2_eq_aK3_r)
+            import unfold
+            txt = open(path).read()
+            add = unfold.lemma_fold_text(txt, limit=a.lemma_fold)
+            if add:
+                path = os.path.join(self.dir, 'tmp', tag + '.f.p')
+                with open(path, 'w') as f:
+                    f.write(txt.rstrip('\n') + '\n' + add)
         if a.hint_axioms and rnd > 0:
             # the K most frequent pool hints that come from at least F sibling proofs, as axioms
             # (pool hints are skolem-free consequences of the axioms and proven lemmas: sound)
@@ -1035,6 +1046,8 @@ def make_parser():
     ap.add_argument('--unfold', nargs='?', const='all', default=None, metavar='F,G,..',
                     help='substitute the problem\'s definitions (f(X1..Xn) = t) away in the axioms, lemmas, '
                          'conjecture and hints (unfold.py); only those of F, G, .. if given')
+    ap.add_argument('--lemma-fold', type=int, default=0, metavar='K',
+                    help='add up to K folded instances of each lemma axiom (unfold.lemma_fold_text)')
     ap.add_argument('--hint-axioms', default='',
                     help='K:F: also add the K most frequent pool hints that occur in >= F sibling proofs as axioms')
     ap.add_argument('--lemma-subsets', action='store_true',
