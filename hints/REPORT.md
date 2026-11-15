@@ -2473,6 +2473,17 @@ failing goals). That is about 1.9 times the fresh proofs per CPU.
   s outcomes, the fresh candidates fell below it, and UB went to resumes
   after 360 fresh runs. The break-even scales with the fresh run's cost
   (0.44 × 0.025), so UB restarted at 13:08 with `--sched-pmin 0.011`.
+* **Result after 62 minutes (13:50): 5 s 33 proofs, 10 s 20**, with 15
+  in both (UB 18 alone, UA 5 alone).
+
+  | arm | fresh proved / runs | resumes proved / runs |
+  |---|---:|---:|
+  | UA, 10 s, cutoff 0.025 | 13 / 476 | 7 / 91 |
+  | UB, 5 s, cutoff 0.011 from 13:08 | 19 / 1,254 | 14 / 77 |
+
+  Both arms were merged into UL (37 new).
+* **UL29 from 13:55** (`abs/ul29.sh`): `--cascade 5,80,320`,
+  `--sched-pmin 0.011 --sched-pmin-auto 400`, 12 workers.
 * **`--sched-pmin-auto W`** (loop.py) sets the cutoff online from the
   last W fresh runs and W resumes: resume proofs per wall second, times
   the mean fresh wall seconds, divided by the scheduler's calibration
