@@ -1772,6 +1772,28 @@ The same holds for the sg3 test: CL5's proofs were a subset of fresh
 * The climber is now a filler (`--cpus 20`, up to 8). It takes only
   goals whose fresh run in the latest round failed as well.
 
+**Fresh runs far from a proof beat resumes near one (UL13, 03:40).**
+UL13 ran 2,600 runs in 115 minutes and made 465 new proofs; the climber
+added 27. Afterwards I replayed its rows in order. Each run was binned by
+its goal's distance, in proof lines, to the nearest goal proven below it
+at the time. The proofs-per-1,000 s column uses wall seconds per run.
+
+| level | proof lines | runs | proved | rate | proofs per 1,000 s |
+|---|---|---|---|---|---|
+| L0 (fresh 20 s) | 0–13 | 613 | 159 | 26% | 8.0 |
+| L0 | 14–21 | 491 | 75 | 15% | 4.4 |
+| L0 | 22–40 | 515 | 99 | 19% | 5.7 |
+| L0 | 41–80 | 527 | 85 | 16% | 4.6 |
+| L0 | 81+ | 157 | 6 | 4% | 1.0 |
+| L1 (resume to 80 s) | 0–13 | 227 | 36 | 16% | 1.2 |
+| L1 | 14–21 | 120 | 21 | 18% | 1.4 |
+
+Fresh runs up to 80 lines away are 3–4× as productive per second as the
+resumes. However, with `--line-gaps 21,13` the goals beyond 21 lines came
+only from `--far-retry`, after every L1 run. UL14 (`abs/ul14.sh`) uses
+`--line-gaps 80,13`, so they now come before the resumes. 7,256 goals
+still had no fresh run in round 5.
+
 ## 2c. Long runs: stall cutoff and checkpoints
 
 * `--eqhint-stall N` gives up when no new rule has matched a hint for N
@@ -1962,13 +1984,13 @@ are run in `/project/hintwork`, with `venv` holding lightgbm.
 
    `G` comes from `rulemodel.py goalfiles`, `H` from
    `hintsel.py knnfiles`, and `P.p` with lemmas from `lemmas.py`.
-5. **The production loop as of 15 Nov 01:32** (`abs/ul13.sh` and
+5. **The production loop as of 15 Nov 03:40** (`abs/ul14.sh` and
    `abs/clive.sh` in /project/hintwork). It is a cascade with fresh 20 s
    runs, resumes to 80 s, and side workers synced in:
 
        loop.py sets/all loops/UL --start 5 --cascade 20,80 --cascade-start 0 \
          --cascade-continue --fresh-first --far-retry --retry-gap 3 \
-         --line-gaps 21,13 --retry-hints 1.25 --sync 60 \
+         --line-gaps 80,13 --retry-hints 1.25 --sync 60 \
          --model --model-fixed rm4t.bin,rm4t.vocab --model-theory \
          --lemmas 6 --lemma-knn 10 --lemma-subsets --lemma-after \
          --twee twee-e22 -j 18 --reserve 0 --pool original --wall-factor 15 \
