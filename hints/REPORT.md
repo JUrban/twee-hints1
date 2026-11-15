@@ -2585,13 +2585,31 @@ target tokens.
 
 * The encode-decode round trip is exact.
 * Overfitting one problem recovers 3 of its 8 future steps.
-* gc1 trains on novel targets from gen2's encoder.
+* gc1 trains on novel targets from gen2's encoder. On the same 29 goals
+  as gen4 it finds:
+  * step 1000: 10 of 1,040 novel steps (gen4: 3), 37 of 2,025
+    future steps (gen4: 9);
+  * step 2000: 12 of 1,040 novel steps, 32 of 2,025 future steps.
 
 **Online test** (`abs/gen_test.sh`, sets/gen200, snapshot ULsW):
 
 | arm | fresh 5 s | resume +15 s |
 |---|---:|---:|
 | GC, control | 0/200 | 4/200 |
+| GG, gen2 at 3000 (n 400, T 0.7), re-queued | 0/200 | 2/200 |
+| GC1A, copy model gc1 at 1000 (n 400, T 0.7), re-queued | 0/200 | 4/200 |
+
+GC1A proved one goal the control did not, `Ka1_eq_Ka2__goal_403`, and
+missed one the control proved. None of the 280 hints it generated for
+that goal is among the proof's 234 lemmas. The +1 comes from the
+re-queue or from search perturbation; arm GQ (re-queue alone) is
+running.
+
+* GG proved 2 of the control's 4 and nothing else.
+* Its hints do steer the search. On one goal, of 353 generated hints,
+  243 became joinable and 117 were matched by new rules (boosted
+  critical pairs get selected).
+* None of that is on a proof path.
 
 **Instance matching of hints (negative).** Of the future proof steps
 missing from the pool, 637 of 1,866 looked like instances of a pool
