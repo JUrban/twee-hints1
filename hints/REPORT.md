@@ -2427,6 +2427,7 @@ snapshot ULsV at 11:57, fresh 20 s, production context):
 This also retests the tier pool, whose earlier negative came from the
 invalid snapshot.
 
+* **20 sibling lemmas** instead of 6: 0 of 30.
 * **Later goals as hints** (`loop.py --hint-after 10`): the statements of
   the next 10 unsolved unit goals of the original. They are unproven, so
   hints only. 0 of 30 heads.
@@ -2459,6 +2460,23 @@ invalid snapshot.
 **UL28 from 12:17** (`abs/ul28.sh`): `--sched-pmin 0.025`, 12 workers.
 UL27's rate, for comparison: 93 proofs in 129 minutes on 10–11 workers,
 plus 18 synced from the side workers.
+
+**A 5 s first level?** Of the last 194 fresh proofs, 84% came within
+10,000 critical pairs (5 abstract s), 69% within 5,000. The median is
+3,390. A 5 s run costs 7.8 wall s against 17.8 for a 10 s run (8
+failing goals). That is about 1.9 times the fresh proofs per CPU.
+
+* **A/B from 12:48** (`abs/lvl_ab.sh`): reflink copies UA and UB of UL
+  at 16,416 r5 rows, 6 workers each. UA uses levels 10,80,320, UB
+  5,80,320.
+* UB first ran with the 0.025 cutoff. After its scheduler retrained on 5
+  s outcomes, the fresh candidates fell below it, and UB went to resumes
+  after 360 fresh runs. The break-even scales with the fresh run's cost
+  (0.44 × 0.025), so UB restarted at 13:08 with `--sched-pmin 0.011`.
+* **`--sched-pmin-auto W`** (loop.py) sets the cutoff online from the
+  last W fresh runs and W resumes: resume proofs per wall second, times
+  the mean fresh wall seconds, divided by the scheduler's calibration
+  (fresh proofs over predicted). With UL27's numbers it gives 0.026.
 
 ## 2c. Long runs: stall cutoff and checkpoints
 
