@@ -2137,6 +2137,36 @@ matched the LightGBM models offline would face the same ceiling, plus
 the cost of running it. So the GNN integration into twee (a scoring
 server with batched calls) was not built.
 
+**GNN version 2** (user, 09:15: the signature is small, so the GNN should
+be symbol-aware; mark the conjecture terms; expand the goal constants
+from flattening; follow the dynamic data collection; train more on the
+harder proofs and clauses).
+
+* twee prints its given rules with the goal constants already expanded
+  (`expandGoalConsts`): flattening constants become their definitions,
+  and skolem constants become fresh variables. The ENIGMA model scores
+  the same expanded forms. So the logs have no goal constants, but they
+  also lose any mark that a term came from the conjecture.
+* Changes in `gnn.py`:
+  * symbol nodes get a learned embedding per name (the vocabulary is 9
+    symbols) besides their arity type;
+  * the conjecture's variables become skolem nodes, and its terms are
+    typed as goal terms;
+  * every rule term that is a variant of a conjecture subterm with at
+    least two function symbols is typed as marked and linked to that
+    goal term by a goal-match edge (about 25% of rule term nodes);
+  * the query's index in the run goes into the scoring layer;
+  * training draws problems with weight (log size) ** 0.5 and anchors
+    samples on proof rule i with weight i + 1. Long proofs and their
+    late rules dominate.
+* The samples stay dynamic: the rules added so far are the context, and
+  the next added rules are the queries. That is the decision twee's rule
+  model makes.
+* A 200-step smoke test gave AUC 0.847 on 5 test problems; version 1 gave
+  0.726 at the same point. The main run (models/gnn2.log, 8,000 steps,
+  6 threads, from 09:25; production on 11 workers) is evaluated on the
+  same 100 test problems as version 1.
+
 **Prover9 on stalled goals** (`p9twee.py`): a LADR problem with
 prolog-style variables, so TPTP names and twee hints need no
 translation. It holds:
@@ -2160,6 +2190,13 @@ goal's skolem constants.
   like a bug in that build.
 * Twee with the Prover9 proof as hints but without the sibling lemmas
   still fails the goal (30 s): the proof leans on the lemmas.
+* Veroff's own AIM settings (from the AIM_REDONE `.in` files: kbo,
+  `lex_order_vars`, no `back_demod`, `restrict_denials`, `para_from_small`,
+  no `cac_redundancy`, `max_weight` 5) fail both goals Prover9 has proved
+  so far.
+  * `max_weight` 5 exhausts the search in 4 s, and 40 times out.
+  * These settings depend on hint lists from earlier attempts at the
+    same goal, so the defaults stay for our sibling pools.
 
 **In production since 08:56:** `p9twee.py --live loops/UL loops/P9L -j 3
 --timeout 60` (`abs/p9live.sh`), a Prover9 side worker.
