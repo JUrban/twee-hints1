@@ -150,12 +150,70 @@ def rows_of(d, min_steps):
         step[t] += 1
 
 
+FUNC = re.compile(r'\b([a-z]\w*)\(')
+THY_FEATURES = ['sim', 'n_extra', 'extra_size', 'extra_vars', 'extra_new_funcs', 'extra_goal_funcs', 'extra_to_e',
+                'heur_rank', 'n_theories', 'goal_size', 'goal_vars']
+
+
+def theory_rows(d, min_steps):
+    """(--theories-out) one row per (target, offered theory) of DIR/theories.tsv (climb.py --theories):
+    features of the theory against the goal; labels from the target's single-theory sketches of that slot:
+    moves, proved with an assumption, nontrivial, the best realization."""
+    tp = os.path.join(d, 'theories.tsv')
+    if not os.path.exists(tp):
+        return
+    moves = collections.defaultdict(list)
+    for r in rows_of(d, min_steps):
+        if r['n_thy'] == 1 and not r['weak_merge'] and not r['weak_unit']:
+            moves[(r['target'], r['thy_rank'])].append(r)
+    last = {}
+    for l in open(tp):
+        w = l.rstrip('\n').split('\t')
+        if len(w) >= 9:
+            last.setdefault(w[0], {})[int(w[1])] = w   # (the target's latest offer per slot)
+    for t, slots in last.items():
+        try:
+            gs = ' '.join(a + ' ' + b for _, a, b in hintsel.goal_lits(t))
+        except Exception:
+            gs = ''
+        gf = set(FUNC.findall(gs))
+        size, nv, _ = goal_shape(t)
+        for j, w in sorted(slots.items()):
+            ex = w[8]
+            ef = set(FUNC.findall(ex))
+            ms = moves.get((t, j), [])
+            if not ms:
+                continue
+            rz = [float(m['realized']) for m in ms if m['realized'] != '']
+            yield {'dir': os.path.basename(d.rstrip('/')), 'target': t, 'slot': j, 'theory': w[2],
+                   'explored': w[5], 'sim': float(w[3]), 'n_extra': int(w[4]),
+                   'extra_size': len(FUNC.findall(ex)) + len(re.findall(r'\be\b', ex)),
+                   'extra_vars': len(set(re.findall(r'\b[A-Z]\w*\b', ex))),
+                   'extra_new_funcs': len(ef - gf), 'extra_goal_funcs': len(ef & gf),
+                   'extra_to_e': len(re.findall(r'= e\b', ex)),
+                   'heur_rank': int(w[6]), 'n_theories': int(w[7]), 'goal_size': size, 'goal_vars': nv,
+                   'moves': len(ms), 'proved_used': sum(m['proved'] and m['used'] > 0 for m in ms),
+                   'nontrivial': sum(m['nontrivial'] == 1 for m in ms),
+                   'best_realized': f'{max(rz):.3f}' if rz else ''}
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('dirs', nargs='+')
     ap.add_argument('--out', required=True)
     ap.add_argument('--min-steps', type=int, default=30)
+    ap.add_argument('--theories-out', help='also one row per (target, offered theory)')
     a = ap.parse_args()
+    if a.theories_out:
+        n = 0
+        with open(a.theories_out, 'w') as f:
+            cols = None
+            for d in a.dirs:
+                for r in theory_rows(d, a.min_steps):
+                    if cols is None:
+                        cols = list(r); f.write('\t'.join(cols) + '\n')
+                    f.write('\t'.join(str(r[k]) for k in cols) + '\n'); n += 1
+        print(f'{n} (target, theory) rows -> {a.theories_out}')
     n = 0
     with open(a.out, 'w') as f:
         cols = None
