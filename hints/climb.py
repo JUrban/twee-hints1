@@ -204,6 +204,10 @@ def main():
                          "strictly contain the target's), one theory at a time")
     ap.add_argument('--chain', action='store_true', help='--updown: a proof becomes a sibling lemma and hints of the later targets at once')
     ap.add_argument('--updown', action='store_true', help='climb up (theory unions, weaker goals) when no sketch proves the target, then down')
+    ap.add_argument('--up-single', action='store_true', help='--updown: going up also adds one assumption at a time')
+    ap.add_argument('--up-levels', type=int, default=2, help='--up-single: levels of one-more-axiom')
+    ap.add_argument('--up-beam', type=int, default=2, help='--up-single: failed sets extended per level')
+    ap.add_argument('--up-width', type=int, default=4, help='--up-single: single additions per extended set')
     ap.add_argument('--weaken', type=int, default=4, help='--updown: weaker goals (instances) to try')
     ap.add_argument('--theory-lemmas', type=int, default=10, help='--theories: proven goals of the stronger theory as assumptions too')
     ap.add_argument('--gen-assume', type=int, default=0, help='assume the generator\'s K most sampled equations, one at a time')
@@ -589,13 +593,35 @@ def main():
         groups = tgroups.get(t) or ([S0] if S0 else [])
         other = frozenset(x for x in S0 if not x.startswith(('assume_thy_', 'assume_gen_')))
         queue = [(g | other, None) for g in groups] or [(frozenset(), None)]
-        tried = set(); runs = 0; real = None; anyproof = False; banned = set(); went_up = False
+        tried = set(); runs = 0; real = None; anyproof = False; banned = set(); up_level = 0
         PRE = ('assume_law_', 'assume_thy_', 'assume_gen_')
+        failed = []   # sets that failed on the real goal at the current level (for --up-single)
+
+        def single_key(x):
+            m_ = re.match(r'assume_thy_(\d+)_(lem)?(\d+)$', x)
+            if m_:
+                return (1 if m_.group(2) else 0, int(m_.group(1)), int(m_.group(3)))
+            return (2 if x.startswith('assume_law_') else 3, 0, 0)
+        singles = sorted((x for x in S0 if x.startswith(PRE)), key=single_key)
         while runs < c.runs:
             if not queue:
-                if anyproof or went_up:
+                if anyproof or up_level >= (c.up_levels if c.up_single else 1):
                     break
-                went_up = True
+                up_level += 1
+                frontier, failed = failed, []
+                if c.up_single:
+                    # one more axiom: the best failed sets of the level below, each with one more
+                    # assumption (another theory's axiom, a stronger theory's lemma, a law), in rank order
+                    for S_ in frontier[:c.up_beam]:
+                        n_ = 0
+                        for x in singles:
+                            if x in S_ or x in banned:
+                                continue
+                            queue.append((S_ | {x}, None)); n_ += 1
+                            if n_ >= c.up_width:
+                                break
+                if up_level > 1:
+                    continue
                 if len(groups) >= 2:
                     queue.append((groups[0] | groups[1] | other, None))
                 if len(groups) >= 3:
@@ -613,6 +639,8 @@ def main():
             tried.add((S, g))
             ok, U, res, nt = run(t, S, c.sketch_time, f's{runs}', goal=g)
             runs += 1
+            if not ok and g is None:
+                failed.append(S)
             if ok and not U and g is None:
                 real = res; break
             if ok and U and c.min_sketch_steps and len(res or ()) < c.min_sketch_steps:
