@@ -1794,6 +1794,71 @@ only from `--far-retry`, after every L1 run. UL14 (`abs/ul14.sh`) uses
 `--line-gaps 80,13`, so they now come before the resumes. 7,256 goals
 still had no fresh run in round 5.
 
+## 2ac. A learned scheduler for the cascade (15 Nov)
+
+UL14 (`--line-gaps 80,13`) made 258 new proofs in its first 25
+minutes, about 610 an hour, against UL13's 243 an hour. Moving the fresh
+runs up to 80 lines away ahead of the resumes was worth about 2.5×
+(2ab).
+
+The next question was which goals to run fresh first. The loop has run
+16,000 fresh runs in rounds 3–5. `schedfeats.py` replays them in order
+and records each run's features as they were when it started:
+
+* distances in proof lines to the nearest proven goal below and above;
+* failed runs so far, and failed fresh runs with the same nearest proven
+  goal below (`nfail_ctx`);
+* growth of the original's proven goals since the goal's last fresh run;
+* the original's success rate over its last 30 fresh runs;
+* the goal's size and number of variables.
+
+**Fresh runs in a new context win.** A fresh run succeeds 43% of the
+time when its nearest proven goal below has changed since its last
+failure. It succeeds 11–15% when that goal has not changed, at any
+distance: 22% even 81+ lines away with a new context. (UL r5, 5,534
+fresh runs.)
+
+| failed fresh runs, same nearest proven goal below | runs | proved |
+|---|---|---|
+| 0 | 1,232 | 43% |
+| 1 | 695 | 15% |
+| 2 | 776 | 13% |
+| 3 | 846 | 14% |
+| 4+ | 1,985 | 11% |
+
+**The model.** `schedmodel.py` is logistic regression on one-hot
+quantile bins, 61 weights. It was trained on rounds 3–4 and the first
+60% of round 5, and tested on the last 40% of round 5 (2,253 runs, 21%
+proved).
+
+| ordering | AUC | top 10% | top 25% | top 50% |
+|---|---|---|---|---|
+| model | 0.737 | 54% | 43% | 32% |
+| proof-line distance | 0.599 | 30% | 29% | 25% |
+
+The weights (log-odds) were these:
+
+* a new context: +0.93;
+* 1 to 4+ earlier failures in the same context: −0.11 to −0.63;
+* growth of the original's proven set above 8%: +0.55;
+* a hot original (recent success rate above 35%): +0.49;
+* more than 84 lines from the nearest proof below: −0.86.
+
+**In the loop.** With `loop.py --sched-model M.json`, the fresh-run
+candidates are the goals whose context or pool changed, at any distance.
+They are ordered by predicted success. Goals predicted below
+`--sched-pmin` (0.06) wait until slots are idle, after the resumes; an
+L1 resume proves about 17% in 3× the time. The history is replayed at
+start (2 s). Each finished run and each synced proof updates it, and the
+scores of the changed original are recomputed.
+
+A 2-worker check (loops/SMT, a reflink copy of UL) made 16 proofs in 23
+fresh runs in its first 5 minutes; these were the model's top picks.
+
+**A/B (running).** ABa (distance order) and ABb (`--sched-model
+sched/m2.json`, retrained with UL14's runs, AUC 0.760) run from the
+same reflink copy of UL, 9 workers each, for an hour.
+
 ## 2c. Long runs: stall cutoff and checkpoints
 
 * `--eqhint-stall N` gives up when no new rule has matched a hint for N
@@ -1922,7 +1987,20 @@ rounds of 30 s or more, but about 40% overhead for 8 s rounds.
 
 ## 4. Next steps
 
-*Updated 14 Nov, 22:30.*
+*Updated 15 Nov, 04:35.*
+
+* **Since 14 Nov 22:30:** sketch climbing (2ab) works but is beaten 3× by
+  fresh runs on its own targets. The cause was stale round-start
+  semantics, fixed by `--fresh-first`. The retry line gap went from 21 to
+  80, worth about 2.5× (UL14: 610 proofs an hour). A learned scheduler
+  (2ac) orders the fresh runs by predicted success; in an A/B from one
+  snapshot it led 60 to 12 after 8.5 minutes.
+* **Next:** put the scheduler into production if the hour-long A/B holds.
+  Then test a 10 s first level against 20 s with it (77% of fresh proofs
+  come within 10 s, 59% within 5 s). Stop the climber, which makes under
+  8 proofs per CPU-hour against about 47 for the learned loop.
+
+*Earlier (14 Nov, 22:30):*
 
 * **Done since the last update:** 6 sibling lemmas won (2r) and run in
   the full loop's cascade round 4. rm6t and rm7t brought no online gain

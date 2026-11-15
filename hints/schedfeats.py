@@ -119,7 +119,7 @@ class History:
     def add(self, n):
         self.R.add(n)
 
-    def replay(self, d, keep=(), out=None):
+    def replay(self, d, keep=(), out=None, levels=('L0',)):
         """replay loop dir d's rounds; with out, write the rows of fresh runs of rounds in keep"""
         srows = [l.rstrip('\n').split('\t') for l in open(os.path.join(d, 'solved.tsv'))]
         rounds = sorted({int(w[1]) for w in srows} | {int(x[1:]) for x in os.listdir(d)
@@ -139,10 +139,11 @@ class History:
                 n, ok = f[0], f[1] == 'THM'
                 lev = f[4] if len(f) >= 5 and f[4][:1] == 'L' else 'L0'
                 ctx = None
-                if lev == 'L0':
+                if lev == 'L0' or (out and lev in levels):
                     m = re.search(r'hints=(\d+)', f[3])
-                    x, ctx = self.feats(n, int(m.group(1)) if m else 0)
-                    if out and r in keep and n not in self.R.solved:
+                    x, c_ = self.feats(n, int(m.group(1)) if m else 0)
+                    ctx = c_ if lev == 'L0' else None
+                    if out and r in keep and n not in self.R.solved and lev in levels:
                         out.write(f'{r}\t{n}\t{int(ok)}\t' + '\t'.join(
                             f'{x[h]:.4g}' if isinstance(x[h], float) else str(x[h]) for h in FEATS) + '\n')
                         nrows += 1
@@ -155,6 +156,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('dir'); ap.add_argument('set'); ap.add_argument('out')
     ap.add_argument('--rounds', default='3,4,5')
+    ap.add_argument('--levels', default='L0', help='rows of these cascade levels (e.g. L1)')
     ap.add_argument('--goal-lines', default='/project/hintwork/abs/goal_lines.tsv')
     a = ap.parse_args()
     keep = {int(x) for x in a.rounds.split(',')}
@@ -165,7 +167,7 @@ def main():
     H = History(names, gl)
     with open(a.out, 'w') as out:
         out.write('round\tname\tlabel\t' + '\t'.join(FEATS) + '\n')
-        nrows = H.replay(a.dir, keep, out)
+        nrows = H.replay(a.dir, keep, out, tuple(a.levels.split(',')))
     print(f'{nrows} rows -> {a.out}')
 
 
