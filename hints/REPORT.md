@@ -13,11 +13,35 @@ in `/project/hintwork` (not in git).
 | + Veroff-style online loop, 5 abstract s round (2o)\* | **36,057** (+16.1% over plain) | 3747 | +18.9 |
 | + its 20 abstract s round (2o)\* | **39,008** (+25.6% over plain) | 4196 | +167.8 |
 | + cascade round, 3 lemmas (2p) | 39,746 | 4291 | +33.7 |
-| + cascade round, 6 lemmas (2r), running: 6,582 runs by 16:30, 14 Nov | **40,960** (+31.9% over plain) | 4447 | +105.2 |
+| + cascade round 4, 6 lemmas (2r), 14 Nov 08:31–17:25 | 41,074 (+32.2% over plain) | 4460 | +123.7 |
+| + cascade round 5 (2w–2ac), from 14 Nov 17:26; at 15 Nov 07:00 | **43,462** (+39.9% over plain) | **4717** (+47.3%) | +199.5 (+15.4 side workers) |
 
 \* Starts from 33,720 proofs: the third round plus 52 from long runs on
 two families (2m). Its time is the summed wall time of the runs, close
 to their CPU time.
+
+**Totals over time** (all 51,784 problems; holdout 5,880). From 14 Nov
+20:00 on, the counts come from the times the proofs' hints files were
+written in loops/UL. Merged proofs count from their merge.
+
+| time | solved | holdout | what ran |
+|---|---|---|---|
+| 14 Nov 07:00 | 39,008 | 4196 | online loop round done (2o) |
+| 14 Nov 08:31 | 39,746 | 4291 | cascade round 3 done (2p) |
+| 14 Nov 17:25 | 41,074 | 4460 | cascade round 4 done (2r) |
+| 14 Nov 20:00 | 41,369 | 4486 | round 5: resumes without requeue (2w), consider-emulation off (2y) |
+| 14 Nov 22:00 | 41,686 | 4512 | proof-line distance (2z) |
+| 15 Nov 00:00 | 42,053 | 4558 | stalled goals retried fresh (2aa), sketch climber (2ab) |
+| 15 Nov 01:32 | 42,234 | 4576 | fresh run first for goals without one in round 5 (2ab) |
+| 15 Nov 03:28 | 42,734 | 4645 | UL13, then retry line gap 21 → 80 (UL14, about 610 an hour) |
+| 15 Nov 04:00 | 43,001 | 4680 | A/B 1 of the learned scheduler starts (2ac) |
+| 15 Nov 05:15 | 43,272 | 4706 | A/B 1 merged; A/B 2 starts |
+| 15 Nov 05:51 | 43,360 | 4709 | A/B 2 merged: the scheduler with 10 s fresh runs wins |
+| 15 Nov 07:00 | 43,462 | 4717 | stall: resumes to 80 s, then tail heads deepen first (2ac) |
+
+From 15 Nov 05:30 the rate fell from hundreds an hour to 50–100. The
+cheap new contexts are used up; 58% of the unsolved goals sit behind the
+95 originals' tail heads (2ac).
 
 The loop's first round is twee with a learned ENIGMA-style rule filter
 plus kNN hints from training proofs. Its second round adds hints from its
