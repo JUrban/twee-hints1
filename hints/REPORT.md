@@ -2562,6 +2562,10 @@ temperature):
 | gen1, 1000 | 200, 0.7 | 4/2,891 | 0.2% | |
 | gen2, 3000 | 200, 0.7 | 13/2,891 | 0.7% | |
 | gen2, 3000 | 400, 0.7 | 24/2,891 | 0.6% | 2 (of 1,251 missing) |
+| gen4 (novel targets), 4000 | 400, 0.7 | 9/2,025* | 0.3% | 3 (of 1,040 missing)* |
+
+\* gen4 is evaluated in its own training run, on a different 29 test
+goals.
 
 The generator learns the common lemmas, which the pool already holds:
 22 of its 24 hits are pool hints. The steps that matter are the 1,251
@@ -2569,7 +2573,19 @@ the pool lacks, and it finds 2 of them.
 
 So gen4 fine-tunes gen2 at step 3000 on novel targets only
 (`--novel loops/UL/hints`): the cuts and targets are proof steps that no
-other goal of the original has as a hint.
+other goal of the original has as a hint. After 1,000 steps it finds 3
+of 1,040 novel steps, about the same as before.
+
+**A copy action** (`hints/gencopy.py`). Novel steps are long (median 18
+symbols). On each side, the largest subterm already in the context
+covers typically 40–70% of the step. So COPY points at a term node of
+the sample, then one VAR action per distinct variable of the copied term
+maps it to the equation's variable slots. Copies make about 22% of the
+target tokens.
+
+* The encode-decode round trip is exact.
+* Overfitting one problem recovers 3 of its 8 future steps.
+* gc1 trains on novel targets from gen2's encoder.
 
 **Online test** (`abs/gen_test.sh`, sets/gen200, snapshot ULsW):
 
