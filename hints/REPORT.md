@@ -2195,14 +2195,15 @@ harder proofs and clauses).
 | on the same 100 test problems | AUC |
 |---|---|
 | GNN version 1 (names ignored), step 2,000 / 4,000 | 0.809 / 0.802 |
-| **GNN version 2**, step 2,000 / 4,000 | **0.864 / 0.879** |
+| **GNN version 2**, step 2,000 / 4,000 / 6,000 / 8,000 (final) | **0.864 / 0.879 / 0.876 / 0.887** |
 | rm4t (production ENIGMA) | 0.837 |
 | rm7t (ENIGMA with in-loop data) | 0.892 |
 | oracle rmO (trained on these problems) | 0.958 |
 
-The user's changes add about 0.07. Version 2 beats the production
-ENIGMA model offline and is still improving. Online, the oracle result
-above means the defer-once filter would not use it.
+The user's changes add about 0.07–0.08. Version 2 ends at 0.887: well
+above the production ENIGMA model, level with rm7t. Online, the oracle
+results (above, and with repeated deferral in 2af) mean the filter would
+not use it.
 
 **Prover9 on stalled goals** (`p9twee.py`): a LADR problem with
 prolog-style variables, so TPTP names and twee hints need no
