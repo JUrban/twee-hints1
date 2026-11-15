@@ -1962,3 +1962,22 @@ are run in `/project/hintwork`, with `venv` holding lightgbm.
 
    `G` comes from `rulemodel.py goalfiles`, `H` from
    `hintsel.py knnfiles`, and `P.p` with lemmas from `lemmas.py`.
+5. **The production loop as of 15 Nov 01:32** (`abs/ul13.sh` and
+   `abs/clive.sh` in /project/hintwork). It is a cascade with fresh 20 s
+   runs, resumes to 80 s, and side workers synced in:
+
+       loop.py sets/all loops/UL --start 5 --cascade 20,80 --cascade-start 0 \
+         --cascade-continue --fresh-first --far-retry --retry-gap 3 \
+         --line-gaps 21,13 --retry-hints 1.25 --sync 60 \
+         --model --model-fixed rm4t.bin,rm4t.vocab --model-theory \
+         --lemmas 6 --lemma-knn 10 --lemma-subsets --lemma-after \
+         --twee twee-e22 -j 18 --reserve 0 --pool original --wall-factor 15 \
+         --args="--abstract-time 2000 --no-resume-requeue --no-eqhint-consider"
+       climb.py sets/all loops/CLV --live loops/UL --cpus 20 -j 2 \
+         --m 8 --knn 8 --runs 12 --sketch-time 5 --final-time 20 --fill 3 -- \
+         (the loop's model, lemma and pool options) --twee twee-e37
+
+   For a new round, use `--cascade-start -1`, so that every goal gets a
+   fresh run in the new context first (2ab). Watch memory with
+   `abs/memwatch.py 7 45`; twee itself stops at 6 GB (`-M6g`).
+   `merge.py UL DIR...` adds proofs from probe dirs.
