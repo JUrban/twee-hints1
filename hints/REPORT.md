@@ -1943,8 +1943,34 @@ snapshot loops/ULsM, 2 workers each):
 * the 500 most frequent hints;
 * rule threshold 0.3 with penalty 5.
 
-Production (UL15, `abs/ul15.sh`) meanwhile runs the scheduler with
-`--cascade 10,80` on 4 workers.
+Production (UL15, `abs/ul15.sh`) meanwhile ran the scheduler with
+`--cascade 10,80` on 4 workers: 8 new proofs in 100 fresh runs in
+7 minutes, about 16 proofs per CPU-hour.
+
+**The portfolio does nothing on stalled goals.** After 35–41 goals per
+variant, every variant except the 500-hint one proved exactly one goal,
+the same one: com_Ralt__goal_246, whose pool had grown with the merges.
+On about 35 stalled goals, 7 variants at 20 s proved nothing beyond it:
+
+* other term orderings;
+* no rule model;
+* more or fewer sibling lemmas;
+* other rule-model settings.
+
+The probe was stopped there (06:00).
+
+So a stalled goal needs new information: a proof nearby, or much more
+search. Settings make no difference. Production went to 20 workers
+(UL16, `abs/ul16.sh`, 06:01).
+
+**Breakthrough probes (running, 06:05).** On sets/st79 (st80 without
+com_Ralt__goal_246), from ULsM, 2 workers each:
+
+* the sketch climber as CL5 (8 unproven siblings and 8 kNN goals as
+  true assumptions, `--fill 3`; `abs/clst.sh`);
+* fresh 80 s runs (`T=80 V=base abs/port.sh`).
+
+A breakthrough also gives the goals above a new context.
 
 ## 2c. Long runs: stall cutoff and checkpoints
 
@@ -2149,7 +2175,7 @@ are run in `/project/hintwork`, with `venv` holding lightgbm.
 
    `G` comes from `rulemodel.py goalfiles`, `H` from
    `hintsel.py knnfiles`, and `P.p` with lemmas from `lemmas.py`.
-5. **The production loop as of 15 Nov 05:55** (`abs/ul15.sh` in
+5. **The production loop as of 15 Nov 06:01** (`abs/ul16.sh` in
    /project/hintwork). It is a cascade of fresh 10 s runs ordered by the
    learned scheduler (2ac), with resumes to 80 s. Proofs that other
    processes append are synced in:
@@ -2160,7 +2186,7 @@ are run in `/project/hintwork`, with `venv` holding lightgbm.
          --line-gaps 80,13 --retry-hints 1.25 --sync 60 \
          --model --model-fixed rm4t.bin,rm4t.vocab --model-theory \
          --lemmas 6 --lemma-knn 10 --lemma-subsets --lemma-after \
-         --twee twee-e22 -j 4 --reserve 0 --pool original --wall-factor 15 \
+         --twee twee-e22 -j 20 --reserve 0 --pool original --wall-factor 15 \
          --args="--abstract-time 2000 --no-resume-requeue --no-eqhint-consider"
 
    The model comes from `schedfeats.py loops/UL sets/all F.tsv` and
