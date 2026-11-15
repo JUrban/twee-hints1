@@ -719,6 +719,8 @@ class Loop:
         # changed since the goal's last failed fresh run (UL r5: 43% then, 11-15% otherwise,
         # at any distance); on the last 40% of r5 its top quarter proved 43% vs 29% by distance.
         SM = H = None; sc = {}; over = collections.Counter(); startctx = {}; calib = [0.0, 0, 0]
+        auto0 = collections.deque(maxlen=a.sched_pmin_auto or 1)   # (ok, wall s, predicted p) of fresh runs
+        auto1 = collections.deque(maxlen=a.sched_pmin_auto or 1)   # (ok, wall s, 0) of resumes
         if a.sched_model:
             import schedfeats, schedmodel
             SM = schedmodel.load_model(a.sched_model)
@@ -890,6 +892,8 @@ class Loop:
                                 SM = schedmodel.train_rows(H.rows, SM['feats'], recent=a.sched_recent)
                                 sc.clear()
                                 print(f'  cascade: --sched-retrain: model retrained on {len(H.rows)} rows', flush=True)
+                    if H and a.sched_pmin_auto:
+                        (auto0 if lev == 0 else auto1).append((ok, dt, p_ if lev == 0 else 0.0))
                     rf.write(f'{n}\t{"THM" if ok else "NO"}\t{dt:.2f}\t{stats}\tL{lev}\tt={time.time()-t0:.0f}\n'); rf.flush()
                     if ok and n in self.solved:
                         pass   # (synced from another process meanwhile: keep its row and hints)
@@ -900,6 +904,17 @@ class Loop:
                                 hf.write(f'{l}\t{r}\n')
                         sf.write(f'{n}\t{rnd}\t{dt:.2f}\n'); sf.flush()
                         add_proof(n, rnd, dt, hs)
+                    if done_n % 50 == 0 and H and a.sched_pmin_auto and len(auto0) >= 100 and len(auto1) >= 50:
+                        # --sched-pmin-auto: a fresh run pays as well as a resume when its actual success
+                        # p0 = (resume proofs per wall second) x (mean fresh wall seconds); the scheduler's
+                        # p is calibrated by (fresh proofs / fresh predicted) over the window
+                        r1 = sum(x[0] for x in auto1) / max(1e-9, sum(x[1] for x in auto1))
+                        c0 = sum(x[1] for x in auto0) / len(auto0)
+                        k = sum(x[0] for x in auto0) / max(1e-9, sum(x[2] for x in auto0))
+                        pm = min(0.3, max(0.003, r1 * c0 / max(k, 0.05)))
+                        lmin = math.log(pm / (1 - pm))
+                        print(f'  cascade: --sched-pmin-auto: {pm:.4f} (resumes {r1*3600:.2f} proofs/h, '
+                              f'fresh {c0:.1f} s, calibration {k:.2f})', flush=True)
                     if done_n % 50 == 0:
                         print(f'  cascade: {done_n} runs, new={new}, {len(running)} running, '
                               f'{time.time()-t0:.0f}s' + (f', synced={nsync}' if a.sync else '')
@@ -1160,6 +1175,9 @@ def make_parser():
                          'deepen first, up to the levels below --head-only-from')
     ap.add_argument('--head-only-from', type=int, default=0,
                     help='--head-first: only tail heads go to levels >= L (e.g. 3 with --cascade 10,80,320,1280)')
+    ap.add_argument('--sched-pmin-auto', type=int, default=0, metavar='W',
+                    help='--sched-model: set --sched-pmin online from the last W fresh runs and W resumes: '
+                         'the predicted success at which a fresh run pays as well per wall second as a resume')
     ap.add_argument('--sched-pmin', type=float, default=0.06,
                     help='--sched-model: fresh runs predicted below this go after the resumes (default 0.06: '
                          'an L1 resume proves ~17%% in 3x the time of a fresh run)')
