@@ -8,7 +8,7 @@ aK2_eq_aK3_r: Prover9 0.2 s, twee 0 of 20 s). This rewrites every formula of
 a problem with the definitions substituted away and drops the definitions,
 so twee works over the base signature (m, ld, rd, e).
 
-  unfold.py IN.p OUT.p            whole problem (axioms, lemmas, conjecture)
+  unfold.py IN.p OUT.p [f,g,..]   whole problem (axioms, lemmas, conjecture); only f, g, .. if given
   unfold.py --hints IN OUT --defs P.p   a hint file (one equation per line)
 
 A definition is an axiom f(V1,..,Vn) = RHS with distinct variables, f not in
@@ -155,8 +155,11 @@ def problem_defs(text):
                 defs[(d[0], len(d[1]))] = (d[1], d[2])
     return defs
 
-def unfold_text(text, defs=None):
+def unfold_text(text, defs=None, only=None):
+    """ONLY: a set of symbol names to unfold (default: every definition)."""
     defs = problem_defs(text) if defs is None else defs
+    if only:
+        defs = {k: v for k, v in defs.items() if k[0] in only}
     out = []
     for g in formulas(text):
         if not g[0]:
@@ -183,7 +186,8 @@ def main():
                 if l.strip():
                     f.write(unfold_eq(l.strip(), defs) + '\n')
         return
-    txt, defs = unfold_text(open(sys.argv[1]).read())
+    only = set(sys.argv[3].split(',')) if len(sys.argv) > 3 else None
+    txt, defs = unfold_text(open(sys.argv[1]).read(), only=only)
     open(sys.argv[2], 'w').write(txt)
     print('unfolded', ' '.join(f'{f}/{n}' for f, n in sorted(defs)), file=sys.stderr)
 

@@ -266,7 +266,8 @@ class Loop:
             # problem's definitions (proofs of unfolded runs give unfolded hints; folded runs
             # normalise them back with the definition rules).
             import unfold
-            txt, defs = unfold.unfold_text(open(path).read())
+            txt, defs = unfold.unfold_text(open(path).read(),
+                                           only=None if a.unfold == 'all' else set(a.unfold.split(',')))
             path = os.path.join(self.dir, 'tmp', tag + '.u.p')
             with open(path, 'w') as f:
                 f.write(txt)
@@ -1031,9 +1032,9 @@ def make_parser():
     ap.add_argument('--lemma-after', action='store_true',
                     help='sibling lemmas are the nearest proven goals above N as well as below (all proven '
                          'before the run, so still well-founded)')
-    ap.add_argument('--unfold', action='store_true',
+    ap.add_argument('--unfold', nargs='?', const='all', default=None, metavar='F,G,..',
                     help='substitute the problem\'s definitions (f(X1..Xn) = t) away in the axioms, lemmas, '
-                         'conjecture and hints (unfold.py)')
+                         'conjecture and hints (unfold.py); only those of F, G, .. if given')
     ap.add_argument('--hint-axioms', default='',
                     help='K:F: also add the K most frequent pool hints that occur in >= F sibling proofs as axioms')
     ap.add_argument('--lemma-subsets', action='store_true',

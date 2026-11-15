@@ -2311,6 +2311,86 @@ s.
   sibling lemmas. On st79u: +3 (10 against 7 of 71).
 * `TWEE_LEMMA_UNITIZE=0` turns it off.
 
+## 2af. Repeated deferral, and definitions that twee folds (15 Nov)
+
+**Repeated deferral** (`twee-e38 --rule-defer-max K`, 239245f). The
+oracle rule model gained nothing online with the defer-once filter (2ad:
+273 against 271). Could a stronger filter let a better model matter? A
+critical pair below the threshold is now deferred up to K times, its
+score multiplied by the penalty each time.
+
+* With the default K = 1, e38 gives the same runs as e22 (20 of 20
+  identical in rules and deferral counts).
+* Paired test, fresh baseline (sets/ultest, the current lemma code,
+  `abs/defer_test.sh`): rm4t with defer-once against the oracle rmO with
+  K = 3 and penalty 5. **270 for the oracle against 269 for the
+  baseline** (of 400; +8/−7), and 11% more work on shared proofs.
+* So a better model does not pay through a stronger filter either. The
+  GNN (2ad) stays offline: wiring it into twee is not worth it while the
+  oracle itself gains nothing.
+
+**Prover9's side worker partly races twee.** Of its 9 proofs, 4 are
+short (1, 3, 10 and 130 steps). Rerun fresh at 20 s in today's context,
+twee proves 2 of the 9. aK2_eq_aK3_r__goal_212 is a 1-step proof for
+Prover9 (0.2 s) from sibling 209, which twee had too. Twee fails it in
+20 s with 12,880 rules.
+
+**The cause: twee folds definitions, Prover9 unfolds them.**
+
+* AIM's defined operations are `a, k, l, r, t`, for example
+  `t(A,B) = ld(B,m(A,B))`.
+* Twee's KBO orients each definition right to left, since the defining
+  term is bigger: `ld(X,m(Y,X)) -> t(Y,X)`. Prover9's default LPO in
+  `p9twee.py` unfolds them (Veroff's own runs used KBO and folded, which
+  is why the goals contain t and r).
+* In goal 212 Prover9 unfolds t, and sibling 209 then rewrites the goal
+  in one step. Twee needs the critical pair of 209 with the t rule, a
+  pair of weight about 58, and never selects it.
+* Twee has no option for this. `--kbo-weight0` and `--precedence` cannot
+  make `t(A,B)` bigger than `ld(B,m(A,B))`, because B occurs twice.
+
+**`unfold.py`** substitutes a problem's definitions away and drops them:
+axioms, lemmas, conjecture and hints are then over m, ld, rd and e.
+`loop.py --unfold` does this for every run. Hints are unfolded with the
+problem's definitions. Folded runs normalise unfolded pool hints back,
+because hints are kept normalised by the rules (`--eqhint-normalise`, on
+by default).
+
+* Goal 212 unfolded: **1.2 s, 2,755 critical pairs**.
+* Unfolded terms are bigger. Unfolded runs take about 4.5 times as long
+  in real time for the same abstract time (plain twee on 200 frontier
+  goals, stopped after 14 runs: unfolded 1, folded 0). Most failed
+  unfolded runs stop at `--max-cpu 200` before 20 abstract seconds.
+
+**Results** (fresh 20 s runs in the production context: 6 sibling
+lemmas, 10 kNN lemmas, the original's pool, rm4t; snapshots of UL at
+10:24 and 10:44):
+
+| goals | folded | all unfolded | only t unfolded |
+|---|---:|---:|---:|
+| the 9 Prover9 proved (sets/p9l9) | 2 | **7** | 3 |
+| the first 10 of 231 that Prover9 failed (sets/p9no40) | 0 (stalled) | **3** | |
+| random frontier goals (sets/unf80) | 0 (stalled) | 1 of 28 (0 of 25 without rm4t) | |
+
+* Unfolding is not a better representation in general: on random
+  frontier goals it proves almost nothing.
+* It works on the goals Prover9's worker picks: the stalled goals
+  nearest to a proof, in proof lines. There it proves goals both Prover9
+  and folded twee fail.
+* Unfolding everything beats unfolding only t (7 against 3).
+* The 4 new proofs were merged into UL.
+
+**In production since 11:18: an unfolded-twee side worker**
+(`uflive.py`, `abs/uflive.sh`, 4 workers). It replaces the Prover9
+worker, which was stopped at 10:24 after 9 proofs in 283 tries. Each
+cycle:
+
+1. syncs UL's proofs into loops/UFL;
+2. takes 24 of p9twee's targets, nearest first;
+3. runs one `loop.py --unfold` round on them;
+4. merges the proofs into UL.
+
+
 ## 2c. Long runs: stall cutoff and checkpoints
 
 * `--eqhint-stall N` gives up when no new rule has matched a hint for N
