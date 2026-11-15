@@ -156,7 +156,8 @@ def main():
                     help='side worker of a running loop.py --cascade --sync: climb its stalled goals (a failed '
                          'deepening run L1+ is the goal\'s last result in its latest round, unsolved), nearest '
                          'proven goal below first; real proofs go into LOOPDIR (hints, then a solved.tsv row). '
-                         'DIR gets a copy of LOOPDIR\'s solved.tsv and a link to its hints. SET is ignored.')
+                         'DIR gets a copy of LOOPDIR\'s solved.tsv (remove it to restart with a fresh copy) '
+                         'and a link to its hints. SET: sets/all (the rule model\'s goal files).')
     ap.add_argument('--refresh', type=float, default=1800, help='--live: seconds between context refreshes')
     ap.add_argument('--exclude', default='', help='--live: comma-separated goal list files to skip')
     argv = sys.argv[1:]
@@ -166,7 +167,8 @@ def main():
     a = loop.make_parser().parse_args([c.set, c.dir] + rest)
     if c.live and not os.path.exists(os.path.join(c.dir, 'solved.tsv')):
         os.makedirs(c.dir, exist_ok=True)
-        os.symlink(os.path.abspath(os.path.join(c.live, 'hints')), os.path.join(c.dir, 'hints'))
+        if not os.path.lexists(os.path.join(c.dir, 'hints')):
+            os.symlink(os.path.abspath(os.path.join(c.live, 'hints')), os.path.join(c.dir, 'hints'))
         with open(os.path.join(c.dir, 'solved.tsv'), 'w') as f:
             for l in open(os.path.join(c.live, 'solved.tsv')):
                 w = l.split('\t')

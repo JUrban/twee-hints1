@@ -685,6 +685,10 @@ class Loop:
                                             b, not a.p9loop, a.cascade_cpu * b)
                         running[fut] = (n, lev)
                 if not running:
+                    if a.sync and time.time() - t0 < a.cascade_hours * 3600:
+                        # nothing to run: wait for proofs from the side workers (new contexts)
+                        time.sleep(a.sync); sync(); sync_t = time.time()
+                        continue
                     break
                 fin, _ = wait(list(running), return_when=FIRST_COMPLETED)
                 for f in fin:
