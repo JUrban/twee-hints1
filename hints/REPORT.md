@@ -2137,7 +2137,7 @@ matched the LightGBM models offline would face the same ceiling, plus
 the cost of running it. So the GNN integration into twee (a scoring
 server with batched calls) was not built.
 
-**GNN version 2** (user, 09:15: the signature is small, so the GNN should
+**GNN version 2** (user, about 09:05: the signature is small, so the GNN should
 be symbol-aware; mark the conjecture terms; expand the goal constants
 from flattening; follow the dynamic data collection; train more on the
 harder proofs and clauses).
@@ -2164,7 +2164,7 @@ harder proofs and clauses).
   model makes.
 * A 200-step smoke test gave AUC 0.847 on 5 test problems; version 1 gave
   0.726 at the same point. The main run (models/gnn2.log, 8,000 steps,
-  6 threads, from 09:25; production on 11 workers) is evaluated on the
+  6 threads, from 09:14; production on 11 workers) is evaluated on the
   same 100 test problems as version 1.
 
 **Prover9 on stalled goals** (`p9twee.py`): a LADR problem with
