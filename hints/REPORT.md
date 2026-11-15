@@ -2489,6 +2489,62 @@ failing goals). That is about 1.9 times the fresh proofs per CPU.
   the mean fresh wall seconds, divided by the scheduler's calibration
   (fresh proofs over predicted). With UL27's numbers it gives 0.026.
 
+**Sibling lemmas in unfolded runs** (`abs/ufl_lem.sh`, sets/p9no_v, ULsV,
+fresh 20 s, unfolded): 6 lemmas 3 of 36, 12 lemmas 4 of 36. The 12-lemma
+arm proved all three of the 6-lemma arm's goals, plus one more. One goal
+is within noise, so the side worker keeps 6.
+
+## 2ah. A hint generator (user's suggestion, 15 Nov)
+
+The user asked whether the GNN2Seq model of Chvalovský, Suda and Urban
+("Neural Conjecturing for Saturation Theorem Provers", IWIL 2026;
+github.com/JUrban/E_conj_dev1, branch vampire4) could be trained here
+to propose hints from a run's current situation: generate new hints
+rather than rank clauses.
+
+* **No GPU is needed.** Their model has about 3M parameters and trained
+  on a GPU in 48 minutes per 100 epochs. Ours is smaller (0.58M) on
+  small AIM graphs and trains on 4 CPU threads at about 1.7 s per step.
+* **Why it might help where ranking stopped helping.** The ranking
+  models (2ad) can only reorder what twee produces. Stalled goals lack
+  hints for steps that no sibling proof contains. Of the future proof
+  steps of 188 solved test goals (cut halfway through each proof), the
+  original's hint pool holds 63% (median pool 4,774 hints); the other
+  37% must come from somewhere else.
+* **Generated hints cost little when wrong.** Twee matches hints by
+  variant, and every critical pair is a theorem, so a false generated
+  equation never matches anything.
+
+**Model** (`hints/gen.py`):
+
+* **Encoder:** gnn.py's symbol-aware graph (version 2: symbol nodes,
+  goal skolems, goal-term marks) over the axioms, the goal and the last
+  256 rules before a cut; 6 message-passing layers, dimension 64.
+* **Decoder:** a causal Transformer (2 layers, 4 heads) with
+  cross-attention to all the sample's nodes. It writes an equation in
+  prefix order with three actions: SYM points at one of the sample's
+  symbol nodes (pointer decoding, as their PointerTreeDecoder), VAR
+  picks a variable slot numbered by first occurrence, EOS ends. An
+  arity count keeps every sample a well-formed pair of terms, as their
+  arity-constrained decoding.
+* **Training samples:** a given log cut just before a proof rule (later
+  cuts likelier); the targets are up to 16 of the proof rules from the
+  cut on, in random orientation; logs weighted by size^0.5 (hard
+  proofs). Data: given/train_only, ul45 and loops/UL/given (17,725
+  logs), with the 400 newest r5 logs (sets/ultest) held out.
+* **Sampling** decodes incrementally (cached self-attention; memory
+  keys and values computed once for all samples): 200 equations in
+  about 2 s on one thread.
+
+**Online use** (`loop.py --gen-model M --gen-n N`): a failed run saves
+the axiom rows and its last 256 rules (`genctx/`). twee-e39 adds
+`--print-given-unsolved` for this; before, the given rules were printed
+only with a proof. When the goal's next level resumes the saved state,
+the run gets N sampled equations on top of its pool hints.
+
+**Sanity check:** trained on one problem for 300 steps, the model
+reproduces 4 of that problem's 8 proof steps after the halfway cut.
+
 ## 2c. Long runs: stall cutoff and checkpoints
 
 * `--eqhint-stall N` gives up when no new rule has matched a hint for N
