@@ -1997,6 +1997,16 @@ com_Ralt__goal_246), from ULsM, 2 workers each, 06:05–06:22:
 
 These goals resist everything tried at these budgets.
 
+> **Correction (15 Nov, 09:40): these probes are invalid.** loop.py
+> `--init` imports only the rows of round 0, and the snapshot loops/ULsM
+> kept the loop's round numbers. So every probe from it ran with the
+> 33,720 round-0 proofs as context (lemmas, pools, kNN lemmas) instead
+> of 43,484. This covers the portfolio, the breakthrough probes and the
+> stalled-goal probes of 2ad (`--pool tier`, `--pool knn`, rm7t).
+> In the full current context, fresh 20 s runs prove about 15% of these
+> goals (2ae). The snapshots for the paired model tests (ULsT) and later
+> probes (ULsN) have the column set to 0.
+
 **Resumes are now the productive work.** UL16 made 43 new proofs in
 20 minutes, about 6.5 per CPU-hour. Its fresh runs proved 27 of 424
 (6%, predicted 41). Its resumes (10 s to 80 s) proved about a quarter.
@@ -2061,7 +2071,8 @@ later long proofs should be worth more for training than the many easy
 ones. Rounds 4–5 have 3,274 given logs; round 5's median log is 203 KB,
 against 51 KB in round 1.
 
-**Stalled goals again** (sets/st79u: 73 unsolved goals of st79, snapshot
+**Stalled goals again** (INVALID, see the correction in 2ac: ULsM gave
+the probes only the round-0 proofs) (sets/st79u: 73 unsolved goals of st79, snapshot
 ULsM refreshed at 07:35, fresh 20 s, 2 workers each):
 
 | variant | proved |
@@ -2129,13 +2140,22 @@ arm; fresh 20 s, production L0 settings, no `--online`):
 * at its stricter matching threshold, rm7t ties rm4t too;
 * the stricter threshold alone loses 10.
 
+| oracle rmO (trained on these 400 goals' own logs: AUC 0.956; at 0.1 keeps 99.3% of proof rules, defers 57.3% of the others), 0.1 | 197 of 259 (rm4t 199) | 2 | 1.01 |
+
 So the better model only cancels the cost of a stricter filter. The
 searches are driven by the pools and lemmas. 52 of the 263 shared
 proofs have identical work under both models, and the rest differ by a
-few per cent either way. **Production keeps rm4t.** A GNN that only
-matched the LightGBM models offline would face the same ceiling, plus
-the cost of running it. So the GNN integration into twee (a scoring
-server with batched calls) was not built.
+few per cent either way. **Even a near-oracle model gains nothing
+through the defer-once filter** (rmO: 197 against 199, work 1.01).
+Production keeps rm4t. Rule-model quality cannot pay off through this
+mechanism, whether ENIGMA or GNN. A GNN would need a stronger hook, such
+as the passive queue's order, where twee would have to score millions of
+critical pairs per run. So the GNN is compared offline only; its twee
+integration (a scoring server with batched calls) was not built.
+
+The work ratio on shared proofs is a BliStr-style proxy: abstract time
+to the same proofs (Urban 2013, user's remark). Counts of proved goals
+stay the main measure, because hints may guide in a roundabout way.
 
 **GNN version 2** (user, about 09:05: the signature is small, so the GNN should
 be symbol-aware; mark the conjecture terms; expand the goal constants
@@ -2162,6 +2182,11 @@ harder proofs and clauses).
 * The samples stay dynamic: the rules added so far are the context, and
   the next added rules are the queries. That is the decision twee's rule
   model makes.
+* Positives and negatives are balanced, as in Chvalovský et al.:
+  * the loss is weighted per batch so that each class carries half the
+    weight;
+  * half the samples are anchored on a proof rule.
+  Both versions do this.
 * A 200-step smoke test gave AUC 0.847 on 5 test problems; version 1 gave
   0.726 at the same point. The main run (models/gnn2.log, 8,000 steps,
   6 threads, from 09:14; production on 11 workers) is evaluated on the
@@ -2211,6 +2236,65 @@ goal's skolem constants.
   with a pool of 15,182 hints.
 
 Production runs beside it on 17 workers (UL24).
+
+## 2ae. The stall was partly an artefact: kNN lemmas the cascade did not see (15 Nov)
+
+**Control in the full context.** Snapshot loops/ULsN is UL at 09:30
+with every row imported. On sets/st79u (goals whose fresh run and resume
+failed in round 5 with an unchanged nearest proven goal below), fresh
+20 s runs prove **7 of 51 goals without the lemma change and 8 with it**
+(`abs/unit_probe.sh`, PU_0 and PU_1; work on shared proofs 0.99). That
+is about 30 proofs per CPU-hour, against production's 2.
+
+* Some are now easy: nil3_24__goal_356 takes 1.7 s, nil3_32__goal_380
+  1.4 s and nil3_29__goal_388 1.9 s.
+* nil3_24__goal_356 had failed twice on 14 Nov, the last time a 141 s
+  resume, and was never retried.
+* **All six proofs of the first 35 use kNN lemmas**, proven goals of
+  other originals with the same or a subset of the axioms
+  (`--lemma-knn 10 --lemma-subsets`), proven after the goal's last run.
+  For example nil3_24__goal_356 used TLRproperties_2__goal_314 and
+  nil3_26__goal_372.
+
+**Two leaks in the cascade:**
+
+1. The retry gate looks only at the sibling context and the pool's
+   growth. A change in a goal's kNN lemmas never made it eligible. The
+   scheduler ranked these goals near the top (p 0.12–0.26, above its
+   0.06 cutoff), but they were never candidates.
+2. The kNN lemma index was built once, when the cascade started, so new
+   proofs reached other goals' kNN lemmas only at a restart.
+
+**Fix** (`loop.py --retry-knn`, 3f05146):
+
+* the kNN index is rebuilt every 30 minutes or 300 proofs;
+* each fresh run's kNN lemma set is recorded (DIR/knn_at.tsv);
+* a goal whose current set differs from its recorded one is eligible for
+  a fresh retry;
+* the scheduler's order is walked best first, and the kNN check (27 ms
+  a goal) runs only as far as free slots need;
+* goals with no record count as changed. The first run after deployment
+  is therefore one fresh pass in the full current context, best-scored
+  goals first.
+
+A smoke test from ULsN (sets/st79u, `--cascade 10,80`, 2 workers) proved
+5 of these goals in 16 runs and 135 s. **Production since 09:44: UL26**
+(`abs/ul26.sh`, 11 workers).
+
+**Unit forms of conditional lemmas** (`lemmas.lemma_form`). A conditional
+goal `~ s = X | C = D` whose hypothesis binds a variable X that does not
+occur in s is equivalent to the unit equation `C = D` with X replaced by
+s.
+
+* That is 6,235 of AIM60k's 9,052 conditional goals (12% of all
+  goals), and lemma import had skipped them all, as siblings and as
+  kNN lemmas. The other 2,817 stay out: they are genuine Horn clauses.
+* Prover9 had used such a sibling. Its proof of aK2_eq_aK3_d__goal_405,
+  the goal twee failed 9 times, uses
+  `-m(k(A,B),t(t(B,C),D)) = E | m(t(t(B,C),D),k(A,B)) = E`.
+* The change gives 2,234 of the 8,270 unsolved goals a different set of
+  sibling lemmas. On st79u: +1 (8 against 7).
+* `TWEE_LEMMA_UNITIZE=0` turns it off.
 
 ## 2c. Long runs: stall cutoff and checkpoints
 
