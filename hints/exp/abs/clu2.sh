@@ -1,5 +1,5 @@
 #!/bin/bash
-# Live up-down climber with the learned move policy as an A/B test (15 Nov 23:50; abs/clu.sh + --move-model
+# Live up-down climber with the learned move policy as an A/B test (15 Nov 23:44; abs/clu.sh + --move-model
 # MODEL --move-ab: targets of odd crc32 sample moves by the policy, the others take the fixed order; climb.tsv tells
 # which is which by the name). Log appended. Earlier header (abs/clu.sh, 22:10): climb.py --live loops/UL takes UL's stalled goals (as abs/clive.sh)
 # with the family test's full config (FUD, REPORT 2aj: 8 siblings + 8 kNN goals + 4 stronger theories with 10 of their
