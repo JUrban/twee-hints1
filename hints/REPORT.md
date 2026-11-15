@@ -2119,10 +2119,22 @@ arm; fresh 20 s, production L0 settings, no `--online`):
 | rm4t, 0.1 (production) | 271 | 8 | 1 |
 | rm7t, 0.1 | 273 | 10 | 0.98 (geometric mean; median 1.00) |
 
-`abs/mabcmp.py` compares the arms. The +0.05 AUC gives nothing online at
-the production threshold. rm7t at threshold 0.2 has rm4t's proof-rule
-loss (91.6% kept) and defers 47.6% of the others. That arm and its
-control, rm4t at 0.2, are running (loops/MB_rm7t_t2, MB_rm4t_t2).
+| rm7t, 0.2 (rm4t's proof-rule loss, 47.6% of the others deferred) | 269 | 9 | 1.00 |
+| rm4t, 0.2 (control) | 261 | 4 (14 lost) | 1.04 |
+
+`abs/mabcmp.py` compares the arms. The +0.05 AUC gives nothing online:
+
+* at the production threshold, rm7t ties rm4t;
+* at its stricter matching threshold, rm7t ties rm4t too;
+* the stricter threshold alone loses 10.
+
+So the better model only cancels the cost of a stricter filter. The
+searches are driven by the pools and lemmas. 52 of the 263 shared
+proofs have identical work under both models, and the rest differ by a
+few per cent either way. **Production keeps rm4t.** A GNN that only
+matched the LightGBM models offline would face the same ceiling, plus
+the cost of running it. So the GNN integration into twee (a scoring
+server with batched calls) was not built.
 
 **Prover9 on stalled goals** (`p9twee.py`): a LADR problem with
 prolog-style variables, so TPTP names and twee hints need no
@@ -2137,8 +2149,30 @@ The first hit is aK2_eq_aK3_r__goal_241, a goal every twee variant failed
 in 44 s with 320 given clauses. The proof has 448 steps at level 64, with
 clauses up to weight 1027, and 277 of its steps are hint matchers. The
 proof's positive steps become the goal's twee hints, minus steps with the
-goal's skolem constants. The run on all 72 stalled goals at 60 s
-(loops/P9T) is in progress.
+goal's skolem constants.
+
+* On all 72 stalled goals at 60 s (loops/P9T), Prover9 proved only that
+  one: 1 in 72 CPU minutes, about 0.8 proofs per CPU-hour, on goals
+  where twee gets 0.
+* One run crashed inside Prover9-new ("stack smashing detected" after
+  3,300 demodulation-limit hits, im2_24_to_25__goal_382), which looks
+  like a bug in that build.
+* Twee with the Prover9 proof as hints but without the sibling lemmas
+  still fails the goal (30 s): the proof leans on the lemmas.
+
+**In production since 08:56:** `p9twee.py --live loops/UL loops/P9L -j 3
+--timeout 60` (`abs/p9live.sh`), a Prover9 side worker.
+
+* Targets: the loop's stalled goals within 80 proof lines (957 at the
+  start), nearest first.
+* A goal is retried only when its nearest proven goal below changes or
+  its pool grows by 25%.
+* Proofs go straight into loops/UL (hints file, then a solved row; the
+  loop reads them with `--sync 60`).
+* Its first proof came after 3 minutes: nslm_to_aa1__goal_688, in 53 s,
+  with a pool of 15,182 hints.
+
+Production runs beside it on 17 workers (UL24).
 
 ## 2c. Long runs: stall cutoff and checkpoints
 
@@ -2268,7 +2302,27 @@ rounds of 30 s or more, but about 40% overhead for 8 s rounds.
 
 ## 4. Next steps
 
-*Updated 15 Nov, 04:35.*
+*Updated 15 Nov, 09:05.*
+
+* **Since 04:35:**
+  * The learned scheduler with a 10 s first level is in production
+    (2ac).
+  * Stalled goals resist every twee variant: settings, cross-original
+    pools, rm7t, the climber, heads at 320 s.
+  * Retraining on the late, long proofs raises offline AUC (0.846 to
+    0.894–0.897) but not online results, even with a stricter filter.
+    The GNN plateaued at AUC 0.80 (2ad).
+  * Prover9, given twee's pools and the sibling lemmas, proves stalled
+    goals twee cannot, at about 0.8 per CPU-hour. It now runs as a live
+    side worker.
+* **Next:**
+  * Measure the side worker over a few hours: its proofs, and twee's
+    follow-up proofs on goals whose context it changed.
+  * If it holds up, try Prover9 settings (max_weight, hint ratios) on
+    the P9L failures. Try twee with the Prover9 proofs as hints on their
+    neighbours.
+
+*Earlier (15 Nov, 04:35):*
 
 * **Since 14 Nov 22:30:** sketch climbing (2ab) works but is beaten 3× by
   fresh runs on its own targets. The cause was stale round-start
