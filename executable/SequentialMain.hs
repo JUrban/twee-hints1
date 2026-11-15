@@ -85,6 +85,7 @@ data MainFlags =
     flags_dump_state :: Maybe FilePath,
     flags_load_state :: Maybe FilePath,
     flags_resume_requeue :: Bool,
+    flags_print_given_unsolved :: Bool,
     flags_stitch :: Maybe FilePath,
     flags_print_hints :: Bool,
     flags_print_hint_matchers :: Bool,
@@ -230,6 +231,12 @@ parseMainFlags = do
     bool "resume-requeue"
       ["With --load-state and hints: re-score the whole saved queue against the new hints (costly for big states)."]
       True
+  flags_print_given_unsolved <-
+    expert $
+    inGroup "Debugging options" $
+    bool "print-given-unsolved"
+      ["With --print-given: print the given rules also when the problem is not solved (for the hint generator, hints/gen.py)."]
+      False
   flags_stitch <-
     expert $
     inGroup "Critical pair weighting heuristics" $
@@ -1516,6 +1523,17 @@ runTwee globals (TSTPFlags tstp) horn precedence config0 flags@MainFlags{..} lat
         putStrLn ("% parents " ++ show p1 ++ " " ++ show p2)
         putStrLn (showEqn (fromMaybe eqn (expandGoalConsts (st_eqhints state) eqn)))
       putStrLn "GIVEN-END"
+
+  when (not (solved state) && flags_print_given_unsolved && cfg_log_given config) $ do
+    let showEqnU (t :=: u) =
+          showProblem
+            [Input Nothing "hint" (Jukebox.Ax Jukebox.Axiom) Unknown $
+               toForm $ clause [Pos (jukeboxTerm ctx t Jukebox.:=: jukeboxTerm ctx u)]]
+    putStrLn "GIVEN-BEGIN"
+    forM_ (reverse (st_given state)) $ \(eqn, p1, p2) -> do
+      putStrLn ("% parents " ++ show p1 ++ " " ++ show p2)
+      putStrLn (showEqnU (fromMaybe eqn (expandGoalConsts (st_eqhints state) eqn)))
+    putStrLn "GIVEN-END"
 
   when (solved state && flags_proof) $ later $ do
     let

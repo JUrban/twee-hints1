@@ -18,6 +18,7 @@ import given as givenlib
 VENV_PY = '/project/hintwork/venv/bin/python'
 
 PROB = hintlib.PROB
+HERE = os.path.dirname(os.path.abspath(__file__))
 
 def orig_of(name):
     return name.split('__goal_')[0]
@@ -39,6 +40,7 @@ class Loop:
             os.makedirs(os.path.join(self.dir, 'p9lem'), exist_ok=True)
         import threading
         self.p9_lock = threading.Lock()
+        self.gen_lock = threading.Lock(); self.gen_stats = [0, 0, 0.0]   # --gen-model: calls, hints, seconds
         self.p9_uncond = {}
         self.model = None  # (model, vocab, goaldir) of the current round
         self.names = [l.strip() for l in open(a.set) if l.strip()]
@@ -188,6 +190,48 @@ class Loop:
         self.model = (m, v, gdir)
         print(f'  round {rnd}: trained rule model {time.time()-t0:.0f}s', file=sys.stderr, flush=True)
 
+    def gen_save(self, name, out, path):
+        """--gen-model: the axiom rows and the last --gen-ctx rules of a failed run, in the given
+        log format (all labelled 0), for the hints of its next (resumed) level."""
+        sig = self.signature(name)
+        ax = set(givenlib.key(l, r, sig) for l, r in givenlib.axioms(name, path))
+        A, R = [], []
+        for idx, x in enumerate(givenlib.parse_given_parents(out)):
+            if x is None or x[0] == x[1]:
+                continue
+            k = givenlib.key(x[0], x[1], sig)
+            (A if k in ax else R).append(f'{-1 if k in ax else 0}\t{idx}\t{k[0]}\t{k[1]}\n')
+        if not R:
+            return
+        d = os.path.join(self.dir, 'genctx'); os.makedirs(d, exist_ok=True)
+        with open(os.path.join(d, name + '.tmp'), 'w') as f:
+            f.writelines(A + R[-self.a.gen_ctx:])
+        os.replace(os.path.join(d, name + '.tmp'), os.path.join(d, name))
+
+    def gen_hints(self, name, hints):
+        """--gen-model (15 Nov, gen.py): HINTS plus --gen-n equations sampled by the hint
+        generator from the goal and the saved context of its previous level."""
+        a = self.a
+        cp = os.path.join(self.dir, 'genctx', name)
+        if not os.path.exists(cp):
+            return hints
+        cmd = [a.gen_python, os.path.join(HERE, 'gen.py'), 'hints', cp, name, '--load', a.gen_model,
+               '--n', str(a.gen_n), '--threads', '1', '--ctx', str(a.gen_ctx), '--temp', str(a.gen_temp)]
+        t0 = time.time()
+        try:
+            p = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, timeout=120)
+        except subprocess.TimeoutExpired:
+            return hints
+        have = {tuple(h[:2]) for h in hints}
+        gen = [tuple(l.split('\t')[:2]) for l in p.stdout.decode().splitlines() if l.count('\t') == 1]
+        gen = [g for g in gen if g not in have and (g[1], g[0]) not in have]
+        with self.gen_lock:
+            self.gen_stats[0] += 1; self.gen_stats[1] += len(gen); self.gen_stats[2] += time.time() - t0
+            if self.gen_stats[0] % 20 == 1:
+                c, h, sec = self.gen_stats
+                print(f'  --gen-model: {c} calls, {h / c:.0f} new hints and {sec / c:.1f}s per call', flush=True)
+        return list(hints) + gen
+
     def run_one(self, name, hints, rnd, budget=None, resume=None, max_cpu=None, variant=0):
         """One twee run. BUDGET (default: the round's timeout), RESUME (default --resume)
         and MAX_CPU (replaces --max-cpu in --args) are for --cascade. VARIANT: which of the
@@ -284,6 +328,8 @@ class Loop:
                 f.write(txt)
             if hints and defs:
                 hints = [tuple(unfold.unfold_eq(x, defs) for x in h[:2]) + tuple(h[2:]) for h in hints]
+        if a.gen_model and resume is True:
+            hints = self.gen_hints(name, hints)
         args = a.args.split()
         if max_cpu is not None:
             args = [x for i, x in enumerate(args) if x != '--max-cpu' and (i == 0 or args[i - 1] != '--max-cpu')]
@@ -292,6 +338,8 @@ class Loop:
                '--no-proof', '--print-hints', '--print-given'] + args
         if a.p9loop:
             cmd += ['--print-hint-matchers']
+        if a.gen_model:   # (twee-e39) the given rules of a failed run, for gen_save
+            cmd += ['--print-given-unsolved']
         k = 0
         if a.p9_orders > 1:
             # P9loop's term orderings: attempt k of a goal (rounds from --start, or the number of
@@ -346,6 +394,8 @@ class Loop:
             # a resumed state that ran out of heap (seen: a saved state plus one new lemma axiom
             # exploding) would do it again at the next level, so the goal starts over
             os.unlink(spath)
+        if a.gen_model and not ok:
+            self.gen_save(name, out, path)
         if a.p9loop and not ok:
             nnew = self.p9_collect(name, out, orig_path)
             out += f'\nP9LEMMAS used={len(p9)} new={nnew}\n'
@@ -1065,6 +1115,12 @@ def make_parser():
                          '--knn-refresh seconds. Sets used are kept in DIR/knn_at.tsv; goals without one count as changed')
     ap.add_argument('--knn-refresh', type=float, default=1800)
     ap.add_argument('--given-extra', help='more given dirs (comma-separated) for training')
+    ap.add_argument('--gen-model', help='(gen.py) hint generator: a failed run saves its context; '
+                    'the resumed next level adds --gen-n generated hints')
+    ap.add_argument('--gen-n', type=int, default=200)
+    ap.add_argument('--gen-ctx', type=int, default=256)
+    ap.add_argument('--gen-temp', type=float, default=1.0)
+    ap.add_argument('--gen-python', default='/project/hintwork/venv/bin/python3')
     ap.add_argument('--model-negmax', type=int, default=400, help='negative rules per problem when training (memory)')
     ap.add_argument('--model-threads', type=int, default=8)
     ap.add_argument('--rerun-solved', action='store_true',
