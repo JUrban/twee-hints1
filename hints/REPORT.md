@@ -37,7 +37,7 @@ written in loops/UL. Merged proofs count from their merge.
 | 15 Nov 04:00 | 43,001 | 4680 | A/B 1 of the learned scheduler starts (2ac) |
 | 15 Nov 05:15 | 43,272 | 4706 | A/B 1 merged; A/B 2 starts |
 | 15 Nov 05:51 | 43,360 | 4709 | A/B 2 merged: the scheduler with 10 s fresh runs wins |
-| 15 Nov 07:00 | 43,462 | 4717 | stall: resumes to 80 s, then tail heads deepen first (2ac) |
+| 15 Nov 07:00 | 43,462 | 4717 | stall: resumes to 80 s, then tail heads first at 320 s (2ac; 8%, dropped at 07:36) |
 
 From 15 Nov 05:30 the rate fell from hundreds an hour to 50–100. The
 cheap new contexts are used up; 58% of the unsolved goals sit behind the
@@ -2031,6 +2031,19 @@ to 80 s go first (about 20%, 150 wall s), then the heads' 320 s runs,
 then the others' (about 30% of L1 failures in r5, about 480 wall s).
 The heads' 1,280 s runs come last.
 
+That left about 2,185 goals waiting for an 80 s resume (about 4 hours)
+before any head ran at 320 s. UL20 (`abs/ul20.sh`, 06:58) therefore put
+the heads first for their 80 s and 320 s levels.
+
+**Negative: the heads at 320 s.** In UL20's first 36 minutes the heads'
+320 s resumes proved 5 of 62 (8%, not the 30% assumed), about 0.4 proofs
+per CPU-hour. There were 4 new proofs in all. The tail heads are the
+hardest goals, not the cheapest breakthroughs.
+
+UL21 (`abs/ul21.sh`, 07:36) goes back to level order:
+* `--cascade 10,80,320` without `--head-first`;
+* the 80 s resumes first (16–20%), then the 320 s runs.
+
 ## 2c. Long runs: stall cutoff and checkpoints
 
 * `--eqhint-stall N` gives up when no new rule has matched a hint for N
@@ -2234,13 +2247,12 @@ are run in `/project/hintwork`, with `venv` holding lightgbm.
 
    `G` comes from `rulemodel.py goalfiles`, `H` from
    `hintsel.py knnfiles`, and `P.p` with lemmas from `lemmas.py`.
-5. **The production loop as of 15 Nov 06:43** (`abs/ul19.sh` in
+5. **The production loop as of 15 Nov 07:36** (`abs/ul21.sh` in
    /project/hintwork). It is a cascade of fresh 10 s runs ordered by the
    learned scheduler (2ac), with resumes to 80 s. Proofs that other
    processes append are synced in:
 
-       loop.py sets/all loops/UL --start 5 --cascade 10,80,320,1280 \
-         --head-first --head-only-from 3 --cascade-start 0 \
+       loop.py sets/all loops/UL --start 5 --cascade 10,80,320 --cascade-start 0 \
          --cascade-continue --fresh-first --far-retry --retry-gap 3 \
          --sched-model sched/m4.json --sched-max-lgap 320 --sched-retrain 200 \
          --line-gaps 80,80 --retry-hints 1.25 --sync 60 \
