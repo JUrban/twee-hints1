@@ -1963,14 +1963,23 @@ So a stalled goal needs new information: a proof nearby, or much more
 search. Settings make no difference. Production went to 20 workers
 (UL16, `abs/ul16.sh`, 06:01).
 
-**Breakthrough probes (running, 06:05).** On sets/st79 (st80 without
-com_Ralt__goal_246), from ULsM, 2 workers each:
+**Breakthrough probes.** On sets/st79 (st80 without
+com_Ralt__goal_246), from ULsM, 2 workers each, 06:05–06:22:
 
 * the sketch climber as CL5 (8 unproven siblings and 8 kNN goals as
-  true assumptions, `--fill 3`; `abs/clst.sh`);
-* fresh 80 s runs (`T=80 V=base abs/port.sh`).
+  true assumptions, `--fill 3`; `abs/clst.sh`): 0 of 15 goals;
+* fresh 80 s runs (`T=80 V=base abs/port.sh`): 1 of 11.
 
-A breakthrough also gives the goals above a new context.
+These goals resist everything tried at these budgets.
+
+**Resumes are now the productive work.** UL16 made 43 new proofs in
+20 minutes, about 6.5 per CPU-hour. Its fresh runs proved 27 of 424
+(6%, predicted 41). Its resumes (10 s to 80 s) proved about a quarter.
+
+In round 5, resumes succeed equally at every distance: 23% within 13
+lines, 19% at 14–21, 23% at 22–40, 23% at 41–80, 29% beyond (24 runs).
+However, `--line-gaps 80,13` allowed resumes only within 13 lines.
+UL17 (`abs/ul17.sh`, 06:23) uses `--line-gaps 80,80`.
 
 ## 2c. Long runs: stall cutoff and checkpoints
 
@@ -2175,7 +2184,7 @@ are run in `/project/hintwork`, with `venv` holding lightgbm.
 
    `G` comes from `rulemodel.py goalfiles`, `H` from
    `hintsel.py knnfiles`, and `P.p` with lemmas from `lemmas.py`.
-5. **The production loop as of 15 Nov 06:01** (`abs/ul16.sh` in
+5. **The production loop as of 15 Nov 06:23** (`abs/ul17.sh` in
    /project/hintwork). It is a cascade of fresh 10 s runs ordered by the
    learned scheduler (2ac), with resumes to 80 s. Proofs that other
    processes append are synced in:
@@ -2183,7 +2192,7 @@ are run in `/project/hintwork`, with `venv` holding lightgbm.
        loop.py sets/all loops/UL --start 5 --cascade 10,80 --cascade-start 0 \
          --cascade-continue --fresh-first --far-retry --retry-gap 3 \
          --sched-model sched/m4.json --sched-max-lgap 320 --sched-retrain 200 \
-         --line-gaps 80,13 --retry-hints 1.25 --sync 60 \
+         --line-gaps 80,80 --retry-hints 1.25 --sync 60 \
          --model --model-fixed rm4t.bin,rm4t.vocab --model-theory \
          --lemmas 6 --lemma-knn 10 --lemma-subsets --lemma-after \
          --twee twee-e22 -j 20 --reserve 0 --pool original --wall-factor 15 \
