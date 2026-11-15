@@ -124,7 +124,9 @@ data Config f =
     -- its CPU budget (--normalise-queue-percent) binds.
     cfg_queue_cost                :: Double,
     cfg_eqhint_watch              :: Float,
-    cfg_eqhint_generalise         :: Bool }
+    cfg_eqhint_generalise         :: Bool,
+    cfg_eqhint_instances          :: Bool,
+    cfg_eqhint_instance_factor    :: Float }
 
 -- | The prover state.
 data State f =
@@ -204,7 +206,9 @@ defaultConfig =
     cfg_interreduce_filter = True,
     cfg_queue_cost = 0,
     cfg_eqhint_watch = 0,
-    cfg_eqhint_generalise = False }
+    cfg_eqhint_generalise = False,
+    cfg_eqhint_instances = False,
+    cfg_eqhint_instance_factor = 0.1 }
 
 -- | Compute cfg_score_cp from the CP configuration.
 {-# INLINE scoreCP #-}
@@ -1166,8 +1170,18 @@ data EqHints f =
     eh_factor :: !(IntMap Float),
     -- fingerprints of the current forms of the live hints no rule has matched
     -- (recomputed when hints are normalised; not saved with the state)
-    eh_open :: !OpenFps }
+    eh_open :: !OpenFps,
+    -- --eqhint-instances: the hints by their non-variable sides (not saved with the state)
+    eh_inst :: !(InstIndex f) }
   deriving (Generic, Binary)
+
+-- | Hints indexed by a non-variable side (stored as side :=: other side), for matching
+-- critical pairs that are instances of a hint. Not serialised.
+newtype InstIndex f = InstIndex (Maybe (Index f (Equation f)))
+
+instance Binary (InstIndex f) where
+  put _ = return ()
+  get = return (InstIndex Nothing)
 
 -- | Not serialised (zero bytes), so states saved before the field existed
 -- still load. Nothing: not computed yet (use all fingerprints).
@@ -1198,7 +1212,7 @@ emptyEqHints = EqHints {
   eh_joined = 0, eh_norm_at = 0, eh_fps = IntSet.empty, eh_goalconsts = IntMap.empty,
   eh_gcfps = IntMap.empty, eh_ntracked = 0, eh_requeued_at = 0, eh_last_match = 0,
   eh_max_gap = 0, eh_last_new_cp = 0, eh_log = [], eh_hgroups = IntMap.empty, eh_gsize = IntMap.empty, eh_gdone = IntMap.empty, eh_open = OpenFps Nothing,
-  eh_factor = IntMap.empty }
+  eh_factor = IntMap.empty, eh_inst = InstIndex Nothing }
 
 -- | Add a hint with an optional factor and the proofs (groups) it comes from.
 {-# INLINEABLE addEqHintFull #-}
@@ -1227,6 +1241,37 @@ addEqHintGeneralisations state =
       let x = build (var (V (1 + maximum (0 : [ v | V v <- vars eqn ]))))
           gen w = [ build (replacePosition p x (Twee.Base.singleton w)) | p <- [1 .. len w - 1], isApp (at w p) ]
       in [ t' :=: u | t' <- gen t ] ++ [ t :=: u' | u' <- gen u ]
+
+-- | Index the live hints for --eqhint-instances: a critical pair that is an instance of a
+-- hint (in either orientation) gets --eqhint-instance-factor. A hint with a side that is a
+-- variable the other side lacks (X = t, e.g. a generalised skolem goal X0 = X1) would match
+-- everything and is left out (also m(X0,X1) = m(X2,X3), see degenerate); a variable side is
+-- never the indexed one.
+{-# INLINEABLE addEqHintInstanceIndex #-}
+addEqHintInstanceIndex :: Function f => State f -> State f
+addEqHintInstanceIndex state =
+  state { st_eqhints = eh { eh_inst = InstIndex (Just idx) } }
+  where
+    eh = st_eqhints state
+    idx = foldl' (\i (t, e) -> Index.insert t e i) Index.empty
+      [ (t, t :=: u)
+      | (n, eqn@(t0 :=: u0)) <- IntMap.toList (eh_live eh), n < trackBase, not (degenerate eqn),
+        (t, u) <- [(t0, u0), (u0, t0)], isApp t ]
+    -- A variable on one side only: the pools hold false generalisations of conditional
+    -- facts (X0 = m(X0,X1), m(X0,X1) = m(X2,X1): each makes the loop trivial), harmless for
+    -- variant matching but their instances are everywhere. Also drops a few true hints
+    -- (rd(X0,X0) = e).
+    degenerate (t :=: u) = usort (vars t) /= usort (vars u)
+
+-- | The hint a critical pair is an instance of (--eqhint-instances).
+{-# INLINEABLE instanceHint #-}
+instanceHint :: Function f => EqHints f -> Equation f -> Maybe Int
+instanceHint eh@EqHints{eh_inst = InstIndex (Just idx)} (t :=: u) =
+  listToMaybe
+    [ n
+    | (a, b) <- [(t, u), (u, t)], (sub, l :=: r) <- Index.matches a idx,
+      isJust (matchIn sub r b), Just n <- [lookupEqHint eh (l :=: r)], n < trackBase ]
+instanceHint _ _ = Nothing
 
 -- | Count the hints of each group (after all hints are added).
 finishEqHintGroups :: State f -> State f
@@ -1341,16 +1386,19 @@ lookupEqHint EqHints{..} eqn
 eqHintScore :: Function f => Config f -> State f -> Term f -> Equation f -> Float -> Float
 eqHintScore config@Config{..} state top eqn s
   | Map.null (eh_map eh) = s
-  | not (goalFingerprint eh eqn `IntSet.member` eh_fps eh) = s
+  | not (goalFingerprint eh eqn `IntSet.member` eh_fps eh) = inst
   | Just n <- lookupEqHintG eh eqn, n < trackBase = dbg n "cheap" (hinted n)
   | cfg_eqhint_consider,
     open,
     n:_ <- filter (< trackBase) (mapMaybe (lookupEqHintG eh) (considerForms config state top eqn)) = dbg n "consider" (hinted n)
   | cfg_eqhint_fullnorm,
     Just n <- lookupEqHintG eh (fullNormEqn state eqn), n < trackBase = dbg n "full" (hinted n)
-  | otherwise = s
+  | otherwise = inst
   where
     eh = st_eqhints state
+    inst
+      | cfg_eqhint_instances, Just n <- instanceHint eh eqn = dbg n "instance" (cfg_eqhint_weight + s * cfg_eqhint_instance_factor)
+      | otherwise = s
     open
       | cfg_eqhint_consider_open, OpenFps (Just fs) <- eh_open eh = goalFingerprint eh eqn `IntSet.member` fs
       | otherwise = True

@@ -2545,6 +2545,29 @@ the run gets N sampled equations on top of its pool hints.
 **Sanity check:** trained on one problem for 300 steps, the model
 reproduces 4 of that problem's 8 proof steps after the halfway cut.
 
+**Instance matching of hints (negative).** Of the future proof steps
+missing from the pool, 637 of 1,866 looked like instances of a pool
+hint. Most of those came from false hints in the pools:
+
+* `X0=X1` (783 matches);
+* `m(X0,X1)=m(X2,X3)`;
+* `X0=m(X0,X1)`;
+* `ld(X0,X1)=rd(X1,X0)`.
+
+They are generalised conditional facts: skolems of hypotheses become
+variables. Under variant matching they are inert, because no critical
+pair is false. Under instance matching they flood the queue: one hint
+matched 270,716 critical pairs in a 5 s run.
+
+twee-e41 has `--eqhint-instances` (a term index over the hints' sides;
+`--eqhint-instance-factor`, default 0.1). It leaves out hints whose two
+sides have different variables. It is off by default, and without it
+the output is identical to e22.
+
+With clean hints only (equal variable sets, no flat or variable
+sides), instances cover 142 of 2,480 missing steps (3%), and the run
+is 1.6–5 times slower in wall time. Dropped.
+
 ## 2c. Long runs: stall cutoff and checkpoints
 
 * `--eqhint-stall N` gives up when no new rule has matched a hint for N
