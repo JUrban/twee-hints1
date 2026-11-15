@@ -2690,10 +2690,12 @@ are run in `/project/hintwork`, with `venv` holding lightgbm.
 
    `G` comes from `rulemodel.py goalfiles`, `H` from
    `hintsel.py knnfiles`, and `P.p` with lemmas from `lemmas.py`.
-5. **The production loop as of 15 Nov 07:36** (`abs/ul21.sh` in
+5. **The production loop as of 15 Nov 12:17** (`abs/ul28.sh` in
    /project/hintwork). It is a cascade of fresh 10 s runs ordered by the
    learned scheduler (2ac), with resumes to 80 s. Proofs that other
-   processes append are synced in:
+   processes append are synced in. Since 07:36 it has gained
+   `--retry-knn` (2ae), unit forms of conditional lemmas (2ae), and
+   `--sched-pmin 0.025` (2ag):
 
        loop.py sets/all loops/UL --start 5 --cascade 10,80,320 --cascade-start 0 \
          --cascade-continue --fresh-first --far-retry --retry-gap 3 \
@@ -2701,8 +2703,16 @@ are run in `/project/hintwork`, with `venv` holding lightgbm.
          --line-gaps 80,80 --retry-hints 1.25 --sync 60 \
          --model --model-fixed rm4t.bin,rm4t.vocab --model-theory \
          --lemmas 6 --lemma-knn 10 --lemma-subsets --lemma-after \
-         --twee twee-e22 -j 20 --reserve 0 --pool original --wall-factor 15 \
+         --twee twee-e22 -j 12 --reserve 0 --pool original --wall-factor 15 \
+         --sched-pmin 0.025 --retry-knn \
          --args="--abstract-time 2000 --no-resume-requeue --no-eqhint-consider"
+
+   Beside it, the unfolded-twee side worker (2af, `abs/uflive.sh`):
+
+       uflive.py loops/UL loops/UFL -j 4 --batch 24 --loop-args "--pool original \
+         --wall-factor 15 --model --model-fixed rm4t.bin,rm4t.vocab --model-theory \
+         --lemmas 6 --lemma-knn 10 --lemma-subsets --lemma-after --twee twee-e22 --timeout 20" \
+         --twee-args "--abstract-time 2000 --max-cpu 200 --no-resume-requeue --no-eqhint-consider"
 
    The model comes from `schedfeats.py loops/UL sets/all F.tsv` and
    `schedmodel.py train F.tsv M.json --drop hints,ofrac,ggap,nfail_c6`.

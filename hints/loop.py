@@ -493,7 +493,41 @@ class Loop:
                 res.append((n, False, dt, f'MULTI {len(names)} {stats}', None))
         return res
 
+    def after_hints(self, n):
+        """--hint-after K: the statements of the next K unsolved unit goals of N's original, as
+        hints (unproven, so never as axioms; hints do not affect soundness)."""
+        import lemmas, unfold
+        if not hasattr(self, '_goals_by_orig'):
+            self._goals_by_orig = collections.defaultdict(list)
+            for f in os.listdir(PROB):
+                if '__goal_' in f and f.endswith('.p'):
+                    o_, k_ = lemmas.split(f[:-2])
+                    self._goals_by_orig[o_].append(k_)
+            for v in self._goals_by_orig.values():
+                v.sort()
+        o, k = lemmas.split(n)
+        out = []
+        for j in self._goals_by_orig.get(o, []):
+            if len(out) >= self.a.hint_after:
+                break
+            m = f'{o}__goal_{j}'
+            if j <= k or m in self.solved:
+                continue
+            f = lemmas.conjecture(m)
+            e = unfold.eq_of(f) if f and lemmas.unit_eq(f) else None
+            if e:
+                out.append((unfold.show(e[0]), unfold.show(e[1])))
+        return out
+
     def hints_for(self, n, pools, knn):
+        a = self.a
+        if a.hint_after:
+            hs = self.hints_for1(n, pools, knn)
+            seen = set((h[0], h[1]) for h in hs)
+            return hs + [h for h in self.after_hints(n) if h not in seen]
+        return self.hints_for1(n, pools, knn)
+
+    def hints_for1(self, n, pools, knn):
         a = self.a
         if a.pool.startswith('knn'):
             _, k, topn = a.pool.split(':')
@@ -1046,6 +1080,8 @@ def make_parser():
     ap.add_argument('--unfold', nargs='?', const='all', default=None, metavar='F,G,..',
                     help='substitute the problem\'s definitions (f(X1..Xn) = t) away in the axioms, lemmas, '
                          'conjecture and hints (unfold.py); only those of F, G, .. if given')
+    ap.add_argument('--hint-after', type=int, default=0, metavar='K',
+                    help='also use the statements of the next K unsolved unit goals of the original as hints')
     ap.add_argument('--lemma-fold', type=int, default=0, metavar='K',
                     help='add up to K folded instances of each lemma axiom (unfold.lemma_fold_text)')
     ap.add_argument('--hint-axioms', default='',
