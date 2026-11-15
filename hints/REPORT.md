@@ -2817,7 +2817,8 @@ order with `--chain`, 1 worker.
   | fam24 | control: the same climb without assumptions, one fresh 80 s run per goal (F80) | 3 (1243b 446, nsmr 614, 616) | 6,032 | 1.8 |
   | fam24 | climb without stronger theories (FUDnt) | 1 (448) | 1,738 | 2.1 |
   | next 24 unsolved 1243b goals | full climb (FUD2) | 1 (455) | 2,904 | 1.2 |
-  | next 24 unsolved 1243b goals | control (F80b) | 455 at 15 of 24 | | |
+  | next 24 unsolved 1243b goals | control (F80b) | 1 (455) | 4,981 | 0.7 |
+  | fam24 | full climb + one-axiom up steps (FUDs, `--up-single`, 24 runs per goal) | 3 (the same as FUD) | 3,402 | 3.2 |
 
 * The climb and long fresh runs prove different goals: 6 distinct
   between them on fam24.
@@ -2825,6 +2826,15 @@ order with `--chain`, 1 worker.
   family: 3 against 1 without them.
 * Per CPU the climb is at least as productive as long fresh runs on
   goals production has stalled on.
+
+* Adding one axiom at a time when going up (FUDs, the user's
+  suggestion) proved the same goals as FUD at 28% more CPU.
+* `--hint-goal` on the other 152 goals of gen200 (fresh 20 s from
+  ULsW): the same 3 proofs as the control, at 13% more CPU. Dropped.
+* The 12 proofs of today's probes that production lacked were merged
+  into UL at 22:50 (`merge.py`; among them the heads
+  aK2_eq_aK3_q__goal_270, mbol_12lemmas__goal_528 and
+  mbol_nil3_a__goal_500 from the 160 s probe HLF).
 
 **Deployed as a live side worker (22:07, `abs/clu.sh`, loops/CLU).**
 
@@ -2837,6 +2847,16 @@ order with `--chain`, 1 worker.
   the data for learning the lattice moves, which the user asked for
   (15 Nov): which step, up or down, to take for a given problem, as a
   randomized policy.
+* In its first 50 minutes, 73 climbs gave 2 proofs:
+  aK2_eq_aK3_1243b__goal_445 and aK2_eq_aK3_gen__goal_495, the first
+  unsolved goal of its original.
+* `latticedata.py` turns climb directories into one row per move. The
+  features describe the target (goal size, variables, axioms, number of
+  stronger theories) and the move (assumptions by kind, theories and
+  their rank, weakened goal, step). The labels are proved, nontrivial
+  (an assumption used, at least 30 proof steps) and credit (the share of
+  the target's real proof found in the sketch's proof).
+* The policy model waits for these labels to accumulate.
 
 ## 2c. Long runs: stall cutoff and checkpoints
 
