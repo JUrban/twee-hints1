@@ -160,6 +160,9 @@ def main():
                          'and a link to its hints. SET: sets/all (the rule model\'s goal files).')
     ap.add_argument('--refresh', type=float, default=1800, help='--live: seconds between context refreshes')
     ap.add_argument('--exclude', default='', help='--live: comma-separated goal list files to skip')
+    ap.add_argument('--cpus', type=int, default=0,
+                    help='--live: start a climb only while fewer than N twee processes run on the machine '
+                         '(own ones included), so the climber fills the CPUs the loop leaves idle; -j caps it')
     argv = sys.argv[1:]
     i = argv.index('--') if '--' in argv else len(argv)
     c = ap.parse_args(argv[:i])
@@ -472,6 +475,21 @@ def live(c, a, lp, gl, pools, ix, climb, out):
             if c.knn:
                 ix['u'] = lemmas.LemmaIndex(sorted(n for n in gl if n not in lp.solved), subsets=True)
             print(f'live: refreshed with {len(new)} new proofs of {D} in {time.time()-t1:.0f}s', flush=True)
+    def others():
+        """twee processes of this user that are not this climber's"""
+        n = 0
+        for pid in os.listdir('/proc'):
+            if not pid.isdigit():
+                continue
+            try:
+                with open(f'/proc/{pid}/cmdline', 'rb') as f:
+                    argv = f.read().split(b'\0')
+            except OSError:
+                continue
+            if argv and os.path.basename(argv[0]).startswith(b'twee') and len(argv) > 1 \
+                    and not argv[1].startswith(c.dir.encode()):
+                n += 1
+        return n
     t0 = time.time(); nsolved = 0; last_refresh = time.time()
     with ThreadPoolExecutor(c.j) as ex:
         running = {}
@@ -481,12 +499,13 @@ def live(c, a, lp, gl, pools, ix, climb, out):
                 refresh(S); last_refresh = time.time()
             busy = set(running.values())
             todo = stalled(S, busy)
-            while len(running) < c.j and todo:
+            cap = c.j if not c.cpus else max(1, min(c.j, c.cpus - others()))
+            while len(running) < cap and todo:
                 t = todo.pop(0)
                 running[ex.submit(climb, t)] = t
             if not running:
                 time.sleep(60); continue
-            fin, _ = wait(list(running), return_when=FIRST_COMPLETED)
+            fin, _ = wait(list(running), timeout=30, return_when=FIRST_COMPLETED)
             for f in fin:
                 running.pop(f)
                 t, ok, runs = f.result()
