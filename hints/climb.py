@@ -26,7 +26,7 @@ and DIR/hints/<goal> as loop.py does.
 import argparse, collections, os, re, subprocess, sys, threading, time
 from concurrent.futures import ThreadPoolExecutor
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-import hintlib, loop, lemmas
+import hintlib, hintsel, loop, lemmas
 
 
 VAR = re.compile(r'\bX\d+\b')
@@ -202,6 +202,8 @@ def main():
     ap.add_argument('--theories', type=int, default=0,
                     help="assume the extra axioms of up to K stronger theories (other originals' axiom sets that "
                          "strictly contain the target's), one theory at a time")
+    ap.add_argument('--updown', action='store_true', help='climb up (theory unions, weaker goals) when no sketch proves the target, then down')
+    ap.add_argument('--weaken', type=int, default=4, help='--updown: weaker goals (instances) to try')
     ap.add_argument('--theory-lemmas', type=int, default=10, help='--theories: proven goals of the stronger theory as assumptions too')
     ap.add_argument('--gen-assume', type=int, default=0, help='assume the generator\'s K most sampled equations, one at a time')
     ap.add_argument('--gen-ctx-dir', default='/project/hintwork/loops/GC1A/genctx')
@@ -348,9 +350,13 @@ def main():
                 i += 1
         return res
 
-    def run(t, S, budget, tag, with_true=True):
+    def run(t, S, budget, tag, with_true=True, goal=None):
         o, _ = lemmas.split(t)
         cand = cands[t]
+        if goal is not None:
+            if not hasattr(lp, 'goal_override'):
+                lp.goal_override = {}
+            lp.goal_override[t] = goal
         with lock:
             tl = [(lab, f) for f, lab in true[o].items()] if with_true else []
         lp.extra_axioms[t] = tl + [(x, cand[x]) for x in sorted(S)]
@@ -360,12 +366,17 @@ def main():
         hints = hs + [h for h in lp.hints_for(t, pools, None) if h not in seen[o]]
         n, ok, dt, stats, res = lp.run_one(t, hints, 1, budget, False, a_cpu(budget))
         lp.extra_axioms.pop(t, None)
+        if goal is not None:
+            lp.goal_override.pop(t, None)
+            if ok:   # (a proof of an instance is not one of T)
+                with lock:
+                    out.write(f'{t}\t{tag}:weak\t{len(S)}\tTHM\t-\t{dt:.2f}\t{goal[:120]}\n'); out.flush()
         used = lp.used.pop(t, set()) if ok else set()
         deps = lp.assumed.pop(t, [])
         U = {x for x in used if x.startswith('assume_')}
         ut = sorted(x for x in used if x.startswith('true_'))
         nt = len(ut)
-        if ok:
+        if ok and goal is None:
             last_true[t] = [tkey[(o, x)] for x in ut if (o, x) in tkey]
         if ok and res:
             with lock:
@@ -546,6 +557,94 @@ def main():
                     for l, r in list(real) + ([] if direct else [k for k in last_true.get(t, []) if k not in real]):
                         hf.write(f'{l}\t{r}\n')
         return t, real is not None, runs
+
+    def weakenings(t):
+        """(--updown) weaker goals: instances of T's unit conjecture, two variables merged (milder)
+        first, then one variable set to the unit e."""
+        try:
+            lits = hintsel.goal_lits(t)
+        except Exception:
+            return []
+        if len(lits) != 1 or not lits[0][0]:
+            return []
+        _, l, r = lits[0]
+        vs = sorted(set(VAR.findall(l + ' ' + r)), key=lambda v: int(v[1:]))
+        def inst(sub):
+            f = lambda x: VAR.sub(lambda m: sub.get(m.group(0), m.group(0)), x)
+            l2, r2 = f(l), f(r)
+            ws = sorted(set(VAR.findall(l2 + ' ' + r2)), key=lambda v: int(v[1:]))
+            return ''.join(f'! [{w}] : ' for w in ws) + f'{l2} = {r2}'
+        out = [inst({w: v}) for i, v in enumerate(vs) for w in vs[i + 1:]]
+        out += [inst({v: 'e'}) for v in vs]
+        return list(dict.fromkeys(out))
+
+    def climb2(t):
+        """(--updown, user 15 Nov; Hernandez-Korovin IJCAR 2018 over-approximation) start at each
+        stronger theory (or generated equation); when none proves T, go up: unions of the theories and
+        weaker goals (instances), alone and in the first theory. From every proof go down: drop a used
+        assumption, or restore the goal. Every proof's steps become hints of the original."""
+        cands[t] = candidates(t)
+        S0 = frozenset(cands[t])
+        groups = tgroups.get(t) or ([S0] if S0 else [])
+        other = frozenset(x for x in S0 if not x.startswith(('assume_thy_', 'assume_gen_')))
+        queue = [(g | other, None) for g in groups] or [(frozenset(), None)]
+        tried = set(); runs = 0; real = None; anyproof = False; banned = set(); went_up = False
+        PRE = ('assume_law_', 'assume_thy_', 'assume_gen_')
+        while runs < c.runs:
+            if not queue:
+                if anyproof or went_up:
+                    break
+                went_up = True
+                if len(groups) >= 2:
+                    queue.append((groups[0] | groups[1] | other, None))
+                if len(groups) >= 3:
+                    queue.append((groups[0] | groups[1] | groups[2] | other, None))
+                for gv in weakenings(t)[:c.weaken]:
+                    queue.append((other, gv))
+                    if groups:
+                        queue.append((groups[0] | other, gv))
+                continue
+            queue.sort(key=lambda n: (n[1] is not None, len(n[0])))
+            S, g = queue.pop(0)
+            S = S - banned
+            if (S, g) in tried or (not S and g is None):
+                continue
+            tried.add((S, g))
+            ok, U, res, nt = run(t, S, c.sketch_time, f's{runs}', goal=g)
+            runs += 1
+            if ok and not U and g is None:
+                real = res; break
+            if ok and U and c.min_sketch_steps and len(res or ()) < c.min_sketch_steps:
+                banned |= {u for u in U if u.startswith(PRE)}
+                if not any(x.startswith(PRE) for x in U - banned):
+                    continue
+            if ok:
+                anyproof = True
+                for u in U:
+                    queue.append((U - {u}, g))
+                if g is not None:
+                    queue.append((U, None))
+        if real is None:
+            ok, U, res, nt = run(t, frozenset(), c.final_time, 'final')
+            if ok:
+                real = res
+        direct = real is not None and not nt
+        if real is not None and nt:
+            ok, _, res, _ = run(t, frozenset(), c.final_time, 'direct', with_true=False)
+            if ok:
+                direct = True; real = res
+        if real is not None:
+            with lock:
+                sf.write(f'{t}\t1\t0\n'); sf.flush()
+                if not direct:
+                    out.write(f'{t}\tchain\t0\tTHM\t0\t0\t\t\t0\t{nt}\n'); out.flush()
+                with open(os.path.join(c.dir, 'hints', t), 'w') as hf:
+                    for l, r in list(real) + ([] if direct else [k for k in last_true.get(t, []) if k not in real]):
+                        hf.write(f'{l}\t{r}\n')
+        return t, real is not None, runs
+
+    if c.updown:
+        climb = climb2
 
     if c.live:
         live(c, a, lp, gl, pools, ix, climb, out)

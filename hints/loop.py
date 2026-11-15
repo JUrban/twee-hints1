@@ -462,6 +462,14 @@ class Loop:
             path = os.path.join(self.dir, 'tmp', tag + '.p')
             with open(path, 'w') as f:
                 f.write(txt)
+        go = getattr(self, 'goal_override', {}).get(name)
+        if go:
+            # (climb.py --updown) a weakened goal: an instance of the conjecture in its place
+            txt = ''.join(x for x in open(path) if not x.startswith('fof(goals,conjecture,')) + \
+                f'fof(goals,conjecture,{go}).\n'
+            path = os.path.join(self.dir, 'tmp', tag + '.w.p')
+            with open(path, 'w') as f:
+                f.write(txt)
         extra = getattr(self, 'extra_axioms', {}).get(name)
         if extra:
             # (climb.py) assumed statements: extra axioms (label, TPTP formula) of this run
