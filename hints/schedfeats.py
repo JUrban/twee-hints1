@@ -13,7 +13,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import hintlib, lemmas
 
 FEATS = ['lgap', 'ggap', 'agap', 'nfail', 'nfail_ctx', 'grow', 'orate', 'ofrac',
-         'size', 'nvars', 'hints', 'nolow', 'nfail_c6', 'dctx']
+         'size', 'nvars', 'hints', 'nolow', 'nfail_c6', 'dctx', 'lg_new']
 
 
 def orig_of(n):
@@ -89,6 +89,8 @@ class History:
         self.last_lg = {}                       # name -> line gap at its last fresh run
         self.orecent = collections.defaultdict(lambda: collections.deque(maxlen=30))
         self.tot = collections.Counter(orig_of(n) for n in names)
+        self.rows = []                          # (features, label) of fresh runs, for retraining
+        self.keep = lambda r: r >= 3            # rounds whose fresh runs replay() keeps in rows
 
     def feats(self, n, hints=0):
         R = self.R; o = orig_of(n)
@@ -101,10 +103,15 @@ class History:
                  orate=(sum(dq) + 0.5) / (len(dq) + 3), ofrac=R.nsol[o] / max(1, self.tot.get(o, 1)),
                  size=s, nvars=v, hints=hints, nolow=int(below is None),
                  nfail_c6=self.fail_c6[(n, c6)], dctx=self.last_lg.get(n, 5000) - lg)
+        # a new context's gain falls with the distance (rounds 3-5: 59% within 13 lines,
+        # 27% at 41-80, 15% at 161-320; with an old one 19%, 11%, 8%)
+        x['lg_new'] = lg if x['nfail_ctx'] == 0 else -1
         return x, (below, c6, lg)
 
-    def observe(self, n, ok, lev, ctx=None):
-        """a finished run of n (ctx: feats(n)[1] when it started; default: now)"""
+    def observe(self, n, ok, lev, ctx=None, x=None):
+        """a finished run of n (ctx, x: feats(n) when it started; default: ctx now, no row)"""
+        if x is not None and lev == 'L0':
+            self.rows.append((x, int(ok)))
         if lev == 'L0':
             below, c6, lg = ctx if ctx else self.feats(n)[1]
             self.orecent[orig_of(n)].append(int(ok))
@@ -143,6 +150,8 @@ class History:
                     m = re.search(r'hints=(\d+)', f[3])
                     x, c_ = self.feats(n, int(m.group(1)) if m else 0)
                     ctx = c_ if lev == 'L0' else None
+                    if lev == 'L0' and self.keep(r) and n not in self.R.solved:
+                        self.rows.append((x, int(ok)))
                     if out and r in keep and n not in self.R.solved and lev in levels:
                         out.write(f'{r}\t{n}\t{int(ok)}\t' + '\t'.join(
                             f'{x[h]:.4g}' if isinstance(x[h], float) else str(x[h]) for h in FEATS) + '\n')

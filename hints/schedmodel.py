@@ -23,9 +23,18 @@ def load(p):
     return head, meta, X, y
 
 
-def cuts(X):
+# fixed bins for the distances in proof lines: quantile bins put everything beyond ~84 lines
+# into one bin, and the scheduler then ran goals 700 lines away as if 100 (ABb: 6/132 vs 22
+# predicted). Beyond 320 lines there are few runs to learn from (loop.py --sched-max-lgap).
+D = [13.5, 21.5, 40.5, 80.5, 160.5, 320.5, 4999.5]
+FIXED = {'lgap': D, 'agap': D, 'lg_new': [-0.5] + D}
+
+
+def cuts(X, head=None):
     C = []
     for j in range(X.shape[1]):
+        if head and head[j] in FIXED:
+            C.append(list(FIXED[head[j]])); continue
         q = np.unique(np.quantile(X[:, j], np.linspace(0, 1, NB + 1)[1:-1]))
         C.append(q.tolist())
     return C
@@ -81,7 +90,7 @@ def main():
         idx = [i for i, (r, _) in enumerate(meta) if r == last]
         cut = idx[int(len(idx) * (1 - a.test_frac))]
         tr = np.arange(cut); te = np.arange(cut, len(y))
-        C = cuts(X[tr]); w = fit(onehot(X[tr], C), y[tr], a.lam)
+        C = cuts(X[tr], head); w = fit(onehot(X[tr], C), y[tr], a.lam)
         s = onehot(X[te], C) @ w
         yt = y[te]
         print(f'train {len(tr)} ({y[tr].mean():.3f}), test {len(te)} ({yt.mean():.3f})')
@@ -96,9 +105,19 @@ def main():
             sj = onehot(X[te][:, [j]], Cj) @ wj
             print(f'    only {h:10s} AUC {auc(sj, yt):.3f}  top25% {top(sj, yt, .25):.3f}')
     elif a.cmd == 'train':
-        C = cuts(X); w = fit(onehot(X, C), y, a.lam)
+        C = cuts(X, head); w = fit(onehot(X, C), y, a.lam)
         json.dump({'feats': head, 'cuts': C, 'w': w.tolist()}, open(a.model, 'w'))
         print(f'{len(y)} rows, {len(w)} weights -> {a.model}')
+
+
+def train_rows(rows, feats, lam=3.0, recent=0):
+    """a model from History.rows [(feature dict, label)]; with recent > 0, only the last rows"""
+    if recent:
+        rows = rows[-recent:]
+    X = np.array([[x[h] for h in feats] for x, _ in rows], float)
+    y = np.array([l for _, l in rows], float)
+    C = cuts(X, list(feats)); w = fit(onehot(X, C), y, lam)
+    return {'feats': list(feats), 'cuts': [np.array(q) for q in C], 'w': w}
 
 
 def load_model(p):

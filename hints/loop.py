@@ -639,7 +639,8 @@ class Loop:
         def score(n):
             o = orig_of(n); v = sc.get(n)
             if v is None or v[0] != over[o]:
-                v = sc[n] = (over[o], schedmodel.score(SM, H.feats(n)[0]))
+                x_ = H.feats(n)[0]
+                v = sc[n] = (over[o], schedmodel.score(SM, x_), x_['lgap'])
             return v[1]
         t0 = time.time(); new = 0; done_n = 0
         def add_proof(n, rnd, dt, hs):
@@ -687,7 +688,8 @@ class Loop:
                     if SM:
                         cand = {n: score(n) for n in att
                                 if n not in busy and (ctx(n) != att[n][0] or grown(n))}
-                        retry = sorted((-v, n) for n, v in cand.items() if v >= lmin)
+                        retry = sorted((-v, n) for n, v in cand.items()
+                                       if v >= lmin and sc[n][2] <= a.sched_max_lgap)
                     else:
                         retry = sorted((g[n][1], lemmas.split(n)[1], n) for n in att
                                        if n not in busy and (ctx(n) != att[n][0] or grown(n)) and may_retry(n, g))
@@ -697,7 +699,8 @@ class Loop:
                                   and may_deepen(n, g) and not grown(n))
                     far = []
                     if SM and a.far_retry and len(running) + len(retry) + len(deep) < a.j:
-                        far = sorted((-v, n) for n, v in cand.items() if v < lmin)[:a.j]
+                        far = sorted((-v, n) for n, v in cand.items()
+                                     if v < lmin or sc[n][2] > a.sched_max_lgap)[:a.j]
                     elif a.far_retry and len(running) + len(retry) + len(deep) < a.j:
                         # --far-retry: idle slots retry (fresh) the goals beyond the retry gaps too,
                         # nearest first, after everything else
@@ -729,8 +732,9 @@ class Loop:
                             fut = ex.submit(self.run_one, n, self.hints_for(n, pools, None), rnd,
                                             b, not a.p9loop, a.cascade_cpu * b)
                         running[fut] = (n, lev)
-                        if H and lev == 0:   # (its context and predicted success, for observe())
-                            startctx[n] = (H.feats(n)[1], 1 / (1 + math.exp(-score(n))))
+                        if H and lev == 0:   # (its features, context and predicted success, for observe())
+                            x_, c_ = H.feats(n)
+                            startctx[n] = (c_, 1 / (1 + math.exp(-score(n))), x_)
                 if not running:
                     if a.sync and time.time() - t0 < a.cascade_hours * 3600:
                         # nothing to run: wait for proofs from the side workers (new contexts)
@@ -743,10 +747,16 @@ class Loop:
                     n, ok, dt, stats, hs = f.result()
                     done_n += 1
                     if H:
-                        c_, p_ = startctx.pop(n, (None, 0.0)) if lev == 0 else (None, 0.0)
-                        H.observe(n, ok, 'L%d' % lev, c_); over[orig_of(n)] += 1
+                        c_, p_, x_ = startctx.pop(n, (None, 0.0, None)) if lev == 0 else (None, 0.0, None)
+                        H.observe(n, ok, 'L%d' % lev, c_, x_); over[orig_of(n)] += 1
                         if lev == 0:
                             calib[0] += p_; calib[1] += 1; calib[2] += ok
+                            if a.sched_retrain and calib[1] % a.sched_retrain == 0:
+                                # the runs the model picks drift from those it learned on
+                                # (ABb: 81+ lines with a new context 21%, predicted 25%)
+                                SM = schedmodel.train_rows(H.rows, SM['feats'], recent=a.sched_recent)
+                                sc.clear()
+                                print(f'  cascade: --sched-retrain: model retrained on {len(H.rows)} rows', flush=True)
                     rf.write(f'{n}\t{"THM" if ok else "NO"}\t{dt:.2f}\t{stats}\tL{lev}\tt={time.time()-t0:.0f}\n'); rf.flush()
                     if ok and n in self.solved:
                         pass   # (synced from another process meanwhile: keep its row and hints)
@@ -993,6 +1003,13 @@ def make_parser():
     ap.add_argument('--sched-model',
                     help='--cascade: order the fresh runs by this model\'s predicted success '
                          '(schedmodel.py train), any distance; below --sched-pmin they wait for --far-retry')
+    ap.add_argument('--sched-retrain', type=int, default=0,
+                    help='--sched-model: retrain the model on the replayed and new fresh runs every N fresh runs')
+    ap.add_argument('--sched-recent', type=int, default=0,
+                    help='--sched-retrain: on the last N fresh runs only (0 = all of rounds 3 on)')
+    ap.add_argument('--sched-max-lgap', type=int, default=10**6,
+                    help='--sched-model: goals farther than this (proof lines) from a proof below go '
+                         'after the resumes (ABb: 700 lines away 6/132 proved)')
     ap.add_argument('--sched-pmin', type=float, default=0.06,
                     help='--sched-model: fresh runs predicted below this go after the resumes (default 0.06: '
                          'an L1 resume proves ~17%% in 3x the time of a fresh run)')

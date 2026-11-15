@@ -1855,9 +1855,60 @@ scores of the changed original are recomputed.
 A 2-worker check (loops/SMT, a reflink copy of UL) made 16 proofs in 23
 fresh runs in its first 5 minutes; these were the model's top picks.
 
-**A/B (running).** ABa (distance order) and ABb (`--sched-model
-sched/m2.json`, retrained with UL14's runs, AUC 0.760) run from the
-same reflink copy of UL, 9 workers each, for an hour.
+**A/B 1: a tie after an hour.** ABa (distance order) and ABb
+(`--sched-model sched/m2.json`, retrained with UL14's runs) ran from the
+same reflink copy of UL, 9 workers each, from 04:05 to 05:07.
+
+| minutes | ABa (distance) | ABb (model) |
+|---|---|---|
+| 8.5 | 11 | 60 |
+| 29 | 97 | 128 |
+| 43 | 122 | 156 |
+| 53 | 166 | 171 |
+| 62 | 177 | 180 |
+
+The union was 255; at 29 minutes only 30 proofs were common.
+
+* ABa began with 76 resumes (L1, 16% at 3× the cost of a fresh run).
+  Then it worked the near goals in proof order: 35% of its fresh runs
+  succeeded, each proof giving a new context to the goal above it.
+* ABb ran no resumes. Its fresh runs proved 53, 53, 18, 27, 6 and 14
+  per 10 minutes. In the fifth bin, 65 of 132 runs went to one
+  original, nslm_to_aa1, at a median of 702 lines from the nearest
+  proof: 6 proved, 22 predicted.
+
+**The cause** was the quantile bins: one bin held every distance beyond
+84 lines, so 700 lines scored like 100. In rounds 3–5 the gain from a
+new context also falls with the distance:
+
+| proof lines | new context | same context |
+|---|---|---|
+| 0–13 | 59% | 19% |
+| 22–40 | 48% | 15% |
+| 41–80 | 27% | 11% |
+| 81–160 | 16% | 5% |
+| 161–320 | 15% | 8% |
+| 321–640 | 11% (28 runs) | 6% (16 runs) |
+
+**Fixes.**
+
+* Fixed bins for the distances (13, 21, 40, 80, 160, 320 lines).
+* `lg_new`: the distance when the context is new, crossed into one
+  feature.
+* `--sched-max-lgap 320`: farther goals run only in idle slots.
+* `--sched-retrain 200`: retrain on all replayed and new fresh runs.
+
+On ABb's last 515 fresh runs, the fixed bins raised AUC from 0.751 to
+0.807. Both arms (251 proofs) were merged into UL, and the climber was
+stopped.
+
+**A/B 2 (running, 05:16).** Three arms from one copy of UL (43,272
+solved), 7 workers each, for an hour:
+
+* ABc: distance order;
+* ABd: `--sched-model sched/m3.json --sched-max-lgap 320 --sched-retrain 200`
+  (m3: fixed bins and `lg_new`, AUC 0.736 against 0.671 for distance);
+* ABe: as ABd, with a 10 s first level (`--cascade 10,80`).
 
 ## 2c. Long runs: stall cutoff and checkpoints
 
