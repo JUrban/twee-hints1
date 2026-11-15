@@ -148,6 +148,9 @@ def main():
                     help='Veroff\'s gap filling: after each sketch proof, one twee --multi-goal run of this '
                          'many seconds tries to prove the proof\'s lemmas that depend on the assumptions, without '
                          'them; the proven ones become axioms (true lemmas) of the later runs on the original\'s goals')
+    ap.add_argument('--min-sketch-steps', type=int, default=0,
+                    help='a sketch proof that uses laws and has fewer steps bans those laws for the target '
+                         '(the climb restarts from the top without them): laws that trivialise give no hints')
     ap.add_argument('--fill-max', type=int, default=40, help='dependent lemmas per --fill check')
     ap.add_argument('--true-max', type=int, default=60, help='true lemmas (from --fill) per original')
     ap.add_argument('-j', type=int, default=2)
@@ -384,6 +387,15 @@ def main():
             runs += 1
             if ok and not U:
                 real = res; break
+            if ok and c.min_sketch_steps and len(res or ()) < c.min_sketch_steps:
+                L = {u for u in U if u.startswith('assume_law_')}
+                if L:
+                    # (--min-sketch-steps) a law that makes the sketch trivial gives a dozen hints:
+                    # ban the laws it used and start again from the top without them
+                    banned |= L
+                    rest = frozenset(S0) - banned
+                    queue = [rest] if rest and rest not in tried else []
+                    continue
             if not ok and not anyproof:
                 # even the top of the lattice is too hard: retry it with twice the time, up to the cap
                 if bt * 2 > cap:

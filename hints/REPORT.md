@@ -2494,6 +2494,34 @@ fresh 20 s, unfolded): 6 lemmas 3 of 36, 12 lemmas 4 of 36. The 12-lemma
 arm proved all three of the 6-lemma arm's goals, plus one more. One goal
 is within noise, so the side worker keeps 6.
 
+**Long budgets on heads (15 Nov 18:15–19:05; `abs/heads_long.sh`, sets/heads_u,
+the 30 heads still unsolved, fresh 160 abstract s, snapshot ULsW).**
+
+* **Unfolded (HLU), stopped after 8 heads: 0.** Every unfolded run hit the
+  800 s CPU cap (797–1,123 s) before 160 abstract s. Unfolded terms are
+  bigger, and at long budgets the runs become CPU-bound.
+* On the same 8, folded (HLF) proved 1 (aK2_eq_aK3_q__goal_270, 500 s).
+  HLF continues; at 12 of 30 it has 3.
+* So unfolding, which proved stalled goals at 20 s (2af), does not
+  scale to the long budgets heads need.
+
+**What a head proof is worth.** Replaying production's round 5
+(loops/UL/r5/results.tsv, 21,784 runs, 2,751 new proofs), 69 proofs
+were of the goal right after an original's furthest proof.
+
+| proofs of the same original after a head proof | within 500 runs | 2,000 | 8,000 |
+|---|---:|---:|---:|
+| mean | 3.2 | 3.6 | 4.6 |
+| median | 1 | 1 | 2 |
+| none | 30 | 28 | 22 |
+
+Other proofs are followed by 5.3 within 2,000 runs. So a head proof does
+not unlock a chain; the goals behind a head are each hard. At about 0.4
+proofs per CPU-hour for heads at 320 s, a head is worth about 2 proofs
+per CPU-hour counting what follows. That is below production's current
+3.5, so the scheduler's equal weighting of proofs does not starve the
+heads.
+
 ## 2ah. A hint generator (user's suggestion, 15 Nov)
 
 The user asked whether the GNN2Seq model of Chvalovský, Suda and Urban
