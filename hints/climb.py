@@ -253,7 +253,7 @@ def main():
                     f.write(f'{w[0]}\t0\t{w[2].strip()}\n')
     loop.init_dir(a)
     lp = loop.Loop(a)
-    lp.used = {}; lp.extra_axioms = {}; lp.assumed = {}
+    lp.used = {}; lp.extra_axioms = {}; lp.assumed = {}; lp.capture_given = set(); lp.captured = {}
     gl = {l.split()[0]: int(l.split()[1]) for l in open(c.goal_lines)}
     allgoals = lemmas.by_original(gl)
     pools = lp.build_pools()
@@ -372,8 +372,19 @@ def main():
             hs = list(sketch[o])
         # sketch hints first: hints_for keeps the pool's order and a cap applies to the tail
         hints = hs + [h for h in lp.hints_for(t, pools, None) if h not in seen[o]]
+        if tag == 'final':
+            lp.capture_given.add(t)
         n, ok, dt, stats, res = lp.run_one(t, hints, 1, budget, False, a_cpu(budget))
         lp.extra_axioms.pop(t, None)
+        if tag == 'final':
+            # the final run's given rules, failed or not: which sketch steps the real theory derives
+            # (realization labels of the moves, latticedata.py)
+            lp.capture_given.discard(t)
+            G_ = lp.captured.pop(t, [])
+            d_ = os.path.join(c.dir, 'realized'); os.makedirs(d_, exist_ok=True)
+            with open(os.path.join(d_, t), 'w') as f_:
+                f_.write(f'# ok={int(ok)} sketch_hints={len(hs)}\n')
+                f_.writelines(f'{l}\t{r}\n' for l, r in G_)
         if goal is not None:
             lp.goal_override.pop(t, None)
             if ok:   # (a proof of an instance is not one of T)

@@ -44,6 +44,14 @@ def kind(x):
     return 'other'
 
 
+_ax = {}
+def axioms_of(t):
+    if t not in _ax:
+        import given
+        _ax[t] = {canon(l, r) for l, r in given.axioms(t)}
+    return _ax[t]
+
+
 _nthy = {}
 def n_theories(t):
     """Stronger theories of T's original (axiom sets of other originals that strictly contain its own)."""
@@ -96,6 +104,12 @@ def rows_of(d, min_steps):
         if len(w) > 3 and w[1] in ('final', 'direct') and w[3] == 'THM':
             real[w[0]] = True
     step = collections.Counter()
+    fin = {}
+    rd = os.path.join(d, 'realized')
+    if os.path.isdir(rd):
+        for t in os.listdir(rd):
+            fin[t] = {canon(*x.rstrip('\n').split('\t')[:2]) for x in open(os.path.join(rd, t))
+                      if not x.startswith('#') and '\t' in x}
     for l in open(os.path.join(d, 'climb.tsv')):
         w = l.rstrip('\n').split('\t')
         if len(w) < 8 or w[1] in ('final', 'direct', 'chain') or w[1].endswith(':weak'):
@@ -112,6 +126,14 @@ def rows_of(d, min_steps):
                 elif not x.startswith('#') and '\t' in x:
                     a, b = x.rstrip('\n').split('\t')[:2]
                     proof.append(canon(a, b))
+        # realization: the share of the sketch's steps (not axioms of T) that the final run (T's own axioms,
+        # all sketch hints) derived as given rules, proved or not (climb.py saves realized/<t>)
+        realized = ''
+        if proof and t in fin:
+            ax = axioms_of(t)
+            st = {x for x in proof if x not in ax}
+            if st:
+                realized = f'{len(st & fin[t]) / len(st):.3f}'
         credit = ''
         hp = os.path.join(d, 'hints', t)
         if real.get(t) and os.path.exists(hp) and ok and os.path.exists(sp):
@@ -122,7 +144,7 @@ def rows_of(d, min_steps):
         yield dict(row, **{
             'proved': int(ok), 'used': len(U), 'steps': len(proof),
             'nontrivial': int(ok and bool(U) and len(proof) >= min_steps) if os.path.exists(sp) or not ok else '',
-            'credit': credit,
+            'credit': credit, 'realized': realized,
             'target_proved': int(bool(real.get(t))),
         })
         step[t] += 1

@@ -506,6 +506,9 @@ class Loop:
             cmd += ['--print-hint-matchers']
         if a.gen_model:   # (twee-e39) the given rules of a failed run, for gen_save
             cmd += ['--print-given-unsolved']
+        cap = name in getattr(self, 'capture_given', ())
+        if cap and not a.gen_model:   # (climb.py) the final run's given rules, also when it fails
+            cmd += ['--print-given-unsolved']
         k = 0
         if a.p9_orders > 1:
             # P9loop's term orderings: attempt k of a goal (rounds from --start, or the number of
@@ -548,6 +551,10 @@ class Loop:
                 f.write(out[:i] + out[j:] if 0 <= i < j else out)  # without the given rules
         if hints and not os.environ.get('LOOP_KEEP_TMP'):
             os.unlink(hpath)
+        if cap:
+            sig_ = self.signature(name)   # (in the hints' canonical form)
+            self.captured[name] = [canon_key(x[0], x[1], sig_) for x in givenlib.parse_given_parents(out)
+                                   if x and x[0] != x[1]]
         ok = 'HINTS-END' in out
         if ok and hasattr(self, 'used'):
             # (climb.py) the axiom and lemma names the proof uses
