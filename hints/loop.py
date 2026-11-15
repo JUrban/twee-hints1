@@ -705,13 +705,18 @@ class Loop:
                         retry = sorted((g[n][1], lemmas.split(n)[1], n) for n in att
                                        if n not in busy and (ctx(n) != att[n][0] or grown(n)) and may_retry(n, g))
                     deep_running = collections.Counter(orig_of(n) for n, l in running.values() if l > 0)
-                    # --head-first: within a level, an original's tail head (the goal after its last
-                    # proven goal) goes first, and only heads go to levels >= --head-only-from. A head's
+                    # --head-first: an original's tail head (the goal after its last proven goal)
+                    # deepens first, and only heads go to levels >= --head-only-from. A head's
                     # proof starts a chain (the goal above gets a new context, ~50%); at 06:45 the 95
                     # heads held 4,851 of the 8,335 unsolved goals behind them, and 93 had never run
                     # beyond 80 s (median 416 wall s in all)
                     hs = heads() if a.head_first else set()
-                    deep = sorted((att[n][1] + 1, int(n not in hs), deep_running[orig_of(n)], g[n][1], lemmas.split(n)[1], n)
+                    # (heads first for the levels below --head-only-from, at any level: a head's
+                    # 320 s resume, ~30% x a chain of ~2, pays about as well per CPU-second as an
+                    # 80 s resume of another goal, ~20%; at 06:58 2,185 goals waited for one)
+                    hof = a.head_only_from or len(T)
+                    deep = sorted((int(not (n in hs and att[n][1] + 1 < hof)), att[n][1] + 1,
+                                   deep_running[orig_of(n)], g[n][1], lemmas.split(n)[1], n)
                                   for n in att
                                   if n not in busy and ctx(n) == att[n][0] and att[n][1] + 1 < len(T)
                                   and (may_deepen(n, g) or n in hs) and not grown(n)
@@ -740,7 +745,7 @@ class Loop:
                         else:
                             if sum(1 for _, l in running.values() if l > 0) >= a.j - a.reserve:
                                 break
-                            lev, _, _, _, _, n = deep.pop(0)
+                            _, lev, _, _, _, n = deep.pop(0)
                             if any(m == n for m, _ in running.values()):
                                 continue
                             att[n] = (ctx(n), lev)
@@ -1030,8 +1035,8 @@ def make_parser():
                     help='--sched-model: goals farther than this (proof lines) from a proof below go '
                          'after the resumes (ABb: 700 lines away 6/132 proved)')
     ap.add_argument('--head-first', action='store_true',
-                    help='--cascade: within a level, tail heads (the goal after the last proven goal of '
-                         'an original) deepen first')
+                    help='--cascade: tail heads (the goal after the last proven goal of an original) '
+                         'deepen first, up to the levels below --head-only-from')
     ap.add_argument('--head-only-from', type=int, default=0,
                     help='--head-first: only tail heads go to levels >= L (e.g. 3 with --cascade 10,80,320,1280)')
     ap.add_argument('--sched-pmin', type=float, default=0.06,
