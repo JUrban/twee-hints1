@@ -31,6 +31,7 @@ from gnn import (parse, isvar, Vocab, load_log, goal_eqs, paths_of, MAXARG, NREL
                  R_LHS, R_RHS, R_SYM, R_ARG, R_GMATCH, variant_key)
 
 A_BOS, A_SYM, A_VAR, A_EOS = 0, 1, 2, 3
+TOKV = __import__('re').compile(r'X[0-9]+')
 MAXV = 12
 
 
@@ -384,7 +385,9 @@ def generate(model, G, s, n, temp=1.0, maxlen=48):
             l = term(); r = term()
         except IndexError:
             continue
-        if l != r:
+        # a side that is a variable the other side lacks (X = t): true only in a trivial theory
+        if l != r and not (l[0] == 'X' and '(' not in l and l not in TOKV.findall(r)) \
+                and not (r[0] == 'X' and '(' not in r and r not in TOKV.findall(l)):
             res.append((l, r))
     model.train()
     return res
@@ -526,7 +529,7 @@ def main():
         through each proof (by proof rule), with the --ctx rules before it as context.
         With --pool-dir also the pool's recall and the generated hits the pool lacks."""
         rec, nh, tot = [], 0, 0
-        pn = pg = 0; ng = 0
+        pn = pg = 0; ng = 0; nl = 0
         for n in names:
             ax, rules = load_log(P[n])
             pr = [i for i, (lab, _, _) in enumerate(rules) if lab == 1]
@@ -534,13 +537,15 @@ def main():
                 continue
             k = pr[len(pr) // 2]
             fut = {canon(l, r) for lab, l, r in rules[k:] if lab == 1}
+            later = {canon(l, r) for lab, l, r in rules[k:]}
             G = GGraph(vocab); G.add_sample(sample_eqs(n, ax, rules, k, a.ctx))
             gen = {canon(l, r) for l, r in generate(model, G, 0, a.n, a.temp, a.maxtok)}
             hit = len(fut & gen)
-            rec.append(hit / len(fut)); nh += hit; tot += len(fut); ng += len(gen)
+            rec.append(hit / len(fut)); nh += hit; tot += len(fut); ng += len(gen); nl += len(later & gen)
             if a.pool_dir:
                 pl = pool_of(n)
                 pn += len(fut & pl); pg += len(fut & gen - pl)
+        print(f'  generated: {ng / max(len(rec), 1):.0f} distinct per cut, {nl / max(ng, 1):.1%} of them derived later in the run', flush=True)
         if a.pool_dir:
             print(f'  pool: {pn}/{tot} future proof rules in the pool, generated and not in the pool {pg}; '
                   f'{ng / max(len(rec), 1):.0f} distinct generated per cut', flush=True)
