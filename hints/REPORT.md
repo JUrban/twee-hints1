@@ -2639,6 +2639,70 @@ With clean hints only (equal variable sets, no flat or variable
 sides), instances cover 142 of 2,480 missing steps (3%), and the run
 is 1.6–5 times slower in wall time. Dropped.
 
+## 2ai. Conjecture cuts (user's suggestion after IWIL 2026, 15 Nov)
+
+The IWIL 2026 paper (Chvalovsky, Suda, Urban) proves generated
+conjectures separately and uses them as cuts. On Mizar60 that gave
++582 of 11,881 hard or unsolved problems, with the first useful
+conjecture at median rank 3.
+
+**Implementation** (`loop.py --gen-cuts K`, 1128103). Before a
+goal's resumed level:
+
+1. The generator (gencopy.py, `--counts`) samples equations from the
+   goal and the last 256 rules of its failed level.
+2. The K most often sampled ones become cut candidates, leaving out
+   variants of the goal.
+3. The candidates are proved in one `twee --multi-goal` run of
+   `--gen-cut-time` abstract s, on the goal's axioms and lemmas, with
+   its hints and rule model.
+4. Those proved after at least one considered critical pair become
+   axioms of the resumed level.
+
+`--gen-cut-sep` proves each cut in its own run instead. That run uses
+the kNN lemmas of the cut's own statement (`LemmaIndex.select(eq=)`) and
+the rule model's goal block of the cut (`write_goalfile(lits=)`).
+`cutoracle.py` supplies oracle candidates instead: rules of the goal's
+later production proof.
+
+**Results** on sets/cut9 (9 gen200 goals that production proved later,
+in 5–128 s), snapshot ULsW, fresh 5 s then resume +15 s:
+
+| arm | cuts proved | goals proved |
+|---|---:|---:|
+| control GC, +15 s | – | 1/9 |
+| control, +20 s | – | 1/9 |
+| oracle, 40 rules spread across the proof, one shared 5 s run | 14–27 of 40 | 1/9 |
+| oracle, the 40 rules nearest the goal, shared | 2–22 of 40 | 1/9 |
+| oracle, the 20 nearest the goal, each alone with its own guidance (5 s each) | 3–15 of 20 | 1/9 (7.3 s against 21.5 s) |
+| generator gc1_4000, top 40, shared (3 gen200 goals) | 0 of 120 | 0/3 |
+| generator, top 10 at T 0.7, each alone | 8 of 90 | 1/9 |
+
+* **A shared cut run is uninformative.** Twee's completion barely
+  depends on the goal: only the rule model's goal features and the
+  lemma and hint selection do. A cut proved in a fresh 5 s run on the
+  goal's own problem is essentially in the state of the goal's own
+  failed 5 s level. In the IWIL setting, E and Vampire are
+  goal-directed, so a separate proof of a cut searches elsewhere.
+* **Separate runs with the cut's own guidance do differ.** Of the 20
+  proof rules nearest the goal, they prove 69 against 35 for the
+  shared run (34 only there). But they cost 20 runs instead of one.
+* **Even oracle cuts gain nothing at this budget.** Up to 15 true proof
+  lemmas as axioms made no new proof in +15 s; one goal went 3× faster.
+  The proofs are 110–700 rules long, and the cuts that can be proved
+  are the easy part.
+* **The generator's cuts** are mostly small identities (for example
+  `t(k(X0,X1),k(X0,X1)) = k(X0,X1)`).
+* **AIM60k already has the strong form of cuts.** Its goals are
+  Prover9's intermediate goals, and the sibling-lemma chain imports
+  them as axioms once proved (section 3, item 1). That is the oracle
+  conjecture-cut mechanism, and it is the loop's largest gain.
+
+Not pursued further. Cut generation in the middle of a run (the user's
+question) has the same limit: a cut proved by the run's own saturation
+is already in its state. Only a cut proved by a differently guided
+search adds information.
+
 ## 2c. Long runs: stall cutoff and checkpoints
 
 * `--eqhint-stall N` gives up when no new rule has matched a hint for N
