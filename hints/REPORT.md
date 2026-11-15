@@ -1979,7 +1979,33 @@ These goals resist everything tried at these budgets.
 In round 5, resumes succeed equally at every distance: 23% within 13
 lines, 19% at 14–21, 23% at 22–40, 23% at 41–80, 29% beyond (24 runs).
 However, `--line-gaps 80,13` allowed resumes only within 13 lines.
-UL17 (`abs/ul17.sh`, 06:23) uses `--line-gaps 80,80`.
+UL17 (`abs/ul17.sh`, 06:23) uses `--line-gaps 80,80`. It made 26 new
+proofs in its first 6.5 minutes, then 5 in the next 9.
+
+**Where the unsolved goals are (06:45).** The 8,335 unsolved goals form
+1,006 runs of consecutive unsolved goals within their originals:
+
+* 559 single holes, between two proven goals;
+* 95 open tails, from the goal after an original's last proven goal to
+  its end, with 4,851 goals (58%);
+* the rest are runs closed by a proven goal above.
+
+The 95 tail heads are the best breakthrough targets: a head's proof
+gives the goal above a new context (about 50%), and so on up the chain.
+They had barely been tried. 93 had never run beyond 80 s, and the
+median head had 6 runs and 416 wall seconds in all.
+
+**Changes** (`loop.py --head-first --head-only-from L`, 9cc44be):
+
+* within a cascade level, tail heads deepen first;
+* only heads go to levels ≥ L;
+* heads deepen at any distance.
+
+UL19 (`abs/ul19.sh`, 06:43) runs `--cascade 10,80,320,1280 --head-first
+--head-only-from 3`. The order follows proofs per CPU-second. Resumes
+to 80 s go first (about 20%, 150 wall s), then the heads' 320 s runs,
+then the others' (about 30% of L1 failures in r5, about 480 wall s).
+The heads' 1,280 s runs come last.
 
 ## 2c. Long runs: stall cutoff and checkpoints
 
@@ -2184,12 +2210,13 @@ are run in `/project/hintwork`, with `venv` holding lightgbm.
 
    `G` comes from `rulemodel.py goalfiles`, `H` from
    `hintsel.py knnfiles`, and `P.p` with lemmas from `lemmas.py`.
-5. **The production loop as of 15 Nov 06:23** (`abs/ul17.sh` in
+5. **The production loop as of 15 Nov 06:43** (`abs/ul19.sh` in
    /project/hintwork). It is a cascade of fresh 10 s runs ordered by the
    learned scheduler (2ac), with resumes to 80 s. Proofs that other
    processes append are synced in:
 
-       loop.py sets/all loops/UL --start 5 --cascade 10,80 --cascade-start 0 \
+       loop.py sets/all loops/UL --start 5 --cascade 10,80,320,1280 \
+         --head-first --head-only-from 3 --cascade-start 0 \
          --cascade-continue --fresh-first --far-retry --retry-gap 3 \
          --sched-model sched/m4.json --sched-max-lgap 320 --sched-retrain 200 \
          --line-gaps 80,80 --retry-hints 1.25 --sync 60 \
