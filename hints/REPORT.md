@@ -2416,7 +2416,7 @@ about 4.5 proofs per CPU-hour. Production makes about 4 per CPU-hour
 **Tail heads** are the first unsolved goal after an original's last
 proof. There are 92, with lines gaps 13–68 (median 34), and most
 unsolved goals sit behind them. On 30 random heads (sets/heads30,
-snapshot ULsV at 12:03, fresh 20 s, production context):
+snapshot ULsV at 11:57, fresh 20 s, production context):
 
 | arm | heads proved |
 |---|---:|
@@ -2442,7 +2442,7 @@ invalid snapshot.
 * So a fresh run predicted at about 0.025 or more pays better than a
   resume.
 
-**UL28 from 12:40** (`abs/ul28.sh`): `--sched-pmin 0.025`, 12 workers.
+**UL28 from 12:17** (`abs/ul28.sh`): `--sched-pmin 0.025`, 12 workers.
 UL27's rate, for comparison: 93 proofs in 129 minutes on 10–11 workers,
 plus 18 synced from the side workers.
 
