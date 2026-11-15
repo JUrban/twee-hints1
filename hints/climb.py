@@ -606,7 +606,7 @@ def main():
                 continue
             queue.sort(key=lambda n: (n[1] is not None, len(n[0])))
             S, g = queue.pop(0)
-            S = S - banned
+            S = frozenset(S) - banned
             if (S, g) in tried or (not S and g is None):
                 continue
             tried.add((S, g))
@@ -620,6 +620,7 @@ def main():
                     continue
             if ok:
                 anyproof = True
+                U = frozenset(U)
                 for u in U:
                     queue.append((U - {u}, g))
                 if g is not None:
