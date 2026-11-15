@@ -454,6 +454,7 @@ def main():
     ap.add_argument('--temp', type=float, default=1.0)
     ap.add_argument('--seed', type=int, default=1)
     ap.add_argument('--cosine', type=int, default=1)
+    ap.add_argument('--novel', help='train: targets only proof rules not among the hints of the original\'s other goals (a hints dir)')
     ap.add_argument('--init-from', help='train: start from this checkpoint (model and vocabulary)')
     ap.add_argument('--step0', type=int, default=0, help='train: the checkpoint\'s step (for the log)')
     ap.add_argument('--pool-dir', help='eval: hints dir of a loop (the pools)')
@@ -558,6 +559,38 @@ def main():
         return
 
     # train
+    novel = None
+    if a.novel:
+        # --novel DIR: targets only the future proof rules no other goal of the original has as a
+        # hint (DIR = a loop's hints dir); the steps the pool cannot supply
+        byo_n = {}
+        for f in os.listdir(a.novel):
+            byo_n.setdefault(f.rpartition('__goal_')[0], []).append(f)
+        ocnt = {}; owncache = {}
+        def hints_of(f):
+            out = set()
+            for l in open(os.path.join(a.novel, f)):
+                w = l.rstrip('\n').split('\t')
+                if len(w) >= 2:
+                    try:
+                        out.add(canon(w[0], w[1]))
+                    except Exception:
+                        pass
+            return out
+        def novel(n):
+            o = n.rpartition('__goal_')[0]
+            if o not in ocnt:
+                c = {}
+                for f in byo_n.get(o, []):
+                    for h in hints_of(f):
+                        c[h] = c.get(h, 0) + 1
+                ocnt[o] = c
+            c = ocnt[o]
+            if n not in owncache:
+                owncache[n] = hints_of(n) if os.path.exists(os.path.join(a.novel, n)) else set()
+            own = owncache[n]
+            return lambda l, r: c.get(canon(l, r), 0) - (canon(l, r) in own) <= 0
+        train = [n for n in train if n.rpartition('__goal_')[0] in byo_n]
     sizes = {n: os.path.getsize(P[n]) for n in train}
     W = np.array([max(sizes[n], 1) ** a.hard for n in train]); W /= W.sum()
     opt = torch.optim.AdamW(model.parameters(), lr=a.lr, weight_decay=1e-4)
@@ -579,7 +612,12 @@ def main():
             n = train[np.random.choice(len(train), p=W)]
             ax, rules = get(n)
             pr = [i for i, (lab, _, _) in enumerate(rules) if lab == 1]
-            if len(pr) < 2:
+            if a.novel:   # cuts and targets: the novel proof rules only
+                nv_ = novel(n)
+                pr = [i for i in pr if nv_(rules[i][1], rules[i][2])]
+                if not pr:
+                    continue
+            elif len(pr) < 2:
                 continue
             # cut: just before a proof rule, later ones likelier (index + 1 weights)
             w_ = np.array([i + 1.0 for i in pr]); j = np.random.choice(len(pr), p=w_ / w_.sum())

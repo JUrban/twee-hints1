@@ -2545,6 +2545,38 @@ the run gets N sampled equations on top of its pool hints.
 **Sanity check:** trained on one problem for 300 steps, the model
 reproduces 4 of that problem's 8 proof steps after the halfway cut.
 
+**Training speed.** The first version took 2.4 s per step. Two fixes
+brought it to about 0.5 s:
+
+* Dropout on the attention weights alone took half the time.
+* Cross-attention was run per sequence over a copy of its sample's
+  memory. It now runs once per sample over all its targets' queries.
+
+**Offline results** at the halfway cut of held-out solved goals (exact
+variant recall of the future proof steps; n samples per cut; T is the
+temperature):
+
+| model, step | n, T | recall | generated, derived later in the run | hits not in the pool |
+|---|---|---:|---:|---:|
+| gen1, 1000 | 200, 1.0 | 1/2,891 | 0.1% | |
+| gen1, 1000 | 200, 0.7 | 4/2,891 | 0.2% | |
+| gen2, 3000 | 200, 0.7 | 13/2,891 | 0.7% | |
+| gen2, 3000 | 400, 0.7 | 24/2,891 | 0.6% | 2 (of 1,251 missing) |
+
+The generator learns the common lemmas, which the pool already holds:
+22 of its 24 hits are pool hints. The steps that matter are the 1,251
+the pool lacks, and it finds 2 of them.
+
+So gen4 fine-tunes gen2 at step 3000 on novel targets only
+(`--novel loops/UL/hints`): the cuts and targets are proof steps that no
+other goal of the original has as a hint.
+
+**Online test** (`abs/gen_test.sh`, sets/gen200, snapshot ULsW):
+
+| arm | fresh 5 s | resume +15 s |
+|---|---:|---:|
+| GC, control | 0/200 | 4/200 |
+
 **Instance matching of hints (negative).** Of the future proof steps
 missing from the pool, 637 of 1,866 looked like instances of a pool
 hint. Most of those came from false hints in the pools:
