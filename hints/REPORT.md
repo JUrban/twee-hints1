@@ -2242,9 +2242,9 @@ Production runs beside it on 17 workers (UL24).
 **Control in the full context.** Snapshot loops/ULsN is UL at 09:30
 with every row imported. On sets/st79u (goals whose fresh run and resume
 failed in round 5 with an unchanged nearest proven goal below), fresh
-20 s runs prove **7 of 51 goals without the lemma change and 8 with it**
-(`abs/unit_probe.sh`, PU_0 and PU_1; work on shared proofs 0.99). That
-is about 30 proofs per CPU-hour, against production's 2.
+20 s runs prove **7 of 71 goals without the lemma change and 10 with it**
+(`abs/unit_probe.sh`, PU_0 and PU_1; +3/−0; work on shared proofs 0.99).
+That is 18–25 proofs per CPU-hour, against production's 2.
 
 * Some are now easy: nil3_24__goal_356 takes 1.7 s, nil3_32__goal_380
   1.4 s and nil3_29__goal_388 1.9 s.
@@ -2279,7 +2279,10 @@ is about 30 proofs per CPU-hour, against production's 2.
 
 A smoke test from ULsN (sets/st79u, `--cascade 10,80`, 2 workers) proved
 5 of these goals in 16 runs and 135 s. **Production since 09:44: UL26**
-(`abs/ul26.sh`, 11 workers).
+(`abs/ul26.sh`, 11 workers). Its first 100 fresh runs made **41 new
+proofs in 132 s**, against about 2 proofs per CPU-hour before. The cap
+on kNN checks per scheduling pass (b4c5cb5) arrives with the next
+restart.
 
 **Unit forms of conditional lemmas** (`lemmas.lemma_form`). A conditional
 goal `~ s = X | C = D` whose hypothesis binds a variable X that does not
@@ -2293,7 +2296,7 @@ s.
   the goal twee failed 9 times, uses
   `-m(k(A,B),t(t(B,C),D)) = E | m(t(t(B,C),D),k(A,B)) = E`.
 * The change gives 2,234 of the 8,270 unsolved goals a different set of
-  sibling lemmas. On st79u: +1 (8 against 7).
+  sibling lemmas. On st79u: +3 (10 against 7 of 71).
 * `TWEE_LEMMA_UNITIZE=0` turns it off.
 
 ## 2c. Long runs: stall cutoff and checkpoints
