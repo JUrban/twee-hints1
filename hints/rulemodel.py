@@ -34,11 +34,12 @@ def load(path, parents=False):
 
 THEORY = False  # add the 't:' block: features summed over the problem's axioms (ENIGMA's theory block)
 
-def goal_feats(name):
+def goal_feats(name, lits=None):
     """Per-problem constant features: the goal block, and with THEORY the
-    theory block (keys prefixed 'T', so they become 'g:T...' columns)."""
+    theory block (keys prefixed 'T', so they become 'g:T...' columns).
+    LITS: (positive, lhs, rhs) of another goal over NAME's axioms (a cut)."""
     f = collections.Counter()
-    lits = hintsel.goal_lits(name)
+    lits = hintsel.goal_lits(name) if lits is None else lits
     for pos, l, r in lits:
         for k, v in enigfeats.features(l, r).items():
             f[('' if pos else 'n') + k] += v
@@ -227,9 +228,9 @@ def main():
               f'rules until proof kept {A[:,2].mean():.3f}, all-pos-kept {np.mean(A[:,0] == 1):.2f}')
 
 
-def write_goalfile(name, vocab, path):
+def write_goalfile(name, vocab, path, lits=None):
     """Goal block of the rule model for twee --rule-goal."""
-    g = goal_feats(name)
+    g = goal_feats(name, lits)
     with open(path, 'w') as f:
         for k, v in g.items():
             c = vocab.get('g:' + k)

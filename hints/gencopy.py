@@ -395,6 +395,7 @@ def main():
     ap.add_argument('--novel', help='train: targets only proof rules no other goal of the original has as a hint')
     ap.add_argument('--pool-dir')
     ap.add_argument('--problem'); ap.add_argument('--out'); ap.add_argument('--drop-known', type=int, default=1)
+    ap.add_argument('--counts', type=int, default=0, help='hints: sample counts as a third column, most frequent first')
     a = ap.parse_args()
     torch.set_num_threads(a.threads); random.seed(a.seed); torch.manual_seed(a.seed); np.random.seed(a.seed)
     if a.load:
@@ -426,11 +427,18 @@ def main():
         k = len(rules) if a.k < 0 else a.k
         G, cands, _ = sample(a.name, ax, rules, k)
         have = {canon(l, r) for _, l, r in ax + rules[:k]} if a.drop_known else set()
-        seen, out = set(), []
+        seen, out, cnt = {}, [], {}
         for l, r in generate(model, G, 0, cands, a.n, a.temp, a.maxtok):
             c = canon(l, r)
-            if c not in seen and c not in have:
-                seen.add(c); out.append(f'{l}\t{r}\n')
+            if c in have:
+                continue
+            cnt[c] = cnt.get(c, 0) + 1
+            if c not in seen:
+                seen[c] = (l, r)
+        if a.counts:   # most often sampled first, with the count (the cut candidates' ranking)
+            out = [f'{seen[c][0]}\t{seen[c][1]}\t{cnt[c]}\n' for c in sorted(seen, key=lambda c: -cnt[c])]
+        else:
+            out = [f'{l}\t{r}\n' for l, r in seen.values()]
         if a.out:
             with open(a.out + '.tmp', 'w') as f:
                 f.writelines(out)

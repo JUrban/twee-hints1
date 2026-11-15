@@ -232,6 +232,161 @@ class Loop:
                 print(f'  --gen-model: {c} calls, {h / c:.0f} new hints and {sec / c:.1f}s per call', flush=True)
         return list(hints) + gen
 
+    def gen_cuts_problem(self, name, path, tag, hints):
+        """--gen-cuts K (15 Nov; Chvalovsky-Suda-Urban IWIL 2026: generated lemmas as cuts, accepted
+        when the prover proves them): the generator samples --gen-n equations from the goal and the
+        saved context of its previous level; the K most often sampled (not variants of the goal) go
+        as negated conjectures into one twee --multi-goal run of --gen-cut-time abstract s on the
+        goal's axioms and lemmas; those proved after at least --gen-cut-min considered critical
+        pairs are added to the goal's problem as axioms. Returns the problem's path."""
+        a = self.a
+        cp = os.path.join(self.dir, 'genctx', name)
+        if not os.path.exists(cp):
+            return path
+        t0 = time.time()
+        cmd = [a.gen_python, os.path.join(HERE, a.gen_script), 'hints', cp, name, '--load', a.gen_model,
+               '--n', str(a.gen_n), '--threads', '1', '--ctx', str(a.gen_ctx), '--temp', str(a.gen_temp), '--counts', '1']
+        try:
+            p = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, timeout=300)
+        except subprocess.TimeoutExpired:
+            return path
+        def canon(l, r):   # variant key, both orientations
+            def key(x):
+                ren = {}
+                return re.sub(r'\bX\d+\b', lambda m: ren.setdefault(m.group(0), f'V{len(ren)}'), x)
+            return min(key(l + '=' + r), key(r + '=' + l))
+        import hintsel
+        try:
+            goal = {canon(l, r) for _, l, r in hintsel.goal_lits(name)}
+        except Exception:
+            goal = set()
+        cands = []
+        for line in p.stdout.decode().splitlines():
+            w = line.split('\t')
+            if len(w) >= 2 and canon(w[0], w[1]) not in goal:
+                cands.append((w[0], w[1]))
+            if len(cands) >= a.gen_cuts:
+                break
+        if not cands:
+            return path
+        base = [l for l in open(path) if l.startswith(('cnf(', 'fof(')) and 'conjecture' not in l]
+        if a.gen_cut_sep:
+            proved = self.prove_cuts_sep(name, base, cands, tag, hints)
+            return self.add_cuts(name, path, tag, cands, proved, t0)
+        neg = []
+        for i, (l, r) in enumerate(cands):
+            sk = lambda s, i=i: re.sub(r'\bX(\d+)\b', lambda m: f'sk_c{i}_{m.group(1)}', s)
+            neg.append(f'cnf(cand_{i},negated_conjecture,{sk(l)} != {sk(r)}).\n')
+        mpath = os.path.join(self.dir, 'tmp', tag + '.cuts.p')
+        with open(mpath, 'w') as f:
+            f.writelines(base + neg)
+        mcmd = [a.twee, mpath, '--max-time', str(a.gen_cut_time), '--no-colour', '--quiet', '--no-proof',
+                '--multi-goal'] + [x for x in a.args.split()]
+        if hints:
+            hpath = os.path.join(self.dir, 'tmp', tag + '.cuts.hints')
+            with open(hpath, 'w') as f:
+                for h in hints:
+                    f.write('\t'.join(h) + '\n')
+            mcmd += ['--hints-file', hpath]
+        if self.model:
+            m, v, gdir = self.model
+            mcmd += ['--rule-model', m, '--rule-vocab', v, '--rule-goal', os.path.join(gdir, name)] + a.model_args.split()
+        try:
+            q = subprocess.run(mcmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                               timeout=a.gen_cut_time * (a.wall_factor if '--abstract-time' in a.args else 1) + 30)
+            out = q.stdout.decode('utf8', 'replace')
+        except subprocess.TimeoutExpired as e:
+            out = (e.stdout or b'').decode('utf8', 'replace')
+        if not os.environ.get('LOOP_KEEP_TMP'):
+            for x in (mpath, os.path.join(self.dir, 'tmp', tag + '.cuts.hints')):
+                if os.path.exists(x):
+                    os.unlink(x)
+        proved = []
+        for line in out.splitlines():
+            if line.startswith('SOLVEDGOAL cand_'):
+                w = line.split()
+                i = int(w[1][5:]); c = int(w[2].split('=')[1])
+                if c >= a.gen_cut_min:
+                    proved.append(i)
+        return self.add_cuts(name, path, tag, cands, proved, t0)
+
+    def prove_cuts_sep(self, name, base, cands, tag, hints):
+        """--gen-cut-sep: each cut in its own run of --gen-cut-time, with the kNN lemmas of its own
+        statement (in place of the goal's) and the rule model's goal block of the cut: twee's
+        completion barely depends on the goal, so a cut proved in a shared run of the goal's own
+        problem is mostly already in the goal's state (oracle test, 15 Nov); goal-relative
+        guidance is what can make a cut's search differ."""
+        a = self.a
+        import lemmas
+        keep = [l for l in base if not l.startswith('fof(lemma_knn_')]
+        hpath = None
+        if hints:
+            hpath = os.path.join(self.dir, 'tmp', tag + '.cuts.hints')
+            with open(hpath, 'w') as f:
+                for h in hints:
+                    f.write('\t'.join(h) + '\n')
+        proved = []
+        for i, (l, r) in enumerate(cands):
+            txt = list(keep)
+            if a.lemma_knn and getattr(self, 'lemma_index', None) is not None:
+                o = orig_of(name)
+                have = set(re.findall(r'fof\(lemma_goal_(\d+),', ''.join(keep)))
+                for j, x in enumerate(self.lemma_index.select(name, a.lemma_knn, exclude={f'{o}__goal_{g}' for g in have},
+                                                              eq=(l, r))):
+                    txt.append(f'fof(lemma_knn_{j}_{x},axiom,{lemmas.lemma_form(x)}).\n')
+            sk = lambda s: re.sub(r'\bX(\d+)\b', lambda m: f'sk_c_{m.group(1)}', s)
+            txt.append(f'cnf(cand_{i},negated_conjecture,{sk(l)} != {sk(r)}).\n')
+            mpath = os.path.join(self.dir, 'tmp', f'{tag}.cut{i}.p')
+            with open(mpath, 'w') as f:
+                f.writelines(txt)
+            mcmd = [a.twee, mpath, '--max-time', str(a.gen_cut_time), '--no-colour', '--quiet', '--no-proof',
+                    '--multi-goal'] + a.args.split()
+            if hpath:
+                mcmd += ['--hints-file', hpath]
+            if self.model:
+                m, v, gdir = self.model
+                import rulemodel
+                vocab = getattr(self, '_rm_vocab', None)
+                if vocab is None:
+                    vocab = self._rm_vocab = {k: int(c) for c, k in (x.rstrip('\n').split('\t') for x in open(v))}
+                gpath = mpath + '.goal'
+                rulemodel.write_goalfile(name, vocab, gpath, lits=[(True, l, r)])
+                mcmd += ['--rule-model', m, '--rule-vocab', v, '--rule-goal', gpath] + a.model_args.split()
+            try:
+                q = subprocess.run(mcmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                                   timeout=a.gen_cut_time * (a.wall_factor if '--abstract-time' in a.args else 1) + 30)
+                out = q.stdout.decode('utf8', 'replace')
+            except subprocess.TimeoutExpired as e:
+                out = (e.stdout or b'').decode('utf8', 'replace')
+            for line in out.splitlines():
+                if line.startswith('SOLVEDGOAL cand_') and int(line.split()[2].split('=')[1]) >= a.gen_cut_min:
+                    proved.append(i)
+            if not os.environ.get('LOOP_KEEP_TMP'):
+                for x in (mpath, mpath + '.goal'):
+                    if os.path.exists(x):
+                        os.unlink(x)
+        if hpath and not os.environ.get('LOOP_KEEP_TMP'):
+            os.unlink(hpath)
+        return proved
+
+    def add_cuts(self, name, path, tag, cands, proved, t0):
+        a = self.a
+        with self.gen_lock:
+            st = self.gen_stats; st[0] += 1; st[1] += len(proved); st[2] += time.time() - t0
+            if st[0] % 10 == 1:
+                print(f'  --gen-cuts: {st[0]} goals, {st[1] / st[0]:.1f} cuts proved of {a.gen_cuts} per goal, '
+                      f'{st[2] / st[0]:.1f}s per goal', flush=True)
+        d = os.path.join(self.dir, 'cuts'); os.makedirs(d, exist_ok=True)
+        with open(os.path.join(d, name), 'a') as f:
+            f.write(''.join(f'{cands[i][0]}\t{cands[i][1]}\n' for i in proved) + '--\n')
+        if not proved:
+            return path
+        cpath = os.path.join(self.dir, 'tmp', tag + '.cut.p')
+        with open(cpath, 'w') as f:
+            f.writelines(open(path).readlines() + [f'cnf(cut_{j},axiom,{cands[i][0]} = {cands[i][1]}).\n'
+                                                   for j, i in enumerate(proved)])
+        return cpath
+
     def run_one(self, name, hints, rnd, budget=None, resume=None, max_cpu=None, variant=0):
         """One twee run. BUDGET (default: the round's timeout), RESUME (default --resume)
         and MAX_CPU (replaces --max-cpu in --args) are for --cascade. VARIANT: which of the
@@ -329,7 +484,10 @@ class Loop:
             if hints and defs:
                 hints = [tuple(unfold.unfold_eq(x, defs) for x in h[:2]) + tuple(h[2:]) for h in hints]
         if a.gen_model and resume is True:
-            hints = self.gen_hints(name, hints)
+            if a.gen_cuts:
+                path = self.gen_cuts_problem(name, path, tag, hints)
+            else:
+                hints = self.gen_hints(name, hints)
         args = a.args.split()
         if max_cpu is not None:
             args = [x for i, x in enumerate(args) if x != '--max-cpu' and (i == 0 or args[i - 1] != '--max-cpu')]
@@ -1122,6 +1280,11 @@ def make_parser():
     ap.add_argument('--gen-temp', type=float, default=1.0)
     ap.add_argument('--gen-python', default='/project/hintwork/venv/bin/python3')
     ap.add_argument('--gen-script', default='gen.py', help='gen.py, or gencopy.py (the copy-action model)')
+    ap.add_argument('--gen-cuts', type=int, default=0, help='with --gen-model: the K most sampled equations as cuts '
+                    '(proved in one --multi-goal run, then axioms of the resumed level) instead of hints')
+    ap.add_argument('--gen-cut-time', type=float, default=5.0)
+    ap.add_argument('--gen-cut-sep', action='store_true', help='--gen-cuts: each cut in its own run with its own kNN lemmas and rule-model goal')
+    ap.add_argument('--gen-cut-min', type=int, default=1, help='a cut counts when proved after this many considered CPs')
     ap.add_argument('--model-negmax', type=int, default=400, help='negative rules per problem when training (memory)')
     ap.add_argument('--model-threads', type=int, default=8)
     ap.add_argument('--rerun-solved', action='store_true',

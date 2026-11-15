@@ -2602,12 +2602,13 @@ target tokens.
 | GC, control | 0/200 | 4/200 |
 | GG, gen2 at 3000 (n 400, T 0.7), re-queued | 0/200 | 2/200 |
 | GC1A, copy model gc1 at 1000 (n 400, T 0.7), re-queued | 0/200 | 4/200 |
+| GQ, re-queue alone (no generator) | 0/200 | 2/200 |
 
 GC1A proved one goal the control did not, `Ka1_eq_Ka2__goal_403`, and
 missed one the control proved. None of the 280 hints it generated for
-that goal is among the proof's 234 lemmas. The +1 comes from the
-re-queue or from search perturbation; arm GQ (re-queue alone) is
-running.
+that goal is among the proof's 234 lemmas. GQ (re-queue alone) proved
+2 of the control's 4 and nothing else, so neither the re-queue nor the
+generated hints gain; GC1A's +1 is search perturbation.
 
 * GG proved 2 of the control's 4 and nothing else.
 * Its hints do steer the search. On one goal, of 353 generated hints,

@@ -197,8 +197,13 @@ class LemmaIndex:
             self._idf[key] = {x: math.log((len(g) + 1) / c) for x, c in df.items()}
         return self._idf[key]
 
-    def select(self, name, k, exclude=()):
-        """The K proven goals with the same axioms most similar to NAME's goal."""
+    def select(self, name, k, exclude=(), eq=None):
+        """The K proven goals with the same axioms most similar to NAME's goal
+        (EQ: (lhs, rhs) of another goal over NAME's axioms, a cut, instead)."""
+        if eq is not None:
+            import feats
+            key = self.info[name][0] if name in self.info else axiom_key(name)
+            return self._select(name, key, frozenset(feats.features(eq[0], eq[1], 3)), k, exclude, None)
         if name not in self.info:  # targets: in memory only, no cache write
             import hintsel
             try:
@@ -207,9 +212,11 @@ class LemmaIndex:
                 F = frozenset()
             self.info[name] = (axiom_key(name), F)
         key, F = self.info[name]
+        return self._select(name, key, F, k, exclude, lemma_form(name) or conjecture(name))
+
+    def _select(self, name, key, F, k, exclude, form):
         idf = self.idf(key, name)
         wF = sum(idf.get(x, 0) for x in F)
-        conj = conjecture(name)
         scored = []
         for m in self.candidates(key, name):
             if m == name or m in exclude:
@@ -221,7 +228,7 @@ class LemmaIndex:
             union = wF + sum(idf[x] for x in G) - inter
             scored.append((inter / union, m))
         scored.sort(key=lambda x: (-x[0], x[1]))
-        out, seen = [], {lemma_form(name) or conj}
+        out, seen = [], {form}
         for _, m in scored:
             f = lemma_form(m)
             if f in seen:
