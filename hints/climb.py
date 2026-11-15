@@ -206,6 +206,7 @@ def main():
     ap.add_argument('--updown', action='store_true', help='climb up (theory unions, weaker goals) when no sketch proves the target, then down')
     ap.add_argument('--move-model', help='--updown: a latticepolicy.py model orders the moves (softmax sampling)')
     ap.add_argument('--move-temp', type=float, default=1.0)
+    ap.add_argument('--move-ab', action='store_true', help='--move-model only on targets of odd crc32 (A/B test)')
     ap.add_argument('--move-eps', type=float, default=0.1, help='--move-model: share of uniformly random moves')
     ap.add_argument('--up-single', action='store_true', help='--updown: going up also adds one assumption at a time')
     ap.add_argument('--up-levels', type=int, default=2, help='--up-single: levels of one-more-axiom')
@@ -604,6 +605,10 @@ def main():
         return list(dict.fromkeys(out))
 
     policy = None
+    def move_arm(t):
+        """--move-ab: the targets that use the policy (odd crc32 of the name); the others the fixed order"""
+        import zlib
+        return zlib.crc32(t.encode()) % 2 == 1
     if c.move_model:
         import json, math, random, latticedata, latticepolicy
         policy = json.load(open(c.move_model))
@@ -656,7 +661,7 @@ def main():
                     if groups:
                         queue.append((groups[0] | other, gv))
                 continue
-            if policy is None:
+            if policy is None or (c.move_ab and not move_arm(t)):
                 queue.sort(key=lambda n: (n[1] is not None, len(n[0])))
                 S, g = queue.pop(0)
             else:

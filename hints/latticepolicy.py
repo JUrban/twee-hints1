@@ -4,8 +4,9 @@
   latticepolicy.py train ROWS.tsv --out policy.json [--label nontrivial|credit] [--test-frac 0.25]
 
 Logistic regression (numpy, L2, standardised features) on latticedata.py rows; the label is
-'nontrivial' (the sketch was proved, used an assumption, and has >= 30 steps) or 'credit' (> 0: the
-target's real proof reused the sketch's steps). The held-out split is by target, so moves of one
+'nontrivial' (the sketch was proved, used an assumption, and has >= 30 steps), 'credit' (> 0: the
+target's real proof reused the sketch's steps) or 'realized' (soft: the share of the sketch's steps
+that the real final run derived, 0 for a failed sketch). The held-out split is by target, so moves of one
 target are never on both sides. climb.py --move-model scores the queued moves with it and samples
 the next by softmax (--move-temp), with --move-eps random moves.
 """
@@ -20,7 +21,12 @@ from latticedata import FEATURES
 def load(path, label):
     X, y, g = [], [], []
     for r in csv.DictReader(open(path), delimiter='\t'):
-        if label == 'credit':
+        if label == 'realized':
+            # soft label: the share of the sketch's steps the real final run derived; 0 for a failed sketch
+            if r['proved'] == '1' and not r['realized']:
+                continue
+            v = float(r['realized']) if r['proved'] == '1' else 0.0
+        elif label == 'credit':
             if r['proved'] != '1' or not r['credit']:
                 continue
             v = float(r['credit']) > 0.05
@@ -28,7 +34,7 @@ def load(path, label):
             if r['nontrivial'] == '':
                 continue
             v = r['nontrivial'] == '1'
-        X.append([float(r[k]) for k in FEATURES]); y.append(int(v)); g.append(r['target'])
+        X.append([float(r[k]) for k in FEATURES]); y.append(float(v)); g.append(r['target'])
     return np.array(X), np.array(y), g
 
 
@@ -58,7 +64,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('cmd', choices=['train'])
     ap.add_argument('rows'); ap.add_argument('--out', required=True)
-    ap.add_argument('--label', default='nontrivial', choices=['nontrivial', 'credit'])
+    ap.add_argument('--label', default='nontrivial', choices=['nontrivial', 'credit', 'realized'])
     ap.add_argument('--test-frac', type=float, default=0.25)
     ap.add_argument('--l2', type=float, default=1.0)
     a = ap.parse_args()
@@ -68,8 +74,9 @@ def main():
     tr = np.array([t not in test for t in g])
     m = fit(X[tr], y[tr], a.l2)
     s_te = [score(m, x) for x in X[~tr]]
-    print(f'{len(y)} moves ({y.sum()} positive), {len(ts)} targets; held-out {(~tr).sum()} moves of {len(test)} targets: '
-          f'AUC {auc(s_te, y[~tr]):.3f}')
+    yb = y[~tr] > (0.5 if a.label != 'realized' else np.median(y[y > 0]) if (y > 0).any() else 0.5)
+    print(f'{len(y)} moves (mean label {y.mean():.3f}), {len(ts)} targets; held-out {(~tr).sum()} moves of {len(test)} '
+          f'targets: AUC {auc(s_te, yb):.3f}' + (' (label above the median of positive)' if a.label == 'realized' else ''))
     m = fit(X, y, a.l2)   # the saved model uses all rows
     m['label'] = a.label; m['n'] = int(len(y))
     for k, w in sorted(zip(FEATURES, m['w']), key=lambda x: -abs(x[1])):
