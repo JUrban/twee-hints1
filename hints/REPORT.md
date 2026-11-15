@@ -2591,7 +2591,9 @@ target tokens.
     future steps (gen4: 9);
   * step 2000: 12 of 1,040 novel steps, 32 of 2,025 future steps;
   * step 2000 with n 1,600: 19 of 1,040 novel steps (1.8%), 51 of 2,025
-    future steps. Four times the samples gives 1.6 times the hits.
+    future steps. Four times the samples gives 1.6 times the hits;
+  * step 3000: 12 novel; step 4000: 11 novel. A plateau, so training was
+    stopped at 18:13 (models/gc1_4000.pt).
 
 **Online test** (`abs/gen_test.sh`, sets/gen200, snapshot ULsW):
 
