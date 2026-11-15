@@ -2731,6 +2731,90 @@ question) has the same limit: a cut proved by the run's own saturation
 is already in its state. Only a cut proved by a differently guided
 search adds information.
 
+## 2aj. Sketches in stronger theories, climbing up and down (user's suggestions, 15 Nov evening)
+
+The user's points:
+
+* Assume stronger theories instead of laws. They are mathematically
+  relevant (Bol loops for loops) and should not trivialise the sketch.
+* Dream up new axioms with the generator.
+* When a sketch is still too hard, make the theory stronger or the goal
+  weaker. Climb both up and down, and learn from the climbs.
+* This follows the over- and under-approximation of Hernandez and
+  Korovin, IJCAR 2018.
+
+**What `climb.py` now does** (04617bc–493f9cd):
+
+* `--min-sketch-steps N`: a law, theory or generated equation whose
+  sketch proof has fewer than N steps is banned for the target.
+* `--theories K`: the extra axioms of up to K stronger theories, one
+  theory at a time.
+  * A stronger theory is the axiom set of another original that
+    strictly contains the target's. 74 of the 129 originals have one;
+    the 17-axiom base theory has 115.
+  * Theories are ranked by the similarity of their solved goals to the
+    target.
+  * `--theory-lemmas 10` adds the stronger theory's proven goals most
+    similar to the target (`LemmaIndex.select_in`). They are true in B,
+    not in A.
+* `--gen-assume K`: the generator's most sampled equations, one at a
+  time.
+* `--updown` (`climb2`): when no sketch proves the target, go up.
+  * Up: unions of the theories, and weaker goals, which are instances
+    of the conjecture (two variables merged first, then a variable set
+    to e). They go in through `loop.py`'s new `goal_override` hook.
+  * Down, from every proof: drop a used assumption, or restore the goal.
+  * Every proof's steps become hints of the original.
+* `--chain`: a proof in the climb is a sibling lemma and hints for the
+  original's later targets at once.
+
+**sets/gen48** (the first 48 of gen200: unsolved, each with one failed
+fresh 5 s run; snapshot ULsW, 1 worker each):
+
+| arm | proved | CPU s |
+|---|---:|---:|
+| fresh 20 s (control) | 1 | 1,589 |
+| fresh 20 s `--backwards-goal 1` | 1 (the same, 35.68 against 35.69 s) | 1,545 |
+| fresh 20 s `--hint-goal` | **2** | 1,822 |
+| CL6A: siblings + kNN goals + gap filling (CL5's config) | 2 | 4,903 |
+| CL6L: laws only, trivialising laws banned | 2 | 4,168 |
+| CL6T: 6 stronger theories + their lemmas | 2 | 4,546 |
+| CL6U: CL6T + up/down | 2 | 4,051 |
+| CL6G: 6 generated equations | 2 | 4,483 |
+
+* Every 2 is aK2_eq_aK3_d__goal_462 (the control's) plus
+  Ka1_eq_Ka2__goal_403.
+* `--hint-goal` alone proves 403 too, so 403 falls to any change in the
+  search. On gen48 the sketches gain nothing beyond perturbation.
+* **Sketches are trivial on these goals** whatever the assumption:
+  * a nearby unproven sibling or kNN goal proves the target in 0.3–2 s;
+  * so does a stronger theory's proven goal (one lemma, 1.7 s);
+  * so does a generated equation (0.3–2.8 s; the generator writes
+    near-restatements of the goal);
+  * so does a weaker goal (an instance, 0.5–1.4 s).
+
+  The assumptions that help are as hard as the target, so the sketch
+  covers only the easy last steps.
+* gen48 spreads its goals over many originals, so sketch hints and true
+  lemmas, which are shared within an original, barely accumulate.
+
+**Family test** (`abs/fam.sh`): sets/fam24 holds the first 12 unsolved
+goals, in proof order, of aK2_eq_aK3_1243b (66 stronger theories) and of
+nsmr_to_aa1 (3). Snapshot loops/ULsX is UL at 20:15. Goals run in
+order with `--chain`, 1 worker.
+
+* **The full up-down climb (FUD) proved 3/24 in 2,652 s:** 1243b
+  goals 441, 445 and 448, none of nsmr_to_aa1.
+  * 441: the final run used 17 true lemmas proved by gap filling (a
+    chain of real proofs); without them it fails.
+  * 445 and 448: the runs with the hints alone also prove them, in
+    14.2 s and 2.7 s.
+* **The control, the same climb without assumptions (one fresh 80 s run
+  per goal, with `--chain`),** had proved 1 (goal 446) at 14 of 24
+  goals, after about the same 2,650 s.
+* Running: the full climb and its control on the next 24 unsolved 1243b
+  goals (fam1243b2), and the climb without theories on fam24.
+
 ## 2c. Long runs: stall cutoff and checkpoints
 
 * `--eqhint-stall N` gives up when no new rule has matched a hint for N
