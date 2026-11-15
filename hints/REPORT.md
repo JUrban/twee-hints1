@@ -39,6 +39,8 @@ written in loops/UL. Merged proofs count from their merge.
 | 15 Nov 05:51 | 43,360 | 4709 | A/B 2 merged: the scheduler with 10 s fresh runs wins |
 | 15 Nov 07:00 | 43,462 | 4717 | stall: resumes to 80 s, then tail heads first at 320 s (2ac; 8%, dropped at 07:36) |
 | 15 Nov 09:05 | 43,502 | 4720 | production cut to 6–12 workers for model tests (2ad); Prover9 side worker from 08:56 |
+| 15 Nov 10:12 | 43,661 | | `--retry-knn` (2ae): kNN lemma changes reach the cascade |
+| 15 Nov 12:05 | 43,735 | 4745 | unfolded-twee side worker from 11:18 (2af) replaces Prover9's |
 
 From 15 Nov 05:30 the rate fell from hundreds an hour to 50–100. The
 cheap new contexts are used up; 58% of the unsolved goals sit behind the
@@ -2537,7 +2539,28 @@ rounds of 30 s or more, but about 40% overhead for 8 s rounds.
 
 ## 4. Next steps
 
-*Updated 15 Nov, 09:05.*
+*Updated 15 Nov, 12:10.*
+
+* **Since 09:05:**
+  * The cascade's retry gate now sees kNN lemma changes (2ae): about
+    +160 proofs in 30 minutes, then the rate fell back to 40–60 an hour.
+  * Model quality cannot pay online. The oracle model gains nothing,
+    with defer-once or with deferral repeated 3 times (2ad, 2af). The
+    GNN reaches AUC 0.887 offline and stays there.
+  * Twee folds AIM's definitions and Prover9 unfolds them (2af).
+    * Unfolded twee proves 7 of Prover9's 9 proofs, and 3 of 10 goals
+      Prover9 failed. On random frontier goals it gains nothing.
+    * It now runs as the side worker, instead of Prover9.
+  * Controls in the same snapshot matter: without them, fresh context
+    looks like a method's gain (the folded lemma instances, 2af).
+* **Next:**
+  * Watch the side worker's rate as it moves away from the nearest
+    targets.
+  * Tail heads (92 originals, 58% of the unsolved goals behind them):
+    folded 0 of 30 at 20 s.
+  * Production and side worker use 14 CPUs. The rest is for tests.
+
+*Earlier (15 Nov, 09:05):*
 
 * **Since 04:35:**
   * The learned scheduler with a 10 s first level is in production
