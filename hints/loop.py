@@ -727,11 +727,18 @@ class Loop:
                     if SM and RK:
                         # best predicted first; the kNN check (~27 ms a goal) only as far as needed
                         free = a.j - len(running)
-                        retry = []; cand = {}
+                        retry = []; cand = {}; kbudget = [150]   # (uncached kNN checks per pass: ~4 s)
+                        def kcheck(n):
+                            v_ = knn_cur.get(n)
+                            if v_ is None or v_[0] != kgen[0]:
+                                if kbudget[0] <= 0:
+                                    return False
+                                kbudget[0] -= 1
+                            return knnch(n)
                         for v, n in sorted((-score(n), n) for n in att if n not in busy):
                             if ctx(n) != att[n][0] or grown(n) or n not in knn_at:
                                 cand[n] = -v
-                            elif -v >= lmin and sc[n][2] <= a.sched_max_lgap and len(retry) < free and knnch(n):
+                            elif -v >= lmin and sc[n][2] <= a.sched_max_lgap and len(retry) < free and kcheck(n):
                                 cand[n] = -v
                             else:
                                 continue
