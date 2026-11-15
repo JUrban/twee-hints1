@@ -1772,7 +1772,7 @@ The same holds for the sg3 test: CL5's proofs were a subset of fresh
 * The climber is now a filler (`--cpus 20`, up to 8). It takes only
   goals whose fresh run in the latest round failed as well.
 
-**Fresh runs far from a proof beat resumes near one (UL13, 03:40).**
+**Fresh runs far from a proof beat resumes near one (UL13, 03:28).**
 UL13 ran 2,600 runs in 115 minutes and made 465 new proofs; the climber
 added 27. Afterwards I replayed its rows in order. Each run was binned by
 its goal's distance, in proof lines, to the nearest goal proven below it
@@ -1984,7 +1984,7 @@ are run in `/project/hintwork`, with `venv` holding lightgbm.
 
    `G` comes from `rulemodel.py goalfiles`, `H` from
    `hintsel.py knnfiles`, and `P.p` with lemmas from `lemmas.py`.
-5. **The production loop as of 15 Nov 03:40** (`abs/ul14.sh` and
+5. **The production loop as of 15 Nov 03:28** (`abs/ul14.sh` and
    `abs/clive.sh` in /project/hintwork). It is a cascade with fresh 20 s
    runs, resumes to 80 s, and side workers synced in:
 
