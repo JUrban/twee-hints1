@@ -2809,11 +2809,34 @@ order with `--chain`, 1 worker.
     chain of real proofs); without them it fails.
   * 445 and 448: the runs with the hints alone also prove them, in
     14.2 s and 2.7 s.
-* **The control, the same climb without assumptions (one fresh 80 s run
-  per goal, with `--chain`),** had proved 1 (goal 446) at 14 of 24
-  goals, after about the same 2,650 s.
-* Running: the full climb and its control on the next 24 unsolved 1243b
-  goals (fam1243b2), and the climb without theories on fam24.
+* **Final numbers:**
+
+  | set | arm | proved | CPU s | proofs per CPU-hour |
+  |---|---|---|---:|---:|
+  | fam24 | full climb (FUD) | 3 (1243b 441, 445, 448) | 2,652 | 4.1 |
+  | fam24 | control: the same climb without assumptions, one fresh 80 s run per goal (F80) | 3 (1243b 446, nsmr 614, 616) | 6,032 | 1.8 |
+  | fam24 | climb without stronger theories (FUDnt) | 1 (448) | 1,738 | 2.1 |
+  | next 24 unsolved 1243b goals | full climb (FUD2) | 1 (455) | 2,904 | 1.2 |
+  | next 24 unsolved 1243b goals | control (F80b) | 455 at 15 of 24 | | |
+
+* The climb and long fresh runs prove different goals: 6 distinct
+  between them on fam24.
+* The stronger theories are what the climb adds on the base-theory
+  family: 3 against 1 without them.
+* Per CPU the climb is at least as productive as long fresh runs on
+  goals production has stalled on.
+
+**Deployed as a live side worker (22:07, `abs/clu.sh`, loops/CLU).**
+
+* It runs the FUD config with `--up-single` (one more axiom when going
+  up).
+* It takes production's stalled goals and fills idle CPUs (`--cpus 20`,
+  at most 6 climbs).
+* Its proofs go into loops/UL.
+* It saves every sketch's proof steps (loops/CLU/sketches). These are
+  the data for learning the lattice moves, which the user asked for
+  (15 Nov): which step, up or down, to take for a given problem, as a
+  randomized policy.
 
 ## 2c. Long runs: stall cutoff and checkpoints
 
