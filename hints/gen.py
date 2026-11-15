@@ -131,6 +131,8 @@ class Dec(nn.Module):
         self.varemb = nn.Embedding(MAXV, d)
         self.pos = nn.Embedding(maxlen, d)
         self.tf = nn.TransformerDecoder(nn.TransformerDecoderLayer(d, nhead, 4 * d, dropout=0.1, batch_first=True), layers)
+        for L in self.tf.layers:   # no dropout on attention weights (half the step time); residual dropout stays
+            L.self_attn.dropout = 0.0; L.multihead_attn.dropout = 0.0
         self.acth = nn.Linear(d, 3)          # SYM, VAR, EOS (action - 1)
         self.pq = nn.Linear(d, d); self.pk = nn.Linear(d, d)
         self.varh = nn.Linear(d, MAXV)
@@ -148,6 +150,27 @@ class Dec(nn.Module):
         x = x + torch.where(ivar.unsqueeze(-1), ve, torch.zeros_like(ve))
         T = acts.shape[1]
         return x + self.pos(torch.arange(start, start + T).clamp(max=self.maxlen - 1)).unsqueeze(0)
+
+    def grouped_logits(self, acts, args, symemb, symmask, mem, memmask, Q):
+        """As step_logits for S*Q sequences grouped by sample (rows s*Q .. s*Q+Q-1 belong to
+        sample s): symemb (S, K, d), mem (S, N, d). Cross-attention runs once per sample over
+        its Q*T queries, so the memory's keys and values are projected once per sample."""
+        S = mem.shape[0]; B, T = acts.shape
+        se = symemb.repeat_interleave(Q, 0)
+        x = self.embed(acts, args, se)
+        causal = torch.triu(torch.ones(T, T, dtype=torch.bool), 1)
+        for L in self.tf.layers:
+            x = L.norm1(x + L.dropout1(L.self_attn(x, x, x, attn_mask=causal, need_weights=False)[0]))
+            xq = x.reshape(S, Q * T, -1)
+            c = L.multihead_attn(xq, mem, mem, key_padding_mask=~memmask, need_weights=False)[0]
+            x = L.norm2(x + L.dropout2(c.reshape(B, T, -1)))
+            x = L.norm3(x + L.dropout3(L.linear2(L.dropout(F.relu(L.linear1(x))))))
+        y = x
+        al = self.acth(y)
+        pl = torch.einsum('btd,bkd->btk', self.pq(y), self.pk(se)) / math.sqrt(self.d)
+        pl = pl.masked_fill(~symmask.repeat_interleave(Q, 0).unsqueeze(1), float('-inf'))
+        vl = self.varh(y)
+        return al, pl, vl
 
     def step_logits(self, acts, args, symemb, symmask, mem, memmask):
         x = self.embed(acts, args, symemb)
@@ -271,10 +294,11 @@ def masks_of(seq, keys):
 def batch_loss(model, G, targets, weights):
     """targets: per sample a list of sequences. Mean token loss, weighted per sample."""
     mem, mm, se, sm, keys = model.memories(G)
-    rows = [(s, q) for s, qs in enumerate(targets) for q in qs]
-    if not rows:
+    if not any(targets):
         return None
-    T = max(len(q) for _, q in rows)
+    Q = max(len(qs) for qs in targets)
+    rows = [(s, qs[i] if i < len(qs) else None) for s, qs in enumerate(targets) for i in range(Q)]
+    T = max(len(q) for _, q in rows if q)
     B = len(rows)
     acts = torch.full((B, T), A_EOS, dtype=torch.long); args = torch.zeros((B, T), dtype=torch.long)
     tin_a = torch.full((B, T), A_EOS, dtype=torch.long); tin_x = torch.zeros((B, T), dtype=torch.long)
@@ -282,6 +306,8 @@ def batch_loss(model, G, targets, weights):
     vmax = torch.zeros((B, T), dtype=torch.long)
     sid = torch.tensor([s for s, _ in rows]); w = torch.tensor([weights[s] for s, _ in rows], dtype=torch.float32)
     for i, (s, q) in enumerate(rows):
+        if q is None:   # padding (the sample has fewer targets): no loss
+            w[i] = 0.0; continue
         ms = masks_of(q, keys[s])
         for t, ((a, x), (must_eos, nv)) in enumerate(zip(q, ms)):
             acts[i, t] = a; args[i, t] = x; valid[i, t] = True; forced[i, t] = must_eos
@@ -289,7 +315,7 @@ def batch_loss(model, G, targets, weights):
         tin_a[i, 0] = A_BOS
         for t in range(1, len(q)):
             tin_a[i, t] = q[t - 1][0]; tin_x[i, t] = q[t - 1][1]
-    al, pl, vl = model.dec.step_logits(tin_a, tin_x, se[sid], sm[sid], mem[sid], mm[sid])
+    al, pl, vl = model.dec.grouped_logits(tin_a, tin_x, se, sm, mem, mm, Q)
     # actions (not where EOS is forced); EOS is not allowed while slots are open
     al = al.clone(); al[..., A_EOS - 1] = al[..., A_EOS - 1].masked_fill(~forced, float('-inf'))
     la = F.cross_entropy(al.reshape(-1, 3), (acts - 1).clamp(min=0).reshape(-1), reduction='none').reshape(B, T)
@@ -301,7 +327,7 @@ def batch_loss(model, G, targets, weights):
     lv = F.cross_entropy(vl.reshape(-1, MAXV), args.reshape(-1).clamp(max=MAXV - 1), reduction='none').reshape(B, T)
     lv = torch.where(valid & (acts == A_VAR), lv, torch.zeros_like(lv))
     tok = (la + lp + lv).sum(1) / valid.sum(1).clamp(min=1)
-    return (tok * w).sum() / w.sum()
+    return (tok * w).sum() / w.sum().clamp(min=1e-9)
 
 
 @torch.no_grad()
@@ -424,6 +450,9 @@ def main():
     ap.add_argument('--k', type=int, default=-1, help='hints: the cut (default: all rules as context)')
     ap.add_argument('--temp', type=float, default=1.0)
     ap.add_argument('--seed', type=int, default=1)
+    ap.add_argument('--cosine', type=int, default=1)
+    ap.add_argument('--init-from', help='train: start from this checkpoint (model and vocabulary)')
+    ap.add_argument('--step0', type=int, default=0, help='train: the checkpoint\'s step (for the log)')
     ap.add_argument('--pool-dir', help='eval: hints dir of a loop (the pools)')
     ap.add_argument('--problem', help='hints-out: the problem file the run had (its axioms)')
     ap.add_argument('--out', help='hints, hints-out: write the hints here (default stdout)')
@@ -431,12 +460,17 @@ def main():
     a = ap.parse_args()
     torch.set_num_threads(a.threads); random.seed(a.seed); torch.manual_seed(a.seed)
 
+    if a.init_from and not a.load:
+        a.load = a.init_from
     if a.load:
         ck = torch.load(a.load, weights_only=False)
         vocab = Vocab(); vocab.idx = ck['vocab']; vocab.frozen = True
         sa = ck['args']
         model = Model(sa['dim'], sa['layers'], sa['dlayers'])
         model.load_state_dict(ck['model'])
+        if a.cmd == 'train':
+            vocab.frozen = False
+            a.dim, a.layers, a.dlayers = sa['dim'], sa['layers'], sa['dlayers']
     else:
         vocab = Vocab()
         model = Model(a.dim, a.layers, a.dlayers)
@@ -560,16 +594,19 @@ def main():
         loss = batch_loss(model, G, targets, weights)
         if loss is None:
             continue
+        if a.cosine:   # cosine decay to a tenth of --lr
+            for g in opt.param_groups:
+                g['lr'] = a.lr * (0.1 + 0.45 * (1 + math.cos(math.pi * step / a.steps)))
         opt.zero_grad(); loss.backward()
         nn.utils.clip_grad_norm_(model.parameters(), 1.0)
         opt.step(); run.append(loss.item())
         if step % 100 == 0 or step in (1, 10):
-            print(f'step {step} loss {np.mean(run[-100:]):.4f} {time.time()-t0:.0f}s (vocab {len(vocab.idx)})', flush=True)
+            print(f'step {step + a.step0} loss {np.mean(run[-100:]):.4f} {time.time()-t0:.0f}s (vocab {len(vocab.idx)})', flush=True)
         if a.save and (step % a.eval_every == 0 or step == a.steps):
             torch.save({'model': model.state_dict(), 'vocab': vocab.idx, 'args': vars(a)}, a.save)
             if test:
                 r, nh, tot, m = evaluate(test[:a.eval_n])
-                print(f'  eval step {step}: mean recall {r:.3f} ({nh}/{tot} future proof rules, {m} problems, n={a.n})', flush=True)
+                print(f'  eval step {step + a.step0}: mean recall {r:.3f} ({nh}/{tot} future proof rules, {m} problems, n={a.n})', flush=True)
 
 
 if __name__ == '__main__':
