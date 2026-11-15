@@ -2140,13 +2140,13 @@ arm; fresh 20 s, production L0 settings, no `--online`):
 * at its stricter matching threshold, rm7t ties rm4t too;
 * the stricter threshold alone loses 10.
 
-| oracle rmO (trained on these 400 goals' own logs: AUC 0.956; at 0.1 keeps 99.3% of proof rules, defers 57.3% of the others), 0.1 | 197 of 259 (rm4t 199) | 2 | 1.01 |
+| oracle rmO (trained on these 400 goals' own logs: AUC 0.956; at 0.1 keeps 99.3% of proof rules, defers 57.3% of the others), 0.1 | 273 | 9 (7 lost) | 1.03 |
 
 So the better model only cancels the cost of a stricter filter. The
 searches are driven by the pools and lemmas. 52 of the 263 shared
 proofs have identical work under both models, and the rest differ by a
 few per cent either way. **Even a near-oracle model gains nothing
-through the defer-once filter** (rmO: 197 against 199, work 1.01).
+through the defer-once filter** (rmO: 273 against 271, work 1.03).
 Production keeps rm4t. Rule-model quality cannot pay off through this
 mechanism, whether ENIGMA or GNN. A GNN would need a stronger hook, such
 as the passive queue's order, where twee would have to score millions of
