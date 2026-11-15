@@ -2411,6 +2411,41 @@ about 4.5 proofs per CPU-hour. Production makes about 4 per CPU-hour
 (UL27: 54 in 79 minutes on 10 workers).
 
 
+## 2ag. Tail heads, and the cutoff between fresh runs and resumes (15 Nov)
+
+**Tail heads** are the first unsolved goal after an original's last
+proof. There are 92, with lines gaps 13–68 (median 34), and most
+unsolved goals sit behind them. On 30 random heads (sets/heads30,
+snapshot ULsV at 12:03, fresh 20 s, production context):
+
+| arm | heads proved |
+|---|---:|
+| folded (control) | 0 of 30 |
+| cross-original pool (`--pool tier:20:500:0.1`) | 0 of 30 |
+| unfolded (2af) | 0 of 28 |
+
+This also retests the tier pool, whose earlier negative came from the
+invalid snapshot.
+
+**Fresh runs against resumes.** The last 1,500 UL27 runs:
+
+| level | proved | runs | rate | CPU-hours | proofs per CPU-hour |
+|---|---:|---:|---:|---:|---:|
+| fresh (10 s) | 54 | 1,039 | 5.2% | 5 | 10.8 |
+| resume to 80 s | 47 | 461 | 10.2% | 20 | 2.4 |
+
+* A resume now costs 9 fresh runs (156 against 17 wall seconds). The
+  0.06 cutoff, below which fresh candidates wait behind the resumes,
+  assumed 3.
+* The scheduler also overpredicts, 2.3 times (33 proofs against 77
+  predicted).
+* So a fresh run predicted at about 0.025 or more pays better than a
+  resume.
+
+**UL28 from 12:40** (`abs/ul28.sh`): `--sched-pmin 0.025`, 12 workers.
+UL27's rate, for comparison: 93 proofs in 129 minutes on 10–11 workers,
+plus 18 synced from the side workers.
+
 ## 2c. Long runs: stall cutoff and checkpoints
 
 * `--eqhint-stall N` gives up when no new rule has matched a hint for N
