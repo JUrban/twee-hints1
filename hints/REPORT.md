@@ -1902,13 +1902,49 @@ On ABb's last 515 fresh runs, the fixed bins raised AUC from 0.751 to
 0.807. Both arms (251 proofs) were merged into UL, and the climber was
 stopped.
 
-**A/B 2 (running, 05:16).** Three arms from one copy of UL (43,272
-solved), 7 workers each, for an hour:
+**A/B 2: the scheduler with a 10 s first level wins.** Three arms ran
+from one copy of UL (43,272 solved), 7 workers each, from 05:16:
 
 * ABc: distance order;
 * ABd: `--sched-model sched/m3.json --sched-max-lgap 320 --sched-retrain 200`
   (m3: fixed bins and `lg_new`, AUC 0.736 against 0.671 for distance);
 * ABe: as ABd, with a 10 s first level (`--cascade 10,80`).
+
+New proofs (ABc / ABd / ABe):
+
+| minutes | ABc | ABd | ABe |
+|---|---|---|---|
+| 12 | 15 | 34 | 33 |
+| 22 | 19 | 43 | 63 |
+| 33 | 22 | 52 | 68 |
+| 35 (stopped) | 22 | 52 | 69 |
+
+Union 88. ABe ran twice as many fresh runs for the same CPU (14% proved
+against 24% for ABd).
+
+After 25 minutes all three arms ran dry: 5 proofs in 10 minutes on 21
+CPUs. A/B 1 and UL14 had taken most of the new contexts. The remaining
+candidates had already failed in their current context. With the same
+settings, such a rerun repeats a deterministic search, so it can only
+succeed if the hint pool has grown.
+
+The arms were stopped at 35 minutes and merged into UL (43,360 solved).
+
+**Next: a portfolio for stalled goals.** sets/st80 holds 80 of the
+1,575 goals within 80 lines of a proof whose last fresh run failed with
+the same nearest proven goal below (`abs/stalled_set.py`). Each goal gets
+fresh 20 s runs in 8 variants of the L0 configuration (`abs/port.sh`,
+snapshot loops/ULsM, 2 workers each):
+
+* the base configuration;
+* term orderings 1 and 2 (`--p9-orders 4 --p9-order-offset k`);
+* no rule model;
+* 12 or 2 sibling lemmas;
+* the 500 most frequent hints;
+* rule threshold 0.3 with penalty 5.
+
+Production (UL15, `abs/ul15.sh`) meanwhile runs the scheduler with
+`--cascade 10,80` on 4 workers.
 
 ## 2c. Long runs: stall cutoff and checkpoints
 
@@ -2113,12 +2149,13 @@ are run in `/project/hintwork`, with `venv` holding lightgbm.
 
    `G` comes from `rulemodel.py goalfiles`, `H` from
    `hintsel.py knnfiles`, and `P.p` with lemmas from `lemmas.py`.
-5. **The production loop as of 15 Nov 03:28** (`abs/ul14.sh` and
+5. **The production loop as of 15 Nov 05:55** (`abs/ul15.sh`; before, `abs/ul14.sh` and
    `abs/clive.sh` in /project/hintwork). It is a cascade with fresh 20 s
    runs, resumes to 80 s, and side workers synced in:
 
-       loop.py sets/all loops/UL --start 5 --cascade 20,80 --cascade-start 0 \
+       loop.py sets/all loops/UL --start 5 --cascade 10,80 --cascade-start 0 \
          --cascade-continue --fresh-first --far-retry --retry-gap 3 \
+         --sched-model sched/m4.json --sched-max-lgap 320 --sched-retrain 200 \
          --line-gaps 80,13 --retry-hints 1.25 --sync 60 \
          --model --model-fixed rm4t.bin,rm4t.vocab --model-theory \
          --lemmas 6 --lemma-knn 10 --lemma-subsets --lemma-after \
