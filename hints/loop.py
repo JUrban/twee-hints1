@@ -516,6 +516,28 @@ class Loop:
         self.lemma_src = {o: set(v) for o, v in lemmas.by_original(self.solved).items()}
         if a.lemma_knn:
             self.lemma_index = lemmas.LemmaIndex(sorted(self.solved), subsets=a.lemma_subsets)
+        # --retry-knn (15 Nov): fresh 20 s runs in the full current context proved 6 of 35 goals the
+        # cascade held as stalled (~30 proofs/CPU-h); all six used kNN lemmas from other originals
+        # proven since their last run, a change the sibling context and pool growth do not see
+        knn_at, knn_cur, kgen = {}, {}, [0, time.time(), len(self.solved)]
+        kfile = os.path.join(self.dir, 'knn_at.tsv')
+        RK = a.retry_knn and a.lemma_knn
+        if RK and os.path.exists(kfile):
+            for l in open(kfile):
+                w = l.rstrip('\n').split('\t')
+                if len(w) == 2 and l.endswith('\n'):
+                    knn_at[w[0]] = frozenset(filter(None, w[1].split(',')))
+        def knn_sig(n):
+            v = knn_cur.get(n)
+            if v is None or v[0] != kgen[0]:
+                v = knn_cur[n] = (kgen[0], frozenset(lemmas.knn_picks(n, self.lemma_src, a.lemmas, self.lemma_index,
+                                                                      a.lemma_knn, a.lemma_after)))
+            return v[1]
+        def knnch(n):
+            return RK and (n not in knn_at or knn_sig(n) != knn_at[n])
+        kf = open(kfile, 'a') if RK else None
+        if RK:
+            print(f'  cascade: --retry-knn: {len(knn_at)} goals with a recorded kNN lemma set', flush=True)
         byo = collections.defaultdict(list)   # the set's goals and the proven goals of their originals
         for n in set(self.names) | set(self.solved):
             if '__goal_' in n:
@@ -696,7 +718,26 @@ class Loop:
                 busy = {n for n, _ in running.values()}
                 if time.time() - t0 < a.cascade_hours * 3600:
                     g = gaps()
-                    if SM:
+                    if RK and (time.time() - kgen[1] >= a.knn_refresh or len(self.solved) - kgen[2] >= 300):
+                        t_ = time.time()
+                        self.lemma_index = lemmas.LemmaIndex(sorted(self.solved), subsets=a.lemma_subsets)
+                        kgen[:] = [kgen[0] + 1, time.time(), len(self.solved)]
+                        print(f'  cascade: --retry-knn: kNN index rebuilt ({len(self.solved)} proofs, '
+                              f'{time.time()-t_:.0f}s)', flush=True)
+                    if SM and RK:
+                        # best predicted first; the kNN check (~27 ms a goal) only as far as needed
+                        free = a.j - len(running)
+                        retry = []; cand = {}
+                        for v, n in sorted((-score(n), n) for n in att if n not in busy):
+                            if ctx(n) != att[n][0] or grown(n) or n not in knn_at:
+                                cand[n] = -v
+                            elif -v >= lmin and sc[n][2] <= a.sched_max_lgap and len(retry) < free and knnch(n):
+                                cand[n] = -v
+                            else:
+                                continue
+                            if -v >= lmin and sc[n][2] <= a.sched_max_lgap and len(retry) < free:
+                                retry.append((v, n))
+                    elif SM:
                         cand = {n: score(n) for n in att
                                 if n not in busy and (ctx(n) != att[n][0] or grown(n))}
                         retry = sorted((-v, n) for n, v in cand.items()
@@ -735,6 +776,9 @@ class Loop:
                         if retry or (far and not deep):
                             n = (retry or far).pop(0)[-1]; lev = 0
                             att[n] = (ctx(n), 0)
+                            if RK:
+                                knn_at[n] = knn_sig(n)
+                                kf.write(f'{n}\t{",".join(sorted(knn_at[n]))}\n'); kf.flush()
                             if a.retry_hints:
                                 hp[n] = psz(n)
                             # fresh in the new context; its state replaces any older one, so deepening
@@ -935,6 +979,11 @@ def make_parser():
     ap.add_argument('--timeout', default='2', help='seconds, or a list per round: 2,8,30')
     ap.add_argument('--model', action='store_true', help='train and use the ENIGMA rule model')
     ap.add_argument('--model-args', default='--rule-threshold 0.1 --rule-penalty 2')
+    ap.add_argument('--retry-knn', action='store_true',
+                    help='--cascade: a change in a goal\'s kNN lemmas (--lemma-knn) since its last fresh run makes it '
+                         'eligible for a fresh retry, like a new sibling context; the kNN index is rebuilt every '
+                         '--knn-refresh seconds. Sets used are kept in DIR/knn_at.tsv; goals without one count as changed')
+    ap.add_argument('--knn-refresh', type=float, default=1800)
     ap.add_argument('--given-extra', help='more given dirs (comma-separated) for training')
     ap.add_argument('--model-negmax', type=int, default=400, help='negative rules per problem when training (memory)')
     ap.add_argument('--model-threads', type=int, default=8)

@@ -33,6 +33,50 @@ def conjecture(name):
     m = re.search(r'fof\(\w+,\s*conjecture,\s*(.*)\)\.\s*$', txt, re.S)
     return m.group(1).strip() if m else None
 
+# A conditional conjecture ~ s = X | C = D (or ~ X = s | C = D) whose hypothesis binds a variable X
+# that does not occur in s is equivalent to the unit equation C = D with X replaced by s: 6,235 of
+# AIM60k's 9,052 conditional goals (15 Nov; Prover9 proved stalled goals with such siblings, which
+# lemma import had skipped). TWEE_LEMMA_UNITIZE=0 turns the conversion off (controls).
+UNITIZE = os.environ.get('TWEE_LEMMA_UNITIZE', '1') != '0'
+_VAR = re.compile(r'X\d+')
+
+def unitize(f):
+    """The unit-equation fof formula equivalent to conjecture F, or None."""
+    body = re.sub(r'!\s*\[[^\]]*\]\s*:\s*', '', f).strip()
+    while body.startswith('(') and body.endswith(')'):
+        body = body[1:-1].strip()
+    if any(c in body for c in ('=>', '&', '<')):
+        return None
+    lits = [x.strip() for x in body.split('|')]
+    if len(lits) != 2:
+        return None
+    neg = [x for x in lits if x.startswith('~')]; pos = [x for x in lits if not x.startswith('~')]
+    if len(neg) != 1 or len(pos) != 1 or '!=' in pos[0] or pos[0].count('=') != 1:
+        return None
+    h = neg[0][1:].strip()
+    while h.startswith('(') and h.endswith(')'):
+        h = h[1:-1].strip()
+    if h.count('=') != 1 or '!=' in h:
+        return None
+    a, b = (x.strip() for x in h.split('='))
+    for v, t in ((b, a), (a, b)):
+        if _VAR.fullmatch(v) and not re.search(r'\b%s\b' % v, t):
+            c, d = (re.sub(r'\b%s\b' % v, t, x.strip()) for x in pos[0].split('='))
+            if c == d:
+                return None
+            vs = sorted(set(_VAR.findall(c + ' ' + d)), key=lambda x: int(x[1:]))
+            eq = f'{c} = {d}'
+            return f'! [{",".join(vs)}] : ({eq})' if vs else eq
+    return None
+
+_lform = {}
+def lemma_form(name):
+    """NAME's conjecture as a unit-equation axiom formula (unitize for conditional ones), or None."""
+    if name not in _lform:
+        f = conjecture(name)
+        _lform[name] = None if not f else f if unit_eq(f) else (unitize(f) if UNITIZE else None)
+    return _lform[name]
+
 def negated_goal(name, tag):
     """The conjecture of NAME as a skolemised negated_conjecture body (constants
     sk<TAG>x<i>), or None unless it is a universally quantified unit equation."""
@@ -73,8 +117,8 @@ def lemma_problem(name, solved, m, after=False):
     for j in cands:
         if len(lem) >= m:
             break
-        f = conjecture(f'{o}__goal_{j}')
-        if f and unit_eq(f):
+        f = lemma_form(f'{o}__goal_{j}')
+        if f:
             lem.append((j, f))
     txt = open(os.path.join(PROB, name + '.p')).read().rstrip('\n') + '\n'
     for j, f in lem:
@@ -123,7 +167,7 @@ class LemmaIndex:
     With subsets=True, a target may use the goals of every problem whose axioms
     are a subset of its own (theorems of a weaker theory hold in the stronger)."""
     def __init__(self, solved_names, subsets=False):
-        names = [n for n in solved_names if unit_eq(conjecture(n) or '~')]
+        names = [n for n in solved_names if lemma_form(n)]
         self.info = goal_info(names)
         self.subsets = subsets
         self.groups = collections.defaultdict(list)
@@ -177,15 +221,32 @@ class LemmaIndex:
             union = wF + sum(idf[x] for x in G) - inter
             scored.append((inter / union, m))
         scored.sort(key=lambda x: (-x[0], x[1]))
-        out, seen = [], {conj}
+        out, seen = [], {lemma_form(name) or conj}
         for _, m in scored:
-            f = conjecture(m)
+            f = lemma_form(m)
             if f in seen:
                 continue
             seen.add(f); out.append(m)
             if len(out) >= k:
                 break
         return out
+
+def sibling_lemmas(name, solved, m, after=False):
+    """The goal numbers lemma_problem picks: up to M nearest proven siblings with a lemma form."""
+    o, k = split(name)
+    cands = sorted((j for j in solved.get(o, ()) if j != k and (after or j < k)), key=lambda j: (abs(k - j), j))
+    out = []
+    for j in cands:
+        if len(out) >= m:
+            break
+        if lemma_form(f'{o}__goal_{j}'):
+            out.append(j)
+    return out
+
+def knn_picks(name, solved, m, index, k, after=False):
+    """The goals lemma_problem_knn takes from INDEX (beside NAME's M sibling lemmas)."""
+    o, _ = split(name)
+    return index.select(name, k, exclude={f'{o}__goal_{j}' for j in sibling_lemmas(name, solved, m, after)})
 
 def lemma_problem_knn(name, solved, m, index, k, after=False):
     """lemma_problem plus up to K lemmas from INDEX (same axioms, any original)."""
@@ -194,7 +255,7 @@ def lemma_problem_knn(name, solved, m, index, k, after=False):
     o, _ = split(name)
     extra = index.select(name, k, exclude={f'{o}__goal_{j}' for j in have})
     for i, x in enumerate(extra):
-        txt += f'fof(lemma_knn_{i}_{x},axiom,{conjecture(x)}).\n'   # (source goal in the name: USEDAXIOMS)
+        txt += f'fof(lemma_knn_{i}_{x},axiom,{lemma_form(x)}).\n'   # (source goal in the name: USEDAXIOMS)
     return txt, n + len(extra)
 
 def main():
