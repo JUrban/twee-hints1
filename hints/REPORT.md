@@ -1676,7 +1676,7 @@ the target's. These are lines of Prover9 proofs, so every lemma that
 depends on them is true too.
 
 **Results on sets/sg1** (32 stalled goals; up to 12 sketch runs of 5 s,
-then 20 s real; CPU includes the fill runs):
+then 20 s real; CPU s = the sum of run times, fill runs included):
 
 | arm | solved | CPU s | proofs per CPU-hour |
 |---|---|---|---|
@@ -1701,9 +1701,39 @@ then 20 s real; CPU includes the fill runs):
   goals.** In CL4, failing sketches cost 1,257 s, failing final runs
   866 s, fills 677 s and successful sketches 574 s.
 
-A larger test is running: sets/sg3, 64 goals of the current loop that
-failed L1 (snapshot loops/ULsK, 41,996 proofs). The arms are CL5 (the
-CL4 config) and F3 (fresh 80 s).
+**Larger test: sets/sg3.** These are 64 goals of the current loop that
+failed L1 (snapshot loops/ULsK, 41,996 proofs).
+
+* CL5, the CL4 config, solved 10/64 in 6,817 CPU s: **5.3 proofs per
+  CPU-hour**.
+* F3, fresh 80 s, was at 8/43 in 6,678 s (4.3 per CPU-hour) when this
+  was written. Final numbers are below.
+
+**The loop's own deepening is worse.** After the restart at 23:56, UL10's
+runs gave these yields:
+
+| level | runs | proofs | average run | proofs per CPU-hour |
+|---|---|---|---|---|
+| L0, fresh 20 s | 72 | 8 | 33 s | 12 |
+| L1, resume to 80 s | 53 | 17 | 113 s | 10 |
+| L2, resume to 320 s | 71 | 21 | 420 s | 2.5 |
+
+L2 took 78% of the CPU. L2 and the climb work on the same goals, those
+that failed L1, and the climb yields twice as much per CPU-hour.
+
+**Deployed (15 Nov 00:43).**
+
+* UL11 (`abs/ul11.sh`) runs only L0 and L1 (`--cascade 20,80`) on 12
+  workers, with `--sync 60`.
+* `climb.py --live loops/UL` (`abs/clive.sh`, 6 workers, 8 once F3 ends)
+  takes UL's goals whose last result is a failed L1+ run, nearest proven
+  goal below first. Each real proof goes into UL: first the hints file,
+  then a solved.tsv row.
+* `loop.py --sync S` reads the appended rows every S s and treats them as
+  its own proofs: pools, lemmas, and retries of the neighbours. A synced
+  cascade with nothing to run waits for such proofs instead of ending
+  its round.
+* `merge.py` merged the 5 earlier probe proofs (S20, SD, SO, CL3) into UL.
 
 ## 2c. Long runs: stall cutoff and checkpoints
 
