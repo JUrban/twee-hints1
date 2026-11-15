@@ -202,6 +202,7 @@ def main():
     ap.add_argument('--theories', type=int, default=0,
                     help="assume the extra axioms of up to K stronger theories (other originals' axiom sets that "
                          "strictly contain the target's), one theory at a time")
+    ap.add_argument('--chain', action='store_true', help='--updown: a proof becomes a sibling lemma and hints of the later targets at once')
     ap.add_argument('--updown', action='store_true', help='climb up (theory unions, weaker goals) when no sketch proves the target, then down')
     ap.add_argument('--weaken', type=int, default=4, help='--updown: weaker goals (instances) to try')
     ap.add_argument('--theory-lemmas', type=int, default=10, help='--theories: proven goals of the stronger theory as assumptions too')
@@ -642,6 +643,15 @@ def main():
                 with open(os.path.join(c.dir, 'hints', t), 'w') as hf:
                     for l, r in list(real) + ([] if direct else [k for k in last_true.get(t, []) if k not in real]):
                         hf.write(f'{l}\t{r}\n')
+                if c.chain:
+                    # (--chain) the proof feeds the original's later targets at once: a sibling lemma,
+                    # and its steps as hints (the online loop's chain, inside the climb)
+                    o, k = lemmas.split(t)
+                    lp.solved[t] = (1, 0.0)
+                    lp.lemma_src.setdefault(o, set()).add(k)
+                    for h in real:
+                        if h not in seen[o]:
+                            seen[o].add(h); sketch[o].insert(0, h)
         return t, real is not None, runs
 
     if c.updown:
