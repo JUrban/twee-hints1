@@ -260,6 +260,18 @@ class Loop:
             path = os.path.join(self.dir, 'tmp', tag + '.p')
             with open(path, 'w') as f:
                 f.write(txt)
+        if a.unfold:
+            # (unfold.py) the definitions substituted away: twee's KBO folds them, Prover9 unfolds;
+            # some stalled goals are a rewrite step apart once unfolded. Hints are unfolded with the
+            # problem's definitions (proofs of unfolded runs give unfolded hints; folded runs
+            # normalise them back with the definition rules).
+            import unfold
+            txt, defs = unfold.unfold_text(open(path).read())
+            path = os.path.join(self.dir, 'tmp', tag + '.u.p')
+            with open(path, 'w') as f:
+                f.write(txt)
+            if hints and defs:
+                hints = [tuple(unfold.unfold_eq(x, defs) for x in h[:2]) + tuple(h[2:]) for h in hints]
         args = a.args.split()
         if max_cpu is not None:
             args = [x for i, x in enumerate(args) if x != '--max-cpu' and (i == 0 or args[i - 1] != '--max-cpu')]
@@ -1019,6 +1031,9 @@ def make_parser():
     ap.add_argument('--lemma-after', action='store_true',
                     help='sibling lemmas are the nearest proven goals above N as well as below (all proven '
                          'before the run, so still well-founded)')
+    ap.add_argument('--unfold', action='store_true',
+                    help='substitute the problem\'s definitions (f(X1..Xn) = t) away in the axioms, lemmas, '
+                         'conjecture and hints (unfold.py)')
     ap.add_argument('--hint-axioms', default='',
                     help='K:F: also add the K most frequent pool hints that occur in >= F sibling proofs as axioms')
     ap.add_argument('--lemma-subsets', action='store_true',

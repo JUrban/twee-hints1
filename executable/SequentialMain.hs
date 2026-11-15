@@ -95,6 +95,7 @@ data MainFlags =
     flags_rule_goal :: Maybe FilePath,
     flags_rule_threshold :: Double,
     flags_rule_penalty :: Float,
+    flags_rule_defer_max :: Int,
     flags_rule_debug :: Bool }
 
 parseMainFlags :: OptionParser MainFlags
@@ -281,6 +282,10 @@ parseMainFlags = do
     expert $
     inGroup "Critical pair weighting heuristics" $
     flag "rule-penalty" ["Score factor for deferred rules (default 2)."] 2 argNum
+  flags_rule_defer_max <-
+    expert $
+    inGroup "Critical pair weighting heuristics" $
+    flag "rule-defer-max" ["Defer each critical pair at most this many times (default 1)."] 1 argNum
   flags_rule_debug <-
     expert $
     inGroup "Debugging options" $
@@ -1198,7 +1203,7 @@ runTwee globals (TSTPFlags tstp) horn precedence config0 flags@MainFlags{..} lat
           conName (Hint _ _) = "?"
         return $! length forest `seq` Map.size vocab `seq` Just $ mkRuleModel RuleModel {
           rm_forest = forest, rm_vocab = vocab, rm_goal = gcols, rm_gkeys = gkeys,
-          rm_name = conName, rm_threshold = log (p / (1 - p)), rm_penalty = flags_rule_penalty,
+          rm_name = conName, rm_threshold = log (p / (1 - p)), rm_penalty = flags_rule_penalty, rm_defer_max = flags_rule_defer_max,
           rm_debug = flags_rule_debug,
           rm_parents = any ("p:" `isPrefixOf`) (Map.keys vocab),
           rm_hvocab_c = IntMap.empty, rm_hvocab_p = IntMap.empty,

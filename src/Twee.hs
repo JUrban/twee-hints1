@@ -142,7 +142,7 @@ data State f =
     st_given          :: [(Equation f, Int, Int)],
     st_cur_parents    :: !(Int, Int),
     st_cur_passive    :: !(Maybe Passive),
-    st_deferred       :: !(Set.Set (Equation f)),
+    st_deferred       :: !(Map (Equation f) Int),
     st_ndeferred      :: !Int,
     st_next_active    :: {-# UNPACK #-} !Id,
     st_considered     :: {-# UNPACK #-} !Int64,
@@ -250,7 +250,7 @@ initialState Config{..} =
     st_given = [],
     st_cur_parents = (0, 0),
     st_cur_passive = Nothing,
-    st_deferred = Set.empty,
+    st_deferred = Map.empty,
     st_ndeferred = 0,
     st_next_active = 1,
     st_considered = 0,
@@ -812,7 +812,7 @@ considerUsing rules config@Config{..} state@State{..} info cp0 =
       | Just rm <- cfg_rule_model,
         Just p <- st_cur_passive,
         let key = canonicalise (cp_eqn cp),
-        not (key `Set.member` st_deferred),
+        Map.findWithDefault 0 key st_deferred < rm_defer_max rm,
         let t :=: u = fromMaybe (cp_eqn cp) (expandGoalConsts st_eqhints (cp_eqn cp)),
         let expand e = fromMaybe e (expandGoalConsts st_eqhints e),
         let parents = [ (pt, pu) | rm_parents rm, r <- [passive_rule1 p, passive_rule2 p],
@@ -822,7 +822,7 @@ considerUsing rules config@Config{..} state@State{..} info cp0 =
         (if rm_debug rm then Debug.Trace.trace ("RULEPRED " ++ show raw ++ " " ++ show (st_next_active - 1) ++ " " ++ prettyShow (t :=: u)) else id) (raw < rm_threshold rm) ->
         state {
           st_cur_passive = Nothing,
-          st_deferred = Set.insert key st_deferred,
+          st_deferred = Map.insertWith (+) key 1 st_deferred,
           st_ndeferred = st_ndeferred + 1,
           st_queue = Queue.insert (passive_rule1 p) [p{passive_score = passive_score p * rm_penalty rm}] st_queue }
       | otherwise ->

@@ -254,6 +254,7 @@ data RuleModel f =
     rm_name      :: f -> String,
     rm_threshold :: Double,          -- on the raw score
     rm_penalty   :: Float,
+    rm_defer_max :: Int,             -- defer each critical pair at most this often
     rm_debug     :: Bool,
     rm_parents   :: Bool,            -- the vocabulary has a "p:" block
     rm_hvocab_c  :: IntMap Int,      -- hashed "c:" vocabulary
