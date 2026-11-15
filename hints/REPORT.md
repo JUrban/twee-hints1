@@ -38,6 +38,7 @@ written in loops/UL. Merged proofs count from their merge.
 | 15 Nov 05:15 | 43,272 | 4706 | A/B 1 merged; A/B 2 starts |
 | 15 Nov 05:51 | 43,360 | 4709 | A/B 2 merged: the scheduler with 10 s fresh runs wins |
 | 15 Nov 07:00 | 43,462 | 4717 | stall: resumes to 80 s, then tail heads first at 320 s (2ac; 8%, dropped at 07:36) |
+| 15 Nov 09:05 | 43,502 | 4720 | production cut to 6–12 workers for model tests (2ad); Prover9 side worker from 08:56 |
 
 From 15 Nov 05:30 the rate fell from hundreds an hour to 50–100. The
 cheap new contexts are used up; 58% of the unsolved goals sit behind the
