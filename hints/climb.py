@@ -388,6 +388,12 @@ def main():
                 for h in res:
                     if h not in seen[o]:
                         seen[o].add(h); sketch[o].append(h)
+            if S or goal is not None:
+                # each sketch proof's steps, for credit labels (which moves' hints a real proof reused)
+                d_ = os.path.join(c.dir, 'sketches', t); os.makedirs(d_, exist_ok=True)
+                with open(os.path.join(d_, tag), 'w') as f_:
+                    f_.write(f'# S={",".join(sorted(S))}\n# U={",".join(sorted(U))}\n# goal={goal or ""}\n')
+                    f_.writelines(f'{l}\t{r}\n' for l, r in res)
         with lock:
             out.write(f'{t}\t{tag}\t{len(S)}\t{"THM" if ok else "NO"}\t{len(U) if ok else -1}\t{dt:.2f}\t'
                       f'{",".join(short(x) for x in sorted(S))}\t{",".join(short(x) for x in sorted(U))}\t{len(hs)}\t{nt}\n')
