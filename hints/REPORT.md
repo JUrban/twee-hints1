@@ -2589,7 +2589,9 @@ target tokens.
   as gen4 it finds:
   * step 1000: 10 of 1,040 novel steps (gen4: 3), 37 of 2,025
     future steps (gen4: 9);
-  * step 2000: 12 of 1,040 novel steps, 32 of 2,025 future steps.
+  * step 2000: 12 of 1,040 novel steps, 32 of 2,025 future steps;
+  * step 2000 with n 1,600: 19 of 1,040 novel steps (1.8%), 51 of 2,025
+    future steps. Four times the samples gives 1.6 times the hits.
 
 **Online test** (`abs/gen_test.sh`, sets/gen200, snapshot ULsW):
 
@@ -2878,12 +2880,14 @@ are run in `/project/hintwork`, with `venv` holding lightgbm.
 
    `G` comes from `rulemodel.py goalfiles`, `H` from
    `hintsel.py knnfiles`, and `P.p` with lemmas from `lemmas.py`.
-5. **The production loop as of 15 Nov 12:17** (`abs/ul28.sh` in
-   /project/hintwork). It is a cascade of fresh 10 s runs ordered by the
-   learned scheduler (2ac), with resumes to 80 s. Proofs that other
-   processes append are synced in. Since 07:36 it has gained
-   `--retry-knn` (2ae), unit forms of conditional lemmas (2ae), and
-   `--sched-pmin 0.025` (2ag):
+5. **The production loop as of 15 Nov 17:31** (`abs/ul31.sh` in
+   /project/hintwork). It is a cascade of fresh 5 s runs ordered by the
+   learned scheduler (2ac), with resumes to 80 and 320 s. Proofs that
+   other processes append are synced in. Since 07:36 it has gained
+   `--retry-knn` (2ae) and unit forms of conditional lemmas (2ae). It
+   now uses `--cascade 5,80,320 --sched-pmin 0.011 --sched-pmin-auto
+   400` (2ag) on 14 workers. The command below is the 12:17 version
+   (`abs/ul28.sh`); `abs/ul31.sh` has the current one:
 
        loop.py sets/all loops/UL --start 5 --cascade 10,80,320 --cascade-start 0 \
          --cascade-continue --fresh-first --far-retry --retry-gap 3 \
@@ -2895,7 +2899,8 @@ are run in `/project/hintwork`, with `venv` holding lightgbm.
          --sched-pmin 0.025 --retry-knn \
          --args="--abstract-time 2000 --no-resume-requeue --no-eqhint-consider"
 
-   Beside it, the unfolded-twee side worker (2af, `abs/uflive.sh`):
+   Beside it ran the unfolded-twee side worker (2af, `abs/uflive.sh`),
+   stopped at 15:17 when it fell to 0–1 proofs per 24-goal cycle:
 
        uflive.py loops/UL loops/UFL -j 4 --batch 24 --loop-args "--pool original \
          --wall-factor 15 --model --model-fixed rm4t.bin,rm4t.vocab --model-theory \
@@ -2910,3 +2915,16 @@ are run in `/project/hintwork`, with `venv` holding lightgbm.
    `abs/memwatch.py 7 45`; twee itself stops at 6 GB (`-M6g`).
    A/B arms (reflink copies of UL) go back with `abs/merge_ab.sh`.
    `merge.py UL DIR...` adds proofs from probe dirs.
+6. **Hint generator** (2ah, CPU torch in `venv`):
+
+       venv/bin/python3 hints/gencopy.py train given/train_only,given/ul45,loops/UL/given,given/ultest \
+         --test-names sets/ultest --save models/gc1.pt --init-enc models/gen2_3000.pt \
+         --novel loops/UL/hints --steps 6000 --threads 4 --batch 8     (abs/gc1.sh)
+       venv/bin/python3 hints/gencopy.py eval GIVENDIRS --test-names NAMES --load models/gc1.pt \
+         --n 400 --temp 0.7 --pool-dir loops/UL/hints
+
+   In a loop, `loop.py --gen-model models/gc1.pt --gen-script
+   gencopy.py --gen-n 400 --gen-temp 0.7` with `--twee twee-e39` (or
+   later) and `--resume-requeue` in the twee arguments. A failed level
+   saves its context, and the resumed level gets the generated hints.
+   `abs/gen_test.sh` is the paired online test.
