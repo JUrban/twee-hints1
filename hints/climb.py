@@ -478,9 +478,14 @@ def main():
                 # stuck at minU (no smaller set proves T): ban its assumptions and climb again from
                 # the top without them, for proofs (and hints) that go another way
                 banned |= minU; minU = None
-                rest = frozenset(S0) - banned
-                if rest and rest not in tried:
-                    queue.append(rest)
+                if tgroups.get(t):
+                    other = frozenset(x for x in S0 if not x.startswith(('assume_thy_', 'assume_gen_')))
+                    queue += [g2 for g2 in ((g | other) - banned for g in tgroups[t])
+                              if g2 and g2 not in tried and any(x.startswith(('assume_thy_', 'assume_gen_')) for x in g2)]
+                else:
+                    rest = frozenset(S0) - banned
+                    if rest and rest not in tried:
+                        queue.append(rest)
             if not queue:
                 break
             queue.sort(key=len)
@@ -498,8 +503,13 @@ def main():
                     # (--min-sketch-steps) a law that makes the sketch trivial gives a dozen hints:
                     # ban the laws it used and start again from the top without them
                     banned |= L
-                    rest = frozenset(S0) - banned
-                    queue = [rest] if rest and rest not in tried else []
+                    if tgroups.get(t):   # one theory (generated equation) at a time, as at the start
+                        other = frozenset(x for x in S0 if not x.startswith(('assume_thy_', 'assume_gen_')))
+                        queue = [g2 for g2 in ((g | other) - banned for g in tgroups[t])
+                                 if g2 and g2 not in tried and any(x.startswith(('assume_thy_', 'assume_gen_')) for x in g2)]
+                    else:
+                        rest = frozenset(S0) - banned
+                        queue = [rest] if rest and rest not in tried else []
                     continue
             if not ok and not anyproof and tgroups.get(t) and queue:
                 continue   # (--theories) the next theory first
