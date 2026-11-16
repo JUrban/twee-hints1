@@ -1071,6 +1071,17 @@ class Loop:
                     else:
                         retry = sorted((g[n][1], lemmas.split(n)[1], n) for n in att
                                        if n not in busy and (ctx(n) != att[n][0] or grown(n)) and may_retry(n, g))
+                    uset = set()
+                    if SM and a.sweep_first:
+                        # --sweep-first: goals never run in this round go first, in goal order across the
+                        # originals. The scheduler's model was trained on retries; from zero it ranked one
+                        # original's goals first and starved the others (LZ4, 16 Nov: 427 runs, all of
+                        # a_of_aa, 232 proofs at 10 min against 806 without the scheduler)
+                        un = [n for _, _, n in sorted((lemmas.split(n)[1], orig_of(n), n) for n in att
+                                                      if n not in busy and att[n] == (None, -1))]
+                        if un:
+                            uset = set(un)
+                            retry = [(0, n) for n in un] + [x for x in retry if x[-1] not in uset]
                     deep_running = collections.Counter(orig_of(n) for n, l in running.values() if l > 0)
                     # --head-first: an original's tail head (the goal after its last proven goal)
                     # deepens first, and only heads go to levels >= --head-only-from. A head's
@@ -1091,7 +1102,7 @@ class Loop:
                     far = []
                     if SM and a.far_retry and len(running) + len(retry) + len(deep) < a.j:
                         far = sorted((-v, n) for n, v in cand.items()
-                                     if v < lmin or sc[n][2] > a.sched_max_lgap)[:a.j]
+                                     if (v < lmin or sc[n][2] > a.sched_max_lgap) and n not in uset)[:a.j]
                     elif a.far_retry and len(running) + len(retry) + len(deep) < a.j:
                         # --far-retry: idle slots retry (fresh) the goals beyond the retry gaps too,
                         # nearest first, after everything else
@@ -1459,6 +1470,9 @@ def make_parser():
                          'deepen first, up to the levels below --head-only-from')
     ap.add_argument('--head-only-from', type=int, default=0,
                     help='--head-first: only tail heads go to levels >= L (e.g. 3 with --cascade 10,80,320,1280)')
+    ap.add_argument('--sweep-first', action='store_true',
+                    help='--sched-model: goals never run in this round get their fresh run first, in goal order '
+                         '(from zero the model alone starves originals without proofs)')
     ap.add_argument('--sched-pmin-auto', type=int, default=0, metavar='W',
                     help='--sched-model: set --sched-pmin online from the last W fresh runs and W resumes: '
                          'the predicted success at which a fresh run pays as well per wall second as a resume')

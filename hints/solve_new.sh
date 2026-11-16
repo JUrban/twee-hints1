@@ -30,7 +30,7 @@ CASCADE=${CASCADE:-5,80,320}
 KNN=${KNN:-30}
 XEVERY=${XEVERY:-120}
 XTWEE=${XTWEE:-/project/bin/twee-e39}   # the transfer worker's twee (as abs/rpx.sh)
-SCHED=${SCHED---sched-model /project/hintwork/sched/m4.json --sched-max-lgap 320 --sched-retrain 200 --sched-pmin 0.011 --sched-pmin-auto 400}
+SCHED=${SCHED---sched-model /project/hintwork/sched/m4.json --sched-max-lgap 320 --sched-retrain 200 --sched-pmin 0.011 --sched-pmin-auto 400 --sweep-first}
 [ -n "$OUT" ] && [ -f "$NAMES" ] && [ -f "$CTX/solved.tsv" ] || { sed -n 2,20p "$0"; exit 1; }
 [ -e "$OUT" ] && { echo "$OUT exists"; exit 1; }
 mkdir -p "$OUT.ctx/hints"
