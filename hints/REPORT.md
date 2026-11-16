@@ -2856,9 +2856,15 @@ order with `--chain`, 1 worker.
   their rank, weakened goal, step). The labels are proved, nontrivial
   (an assumption used, at least 30 proof steps) and credit (the share of
   the target's real proof found in the sketch's proof).
-* In its first 1.6 hours (to 23:43), 202 climbs gave 6 proofs:
-  1243b_445, gen_495, 1243_342, aa1_45_c_285, aa2_12_355 and
-  aa_instances_4_289.
+* In its first 1.6 hours (to 23:43), 202 climbs gave 3 proofs:
+  1243b_445, gen_495 and 1243_342. (An earlier version of this line said
+  6. Three names were misread from a directory listing; their climbs
+  failed.)
+* By 01:30 the climber had 9 proofs, all in production: Kproperties_1
+  314, aK2_eq_aK3_1243 342, 1243b 445, gen 495, aK2_eq_aK3_r 266,
+  aa1_45_c 323, nil3_18 290, nsmr_to_aa1 612 and 732. Production then
+  proved 9 later goals of the same originals: 1243b 446, 447, 448, 455;
+  r 268, 269; nsmr 735, 737.
 
 ## 2ak. Learning the lattice moves (user, 15 Nov: "what are the best steps in the lattice given a problem")
 
