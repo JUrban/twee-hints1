@@ -3088,6 +3088,44 @@ exact ones.
 * For that, production went from 14 to 10 workers at 05:12
   (abs/ul32.sh, `--cascade-continue`). Its marginal runs make about 0.8
   proofs per CPU hour.
+* **Most instance candidates were junk.** Every one of the 2,581 had a
+  conditional goal among its sources. Proofs of conditional goals have
+  steps that use the hypotheses, and these are false once generalized.
+  With sources restricted to proofs of unit goals (`find --instances`
+  since 05:30), there are 132 candidates, and only 28 are new with
+  sources in other originals. The noisy batch still yields about 3 per
+  CPU hour (6 of 216 with source lemmas), more than production's
+  marginal runs, so it goes on, on 4 workers.
+
+**Source lemmas (`run --src-lemmas K`, 05:05).** A source proof was
+found with its own original's proven goals as lemma axioms, and the
+target run lacked them. Now the source goal and its K−1 nearest proven
+goals below are lemma axioms of the target run. These are proven goals
+of the same or weaker axioms, the kind `--lemma-knn --lemma-subsets`
+already adds, so the trust level stays the same.
+
+* On the 69 goals of transfer1 that failed: **63 proved**, in 338 run
+  seconds.
+* 30 of the 63 proofs are one step. 12 goals are identical to a source
+  goal. So many unsolved goals were, up to renaming or instantiation,
+  proven goals of other originals with the same or weaker axioms. The
+  kNN lemmas (10 by goal features) did not bring them; exact step
+  matching does.
+* `find --goals` lists unsolved goals that are instances of proven
+  goals of other originals with the same or weaker axioms. After the
+  merges only 5 were left; 3 of them proved, together with 3 of the 28
+  clean instance candidates (sets/transfer6.tsv).
+
+**Live (05:37, `transfer.py live`, abs/xfrlive.sh, 2 workers, every 20
+minutes).** With production's current proofs as context (symlinked
+hints, its solved.tsv with rounds zeroed), it finds the new step and
+goal-instance candidates, runs the untried ones with source lemmas, and
+puts the proofs into UL. Its first cycle had 10 step candidates, 6 of
+them new.
+
+**Totals of the transfer so far:** 32 + 63 + 6 + 7 proved, of which
+101 were merged into UL. UL went from 44,240 (04:12) to 44,398 (05:35).
+
 * **A decision for the user.** A step of a proof from the same or weaker
   axioms (and without hypotheses) is a proven theorem, exactly like the
   proven sibling goals the loop already adds as lemmas. As a lemma axiom

@@ -5,10 +5,15 @@ production pool (--pool original) only offers the goal's own original's proofs, 
 with the proof that contains them.
 
   transfer.py find LOOPDIR --out GOALS.tsv [--any-theory]   # goal, source proofs, axioms beyond the goal's
-  transfer.py run GOALS.tsv DIR [-j J] [--time T] -- LOOP-OPTIONS (as climb.py: --init SNAPSHOT ...)
+  transfer.py run GOALS.tsv DIR [-j J] [--time T] [--src-lemmas K] -- LOOP-OPTIONS (--init SNAPSHOT ...)
 
 `run` gives each goal its source proofs' steps first, then the usual pool, in one fresh run; proofs are written
 to DIR (hints/, solved.tsv round 1) for merge.py.
+
+  transfer.py live LOOPDIR DIR [-j J] [--time T] [--src-lemmas K] [--every S] -- LOOP-OPTIONS (no --init)
+
+`live` repeats find (steps of proofs from the same or weaker axioms, instances of proven goals) and run on the new
+candidates every S seconds beside a running loop, with LOOPDIR's proofs as context, and puts the proofs into it.
 """
 import os, re, sys, threading, time
 from concurrent.futures import ThreadPoolExecutor
@@ -91,7 +96,18 @@ def find_instances(D, out, allp='/project/hintwork/sets/all'):
     hits = {}
     hd = os.path.join(D, 'hints')
     seen = set()
+    unit = {}
     for f in os.listdir(hd):
+        # only proofs of unconditional unit goals: a conditional goal's steps may use its hypotheses, and with
+        # their constants generalized they can be false equations that match many goals
+        o_ = f.rpartition('__goal_')[0]
+        if f not in unit:
+            try:
+                unit[f] = lemmas.unit_eq(lemmas.conjecture(f) or '~')
+            except OSError:
+                unit[f] = False
+        if not unit[f]:
+            continue
         A = axs(f)
         try:
             lines = open(os.path.join(hd, f)).read().splitlines()
@@ -122,7 +138,58 @@ def find_instances(D, out, allp='/project/hintwork/sets/all'):
         for g, fs in sorted(hits.items()):
             fs = sorted(fs, key=lambda f: (lemmas.split(f)[0] != lemmas.split(g)[0], len(axs(f) - axs(g))))
             fo.write(g + '\t' + ','.join(fs[:3]) + f'\t{len(axs(fs[0]) - axs(g))}\n')
-    print(f'{len(hits)} unsolved goals are instances of steps of proofs from the same or weaker axioms -> {out}')
+    print(f'{len(hits)} unsolved goals are instances of steps of proofs of unit goals from the same or weaker axioms -> {out}')
+
+
+def find_goal_instances(D, out, allp='/project/hintwork/sets/all'):
+    """(find --goals) unsolved unit goals that are instances (or variants) of a proven unit goal of an original with
+    the same or weaker axioms: provable in one step with that goal as a lemma (the --lemma-knn --lemma-subsets kind)"""
+    S = [l.split('\t')[0] for l in open(os.path.join(D, 'solved.tsv'))]
+    Sset = set(S)
+    def unit_lits(n):
+        try:
+            lits = hintsel.goal_lits(n)
+        except Exception:
+            return None
+        if len(lits) == 1 and lits[0][0]:
+            l, r = key(lits[0][1], lits[0][2])
+            return parse(l), parse(r)
+        return None
+    ax = {}
+    def axs(n):
+        o = lemmas.split(n)[0]
+        if o not in ax:
+            ax[o] = lemmas.axiom_set(n)
+        return ax[o]
+    byroot = {}
+    for n in (l.strip() for l in open(allp)):
+        if n and n not in Sset:
+            u = unit_lits(n)
+            if u:
+                byroot.setdefault((root(u[0]), root(u[1])), []).append((n, u[0], u[1]))
+                byroot.setdefault((root(u[1]), root(u[0])), []).append((n, u[1], u[0]))
+    hits = {}
+    for m in dict.fromkeys(S):
+        try:
+            if not lemmas.unit_eq(lemmas.conjecture(m) or '~'):
+                continue
+        except OSError:
+            continue
+        u = unit_lits(m)
+        if not u:
+            continue
+        A = axs(m)
+        for n, a, b in byroot.get((root(u[0]), root(u[1])), ()):
+            if lemmas.split(n)[0] == lemmas.split(m)[0] or not A <= axs(n):
+                continue
+            sub = match(u[0], a, {})
+            if sub is not False and match(u[1], b, sub) is not False:
+                hits.setdefault(n, []).append(m)
+    with open(out, 'w') as fo:
+        for g, ms in sorted(hits.items()):
+            fo.write(g + '\t' + ','.join(ms[:3]) + '\t1\n')
+    print(f'{len(hits)} unsolved goals are instances of proven goals of other originals with the same or weaker '
+          f'axioms -> {out}')
 
 
 def find(D, out, allp='/project/hintwork/sets/all', any_theory=False):
@@ -166,7 +233,48 @@ def find(D, out, allp='/project/hintwork/sets/all', any_theory=False):
           'the same or weaker axioms') + f' -> {out}')
 
 
-def run(goals, d, j, T, rest):
+def live(D, d, j, T, rest, src_lemmas, every):
+    """(live) beside a running loop D: every EVERY s, find the unsolved goals that are steps of D's proofs from the
+    same or weaker axioms or instances of its proven goals, run the ones not tried with the same first source, and
+    put the proofs into D (hints through DIR/hints -> D/hints, then a D/solved.tsv row, which D --sync takes in)"""
+    import subprocess
+    os.makedirs(d, exist_ok=True)
+    if not os.path.lexists(os.path.join(d, 'hints')):
+        os.symlink(os.path.abspath(os.path.join(D, 'hints')), os.path.join(d, 'hints'))
+    me = os.path.abspath(__file__)
+    while True:
+        t0 = time.time()
+        with open(os.path.join(d, 'solved.tsv.tmp'), 'w') as f:   # D's proofs as this dir's context (round 0)
+            for l in open(os.path.join(D, 'solved.tsv')):
+                w = l.split('\t')
+                if len(w) >= 3 and l.endswith('\n'):
+                    f.write(f'{w[0]}\t0\t{w[2].strip()}\n')
+        os.replace(os.path.join(d, 'solved.tsv.tmp'), os.path.join(d, 'solved.tsv'))
+        find(D, os.path.join(d, 'c_steps.tsv'))
+        find_goal_instances(D, os.path.join(d, 'c_goals.tsv'))
+        tp = os.path.join(d, 'transfer.tsv')
+        tried = set()
+        if os.path.exists(tp):
+            for l in open(tp):
+                w = l.rstrip('\n').split('\t')
+                if len(w) >= 5:
+                    tried.add((w[0], w[4].split(',')[0]))
+        new = {}
+        for c in ('c_goals.tsv', 'c_steps.tsv'):
+            for l in open(os.path.join(d, c)):
+                w = l.rstrip('\n').split('\t')
+                if (w[0], w[1].split(',')[0]) not in tried and w[0] not in new:
+                    new[w[0]] = l if l.endswith('\n') else l + '\n'
+        with open(os.path.join(d, 'cycle.tsv'), 'w') as f:
+            f.writelines(new.values())
+        print(f'live: {len(new)} new candidates {time.strftime("%H:%M:%S")}', flush=True)
+        if new:
+            subprocess.run([sys.executable, me, 'run', os.path.join(d, 'cycle.tsv'), d, '-j', str(j), '--time', str(T),
+                            '--src-lemmas', str(src_lemmas), '--live-dst', D, '--'] + rest)
+        time.sleep(max(0, every - (time.time() - t0)))
+
+
+def run(goals, d, j, T, rest, src_lemmas=0, live_dst=None):
     import loop
     os.makedirs(d, exist_ok=True)
     names = os.path.join(d, 'goals.names')   # (loop.py's goal set: names only)
@@ -184,7 +292,7 @@ def run(goals, d, j, T, rest):
         lp.lemma_index = lemmas.LemmaIndex(sorted(lp.solved), subsets=a.lemma_subsets)
     src, rank = {}, {}
     tp = os.path.join(d, 'transfer.tsv')
-    done = {l.split('\t')[0] for l in open(tp)} if os.path.exists(tp) else set()   # (a restart skips the tried)
+    done = {l.split('\t')[0] for l in open(tp)} if os.path.exists(tp) and not live_dst else set()   # (a restart skips the tried)
     for i, l in enumerate(open(goals)):
         w = l.rstrip('\n').split('\t')
         if w[0] in lp.solved or w[0] in done:
@@ -204,13 +312,34 @@ def run(goals, d, j, T, rest):
                     seen.add(w); hs.append(w)
         n0 = len(hs)
         hs += [h for h in lp.hints_for(g, pools, None) if (h[0], h[1]) not in seen]
+        if src_lemmas:
+            # the source goals and their nearest proven goals below as lemma axioms (proven goals of the same or
+            # weaker axioms: the kind --lemma-knn --lemma-subsets adds), which the source proofs had as axioms
+            L, A = [], lemmas.axiom_set(g)
+            for f in src[g]:
+                o2, k2 = lemmas.split(f)
+                if not lemmas.axiom_set(f) <= A:
+                    continue
+                below = sorted((j for j in lp.lemma_src.get(o2, ()) if j <= k2), reverse=True)[:src_lemmas]
+                for j in below:
+                    m = f'{o2}__goal_{j}'
+                    fm = lemmas.lemma_form(m)
+                    if fm and (m, fm) not in L:
+                        L.append((m, fm))
+            lp.extra_axioms[g] = [(f'srclem_{i}', fm) for i, (m, fm) in enumerate(L)]
         n, ok, dt, stats, res = lp.run_one(g, hs, 1, T, False, 10 * T)
+        lp.extra_axioms.pop(g, None)
         with lock:
             out.write(f'{g}\t{"THM" if ok else "NO"}\t{dt:.2f}\t{n0}\t{",".join(src[g])}\n'); out.flush()
             if ok:
                 with open(os.path.join(d, 'hints', g), 'w') as hf:
                     hf.writelines(f'{l}\t{r}\n' for l, r in res)
                 sf.write(f'{g}\t1\t0\n'); sf.flush()
+                if live_dst:   # (live) the row in the running loop's solved.tsv, at its current round
+                    R = max(int(x.split('\t')[1]) for x in open(os.path.join(live_dst, 'solved.tsv'))
+                            if x.count('\t') >= 2 and x.endswith('\n'))
+                    with open(os.path.join(live_dst, 'solved.tsv'), 'a') as lf:
+                        lf.write(f'{g}\t{R}\t0\n')
         return ok
     t0 = time.time()
     with ThreadPoolExecutor(j) as ex:
@@ -220,7 +349,15 @@ def run(goals, d, j, T, rest):
 
 def main():
     argv = sys.argv[1:]
-    if argv[0] == 'find' and '--instances' in argv:
+    if argv[0] == 'live':
+        i = argv.index('--') if '--' in argv else len(argv)
+        opts, rest = argv[1:i], argv[i + 1:]
+        val = lambda k, dflt: type(dflt)(opts[opts.index(k) + 1]) if k in opts else dflt
+        live(opts[0], opts[1], val('-j', 2), val('--time', 20.0), rest, val('--src-lemmas', 6), val('--every', 1200.0))
+        return
+    if argv[0] == 'find' and '--goals' in argv:
+        find_goal_instances(argv[1], argv[argv.index('--out') + 1])
+    elif argv[0] == 'find' and '--instances' in argv:
         find_instances(argv[1], argv[argv.index('--out') + 1])
     elif argv[0] == 'find':
         find(argv[1], argv[argv.index('--out') + 1], any_theory='--any-theory' in argv)
@@ -230,7 +367,9 @@ def main():
         goals, d = opts[0], opts[1]
         j = int(opts[opts.index('-j') + 1]) if '-j' in opts else 2
         T = float(opts[opts.index('--time') + 1]) if '--time' in opts else 20
-        run(goals, d, j, T, rest)
+        K = int(opts[opts.index('--src-lemmas') + 1]) if '--src-lemmas' in opts else 0
+        dst = opts[opts.index('--live-dst') + 1] if '--live-dst' in opts else None
+        run(goals, d, j, T, rest, K, dst)
 
 
 if __name__ == '__main__':
