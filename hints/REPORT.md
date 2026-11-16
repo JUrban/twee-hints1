@@ -47,6 +47,7 @@ written in loops/UL. Merged proofs count from their merge.
 | 16 Nov 02:00 | 44,148 | 4820 | learned move policy and theory sampling in the climber (2ak) |
 | 16 Nov 04:00 | 44,234 | 4831 | 86 in two hours (climber burst 02:22–03:10 and production; heads first was not its cause, 2ak) |
 | 16 Nov 06:30 | 44,434 | 4858 | proof-step transfer (2al): about 110 merged; long climbs on heads 12 of 65; production at 10 workers from 05:12 |
+| 16 Nov 10:28 | 44,630 | 4882 | production with 30 kNN lemmas from 07:20 (2am), 152 new; live transfer 21; head climbs 17 of 111 (14.7 CPU h), then the live head climber 4 of 55 (8.5 CPU h) |
 
 From 15 Nov 05:30 the rate fell from hundreds an hour to 50–100. The
 cheap new contexts are used up; 58% of the unsolved goals sit behind the
@@ -3132,7 +3133,9 @@ minutes).** With production's current proofs as context (symlinked
 hints, its solved.tsv with rounds zeroed), it finds the new step and
 goal-instance candidates, runs the untried ones with source lemmas, and
 puts the proofs into UL. Its first cycle had 10 step candidates, 6 of
-them new.
+them new. **By 10:28 it had proved 21 of 25 new candidates.** These are
+mostly goals that production's fresh proofs make into steps, and each
+takes seconds.
 
 **Totals of the transfer so far:** 32 + 63 + 6 + 7 proved, of which
 101 were merged into UL. UL went from 44,240 (04:12) to 44,398 (05:35).
@@ -3187,6 +3190,9 @@ goals of ULsZ, fresh 20 abstract s from ULsZ, 2 workers per arm):
   per worker). Before, at 10 workers with 10 lemmas, it was 59 in 2
   hours, about 29 an hour (2.9 per worker). Part of this is the
   restart: fresh runs in new contexts come first.
+* **Over 3 hours (07:20–10:27):** 152 new, about 49 an hour or 4.1
+  per worker hour. 88 of them came from 4,325 fresh retries (2%). The
+  rest came from deeper cascade levels.
 
 **Choosing the lemmas better (08:00).** kNN lemma use is spread widely.
 12,205 uses in 2,755 proofs fall on 3,369 distinct proven goals. The 200
@@ -3229,6 +3235,12 @@ which is noise. I stopped the stronger weights (B = 1, W = 3) after a
 few minutes: they could not settle anything on 150 goals. Instead,
 30 against 60 is replicated on 300 other unsolved goals (sets/unsol300b,
 RN30/RN60, from 09:20).
+
+**The rerun does not bear out 60** (interim, 10:28): 30 lemmas 7 of 245
+goals done, 60 lemmas 6 of 235. Taken together with the first test,
+going past 30 shows no measurable gain, so production stays at 30.
+Selection tests on 150–300 goals at 20 s resolve only differences of
+several proofs. Production changes only on effects that large.
 
 ## 2c. Long runs: stall cutoff and checkpoints
 
