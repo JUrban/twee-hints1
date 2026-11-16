@@ -835,8 +835,14 @@ def live(c, a, lp, gl, pools, ix, climb, out):
                 time.sleep(60); continue
             fin, _ = wait(list(running), timeout=30, return_when=FIRST_COMPLETED)
             for f in fin:
-                running.pop(f)
-                t, ok, runs = f.result()
+                t = running.pop(f)
+                try:
+                    t, ok, runs = f.result()
+                except Exception:   # (one climb's error must not stop the live climber)
+                    import traceback
+                    print(f'{t} ERROR {traceback.format_exc()}', flush=True)
+                    climbed.add(t)
+                    continue
                 climbed.add(t)
                 S, R = dst()
                 if ok and t not in S:
