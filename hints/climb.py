@@ -806,6 +806,7 @@ def live(c, a, lp, gl, pools, ix, climb, out):
     climbed = {l.split('\t')[0] for l in open(os.path.join(c.dir, 'climb.tsv'))}
     nclimb = collections.Counter(l.split('\t')[0] for l in open(os.path.join(c.dir, 'climb.tsv'))
                                  if l.split('\t')[1:2] == ['final'])
+    at_climb = {}    # head -> its original's number of proven goals at its last climb (--reclimb-heads)
     c.cprefix = {}   # target -> run tag prefix of a re-climb (r1, r2, ...), so its sketch logs stay apart
     def dst():
         S, R = set(), 0
@@ -845,8 +846,15 @@ def live(c, a, lp, gl, pools, ix, climb, out):
             o, k = lemmas.split(n)
             if o not in first or k < first[o][0]:
                 first[o] = (k, n)
-        heads = sorted((n for _, n in first.values() if nclimb[n] < c.reclimb_heads),
-                       key=lambda n: (nclimb[n], dist(n), n))
+        # a climbed head again only when its original has new proofs since that climb (new lemmas and hints):
+        # re-climbs in an unchanged context gave 2 proofs in 87 climbs (0.45 per CPU h, new targets 2.1)
+        def ok_head(n):
+            if nclimb[n] == 0:
+                return True
+            o = lemmas.split(n)[0]
+            at_climb.setdefault(n, len(by.get(o, ())))
+            return nclimb[n] < c.reclimb_heads and len(by.get(o, ())) > at_climb[n]
+        heads = sorted((n for _, n in first.values() if ok_head(n)), key=lambda n: (nclimb[n], dist(n), n))
         hs = set(heads); res = [n for n in res if n not in hs]
         mixed = []
         while heads or res:
@@ -912,6 +920,7 @@ def live(c, a, lp, gl, pools, ix, climb, out):
                     continue
                 climbed.add(t); nclimb[t] += 1
                 S, R = dst()
+                at_climb[t] = len(lemmas.by_original(S).get(lemmas.split(t)[0], ()))
                 if ok and t not in S:
                     # (the hints file is already in place: DIR/hints links to D/hints)
                     with open(os.path.join(D, 'solved.tsv'), 'a') as sf:
