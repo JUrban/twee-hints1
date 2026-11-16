@@ -3407,6 +3407,22 @@ the same.
   * Part is legitimate: the 12k later proofs of other originals are
     harder theorems that new originals can use too.
   * For the secret part, both kinds of context are clean.
+* **Clean replay at 60 minutes** (stopped at 13:59): **934 of 1,320**.
+  795 came from the cascade in 3.92 CPU h (1,379 runs at 5 s, 747
+  proved; 97 at 80 s, 48 proved), and 386 from the transfer. Unlike the
+  full-context replay it was still growing: 755 at 25 minutes, 795 at
+  60.
+
+| 3 holdout originals, 1,320 goals | proved |
+|---|---:|
+| plain twee, 4 s | 731 |
+| replay, clean context, 60 min, about 4 CPU h | 934 |
+| replay, full context, 60 min, about 3.4 CPU h | 1,041 |
+| production, 3 days | 1,109 |
+
+**The other 8 whole holdout originals** (abs/ho8.sh, sets/ho8, 3,400
+goals; plain 2,156, production 3,081) run from 14:00 with
+`solve_new.sh` and the clean context, 4 workers for 1 hour.
 
 ## 2c. Long runs: stall cutoff and checkpoints
 
