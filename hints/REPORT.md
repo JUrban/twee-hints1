@@ -3236,9 +3236,10 @@ few minutes: they could not settle anything on 150 goals. Instead,
 30 against 60 is replicated on 300 other unsolved goals (sets/unsol300b,
 RN30/RN60, from 09:20).
 
-**The rerun does not bear out 60** (interim, 10:28): 30 lemmas 7 of 245
-goals done, 60 lemmas 6 of 235. Taken together with the first test,
-going past 30 shows no measurable gain, so production stays at 30.
+**The rerun does not bear out 60** (10:46): 30 lemmas prove 10 of 300,
+60 lemmas 8 of 300 (+1/−3), at 3% more wall time. Taken together with
+the first test (+4/−1 there), 30 and 60 are even at 19 and 17 of 450
+goals, so production stays at 30.
 Selection tests on 150–300 goals at 20 s resolve only differences of
 several proofs. Production changes only on effects that large.
 
