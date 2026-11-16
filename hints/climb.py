@@ -227,6 +227,8 @@ def main():
     ap.add_argument('--updown', action='store_true', help='climb up (theory unions, weaker goals) when no sketch proves the target, then down')
     ap.add_argument('--move-model', help='--updown: a latticepolicy.py model orders the moves (softmax sampling)')
     ap.add_argument('--move-temp', type=float, default=1.0)
+    ap.add_argument('--heads-only', action='store_true',
+                    help='--live --reclimb-heads: climb only the heads (each original\'s first unsolved goal)')
     ap.add_argument('--reclimb-heads', type=int, default=0,
                     help='--live: climb each original\'s first unsolved goal up to N times, interleaved with new targets')
     ap.add_argument('--theory-ts', action='store_true',
@@ -855,6 +857,8 @@ def live(c, a, lp, gl, pools, ix, climb, out):
             at_climb.setdefault(n, len(by.get(o, ())))
             return nclimb[n] < c.reclimb_heads and len(by.get(o, ())) > at_climb[n]
         heads = sorted((n for _, n in first.values() if ok_head(n)), key=lambda n: (nclimb[n], dist(n), n))
+        if c.heads_only:   # (--heads-only) only the heads: new ones, and climbed ones whose original changed
+            return heads
         hs = set(heads); res = [n for n in res if n not in hs]
         mixed = []
         while heads or res:
