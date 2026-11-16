@@ -3717,6 +3717,31 @@ rounds of 30 s or more, but about 40% overhead for 8 s rounds.
 
 ## 4. Next steps
 
+*16 Nov, 19:00:*
+
+* **Since 15:15:**
+  * From zero, with no other originals' proofs, the loop reaches 890
+    of 1,320 replay goals in 1 hour (plain twee 731). The public
+    context adds 5–6% (942) (2aq).
+  * Two from-scratch knobs failed: 60 kNN lemmas (920) and a 20 s
+    level. A 2-minute transfer cycle gave 942 and became the default.
+  * Same statement in another theory (2ar): 13 of 323 filtered
+    candidates. The source proofs mostly use the axiom that differs.
+  * `solve_new.sh` now keeps the new goals' public siblings by default
+    (EXCLUDE=goals). That matters for the 1,156 secret goals moved
+    out of public originals.
+  * Production at 8 workers from 17:20, 4 from 19:50: its 320 s level
+    made 0.3 proofs per CPU hour. The instance batch (2.3 an hour) has
+    the rest.
+* **Next:**
+  * A learned-scheduler arm on the replay (LVS, to 19:50).
+  * Then 4-hour from-scratch curves, with context (LV4) and from zero
+    (LZ4). Production has 1,111 of these 1,320, after 3.5 days of
+    loops. 127 of the 158 gap goals with recorded runs took it under
+    30 s, so they need context, not long runs.
+  * Open for the user: proof steps as lemma axioms (2al), worth at
+    most about 39 proofs.
+
 *16 Nov, 15:15:*
 
 * Make the first hour on new problems faster, testing on the replay
