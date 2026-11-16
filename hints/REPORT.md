@@ -3528,6 +3528,42 @@ rounds of 30 s or more, but about 40% overhead for 8 s rounds.
 
 ## 3. Assessment
 
+*16 Nov, 15:15. The text after this update is from 13–14 Nov.*
+
+* **Where it stands:**
+  * All 51,784 public problems: 44,710 solved, +43.9% over plain twee
+    at 4 s. The holdout has 4,898, +52.9%. This took about 3.5 days of
+    loops on 10–16 workers.
+  * **Unseen originals:** on the 11 whole holdout originals, from
+    scratch with a clean context, the system reaches 71.7% in 1 hour
+    per batch, against 61.2% for plain twee (2aq).
+* **Where the gain comes from**, by today's evidence:
+  1. **The sibling chain:** proven goals of the same original as lemma
+     axioms, online (below).
+  2. **Exact reuse across originals.** A proven goal of the same or a
+     weaker theory proves a goal that states it, or of which it is an
+     instance.
+     * kNN lemmas from such theories: 10 → 30 lemmas helped. A filter
+       that dropped goals identical to the target had hidden many of
+       them since 13 Nov; fixed 16 Nov, 2al.
+     * The proof-step transfer (2al): a goal that is a step of another
+       proof gets that proof as hints and its goal as a lemma.
+     * On new originals this reuse does most of the first hour's work.
+       The transfer alone proves 30–40% of the goals in seconds.
+  3. **Hints from all of the original's proofs**, and the ENIGMA rule
+     filter in the short runs.
+* **What did not help** (16 Nov additions to the list below):
+  * more than 30 kNN lemmas;
+  * use-count or MaSh-style dependency selection of lemmas (2am);
+  * similar proofs' steps as hints from other originals (2ap);
+  * the rule model ordering the queue (2ao);
+  * learned climbing moves and theory sampling (2ak);
+  * extra CPU for heads (2an).
+* **The limit now:** the remaining 7,074 public goals need long
+  derivations. Fresh retries in new contexts are used up: 0 of 281
+  since 11:05. The 320 s level makes about 1 proof per CPU hour, the
+  climbers 0.5–1.2.
+
 *Rewritten 13 Nov evening, updated 14 Nov morning; earlier conclusions are corrected where noted.*
 
 * **Overall.** On all 51,784 public problems at 4 s per problem, the
@@ -3581,6 +3617,16 @@ rounds of 30 s or more, but about 40% overhead for 8 s rounds.
     time.
 
 ## 4. Next steps
+
+*16 Nov, 15:15:*
+
+* Make the first hour on new problems faster, testing on the replay
+  (2aq): budget levels (a 20 s level is running), the transfer's
+  cadence, the context.
+* For the secret part: `solve_new.sh` with the full public context.
+* Production goes on at 12–16 workers, at about 16 proofs an hour.
+* Open for the user: proof steps as lemma axioms (2al). It is worth at
+  most about 39 proofs now (2an).
 
 *Updated 15 Nov, 12:10.*
 
