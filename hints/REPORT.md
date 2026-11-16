@@ -3527,12 +3527,22 @@ with the clean context. The control is LVD.
 | LVD (no scheduler) | 628 | 809 | 847 | 884 | 921 | 942 |
 | **LVS (scheduler)** | 431 | 830 | 868 | 917 | 943 | **972** |
 
-* **+30**, against about 1 of noise. The scheduler leaves out resumes it
-  predicts to fail, so more fresh runs and deeper levels go to goals
-  that can be proved. Its cascade made fewer 5 s proofs (536 against
-  753) and more of the rest.
-* `solve_new.sh` now uses it by default (`SCHED`). The 4-hour arms
-  (LV4, LZ4, from 19:52) have it too.
+* ~~+30, against about 1 of noise~~. **Corrected at 21:50: the +30 is
+  noise.** LV4 has LVS's settings exactly (the same context file, the
+  same options except the 4-hour stop), and it had **919** at 60
+  minutes against LVS's 971. Without the scheduler, runs repeat to
+  within one proof (LVA 933, RPc 934). With it, small timing
+  differences move the retraining points and the auto-tuned floor
+  (LVS 0.054–0.058, LV4 0.087, then 0.048 down to 0.022), and with
+  them which goals get the 80 s level. The scheduler arms' mean at 60
+  minutes is 943 (971, 919, and LVS2 940, below), the same as LVD's 942.
+* The wall-clock hour is not the cause. Counting each run's abstract
+  seconds (`abs/workcurve.py`) gives LVS 947 and LV4 917 at 7,000
+  abstract seconds of cascade work.
+* `solve_new.sh` keeps it by default (`SCHED`), because with
+  `--sweep-first` it is no worse from scratch and production's
+  long-run evidence (2ac) is for it. A single 1-hour run of the
+  scheduler on this testbed cannot tell effects under about 50 proofs.
 * **From zero it starved originals** (LZ4, first try, 19:52–20:03:
   232 proofs at 10 minutes against 806). All 427 runs were a_of_aa
   goals. The model orders fresh runs by predicted success, and an
@@ -3546,8 +3556,39 @@ with the clean context. The control is LVD.
   only the retries it was trained on. It is in `solve_new.sh`'s SCHED
   default. LZ4 restarted with it at 20:05: 724 at 4 minutes against
   732 without the scheduler, and all three originals ran evenly. LV4
-  runs without it. LVS2 (LVS with --sweep-first, queued after the
-  instance batch) tests it at 1 hour.
+  runs without it.
+* **With context, sweep-first gives 940** (LVS2, 20:41–21:42; LVS 972
+  and LV4 919 without it). It runs every goal at 5 s first: 2,103
+  runs at 5 s and 51 at 80 s in the hour, against 1,439 and 86 for
+  LVS. 260 of its 783 cascade proofs are goals that the transfer
+  proves too. Within the noise, so it stays in the default.
+* **From zero, 2 hours**: LZ4 (scheduler with sweep-first) 937, LVZ
+  (no scheduler, 1 hour) 890. At 60 minutes 906 against 890; at equal
+  cascade work (7,000 abstract s) 879 against 884, the same.
+
+**Why the replays level off near 950** (21:50). LV4 had 948 at 2 hours
+(stopped there) and LZ4 937. Production has 1,111 of the 1,320, and
+the 4-hour replays' proofs are a subset of it. Of the 159 goals
+production has and LV4 has not, production proved 151 with its own
+runs: median 7.9 s wall, three quarters under 25 s. 88 came at the
+5 s level, 18 at 80 s, 3 at 320 s, and 42 in rounds 1–2, before the
+cascade. So they are not hard. 56 of those runs kept their output.
+* 42 of the 56 use a sibling lemma that is itself one of the 159, so
+  they follow from a few earlier ones.
+* **45 of 54 with named kNN lemmas use one from another original's goal
+  proven after 13 Nov.** loops/ALL, the replays' context, is a snapshot
+  from 13 Nov 02:58 with 32,377 proofs. Production now has 44,838.
+  For example nil3_23_32_to_26's late goals use goals of
+  nil3_23_32_to_25, _27, _28 and _31, which production proved later.
+* So the replays measure the method under a context that is 3 days
+  older than the one new problems will get. The secret part will run
+  with all of today's public proofs.
+* **LVU (running, 21:53–22:53)**: LVS2's settings with today's
+  context: loops/ULX, loops/UL at 21:52 minus the 3 originals, 43,681
+  proofs. 46 proofs are left out because a kept output or a transfer
+  row shows an rp3 goal among their sources. About 1.6% of the checked
+  newer proofs (41 of 2,609) used an rp3 goal as a kNN lemma, so
+  some of the outputs that were not kept may carry rp3 information too.
 
 So about half the gap between plain twee and three days of production
 is closed in the first hour, on originals the system has never seen.
