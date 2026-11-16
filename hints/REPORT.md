@@ -3533,6 +3533,21 @@ with the clean context. The control is LVD.
   753) and more of the rest.
 * `solve_new.sh` now uses it by default (`SCHED`). The 4-hour arms
   (LV4, LZ4, from 19:52) have it too.
+* **From zero it starved originals** (LZ4, first try, 19:52–20:03:
+  232 proofs at 10 minutes against 806). All 427 runs were a_of_aa
+  goals. The model orders fresh runs by predicted success, and an
+  original with no proven goal scores below the floor or beyond the
+  line-gap limit. Production never shows this: every original has
+  proofs. With context the transfer gives each original proofs
+  within seconds, but LVS still started slowly (431 against 628 at
+  1 minute).
+* **Fix: `loop.py --sweep-first`** (d8e36da). Goals never run in the
+  round go first, in goal order across originals, and the model ranks
+  only the retries it was trained on. It is in `solve_new.sh`'s SCHED
+  default. LZ4 restarted with it at 20:05: 724 at 4 minutes against
+  732 without the scheduler, and all three originals ran evenly. LV4
+  runs without it. LVS2 (LVS with --sweep-first, queued after the
+  instance batch) tests it at 1 hour.
 
 So about half the gap between plain twee and three days of production
 is closed in the first hour, on originals the system has never seen.
