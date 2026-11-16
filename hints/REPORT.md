@@ -3340,6 +3340,44 @@ No gain, and 7–8% more wall time. What transfers across originals is
 exact: a goal that is a step of another proof (2al), or a proven goal as
 a lemma axiom (2am). Similar proofs' steps as hints do not.
 
+## 2aq. From scratch on unseen originals: a replay (16 Nov, from 11:55)
+
+What would the final system do on a new benchmark part, such as the
+secret 10,016 problems? The replay (abs/replay.sh) takes 3 whole holdout
+originals: a_of_aa, lra2aa and nil3_23_32_to_26 (sets/rp3, 1,320 goals).
+It removes their proofs (loops/RPs = UL at 11:50 minus them) and runs
+them from scratch.
+
+* **Settings:** production's cascade (abs/ul34.sh) on 4 workers,
+  without the learned scheduler, which was trained on production's
+  history of these goals.
+* **Transfer:** the live proof-step transfer runs beside it (abs/rpx.sh,
+  `transfer.py live --set sets/rp3`, every 10 minutes, 2 workers).
+* **Context:** the other 126 originals' proofs, as kNN lemma sources
+  and transfer sources.
+
+| system | proved of 1,320 | time |
+|---|---:|---|
+| plain twee, 4 s (runs/ALL_plain_t4) | 731 | 0.8 CPU h |
+| production, 3 days of loops (all versions) | 1,109 | – |
+| **replay, after 25 minutes** | **1,039** | about 2.5 CPU h |
+
+* **A third of these goals are instances of proven goals of other
+  originals** with the same or weaker axioms. The transfer worker's
+  first scan found 452 such goals (`find --goals`) and 546 candidates in
+  all, and proved 545 of the 546 in 91 s of runs.
+* The cascade itself proved 852 goals, 482 of them in the first minute,
+  mostly with kNN lemmas that state the goal itself. These became
+  possible with the fix in 2al.
+* Curve of the cascade's own proofs (minutes, proved, CPU h): 1: 482,
+  4: 804, 10: 846, 25: 852. The rest is the transfer's (189 synced).
+* **Caveat:** the other originals' proofs were found partly with these
+  3 originals' proofs in context, for example as kNN lemmas. A clean
+  replay would need a context computed without them. For the secret
+  part, the public proofs are a clean context.
+
+The replay goes on, and its curve is in loops/RP.curve.
+
 ## 2c. Long runs: stall cutoff and checkpoints
 
 * `--eqhint-stall N` gives up when no new rule has matched a hint for N
