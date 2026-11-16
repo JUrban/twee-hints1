@@ -175,14 +175,15 @@ def theories(t, k, info=None, explore=0, meta=None):
     ranked = sorted(groups.values(), key=lambda x: (x[0], x[1], x[2]))
     # (--theory-explore R) the last R of the K slots take theories drawn at random from the rest, seeded by
     # the target, so the logs cover more than the heuristic's top (data for learning the theory choice)
-    R = min(explore, max(0, len(ranked) - (k - explore)), k)
-    head, rest = ranked[:k - R], ranked[k - R:]
+    h = max(0, k - explore)
+    rest = ranked[h:]
+    R = min(explore, len(rest)) if len(ranked) > k else 0
     import random as _r
-    pick = head + _r.Random(t).sample(rest, R) if R else ranked[:k]
+    pick = ranked[:h] + _r.Random(t).sample(rest, R) if R else ranked[:k]
     for j, v in enumerate(pick):
         out.append((byB[id(v)], {f'assume_thy_{j}_{i}': f for i, f in enumerate(v[3])}))
         if meta is not None:
-            meta.append((j, v[2], -v[0], v[1], int(j >= k - R and R > 0), ranked.index(v), len(ranked),
+            meta.append((j, v[2], -v[0], v[1], int(R > 0 and j >= h), ranked.index(v), len(ranked),
                          ' & '.join(v[3])))
     return out
 
