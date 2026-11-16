@@ -3177,6 +3177,10 @@ goals of ULsZ, fresh 20 abstract s from ULsZ, 2 workers per arm):
 * **Production since 07:20** (abs/ul33.sh) uses `--lemma-knn 30` and
   the lemmas.py fix (2al), on 12 workers. Every goal's kNN set changes,
   so `--retry-knn` makes them all eligible for a fresh retry.
+* **Its rate:** 32 new in the first 26 minutes, about 74 an hour (6.2
+  per worker). Before, at 10 workers with 10 lemmas, it was 59 in 2
+  hours, about 29 an hour (2.9 per worker). Part of this is the
+  restart: fresh runs in new contexts come first.
 
 ## 2c. Long runs: stall cutoff and checkpoints
 
