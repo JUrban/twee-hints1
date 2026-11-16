@@ -2965,6 +2965,40 @@ theories on 157 targets):**
   good theories come first and untried ones still get tried.
 * Live since 01:15 (abs/clu4.sh) as a second A/B: `--theory-ts-ab` uses
   bit 1 of the crc32, crossed with the move policy on bit 0.
+**The A/B after 205 climbs (01:19–02:16):** 3 proofs, no difference on
+either bit (move policy 1 vs 2, p = 0.60; theory sampling 1 vs 2,
+p = 1.0). At a 1.5% proof rate, a 2× gain needs more than a thousand
+climbs per arm to show.
+
+**Heads first (02:22, `--reclimb-heads 4`, abs/clu5.sh).** The climber
+had climbed each target exactly once (696 targets over 96 originals).
+Now every other free slot goes to an original's first unsolved goal
+(111 heads; 27 never climbed), interleaved with new targets.
+
+* In the next 150 climbs: 8 proofs (5%, against 1.5% before):
+  * aip_to_aK1 185;
+  * mbol_to_aK1 550, 552, 554 (a chain: each proof makes the next goal
+    the head);
+  * mbol_lem2 512;
+  * mbol_nil3_a 494, 342;
+  * nil3_1K_f 325.
+* Re-climbing a head whose context hadn't changed gave 2 proofs in 87
+  climbs (0.45 per CPU hour, new targets 2.1). Since 03:05 a head is
+  re-climbed only after its original has gained a proof since its last
+  climb.
+* The theory-sampling bit split 0 vs 8 proofs (p = 0.007), but that is
+  chance:
+  * targets without stronger theories, where the theory ranking can't
+    matter, split 0/21 vs 3/25;
+  * three of the 8 are the mbol_to_aK1 chain, which all fell on one
+    side.
+  The proofs cluster by original, so the tests should count originals,
+  not targets.
+* Production since 01:30: 73 new proofs. 12 are the climber's, and 21
+  more are in originals where the climber proved a goal (ns_to_aa1_b 12,
+  mbol_to_aK1 7, aK2_eq_aK3_r 4). The climber's 6 CPUs connect to
+  almost half of production's progress.
+
 * A bug in the first exploration code (a sample larger than the rest of
   the theories) stopped the live climber from 00:02 to 00:19. A failed
   climb is now logged as ERROR and the climber goes on.
