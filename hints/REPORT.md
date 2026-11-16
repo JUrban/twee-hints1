@@ -3447,6 +3447,14 @@ clean context:
 | **`solve_new.sh`, 1 hour per batch (3 + 8 originals), about 8 CPU h in all** | **3,385** | **71.7%** |
 | production, 3 days, every version, full context | 4,190 | 88.8% |
 
+**Will the reuse carry over to the secret part?** It depends on how
+the axiom sets relate. Every whole holdout original has 12–30 public
+originals with the same or weaker axioms, which are the kNN lemma and
+transfer sources. In 6 of the 11, those include originals with
+identical axioms. The 129 public originals have 17–28 axioms each, and
+68 of them have 18. The secret originals were picked from the same
+groups (README), so they will most likely have such neighbours too.
+
 **A 20 s level from scratch** (abs/lv_test.sh, 15:05–16:06, sets/rp3,
 clean context, 4 workers plus the transfer, 1 hour):
 
