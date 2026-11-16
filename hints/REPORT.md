@@ -3376,7 +3376,17 @@ them from scratch.
   replay would need a context computed without them. For the secret
   part, the public proofs are a clean context.
 
-The replay goes on, and its curve is in loops/RP.curve.
+**At 60 minutes** (stopped at 12:58): **1,041 of 1,320**. 854 came from
+the cascade, in 3.25 CPU h: 1,000 runs at 5 s, 54 at 80 s and 12 at
+320 s. 545 came from the transfer, in about 0.1 CPU h, and the two
+overlap. Production has 1,109 after 3 days. The replay's last 35 minutes
+added only 2.
+
+**Clean replay** (abs/replayc.sh, abs/rpxc.sh, abs/replaycurvec.sh;
+loops/RPc, from 12:59). The context is loops/ALL minus the 3
+originals: 31,605 proofs of the 13 Nov 2 + 2 s loop, from before kNN
+lemmas, so none of them used these originals. Settings and budget are
+the same.
 
 ## 2c. Long runs: stall cutoff and checkpoints
 
