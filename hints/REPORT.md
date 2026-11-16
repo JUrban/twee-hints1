@@ -3029,6 +3029,49 @@ Now every other free slot goes to an original's first unsolved goal
   the theories) stopped the live climber from 00:02 to 00:19. A failed
   climb is now logged as ERROR and the climber goes on.
 
+## 2al. Goals that are steps of existing proofs (16 Nov, 04:20)
+
+**The observation.** 2,905 of the 7,543 unsolved goals are, up to
+variable names, a step of a proof found earlier. 101 of those proofs
+come from goals with the same or weaker axioms, so the goal is a theorem
+with its proof written down. The other 2,804 come from other theories:
+2,222 with one axiom more than the goal's, 450 with two.
+
+Production's hint pool (`--pool original`) offers only the goal's own
+original's proofs, and the kNN lemmas are proven goals, not proof steps.
+So these proofs never reached the goals. Only 12 of the 101 had the
+proof in their own original.
+
+**`transfer.py`:**
+
+* `find LOOPDIR --out GOALS.tsv [--any-theory]` lists the unsolved unit
+  goals whose canonical equation is a step of some hints file. With
+  `--any-theory` the source may have more axioms. Its step is then
+  maybe true only there, but false hints are inert (they only match
+  critical pairs, which are theorems).
+* `run GOALS.tsv DIR -- LOOP-OPTIONS` makes one fresh run per goal. The
+  source proofs' steps come first (up to 3 sources: own original first,
+  then the fewest extra axioms, then the shortest), then the usual pool
+  and lemmas. Proofs go to DIR for `merge.py`.
+
+**Same or weaker axioms** (abs/xfr.sh, sets/transfer1.tsv, snapshot
+ULsY at 04:15, fresh 20 abstract s, 3 workers):
+
+* **32 of 101 proved** in 2,675 run seconds, **about 43 proofs per CPU
+  hour**: more than 20 times production's average and about 70 times
+  the climber's.
+* Proved runs took 4 s on average. 30 merged into UL at 04:40; the
+  other 2 had been proved by production meanwhile.
+
+**From other theories** (abs/xfr2.sh, sets/transfer2b.tsv, the 2,804
+others, fewest extra axioms first): running from 04:42 on 3 workers.
+The live climber was stopped for it (about 0.5 proofs per CPU hour).
+
+**Beside it, long climbs on the heads** (abs/clh.sh, the 111 first
+unsolved goals, the live climber's config with a 160 s final run, 4
+workers): 2 of the first 8 heads proved (KK_Kcom_to_aK1 255, Ka1_eq_Ka2
+361) in 4,128 CPU s, about 1.7 per CPU hour.
+
 ## 2c. Long runs: stall cutoff and checkpoints
 
 * `--eqhint-stall N` gives up when no new rule has matched a hint for N
