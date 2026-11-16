@@ -45,7 +45,7 @@ written in loops/UL. Merged proofs count from their merge.
 | 15 Nov 22:00 | 44,060 | 4800 | sketch tests with stronger theories, climbing up and down (2aj) |
 | 16 Nov 00:00 | 44,110 | 4813 | live up-down climber from 22:07, 12 test proofs merged at 22:50 (2aj) |
 | 16 Nov 02:00 | 44,148 | 4820 | learned move policy and theory sampling in the climber (2ak) |
-| 16 Nov 04:00 | 44,234 | 4831 | the climber takes heads first from 02:22 (2ak): 86 in two hours |
+| 16 Nov 04:00 | 44,234 | 4831 | 86 in two hours (climber burst 02:22–03:10 and production; heads first was not its cause, 2ak) |
 
 From 15 Nov 05:30 the rate fell from hundreds an hour to 50–100. The
 cheap new contexts are used up; 58% of the unsolved goals sit behind the
@@ -2980,7 +2980,8 @@ had climbed each target exactly once (696 targets over 96 originals).
 Now every other free slot goes to an original's first unsolved goal
 (111 heads; 27 never climbed), interleaved with new targets.
 
-* In the next 150 climbs: 8 proofs (5%, against 1.5% before):
+* In the next 150 climbs: 8 proofs (5%, against 1.5% before; but see
+  the correction below):
   * aip_to_aK1 185;
   * mbol_to_aK1 550, 552, 554 (a chain: each proof makes the next goal
     the head);
@@ -3004,12 +3005,25 @@ Now every other free slot goes to an original's first unsolved goal
   mbol_to_aK1 7, aK2_eq_aK3_r 4). The climber's 6 CPUs connect to
   almost half of production's progress.
 
-* **After the new heads ran out (03:10–03:54):** 1 proof in 160 climbs
-  (aK2_eq_aK3_r 275), with the A/B arms by original and no difference.
-  The 5% burst came from the 27 heads never climbed before and from
-  heads that chains opened. Without new heads the climber is back at
-  about 1% of climbs. Heads first pays when proofs elsewhere open new
-  heads, so the ordering stays.
+* **After 03:10:** 2 proofs in 213 climbs (aK2_eq_aK3_r 275,
+  Kproperties_1 310), with the A/B arms by original and no difference.
+* **Correction (04:30): the burst was not the heads' doing.** The state
+  just before each of the climber's 19 proofs since 22:07 shows:
+  * 3 were the first unsolved goal of their original (aip_to_aK1 185,
+    mbol_nil3_a 342, nil3_1K_f 325);
+  * 1 was a tail head, the first unsolved goal after the last proof
+    (aK2_eq_aK3_r 275);
+  * the other 15 sit inside holes, with proved goals on both sides.
+  In the 02:22–03:10 burst, 3 of the 8 proofs were heads. Heads had half
+  the slots, so they did no better than the ordinary targets.
+* **First unsolved is not the tail head.** In 109 of the 111 originals
+  with unsolved goals, later goals are proved past the first unsolved
+  one, so `--reclimb-heads` targets holes. 4,710 of the 7,543 unsolved
+  goals are at or behind the tail heads, and 2,833 are in holes.
+* The yield varies by window: 3 of 202, then 3 of 205, 8 of 150, 2 of
+  213. It follows the supply of targets whose context changed (chains
+  such as mbol_to_aK1 550, 552, 554, and production's new proofs), not
+  the ordering.
 
 * A bug in the first exploration code (a sample larger than the rest of
   the theories) stopped the live climber from 00:02 to 00:19. A failed
