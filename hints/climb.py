@@ -325,10 +325,10 @@ def main():
     sf = open(os.path.join(c.dir, 'solved.tsv'), 'a')
 
     def ts_arm(t):
-        """--theory-ts-ab: the targets that rank theories by Thompson sampling (bit 1 of crc32, independent of
+        """--theory-ts-ab: the targets that rank theories by Thompson sampling (bit 1 of the original's crc32, independent of
         --move-ab's bit 0); without --theory-ts-ab all of them"""
         import zlib
-        return not c.theory_ts_ab or (zlib.crc32(t.encode()) >> 1) % 2 == 1
+        return not c.theory_ts_ab or (zlib.crc32(lemmas.split(t)[0].encode()) >> 1) % 2 == 1
 
     def candidates(t):
         """label -> TPTP formula of each candidate assumption of target T."""
@@ -662,9 +662,9 @@ def main():
 
     policy = None
     def move_arm(t):
-        """--move-ab: the targets that use the policy (odd crc32 of the name); the others the fixed order"""
-        import zlib
-        return zlib.crc32(t.encode()) % 2 == 1
+        """--move-ab: the targets that use the policy (odd crc32 of the original's name); the others the fixed order"""
+        import zlib   # (by the original: its goals' proofs come in chains, so the unit is the original)
+        return zlib.crc32(lemmas.split(t)[0].encode()) % 2 == 1
     if c.move_model:
         import json, math, random, latticedata, latticepolicy
         policy = json.load(open(c.move_model))

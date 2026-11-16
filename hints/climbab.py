@@ -23,6 +23,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('dir'); ap.add_argument('log')
     ap.add_argument('--after', type=int, default=1, help='count the climbs after the N-th from last start')
+    ap.add_argument('--by-original', action='store_true', help='arms by the original\'s crc32 (climb.py since 16 Nov 03:10)')
     a = ap.parse_args()
     lines = open(a.log).read().splitlines()
     starts = [i for i, l in enumerate(lines) if l.startswith('--theory-ts:')]
@@ -44,11 +45,12 @@ def main():
     for bit, name in ((0, 'move policy'), (1, 'theory TS')):
         arms = {}
         for v in (1, 0):
-            ts = [t for t in res if (zlib.crc32(t.encode()) >> bit) % 2 == v]
+            ts = [t for t in res if (zlib.crc32((t.rsplit('__goal_', 1)[0] if a.by_original else t).encode()) >> bit) % 2 == v]
             p = sum(res[t] for t in ts); h = sum(cpu[t] for t in ts) / 3600
+            os_ = {t.rsplit('__goal_', 1)[0] for t in ts}; op = {t.rsplit('__goal_', 1)[0] for t in ts if res[t]}
             arms[v] = (len(ts), p)
             print(f'  {name:12s} {"on " if v else "off"}: {len(ts):4d} climbs, {p:3d} proofs, {h:6.2f} CPU h, '
-                  f'{p / h if h else 0:5.2f} proofs/CPU h')
+                  f'{p / h if h else 0:5.2f} proofs/CPU h; originals {len(op)}/{len(os_)} with a proof')
         (n1, p1), (n0, p0) = arms[1], arms[0]
         print(f'  {name:12s} Fisher p (proofs per climb) = {fisher(p1, n1 - p1, p0, n0 - p0):.3f}')
 
