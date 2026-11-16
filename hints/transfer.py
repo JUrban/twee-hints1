@@ -192,6 +192,42 @@ def find_goal_instances(D, out, allp='/project/hintwork/sets/all'):
           f'axioms -> {out}')
 
 
+def find_same_other(D, out, allp='/project/hintwork/sets/all'):
+    """(find --same-other, 16 Nov) unsolved unit goals whose statement (up to renaming) is a proven goal of an
+    original whose axioms are NOT a subset of theirs (incomparable or stronger): 1,888 of 7,025 on 16 Nov. Such a
+    proof holds for the goal if it (and its lemmas' proofs) use none of the missing axioms; run --src-pool tests
+    that by proving the goal with the source original's whole pool as hints. Sources: fewest missing axioms first."""
+    S = sorted({l.split('\t')[0] for l in open(os.path.join(D, 'solved.tsv'))}); Ss = set(S)
+    def k(n):
+        try:
+            lits = hintsel.goal_lits(n)
+        except Exception:
+            return None
+        return key(lits[0][1], lits[0][2]) if len(lits) == 1 and lits[0][0] else None
+    pk = {}
+    for n in S:
+        x = k(n)
+        if x:
+            pk.setdefault(x, []).append(n)
+    rows = []
+    for g in (l.strip() for l in open(allp)):
+        if not g or g in Ss:
+            continue
+        x = k(g)
+        if not x or x not in pk:
+            continue
+        A = lemmas.axiom_set(g)
+        fs = [f for f in pk[x] if not lemmas.axiom_set(f) <= A]
+        if len(fs) < len(pk[x]):
+            continue   # (a weaker source exists: find --goals has it)
+        fs.sort(key=lambda f: (len(lemmas.axiom_set(f) - A), f))
+        rows.append((len(lemmas.axiom_set(fs[0]) - A), g, fs[:3]))
+    with open(out, 'w') as fo:
+        for m, g, fs in sorted(rows, key=lambda r: (r[0], r[1])):
+            fo.write(f'{g}\t{",".join(fs)}\t{m}\n')
+    print(f'{len(rows)} unsolved goals are proven goals of originals with axioms not within theirs -> {out}')
+
+
 def find(D, out, allp='/project/hintwork/sets/all', any_theory=False):
     S = {l.split('\t')[0] for l in open(os.path.join(D, 'solved.tsv'))}
     want = {}
@@ -274,7 +310,7 @@ def live(D, d, j, T, rest, src_lemmas, every, allp='/project/hintwork/sets/all')
         time.sleep(max(0, every - (time.time() - t0)))
 
 
-def run(goals, d, j, T, rest, src_lemmas=0, live_dst=None):
+def run(goals, d, j, T, rest, src_lemmas=0, live_dst=None, src_pool=False):
     import loop
     os.makedirs(d, exist_ok=True)
     names = os.path.join(d, 'goals.names')   # (loop.py's goal set: names only)
@@ -310,6 +346,11 @@ def run(goals, d, j, T, rest, src_lemmas=0, live_dst=None):
                 w = tuple(x.rstrip('\n').split('\t')[:2])
                 if len(w) == 2 and w not in seen:
                     seen.add(w); hs.append(w)
+        if src_pool:   # (--src-pool) all proofs of the sources' originals, as hints (their lemma chains)
+            for f in src[g]:
+                for h in pools.get(lp.pool_key(f), []):
+                    if (h[0], h[1]) not in seen:
+                        seen.add((h[0], h[1])); hs.append((h[0], h[1]))
         n0 = len(hs)
         hs += [h for h in lp.hints_for(g, pools, None) if (h[0], h[1]) not in seen]
         if src_lemmas:
@@ -356,7 +397,9 @@ def main():
         live(opts[0], opts[1], val('-j', 2), val('--time', 20.0), rest, val('--src-lemmas', 6), val('--every', 1200.0),
              val('--set', '/project/hintwork/sets/all'))
         return
-    if argv[0] == 'find' and '--goals' in argv:
+    if argv[0] == 'find' and '--same-other' in argv:
+        find_same_other(argv[1], argv[argv.index('--out') + 1])
+    elif argv[0] == 'find' and '--goals' in argv:
         find_goal_instances(argv[1], argv[argv.index('--out') + 1])
     elif argv[0] == 'find' and '--instances' in argv:
         find_instances(argv[1], argv[argv.index('--out') + 1])
@@ -370,7 +413,7 @@ def main():
         T = float(opts[opts.index('--time') + 1]) if '--time' in opts else 20
         K = int(opts[opts.index('--src-lemmas') + 1]) if '--src-lemmas' in opts else 0
         dst = opts[opts.index('--live-dst') + 1] if '--live-dst' in opts else None
-        run(goals, d, j, T, rest, K, dst)
+        run(goals, d, j, T, rest, K, dst, '--src-pool' in opts)
 
 
 if __name__ == '__main__':
