@@ -3243,6 +3243,50 @@ goals, so production stays at 30.
 Selection tests on 150–300 goals at 20 s resolve only differences of
 several proofs. Production changes only on effects that large.
 
+## 2an. Where the proofs come from now, and what a head is worth (16 Nov, 11:00)
+
+**Production's round 5 by cascade level** (UL/r5/results.tsv, 32,768
+runs):
+
+| level | runs | proved | wall h | proofs per wall h |
+|---|---:|---:|---:|---:|
+| 5 s (first or fresh) | 25,205 | 2,191 | 133.3 | 16.4 |
+| 80 s | 6,962 | 1,064 | 282.4 | 3.8 |
+| 320 s | 603 | 119 | 116.0 | 1.0 |
+
+Over 07:20–10:27 production made 4.1 proofs per worker hour. The 320 s
+level alone gives about as much as the climbers did (1.2 per CPU hour
+for the batch of long climbs on heads), so a level above 320 s would
+give less.
+
+**Is a head worth more than its own proof?** The 111 stuck heads of
+03:10 (sets/heads_stuck): 69 of them are proved now, 17 by the long
+climbs and the rest by production and the transfer. Goals proved per
+original-hour:
+
+| originals | goals per hour |
+|---|---:|
+| 69 with the head proved, after its proof | 0.53 |
+| the same 69, in equal windows before their head's proof | 0.43 |
+| 42 whose head is still unproved, since 05:13 | 0.24 |
+
+A proved head raises its original's later rate by about 0.1 goals an
+hour, so over the 5 hours measured it brings about half a further goal.
+Most of the difference to the unproved ones is selection: the active
+originals get their heads proved. So a head is worth little beyond its
+own proof.
+
+* The live head climber (abs/clhl.sh, 30 kNN lemmas, 160 s final
+  runs) made 4 proofs from 60 heads in 8.5 CPU h, which is 0.47 per CPU
+  hour. **Stopped at 11:05.** Its 4 CPUs went to production, which now
+  runs 16 workers (abs/ul34.sh).
+* **Proof steps as lemma axioms (the open decision in 2al) is now worth
+  little.** Only 39 unsolved goals are instances of a step of a proof
+  of a unit goal from the same or weaker axioms. 34 of them failed with
+  the steps as hints and the source goals as lemmas. So the
+  decision would bring at most about 39 proofs now. Beyond that it is
+  a larger lemma pool, and more than 30 kNN lemmas did not help (2am).
+
 ## 2c. Long runs: stall cutoff and checkpoints
 
 * `--eqhint-stall N` gives up when no new rule has matched a hint for N
