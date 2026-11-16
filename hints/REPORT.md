@@ -41,6 +41,11 @@ written in loops/UL. Merged proofs count from their merge.
 | 15 Nov 09:05 | 43,502 | 4720 | production cut to 6–12 workers for model tests (2ad); Prover9 side worker from 08:56 |
 | 15 Nov 10:12 | 43,661 | | `--retry-knn` (2ae): kNN lemma changes reach the cascade |
 | 15 Nov 12:05 | 43,735 | 4745 | unfolded-twee side worker from 11:18 (2af) replaces Prover9's |
+| 15 Nov 18:00 | 43,963 | 4784 | 5 s first level (2ag), production 14 workers from 17:31, generator tests (2ah) |
+| 15 Nov 22:00 | 44,060 | 4800 | sketch tests with stronger theories, climbing up and down (2aj) |
+| 16 Nov 00:00 | 44,110 | 4813 | live up-down climber from 22:07, 12 test proofs merged at 22:50 (2aj) |
+| 16 Nov 02:00 | 44,148 | 4820 | learned move policy and theory sampling in the climber (2ak) |
+| 16 Nov 04:00 | 44,234 | 4831 | the climber takes heads first from 02:22 (2ak): 86 in two hours |
 
 From 15 Nov 05:30 the rate fell from hundreds an hour to 50–100. The
 cheap new contexts are used up; 58% of the unsolved goals sit behind the
