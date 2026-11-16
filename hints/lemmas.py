@@ -21,7 +21,7 @@ lemmas.py NAMES SOLVED OUTDIR [-m M] [--after]
 import argparse, collections, hashlib, math, os, pickle, re, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-PROB = '/project/AIM60k/problems/tptp'
+PROB = os.environ.get('AIM_PROB', '/project/AIM60k/problems/tptp')   # (16 Nov) AIM_PROB: another problem dir
 CACHE = '/project/hintwork/abs/goalinfo.pkl'
 
 def split(name):

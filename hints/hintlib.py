@@ -1,7 +1,7 @@
 """Helpers for twee equation hints: extract from twee output, write hint files."""
 import re, os
 
-PROB = '/project/AIM60k/problems/tptp'
+PROB = os.environ.get('AIM_PROB', '/project/AIM60k/problems/tptp')   # (16 Nov) AIM_PROB: another problem dir
 
 _cnf = re.compile(r'(?:cnf|fof)\(\s*hint\s*,\s*axiom\s*,\s*(.*)\)\.\s*$', re.S)
 

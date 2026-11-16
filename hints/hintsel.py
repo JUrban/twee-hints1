@@ -8,7 +8,7 @@ import collections, math, os, re, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import feats
 
-PROB = '/project/AIM60k/problems/tptp'
+PROB = os.environ.get('AIM_PROB', '/project/AIM60k/problems/tptp')   # (16 Nov) AIM_PROB: another problem dir
 
 def goal_of_problem(name):
     """(lhs, rhs) of the conjecture of a TPTP problem, variables uppercase."""

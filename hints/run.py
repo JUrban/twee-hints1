@@ -13,7 +13,7 @@ With --hints-dir, passes DIR/<name> as --hints-file when it exists
 import argparse, os, re, subprocess, sys, time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-PROB = '/project/AIM60k/problems/tptp'
+PROB = os.environ.get('AIM_PROB', '/project/AIM60k/problems/tptp')   # (16 Nov) AIM_PROB: another problem dir
 
 def run_one(name, a):
     cmd = [a.twee, os.path.join(a.prob_dir, name + '.p'), '--max-time', str(a.timeout),

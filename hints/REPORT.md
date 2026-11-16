@@ -3700,3 +3700,19 @@ are run in `/project/hintwork`, with `venv` holding lightgbm.
    later) and `--resume-requeue` in the twee arguments. A failed level
    saves its context, and the resumed level gets the generated hints.
    `abs/gen_test.sh` is the paired online test.
+
+6. **New problems, from scratch** (16 Nov, `hints/solve_new.sh`; the
+   setting of 2aq):
+
+       solve_new.sh NAMES CONTEXT OUT [J [HOURS]]
+
+   * It runs the cascade (5, 80, 320 s, 30 kNN lemmas, 6 siblings, rm4t;
+     no scheduler) on the goals in NAMES, with J workers for HOURS.
+   * Beside it, the live proof-step transfer runs on 2 workers every 10
+     minutes.
+   * CONTEXT's proofs outside the new goals' originals are the round-0
+     context: lemma sources, hint pools and transfer sources.
+   * `AIM_PROB` sets the problem directory. For new problems, use one
+     with links to both the public and the new `.p` files.
+   * A 2-minute test on 20 lra2aa goals with the clean context proved
+     20 of 20.
