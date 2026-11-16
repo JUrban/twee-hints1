@@ -258,7 +258,9 @@ class LemmaIndex:
             union = wF + sum(idf[x] for x in G) - inter
             scored.append((inter / union, m))
         scored.sort(key=lambda x: (-x[0], x[1]))
-        out, seen = [], {form}
+        # (16 Nov) seen was {form}, which dropped every proven goal stating exactly the target: but such a goal of
+        # the same or a weaker theory proves it (46 of transfer.py's 63 source-lemma proofs were of this kind)
+        out, seen = [], set()
         for _, m in scored:
             f = lemma_form(m)
             if f in seen:

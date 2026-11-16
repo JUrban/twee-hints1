@@ -3116,6 +3116,16 @@ already adds, so the trust level stays the same.
   merges only 5 were left; 3 of them proved, together with 3 of the 28
   clean instance candidates (sets/transfer6.tsv).
 
+**Why the kNN lemmas missed them: a filter in `LemmaIndex._select`.**
+Since the first kNN lemma code (13 Nov, d6b6bf9) the selection started
+with `seen = {target's formula}`, so it dropped every proven goal stating
+exactly the target, from any original. Such a goal of the same or a
+weaker theory proves the target. 46 of the 63 source-lemma proofs above
+were of this kind (identical lemma formula strings). Fixed on 16 Nov
+06:00: the identical proven goal now comes first. Production reads it
+at its next restart; until then the live worker's `find --goals`
+catches these cases.
+
 **Live (05:37, `transfer.py live`, abs/xfrlive.sh, 2 workers, every 20
 minutes).** With production's current proofs as context (symlinked
 hints, its solved.tsv with rounds zeroed), it finds the new step and
