@@ -3495,6 +3495,28 @@ LVA 933):
   noise, but it costs only the scans, so `solve_new.sh` now cycles
   every 2 minutes by default (XEVERY=120).
 
+**From zero** (abs/lvz_test.sh, LVZ, 17:50–18:51): the same 3 originals
+with an empty context, so there are no other originals' proofs for
+kNN lemmas, hint pools or the transfer. Totals over time, cascade and
+transfer together (abs/totcurve.py, from the proof files' times):
+
+| minutes | 1 | 4 | 10 | 25 | 40 | 60 |
+|---|---:|---:|---:|---:|---:|---:|
+| clean public context, transfer every 10 min (LVA) | 634 | 807 | 849 | 896 | 905 | 933 |
+| the same, every 2 min (LVD) | 628 | 809 | 847 | 884 | 921 | 942 |
+| **from zero (LVZ)** | 565 | 732 | 806 | 858 | 883 | **890** |
+| plain twee at 4 s, 0.8 CPU h | | | | | | 731 |
+
+* **The loop alone does most of it.** From zero it reaches 890 of
+  1,320 in 1 hour on 4 workers, 22% over plain twee (731).
+* **The public context adds 43–52 proofs (5–6%).** The transfer
+  proves 420 goals in seconds, but the cascade from zero proves most
+  of those within minutes as well. The context's lead is largest
+  early (+75 at 4 minutes).
+* Caveat: the rule model rm4t is still the fixed one. It was trained
+  on plain 2 s proofs of the training split (2e, 2f), the kind a
+  from-zero run makes in its first sweep.
+
 So about half the gap between plain twee and three days of production
 is closed in the first hour, on originals the system has never seen.
 Most of it comes in the first 10 minutes. Exact reuse of other
@@ -3609,6 +3631,9 @@ rounds of 30 s or more, but about 40% overhead for 8 s rounds.
   * **Unseen originals:** on the 11 whole holdout originals, from
     scratch with a clean context, the system reaches 71.7% in 1 hour
     per batch, against 61.2% for plain twee (2aq).
+  * **From zero**, with no other originals' proofs, on the 3 replay
+    originals: 890 of 1,320 in 1 hour on 4 workers, against 731 for
+    plain twee and 942 with the public context (2aq).
 * **Where the gain comes from**, by today's evidence:
   1. **The sibling chain:** proven goals of the same original as lemma
      axioms, online (below).
@@ -3620,8 +3645,10 @@ rounds of 30 s or more, but about 40% overhead for 8 s rounds.
        them since 13 Nov; fixed 16 Nov, 2al.
      * The proof-step transfer (2al): a goal that is a step of another
        proof gets that proof as hints and its goal as a lemma.
-     * On new originals this reuse does most of the first hour's work.
-       The transfer alone proves 30–40% of the goals in seconds.
+     * On new originals the transfer proves 30–40% of the goals in
+       seconds. But from zero, with no other originals' proofs, the
+       loop proves most of them within minutes too. The public context
+       is worth 5–6% at 1 hour (942 against 890, 2aq).
   3. **Hints from all of the original's proofs**, and the ENIGMA rule
      filter in the short runs.
 * **What did not help** (16 Nov additions to the list below):
