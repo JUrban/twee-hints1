@@ -46,6 +46,7 @@ written in loops/UL. Merged proofs count from their merge.
 | 16 Nov 00:00 | 44,110 | 4813 | live up-down climber from 22:07, 12 test proofs merged at 22:50 (2aj) |
 | 16 Nov 02:00 | 44,148 | 4820 | learned move policy and theory sampling in the climber (2ak) |
 | 16 Nov 04:00 | 44,234 | 4831 | 86 in two hours (climber burst 02:22–03:10 and production; heads first was not its cause, 2ak) |
+| 16 Nov 06:30 | 44,434 | 4858 | proof-step transfer (2al): about 110 merged; long climbs on heads 12 of 65; production at 10 workers from 05:12 |
 
 From 15 Nov 05:30 the rate fell from hundreds an hour to 50–100. The
 cheap new contexts are used up; 58% of the unsolved goals sit behind the
