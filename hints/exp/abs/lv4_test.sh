@@ -5,5 +5,5 @@
 # Runs a private copy of solve_new.sh.
 cd /project/hintwork
 sed "s|^H=.*|H=/project/twee/hints|" /project/twee/hints/solve_new.sh > loops/$ARM.solve_new.sh
-LOOPARGS="$LOOPARGS" bash loops/$ARM.solve_new.sh sets/rp3 $CTX loops/$ARM 4 ${HOURS:-4} > loops/$ARM.out 2>&1
+EXCLUDE=originals LOOPARGS="$LOOPARGS" bash loops/$ARM.solve_new.sh sets/rp3 $CTX loops/$ARM 4 ${HOURS:-4} > loops/$ARM.out 2>&1
 touch loops/$ARM.done

@@ -6,8 +6,11 @@
 # NAMES    goal names (X__goal_N), one per line. The problem files X__goal_N.p are read from $AIM_PROB (default
 #          the AIM60k tptp dir). For new problems, make a directory with links to the public and the new .p files:
 #          the context's goals are read too.
-# CONTEXT  a loop dir with solved.tsv and hints/ (for example loops/UL, or a snapshot of it). Its proofs outside
-#          the NAMES' originals are the round-0 context: sibling and kNN lemma sources, hint pools, transfer sources.
+# CONTEXT  a loop dir with solved.tsv and hints/ (for example loops/UL, or a snapshot of it). Its proofs are the
+#          round-0 context: sibling and kNN lemma sources, hint pools, transfer sources. EXCLUDE=goals (default)
+#          leaves out only proofs of the NAMES themselves, so goals moved out of a public original (1,156 of the
+#          secret part, README) keep their public siblings as lemmas. EXCLUDE=originals leaves out every proof of
+#          the NAMES' originals: a replay that simulates unseen originals (REPORT 2aq).
 # OUT      the new loop dir (must not exist); OUT.ctx holds the context, OUT.xfer the transfer worker.
 # J        cascade workers (default 4); the live proof-step transfer (transfer.py live) adds 2 at times.
 # HOURS    no new cascade runs after this many hours (default 1).
@@ -29,18 +32,21 @@ XTWEE=${XTWEE:-/project/bin/twee-e39}   # the transfer worker's twee (as abs/rpx
 [ -n "$OUT" ] && [ -f "$NAMES" ] && [ -f "$CTX/solved.tsv" ] || { sed -n 2,20p "$0"; exit 1; }
 [ -e "$OUT" ] && { echo "$OUT exists"; exit 1; }
 mkdir -p "$OUT.ctx/hints"
-python3 - "$NAMES" "$CTX" "$OUT.ctx" <<'EOF'
+python3 - "$NAMES" "$CTX" "$OUT.ctx" "${EXCLUDE:-goals}" <<'EOF'
 import os, shutil, sys
-names, ctx, snap = sys.argv[1:]
-O = {l.strip().rsplit('__goal_', 1)[0] for l in open(names) if l.strip()}
+names, ctx, snap, excl = sys.argv[1:]
+assert excl in ('goals', 'originals'), excl
+G = {l.strip() for l in open(names) if l.strip()}
+O = {g.rsplit('__goal_', 1)[0] for g in G}
 n = 0
 with open(os.path.join(snap, 'solved.tsv'), 'w') as f:
     for l in open(os.path.join(ctx, 'solved.tsv')):
         w = l.rstrip('\n').split('\t')
-        if len(w) >= 3 and w[0].rsplit('__goal_', 1)[0] not in O and os.path.exists(os.path.join(ctx, 'hints', w[0])):
+        out = w[0] in G or (excl == 'originals' and w[0].rsplit('__goal_', 1)[0] in O)
+        if len(w) >= 3 and not out and os.path.exists(os.path.join(ctx, 'hints', w[0])):
             f.write(f'{w[0]}\t0\t{w[2]}\n'); n += 1
             shutil.copy2(os.path.join(ctx, 'hints', w[0]), os.path.join(snap, 'hints', w[0]))
-print(f'context: {n} proofs outside the {len(O)} originals of the new goals')
+print(f'context: {n} proofs (EXCLUDE={excl}: {len(G)} new goals of {len(O)} originals)')
 EOF
 MOD="--model --model-fixed $M.bin,$M.vocab --model-theory --lemmas 6 --lemma-knn $KNN --lemma-subsets --lemma-after"
 python3 -u "$H/loop.py" "$NAMES" "$OUT" --init "$OUT.ctx" --start 1 --cascade "$CASCADE" --cascade-start -1 --retry-gap 3 \

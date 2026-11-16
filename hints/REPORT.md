@@ -3899,10 +3899,18 @@ are run in `/project/hintwork`, with `venv` holding lightgbm.
 
    * It runs the cascade (5, 80, 320 s, 30 kNN lemmas, 6 siblings, rm4t;
      no scheduler) on the goals in NAMES, with J workers for HOURS.
-   * Beside it, the live proof-step transfer runs on 2 workers every 10
-     minutes.
-   * CONTEXT's proofs outside the new goals' originals are the round-0
-     context: lemma sources, hint pools and transfer sources.
+   * Beside it, the live proof-step transfer runs on 2 workers every 2
+     minutes (XEVERY, 2aq).
+   * CONTEXT's proofs are the round-0 context: lemma sources, hint
+     pools and transfer sources.
+     * By default (`EXCLUDE=goals`) only proofs of the NAMES themselves
+       are left out. So the 1,156 secret goals moved out of public
+       originals (README) keep their public siblings as lemmas.
+     * `EXCLUDE=originals` leaves out every proof of the new goals'
+       originals. The replays (2aq) use it to simulate unseen
+       originals.
+   * `LOOPARGS` passes extra loop.py options, for example the learned
+     scheduler's (abs/lvs_test.sh).
    * `AIM_PROB` sets the problem directory. For new problems, use one
      with links to both the public and the new `.p` files.
    * A 2-minute test on 20 lra2aa goals with the clean context proved
