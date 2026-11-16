@@ -227,6 +227,8 @@ def main():
     ap.add_argument('--updown', action='store_true', help='climb up (theory unions, weaker goals) when no sketch proves the target, then down')
     ap.add_argument('--move-model', help='--updown: a latticepolicy.py model orders the moves (softmax sampling)')
     ap.add_argument('--move-temp', type=float, default=1.0)
+    ap.add_argument('--reclimb-heads', type=int, default=0,
+                    help='--live: climb each original\'s first unsolved goal up to N times, interleaved with new targets')
     ap.add_argument('--theory-ts', action='store_true',
                     help='--theories: rank the stronger theories by Thompson sampling of their nontrivial-sketch rate')
     ap.add_argument('--theory-ts-ab', action='store_true', help='--theory-ts only on targets with bit 1 of crc32')
@@ -584,7 +586,7 @@ def main():
             if S in tried:
                 continue
             tried.add(S)
-            ok, U, res, nt = run(t, S, bt, f's{runs}')
+            ok, U, res, nt = run(t, S, bt, f'{getattr(c, "cprefix", {}).get(t, "")}s{runs}')
             runs += 1
             if ok and not U:
                 real = res; break
@@ -732,7 +734,7 @@ def main():
             if (S, g) in tried or (not S and g is None):
                 continue
             tried.add((S, g))
-            ok, U, res, nt = run(t, S, c.sketch_time, f's{runs}', goal=g)
+            ok, U, res, nt = run(t, S, c.sketch_time, f'{getattr(c, "cprefix", {}).get(t, "")}s{runs}', goal=g)
             runs += 1
             if not ok and g is None:
                 failed.append(S)
@@ -802,6 +804,9 @@ def live(c, a, lp, gl, pools, ix, climb, out):
         skip |= {l.strip() for l in open(f) if l.strip()}
     out.flush()
     climbed = {l.split('\t')[0] for l in open(os.path.join(c.dir, 'climb.tsv'))}
+    nclimb = collections.Counter(l.split('\t')[0] for l in open(os.path.join(c.dir, 'climb.tsv'))
+                                 if l.split('\t')[1:2] == ['final'])
+    c.cprefix = {}   # target -> run tag prefix of a re-climb (r1, r2, ...), so its sketch logs stay apart
     def dst():
         S, R = set(), 0
         for l in open(os.path.join(D, 'solved.tsv')):
@@ -827,7 +832,29 @@ def live(c, a, lp, gl, pools, ix, climb, out):
         # proved 36/95 of the climber's first targets at 49 proofs/CPU-h, the climber 31/102 at 15)
         res = [n for n, (ok, lev) in last.items() if ok == 'NO' and lev != 'L0' and n in fresh and n not in S
                and n not in climbed and n not in skip and n not in busy]
-        return sorted(res, key=lambda n: (dist(n), n))
+        res.sort(key=lambda n: (dist(n), n))
+        if not c.reclimb_heads:
+            return res
+        # (--reclimb-heads N) each original's first unsolved goal, climbed up to N times (the climbs are randomized
+        # by the move policy and theory sampling; a head's proof opens its original's later goals), fewest climbs
+        # first; interleaved with the new targets
+        first = {}
+        for n in gl:
+            if n in S or n in skip or n in busy:
+                continue
+            o, k = lemmas.split(n)
+            if o not in first or k < first[o][0]:
+                first[o] = (k, n)
+        heads = sorted((n for _, n in first.values() if nclimb[n] < c.reclimb_heads),
+                       key=lambda n: (nclimb[n], dist(n), n))
+        hs = set(heads); res = [n for n in res if n not in hs]
+        mixed = []
+        while heads or res:
+            if heads:
+                mixed.append(heads.pop(0))
+            if res:
+                mixed.append(res.pop(0))
+        return mixed
     def refresh(S):
         new = [n for n in S if n not in lp.solved]
         for n in new:
@@ -868,6 +895,8 @@ def live(c, a, lp, gl, pools, ix, climb, out):
             cap = c.j if not c.cpus else max(1, min(c.j, c.cpus - others()))
             while len(running) < cap and todo:
                 t = todo.pop(0)
+                if nclimb[t]:
+                    c.cprefix[t] = f'r{nclimb[t]}'
                 running[ex.submit(climb, t)] = t
             if not running:
                 time.sleep(60); continue
@@ -881,7 +910,7 @@ def live(c, a, lp, gl, pools, ix, climb, out):
                     print(f'{t} ERROR {traceback.format_exc()}', flush=True)
                     climbed.add(t)
                     continue
-                climbed.add(t)
+                climbed.add(t); nclimb[t] += 1
                 S, R = dst()
                 if ok and t not in S:
                     # (the hints file is already in place: DIR/hints links to D/hints)
