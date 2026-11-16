@@ -3474,6 +3474,29 @@ originals' proven goals and proof steps does most of the work: goals
 that state, or are instances of, proven goals of the same or weaker
 axioms.
 
+## 2ar. The same statement proven in another theory (16 Nov, 16:20)
+
+`transfer.py find --same-other` lists the unsolved goals whose statement,
+up to renaming, is a proven goal of an original whose axioms are not
+within theirs. On 16 Nov that is **1,887 of 7,025**. For 1,361 of them
+the source theory has only one axiom the goal's lacks. Such a proof
+holds for the goal if neither it nor its lemmas use the missing axioms.
+
+* **They mostly do.** In 359 of 400 source proofs (90%), the missing
+  axiom is itself a step of the proof. The shared statements hold there
+  because of the hypothesis that differs.
+* **Pilot with the source original's whole pool as hints**
+  (`run --src-pool`, sets/so60.tsv): 0 of 25. Stopped.
+* **The 323 whose source proof has no missing axiom as a step**
+  (sets/so_free.tsv): source proof steps as hints, 20 s, 60 of them
+  (sets/sof60.tsv): **3 of 60**, in 0.6 CPU h. That's 5 per CPU hour,
+  more than production's 1 per worker hour now. The other 263
+  (sets/sof_rest.tsv) are queued as a side batch. The 3 proofs are
+  merged.
+* So the lemma chains carry the dependence, even when the final proof
+  does not show it. Exact reuse works within the same or weaker
+  axioms (2al, 2am) and rarely across them.
+
 ## 2c. Long runs: stall cutoff and checkpoints
 
 * `--eqhint-stall N` gives up when no new rule has matched a hint for N
