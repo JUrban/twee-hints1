@@ -3317,6 +3317,29 @@ same context):
 
 Not pursued. The option stays in, off by default.
 
+## 2ap. Hints from the kNN lemmas' proofs (16 Nov, 11:35): no gain
+
+The cross-original hint pools of earlier tests were never measured
+where the control proves anything. 2ad's snapshot was invalid, and 2ag
+used heads, where every arm proved 0 of 30.
+
+`loop.py --hint-lemma-proofs F` (`--hint-lemma-proof-max 300`) adds, after the
+own pool, the proof steps of each of the run's 30 kNN lemmas as hints
+with factor F. These are proven goals of the same or weaker axioms,
+mostly of other originals. It adds 200–600 hints per goal once the own
+pool's duplicates are removed. Paired, as KN30 (abs/hlp_test.sh,
+unsol150, ULsZ, fresh 20 s):
+
+| arm | proved | against KN30 | wall s |
+|---|---:|---|---:|
+| KN30 (control) | 6 | – | 4,919 |
+| F = 0.1 (KH01) | 5 | +1/−2 | 5,323 |
+| F = 0.01, the own pool's boost (KH001) | 5 | +1/−2 | 5,240 |
+
+No gain, and 7–8% more wall time. What transfers across originals is
+exact: a goal that is a step of another proof (2al), or a proven goal as
+a lemma axiom (2am). Similar proofs' steps as hints do not.
+
 ## 2c. Long runs: stall cutoff and checkpoints
 
 * `--eqhint-stall N` gives up when no new rule has matched a hint for N
