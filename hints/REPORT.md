@@ -3215,6 +3215,21 @@ Two ways to choose the 30 differently, both in `lemmas.LemmaIndex`:
   found with plain-similarity lemmas, so the offline measure favours
   plain similarity. The paired runs below decide.
 
+Paired runs (30 lemmas, as KN30, same 150 goals):
+
+| selection | proved | against plain 30 | wall s |
+|---|---:|---|---:|
+| plain similarity (KN30) | 6 | – | 4,919 |
+| use counts, B = 0.3 (KP03) | 7 | +3/−2 | 5,042 |
+| MaSh-style dependencies, W = 1 (KD10) | 5 | +1/−2 | 4,927 |
+
+Neither selection beats plain similarity. Across all the arms, 10
+distinct goals were proved, so the arms differ by one or two goals each,
+which is noise. I stopped the stronger weights (B = 1, W = 3) after a
+few minutes: they could not settle anything on 150 goals. Instead,
+30 against 60 is replicated on 300 other unsolved goals (sets/unsol300b,
+RN30/RN60, from 09:20).
+
 ## 2c. Long runs: stall cutoff and checkpoints
 
 * `--eqhint-stall N` gives up when no new rule has matched a hint for N
