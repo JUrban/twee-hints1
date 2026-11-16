@@ -3518,9 +3518,10 @@ holds for the goal if neither it nor its lemmas use the missing axioms.
 * **The 323 whose source proof has no missing axiom as a step**
   (sets/so_free.tsv): source proof steps as hints, 20 s, 60 of them
   (sets/sof60.tsv): **3 of 60**, in 0.6 CPU h. That's 5 per CPU hour,
-  more than production's 1 per worker hour now. The other 263
-  (sets/sof_rest.tsv) are queued as a side batch. The 3 proofs are
-  merged.
+  more than production's 1 per worker hour now. The 3 proofs are
+  merged. The other 263 (sets/sof_rest.tsv, run SOR, 4 workers, to
+  17:47): **10 of 263** in 2.4 CPU h, 4.2 an hour, 9 of them new to
+  production. All 323 are now tried.
 * So the lemma chains carry the dependence, even when the final proof
   does not show it. Exact reuse works within the same or weaker
   axioms (2al, 2am) and rarely across them.
