@@ -546,6 +546,10 @@ parseConfig = do
     expert $
     inGroup "Critical pair weighting heuristics" $
     defaultFlag "eqhint-instance-factor" "Score factor of critical pairs that are instances of a hint (--eqhint-instances)" cfg_eqhint_instance_factor argNum
+  cfg_cp_model_factor <-
+    expert $
+    inGroup "Critical pair weighting heuristics" $
+    defaultFlag "cp-model-factor" "Score factor F ** q of each critical pair, q = the --rule-model probability that it is a proof rule (1 = off)" cfg_cp_model_factor argNum
   cfg_eqhint_watch <-
     expert $
     inGroup "Critical pair weighting heuristics" $

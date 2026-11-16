@@ -126,7 +126,10 @@ data Config f =
     cfg_eqhint_watch              :: Float,
     cfg_eqhint_generalise         :: Bool,
     cfg_eqhint_instances          :: Bool,
-    cfg_eqhint_instance_factor    :: Float }
+    cfg_eqhint_instance_factor    :: Float,
+    -- (16 Nov) score factor F ** q for each critical pair, q = the rule model's probability that it is a proof
+    -- rule (1 = off)
+    cfg_cp_model_factor           :: Float }
 
 -- | The prover state.
 data State f =
@@ -208,7 +211,8 @@ defaultConfig =
     cfg_eqhint_watch = 0,
     cfg_eqhint_generalise = False,
     cfg_eqhint_instances = False,
-    cfg_eqhint_instance_factor = 0.1 }
+    cfg_eqhint_instance_factor = 0.1,
+    cfg_cp_model_factor = 1 }
 
 -- | Compute cfg_score_cp from the CP configuration.
 {-# INLINE scoreCP #-}
@@ -541,12 +545,23 @@ instance Queue.Batch Batch where
 makePassive :: Function f => Config f -> State f -> Overlap (Active f) f -> Passive
 makePassive config@Config{..} state@State{..} Overlap{..} =
   Passive {
-    passive_score = eqHintScore config state overlap_top overlap_eqn (scoreCP config depth st_hints overlap_eqn),
+    passive_score = cpModel (eqHintScore config state overlap_top overlap_eqn (scoreCP config depth st_hints overlap_eqn)),
     passive_rule1 = active_id overlap_rule1,
     passive_rule2 = active_id overlap_rule2,
     passive_how   = overlap_how }
   where
     depth = Depth (succ (getDepth (the overlap_rule1) `max` getDepth (the overlap_rule2)))
+    -- (16 Nov, --cp-model-factor F) the rule model orders the queue: score * F ** q
+    cpModel s
+      | cfg_cp_model_factor < 1, Just rm <- cfg_rule_model =
+        let expand e = fromMaybe e (expandGoalConsts st_eqhints e)
+            t :=: u = expand overlap_eqn
+            parents = [ (pt, pu) | rm_parents rm, a <- [overlap_rule1, overlap_rule2],
+                                   let pt :=: pu = expand (unorient (active_rule a)) ]
+            raw = ruleModelRaw rm (fromIntegral st_next_active) t u parents
+            q = 1 / (1 + exp (negate raw)) :: Double
+        in s * cfg_cp_model_factor ** realToFrac q
+      | otherwise = s
 
 -- | Turn a Passive back into an overlap.
 -- Doesn't try to simplify it.

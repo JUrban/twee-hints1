@@ -3287,6 +3287,36 @@ own proof.
   decision would bring at most about 39 proofs now. Beyond that it is
   a larger lemma pool, and more than 30 kNN lemmas did not help (2am).
 
+## 2ao. The rule model ordering the queue (16 Nov, 11:20): too slow, and the oracle says no
+
+2ad left a stronger hook for a learned model open: ordering twee's queue
+instead of deferring a rule once. **twee-e42 `--cp-model-factor F`**
+does this. It multiplies each new critical pair's score by F ** q,
+where q is rm4t's probability that the pair is a proof rule, with the
+parents' features as in the deferral. F = 1 is off and identical to e41.
+
+**Smoke test** (abs/cpm_test.sh, sets/kn30thm: the 6 goals KN30 proved,
+same context):
+
+| arm | proved | wall s, the 4 proved by both |
+|---|---:|---:|
+| F = 1 | 6 | 25.6 (work identical to e39) |
+| F = 0.1 | 4 (2 hit the 200 s CPU limit) | 264.9 |
+
+* **Scoring every new pair costs about 10× the wall time.** Twee makes
+  millions of pairs and normalises each, and the model adds three
+  featurisations and 200 trees per pair.
+* **Work in abstract time is mixed:**
+  * nil3_32 343: 2,597 considered against 4,623;
+  * a_instances 361: 8,012 against 6,879;
+  * aK2_eq_aK3_o 439: unproved in the 40,000 it was allowed.
+* Earlier, the oracle model with deferral up to 3 times at penalty 5
+  (2af) tied the baseline. Deferring non-proof pairs 125× is close to
+  this boost of proof pairs, so there is no sign that the order is
+  worth the cost.
+
+Not pursued. The option stays in, off by default.
+
 ## 2c. Long runs: stall cutoff and checkpoints
 
 * `--eqhint-stall N` gives up when no new rule has matched a hint for N
