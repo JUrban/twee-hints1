@@ -48,6 +48,7 @@ written in loops/UL. Merged proofs count from their merge.
 | 16 Nov 04:00 | 44,234 | 4831 | 86 in two hours (climber burst 02:22–03:10 and production; heads first was not its cause, 2ak) |
 | 16 Nov 06:30 | 44,434 | 4858 | proof-step transfer (2al): about 110 merged; long climbs on heads 12 of 65; production at 10 workers from 05:12 |
 | 16 Nov 10:28 | 44,630 | 4882 | production with 30 kNN lemmas from 07:20 (2am), 152 new; live transfer 21; head climbs 17 of 111 (14.7 CPU h), then the live head climber 4 of 55 (8.5 CPU h) |
+| 16 Nov 14:00 | 44,710 | 4898 | production on 16 workers from 11:05 (2an): 49 new by 14:00, about 16 an hour, fresh retries now 0 of 281; live transfer 27 of 35 in all; replays on 4–6 CPUs (2aq) |
 
 From 15 Nov 05:30 the rate fell from hundreds an hour to 50–100. The
 cheap new contexts are used up; 58% of the unsolved goals sit behind the
