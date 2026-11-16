@@ -13,13 +13,15 @@
 # HOURS    no new cascade runs after this many hours (default 1).
 #
 # MODEL (default /project/hintwork/models/rm4t, with .bin and .vocab), TWEE (default /project/bin/twee-e22) and
-# XTWEE (the transfer's, default /project/bin/twee-e39) can be set in the environment. Solved goals end up in
+# XTWEE (the transfer's, default /project/bin/twee-e39) and CASCADE (the levels, default 5,80,320) can be set in
+# the environment. Solved goals end up in
 # OUT/solved.tsv, proofs in OUT/hints.
 set -e
 H=$(cd "$(dirname "$0")" && pwd)
 NAMES=$1; CTX=$2; OUT=$3; J=${4:-4}; HOURS=${5:-1}
 M=${MODEL:-/project/hintwork/models/rm4t}
 TWEE=${TWEE:-/project/bin/twee-e22}
+CASCADE=${CASCADE:-5,80,320}
 XTWEE=${XTWEE:-/project/bin/twee-e39}   # the transfer worker's twee (as abs/rpx.sh)
 [ -n "$OUT" ] && [ -f "$NAMES" ] && [ -f "$CTX/solved.tsv" ] || { sed -n 2,20p "$0"; exit 1; }
 [ -e "$OUT" ] && { echo "$OUT exists"; exit 1; }
@@ -38,7 +40,7 @@ with open(os.path.join(snap, 'solved.tsv'), 'w') as f:
 print(f'context: {n} proofs outside the {len(O)} originals of the new goals')
 EOF
 MOD="--model --model-fixed $M.bin,$M.vocab --model-theory --lemmas 6 --lemma-knn 30 --lemma-subsets --lemma-after"
-python3 -u "$H/loop.py" "$NAMES" "$OUT" --init "$OUT.ctx" --start 1 --cascade 5,80,320 --cascade-start -1 --retry-gap 3 \
+python3 -u "$H/loop.py" "$NAMES" "$OUT" --init "$OUT.ctx" --start 1 --cascade "$CASCADE" --cascade-start -1 --retry-gap 3 \
   $MOD --twee "$TWEE" --keep-out -j "$J" --reserve 0 --pool original --wall-factor 15 --line-gaps 80,80 \
   --retry-hints 1.25 --fresh-first --far-retry --retry-knn --sync 60 --cascade-hours "$HOURS" \
   --args="--abstract-time 2000 --no-resume-requeue --no-eqhint-consider" > "$OUT.log" 2>&1 &
