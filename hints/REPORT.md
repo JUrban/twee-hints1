@@ -2920,7 +2920,48 @@ in the policy's training rows; the live climber had visited them.
 * `--move-ab`: targets with an odd crc32 of the name sample by the
   policy, the others take the fixed order.
 * The comparison is proofs per CPU over many stalled production goals.
-* The policy is retrained on the realization labels as they accumulate.
+* The policy is retrained as labels accumulate.
+
+**Which label (16 Nov 01:00, 478 targets, 5,714 moves of the live
+climber):**
+
+* Realization overrates weaker goals. Their steps are theorems of the
+  real theory, so the final run re-derives them (mean realization
+  0.5–0.76) whether or not they help.
+* On the 7 targets the climber proved, weaker-goal steps had little
+  credit (0.03–0.09). A theory with kNN goals and no siblings had the
+  most (0.20). Siblings in a step lowered credit (theory + siblings +
+  kNN: 0.06).
+* Where both labels exist (proved targets) they agree: correlation 0.96
+  over 18 sketches.
+* A model on realization puts weaker goals first (weight +1.0). The
+  model on nontrivial has held-out AUC 0.757 (0.654 at 100 targets), and
+  siblings are its largest negative weight. It is `models/lattice2n.json`,
+  in the live A/B since 01:19.
+
+**Which stronger theory (`latticedata.py --theories-out`, 363 offered
+theories on 157 targets):**
+
+| offered theories | moves | proved using an assumption | nontrivial |
+|---|---:|---:|---:|
+| the heuristic's (similarity of solved goals in the theory) | 625 | 50% | 20% |
+| random others (`--theory-explore 2`) | 152 | 73% | 36% |
+
+* The similarity rank misleads. Its most offered theories (ns_to_aa1_c,
+  ns_to_aa1_b, aK2_eq_aK3_o, on 33–51 targets) give nontrivial sketches
+  2–6% of the time.
+* aa1_45_a, aK2_eq_aK3_1243, osb_Kcom_to_aa1 and aK2_eq_aK3_i give
+  31–54%.
+* **Thompson sampling (`--theory-ts`).** Each theory has a Beta posterior
+  of its nontrivial-sketch rate (prior Beta(0.4, 1.6)), filled from the
+  logs at start (57 theories, 793 sketches) and online after every
+  single-theory sketch. The climb ranks theories by a draw from it, so
+  good theories come first and untried ones still get tried.
+* Live since 01:15 (abs/clu4.sh) as a second A/B: `--theory-ts-ab` uses
+  bit 1 of the crc32, crossed with the move policy on bit 0.
+* A bug in the first exploration code (a sample larger than the rest of
+  the theories) stopped the live climber from 00:02 to 00:19. A failed
+  climb is now logged as ERROR and the climber goes on.
 
 ## 2c. Long runs: stall cutoff and checkpoints
 
