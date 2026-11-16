@@ -3182,6 +3182,33 @@ goals of ULsZ, fresh 20 abstract s from ULsZ, 2 workers per arm):
   hours, about 29 an hour (2.9 per worker). Part of this is the
   restart: fresh runs in new contexts come first.
 
+**Choosing the lemmas better (08:00).** kNN lemma use is spread widely.
+12,205 uses in 2,755 proofs fall on 3,369 distinct proven goals. The 200
+most used cover 44% of uses, and a proof uses 4.4 of its 10 on average.
+Two ways to choose the 30 differently, both in `lemmas.LemmaIndex`:
+
+* **Use counts** (`loop.py --lemma-pop B`): similarity × (1 + B log(1 +
+  the number of proofs whose USEDAXIOMS name the lemma);
+  `lemmas.lemma_uses` greps the kept outputs in a second). B = 0.3
+  changes a quarter of the top 30.
+* **MaSh-style dependencies** (`--lemma-deps W`). This is the k-NN
+  premise selection of Sledgehammer's MaSh, with *proof dependencies*
+  taken from the stored proofs. A proven goal depends on another proven
+  goal (same or weaker axioms) when the other's equation (canonical, as
+  in transfer.py) is a step of its proof. `lemmas.proof_deps` finds
+  these in 20 s over all 44k stored proofs. 36k proofs have some, about
+  60 on average; the most common are near-axioms shared by half the
+  proofs, which the idf weight removes.
+  * A lemma's score is the similarity of each of the 50 nearest proven
+    goals it is, plus W × similarity × idf / √(#deps) for each whose
+    proof has it as a step.
+  * W = 1 changes 23% of the top 30.
+* **Offline**, on 288 round 4–5 proofs, with the target's own proof
+  left out: recall at 30 of the step lemmas from other originals is
+  0.183 with plain similarity and 0.189 with W = 1. Those proofs were
+  found with plain-similarity lemmas, so the offline measure favours
+  plain similarity. The paired runs below decide.
+
 ## 2c. Long runs: stall cutoff and checkpoints
 
 * `--eqhint-stall N` gives up when no new rule has matched a hint for N
