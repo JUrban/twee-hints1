@@ -759,11 +759,32 @@ class Loop:
 
     def hints_for(self, n, pools, knn):
         a = self.a
+        hs = self.hints_for1(n, pools, knn)
         if a.hint_after:
-            hs = self.hints_for1(n, pools, knn)
             seen = set((h[0], h[1]) for h in hs)
-            return hs + [h for h in self.after_hints(n) if h not in seen]
-        return self.hints_for1(n, pools, knn)
+            hs = hs + [h for h in self.after_hints(n) if h not in seen]
+        if a.hint_lemma_proofs:
+            hs = hs + self.lemma_proof_hints(n, set((h[0], h[1]) for h in hs))
+        return hs
+
+    def lemma_proof_hints(self, n, seen):
+        """(16 Nov, --hint-lemma-proofs F) the proof steps of N's kNN lemmas (proven goals of the same or weaker
+        axioms, mostly of other originals) as hints with score factor F, after N's own pool"""
+        import lemmas
+        a = self.a
+        if not a.lemma_knn or getattr(self, 'lemma_index', None) is None or not getattr(self, 'lemma_src', None):
+            return []
+        out = []
+        for src in lemmas.knn_picks(n, self.lemma_src, a.lemmas, self.lemma_index, a.lemma_knn, a.lemma_after):
+            try:
+                lines = open(os.path.join(self.dir, 'hints', src)).read().splitlines()
+            except OSError:
+                continue
+            for x in lines[:a.hint_lemma_proof_max]:
+                w = x.split('\t')
+                if len(w) >= 2 and (w[0], w[1]) not in seen:
+                    seen.add((w[0], w[1])); out.append((w[0], w[1], str(a.hint_lemma_proofs)))
+        return out
 
     def hints_for1(self, n, pools, knn):
         a = self.a
@@ -1354,6 +1375,10 @@ def make_parser():
     ap.add_argument('--unfold', nargs='?', const='all', default=None, metavar='F,G,..',
                     help='substitute the problem\'s definitions (f(X1..Xn) = t) away in the axioms, lemmas, '
                          'conjecture and hints (unfold.py); only those of F, G, .. if given')
+    ap.add_argument('--hint-lemma-proofs', type=float, default=0.0, metavar='F',
+                    help='also use the proof steps of each kNN lemma (--lemma-knn) as hints, with score factor F')
+    ap.add_argument('--hint-lemma-proof-max', type=int, default=300, metavar='M',
+                    help='--hint-lemma-proofs: at most M steps from each lemma\'s proof')
     ap.add_argument('--hint-after', type=int, default=0, metavar='K',
                     help='also use the statements of the next K unsolved unit goals of the original as hints')
     ap.add_argument('--lemma-fold', type=int, default=0, metavar='K',
