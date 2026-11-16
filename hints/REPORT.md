@@ -3150,6 +3150,34 @@ unsolved goals, the live climber's config with a 160 s final run, 4
 workers): 2 of the first 8 heads proved (KK_Kcom_to_aK1 255, Ka1_eq_Ka2
 361) in 4,128 CPU s, about 1.7 per CPU hour.
 
+## 2am. How many kNN lemmas (16 Nov, 06:50)
+
+**Use by rank.** Production's outputs (`--keep-out`, r*/out) list each
+proof's used axioms (USEDAXIOMS), and the kNN lemma names carry their
+rank (`lemma_knn_<rank>_<source goal>`).
+
+* 2,625 of 2,755 proved runs use a kNN lemma, and 2,016 use a sibling
+  lemma.
+* Use barely falls with rank: rank 0 in 1,686 proofs, rank 1 in 1,320,
+  rank 5 in 1,127, rank 9 still in 1,053. So 10 looked too few.
+  (2r had found no gain from 20 on one original, on 14 Nov.)
+
+**Paired test** (abs/knn_test.sh, sets/unsol150 = 150 random unsolved
+goals of ULsZ, fresh 20 abstract s from ULsZ, 2 workers per arm):
+
+| kNN lemmas | proved | wall s |
+|---|---:|---:|
+| 10 (production) | 3 | 4,981 |
+| 20 | 3 (the same) | 4,953 |
+| **30** | **6** (+3/−0) | 4,919 |
+
+* The 3 extra proofs use lemmas of rank 11–27 (a_instances 361: ranks
+  26 and 27; aK2rev 323: 11, 14, 20, 23; nil3_32 343: 25). So the gain
+  comes from the extra lemmas, at no cost in time.
+* **Production since 07:20** (abs/ul33.sh) uses `--lemma-knn 30` and
+  the lemmas.py fix (2al), on 12 workers. Every goal's kNN set changes,
+  so `--retry-knn` makes them all eligible for a fresh retry.
+
 ## 2c. Long runs: stall cutoff and checkpoints
 
 * `--eqhint-stall N` gives up when no new rule has matched a hint for N
