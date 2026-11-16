@@ -17,6 +17,12 @@ in `/project/hintwork` (not in git).
 | + cascade round 5 (2w–2ac), from 14 Nov 17:26; at 15 Nov 07:00 | **43,462** (+39.9% over plain) | **4717** (+47.3%) | +199.5 (+15.4 side workers) |
 | + round 5 continued: climbers, proof-step transfer, 30 kNN lemmas (2aj–2an); at 16 Nov 14:00 | **44,710** (+43.9% over plain) | **4898** (+52.9%) | – |
 
+**On unseen originals** (2aq): the 11 whole holdout originals from
+scratch, with only the 13 Nov 2 + 2 s proofs of the other originals as
+context. They give 3,385 of 4,720 (71.7%) in 1 hour per batch on 4
+workers plus the transfer, against 2,887 (61.2%) for plain twee at 4 s.
+`hints/solve_new.sh` runs this on a new set.
+
 \* Starts from 33,720 proofs: the third round plus 52 from long runs on
 two families (2m). Its time is the summed wall time of the runs, close
 to their CPU time.
@@ -3423,8 +3429,30 @@ the same.
 | production, 3 days | 1,109 |
 
 **The other 8 whole holdout originals** (abs/ho8.sh, sets/ho8, 3,400
-goals; plain 2,156, production 3,081) run from 14:00 with
-`solve_new.sh` and the clean context, 4 workers for 1 hour.
+goals) ran from 14:00 to 15:01 with `solve_new.sh` and the clean
+context, on 4 workers for 1 hour plus the transfer: **2,451 of 3,400**.
+
+* The cascade made 1,723: 2,628 runs at 5 s with 1,674 proved, and 90
+  at 80 s with 49 proved, in 3.9 CPU h.
+* The transfer made 1,385, and the two overlap.
+* Curve of the cascade (minutes: proved): 1: 526, 4: 1,340, 10: 1,541,
+  25: 1,661, 60: 1,723.
+
+**All 11 whole holdout originals** (4,720 goals), from scratch with the
+clean context:
+
+| system | proved | share |
+|---|---:|---:|
+| plain twee, 4 s | 2,887 | 61.2% |
+| **`solve_new.sh`, 1 hour per batch (3 + 8 originals), about 8 CPU h in all** | **3,385** | **71.7%** |
+| production, 3 days, every version, full context | 4,190 | 88.8% |
+
+So about half the gap between plain twee and three days of production
+is closed in the first hour, on originals the system has never seen.
+Most of it comes in the first 10 minutes. Exact reuse of other
+originals' proven goals and proof steps does most of the work: goals
+that state, or are instances of, proven goals of the same or weaker
+axioms.
 
 ## 2c. Long runs: stall cutoff and checkpoints
 
