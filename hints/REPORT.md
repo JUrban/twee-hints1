@@ -18,10 +18,13 @@ in `/project/hintwork` (not in git).
 | + round 5 continued: climbers, proof-step transfer, 30 kNN lemmas (2aj–2an); at 16 Nov 14:00 | **44,710** (+43.9% over plain) | **4898** (+52.9%) | – |
 
 **On unseen originals** (2aq): the 11 whole holdout originals from
-scratch, with only the 13 Nov 2 + 2 s proofs of the other originals as
-context. They give 3,385 of 4,720 (71.7%) in 1 hour per batch on 4
-workers plus the transfer, against 2,887 (61.2%) for plain twee at 4 s.
-`hints/solve_new.sh` runs this on a new set.
+scratch, in 1 hour per batch on 4 workers plus the transfer. Plain twee
+at 4 s solves 2,887 of 4,720 (61.2%). With the 13 Nov proofs of the
+other originals as context, `hints/solve_new.sh` solves 3,513 (74.4%).
+With today's proofs it solves 4,106 (87.0%), against 4,203 (89.0%) for
+3.5 days of production. Today's context partly leaks the 8 originals
+of one batch, so 87.0% is an upper bound; the other batch (1,085 of
+1,320, 82.2%) is nearly clean.
 
 \* Starts from 33,720 proofs: the third round plus 52 from long runs on
 two families (2m). Its time is the summed wall time of the runs, close
@@ -3509,10 +3512,11 @@ transfer together (abs/totcurve.py, from the proof files' times):
 
 * **The loop alone does most of it.** From zero it reaches 890 of
   1,320 in 1 hour on 4 workers, 22% over plain twee (731).
-* **The public context adds 43–52 proofs (5–6%).** The transfer
+* **The 13 Nov context adds 43–52 proofs (5–6%).** The transfer
   proves 420 goals in seconds, but the cascade from zero proves most
   of those within minutes as well. The context's lead is largest
-  early (+75 at 4 minutes).
+  early (+75 at 4 minutes). *Today's context, filtered, adds 195
+  (22%): 1,085 (LVU, below).*
 * Caveat: the rule model rm4t is still the fixed one. It was trained
   on plain 2 s proofs of the training split (2e, 2f), the kind a
   from-zero run makes in its first sweep.
@@ -3581,14 +3585,76 @@ cascade. So they are not hard. 56 of those runs kept their output.
   For example nil3_23_32_to_26's late goals use goals of
   nil3_23_32_to_25, _27, _28 and _31, which production proved later.
 * So the replays measure the method under a context that is 3 days
-  older than the one new problems will get. The secret part will run
-  with all of today's public proofs.
-* **LVU (running, 21:53–22:53)**: LVS2's settings with today's
-  context: loops/ULX, loops/UL at 21:52 minus the 3 originals, 43,681
-  proofs. 46 proofs are left out because a kept output or a transfer
-  row shows an rp3 goal among their sources. About 1.6% of the checked
-  newer proofs (41 of 2,609) used an rp3 goal as a kNN lemma, so
-  some of the outputs that were not kept may carry rp3 information too.
+  older than the one new problems will get. The morning's replay with
+  the full context (RPs, 1,041) showed this too, but its context was
+  contaminated, and the later arms all used loops/ALL. The secret part
+  will run with all of today's public proofs.
+* **Today's context, filtered (LVU, 21:53–22:53, stopped at 23:35
+  when its last runs ended): 1,085 of 1,320 in 1 hour.** The settings
+  are LVS2's, with loops/ULX as the context. That is loops/UL at 21:52
+  minus the 3 originals, 43,681 proofs (`abs/freshctx.py`). 46 proofs
+  are left out because a kept output names an rp3 goal among their kNN
+  lemmas (41), or a transfer row names one among its sources (5).
+
+| minutes | 1 | 4 | 10 | 25 | 40 | 60 |
+|---|---:|---:|---:|---:|---:|---:|
+| loops/ALL, 13 Nov (LVS2, same settings) | 580 | 799 | 856 | 875 | 903 | 940 |
+| **loops/ULX, today (LVU)** | 416 | 969 | 1,036 | 1,065 | 1,075 | **1,085** |
+| production, 3.5 days | | | | | | 1,111 |
+
+* The transfer proves 575 (417 with loops/ALL). The cascade made 1,510
+  runs at 5 s (803 proved), 76 at 80 s (25), and 8 at 320 s (2).
+* **Leaks** (`abs/leakcheck.py`). LVU has 137 proofs that LV4 lacks.
+  44 of them use only sources that are old, verified clean, or from
+  the 3 originals themselves. 88 use at least one newer source whose
+  output was not kept. Among the newer proofs whose output was kept,
+  1.6% used an rp3 goal (41 of 2,609), so few of those 88 can be
+  leaks.
+
+**The other 8 holdout originals** (sets/ho8, 3,400 goals, 4 workers, 1
+hour, each run stopped when its last runs ended):
+
+| minutes | 1 | 4 | 10 | 25 | 40 | 60 |
+|---|---:|---:|---:|---:|---:|---:|
+| HO8, 14:00: loops/ALL, no scheduler, transfer every 10 min | 456 | 2,060 | 2,260 | 2,384 | 2,417 | 2,451 |
+| HO8b, 21:43: loops/ALL, today's defaults (`abs/ho8b.sh`) | 473 | 2,046 | 2,274 | 2,474 | 2,520 | **2,573** |
+| HO8U, 22:47: loops/HOX, today's proofs (`abs/hou_test.sh`) | 155 | 1,012 | 2,701 | 2,940 | 2,995 | **3,021** |
+| production, 3.5 days | | | | | | 3,092 |
+
+* **Today's defaults: +122 on the same context** (2,573 against
+  2,451; at 7,000 abstract s of cascade work 2,504 against 2,420). The
+  scheduler with sweep-first and the 2-minute transfer cycle changed
+  together, so this does not say which of them helped.
+* **HO8U is an upper bound.** Here the context leaks a lot.
+  loops/HOX leaves out 1,114 proofs that are known to use a ho8 goal:
+  941 with it among their kNN lemmas, 173 with it among their transfer
+  sources. But among the newer proofs whose outputs were kept, **37%
+  used a ho8 goal** as a kNN lemma (941 of 2,513), against 1.6% for
+  rp3. The 8 originals (aK2_eq_aK3_1243b and _f, aa1_12, aa1_45_b,
+  aK1_to_aK2, mbol_KK_to_aK1, mbol_lem2, ns_to_aK1) belong to the big
+  aK and aa families, and the families' later public proofs used
+  their goals as lemmas. The most frequent users among the excluded
+  1,114 are the rp3 originals themselves (154) and nslm_to_aa1,
+  aK2_eq_aK3_a, nsmr_to_aa1. About 9,000 newer proofs could not be
+  checked.
+  Of HO8U's 449 extra proofs over HO8b, 353 use at least one of them.
+* So for these 8 originals the result with a clean context of
+  today's size lies between 2,573 and 3,021. For rp3, whose
+  originals have few close public relatives, the leak rate is small
+  and 1,085 stands.
+
+**All 11 holdout originals, 1 hour per batch, today's defaults:**
+
+| context | proved of 4,720 | share |
+|---|---:|---:|
+| plain twee, 4 s | 2,887 | 61.2% |
+| loops/ALL, 13 Nov (LVS2 940 + HO8b 2,573) | 3,513 | 74.4% |
+| today's proofs, filtered (LVU 1,085 + HO8U 3,021; HO8U leaks) | 4,106 | 87.0% |
+| production, 3.5 days | 4,203 | 89.0% |
+
+The secret part's context will be today's public proofs, which never
+saw a secret goal. How close the secret originals come to the upper
+row depends on how many close public relatives they have.
 
 So about half the gap between plain twee and three days of production
 is closed in the first hour, on originals the system has never seen.
@@ -3719,9 +3785,10 @@ rounds of 30 s or more, but about 40% overhead for 8 s rounds.
      * The proof-step transfer (2al): a goal that is a step of another
        proof gets that proof as hints and its goal as a lemma.
      * On new originals the transfer proves 30–40% of the goals in
-       seconds. But from zero, with no other originals' proofs, the
-       loop proves most of them within minutes too. The public context
-       is worth 5–6% at 1 hour (942 against 890, 2aq).
+       seconds. From zero, with no other originals' proofs, the loop
+       proves 890 of 1,320 replay goals in 1 hour. The 13 Nov context
+       adds 5–6% (942), today's filtered one 22% (1,085, against
+       production's 1,111 after 3.5 days; 2aq).
   3. **Hints from all of the original's proofs**, and the ENIGMA rule
      filter in the short runs.
 * **What did not help** (16 Nov additions to the list below):
@@ -3789,6 +3856,32 @@ rounds of 30 s or more, but about 40% overhead for 8 s rounds.
     time.
 
 ## 4. Next steps
+
+*16 Nov, 23:55:*
+
+* **Since 19:00:**
+  * The learned scheduler's +30 on the replay was noise. Two runs with
+    the same settings gave 971 and 919. `--sweep-first` (needed from
+    zero) gave 940 with context (2aq).
+  * The 4-hour replays leveled off near 950 because loops/ALL is the
+    13 Nov context. Production's proofs of the missing goals use kNN
+    lemmas from later proofs of other originals.
+  * With today's proofs, filtered for known leaks (`abs/freshctx.py`):
+    1,085 of 1,320 in 1 hour (production 1,111). On the other 8
+    holdout originals 3,021 of 3,400 (production 3,092), but 37% of
+    the checkable newer proofs there used those originals' goals, so
+    that is an upper bound. The 13 Nov context with today's defaults
+    gives 2,573.
+* **Running overnight:**
+  * Z0, from 23:49: the final system from zero on all 51,784 public
+    problems (`abs/z0_test.sh`): 12 workers plus the transfer, 10
+    hours, without the scheduler (at this size `--sweep-first` would
+    run every goal once before any retry). It gives the curve over
+    time to set against the totals table above, and any proofs it
+    finds that production lacks.
+  * Production at 4 workers once LZ4's last runs end.
+* Open for the user: proof steps as lemma axioms (2al), worth at most
+  about 39 proofs.
 
 *16 Nov, 19:00:*
 
