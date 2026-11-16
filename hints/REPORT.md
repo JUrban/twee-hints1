@@ -3267,6 +3267,20 @@ level alone gives about as much as the climbers did (1.2 per CPU hour
 for the batch of long climbs on heads), so a level above 320 s would
 give less.
 
+**By 17:15 the 320 s level was the CPU sink.** Production's last 450
+runs:
+
+| level | proofs | CPU h | proofs per CPU h |
+|---|---:|---:|---:|
+| 320 s | 6 | 20.2 | 0.3 |
+| 80 s | 11 | 3.7 | 3 |
+| 5 s | 3 | 0.8 | 4 |
+
+So production went down to 8 workers (abs/ul36.sh, 17:20). The freed
+CPUs go to side batches that make 2–5 an hour: the cross-theory
+candidates (2ar, SOR) and the instance batch (XFR3L). Both lists are
+finite. When they are done, production gets the CPUs back.
+
 **Is a head worth more than its own proof?** The 111 stuck heads of
 03:10 (sets/heads_stuck): 69 of them are proved now, 17 by the long
 climbs and the rest by production and the transfer. Goals proved per
