@@ -3170,7 +3170,13 @@ goals of ULsZ, fresh 20 abstract s from ULsZ, 2 workers per arm):
 | 10 (production) | 3 | 4,981 |
 | 20 | 3 (the same) | 4,953 |
 | **30** | **6** (+3/−0) | 4,919 |
+| 60 | 9 (+4/−1 against 30) | 5,466 |
+| 100 | 5 (+1/−2 against 30) | 5,685 |
 
+* 60 and 100 were run later (07:46–08:34) on the same goals and
+  context. 60 proves the most, 9, at 11% more wall time; 100 proves
+  fewer and is slower. The numbers are small: 30 against 60 is +4/−1,
+  so not significant on its own. The peak lies somewhere around 30–60.
 * The 3 extra proofs use lemmas of rank 11–27 (a_instances 361: ranks
   26 and 27; aK2rev 323: 11, 14, 20, 23; nil3_32 343: 25). So the gain
   comes from the extra lemmas, at no cost in time.
