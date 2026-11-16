@@ -233,7 +233,7 @@ def find(D, out, allp='/project/hintwork/sets/all', any_theory=False):
           'the same or weaker axioms') + f' -> {out}')
 
 
-def live(D, d, j, T, rest, src_lemmas, every):
+def live(D, d, j, T, rest, src_lemmas, every, allp='/project/hintwork/sets/all'):
     """(live) beside a running loop D: every EVERY s, find the unsolved goals that are steps of D's proofs from the
     same or weaker axioms or instances of its proven goals, run the ones not tried with the same first source, and
     put the proofs into D (hints through DIR/hints -> D/hints, then a D/solved.tsv row, which D --sync takes in)"""
@@ -250,8 +250,8 @@ def live(D, d, j, T, rest, src_lemmas, every):
                 if len(w) >= 3 and l.endswith('\n'):
                     f.write(f'{w[0]}\t0\t{w[2].strip()}\n')
         os.replace(os.path.join(d, 'solved.tsv.tmp'), os.path.join(d, 'solved.tsv'))
-        find(D, os.path.join(d, 'c_steps.tsv'))
-        find_goal_instances(D, os.path.join(d, 'c_goals.tsv'))
+        find(D, os.path.join(d, 'c_steps.tsv'), allp)          # (--set ALLP: only these goals are candidates)
+        find_goal_instances(D, os.path.join(d, 'c_goals.tsv'), allp)
         tp = os.path.join(d, 'transfer.tsv')
         tried = set()
         if os.path.exists(tp):
@@ -353,7 +353,8 @@ def main():
         i = argv.index('--') if '--' in argv else len(argv)
         opts, rest = argv[1:i], argv[i + 1:]
         val = lambda k, dflt: type(dflt)(opts[opts.index(k) + 1]) if k in opts else dflt
-        live(opts[0], opts[1], val('-j', 2), val('--time', 20.0), rest, val('--src-lemmas', 6), val('--every', 1200.0))
+        live(opts[0], opts[1], val('-j', 2), val('--time', 20.0), rest, val('--src-lemmas', 6), val('--every', 1200.0),
+             val('--set', '/project/hintwork/sets/all'))
         return
     if argv[0] == 'find' and '--goals' in argv:
         find_goal_instances(argv[1], argv[argv.index('--out') + 1])
