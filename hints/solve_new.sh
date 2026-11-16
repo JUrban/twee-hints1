@@ -14,7 +14,8 @@
 #
 # MODEL (default /project/hintwork/models/rm4t, with .bin and .vocab), TWEE (default /project/bin/twee-e22) and
 # XTWEE (the transfer's, default /project/bin/twee-e39), CASCADE (the levels, default 5,80,320), KNN (kNN lemmas,
-# default 30) and XEVERY (the transfer's cycle in seconds, default 600) can be set in the environment. Solved goals end up in
+# default 30) and XEVERY (the transfer's cycle in seconds, default 120: 942 against 933 at 600, REPORT 2aq) can
+# be set in the environment. Solved goals end up in
 # OUT/solved.tsv, proofs in OUT/hints.
 set -e
 H=$(cd "$(dirname "$0")" && pwd)
@@ -23,7 +24,7 @@ M=${MODEL:-/project/hintwork/models/rm4t}
 TWEE=${TWEE:-/project/bin/twee-e22}
 CASCADE=${CASCADE:-5,80,320}
 KNN=${KNN:-30}
-XEVERY=${XEVERY:-600}
+XEVERY=${XEVERY:-120}
 XTWEE=${XTWEE:-/project/bin/twee-e39}   # the transfer worker's twee (as abs/rpx.sh)
 [ -n "$OUT" ] && [ -f "$NAMES" ] && [ -f "$CTX/solved.tsv" ] || { sed -n 2,20p "$0"; exit 1; }
 [ -e "$OUT" ] && { echo "$OUT exists"; exit 1; }

@@ -3467,6 +3467,20 @@ clean context, 4 workers plus the transfer, 1 hour):
 * The control repeats RPc (934) to within one proof, so this testbed's
   noise is small. Effects of about 20 proofs are visible.
 
+**Two more knobs** (abs/lv2_test.sh, 16:08–17:10, same setting; control
+LVA 933):
+
+| arm | proved | the cascade's own |
+|---|---:|---:|
+| 60 kNN lemmas (LVC) | 920 (−13) | 764 |
+| the transfer every 2 minutes instead of 10 (LVD) | **942** (+9) | 799 |
+
+* 60 lemmas again bring nothing (2am). The early sweep is slower with
+  them: 645 against 671 at 4 minutes.
+* The faster transfer cycle passes reuse on sooner. +9 is near the
+  noise, but it costs only the scans, so `solve_new.sh` now cycles
+  every 2 minutes by default (XEVERY=120).
+
 So about half the gap between plain twee and three days of production
 is closed in the first hour, on originals the system has never seen.
 Most of it comes in the first 10 minutes. Exact reuse of other
