@@ -2999,6 +2999,13 @@ Now every other free slot goes to an original's first unsolved goal
   mbol_to_aK1 7, aK2_eq_aK3_r 4). The climber's 6 CPUs connect to
   almost half of production's progress.
 
+* **After the new heads ran out (03:10–03:54):** 1 proof in 160 climbs
+  (aK2_eq_aK3_r 275), with the A/B arms by original and no difference.
+  The 5% burst came from the 27 heads never climbed before and from
+  heads that chains opened. Without new heads the climber is back at
+  about 1% of climbs. Heads first pays when proofs elsewhere open new
+  heads, so the ordering stays.
+
 * A bug in the first exploration code (a sample larger than the rest of
   the theories) stopped the live climber from 00:02 to 00:19. A failed
   climb is now logged as ERROR and the climber goes on.
