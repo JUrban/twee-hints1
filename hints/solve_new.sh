@@ -18,7 +18,8 @@
 # MODEL (default /project/hintwork/models/rm4t, with .bin and .vocab), TWEE (default /project/bin/twee-e22) and
 # XTWEE (the transfer's, default /project/bin/twee-e39), CASCADE (the levels, default 5,80,320), KNN (kNN lemmas,
 # default 30) and XEVERY (the transfer's cycle in seconds, default 120: 942 against 933 at 600, REPORT 2aq) can
-# be set in the environment, and LOOPARGS (extra loop.py options, for example the learned scheduler's). Solved goals
+# be set in the environment. SCHED holds the learned scheduler's options (production's, abs/ul36.sh; from scratch
+# 972 against 942 without it, REPORT 2aq); SCHED= turns it off. LOOPARGS adds other loop.py options. Solved goals
 # end up in OUT/solved.tsv, proofs in OUT/hints.
 set -e
 H=$(cd "$(dirname "$0")" && pwd)
@@ -29,6 +30,7 @@ CASCADE=${CASCADE:-5,80,320}
 KNN=${KNN:-30}
 XEVERY=${XEVERY:-120}
 XTWEE=${XTWEE:-/project/bin/twee-e39}   # the transfer worker's twee (as abs/rpx.sh)
+SCHED=${SCHED---sched-model /project/hintwork/sched/m4.json --sched-max-lgap 320 --sched-retrain 200 --sched-pmin 0.011 --sched-pmin-auto 400}
 [ -n "$OUT" ] && [ -f "$NAMES" ] && [ -f "$CTX/solved.tsv" ] || { sed -n 2,20p "$0"; exit 1; }
 [ -e "$OUT" ] && { echo "$OUT exists"; exit 1; }
 mkdir -p "$OUT.ctx/hints"
@@ -51,7 +53,7 @@ EOF
 MOD="--model --model-fixed $M.bin,$M.vocab --model-theory --lemmas 6 --lemma-knn $KNN --lemma-subsets --lemma-after"
 python3 -u "$H/loop.py" "$NAMES" "$OUT" --init "$OUT.ctx" --start 1 --cascade "$CASCADE" --cascade-start -1 --retry-gap 3 \
   $MOD --twee "$TWEE" --keep-out -j "$J" --reserve 0 --pool original --wall-factor 15 --line-gaps 80,80 \
-  --retry-hints 1.25 --fresh-first --far-retry --retry-knn --sync 60 --cascade-hours "$HOURS" $LOOPARGS \
+  --retry-hints 1.25 --fresh-first --far-retry --retry-knn --sync 60 --cascade-hours "$HOURS" $SCHED $LOOPARGS \
   --args="--abstract-time 2000 --no-resume-requeue --no-eqhint-consider" > "$OUT.log" 2>&1 &
 LOOP=$!
 until [ -f "$OUT/config.json" ] || ! kill -0 $LOOP 2>/dev/null; do sleep 2; done

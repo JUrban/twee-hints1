@@ -3517,6 +3517,23 @@ transfer together (abs/totcurve.py, from the proof files' times):
   on plain 2 s proofs of the training split (2e, 2f), the kind a
   from-zero run makes in its first sweep.
 
+**The learned scheduler from scratch** (abs/lvs_test.sh, LVS,
+18:51–19:52). Production's scheduler options (2ac: its model m4, the
+probability floor 0.011 with auto-tuning, retraining every 200 runs)
+with the clean context. The control is LVD.
+
+| minutes | 1 | 4 | 10 | 25 | 40 | 60 |
+|---|---:|---:|---:|---:|---:|---:|
+| LVD (no scheduler) | 628 | 809 | 847 | 884 | 921 | 942 |
+| **LVS (scheduler)** | 431 | 830 | 868 | 917 | 943 | **972** |
+
+* **+30**, against about 1 of noise. The scheduler leaves out resumes it
+  predicts to fail, so more fresh runs and deeper levels go to goals
+  that can be proved. Its cascade made fewer 5 s proofs (536 against
+  753) and more of the rest.
+* `solve_new.sh` now uses it by default (`SCHED`). The 4-hour arms
+  (LV4, LZ4, from 19:52) have it too.
+
 So about half the gap between plain twee and three days of production
 is closed in the first hour, on originals the system has never seen.
 Most of it comes in the first 10 minutes. Exact reuse of other
@@ -3922,8 +3939,9 @@ are run in `/project/hintwork`, with `venv` holding lightgbm.
 
        solve_new.sh NAMES CONTEXT OUT [J [HOURS]]
 
-   * It runs the cascade (5, 80, 320 s, 30 kNN lemmas, 6 siblings, rm4t;
-     no scheduler) on the goals in NAMES, with J workers for HOURS.
+   * It runs the cascade (5, 80, 320 s, 30 kNN lemmas, 6 siblings, rm4t,
+     the learned scheduler) on the goals in NAMES, with J workers for
+     HOURS.
    * Beside it, the live proof-step transfer runs on 2 workers every 2
      minutes (XEVERY, 2aq).
    * CONTEXT's proofs are the round-0 context: lemma sources, hint
@@ -3934,8 +3952,8 @@ are run in `/project/hintwork`, with `venv` holding lightgbm.
      * `EXCLUDE=originals` leaves out every proof of the new goals'
        originals. The replays (2aq) use it to simulate unseen
        originals.
-   * `LOOPARGS` passes extra loop.py options, for example the learned
-     scheduler's (abs/lvs_test.sh).
+   * `SCHED=` turns the scheduler off. `LOOPARGS` passes other loop.py
+     options.
    * `AIM_PROB` sets the problem directory. For new problems, use one
      with links to both the public and the new `.p` files.
    * A 2-minute test on 20 lra2aa goals with the clean context proved
