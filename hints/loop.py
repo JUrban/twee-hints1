@@ -742,6 +742,19 @@ class Loop:
                 out.append((unfold.show(e[0]), unfold.show(e[1])))
         return out
 
+    def make_lemma_index(self):
+        """The kNN lemma index over the proven goals; --lemma-pop: similarity weighted by lemma use counts, from
+        --lemma-uses DIRS (then the loop's own goals are left out of the counts) or else from this loop's outputs."""
+        import lemmas
+        a = self.a
+        uses = None
+        if a.lemma_pop:
+            if a.lemma_uses:
+                uses = lemmas.lemma_uses(a.lemma_uses.split(','), exclude=set(self.names))
+            else:
+                uses = lemmas.lemma_uses([self.dir])
+        return lemmas.LemmaIndex(sorted(self.solved), subsets=a.lemma_subsets, uses=uses, pop=a.lemma_pop)
+
     def hints_for(self, n, pools, knn):
         a = self.a
         if a.hint_after:
@@ -796,7 +809,7 @@ class Loop:
             self.train_model(rnd)
         self.lemma_src = {o: set(v) for o, v in lemmas.by_original(self.solved).items()}
         if a.lemma_knn:
-            self.lemma_index = lemmas.LemmaIndex(sorted(self.solved), subsets=a.lemma_subsets)
+            self.lemma_index = self.make_lemma_index()
         # --retry-knn (15 Nov): fresh 20 s runs in the full current context proved 6 of 35 goals the
         # cascade held as stalled (~30 proofs/CPU-h); all six used kNN lemmas from other originals
         # proven since their last run, a change the sibling context and pool growth do not see
@@ -1003,7 +1016,7 @@ class Loop:
                     g = gaps()
                     if RK and (time.time() - kgen[1] >= a.knn_refresh or len(self.solved) - kgen[2] >= 300):
                         t_ = time.time()
-                        self.lemma_index = lemmas.LemmaIndex(sorted(self.solved), subsets=a.lemma_subsets)
+                        self.lemma_index = self.make_lemma_index()
                         kgen[:] = [kgen[0] + 1, time.time(), len(self.solved)]
                         print(f'  cascade: --retry-knn: kNN index rebuilt ({len(self.solved)} proofs, '
                               f'{time.time()-t_:.0f}s)', flush=True)
@@ -1177,7 +1190,7 @@ class Loop:
             import lemmas
             self.lemma_src = lemmas.by_original(self.solved)  # proven before this round
             if a.lemma_knn:
-                self.lemma_index = lemmas.LemmaIndex(sorted(self.solved), subsets=a.lemma_subsets)
+                self.lemma_index = self.make_lemma_index()
         rdir = os.path.join(self.dir, 'r%d' % rnd)
         os.makedirs(rdir, exist_ok=True)
         t0 = time.time(); new = 0
@@ -1320,6 +1333,11 @@ def make_parser():
     ap.add_argument('--rerun-unhinted', action='store_true')
     ap.add_argument('--lemmas', type=int, default=0,
                     help='rounds > 0: add up to N proven sibling goals (nearest below) as axioms')
+    ap.add_argument('--lemma-pop', type=float, default=0.0,
+                    help='--lemma-knn: multiply a candidate lemma\'s similarity by 1 + POP * log(1 + its uses in proofs)')
+    ap.add_argument('--lemma-uses', default='',
+                    help='--lemma-pop: count uses in these loop dirs (comma list; the run\'s own goals left out) '
+                         'instead of this loop\'s outputs')
     ap.add_argument('--lemma-knn', type=int, default=0,
                     help='rounds > 0: also add up to K proven goals with the same axioms (any original) most similar to the goal')
     ap.add_argument('--model-theory', action='store_true',

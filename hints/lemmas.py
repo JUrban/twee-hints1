@@ -162,14 +162,44 @@ def axiom_set(name):
         _axset[o] = frozenset(out)
     return _axset[o]
 
+def lemma_uses(dirs, exclude=()):
+    """source goal -> number of proofs whose USEDAXIOMS name it as a lemma (kNN lemma_knn_<i>_<goal> or sibling
+    lemma_goal_<j>), over the kept outputs DIR/r*/out/<target> of each loop DIR; targets in EXCLUDE are skipped."""
+    import glob, subprocess
+    cnt = collections.Counter()
+    outs = [g for d in dirs for g in glob.glob(os.path.join(d, 'r*', 'out'))]
+    if not outs:
+        return cnt
+    p = subprocess.run(['grep', '-r', '-m1', '^USEDAXIOMS'] + outs, capture_output=True, text=True)
+    for line in p.stdout.splitlines():
+        path, _, rest = line.partition(':USEDAXIOMS')
+        tgt = os.path.basename(path)
+        if tgt in exclude:
+            continue
+        o = tgt.rsplit('__goal_', 1)[0]
+        srcs = set()
+        for x in rest.split():
+            m = re.match(r'lemma_knn_\d+_(\S+__goal_\d+)$', x)
+            if m:
+                srcs.add(m.group(1)); continue
+            m = re.match(r'lemma_goal_(\d+)$', x)
+            if m:
+                srcs.add(f'{o}__goal_{m.group(1)}')
+        cnt.update(srcs)
+    return cnt
+
 class LemmaIndex:
     """Proven unit-equation goals grouped by axiom set, for similarity search.
     With subsets=True, a target may use the goals of every problem whose axioms
     are a subset of its own (theorems of a weaker theory hold in the stronger)."""
-    def __init__(self, solved_names, subsets=False):
+    def __init__(self, solved_names, subsets=False, uses=None, pop=0.0):
         names = [n for n in solved_names if lemma_form(n)]
         self.info = goal_info(names)
         self.subsets = subsets
+        # (16 Nov) POP > 0: a candidate's similarity is multiplied by 1 + POP * log(1 + USES[m]), USES[m] = the
+        # number of proofs that used m as a lemma (lemma_uses)
+        self.uses = uses or {}
+        self.pop = pop
         self.groups = collections.defaultdict(list)
         self.sets = {}
         for n in names:
@@ -256,7 +286,10 @@ class LemmaIndex:
             if inter <= 0:
                 continue
             union = wF + sum(idf[x] for x in G) - inter
-            scored.append((inter / union, m))
+            sc = inter / union
+            if self.pop:
+                sc *= 1 + self.pop * math.log1p(self.uses.get(m, 0))
+            scored.append((sc, m))
         scored.sort(key=lambda x: (-x[0], x[1]))
         # (16 Nov) seen was {form}, which dropped every proven goal stating exactly the target: but such a goal of
         # the same or a weaker theory proves it (46 of transfer.py's 63 source-lemma proofs were of this kind)
