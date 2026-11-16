@@ -188,11 +188,48 @@ def lemma_uses(dirs, exclude=()):
         cnt.update(srcs)
     return cnt
 
+def proof_deps(hints_dir, solved):
+    """(MaSh-style kNN lemmas, 16 Nov) proof -> the proven unit goals of the same or weaker axioms whose equation
+    (canonical, as transfer.key) is a step of its proof (HINTS_DIR/<goal>), besides its own goal; and their idf
+    (log(proofs / proofs that have the goal as a step)). About 20 s for 44k proofs."""
+    import transfer, hintsel
+    keyof = {}
+    for n in solved:
+        if not lemma_form(n):
+            continue
+        try:
+            lits = hintsel.goal_lits(n)
+        except Exception:
+            continue
+        if len(lits) == 1 and lits[0][0]:
+            keyof[n] = transfer.key(lits[0][1], lits[0][2])
+    want = collections.defaultdict(list)
+    for n, k in keyof.items():
+        want[k].append(n)
+    deps = {}
+    for f in solved:
+        try:
+            lines = open(os.path.join(hints_dir, f)).read().splitlines()
+        except OSError:
+            continue
+        A = axiom_set(f); kf = keyof.get(f); out = set()
+        for x in lines:
+            w = x.split('\t')
+            if len(w) >= 2 and (w[0], w[1]) != kf:
+                for g in want.get((w[0], w[1]), ()):
+                    if g != f and axiom_set(g) <= A:
+                        out.add(g)
+        if out:
+            deps[f] = frozenset(out)
+    df = collections.Counter(g for v in deps.values() for g in v)
+    N = max(1, len(deps))
+    return deps, {g: math.log(N / c) / math.log(N + 1) for g, c in df.items()}
+
 class LemmaIndex:
     """Proven unit-equation goals grouped by axiom set, for similarity search.
     With subsets=True, a target may use the goals of every problem whose axioms
     are a subset of its own (theorems of a weaker theory hold in the stronger)."""
-    def __init__(self, solved_names, subsets=False, uses=None, pop=0.0):
+    def __init__(self, solved_names, subsets=False, uses=None, pop=0.0, deps=None, dep_w=0.0, dep_n=50):
         names = [n for n in solved_names if lemma_form(n)]
         self.info = goal_info(names)
         self.subsets = subsets
@@ -200,6 +237,12 @@ class LemmaIndex:
         # number of proofs that used m as a lemma (lemma_uses)
         self.uses = uses or {}
         self.pop = pop
+        # (16 Nov) DEP_W > 0 (deps = proof_deps(..)): MaSh-style kNN; a lemma scores the similarity of each of the
+        # DEP_N nearest proven goals it is, plus DEP_W x similarity x idf / sqrt(#deps) for each whose proof has it
+        # as a step
+        self.deps, self.dep_idf = deps if deps else ({}, {})
+        self.dep_w = dep_w
+        self.dep_n = dep_n
         self.groups = collections.defaultdict(list)
         self.sets = {}
         for n in names:
@@ -291,6 +334,18 @@ class LemmaIndex:
                 sc *= 1 + self.pop * math.log1p(self.uses.get(m, 0))
             scored.append((sc, m))
         scored.sort(key=lambda x: (-x[0], x[1]))
+        if self.dep_w and self.deps:
+            cand = set(self.candidates(key, name))
+            acc = collections.defaultdict(float)
+            for sc, m in scored[:self.dep_n]:
+                acc[m] += sc
+                D = self.deps.get(m)
+                if D:
+                    w = self.dep_w * sc / math.sqrt(len(D))
+                    for g in D:
+                        if g in cand and g != name and g not in exclude:
+                            acc[g] += w * self.dep_idf.get(g, 0.0)
+            scored = sorted(((v, m) for m, v in acc.items()), key=lambda x: (-x[0], x[1]))
         # (16 Nov) seen was {form}, which dropped every proven goal stating exactly the target: but such a goal of
         # the same or a weaker theory proves it (46 of transfer.py's 63 source-lemma proofs were of this kind)
         out, seen = [], set()

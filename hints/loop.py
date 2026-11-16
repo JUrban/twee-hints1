@@ -753,7 +753,9 @@ class Loop:
                 uses = lemmas.lemma_uses(a.lemma_uses.split(','), exclude=set(self.names))
             else:
                 uses = lemmas.lemma_uses([self.dir])
-        return lemmas.LemmaIndex(sorted(self.solved), subsets=a.lemma_subsets, uses=uses, pop=a.lemma_pop)
+        deps = lemmas.proof_deps(os.path.join(self.dir, 'hints'), sorted(self.solved)) if a.lemma_deps else None
+        return lemmas.LemmaIndex(sorted(self.solved), subsets=a.lemma_subsets, uses=uses, pop=a.lemma_pop,
+                                 deps=deps, dep_w=a.lemma_deps, dep_n=a.lemma_dep_n)
 
     def hints_for(self, n, pools, knn):
         a = self.a
@@ -1333,6 +1335,10 @@ def make_parser():
     ap.add_argument('--rerun-unhinted', action='store_true')
     ap.add_argument('--lemmas', type=int, default=0,
                     help='rounds > 0: add up to N proven sibling goals (nearest below) as axioms')
+    ap.add_argument('--lemma-deps', type=float, default=0.0,
+                    help='--lemma-knn, MaSh-style: also score the lemmas that the nearest proven goals\' proofs have '
+                         'as steps, with this weight (lemmas.proof_deps)')
+    ap.add_argument('--lemma-dep-n', type=int, default=50, help='--lemma-deps: the number of nearest proven goals')
     ap.add_argument('--lemma-pop', type=float, default=0.0,
                     help='--lemma-knn: multiply a candidate lemma\'s similarity by 1 + POP * log(1 + its uses in proofs)')
     ap.add_argument('--lemma-uses', default='',
