@@ -3,5 +3,5 @@
 # production 3,081 after 3 days): hints/solve_new.sh with the clean context loops/ALL (13 Nov, round 0 and 1),
 # 4 workers, 1 hour; curve as abs/replaycurvec.sh (ARM=HO8).
 cd /project/hintwork
-/project/twee/hints/solve_new.sh sets/ho8 loops/ALL loops/HO8 4 1 > loops/HO8.out 2>&1
+EXCLUDE=originals /project/twee/hints/solve_new.sh sets/ho8 loops/ALL loops/HO8 4 1 > loops/HO8.out 2>&1
 touch loops/HO8.done
