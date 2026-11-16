@@ -129,7 +129,7 @@ def _make_laws(path, ar, consts, defined):
 
 _thy = {}
 _thy_lock = threading.Lock()
-def theories(t, k, info=None, explore=0, meta=None):
+def theories(t, k, info=None, explore=0, meta=None, ts=None):
     """(--theories, user's suggestion 15 Nov: assume a stronger theory, e.g. Bol loops for loops) the extra
     axioms of the K originals' theories that strictly contain T's axioms, fewest extra axioms first, one
     group per distinct theory: [{label: TPTP formula}]. Stronger theories are mathematically relevant and
@@ -173,6 +173,15 @@ def theories(t, k, info=None, explore=0, meta=None):
     out = []
     byB = {id(v): B for B, v in groups.items()}
     ranked = sorted(groups.values(), key=lambda x: (x[0], x[1], x[2]))
+    if ts is not None:
+        # (--theory-ts) Thompson sampling: rank by a draw from each theory's Beta posterior of its nontrivial
+        # sketch rate (prior mean 0.2, weight 2), so the good theories come first and the untried get tried
+        import random as _r
+        rng = _r.Random()
+        th = {id(v): rng.betavariate(0.4 + ts.get(v[2], (0, 0))[0],
+                                     1.6 + ts.get(v[2], (0, 0))[1] - ts.get(v[2], (0, 0))[0]) for v in ranked}
+        ranked.sort(key=lambda v: -th[id(v)])
+        explore = 0
     # (--theory-explore R) the last R of the K slots take theories drawn at random from the rest, seeded by
     # the target, so the logs cover more than the heuristic's top (data for learning the theory choice)
     h = max(0, k - explore)
@@ -183,7 +192,8 @@ def theories(t, k, info=None, explore=0, meta=None):
     for j, v in enumerate(pick):
         out.append((byB[id(v)], {f'assume_thy_{j}_{i}': f for i, f in enumerate(v[3])}))
         if meta is not None:
-            meta.append((j, v[2], -v[0], v[1], int(R > 0 and j >= h), ranked.index(v), len(ranked),
+            meta.append((j, v[2], -v[0], v[1], 2 if ts is not None else int(R > 0 and j >= h),
+                         sorted(groups.values(), key=lambda x: (x[0], x[1], x[2])).index(v), len(ranked),
                          ' & '.join(v[3])))
     return out
 
@@ -217,6 +227,9 @@ def main():
     ap.add_argument('--updown', action='store_true', help='climb up (theory unions, weaker goals) when no sketch proves the target, then down')
     ap.add_argument('--move-model', help='--updown: a latticepolicy.py model orders the moves (softmax sampling)')
     ap.add_argument('--move-temp', type=float, default=1.0)
+    ap.add_argument('--theory-ts', action='store_true',
+                    help='--theories: rank the stronger theories by Thompson sampling of their nontrivial-sketch rate')
+    ap.add_argument('--theory-ts-ab', action='store_true', help='--theory-ts only on targets with bit 1 of crc32')
     ap.add_argument('--theory-explore', type=int, default=0,
                     help='--theories K: the last R slots go to random other stronger theories (seeded by target)')
     ap.add_argument('--move-ab', action='store_true', help='--move-model only on targets of odd crc32 (A/B test)')
@@ -297,8 +310,23 @@ def main():
     fo = open(os.path.join(c.dir, 'fill.tsv'), 'a')
     seen = collections.defaultdict(set)
     lock = threading.Lock()
+    # (--theory-ts) per theory (its representative original): [nontrivial single-theory sketches, such sketches],
+    # from this dir's logs and then online; tmeta: target -> {slot: theory}
+    thy_stats = collections.defaultdict(lambda: [0, 0]); tmeta = {}
+    if c.theory_ts and os.path.exists(os.path.join(c.dir, 'theories.tsv')):
+        import latticedata
+        for r_ in latticedata.theory_rows(c.dir, c.min_sketch_steps or 30):
+            thy_stats[r_['theory']][0] += r_['nontrivial']; thy_stats[r_['theory']][1] += r_['moves']
+        print(f'--theory-ts: {len(thy_stats)} theories, {sum(v[1] for v in thy_stats.values())} sketches from the logs',
+              flush=True)
     out = open(os.path.join(c.dir, 'climb.tsv'), 'a')
     sf = open(os.path.join(c.dir, 'solved.tsv'), 'a')
+
+    def ts_arm(t):
+        """--theory-ts-ab: the targets that rank theories by Thompson sampling (bit 1 of crc32, independent of
+        --move-ab's bit 0); without --theory-ts-ab all of them"""
+        import zlib
+        return not c.theory_ts_ab or (zlib.crc32(t.encode()) >> 1) % 2 == 1
 
     def candidates(t):
         """label -> TPTP formula of each candidate assumption of target T."""
@@ -349,7 +377,10 @@ def main():
         if c.theories:
             li = getattr(lp, 'lemma_index', None)
             meta = []
-            groups = theories(t, c.theories, li.info if li is not None else None, c.theory_explore, meta)
+            with lock:
+                ts_ = {o: tuple(v) for o, v in thy_stats.items()} if c.theory_ts and ts_arm(t) else None
+            groups = theories(t, c.theories, li.info if li is not None else None, c.theory_explore, meta, ts_)
+            tmeta[t] = {m_[0]: m_[1] for m_ in meta}
             with lock, open(os.path.join(c.dir, 'theories.tsv'), 'a') as f_:   # (for learning the theory choice)
                 f_.writelines('\t'.join(map(str, (t,) + m_)) + '\n' for m_ in meta)
             A = lemmas.axiom_set(t)
@@ -429,6 +460,13 @@ def main():
             out.write(f'{t}\t{tag}\t{len(S)}\t{"THM" if ok else "NO"}\t{len(U) if ok else -1}\t{dt:.2f}\t'
                       f'{",".join(short(x) for x in sorted(S))}\t{",".join(short(x) for x in sorted(U))}\t{len(hs)}\t{nt}\n')
             out.flush()
+        js = {int(x.split('_')[2]) for x in S if x.startswith('assume_thy_')}
+        if len(js) == 1 and goal is None and t in tmeta:   # (--theory-ts) a single-theory sketch: update its theory
+            o_ = tmeta[t].get(js.pop())
+            if o_:
+                with lock:
+                    thy_stats[o_][1] += 1
+                    thy_stats[o_][0] += int(bool(ok and U and len(res) >= (c.min_sketch_steps or 30)))
         if ok and U and c.fill:
             fill(t, deps, tag)
         return ok, U, res, nt
