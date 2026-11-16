@@ -3447,6 +3447,18 @@ clean context:
 | **`solve_new.sh`, 1 hour per batch (3 + 8 originals), about 8 CPU h in all** | **3,385** | **71.7%** |
 | production, 3 days, every version, full context | 4,190 | 88.8% |
 
+**A 20 s level from scratch** (abs/lv_test.sh, 15:05–16:06, sets/rp3,
+clean context, 4 workers plus the transfer, 1 hour):
+
+| levels | proved | the cascade's own | runs (proved) beyond 5 s |
+|---|---:|---:|---|
+| 5, 80, 320 s (LVA, control) | **933** | 791 | 95 at 80 s (48) |
+| 5, 20, 80, 320 s (LVB) | 925 | 792 | 198 at 20 s (38), 48 at 80 s (8) |
+
+* No gain, so production's levels stay.
+* The control repeats RPc (934) to within one proof, so this testbed's
+  noise is small. Effects of about 20 proofs are visible.
+
 So about half the gap between plain twee and three days of production
 is closed in the first hour, on originals the system has never seen.
 Most of it comes in the first 10 minutes. Exact reuse of other
