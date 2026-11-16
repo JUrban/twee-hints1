@@ -15,6 +15,7 @@ in `/project/hintwork` (not in git).
 | + cascade round, 3 lemmas (2p) | 39,746 | 4291 | +33.7 |
 | + cascade round 4, 6 lemmas (2r), 14 Nov 08:31–17:25 | 41,074 (+32.2% over plain) | 4460 | +123.7 |
 | + cascade round 5 (2w–2ac), from 14 Nov 17:26; at 15 Nov 07:00 | **43,462** (+39.9% over plain) | **4717** (+47.3%) | +199.5 (+15.4 side workers) |
+| + round 5 continued: climbers, proof-step transfer, 30 kNN lemmas (2aj–2an); at 16 Nov 14:00 | **44,710** (+43.9% over plain) | **4898** (+52.9%) | – |
 
 \* Starts from 33,720 proofs: the third round plus 52 from long runs on
 two families (2m). Its time is the summed wall time of the runs, close
