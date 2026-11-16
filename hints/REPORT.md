@@ -3063,9 +3063,38 @@ ULsY at 04:15, fresh 20 abstract s, 3 workers):
 * Proved runs took 4 s on average. 30 merged into UL at 04:40; the
   other 2 had been proved by production meanwhile.
 
+* Split by where the source proof was: sources only in other
+  originals 29 of 89; a source in the goal's own original 3 of 12. The
+  own original's proofs were already in the goal's pool.
+
 **From other theories** (abs/xfr2.sh, sets/transfer2b.tsv, the 2,804
-others, fewest extra axioms first): running from 04:42 on 3 workers.
-The live climber was stopped for it (about 0.5 proofs per CPU hour).
+others, fewest extra axioms first, from 04:42): 1 of 28 (about 4 per CPU
+hour). A step of a stronger theory's proof is mostly not derivable in
+the weaker one. Paused at 04:46 for the instances below. The live
+climber was stopped at 04:42 (about 0.5 proofs per CPU hour).
+
+**Instances of steps** (`find --instances`: the goal is σ(step) for a
+step of a proof from the same or weaker axioms; one-way matching over
+all hints files, 3.5 minutes): 3,108 unsolved goals, 3,007 beyond the
+exact ones.
+
+* Proofs of goals with hypotheses can have hypothesis-dependent steps,
+  which are false once generalized. Such candidates just fail.
+* Sources in the goal's own original first (sets/transfer3b.tsv): 1 of
+  61. Those proofs were already in the pool, so the order was wrong.
+* Sources in other originals only (sets/transfer3c.tsv, 2,581 goals):
+  3 of the first 45, about 7.7 proofs per CPU hour. Running from 05:13
+  on 6 workers.
+* For that, production went from 14 to 10 workers at 05:12
+  (abs/ul32.sh, `--cascade-continue`). Its marginal runs make about 0.8
+  proofs per CPU hour.
+* **A decision for the user.** A step of a proof from the same or weaker
+  axioms (and without hypotheses) is a proven theorem, exactly like the
+  proven sibling goals the loop already adds as lemmas. As a lemma axiom
+  it would prove its instances at once, so most of the 3,108 would
+  count as solved modulo lemmas. The runs here instead give the steps as
+  hints, so twee re-derives them and each proof stays at the current
+  trust level.
 
 **Beside it, long climbs on the heads** (abs/clh.sh, the 111 first
 unsolved goals, the live climber's config with a 160 s final run, 4

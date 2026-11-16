@@ -23,6 +23,108 @@ def key(l, r):
     return min(a, b)
 
 
+def parse(s):
+    """term string -> nested tuples (functor, args...); variables are strings starting with an upper-case letter"""
+    toks = re.findall(r'[A-Za-z0-9_]+|[(),]', s)
+    pos = 0
+    def term():
+        nonlocal pos
+        t = toks[pos]; pos += 1
+        if pos < len(toks) and toks[pos] == '(':
+            pos += 1; args = []
+            while True:
+                args.append(term())
+                if toks[pos] == ',':
+                    pos += 1
+                else:
+                    pos += 1; break   # ')'
+            return (t,) + tuple(args)
+        return t if t[0].isupper() else (t,)
+    return term()
+
+
+def match(p, t, sub):
+    """extend SUB so that p under it is t (one-way matching); False if impossible"""
+    if isinstance(p, str):
+        if p in sub:
+            return sub if sub[p] == t else False
+        sub[p] = t
+        return sub
+    if isinstance(t, str) or p[0] != t[0] or len(p) != len(t):
+        return False
+    for a, b in zip(p[1:], t[1:]):
+        if match(a, b, sub) is False:
+            return False
+    return sub
+
+
+def root(x):
+    return '*' if isinstance(x, str) else x[0]
+
+
+def find_instances(D, out, allp='/project/hintwork/sets/all'):
+    """(find --instances) unsolved unit goals that are instances of a step of a proof from the same or weaker
+    axioms (the step, as a theorem, proves them by instantiation)"""
+    S = {l.split('\t')[0] for l in open(os.path.join(D, 'solved.tsv'))}
+    goals = []
+    for n in (l.strip() for l in open(allp)):
+        if not n or n in S:
+            continue
+        try:
+            lits = hintsel.goal_lits(n)
+        except Exception:
+            continue
+        if len(lits) == 1 and lits[0][0]:
+            l, r = key(lits[0][1], lits[0][2])
+            goals.append((n, parse(l), parse(r)))
+    ax = {}
+    def axs(n):
+        o = lemmas.split(n)[0]
+        if o not in ax:
+            ax[o] = lemmas.axiom_set(n)
+        return ax[o]
+    # goals by (root of lhs, root of rhs), both orientations
+    byroot = {}
+    for g in goals:
+        byroot.setdefault((root(g[1]), root(g[2])), []).append((g, False))
+        byroot.setdefault((root(g[2]), root(g[1])), []).append((g, True))
+    hits = {}
+    hd = os.path.join(D, 'hints')
+    seen = set()
+    for f in os.listdir(hd):
+        A = axs(f)
+        try:
+            lines = open(os.path.join(hd, f)).read().splitlines()
+        except OSError:
+            continue
+        for x in lines:
+            w = x.split('\t')
+            if len(w) < 2 or (w[0], w[1], f.rpartition('__goal_')[0]) in seen:
+                continue
+            seen.add((w[0], w[1], f.rpartition('__goal_')[0]))
+            try:
+                pl, pr = parse(w[0]), parse(w[1])
+            except (IndexError, ValueError):
+                continue
+            keys = [(root(pl), root(pr))]
+            for k in keys:
+                for (g, swap) in byroot.get(k, ()):
+                    n, gl_, gr_ = g
+                    if n in hits and len(hits[n]) >= 3:
+                        continue
+                    if not A <= axs(n):
+                        continue
+                    a, b = (gr_, gl_) if swap else (gl_, gr_)
+                    sub = match(pl, a, {})
+                    if sub is not False and match(pr, b, sub) is not False:
+                        hits.setdefault(n, set()).add(f)
+    with open(out, 'w') as fo:
+        for g, fs in sorted(hits.items()):
+            fs = sorted(fs, key=lambda f: (lemmas.split(f)[0] != lemmas.split(g)[0], len(axs(f) - axs(g))))
+            fo.write(g + '\t' + ','.join(fs[:3]) + f'\t{len(axs(fs[0]) - axs(g))}\n')
+    print(f'{len(hits)} unsolved goals are instances of steps of proofs from the same or weaker axioms -> {out}')
+
+
 def find(D, out, allp='/project/hintwork/sets/all', any_theory=False):
     S = {l.split('\t')[0] for l in open(os.path.join(D, 'solved.tsv'))}
     want = {}
@@ -81,9 +183,11 @@ def run(goals, d, j, T, rest):
     if a.lemma_knn:
         lp.lemma_index = lemmas.LemmaIndex(sorted(lp.solved), subsets=a.lemma_subsets)
     src, rank = {}, {}
+    tp = os.path.join(d, 'transfer.tsv')
+    done = {l.split('\t')[0] for l in open(tp)} if os.path.exists(tp) else set()   # (a restart skips the tried)
     for i, l in enumerate(open(goals)):
         w = l.rstrip('\n').split('\t')
-        if w[0] in lp.solved:
+        if w[0] in lp.solved or w[0] in done:
             continue
         src[w[0]] = w[1].split(',')
         rank[w[0]] = (int(w[2]) if len(w) > 2 and w[2].isdigit() else 0, i)   # fewest extra axioms first
@@ -116,7 +220,9 @@ def run(goals, d, j, T, rest):
 
 def main():
     argv = sys.argv[1:]
-    if argv[0] == 'find':
+    if argv[0] == 'find' and '--instances' in argv:
+        find_instances(argv[1], argv[argv.index('--out') + 1])
+    elif argv[0] == 'find':
         find(argv[1], argv[argv.index('--out') + 1], any_theory='--any-theory' in argv)
     else:
         i = argv.index('--') if '--' in argv else len(argv)
