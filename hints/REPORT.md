@@ -3388,6 +3388,26 @@ originals: 31,605 proofs of the 13 Nov 2 + 2 s loop, from before kNN
 lemmas, so none of them used these originals. Settings and budget are
 the same.
 
+| minutes | cascade, full context | cascade, clean context |
+|---:|---:|---:|
+| 1 | 482 | 539 |
+| 4 | 804 | 681 |
+| 10 | 846 | 724 |
+| 25 | 852 | 755 |
+| **with the transfer, 25 min** | **1,039** | **893** |
+
+* With the clean context, the transfer's first scan finds 384 goals
+  that are steps of proofs and 356 that are instances of proven goals,
+  against 546 and 452. It proves 385 of the 387 it tried.
+* **So on unseen originals the system makes 893 in 25 minutes (about
+  1.7 CPU h) from a context of 2 + 2 s proofs alone, against 731 for
+  plain twee.** That's 22% more.
+  * With today's richer context it makes 1,039. Part of the 146
+    difference is the contamination above.
+  * Part is legitimate: the 12k later proofs of other originals are
+    harder theorems that new originals can use too.
+  * For the secret part, both kinds of context are clean.
+
 ## 2c. Long runs: stall cutoff and checkpoints
 
 * `--eqhint-stall N` gives up when no new rule has matched a hint for N
