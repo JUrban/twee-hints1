@@ -20,7 +20,7 @@ So, on production's unsolved late goals:
 * Here: unsolved goals, one long run each, and the chain of proofs right below the goal as the guide. That is
   Veroff's ladder: the proofs of goal k−1, k−2, … expanded to their foundations guide goal k.
 
-**Setup** (17 Nov, launched 20:08). Work dir /project/hintwork/exp3. Scripts in hints/exp (exp3_*), sets in
+**Setup** (17 Nov, launched 20:03). Work dir /project/hintwork/exp3. Scripts in hints/exp (exp3_*), sets in
 hints/exp/sets.
 * **Goals** (exp/sets/exp3_goals48):
   * Candidates: public goals unsolved in all 16 production-like loops (UL, Z0–Z4, PGA, PGB, ORA–ORH; 44,906
@@ -71,9 +71,9 @@ hints/exp/sets.
 * **Output only:** every run adds `--print-hint-matchers` (a HINTMATCHER line per rule that matches a hint).
   HINTLOG's second number is the matching rule's id, not the hint's, so only the matchers show which chain
   hints (which sibling, own steps or lemma steps) the search reached.
-* **Launch** (20:08): `cd /project/hintwork/exp3; echo 6 > J; nohup python3 run.py C,K,E,V 320 12 > run320.out
+* **Launch** (20:03): `cd /project/hintwork/exp3; echo 6 > J; nohup python3 run.py C,K,E,V 320 12 > run320.out
   2>&1 &` (goals47 is the default set).
-  * A first launch at 20:02 without `--print-hint-matchers` was stopped after 3 minutes, before any run had
+  * A first launch at 20:02 without `--print-hint-matchers` was stopped after a minute, before any run had
     finished, and its files were removed.
 
 **Smoke test** (on a goal of the first pick, R1dist_to_aa1 473, 5 s): all four arms ran and printed HINTLOG.
