@@ -4096,8 +4096,27 @@ Two fixes (0903499):
   If it deepens later, its next level starts over with the full
   budget.
 
-ORE (e43 + `--lean-states`) and ORF (also 5, 20, 80, 320 s) start when
-ORC and ORD end (abs/or_queue.sh).
+**A 20 s level at scale, and the noise** (sets/half1, 6 workers, 2 h,
+from zero, 11:04–13:05):
+
+| arm | 10 min | 30 min | 60 min | 90 min | 120 min | never run | deeper runs (proved) |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| ORA, control (09:02) | 9,412 | 15,349 | 17,381 | 18,074 | 18,319 | 3,923 | 80 s: 103 (37) |
+| ORD, control repeat | 9,303 | 15,330 | 17,422 | 18,254 | 18,504 | 3,902 | 80 s: 107 (51) |
+| ORC, 5, 20, 80, 320 s | 9,575 | 15,216 | 17,502 | 18,277 | **18,552** | 4,031 | 20 s: 388 (103), 80 s: 3 (2) |
+
+* **Noise:** two identical runs differ by up to 185 (1%) after an
+  hour. Earlier single-run comparisons at this scale (ORB's −91) are
+  within it.
+* ORC is 48 above ORD and 233 above ORA: a lean towards the 20 s
+  level, not proof.
+  * Its 20 s level proved 27% of its runs. They cost a quarter of an
+    80 s run each.
+  * Its deeper class got more slots (388 runs against 107) without
+    costing first runs (4,031 never run against 3,902).
+
+ORE (e43 + `--lean-states`) and ORF (also 5, 20, 80, 320 s) run from
+13:05 (abs/or_queue.sh). They are judged against this 1% band.
 
 ## 2c. Long runs: stall cutoff and checkpoints
 
