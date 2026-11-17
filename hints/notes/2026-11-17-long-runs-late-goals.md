@@ -25,7 +25,7 @@ Abstract time is deterministic, so the first 320 s repeat exp3's C run exactly, 
 fewer than 1,280,000 pairs.
 
 **Run.** `cd /project/hintwork/exp5; echo 3 > J; nohup python3 run.py C 640 8 > run_C640.out 2>&1 &`
-* Launched 22:55 with 3 workers (exp3 holds 8 until it finishes, about 04:00); 4 from 23:09. The J file goes up as exp3 frees
+* Launched 22:55 with 3 workers (exp3 holds 8 until it finishes, about 04:00); 4 from 23:09, back to 3 at 23:20 (load 22.6 with exp4's refinement). The J file goes up as exp3 frees
   CPUs, to at most 6 for memory: peak at 320 s is up to 3.7 GB.
 * Output: res_C@640.tsv (goal, proved, CPU s, peak MB, considered pairs, matched hints, hints), out_C@640/,
   given_C@640/.
