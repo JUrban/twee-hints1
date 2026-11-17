@@ -3950,6 +3950,21 @@ keeps a share for the deeper levels.
   the goals that never ran are mostly ones a 5 s run does not prove.
   MX60 against FO60 (914 against 891) is one run each.
 
+**The replay with today's context** (rp3, context loops/ULX with every
+proof of rp3's originals left out, 4 workers, 1 hour, 2aq):
+
+| run | 1 min | 4 min | 10 min | 25 min | 40 min | 60 min |
+|---|---:|---:|---:|---:|---:|---:|
+| LVU, learned scheduler (`solve_new.sh` default then) | 416 | 969 | 1,036 | 1,065 | 1,075 | 1,085 |
+| **LVF**, `--mix 0.25 --fail-order`, no scheduler | 455 | 1,004 | 1,041 | 1,068 | 1,085 | **1,095** |
+
+* Ahead at every mark, and every goal ran at least once. Production
+  took 3.5 days to reach 1,111. Scheduler runs vary by about 25, so
+  this is a lean, not proof.
+* **`solve_new.sh` now defaults to this order** (`ORDER`, 2db27bf),
+  with `--mix 0.1`, which keeps one worker each at 4 workers and two
+  at 12. `SCHED` turns the scheduler back on.
+
 ## 2c. Long runs: stall cutoff and checkpoints
 
 * `--eqhint-stall N` gives up when no new rule has matched a hint for N
