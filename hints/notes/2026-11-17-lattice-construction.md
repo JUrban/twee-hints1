@@ -193,6 +193,7 @@ inventor's paradox).
   `l(X0,X1,k(X2,X3)) = X0` for aK2_eq_aK3_gen 522.
 * The survivors are run as goals (sketch.py, kind gen, 20 s, 1 CPU, launched 22:13):
   `python3 sketch.py gen47.tsv gsketch20.tsv -j 1 --time 20`.
+* **Result (22:33): none of the 36 proves in 20 s.** Where true, they are no easier than the goal.
 
 **Launch** (stage 1, 20:33): `cd /project/hintwork/exp4; nohup bash stage1.sh > stage1.out 2>&1 &`.
 
