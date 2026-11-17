@@ -96,6 +96,13 @@ Hints: C 9,333, E 9,398, K and V 1,916. Matched: C 1,157, E 1,154, K 530, V 396.
   sibling, rank 5 (271), carries 7,339 of the chain's steps. All arms match the 2 own steps of 297, so "rank 0
   matched" means little.
 
+**Progress** (20:35).
+* The first proofs: R1dist_to_aa1 619, by C at 529,216 critical pairs (265 abstract s), by E at 181 s and by K at
+  247 s. It is new to the benchmark.
+* Workers lowered from 12 to 11 at 20:35, because exp4 stage 1 (2 CPUs) put the load at 22.
+* Proofs are merged into UL at the end via exp3/tomerge.py, which writes a loop dir of hint files from the
+  outputs.
+
 **Chain holes** (found 20:23).
 * 127 of the 439 siblings (29%) have no USEDAXIOMS record, so they enter as leaves. Their closures hold a median
   of 13 unrecorded members (q3 46, max 202).
