@@ -4367,8 +4367,10 @@ the 200, against 52 for the sum filter, at the same abstract budget and
 5–6 times the CPU. Offline they kept 93.5–97.5% of the proof pairs
 against the sum's 84.1%. As with the dense models, offline ranking on
 the old proofs' pairs does not predict the online result
-(notes/2026-11-17-pg-pcat-enigma.md). The additive forms (pgtest7) are
-running. The additive model is under test on the 200 goals.
+(notes/2026-11-17-pg-pcat-enigma.md). The additive forms (pgtest7,
+19:12) cost what the sum costs and prove 36–38 (each −16 or −17 against
+the sum). So every learned parental model tried, dense or ENIGMA, full
+or additive, has lost to the untrained sum filter. The sum stays. The additive model is under test on the 200 goals.
 
 ## 2c. Long runs: stall cutoff and checkpoints
 

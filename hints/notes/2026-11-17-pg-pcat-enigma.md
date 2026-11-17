@@ -81,7 +81,14 @@ Online, pgtest6 (twee-e54, 200 testbed goals, 5 abstract s; ended 19:06):
 | pce_1024 (full, ENIGMA only) at 0.0052 | 36 | +8 −1 | 5,960 |
 | pcd_1024 (full, ENIGMA + numbers) at 0.0007 | 39 | +11 −1 | 4,767 |
 
-pgtest7 (additive): running.
+pgtest7 (twee-e55, 6 workers; ended about 19:12; compared with the sum):
+
+| filter | proved | gained / lost against the sum | CPU s |
+|---|---:|---:|---:|
+| sum 0.269 | **52** | | 889 |
+| pca_1024 (additive, ENIGMA only) at 0.0113 | 36 | +1 −17 | 848 |
+| pcad_1024 (additive, + numbers) at 0.0018 | 38 | +2 −16 | 809 |
+| pcad_1024 at 0.005 (25% of overlaps kept) | 37 | +2 −17 | 795 |
 
 **Reading so far.**
 * **The full Pcat models lose online at the same abstract budget** (36 and 39 against the sum's 52), even
@@ -98,5 +105,11 @@ pgtest7 (additive): running.
   gives up the interactions between the two parents; pgtest6 against pgtest7 shows what those are worth in
   proofs.
 
-**Decision and next.** Wait for pgtest6/7. If a model beats the sum online: its half1 A/B against the sum.
+* The additive forms cost what the sum costs but lose as much as the full ones (36–38). So the interactions
+  between the two parents are not what is missing. Every learned parental model, dense or ENIGMA, full or
+  additive, has lost to the untrained sum of the two parents' rule-model scores.
+
+**Decision and next.** Keep the sum filter (solve_new.sh's default since 19:00). Not tried: on-policy data (pairs
+logged from runs with the filter on), and the paper's larger forests (1k–8k leaves); I would only try those with a
+new reason. Was: wait for pgtest6/7. If a model beats the sum online: its half1 A/B against the sum.
 If only the full model does: a faster forest evaluator (flat unboxed arrays) or smaller forests. REPORT 2av.

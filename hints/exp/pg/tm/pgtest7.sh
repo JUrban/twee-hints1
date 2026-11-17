@@ -1,5 +1,5 @@
 #!/bin/bash
-# (17 Nov 18:21) additive Pcat ENIGMA parental models (pg/pc2.sh; twee-e55 PGEnigmaAdd: each rule scored once in both
+# (17 Nov 18:22) additive Pcat ENIGMA parental models (pg/pc2.sh; twee-e55 PGEnigmaAdd: each rule scored once in both
 # roles, a pair two lookups, CPU as the sum filter's) on the 200-goal testbed pg/tb: ENIGMA only (pca) and with the 10
 # numbers per rule (pcad) at the sum filter's pruning (38% of overlaps), pcad stricter (25%); the sum as CPU reference.
 # Starts when the half1 A/B (PGA/PGB solve_new.sh, PIDs 2204857 2204864) has ended.
