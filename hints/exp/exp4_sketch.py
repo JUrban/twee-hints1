@@ -4,7 +4,7 @@
 Each run is the goal's captured production command (exp3/tb: sibling and kNN lemmas, the original's pool, rm4t,
 twee-e48, PG 0.25) at T abstract s (default 5), with the proof printed, and
   an up move S: the problem plus fof(assume_S, axiom, S);
-  a weaker goal: the conjecture replaced by the instance.
+  a weaker goal (inst) or a generalised goal (gen, genmoves.py): the conjecture replaced by it.
 For a proof of an up move: whether S was used (USEDAXIOMS), the proof's size (lemmas printed as hints), and
 the instances of S the proof used: at each step 'by axiom k (assume_S)' the two terms differ at one position,
 the redex; (redex = contractum), with the goal's constants generalised to variables, is the instance. Each
@@ -62,7 +62,7 @@ def run(row, T):
     g, mid, kind, mv = row[:4]
     w = list(cmds[g]); prob = open(w[1]).read()
     os.makedirs(f'{a.out}.d', exist_ok=True); pp = f'{a.out}.d/{g}.{mid}.p'
-    if kind == 'inst':
+    if kind in ('inst', 'gen'):
         body = mv.strip().rstrip('.').strip()
         vs = sorted(set(re.findall(r'\bX\d+\b', body)))
         conj = f"fof(goals,conjecture,{'! [' + ','.join(vs) + '] : ' if vs else ''}{body})."

@@ -171,6 +171,16 @@ were sketched at 5 s.
 * Goal 299: the normal forms are m(m(x1,x0), k(x2,m(x0,x1))) and m(k(x0,x1), t(m(x0,x1),x2)). Their one
   decomposition needs m(x0,x1) = k(x1,x0), which is false.
 
+**Generalisations of the goal** (genmoves.py, 22:05). Korovin's generalisation, applied to the goal itself (Polya's
+inventor's paradox).
+* Every occurrence of one proper subterm of the goal is replaced by a fresh variable. The result implies the goal,
+  so if it is true it gives the goal at once, and it has fewer symbols.
+* Mace4 screen: sizes up to 12, 10 s each. Of 214 generalisations, 178 are refuted, most by size 2, i.e. Z2: a
+  variable that occurs only once is free. 36 survive, in 20 goals; for example
+  `l(X0,X1,k(X2,X3)) = X0` for aK2_eq_aK3_gen 522.
+* The survivors are run as goals (sketch.py, kind gen, 20 s, 1 CPU, launched 22:13):
+  `python3 sketch.py gen47.tsv gsketch20.tsv -j 1 --time 20`.
+
 **Launch** (stage 1, 20:33): `cd /project/hintwork/exp4; nohup bash stage1.sh > stage1.out 2>&1 &`.
 
 **Resources.** exp3 holds 12 workers until about midnight. Stage 1 starts with Mace4 (cheap, 1–2 CPUs) and tries

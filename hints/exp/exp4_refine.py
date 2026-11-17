@@ -8,7 +8,9 @@ Per goal one more run ('all') gives the plausible instances of all its proved sk
 If the run proves the goal, the assumptions it used (USEDAXIOMS) are the rung: conjectures plausible in T
 (no countermodel up to 8) that suffice for the goal; if it used none, it is a real proof.
 OUT.tsv: goal, source (move id or 'all'), assumptions given, proved, used, CPU s, the used conjectures (; sep.).
-Outputs in OUT.d/<goal>.<source>."""
+Outputs in OUT.d/<goal>.<source>.
+--rescreen R.tsv (rescreen.py): also drop the instances refuted there (sizes up to 12, 30 s). Instances that are
+S itself up to renaming and orientation are dropped too (no step down)."""
 import argparse, collections, concurrent.futures as cf, os, re, subprocess
 TB = '/project/hintwork/exp3/tb'
 cmds = {}
@@ -31,12 +33,28 @@ def run(g, src, conj, T, out_dir):
     return [g, src, len(conj), int(ok), len(used) if ok else '', f'{cpu:.1f}', '; '.join(conj[i] for i in used) if ok else '']
 ap = argparse.ArgumentParser(); ap.add_argument('sketch'); ap.add_argument('out')
 ap.add_argument('-j', type=int, default=2); ap.add_argument('--time', type=float, default=5)
+ap.add_argument('--rescreen')
 a = ap.parse_args()
+refuted = set()
+if a.rescreen:
+    for l in open(a.rescreen):
+        w = l.rstrip('\n').split('\t')
+        if w[2] != '-': refuted.add((w[0], w[1]))
+def canon(eq):
+    """eq with its variables (X0.. or A..H) renamed by first occurrence, the smaller orientation"""
+    l, r = eq.split(' = ')
+    def ren(x, y):
+        names = {}
+        f = lambda m: names.setdefault(m.group(0), f'V{len(names)}')
+        pat = r'\b(X\d+|[A-H])\b'
+        return re.sub(pat, f, x) + ' = ' + re.sub(pat, f, y)
+    return min(ren(l, r), ren(r, l))
 jobs, per_goal = [], collections.defaultdict(list)
 for l in open(a.sketch):
     w = l.rstrip('\n').split('\t')
     if len(w) < 11 or w[4] != '1' or w[5] != '1': continue
-    conj = [c for c in w[10].split('; ') if c and not c.startswith('x ')]
+    conj = [c for c in w[10].split('; ') if c and not c.startswith('x ') and (w[0], c) not in refuted
+            and canon(c) != canon(w[3])]
     if not conj: continue
     jobs.append((w[0], w[1], conj))
     for c in conj:
