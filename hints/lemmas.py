@@ -252,6 +252,9 @@ class LemmaIndex:
                 self.sets[k] = axiom_set(n)
         self._idf = {}
         self._cands = {}
+        # (17 Nov) select() memo: the loop picks a goal's kNN lemmas at dispatch (--retry-knn) and again when it
+        # writes the problem, ~20-40 ms each over 20k+ candidates (Z0); the index is rebuilt, not changed
+        self._memo = {}
 
     def candidates(self, key, name):
         if key not in self._cands:
@@ -307,6 +310,10 @@ class LemmaIndex:
             import feats
             key = self.info[name][0] if name in self.info else axiom_key(name)
             return self._select(name, key, frozenset(feats.features(eq[0], eq[1], 3)), k, exclude, None)
+        mk = (name, k, frozenset(exclude))
+        v = self._memo.get(mk)
+        if v is not None:
+            return list(v)
         if name not in self.info:  # targets: in memory only, no cache write
             import hintsel
             try:
@@ -315,7 +322,9 @@ class LemmaIndex:
                 F = frozenset()
             self.info[name] = (axiom_key(name), F)
         key, F = self.info[name]
-        return self._select(name, key, F, k, exclude, lemma_form(name) or conjecture(name))
+        out = self._select(name, key, F, k, exclude, lemma_form(name) or conjecture(name))
+        self._memo[mk] = tuple(out)
+        return out
 
     def _select(self, name, key, F, k, exclude, form):
         idf = self.idf(key, name)
