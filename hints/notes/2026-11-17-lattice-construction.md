@@ -179,6 +179,10 @@ were sketched at 5 s.
 * **Relaunched with the sketch hints boosted** (hints file column 3 = 0.001, ten times the pool's default 0.01;
   score = size × factor, lower is better). Arms U then I, 80 s, 2 CPUs:
   `python3 downhints.py sketch47.tsv down80f.tsv -j 2 --time 80 --arms U,I --factor 0.001`
+  * **Stopped at 22:53, after 10 goals in both arms (20 runs): no proofs.** Hint matches again about equal to the
+    plain runs (for example 920/966, 1,329/1,307, 1,626/1,553). The sketch steps the pool lacks are few (7–473),
+    and even at ten times the boost they do not change the search's course within 80 s.
+  * Its CPUs went to exp5, long runs (notes/2026-11-17-long-runs-late-goals.md).
 
 **Deductions from the goal** (nf.py, launched 22:02, 1 CPU). Move 9, conjectures by deduction from the goal.
 `python3 nf.py /project/hintwork/exp3/goals47 nf20.tsv -j 1 --time 20`
