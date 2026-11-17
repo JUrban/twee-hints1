@@ -117,6 +117,17 @@ collapse, 12 force a group and 23 are kept (17 strengthenings, 6 weaker goals).
   the sketch again. If it still proves, the rung is that handful of conjectures, each a subgoal. If it does not,
   combine the plausible instances of several moves.
 
+**Refinement on the first goal** (refine.py, 20:36). The plausible used instances were given as separate assumptions
+(fof(assume_i, ...)), 5 s, once for each of the 6 proved sketches that had any (2–9 instances), and once with all 24
+together. **None proves.**
+* Every sketch depended on consequences of its assumption that are false in T. The assumption changes the
+  theory, not just the search.
+* Only the universally quantified instance can be a lemma. A used instance holds the goal's constants, but the
+  goal is true in T, so "the goal or the instance" holds trivially and says nothing.
+* So on this goal the steps exist but are not small.
+* Down steps still to try on all 47: the refinement at 20 s, and Veroff's sketch hints (the real goal, no
+  assumptions, with the proved sketches' steps as hints, false ones included, at 80 s against exp3's 320 s).
+
 **Launch** (stage 1, 20:33): `cd /project/hintwork/exp4; nohup bash stage1.sh > stage1.out 2>&1 &`.
 
 **Resources.** exp3 holds 12 workers until about midnight. Stage 1 starts with Mace4 (cheap, 1–2 CPUs) and tries
