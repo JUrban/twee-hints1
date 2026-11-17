@@ -99,7 +99,11 @@ Hints: C 9,333, E 9,398, K and V 1,916. Matched: C 1,157, E 1,154, K 530, V 396.
 **Progress** (20:35).
 * The first proofs: R1dist_to_aa1 619, by C at 529,216 critical pairs (265 abstract s), by E at 181 s and by K at
   247 s. It is new to the benchmark.
-* Workers lowered from 12 to 11 at 20:35, because exp4 stage 1 (2 CPUs) put the load at 22.
+* Workers lowered from 12 to 11 at 20:35, because exp4 stage 1 (2 CPUs) put the load at 22, and to 10 at 20:52
+  (load 23.9), and to 8 at 21:57 for exp4's down runs.
+* 21:53, 49 of 188 runs done. C proved 4 goals (619, aK2_eq_aK3_q 252, aK2_eq_aK3_t 369 and 372), K the same 4,
+  and E 3 of them. V, from the axioms with the chain, proved aK2_eq_aK3_q 211, which no other arm has, and 372
+  fastest (82k critical pairs, against C's 233k).
 * Proofs are merged into UL at the end via exp3/tomerge.py, which writes a loop dir of hint files from the
   outputs.
 

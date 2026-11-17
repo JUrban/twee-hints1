@@ -128,6 +128,38 @@ together. **None proves.**
 * Down steps still to try on all 47: the refinement at 20 s, and Veroff's sketch hints (the real goal, no
   assumptions, with the proved sketches' steps as hints, false ones included, at 80 s against exp3's 320 s).
 
+**Stage 1 results** (all 47 goals, finished 21:53). 2,586 moves were generated, and 1,031 survived the screen and
+were sketched at 5 s.
+
+| kind | sketched | proved at 5 s | proof lemmas (quartiles) |
+|---|---:|---:|---|
+| weaker goals (instances of the goal) | 377 | 178, in all 47 goals | 3 / 16 / 26 / 41 / 231 |
+| groupings | 149 | 77 | |
+| filterings | 126 | 118 | |
+| laws | 379 | 187 | |
+| all strengthenings | 654 | 382, in 45 goals | 3 / 24 / 39 / 82 / 439 |
+
+* No strengthening's proof went without S, so none is a proof of the goal itself.
+* The proofs used 1,653 instances of S, and Mace4 (5 s, up to size 8) refuted 1,336.
+* 21 sketches in 15 goals used only instances it did not refute. But many of those are S itself in its full
+  generality (k(A,B) = e, i.e. commutativity, in 7 goals), which is no step down.
+* **The 5 s screen is too lenient.** Commutativity in R1dist_to_aa1 and aK2_eq_aK3_q has a countermodel of size 8.
+  Mace4 finds it in 11–17 s, after the 5 s limit. l = r in aK2_eq_aK3_e has one of size 9 (9 s).
+  * rescreen.py screens the 317 surviving (goal, instance) pairs again: sizes up to 12, 30 s each, 3 CPUs.
+    Launched 21:56, output rescreen47.tsv.
+* **Weaker goals are real steps down.** In every goal some instance of the goal (two variables identified, or one
+  set to e) proves in 5 s, with proofs of median 26 lemmas. These are true lemmas.
+
+**Down step with sketch hints** (downhints.py, launched 21:57).
+`python3 downhints.py sketch47.tsv down80.tsv -j 2 --time 80 --arms I,U`
+* The real goal, with no assumptions, runs with the goal's production command (exp3/tb) at 80 abstract s.
+* Hints: the pool, plus the steps of the goal's proved sketches, as in Veroff's proof sketches.
+* Arm I takes the weaker goals' proofs, which are all true. Arm U takes the strengthened theories' proofs, which
+  include steps false in T.
+* 47 goals × 2 arms. exp3 lowered to 8 workers for it.
+* Control without a run: exp3's C@320 runs the same command, and abstract time is deterministic. So C proves
+  within 80 s iff its proof took at most 160,000 critical pairs. None of its 4 proofs did (230k–529k).
+
 **Launch** (stage 1, 20:33): `cd /project/hintwork/exp4; nohup bash stage1.sh > stage1.out 2>&1 &`.
 
 **Resources.** exp3 holds 12 workers until about midnight. Stage 1 starts with Mace4 (cheap, 1–2 CPUs) and tries
