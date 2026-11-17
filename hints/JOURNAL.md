@@ -628,6 +628,6 @@ Written from 17 Nov 18:30 on. Experiments before that are in REPORT.md and in th
 | notes/2026-11-17-pg-sum-filter.md | does the sum-of-scores parental filter help? (200-goal testbed) | done: 52 against 29 at 0.269 |
 | notes/2026-11-17-pg-learned-dense.md | learned parental models on 10 numbers per rule | done: lose online (37–49) |
 | notes/2026-11-17-pg-pcat-enigma.md | Pcat on hashed ENIGMA features, as the paper (full and additive) | online tests running |
-| notes/2026-11-17-pg-ab-half1.md | the sum filter at scale: half1 from zero, 2 h | ends 18:54; +596 at 100 min, shrinking |
+| notes/2026-11-17-pg-ab-half1.md | the sum filter at scale: half1 from zero, 2 h | done: 18,987 against 18,410; PG default |
 | notes/2026-11-17-lemma-circularity.md | are lemma chains circular? are kNN lemmas from weaker theories? | done: no violations on 67k recorded proofs |
 

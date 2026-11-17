@@ -334,6 +334,12 @@ trained or tuned on it:
   (`hints/train_pool`, 8562). The loop then adds the holdout problems it
   solves itself, as a Veroff loop would.
 * Threshold and penalty were tuned on dev originals.
+* *Correction, 17 Nov:* the design was not quite clean. dev10, where the
+  first choices were made (kNN 30:100, requeue, the model's settings),
+  holds two whole holdout originals (aK1_to_aK2, a_of_aa: 380 problems)
+  and 66 moved late goals. The tuning set of 818 held 22 moved late
+  goals. The training data and hint pools were clean
+  (notes/2026-11-12-holdout.md).
 
 All runs use 20 processes in parallel on a 112-core machine.
 
@@ -763,8 +769,10 @@ from one long run. twee-e16 prints `HINTLOG`, the critical-pair count of
 each hint's first match. A run with stall limit G stops at the first gap
 of G without a new match; the proof counts if it came before that.
 
-**fam_long:** 60 problems, the first 30 goals of aK2_eq_aK3_d and of
-nil3_30 that the full-benchmark loop left unsolved. Each run gets 120
+**fam_long:** 60 problems, 30 goals each of aK2_eq_aK3_d and nil3_30
+that the full-benchmark loop left unsolved. *Corrected 17 Nov:* they are
+not the first 30 but those with the most solved goals among the 10
+before them, so the set favours lemmas. Each run gets 120
 abstract s (240k critical pairs), rm4t, 3 sibling lemmas plus 10
 subset-kNN lemmas, and kNN hints (median 144, at most 200).
 
@@ -4347,7 +4355,10 @@ took 1.23 s.
 abs/setcurve.py: PGA 11,467 / 18,529 / 18,912 at 10 / 60 / 100
 minutes, PGB 10,061 / 17,608 / 18,316 (notes/2026-11-17-pg-ab-half1.md).
 An earlier "9,458 against 8,986 at 10 minutes" was read before minute
-10. The additive model is under test on the 200 goals.
+10. **At 2 hours: PGA 18,987, PGB 18,410 (+577, three times the noise
+of identical runs).** The gain is front-loaded (+1,406 at 10 minutes)
+and flat over the last 20 minutes. PG at 0.25 is solve_new.sh's
+default from 19:00 (`PG=` turns it off). The additive model is under test on the 200 goals.
 
 ## 2c. Long runs: stall cutoff and checkpoints
 

@@ -31,11 +31,15 @@
 # -11% CPU, same output), CASCADE 5,20,80,320 and STATES (default --no-fresh-states: a goal's first deeper level
 # starts over with its full budget instead of resuming a fresh run's state; ORH 18,476 against ORG's 18,374 at
 # 2 hours, 4,792 runs an hour against 4,268; REPORT 2au). STATES= keeps the fresh runs' states.
+# (17 Nov 19:00) TWEE default twee-e48 and PG (default --pg-threshold 0.25): parental guidance, no critical pairs of
+# two rules whose source pairs' rule-model scores sum below logit 0.25 (half1 from zero, 2 hours: PGA 18,987 against
+# PGB's 18,410; REPORT 2av, notes/2026-11-17-pg-ab-half1.md). With PG= twee-e48 matches e44. The transfer keeps XTWEE.
 set -e
 H=$(cd "$(dirname "$0")" && pwd)
 NAMES=$1; CTX=$2; OUT=$3; J=${4:-4}; HOURS=${5:-1}
 M=${MODEL:-/project/hintwork/models/rm4t}
-TWEE=${TWEE:-/project/bin/twee-e44}
+TWEE=${TWEE:-/project/bin/twee-e48}
+PG=${PG---pg-threshold 0.25}
 CASCADE=${CASCADE:-5,20,80,320}
 STATES=${STATES---no-fresh-states}
 KNN=${KNN:-30}
@@ -67,7 +71,7 @@ MOD="--model --model-fixed $M.bin,$M.vocab --model-theory --lemmas 6 --lemma-knn
 python3 -u "$H/loop.py" "$NAMES" "$OUT" --init "$OUT.ctx" --start 1 --cascade "$CASCADE" --cascade-start -1 --retry-gap 3 \
   $MOD --twee "$TWEE" --keep-out -j "$J" --reserve 0 --pool original --wall-factor 15 --line-gaps 80,80 \
   --retry-hints 1.25 --fresh-first --far-retry --retry-knn --sync 60 --cascade-hours "$HOURS" --pass-every "$PASS" $ORDER $SCHED $STATES $LOOPARGS \
-  --args="--abstract-time 2000 --no-resume-requeue --no-eqhint-consider" > "$OUT.log" 2>&1 &
+  --args="--abstract-time 2000 --no-resume-requeue --no-eqhint-consider $PG" > "$OUT.log" 2>&1 &
 LOOP=$!
 until [ -f "$OUT/config.json" ] || ! kill -0 $LOOP 2>/dev/null; do sleep 2; done
 python3 "$H/transfer.py" live "$OUT" "$OUT.xfer" -j 2 --time 20 --src-lemmas 6 --every "$XEVERY" --set "$(realpath "$NAMES")" -- \
