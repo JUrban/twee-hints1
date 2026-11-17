@@ -1047,6 +1047,12 @@ class Loop:
             tm = [0.0, 0.0, 0.0, 0.0]   # the main thread's seconds: scheduling passes, submitting, waiting, results
             t_r = None
             retry, deep, far, light, last_full = [], [], [], False, -1e18
+            # --mix M: runs of three kinds, near retries (r), goals beyond the retry gaps (f: far, and goals
+            # never run) and deeper levels (d); each kind with waiting goals keeps M of the workers, the
+            # other slots go to the kind with the most proofs per run second over its last 300 runs
+            ycls = {c: collections.deque(maxlen=300) for c in 'rfd'}; rcls = {}; ncls = collections.Counter()
+            def yld(c):
+                return (sum(x[0] for x in ycls[c]) + 0.5) / (sum(x[1] for x in ycls[c]) + 5.0)
             while True:
                 if t_r is not None:
                     tm[3] += time.time() - t_r
@@ -1125,10 +1131,10 @@ class Loop:
                                       and (may_deepen(n, g) or n in hs) and not grown(n)
                                       and (n in hs or not a.head_only_from or att[n][1] + 1 < a.head_only_from))
                         far = []
-                        if SM and a.far_retry and len(running) + len(retry) + len(deep) < a.j:
+                        if SM and a.far_retry and (a.mix or len(running) + len(retry) + len(deep) < a.j):
                             far = sorted((-v, n) for n, v in cand.items()
                                          if (v < lmin or sc[n][2] > a.sched_max_lgap) and n not in uset)[:a.j]
-                        elif a.far_retry and len(running) + len(retry) + len(deep) < a.j:
+                        elif a.far_retry and (a.mix or len(running) + len(retry) + len(deep) < a.j):
                             # --far-retry: idle slots retry (fresh) the goals beyond the retry gaps too,
                             # nearest first, after everything else
                             far = heapq.nsmallest(a.j, ((g[n][1], gnum[n][1], n) for n in att
@@ -1136,8 +1142,18 @@ class Loop:
                                                         and not may_retry(n, g)))
                     tm[0] += time.time() - tq_; tq_ = time.time()
                     while len(running) < a.j and (retry or deep or far):
-                        if retry or (far and not deep):
-                            n = (retry or far).pop(0)[-1]; lev = 0
+                        if a.mix:
+                            cn_ = collections.Counter(rcls.values())
+                            av = [c for c, L in (('r', retry), ('f', far), ('d', deep)) if L
+                                  and (c != 'd' or cn_['d'] < a.j - a.reserve)]
+                            if not av:
+                                break
+                            low = [c for c in av if cn_[c] < a.mix * a.j]
+                            cl = min(low, key=lambda c: cn_[c]) if low else max(av, key=yld)
+                        else:
+                            cl = ('r' if retry else 'f') if retry or (far and not deep) else 'd'
+                        if cl != 'd':
+                            n = (retry if cl == 'r' else far).pop(0)[-1]; lev = 0
                             if light and (n not in att or n in busy or not (ctx(n) != att[n][0] or grown(n))):
                                 continue
                             att[n] = (ctx(n), 0)
@@ -1166,7 +1182,7 @@ class Loop:
                             b = T[lev] - T[lev - 1] if (a.p9loop or os.path.exists(sp)) else T[lev]
                             fut = ex.submit(self.run_one, n, self.hints_for(n, pools, None), rnd,
                                             b, not a.p9loop, a.cascade_cpu * b)
-                        running[fut] = (n, lev)
+                        running[fut] = (n, lev); rcls[fut] = cl; ncls[cl] += 1
                         if H and lev == 0:   # (its features, context and predicted success, for observe())
                             x_, c_ = H.feats(n)
                             startctx[n] = (c_, 1 / (1 + math.exp(-score(n))), x_)
@@ -1186,6 +1202,7 @@ class Loop:
                 for f in fin:
                     n0, lev = running.pop(f)
                     n, ok, dt, stats, hs = f.result()
+                    ycls[rcls.pop(f, 'r')].append((1 if ok else 0, dt))
                     done_n += 1
                     if H:
                         c_, p_, x_ = startctx.pop(n, (None, 0.0, None)) if lev == 0 else (None, 0.0, None)
@@ -1225,6 +1242,7 @@ class Loop:
                         print(f'  cascade: {done_n} runs, new={new}, {len(running)} running, '
                               f'{time.time()-t0:.0f}s' + (f', synced={nsync}' if a.sync else '')
                               + f', main s: pass {tm[0]:.0f} submit {tm[1]:.0f} wait {tm[2]:.0f} results {tm[3]:.0f}'
+                              + (', mix ' + ' '.join(f'{c} {ncls[c]} {3600*yld(c):.0f}/h' for c in 'rfd') if a.mix else '')
                               + (f', fresh {calib[2]}/{calib[1]} (predicted {calib[0]:.0f})' if H else ''),
                               file=sys.stderr, flush=True)
         msg = f'cascade: {done_n} runs new {new} total {len(self.solved)}/{len(self.names)} {time.time()-t0:.0f}s'
@@ -1487,6 +1505,11 @@ def make_parser():
     ap.add_argument('--pass-every', type=float, default=0, metavar='S',
                     help='--cascade: the full scheduling pass at most every S seconds, the lists it made used up '
                          'in between (from zero on 51,784 goals the pass took 75%% of the main thread)')
+    ap.add_argument('--mix', type=float, default=0,
+                    help='--cascade: near retries, goals beyond the retry gaps (also never run) and deeper levels '
+                         'each keep this share of the workers while they have waiting goals; the other slots go to '
+                         'the kind with the most proofs per run second lately (with --far-retry; from zero on '
+                         '51,784 goals the near retries took every slot and 12,998 goals never ran, REPORT 2as)')
     ap.add_argument('--far-retry', action='store_true',
                     help='--cascade: slots with nothing else to run retry goals beyond the retry gaps '
                          '(fresh at T0, nearest first) when their context or pool changed')

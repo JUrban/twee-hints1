@@ -3757,6 +3757,43 @@ curve above is the comparison.
   kNN picks over an index of 20k proofs. The main thread waits 40% of
   the time, so the workers are mostly the limit now.
 
+**Z1 at 2 hours (stopped at 126 minutes, 03:02).** Counts by proof-file
+times at the stop. Some files were rewritten later, so the 20-minute
+count read then (22,577) is now 22,165.
+
+| minutes | 10 | 20 | 30 | 45 | 60 | 90 | 120 | 126 |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| Z0 | 6,215 | 17,435 | 22,979 | 28,909 | 32,475 | | | |
+| **Z1** | 7,942 | 22,165 | 28,996 | 32,664 | 34,181 | 35,514 | 36,552 | **36,760** |
+
+| Z1, 15-minute windows | 0–15 | 15–30 | 30–45 | 45–60 | 60–75 | 75–90 | 90–105 | 105–120 |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| loop runs | 14,706 | 8,660 | 2,733 | 1,818 | 1,469 | 1,626 | 1,565 | 1,874 |
+| proved by them | 14,469 | 8,357 | 2,059 | 959 | 573 | 434 | 435 | 415 |
+| busy workers (of 12) | 8.1 | 9.4 | 11.4 | 11.7 | 11.7 | 11.9 | 11.8 | 11.8 |
+
+* Production (loops/UL, days of runs) has 44,841. Z1 found no proof
+  production lacks, and production has 8,116 that Z1 has not.
+* **Every one of Z1's 34,579 runs was at the first level (5 s).**
+* **12,998 of its 15,062 unsolved goals never ran at all.** The other
+  2,064 were retried, many of them 6 or more times.
+* **6,080 of production's 8,116 extra proofs are on goals Z1 never
+  ran.** By production's rounds: 2,799 from its cascade, 690 from
+  round 0 (plain twee and the first lemma runs), the rest from rounds
+  1–4.
+* **The cause is the dispatch order.** A near retry is a goal at most
+  `--retry-gap` places (or 80 proof lines) after a proven sibling,
+  with a changed context. Near retries go first, then deeper levels.
+  Goals beyond the gaps, including every goal with no proven goal
+  below it, run only on idle slots (`--far-retry`). On 51,784 goals,
+  some context changes all the time, so there is always a near retry
+  waiting and no slot is ever idle.
+* The near retries still paid: 22–27% of them proved their goal in
+  the second hour. But the goals beyond the gaps never got one run.
+* **Replays have the same flaw on a small scale.** PE1 (rp3, 15
+  minutes) left 438 of its 489 unsolved goals never run, and made 26
+  deeper runs out of 1,151.
+
 ## 2c. Long runs: stall cutoff and checkpoints
 
 * `--eqhint-stall N` gives up when no new rule has matched a hint for N
