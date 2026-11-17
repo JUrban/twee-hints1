@@ -3975,6 +3975,88 @@ proof of rp3's originals left out, 4 workers, 1 hour, 2aq):
   with `--mix 0.1`, which keeps one worker each at 4 workers and two
   at 12. `SCHED` turns the scheduler back on.
 
+## 2au. The tail: which goals get the longer runs (17 Nov, from 08:40)
+
+**`--fail-reset` (FR60)** gives no gain. A goal's failure count restarts
+when the nearest proven goal below it changes (rp3 from zero, 4 workers,
+1 hour, otherwise as FO60):
+
+| run | 15 min | 30 min | 45 min | 60 min | 80 s runs (proved) |
+|---|---:|---:|---:|---:|---:|
+| FO60, `--fail-order` | 828 | 872 | 888 | 891 | 93 (42) |
+| FR60, + `--fail-reset` | 835 | 855 | 859 | 886 | 53 (32) |
+
+It stays off.
+
+**Z4 stopped at 3 h 56 min** with 38,044 goals (60 min 35,511, 2 h 37,713,
+3 h 37,962, 3.5 h 38,017). It was adding about 120 proofs an hour.
+* Every goal but 782 had had a 5 s run. Only 545 had an 80 s run (112
+  proved) and 25 a 320 s run (4).
+* In its last 3,261 runs, 5 s runs proved 48 of 3,012 (19,778 s) and
+  80 s runs 30 of 240 (26,098 s).
+* Its 14 proofs that production lacked are merged into loops/UL (44,858).
+
+**What production's extra goals needed.** Production has proved 6,818
+goals Z4 has not. They took much longer in production, even with
+production's richer context:
+
+| goals | ≤ 0.5 s | ≤ 2 s | ≤ 5 s | ≤ 20 s | ≤ 80 s | ≤ 320 s | more |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| proved by production only | 443 | 330 | 1,265 | 2,342 | 2,011 | 384 | 43 |
+| proved by both | 29,897 | 4,684 | 1,646 | 1,229 | 515 | 47 | 8 |
+
+* 70% of the gap took more than 5 s. So the tail is a question of which
+  goals get the longer runs. Giving every one of Z4's 13,740 unsolved
+  goals an 80 s run would take about 25 hours on 12 workers.
+
+**The failed 5 s run's hint statistics do not predict an 80 s success.**
+The statistics are hints, live, matched, lastmatch, maxgap, deferred and
+rules, as raw values and as ratios.
+* On production's 6,351 80 s runs every feature has an AUC of 0.43–0.55.
+  On Z4's 544 it is 0.42–0.58.
+
+**The original's recent proof rate does predict success.** It is computed
+online, from earlier runs only, smoothed towards the overall rate with
+weight 5:
+
+| runs | AUC | top fifth by the rate proved | the rest proved |
+|---|---:|---:|---:|
+| production, 5 s (38,182) | 0.73 | 25% | 8% |
+| production, 80 s (7,659) | 0.66 | 29% | 12% |
+| production, 320 s (965) | 0.57 | 20% | 14% |
+| Z4 after 30,000 runs, 5 s (14,777, all first runs) | 0.84 | 50% | 10% |
+| Z4 after 30,000 runs, 80 s (494) | 0.70 | 35% | 14% |
+
+* Weighting older runs by 0.9 per newer run of the same original (about
+  its last 10 runs) raises the 5 s AUC to 0.85 (Z4) and 0.82
+  (production).
+* For the 80 s level, the original's 80 s rate does better on production
+  (0.67) and its 5 s rate on Z4 (0.68). A blend, with the 5 s rate as
+  the prior of the 80 s one, gives 0.60 and 0.66.
+* Z4 never used this signal. Without the scheduler, both queues sort
+  by failure count and distance only.
+
+**`loop.py --orig-rate`.** Goals of the originals whose recent runs proved
+most go first:
+* within `--fail-order`'s failure counts, before near-or-far and
+  distance;
+* within each deeper level.
+
+Details:
+* The rates are kept per original and kind (5 s, or deeper), with
+  weight 0.9 per newer run. The deeper rate's prior is the original's
+  5 s rate times the overall ratio.
+* They are used in bins of 0.1, with everything above 0.9 in one bin.
+  From zero, when nearly every run proves, the order stays nearest
+  first. The learned scheduler's per-original ranking starved originals
+  there (2aq).
+
+**The A/B test** is ORA (control, `solve_new.sh`'s defaults) against ORB
+(`--orig-rate`), both from zero (abs/or_test.sh, from 09:02). They run
+on sets/half1: 64 of the 129 originals, chosen at random with seed 17,
+25,937 goals. Z4 proved 18,887 of them and production 22,291. Each arm
+has 6 workers, a transfer every 5 minutes, and 2 hours. Results follow.
+
 ## 2c. Long runs: stall cutoff and checkpoints
 
 * `--eqhint-stall N` gives up when no new rule has matched a hint for N

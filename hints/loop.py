@@ -937,6 +937,19 @@ class Loop:
         running = {}   # future -> (name, level)
         nf = collections.Counter()   # goal -> its failed fresh (T0) runs in this round (--fail-order)
         nfb = {}   # --fail-reset: goal -> its places after the nearest proven goal below at its last failure
+        # --orig-rate: (original, fresh run?) -> its runs' proofs and runs, each older run weighing 0.9 per
+        # newer one of the same original and kind (about its last 10), and the last 500 of each kind overall
+        ors = collections.defaultdict(float); orc = collections.defaultdict(float)
+        org = {True: collections.deque(maxlen=500), False: collections.deque(maxlen=500)}
+        origs = sorted({v[0] for v in gnum.values()})
+        ob0, obd = {}, {}
+        def orate(o):
+            """the original's estimated proof rates: a fresh run, a deeper level (the latter's prior is the
+            former scaled by the overall ratio)"""
+            G0 = org[True]; p0 = (sum(G0) + 1) / (len(G0) + 10)
+            GD = org[False]; pd = (sum(GD) + 1) / (len(GD) + 10)
+            v0 = (ors[(o, True)] + 5 * p0) / (orc[(o, True)] + 5)
+            return v0, (ors[(o, False)] + 5 * v0 * pd / p0) / (orc[(o, False)] + 5)
         rdir = os.path.join(self.dir, 'r%d' % rnd); os.makedirs(rdir, exist_ok=True)
         if a.cascade_continue and os.path.exists(os.path.join(rdir, 'results.tsv')):
             # a restarted round: the levels this round already tried (in the current context)
@@ -1081,6 +1094,12 @@ class Loop:
                     if not light:
                         last_full = tq_; krb = 0.0
                         g = gaps()
+                        if a.orig_rate:
+                            # (in bins of 0.1, all above 0.9 in one: from zero, when nearly every run proves,
+                            # the order stays nearest first; the learned scheduler's per-original ranking
+                            # starved originals there, 2aq)
+                            for o in origs:
+                                v0, vd = orate(o); ob0[o] = -min(9, int(10 * v0)); obd[o] = -min(9, int(10 * vd))
                         if RK and (time.time() - kgen[1] >= a.knn_refresh or len(self.solved) - kgen[2] >= 300):
                             t_ = time.time()
                             self.lemma_index = self.make_lemma_index()
@@ -1118,9 +1137,9 @@ class Loop:
                             # far, then nearest. In Z1's second hour a goal's first run proved 51% (365 proofs
                             # per run hour), one that had failed before 4-6% (17-29 an hour), on 61% of the
                             # workers' time; Z2 after 30 min 88% (1,749 an hour) against 7-17% (52-106)
-                            nfg = nf.get; fr = a.fail_reset; nbg = nfb.get
+                            nfg = nf.get; fr = a.fail_reset; nbg = nfb.get; obg = ob0.get
                             retry = sorted((nfg(n, 0) if not fr or nbg(n) == g[n][0] else 0,
-                                            0 if may_retry(n, g) else 1, g[n][1], gnum[n][1], n) for n in att
+                                            obg(gnum[n][0], 0), 0 if may_retry(n, g) else 1, g[n][1], gnum[n][1], n) for n in att
                                            if n not in busy and (ctx(n) != att[n][0] or grown(n))
                                            and (a.far_retry or may_retry(n, g)))
                         else:
@@ -1149,7 +1168,7 @@ class Loop:
                         # 80 s resume of another goal, ~20%; at 06:58 2,185 goals waited for one)
                         hof = a.head_only_from or len(T)
                         deep = sorted((int(not (n in hs and att[n][1] + 1 < hof)), att[n][1] + 1,
-                                       deep_running[gnum[n][0]], g[n][1], gnum[n][1], n)
+                                       obd.get(gnum[n][0], 0), deep_running[gnum[n][0]], g[n][1], gnum[n][1], n)
                                       for n in att
                                       if n not in busy and ctx(n) == att[n][0] and att[n][1] + 1 < len(T)
                                       and (may_deepen(n, g) or n in hs) and not grown(n)
@@ -1196,7 +1215,7 @@ class Loop:
                         else:
                             if sum(1 for _, l in running.values() if l > 0) >= a.j - a.reserve:
                                 break
-                            _, lev, _, _, _, n = deep.pop(0)
+                            x_ = deep.pop(0); lev, n = x_[1], x_[-1]
                             if any(m == n for m, _ in running.values()):
                                 continue
                             if light and (n not in att or att[n][1] + 1 != lev or ctx(n) != att[n][0] or grown(n)):
@@ -1229,6 +1248,10 @@ class Loop:
                     n0, lev = running.pop(f)
                     n, ok, dt, stats, hs = f.result()
                     ycls[rcls.pop(f, 'r')].append((1 if ok else 0, dt)); rt0.pop(f, None)
+                    if a.orig_rate:
+                        k_ = (orig_of(n), lev == 0)
+                        ors[k_] = ors[k_] * 0.9 + (1 if ok else 0); orc[k_] = orc[k_] * 0.9 + 1
+                        org[lev == 0].append(1 if ok else 0)
                     if lev == 0 and not ok:
                         if a.fail_reset:
                             # (counted since the nearest proven goal below last changed)
@@ -1548,6 +1571,11 @@ def make_parser():
                          'failed fresh runs in the round first, then those within the retry gaps, then the nearest '
                          '(with --far-retry also the goals beyond the gaps; a first run proved 51%% in Z1\'s second '
                          'hour, a repeat 4-6%%, REPORT 2as)')
+    ap.add_argument('--orig-rate', action='store_true',
+                    help='--cascade: within --fail-order\'s failure counts, and within each deeper level, goals of '
+                         'originals whose recent runs of that kind proved most go first (in bins of 0.1; Z4 after '
+                         '30,000 runs: the top fifth of fresh runs by this rate proved 50%%, the rest 10%%, AUC 0.84; '
+                         'production\'s 80 s resumes 29%% against 12%%)')
     ap.add_argument('--fail-reset', action='store_true',
                     help='--fail-order: a goal\'s failures count from the last change of the nearest proven goal '
                          'below it (Z1 after 30 min: a repeat after such a change proved 13.1%%, 62 an hour, '
