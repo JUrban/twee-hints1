@@ -524,10 +524,12 @@ class Loop:
         if hints and a.stall:
             cmd += ['--eqhint-stall', str(a.stall)]
         spath = os.path.join(self.dir, 'states', name + '.bin')
-        if resume:   # True: continue the saved state; 'fresh': start over but save (replaces the old state)
-            if resume != 'fresh' and os.path.exists(spath):
+        if resume:   # True: continue the saved state; 'fresh': start over but save (replaces the old state);
+            # 'nosave': start over and keep no state (an older one is removed: it is of an older context)
+            if resume not in ('fresh', 'nosave') and os.path.exists(spath):
                 cmd += ['--load-state', spath]
-            cmd += ['--dump-state', spath + '.tmp']
+            if resume != 'nosave':
+                cmd += ['--dump-state', spath + '.tmp']
         if hints:
             hpath = os.path.join(self.dir, 'tmp', tag + '.hints')
             with open(hpath, 'w') as f:
@@ -579,7 +581,7 @@ class Loop:
                 with open(ap, 'w') as fh:
                     fh.write(str(n0 + 1))
         if resume:
-            if ok:
+            if ok or resume == 'nosave':
                 for p in (spath, spath + '.tmp'):
                     if os.path.exists(p):
                         os.unlink(p)
@@ -1210,8 +1212,13 @@ class Loop:
                             # fresh in the new context; its state replaces any older one, so deepening
                             # continues this search
                             # (--p9loop: no states; the goal's matcher lemmas carry over instead)
+                            # (--lean-states: a goal that may not deepen now keeps no state; a 10 MB state
+                            # took 20-30% of a failing 5 s run's wall time, and 97% of Z4's 13,427 were never
+                            # resumed; were it to deepen later, its next level starts over with the full budget)
+                            keep = not a.lean_states or len(T) < 2 or may_deepen(n, g) or n in hs
                             fut = ex.submit(self.run_one, n, self.hints_for(n, pools, None), rnd,
-                                            T[0], False if a.p9loop else 'fresh', a.cascade_cpu * T[0])
+                                            T[0], False if a.p9loop else ('fresh' if keep else 'nosave'),
+                                            a.cascade_cpu * T[0])
                         else:
                             if sum(1 for _, l in running.values() if l > 0) >= a.j - a.reserve:
                                 break
@@ -1571,6 +1578,9 @@ def make_parser():
                          'failed fresh runs in the round first, then those within the retry gaps, then the nearest '
                          '(with --far-retry also the goals beyond the gaps; a first run proved 51%% in Z1\'s second '
                          'hour, a repeat 4-6%%, REPORT 2as)')
+    ap.add_argument('--lean-states', action='store_true',
+                    help='--cascade: a fresh run of a goal that may not deepen now (beyond --frontier and the '
+                         'line gap, not a head) keeps no state (with twee-e43, which keeps none for a proved goal)')
     ap.add_argument('--orig-rate', action='store_true',
                     help='--cascade: within --fail-order\'s failure counts, and within each deeper level, goals of '
                          'originals whose recent runs of that kind proved most go first (in bins of 0.1; Z4 after '

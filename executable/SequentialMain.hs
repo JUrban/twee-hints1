@@ -217,7 +217,7 @@ parseMainFlags = do
     expert $
     inGroup "Debugging options" $
     flag "dump-state"
-      ["Dump prover state to this file on termination (off by default)."]
+      ["Dump prover state to this file on termination, unless the problem was solved (off by default)."]
       Nothing (Just <$> argFile)
   flags_load_state <-
     expert $
@@ -1458,10 +1458,12 @@ runTwee globals (TSTPFlags tstp) horn precedence config0 flags@MainFlags{..} lat
   line
 
   cpuEnd <- getCPUTime
+  -- (not when the goal is proved: nothing resumes a solved state, and on AIM goals the dump
+  -- took 20-30% of a short run's time and 4x its peak memory, REPORT 2au)
   case flags_dump_state of
-    Nothing -> return ()
-    Just dumpStateFile ->
+    Just dumpStateFile | not (solved state) ->
       BS.writeFile dumpStateFile (encode state)
+    _ -> return ()
 
   when (cfg_max_cpu config > 0 && fromIntegral cpuEnd / 1e12 >= cfg_max_cpu config) $ putStrLn "CPULIMIT"
   putStrLn $ "WORK considered=" ++ show (st_considered state) ++ " rules=" ++ show (fromIntegral (st_next_active state) :: Int)
