@@ -3793,6 +3793,81 @@ count read then (22,577) is now 22,165.
 * **Replays have the same flaw on a small scale.** PE1 (rp3, 15
   minutes) left 438 of its 489 unsolved goals never run, and made 26
   deeper runs out of 1,151.
+* **So does production.** 4,114 of its 6,943 unsolved goals have not
+  run in round 5, its cascade round of several days. 680 goals ran
+  there 10 or more times. ul37's last 2.5 hours on 4 workers gave 4
+  proofs, mostly from 320 s resumes.
+
+## 2at. Repeats cost most of the time: `--mix` and `--fail-order` (17 Nov, from 03:10)
+
+**`--mix M`** (f065848, 187832f) splits the runs into three kinds:
+
+* near retries;
+* far goals: those beyond the retry gaps, including the never-run ones;
+* deeper levels.
+
+Each kind that has goals waiting keeps M of the workers. The other
+slots go to the kind with the most proofs per run second over its
+last 300 runs. The seconds its running jobs have taken so far count
+as spent without a proof. Without that, a 320 s resume, which takes
+about 25 wall minutes, kept the deeper levels first until one ended
+(seen in production).
+
+| run | 4 min | 10 min | 15 min |
+|---|---:|---:|---:|
+| PE1 (rp3 from zero, 4 workers) | 733 | 809 | 830 |
+| MX1, `--mix 0.1` (one worker each) | 734 | 807 | 831 |
+| MX3, `--mix 0.5` (two each) | 717 | 789 | 824 |
+
+**Z2** (`abs/z2_test.sh`): Z1 plus `--mix 0.1`, which keeps 2 of the 12
+workers each for far goals and deeper levels.
+
+| minutes | 10 | 20 | 30 | 45 | 60 |
+|---|---:|---:|---:|---:|---:|
+| Z1 | 7,942 | 22,165 | 28,996 | 32,664 | 34,181 |
+| Z2 | 5,724 | 18,540 | 25,967 | 31,226 | 33,539 |
+
+Proofs per worker-hour by kind, from Z2's status lines:
+
+| minutes | 25 | 30 | 50 | 60 |
+|---|---:|---:|---:|---:|
+| near retries | 4,147 | 1,994 | 1,189 | 517 |
+| far goals | 431 | 276 | 118 | 127 |
+| deeper levels | 15 | 15 | 15 | 15 |
+
+* At 5 s, far goals pay less than near retries for the whole first
+  hour, so the reserved slots cost. Z2 was stopped at 65 minutes, 2%
+  behind Z1.
+
+**What the time goes to.** In Z1's second hour the first-level runs,
+by how often the goal had failed before in the round:
+
+| earlier failures | runs | proved | | proofs per run hour |
+|---|---:|---:|---:|---:|
+| 0 | 3,516 | 1,800 | 51% | 365 |
+| 1 | 1,270 | 78 | 6% | 29 |
+| 2 | 882 | 35 | 4% | 19 |
+| 3–8+ | 1,443 | 63 | 4% | 17–32 |
+
+* **A goal's first run pays 12–20 times as well as a repeat after a
+  failure, and the repeats took 61% of the workers' time.**
+* A repeat comes after a change in the goal's context: a nearer
+  sibling proved, or the original's hint pool grown by 25%. On a large
+  set something changes all the time.
+* Z2 after 30 minutes: first runs 4,760/5,408 (1,749 an hour) against
+  7–17% (52–106 an hour) for repeats. LVZ (rp3) after 15 minutes: 36
+  first runs against 316 repeats.
+
+**`--fail-order`** (3db0e8d): one list holds every goal with a new
+context, near and far (with `--far-retry`). The goals with the fewest
+failed fresh runs in the round go first, then those within the retry
+gaps, then the nearest. It is for runs without the learned scheduler,
+whose model ranks retries itself. It is used with `--mix`, which
+keeps a share for the deeper levels.
+
+* rp3 from zero, 2 workers, 2.4 minutes: 617 proved with `--fail-order
+  --mix 0.25`, against 383 with `--mix 0.25` alone. At most 2 runs per
+  goal, against 6.
 
 ## 2c. Long runs: stall cutoff and checkpoints
 

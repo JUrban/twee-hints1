@@ -1050,6 +1050,7 @@ class Loop:
             tm = [0.0, 0.0, 0.0, 0.0]   # the main thread's seconds: scheduling passes, submitting, waiting, results
             t_r = None
             retry, deep, far, light, last_full = [], [], [], False, -1e18
+            pdur = 0.0   # the last full pass's seconds (without a kNN index rebuild)
             # --mix M: runs of three kinds, near retries (r), goals beyond the retry gaps (f: far, and goals
             # never run) and deeper levels (d); each kind with waiting goals keeps M of the workers, the
             # other slots go to the kind with the most proofs per run second over its last 300 runs; the
@@ -1072,14 +1073,17 @@ class Loop:
                     # --pass-every S: the full pass (every waiting goal: gaps, contexts, pools; on 51,784 goals
                     # from zero 134 of the main thread's 180 s) at most every S seconds; between them the
                     # lists it made are used up, each goal checked again when it is taken
-                    light = bool(a.pass_every and (retry or deep or far) and tq_ - last_full < a.pass_every)
+                    # (and at most every 8 times the last full pass's length: --fail-order's list of every
+                    # waiting goal took 0.2-0.35 s a pass, Z3 kept 5-7 of its 12 workers busy, REPORT 2at)
+                    light = bool(a.pass_every and (retry or deep or far)
+                                 and tq_ - last_full < max(a.pass_every, 8 * pdur))
                     if not light:
-                        last_full = tq_
+                        last_full = tq_; krb = 0.0
                         g = gaps()
                         if RK and (time.time() - kgen[1] >= a.knn_refresh or len(self.solved) - kgen[2] >= 300):
                             t_ = time.time()
                             self.lemma_index = self.make_lemma_index()
-                            kgen[:] = [kgen[0] + 1, time.time(), len(self.solved)]
+                            kgen[:] = [kgen[0] + 1, time.time(), len(self.solved)]; krb = time.time() - t_
                             print(f'  cascade: --retry-knn: kNN index rebuilt ({len(self.solved)} proofs, '
                                   f'{time.time()-t_:.0f}s)', flush=True)
                         if SM and RK:
@@ -1113,7 +1117,8 @@ class Loop:
                             # far, then nearest. In Z1's second hour a goal's first run proved 51% (365 proofs
                             # per run hour), one that had failed before 4-6% (17-29 an hour), on 61% of the
                             # workers' time; Z2 after 30 min 88% (1,749 an hour) against 7-17% (52-106)
-                            retry = sorted((nf[n], 0 if may_retry(n, g) else 1, g[n][1], gnum[n][1], n) for n in att
+                            nfg = nf.get
+                            retry = sorted((nfg(n, 0), 0 if may_retry(n, g) else 1, g[n][1], gnum[n][1], n) for n in att
                                            if n not in busy and (ctx(n) != att[n][0] or grown(n))
                                            and (a.far_retry or may_retry(n, g)))
                         else:
@@ -1157,6 +1162,8 @@ class Loop:
                             far = heapq.nsmallest(a.j, ((g[n][1], gnum[n][1], n) for n in att
                                                         if n not in busy and (ctx(n) != att[n][0] or grown(n))
                                                         and not may_retry(n, g)))
+                    if not light:
+                        pdur = max(0.0, time.time() - tq_ - krb)
                     tm[0] += time.time() - tq_; tq_ = time.time()
                     while len(running) < a.j and (retry or deep or far):
                         if a.mix:
