@@ -117,7 +117,7 @@ collapse, 12 force a group and 23 are kept (17 strengthenings, 6 weaker goals).
   the sketch again. If it still proves, the rung is that handful of conjectures, each a subgoal. If it does not,
   combine the plausible instances of several moves.
 
-**Launch** (stage 1, 20:35): `cd /project/hintwork/exp4; nohup bash stage1.sh > stage1.out 2>&1 &`.
+**Launch** (stage 1, 20:33): `cd /project/hintwork/exp4; nohup bash stage1.sh > stage1.out 2>&1 &`.
 
 **Resources.** exp3 holds 12 workers until about midnight. Stage 1 starts with Mace4 (cheap, 1–2 CPUs) and tries
 single goals. The sketch runs wait for free CPUs.
