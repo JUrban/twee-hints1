@@ -9,7 +9,7 @@ the proofs it finds to the pool.
 usage: loop.py SET DIR [--rounds N] [--timeout S] [-j N] [--twee BIN]
                [--args "..."] [--pool original|all] [--aux]
 """
-import argparse, collections, json, math, os, random, re, subprocess, sys, time
+import argparse, collections, heapq, json, math, os, random, re, subprocess, sys, time
 from concurrent.futures import ThreadPoolExecutor, as_completed, wait, FIRST_COMPLETED
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import hintlib
@@ -864,6 +864,11 @@ class Loop:
         for o in byo:
             byo[o].sort(key=lambda n: lemmas.split(n)[1])
         srt = {}   # original -> sorted proven goal numbers (dropped when a proof arrives)
+        # ctx() runs for every waiting goal several times in every pass (Z0, 51,784 goals from zero: 43M
+        # calls, most of the dispatcher's time, 6 of 12 workers idle), so it is cached per original and
+        # dropped with srt
+        ctxc = {}   # original -> {(name, after): ctx}
+        gnum = {n: lemmas.split(n) for n in self.names if "__goal_" in n}   # name -> (original, goal number)
         def heads():
             hs = set()
             for L in byo.values():
@@ -876,7 +881,15 @@ class Loop:
                     hs.add(L[0])
             return hs
         def ctx(n, after=None):
-            o, k = lemmas.split(n)
+            o, k = gnum[n] if n in gnum else lemmas.split(n)
+            c_ = ctxc.get(o)
+            if c_ is None:
+                c_ = ctxc[o] = {}
+            v_ = c_.get((n, after))
+            if v_ is None:
+                v_ = c_[(n, after)] = ctx_(o, k, after)
+            return v_
+        def ctx_(o, k, after):
             if o not in srt:
                 srt[o] = sorted(self.lemma_src.get(o, ()))
             pr = srt[o]
@@ -1006,7 +1019,7 @@ class Loop:
             pools[key] = [h for h, _ in cnt[key].most_common()]
             o, k = lemmas.split(n)
             self.lemma_src[o] = self.lemma_src.get(o, set()) | {k}
-            srt.pop(o, None)
+            srt.pop(o, None); ctxc.pop(o, None)
         # --sync: proofs that other processes (climb.py --live, merge.py) append to solved.tsv
         # after writing their hints file join the pools and lemmas as if found here
         sync_f = open(os.path.join(self.dir, 'solved.tsv'), 'rb')
@@ -1069,7 +1082,7 @@ class Loop:
                         retry = sorted((-v, n) for n, v in cand.items()
                                        if v >= lmin and sc[n][2] <= a.sched_max_lgap)
                     else:
-                        retry = sorted((g[n][1], lemmas.split(n)[1], n) for n in att
+                        retry = sorted((g[n][1], gnum[n][1], n) for n in att
                                        if n not in busy and (ctx(n) != att[n][0] or grown(n)) and may_retry(n, g))
                     uset = set()
                     if SM and a.sweep_first:
@@ -1077,7 +1090,7 @@ class Loop:
                         # originals. The scheduler's model was trained on retries; from zero it ranked one
                         # original's goals first and starved the others (LZ4, 16 Nov: 427 runs, all of
                         # a_of_aa, 232 proofs at 10 min against 806 without the scheduler)
-                        un = [n for _, _, n in sorted((lemmas.split(n)[1], orig_of(n), n) for n in att
+                        un = [n for _, _, n in sorted((gnum[n][1], gnum[n][0], n) for n in att
                                                       if n not in busy and att[n] == (None, -1))]
                         if un:
                             uset = set(un)
@@ -1094,7 +1107,7 @@ class Loop:
                     # 80 s resume of another goal, ~20%; at 06:58 2,185 goals waited for one)
                     hof = a.head_only_from or len(T)
                     deep = sorted((int(not (n in hs and att[n][1] + 1 < hof)), att[n][1] + 1,
-                                   deep_running[orig_of(n)], g[n][1], lemmas.split(n)[1], n)
+                                   deep_running[gnum[n][0]], g[n][1], gnum[n][1], n)
                                   for n in att
                                   if n not in busy and ctx(n) == att[n][0] and att[n][1] + 1 < len(T)
                                   and (may_deepen(n, g) or n in hs) and not grown(n)
@@ -1106,9 +1119,9 @@ class Loop:
                     elif a.far_retry and len(running) + len(retry) + len(deep) < a.j:
                         # --far-retry: idle slots retry (fresh) the goals beyond the retry gaps too,
                         # nearest first, after everything else
-                        far = sorted((g[n][1], lemmas.split(n)[1], n) for n in att
-                                     if n not in busy and (ctx(n) != att[n][0] or grown(n))
-                                     and not may_retry(n, g))[:a.j]
+                        far = heapq.nsmallest(a.j, ((g[n][1], gnum[n][1], n) for n in att
+                                                    if n not in busy and (ctx(n) != att[n][0] or grown(n))
+                                                    and not may_retry(n, g)))
                     while len(running) < a.j and (retry or deep or far):
                         if retry or (far and not deep):
                             n = (retry or far).pop(0)[-1]; lev = 0
