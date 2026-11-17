@@ -4209,6 +4209,44 @@ On the 203 captured runs (29 proved, 174 failed) against e43:
 * 3 searches diverge slightly. The same goals prove.
 * Proved 29 against 29; CPU 851 s against 960 s (**−11%**).
 
+With e44, at `--eqhint-factor 1`, skipping every hint lookup after the
+fingerprint saves 0.05 s (3.72 against 3.67 s), so lookups cost about
+1%. Larger GC allocation areas are slower: by default 4.82 s, with
+`-A16m` 5.21 s, with `-A64m` 5.24 s, all with the same output.
+
+**A cost-centre profile** (`ghc-prof` installed by the user; a profiling
+build with `-fprof-auto-top`, kept outside the repo). Three of the
+failing goals, each with and without hints. Times are inherited
+shares of the run; profiling makes it about 5× slower, with the same
+search.
+
+| goal | total s, hinted / unhinted | new pairs (`indexedOverlaps`) | `simplify`, all callers | joining selected pairs | rule model | hint renormalisation |
+|---|---:|---:|---:|---:|---:|---:|
+| aK2_eq_aK3_i 233 | 26.9 / 18.2 | 54% / 45% | 34%, in pair generation alone | 10% / 18% | 6% / 11% | 1.8% / 0 |
+| Ka1_eq_Ka2 297 | 37.4 / 27.3 | 58% / 55% | 48% / 44% | 9% / 14% | 4% / 7% | 1.4% / 0 |
+| mbol_to_nil3 371 | 24.6 / 15.8 | 58% / 52% | 46% / 39% | 8% / 15% | 3% / 8% | 2.4% / 0 |
+
+* Most of a run goes into making the critical pairs of each new rule.
+  Above all that is normalising both sides of each pair before it is
+  scored and queued.
+  * In the first goal's hinted run, 290,299 pairs were made in 5
+    abstract s. Only 10,000 pairs are ever taken from the queue.
+  * Hint matching needs these normal forms, since both hints and pairs
+    are matched in normal form. So normalisation cannot simply be
+    skipped.
+* Hinted runs make fewer rules but more pairs, because hinted rules
+  overlap more. That is the 1.7 s difference at factor 1, not the
+  hints' bookkeeping.
+* A `simplify` call averages 1.32 passes and about 10 rule-index
+  lookups.
+  * Skipping the rebuild of a term with no reducible subterm gives
+    the same output on all 200 goals. It is 4.6% slower (864 against
+    826 s), because the lookups are the cost, not the rebuild.
+    Reverted.
+  * Skipping, in later passes, the subterms an earlier pass found
+    irreducible would cut about 17% of the lookups, about 6% of a
+    run. Not done.
+
 ## 2c. Long runs: stall cutoff and checkpoints
 
 * `--eqhint-stall N` gives up when no new rule has matched a hint for N
