@@ -3903,6 +3903,27 @@ keeps a share for the deeper levels.
 | busy workers, Z4 | 6.8 | 7.3 | 8.1 | 8.6 | 12.7 | 6.8 |
 
 * **Twice Z1's count at 10 minutes, 3% more at 30.**
+
+| minutes | 45 | 60 | 75 | 90 | 105 | 120 |
+|---|---:|---:|---:|---:|---:|---:|
+| Z1 | 32,664 | 34,181 | 34,974 | 35,514 | 36,036 | 36,552 |
+| **Z4** | 33,569 | 35,511 | 36,675 | 37,328 | 37,556 | **37,713** |
+| Z4's runs in the 15 minutes before | | | 2,043 | 1,899 | 1,569 | 1,471 |
+| proved by them | | | 822 | 518 | 182 | 122 |
+
+* **Z4 reaches Z1's 2-hour count at about 84 minutes, and has 1,161
+  more at 2 hours.**
+* Its rate then falls fast: 122 proofs in the last quarter-hour,
+  against Z1's 415. At equal counts Z4 does better (518 per quarter-hour
+  at 36.7k, Z1 415 at 36.5k), but by 90 minutes it has used up the
+  goals that are easy next to a proof.
+* All of Z4's second-hour first-level runs were first runs: 1,621 of
+  6,895 proved (168 an hour). Most were goals beyond the gaps, which
+  prove 8–12% of the time now. 7,189 goals were still unrun at 2
+  hours.
+* The deeper levels made 164 runs in 2 hours, and 54 of them (34%)
+  proved at the 80 s level. That is 15 proofs per worker-hour, against
+  33 for the first-level runs at 2 hours.
 * In the first 30 minutes 25,250 of Z4's 25,527 runs proved their goal,
   yet 21,646 goals had not run at all. In this phase every run is a
   proof, so the limits are how fast one Python process hands out runs

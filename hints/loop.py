@@ -936,6 +936,7 @@ class Loop:
                for n in self.names if n not in self.solved}
         running = {}   # future -> (name, level)
         nf = collections.Counter()   # goal -> its failed fresh (T0) runs in this round (--fail-order)
+        nfb = {}   # --fail-reset: goal -> its places after the nearest proven goal below at its last failure
         rdir = os.path.join(self.dir, 'r%d' % rnd); os.makedirs(rdir, exist_ok=True)
         if a.cascade_continue and os.path.exists(os.path.join(rdir, 'results.tsv')):
             # a restarted round: the levels this round already tried (in the current context)
@@ -1117,8 +1118,9 @@ class Loop:
                             # far, then nearest. In Z1's second hour a goal's first run proved 51% (365 proofs
                             # per run hour), one that had failed before 4-6% (17-29 an hour), on 61% of the
                             # workers' time; Z2 after 30 min 88% (1,749 an hour) against 7-17% (52-106)
-                            nfg = nf.get
-                            retry = sorted((nfg(n, 0), 0 if may_retry(n, g) else 1, g[n][1], gnum[n][1], n) for n in att
+                            nfg = nf.get; fr = a.fail_reset; nbg = nfb.get
+                            retry = sorted((nfg(n, 0) if not fr or nbg(n) == g[n][0] else 0,
+                                            0 if may_retry(n, g) else 1, g[n][1], gnum[n][1], n) for n in att
                                            if n not in busy and (ctx(n) != att[n][0] or grown(n))
                                            and (a.far_retry or may_retry(n, g)))
                         else:
@@ -1228,7 +1230,12 @@ class Loop:
                     n, ok, dt, stats, hs = f.result()
                     ycls[rcls.pop(f, 'r')].append((1 if ok else 0, dt)); rt0.pop(f, None)
                     if lev == 0 and not ok:
-                        nf[n] += 1
+                        if a.fail_reset:
+                            # (counted since the nearest proven goal below last changed)
+                            gb = g[n][0] if n in g else None
+                            nf[n] = nf[n] + 1 if nfb.get(n) == gb else 1; nfb[n] = gb
+                        else:
+                            nf[n] += 1
                     done_n += 1
                     if H:
                         c_, p_, x_ = startctx.pop(n, (None, 0.0, None)) if lev == 0 else (None, 0.0, None)
@@ -1541,6 +1548,10 @@ def make_parser():
                          'failed fresh runs in the round first, then those within the retry gaps, then the nearest '
                          '(with --far-retry also the goals beyond the gaps; a first run proved 51%% in Z1\'s second '
                          'hour, a repeat 4-6%%, REPORT 2as)')
+    ap.add_argument('--fail-reset', action='store_true',
+                    help='--fail-order: a goal\'s failures count from the last change of the nearest proven goal '
+                         'below it (Z1 after 30 min: a repeat after such a change proved 13.1%%, 62 an hour, '
+                         'otherwise 5.2%%, 23 an hour; far first runs in Z4\'s second hour 8-12%%)')
     ap.add_argument('--far-retry', action='store_true',
                     help='--cascade: slots with nothing else to run retry goals beyond the retry gaps '
                          '(fresh at T0, nearest first) when their context or pool changed')
