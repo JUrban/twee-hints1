@@ -935,6 +935,7 @@ class Loop:
                    else (None, -1))
                for n in self.names if n not in self.solved}
         running = {}   # future -> (name, level)
+        nf = collections.Counter()   # goal -> its failed fresh (T0) runs in this round (--fail-order)
         rdir = os.path.join(self.dir, 'r%d' % rnd); os.makedirs(rdir, exist_ok=True)
         if a.cascade_continue and os.path.exists(os.path.join(rdir, 'results.tsv')):
             # a restarted round: the levels this round already tried (in the current context)
@@ -945,6 +946,8 @@ class Loop:
                     lev = int(f[4][1:])
                     if lev == 0:
                         fresh.add(f[0])
+                        if f[1] == 'NO':
+                            nf[f[0]] += 1
                     if lev > att[f[0]][1]:
                         att[f[0]] = (ctx(f[0]), lev); k0 += 1
             print(f'  cascade: continuing round {rnd}, {k0} level updates from its results', flush=True)
@@ -1104,6 +1107,15 @@ class Loop:
                                     if n not in busy and (ctx(n) != att[n][0] or grown(n))}
                             retry = sorted((-v, n) for n, v in cand.items()
                                            if v >= lmin and sc[n][2] <= a.sched_max_lgap)
+                        elif a.fail_order:
+                            # --fail-order: every goal with a new context (with --far-retry also those beyond
+                            # the retry gaps) in one list, fewest failed fresh runs first, then near before
+                            # far, then nearest. In Z1's second hour a goal's first run proved 51% (365 proofs
+                            # per run hour), one that had failed before 4-6% (17-29 an hour), on 61% of the
+                            # workers' time; Z2 after 30 min 88% (1,749 an hour) against 7-17% (52-106)
+                            retry = sorted((nf[n], 0 if may_retry(n, g) else 1, g[n][1], gnum[n][1], n) for n in att
+                                           if n not in busy and (ctx(n) != att[n][0] or grown(n))
+                                           and (a.far_retry or may_retry(n, g)))
                         else:
                             retry = sorted((g[n][1], gnum[n][1], n) for n in att
                                            if n not in busy and (ctx(n) != att[n][0] or grown(n)) and may_retry(n, g))
@@ -1139,7 +1151,7 @@ class Loop:
                         if SM and a.far_retry and (a.mix or len(running) + len(retry) + len(deep) < a.j):
                             far = sorted((-v, n) for n, v in cand.items()
                                          if (v < lmin or sc[n][2] > a.sched_max_lgap) and n not in uset)[:a.j]
-                        elif a.far_retry and (a.mix or len(running) + len(retry) + len(deep) < a.j):
+                        elif a.far_retry and not (a.fail_order and not SM) and (a.mix or len(running) + len(retry) + len(deep) < a.j):
                             # --far-retry: idle slots retry (fresh) the goals beyond the retry gaps too,
                             # nearest first, after everything else
                             far = heapq.nsmallest(a.j, ((g[n][1], gnum[n][1], n) for n in att
@@ -1208,6 +1220,8 @@ class Loop:
                     n0, lev = running.pop(f)
                     n, ok, dt, stats, hs = f.result()
                     ycls[rcls.pop(f, 'r')].append((1 if ok else 0, dt)); rt0.pop(f, None)
+                    if lev == 0 and not ok:
+                        nf[n] += 1
                     done_n += 1
                     if H:
                         c_, p_, x_ = startctx.pop(n, (None, 0.0, None)) if lev == 0 else (None, 0.0, None)
@@ -1515,6 +1529,11 @@ def make_parser():
                          'each keep this share of the workers while they have waiting goals; the other slots go to '
                          'the kind with the most proofs per run second lately (with --far-retry; from zero on '
                          '51,784 goals the near retries took every slot and 12,998 goals never ran, REPORT 2as)')
+    ap.add_argument('--fail-order', action='store_true',
+                    help='--cascade without --sched-model: the fresh (T0) runs in one list, goals with the fewest '
+                         'failed fresh runs in the round first, then those within the retry gaps, then the nearest '
+                         '(with --far-retry also the goals beyond the gaps; a first run proved 51%% in Z1\'s second '
+                         'hour, a repeat 4-6%%, REPORT 2as)')
     ap.add_argument('--far-retry', action='store_true',
                     help='--cascade: slots with nothing else to run retry goals beyond the retry gaps '
                          '(fresh at T0, nearest first) when their context or pool changed')
