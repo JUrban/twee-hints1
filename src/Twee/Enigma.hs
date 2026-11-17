@@ -6,7 +6,7 @@
 -- @hints/enigfeats.py@, which produces the training data.
 {-# LANGUAGE BangPatterns, RecordWildCards #-}
 module Twee.Enigma(
-  Tree, Forest, parseForest, parseForestBin, predictRaw,
+  Tree, Forest, parseForest, parseForestBin, predictRaw, predictDense, predictWith, treeFeatures,
   eqnFeatures, eqnFeaturesH, RuleModel(..), mkRuleModel, ruleModelRow, ruleModelRaw) where
 
 import Data.Array.Unboxed
@@ -41,6 +41,10 @@ data Tree =
     t_leaf  :: !(UArray Int Double) }
 
 type Forest = [Tree]
+
+-- | The features a tree splits on.
+treeFeatures :: Tree -> UArray Int Int
+treeFeatures = t_feat
 
 -- | Parse the trees of a LightGBM text model.
 parseForest :: String -> Forest
@@ -110,10 +114,16 @@ predictRaw forest x = predictDense forest (dense x)
       return a
 
 predictDense :: Forest -> UArray Int Double -> Double
-predictDense forest x = foldl' (\ !s t -> s + evalTree t) 0 forest
+predictDense forest x = predictWith forest val
   where
     (_, hi) = bounds x
     val f = if f <= hi then unsafeAt x f else 0
+
+-- | Raw score of a forest on the features given by a function (no array is built).
+{-# INLINE predictWith #-}
+predictWith :: Forest -> (Int -> Double) -> Double
+predictWith forest val = foldl' (\ !s t -> s + evalTree t) 0 forest
+  where
     evalTree t
       | snd (bounds (t_feat t)) < 0 = t_leaf t ! 0
       | otherwise = go 0

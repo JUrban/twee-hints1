@@ -92,6 +92,7 @@ data MainFlags =
     flags_hints_file :: Maybe FilePath,
     flags_track_hints :: Maybe FilePath,
     flags_rule_model :: Maybe FilePath,
+    flags_pg_model :: Maybe FilePath,
     flags_rule_vocab :: Maybe FilePath,
     flags_rule_goal :: Maybe FilePath,
     flags_rule_threshold :: Double,
@@ -272,6 +273,12 @@ parseMainFlags = do
     inGroup "Critical pair weighting heuristics" $
     flag "rule-model"
       ["LightGBM model (text) predicting whether a new rule is useful; rules predicted useless are deferred once."]
+      Nothing (Just <$> argFile)
+  flags_pg_model <-
+    expert $
+    inGroup "Critical pair weighting heuristics" $
+    flag "pg-model"
+      ["Parental model for --pg-threshold: an additive LightGBM forest (hints/lgb2bin.py format, hints/pgtrain.py: each tree on the new rule's 10 features or on the partner's, twee's pgRuleFeatures) in place of the sum of the two rules' --rule-model scores."]
       Nothing (Just <$> argFile)
   flags_rule_vocab <-
     expert $
@@ -1235,8 +1242,16 @@ runTwee globals (TSTPFlags tstp) horn precedence config0 flags@MainFlags{..} lat
           rm_parents = any ("p:" `isPrefixOf`) (Map.keys vocab),
           rm_hvocab_c = IntMap.empty, rm_hvocab_p = IntMap.empty,
           rm_hgoal_v = IntSet.empty, rm_hgoal_h = IntSet.empty, rm_hgoal_c = IntSet.empty }
+  pgModel <-
+    case flags_pg_model of
+      Nothing -> return Nothing
+      Just mfile -> do
+        forest <- parseForestBin <$> BS.readFile mfile
+        case splitPGModel forest of
+          Just m@(fr, fa) -> return $! length fr `seq` length fa `seq` Just m
+          Nothing -> error ("--pg-model " ++ mfile ++ ": a tree mixes the new rule's and the partner's features (train with interaction constraints)")
   let
-    config = config1 { cfg_rule_model = ruleModel }
+    config = config1 { cfg_rule_model = ruleModel, cfg_pg_model = pgModel }
 
   let
     readHintFile Nothing = return []

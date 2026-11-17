@@ -4,6 +4,8 @@ module Twee where
 
 import Twee.Base
 import Twee.Enigma
+import Data.Array.Unboxed(UArray, listArray, elems, (!))
+import Data.Array.Base(unsafeAt)
 import qualified Data.Set as Set
 import Twee.Rule hiding (normalForms)
 import qualified Twee.Rule as Rule
@@ -136,7 +138,9 @@ data Config f =
     cfg_pg_threshold              :: Maybe Double,
     -- | (17 Nov) Trace each new rule's id, parents and raw score (PGR) and its critical
     -- pairs per partner (PGN) on stderr; score every rule (also when not deferring).
-    cfg_pg_log                    :: Bool }
+    cfg_pg_log                    :: Bool,
+    -- | (17 Nov) Parental model: an additive forest (see 'splitPGModel') in place of the sum of scores.
+    cfg_pg_model                  :: Maybe (Forest, Forest) }
 
 -- | The prover state.
 data State f =
@@ -171,27 +175,101 @@ data State f =
 -- | Parental guidance (--pg-threshold): the --rule-model raw score of each active by
 -- id, and the score of the critical pair being added (for the rules made from it).
 -- Not serialised (zero bytes): after a load no rule has a score, so all are paired.
--- The third field is set once the freezer has been emptied (the filter is then off).
-data PG = PG !(IntMap Double) !(Maybe Double) !Bool
+data PG =
+  PG {
+    -- the raw score of each active (by id) that has one
+    pg_raw    :: !(IntMap Double),
+    -- the raw score and queue score of the critical pair being added
+    pg_cur    :: !(Maybe Double),
+    pg_cur_ps :: !Double,
+    -- set once the freezer has been emptied (the filter is then off)
+    pg_thawed :: !Bool,
+    -- with --pg-model: the two parts of each active's score, as the new rule of a
+    -- pair and as its partner
+    pg_gh     :: !(IntMap (Double, Double)) }
 
 instance Binary PG where
   put _ = return ()
   get = return emptyPG
 
 emptyPG :: PG
-emptyPG = PG IntMap.empty Nothing False
+emptyPG = PG IntMap.empty Nothing 0 False IntMap.empty
+
+-- | The parental model's features of a rule, made when it is added:
+-- raw score, lhs and rhs size, number of variables, depth, hint match (0 none,
+-- 1 a tracked hint, 2 an already matched hint, 3 a new one), orientation (0
+-- oriented, 1 weakly, 2 permutative, 3 unoriented), id, queue score of its
+-- critical pair, number of actives.
+pgRuleFeatures :: Function f => State f -> Active f -> Double -> Double -> UArray Int Double
+pgRuleFeatures State{..} Active{..} q ps =
+  listArray (0, 9)
+    [ q, fromIntegral (len t), fromIntegral (len u), fromIntegral (length (usort (vars t ++ vars u))),
+      fromIntegral (getDepth (info_depth active_info)), hm, ori, fromIntegral active_id, ps,
+      fromIntegral (IntMap.size st_active_set) ]
+  where
+    t = lhs active_rule
+    u = rhs active_rule
+    orient = orientation active_rule
+    eh = st_eqhints
+    hm | Map.null (eh_map eh) = 0
+       | otherwise =
+         case lookupEqHintG eh (unorient active_rule) of
+           Nothing -> 0
+           Just n | n >= trackBase -> 1
+                  | IntSet.member n (eh_matched eh) -> 2
+                  | otherwise -> 3
+    ori = case orient of
+            Oriented -> 0
+            WeaklyOriented{} -> 1
+            Permutative{} -> 2
+            Unoriented -> 3
+
+-- | An additive parental model (trained with interaction constraints): the trees on
+-- the new rule's features (0-9) and those on the partner's (10-19). A pair's raw
+-- score is the sum of the first part of the new rule and the second of the partner.
+splitPGModel :: Forest -> Maybe (Forest, Forest)
+splitPGModel forest
+  | all (\t -> side t /= Just 2) forest = Just ([ t | t <- forest, side t /= Just 1 ], [ t | t <- forest, side t == Just 1 ])
+  | otherwise = Nothing
+  where
+    -- Just 0: no split or only new-rule features, Just 1: only partner features, Just 2: both (or others)
+    side t =
+      case [ f | f <- elems (treeFeatures t) ] of
+        fs | all (< 10) fs -> Just 0
+           | all (\f -> f >= 10 && f < 20) fs -> Just 1
+           | otherwise -> Just 2
+
+pgParts :: (Forest, Forest) -> UArray Int Double -> (Double, Double)
+pgParts (fr, fa) f = (predictWith fr (\i -> unsafeAt f i), predictWith fa (\i -> unsafeAt f (i - 10)))
 
 -- | Parental guidance: are the critical pairs of these two actives made now?
 -- Each pair's decision depends only on the two stored scores, so the skipped pairs
 -- (the freezer) can be made again later by 'thawPG'.
-pgKeepPair :: Maybe Double -> PG -> Active f -> Active f -> Bool
-pgKeepPair pgThr (PG pgRaw _ thawed) r1 r2 =
-  case pgThr of
-    Just thr | not thawed,
-               Just q1 <- IntMap.lookup (fromIntegral (active_id r1)) pgRaw,
-               Just q2 <- IntMap.lookup (fromIntegral (active_id r2)) pgRaw ->
-      q1 + q2 >= log (thr / (1 - thr))
-    _ -> True
+pgKeepPair :: Config f -> PG -> Active f -> Active f -> Bool
+pgKeepPair config pg r1 = fromMaybe (const True) (pgFilter config pg r1)
+
+-- | The parental filter of a new rule's partners, Nothing when every pair is made
+-- (no --pg-threshold, the freezer emptied, or the rule has no score).
+{-# INLINE pgFilter #-}
+pgFilter :: Config f -> PG -> Active f -> Maybe (Active f -> Bool)
+pgFilter Config{..} PG{..} r1 =
+  case cfg_pg_threshold of
+    Just thr | not pg_thawed, Just q1 <- IntMap.lookup i1 pg_raw ->
+      let lim = log (thr / (1 - thr)) in
+      case cfg_pg_model of
+        Nothing -> Just $ \r2 ->
+          case IntMap.lookup (fromIntegral (active_id r2)) pg_raw of
+            Just q2 -> q1 + q2 >= lim
+            Nothing -> True
+        Just _
+          | Just (g1, _) <- IntMap.lookup i1 pg_gh -> Just $ \r2 ->
+            case IntMap.lookup (fromIntegral (active_id r2)) pg_gh of
+              Just (_, h2) -> g1 + h2 >= lim
+              Nothing -> True
+          | otherwise -> Nothing
+    _ -> Nothing
+  where
+    i1 = fromIntegral (active_id r1)
 
 -- | The freezer: when the queue is empty, make every critical pair that parental
 -- guidance skipped (of each active with itself and its older partners) and turn the
@@ -199,12 +277,11 @@ pgKeepPair pgThr (PG pgRaw _ thawed) r1 r2 =
 {-# INLINEABLE thawPG #-}
 thawPG :: Function f => Config f -> State f -> State f
 thawPG config state@State{..} =
-  foldl' one state{st_pg = PG pgRaw Nothing True} (IntMap.elems st_active_set)
+  foldl' one state{st_pg = st_pg { pg_cur = Nothing, pg_thawed = True }} (IntMap.elems st_active_set)
   where
-    PG pgRaw _ _ = st_pg
-    frozen r1 r2 = active_id r2 <= active_id r1 && not (pgKeepPair (cfg_pg_threshold config) st_pg r1 r2)
+    frozen r1 r2 = active_id r2 <= active_id r1 && not (pgKeepPair config st_pg r1 r2)
     one st r =
-      case [ makePassive config st o | o <- indexedOverlaps (frozen r) st r ] of
+      case [ makePassive config st o | o <- indexedOverlaps (Just (frozen r)) st r ] of
         [] -> st
         ps -> enqueue st (the r) ps
 
@@ -267,7 +344,8 @@ defaultConfig =
     cfg_eqhint_instance_factor = 0.1,
     cfg_cp_model_factor = 1,
     cfg_pg_threshold = Nothing,
-    cfg_pg_log = False }
+    cfg_pg_log = False,
+    cfg_pg_model = Nothing }
 
 -- | Compute cfg_score_cp from the CP configuration.
 {-# INLINE scoreCP #-}
@@ -422,7 +500,7 @@ makePassives config@Config{..} state@State{..} rule
   | cfg_overlap_index && cfg_max_cp_depth == maxBound =
   stampWith "make critical pair" length
   [ makePassive config state overlap
-  | overlap <- indexedOverlaps (pgKeepPair cfg_pg_threshold st_pg rule) state rule ]
+  | overlap <- indexedOverlaps (pgFilter config st_pg rule) state rule ]
   | otherwise =
 -- XXX factor out depth calculation
   stampWith "make critical pair" length
@@ -492,12 +570,12 @@ rebuildOverlapIndex state =
 -- the same ones and in the same order as 'overlaps', but only rules whose
 -- fingerprints are compatible are tried.
 {-# INLINEABLE indexedOverlaps #-}
-indexedOverlaps :: forall f. Function f => (Active f -> Bool) -> State f -> Active f -> [Overlap (Active f) f]
+indexedOverlaps :: forall f. Function f => Maybe (Active f -> Bool) -> State f -> Active f -> [Overlap (Active f) f]
 indexedOverlaps pgKeep State{..} r1 =
   [ o
   | (d1i, k2, part, n) <- sortCands cands,
+    not (IntSet.member (k2 `shiftR` 1) pgRejected),
     Just r2 <- [IntMap.lookup (k2 `shiftR` 1) st_active_set],
-    pgKeep r2,
     let d1 = toEnum d1i
         d2 = toEnum (k2 .&. 1)
         eq1 = dirEqn r1' d1
@@ -508,6 +586,14 @@ indexedOverlaps pgKeep State{..} r1 =
   where
     idx = index_oriented st_rules
     OverlapIndex{..} = st_overlaps
+    -- parental guidance: the partners whose pairs are not made, decided once each
+    pgRejected =
+      case pgKeep of
+        Nothing -> IntSet.empty
+        Just keep ->
+          IntSet.fromList
+            [ i | i <- IntSet.toList (IntSet.fromList [ k2 `shiftR` 1 | (_, k2, _, _) <- cands ]),
+                  Just r2 <- [IntMap.lookup i st_active_set], not (keep r2) ]
     bnd = (V (maybe maxBound fst (IntMap.lookupMin oi_minvar)),
            V (maybe minBound fst (IntMap.lookupMax oi_maxvar)))
     r1' :: Rule f
@@ -769,14 +855,21 @@ addActive config state@State{..} active0 =
     mscore
       | cfg_print_score config = Just (activeScore config state active)
       | otherwise = Nothing
-    PG pgRaw pgCur pgThawed = st_pg
-    pg' = case pgCur of
-            Just q -> PG (IntMap.insert (fromIntegral st_next_active) q pgRaw) pgCur pgThawed
+    PG{..} = st_pg
+    pgF = case pg_cur of
+            Just q | isJust (cfg_pg_model config) || cfg_pg_log config -> Just (pgRuleFeatures state active q pg_cur_ps)
+            _ -> Nothing
+    pg' = case pg_cur of
+            Just q -> st_pg { pg_raw = IntMap.insert (fromIntegral st_next_active) q pg_raw,
+                              pg_gh = case (pgF, cfg_pg_model config) of
+                                        (Just f, Just m) -> IntMap.insert (fromIntegral st_next_active) (pgParts m f) pg_gh
+                                        _ -> pg_gh }
             Nothing -> st_pg
     pgTrace
       | cfg_pg_log config =
         Debug.Trace.trace ("PGR " ++ show (fromIntegral st_next_active :: Int) ++ " " ++ show (fst st_cur_parents) ++ " " ++
-                           show (snd st_cur_parents) ++ " " ++ maybe "-" show pgCur ++ " " ++ pgCanon (unorient active_rule))
+                           show (snd st_cur_parents) ++ " " ++ maybe "-" show pg_cur ++ " " ++
+                           maybe "-" (intercalate "," . map show . elems) pgF ++ " " ++ pgCanon (unorient active_rule))
       | otherwise = id
     state' =
       pgTrace $
@@ -918,12 +1011,13 @@ considerUsing rules config@Config{..} state@State{..} info cp0 =
                  (Just rm, Just p) -> Just (rawWith rm p)
                  _ -> Nothing
         -- --pg-threshold / --pg-log: remember the score for the rules made from this pair
-        PG pgRaw _ pgThawed = st_pg
         pgCur = if isJust cfg_pg_threshold || cfg_pg_log then mraw else Nothing
         accept =
-          (\st@State{st_pg = PG r _ th} -> st { st_pg = PG r Nothing th }) $
+          (\st@State{st_pg = pg} -> st { st_pg = pg { pg_cur = Nothing } }) $
           generaliseCP cp $
-          foldl' (\state cp -> addCP config model state info cp) state{st_cur_passive = Nothing, st_pg = PG pgRaw pgCur pgThawed} (split cp)
+          foldl' (\state cp -> addCP config model state info cp)
+            state{st_cur_passive = Nothing,
+                  st_pg = st_pg { pg_cur = pgCur, pg_cur_ps = maybe 0 (realToFrac . passive_score) st_cur_passive }} (split cp)
       in case (cfg_rule_model, st_cur_passive, mraw) of
         (Just rm, Just p, Just raw)
           | Map.findWithDefault 0 key st_deferred < rm_defer_max rm,
@@ -1919,7 +2013,7 @@ complete1 config@Config{..} state
       Nothing -> -- normal mode
         case dequeue config state of
           (Nothing, state)
-            | isJust cfg_pg_threshold, PG _ _ False <- st_pg state ->
+            | isJust cfg_pg_threshold, not (pg_thawed (st_pg state)) ->
               -- parental guidance: empty the freezer and go on
               (if cfg_pg_log then Debug.Trace.trace "PGTHAW" else id) (True, thawPG config state)
             | otherwise -> (False, state)
