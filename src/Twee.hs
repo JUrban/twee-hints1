@@ -60,7 +60,7 @@ import GHC.Generics
 import Data.Binary.Sharing
 import Data.Bits
 import Data.Hashable(hash)
-import Data.Intern(symId)
+import Data.Intern(symId, unintern)
 
 ----------------------------------------------------------------------
 -- * Configuration and prover state.
@@ -148,9 +148,8 @@ data Config f =
 data PGModel = PGAdditive Forest Forest | PGFull Forest
   -- | Pcat on hashed ENIGMA features (FroCoS 2021): the new rule's ENIGMA features
   -- hashed to base b (feature key mod b, see 'pgEnigmaVec'), the partner's (b..2b-1),
-  -- then both rules' 'pgRuleFeatures' (2b..2b+19) and the id gap (2b+20). The Bool:
-  -- ENIGMA Anonymous (symbols by arity) instead of symbol names.
-  | PGEnigma Forest Int Bool
+  -- then both rules' 'pgRuleFeatures' (2b..2b+19) and the id gap (2b+20).
+  | PGEnigma Forest Int
 
 -- | The prover state.
 data State f =
@@ -238,15 +237,18 @@ pgRuleFeatures State{..} Active{..} q ps =
             Permutative{} -> 2
             Unoriented -> 3
 
--- | A rule's ENIGMA features (hashed keys), with symbol names or anonymous.
-pgEnigmaKeys :: Function f => Maybe (RuleModel f) -> Bool -> Rule f -> [(Int, Double)]
-pgEnigmaKeys rm anon r =
-  let (hf, _, _, _) =
-        if anon then eqnFeaturesHWith anonSym (lhs r) (rhs r)
-        else case rm of
-               Just RuleModel{rm_name = name} -> eqnFeaturesH name (lhs r) (rhs r)
-               Nothing -> eqnFeaturesHWith anonSym (lhs r) (rhs r)
+-- | A rule's ENIGMA features (hashed keys), as the rule model computes them: on the
+-- rule with the goal constants expanded ('expandGoalConsts': flattening constants
+-- become their definitions, skolems fresh variables), so only the theory's symbols
+-- remain, by name.
+pgEnigmaKeys :: Function f => State f -> Maybe (RuleModel f) -> Rule f -> [(Int, Double)]
+pgEnigmaKeys State{st_eqhints = eh} rm r =
+  let t :=: u = fromMaybe (unorient r) (expandGoalConsts eh (unorient r))
+      (hf, _, _, _) = eqnFeaturesHWith sym t u
   in IntMap.toList hf
+  where
+    sym t@(App f _) = maybe (anonSym t) (\RuleModel{rm_name = name} -> name (unintern f)) rm
+    sym t = anonSym t
 
 -- | Hashed ENIGMA features folded to base b (key mod b).
 pgEnigmaVec :: Int -> [(Int, Double)] -> UArray Int Double
@@ -295,7 +297,7 @@ pgFilter Config{..} PG{..} r1 =
               Just (_, h2) -> g1 + h2 >= lim
               Nothing -> True
           | otherwise -> Nothing
-        Just (PGEnigma forest c _)
+        Just (PGEnigma forest c)
           | Just f1 <- IntMap.lookup i1 pg_feats, Just e1 <- IntMap.lookup i1 pg_enig -> Just $ \r2 ->
             let i2 = fromIntegral (active_id r2) in
             case (IntMap.lookup i2 pg_feats, IntMap.lookup i2 pg_enig) of
@@ -923,11 +925,10 @@ addActive config state@State{..} active0 =
             _ -> Nothing
     -- the rule's hashed ENIGMA features (for the log: named and anonymous)
     pgE = case pgF of
-            Just _ | cfg_pg_log config -> Just (pgEnigmaKeys (cfg_rule_model config) False active_rule,
-                                                 pgEnigmaKeys (cfg_rule_model config) True active_rule)
+            Just _ | cfg_pg_log config -> Just (pgEnigmaKeys state (cfg_rule_model config) active_rule)
             _ -> Nothing
     pgEV = case (pgF, cfg_pg_model config) of
-             (Just _, Just (PGEnigma _ b anon)) -> Just (pgEnigmaVec b (pgEnigmaKeys (cfg_rule_model config) anon active_rule))
+             (Just _, Just (PGEnigma _ b)) -> Just (pgEnigmaVec b (pgEnigmaKeys state (cfg_rule_model config) active_rule))
              _ -> Nothing
     pg' = case pg_cur of
             Just q -> st_pg { pg_raw = IntMap.insert (fromIntegral st_next_active) q pg_raw,
@@ -945,7 +946,7 @@ addActive config state@State{..} active0 =
         Debug.Trace.trace ("PGR " ++ show (fromIntegral st_next_active :: Int) ++ " " ++ show (fst st_cur_parents) ++ " " ++
                            show (snd st_cur_parents) ++ " " ++ maybe "-" show pg_cur ++ " " ++
                            maybe "-" (intercalate "," . map show . elems) pgF ++ " " ++
-                           maybe "E- A-" (\(e, an) -> 'E' : keys e ++ " A" ++ keys an) pgE ++ " " ++
+                           maybe "E-" (\k -> 'E' : keys k) pgE ++ " " ++
                            pgCanon (unorient active_rule))
       | otherwise = id
     keys ks = intercalate "," [ show k ++ ":" ++ show v | (k, v) <- ks ]

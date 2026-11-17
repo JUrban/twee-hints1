@@ -1,0 +1,587 @@
+# Working record: hint guidance for twee (internal)
+
+Written 17 Nov 2026, 18:10, from the whole session transcript (12 Nov 19:30 to now: 68 user messages,
+32 more sent mid-turn, 940 replies, 4,974 tool calls, 24 context compactions), the 334 commits on
+branch `hints`, and REPORT.md. REPORT.md is the outward report, with results and numbers. This file is for
+resuming the work. It says why each thread was started, how it was done, what came out, where the
+pieces are, and what went wrong.
+
+**When resuming:** read sections 1, 2 and 8 first. Before designing anything, grep this file and REPORT.md for
+the topic (section 7 lists the mistakes this rule prevents). Add to the log in section 6 when a thread
+starts, changes or ends.
+
+The transcript is `~/.claude/projects/-project/06816eaa-f48d-4d65-80b0-498c3b54febf.jsonl` (86 MB).
+`~/.config/fc1dev/scratch/twee-record/digest.py JSONL OUT` turns it into a readable digest: user messages,
+my replies, tool-call descriptions and the compaction summaries. That directory also holds `user.txt`
+(the user's messages), `midturn.txt` (messages sent while I worked), `gitlog.txt`, `sum01..24.txt`
+(the compaction summaries) and `errs.txt` (their errors and results sections).
+
+---------------------------------------------------------------------------------------------------------
+
+## 1. The goal, and what the user has asked for along the way
+
+**Goal (12 Nov 19:30, re-set 13 Nov 09:39 as a /goal):** hint guidance for twee on AIM60k. The model is
+Veroff-style hint loops: easy problems give hints that guide harder ones, so as to solve as many problems as
+possible in the least time.
+* Learn from the Prover9-new branches.
+* Iterate on small subsets: the about 150 hard originals and the goals derived from them.
+* Own branch, frequent commits, interim reports, critical self-review.
+* About 20 CPUs and 60 GB RAM.
+* One agent: no worker agents. Many twee processes in parallel are fine.
+
+**The user's directions, in order** (what each led to is in brackets):
+
+* 12 Nov 20:35: look at the latest ENIGMA featurizers. [Twee.Enigma, the rule model rm*: REPORT 2b]
+* 12 Nov 20:51: hints matter in long hard runs. Veroff stops a run when no hint has matched for many given
+  clauses. [--eqhint-stall, later HINTLOG/stallsim: 2c, 2m]
+* mid-turn, 12–13 Nov:
+  * "doesn't P9 also demodulate hints during the run?" [hints are kept normalised by the oriented rules]
+  * "knn because too many hints slow things down? what knn, on what?" [explained: kNN over goal statements]
+  * checkpointing as in recent P9 [--dump-state/--load-state, loop.py --resume]
+  * ENIGMA and ENIGMAWatch guidance [rule model; ProofWatch hint boosting, neutral]
+  * control: Prover9 hint loops on a couple of families [p9loop.py: 2i]
+  * the "harder" evaluation: how long runs stay on hints, gaps up to about a minute, let such runs go
+    longer [HINTLOG, stallsim, V2 rounds: 2m]
+* 13 Nov 09:03: Veroff reorients proofs into SFDF runs (strictly forward, demodulation-free), so hints carry
+  no skolems. Did we? Reorientation can be expensive.
+  [p9loop --convert/--sfdf: no gain (2n); skolem-free hints from conditional goals (2j)]
+* 13 Nov 09:28: **compare runs by abstract time** (inferences, given clauses), never CPU or wall time,
+  because the machine load varies. [--abstract-time 2000 everywhere since then: 2k]
+* mid-turn, 13–14 Nov:
+  * "a twee process took 100 GB, I killed it. 1. prevent that at all cost (kill before, RAM limit),
+    2. look into it and fix the growth in twee". [-M6g default heap limit, memwatch.py, the stale-id
+    resume bug fixed at the root: 2x]
+  * Nigma guidance combined with hints; "we already use enigma-style clause ranking?" [yes: rule model]
+  * sketches: extra assumptions, a lattice of assumption sets, climb from easy to the original
+    [climb.py: 2ab]
+  * the numbers at the top of the REPORT should be totals by time [the summary table]
+* 14 Nov 10:05: ENIGMA-style looping (retrain on new, shorter proofs; Mizar60 paper; Deepire), and the
+  dynamic GNN of Chvalovsky et al. LPAR 2023; CPU GNNs as in Deepire. [EL/EHL/FHL loops, deepire.py,
+  gnn.py: 2u, 2ad]
+* 14 Nov 13:14: do long runs slow down? Use the Prover9 branches' indexing. [fingerprint overlap index,
+  interreduction filter, 1.8–2x: 2v]
+* 14 Nov 14:03: implement Veroff's p9loop and bigloop (AITP 2026 slides BV.pdf, ai4reason.eu/veroff-aim-proof).
+  14:37: they also vary the settings, such as orderings. [--p9loop, --p9-orders, --p9-parallel: 2w]
+* 14 Nov 20:53: "isn't the name encoding the real goal?" (AIM60k goal files name the line of the
+  original Prover9 proof). [--line-gaps, distance in proof lines: 2z]
+* 14 Nov 22:39: Veroff adds frequent extra axioms such as commutativity to the lattice pool. [climb.py --laws, --freq]
+* mid-turn, 14–15 Nov:
+  * retrain the ENIGMA guidance now and then; later long proofs are worth more for training than easy ones
+    [rm7t/rm8h on hard proofs: offline +0.05 AUC, online nothing: 2ad]
+  * enough data for the dynamic GNN [gnn.py v1]
+  * **GNN v2:** symbol-aware (the signature is tiny), mark the conjecture terms, expand the goal constants
+    from flattening, dynamic data as Chvalovsky 2023, prefer harder proofs [gnn.py v2: AUC 0.887 offline]
+  * BliStr uses abstract proof-search length as a proxy metric for unsolved problems, but don't overdo it
+  * a GNN2Seq hint generator after JUrban/E_conj_dev1 (branch vampire4, IWIL paper), dreaming up hints from
+    the clause situation [gen.py, gencopy.py: 2ah]
+  * "what's our production loop now, and what helps?"
+  * add axioms from other problems (Bol loop instead of loop), mathematically relevant, not trivialising;
+    dream up axioms with the generator [climb.py --theories, --gen-assume: 2aj]
+  * when the strengthened theory is still too hard, strengthen more or weaken the goal; climb up and down,
+    as in Korovin's abstraction-refinement paper (978-3-319-94205-6_43.pdf) [--updown]
+  * "shouldn't we learn the up/down steps?" [latticedata.py, latticepolicy.py, Thompson sampling: 2ak]
+* 15 Nov 09:37: Chvalovsky's GNNs balance positives and negatives in the loss. [pos_weight in gnn.py]
+* 15 Nov 18:24: try the conjecture cuts of the IWIL 2026 paper (it helped on Mizar). 18:31: generate cuts in the
+  middle of the search from the proof state, like the hints. [--gen-cuts: no gain, 2ai]
+* 15 Nov 18:59: "by sketches you mean extra axioms like commutativity, then hints from those runs guide the
+  original?" (yes)
+* 15 Nov 21:49: "are you keeping notes how the experiments were done in the repo?" [hints/exp/: every
+  launch script and goal set is copied there and committed]
+* 15 Nov 21:52–21:54: what's a climb without theories; the up step could also add one axiom. [--up-single]
+* 16 Nov 10:28: update the report numbers.
+* 17 Nov 08:40: "what's the last day's work about?"
+* 17 Nov 14:54: **delete Z4's states** (done).
+* 17 Nov 15:17–15:22: the user set kernel.perf_event_paranoid=-1 and installed ghc-prof. Profiling works:
+  `cabal build exe:twee --builddir=dist-prof --constraint='twee-lib +profile'`. perf still records nothing
+  in the sandbox (no /sys).
+* 17 Nov 15:52: Veroff limits generated clauses by weight; in E there is **parental guidance** (FroCoS
+  2021), a smarter quick prefilter. 15:54: go ahead with it.
+* 17 Nov 16:14–16:16: "otter or discount loop?" (DISCOUNT). "We did the freezer for E. Have you read the
+  FroCoS paper?"
+* 17 Nov (mid-turn): "every new rule is scored against all candidate partners, roughly 840k evaluations
+  sounds silly. In E we score only partners that produce an offspring. Did you read the paper?" Then:
+  "tell me exactly how the paper does these things".
+* 17 Nov 17:30: **try ENIGMA features in Pcat, as in the paper.** 17:40: hashing to a small base, not sparse
+  features. 17:44: E's fast hash? 17:54: FNV-1a is fine if fast. Mizar needed hashing for its many symbols
+  and paths. 17:56: anonymous features worry me, because AIM has few symbols and they matter.
+  "Didn't we discuss all this before?" (yes: the GNN v2 and goal-constant conventions).
+* 17 Nov 17:58 and 18:00: keep a more detailed record for internal use; go over the whole session. [this file]
+
+**Decisions waiting for the user:** proof steps of other proofs as lemma axioms (REPORT 2an: worth at most about
+39 goals now). Do not do it without approval.
+
+---------------------------------------------------------------------------------------------------------
+
+## 2. Standing rules (the user's, and my own lessons)
+
+Resources and processes:
+* About 20 CPUs and at most 60 GB RAM. Twee binaries run with `-M6g` by default (twee.cabal rtsopts).
+  Use `abs/memwatch.py 7 45` for loops, and pywatch guards for big trainings: rm6t reached 55 GB, so use
+  negmax 150–200.
+* **Never `pkill -f` or `pgrep -f | kill`.** Patterns match my own shell, whose command line contains the
+  pattern (exit 144, at least six times). Kill by exact PID trees:
+  `desc() { for c in $(ps -o pid= --ppid $1); do desc $c; done; echo $1; }`. Find PIDs with
+  `ps -eo pid,args | awk` on exact fields.
+* No foreground sleeps or sleep chains (the harness blocks them). Wait with an until-loop in
+  run_in_background and end the turn. Never start a second waiter for the same thing. Waiters with
+  timeouts over 600 s get backgrounded automatically, and "timeout reached" is not completion: check the files.
+* **Never edit a running bash script.** Bash reads it by offset (queue3.sh died; solve_new.sh had to be
+  restored in place with `git show HEAD~1:... >`). `sed -i` makes a new inode and is safe, but avoid it
+  anyway. Tests run private copies: `sed "s|^H=.*|H=/project/twee/hints|" solve_new.sh > PRIVATE`.
+* Install loop.py edits atomically: test on a scratch copy with production's exact options, then `.tmp`,
+  py_compile, mv. A shadowed variable name crashed production three times: `k`, the `heads` set, and `nf`
+  (UL40 died at 16:24 on 17 Nov).
+* **No `rm -rf` on variable paths** (memory, 15 Nov; I broke it once on 17 Nov). Remove only literal paths,
+  and refresh into new empty directories.
+* Every new script gets `chmod +x` (z4_test.sh did not).
+* The session scratchpad (/tmp/claude-1001/...) is wiped when the session ends, and every process the
+  session started dies with it. Keep anything needed later in /project/hintwork or
+  ~/.config/fc1dev/scratch. On 17 Nov 18:05 the PG testbed was copied to pg/tb, its scripts to pg/tm, and the
+  paper's text to pg/paper.
+* Run Python with `-I` in the scratchpad: a stray copy.py there shadows the standard library.
+
+Method:
+* Compare by abstract time (`--abstract-time 2000`: 2,000 critical pairs considered = 1 s; deterministic,
+  6/6 identical). Report CPU separately, measured as user + sys of the twee processes. Wall time on this
+  shared machine varies by about 15% (load 35–45).
+* **Noise:** identical whole-set runs differ by about 1% (half1 2 h: 185 of about 18,400). The rp3 replay
+  repeats to within 1, but scheduler runs vary by about 25 to 50 (971 against 919 with the same settings).
+  r1sim varies by ±3. Replicate before claiming a gain. Three of my claims were noise:
+  * the scheduler's +30;
+  * KN60's 9/150 (the replication gave 8/300 against 10/300);
+  * Thompson sampling at 0 against 8, p = 0.007 (an artefact of assigning arms per target).
+* **Controls:** every new mechanism gets the cheapest obvious control at the same cost. The live climber looked
+  good until a plain fresh-retry control made 3x its proofs per CPU hour (2ab).
+* **Leaks:** check that test goals' proofs are not in training data, pools or contexts.
+  * rm7t was trained on the test goals' proofs: cancelled.
+  * 10 ho3_unsolved problems were in all_r0_hard.
+  * HO8U's context leaked 37% (reported as an upper bound).
+  * `loop.py --init` imports only round-0 rows, so snapshots need column 2 set to 0. ULsM's probes were
+    invalid because of this.
+* **New twee flags must be off by default, with identical output when off.** Check results, WORK
+  (considered, rules) and hints on 150–200 captured runs before using a binary.
+* Install binaries under new names: /project/bin/twee-eNN, never overwritten (a running binary gives "text
+  file busy", and old results must stay reproducible). Wrappers such as twee-pg add `$TWEE_PG_ARGS`.
+* Experiment launch scripts live in /project/hintwork/abs and pg. Copy them and the goal sets into
+  /project/twee/hints/exp/{abs,pg,sets} and commit them with each REPORT section. The header comment holds
+  the real start time (check `date`; I wrote wrong times at least six times) and the reason.
+* Commit often on branch `hints`. Messages end with `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`.
+* Report in plain words, never by internal labels alone. Never put the user's email or name into outside requests.
+* Before designing a feature, read the paper it comes from (section 7.1). If a paper is cited, read the relevant
+  sections fully, then write down its exact method here before implementing.
+* Reuse conventions that already exist (section 4.4). Grep REPORT.md and this file first.
+
+---------------------------------------------------------------------------------------------------------
+
+## 3. Where things are
+
+Repositories and directories:
+* `/project/twee`: twee, branch `hints` (my branch, 334 commits since 12 Nov). The source is in src/Twee.hs
+  (main loop, hints, PG), src/Twee/Enigma.hs (forest evaluator, ENIGMA features), src/Twee/Index (FPIndex),
+  executable/SequentialMain.hs (flags) and hints/ (all Python and REPORT.md).
+* `/project/hintwork`: working directory, not versioned; scripts are copied to hints/exp. Python venv:
+  `venv/bin/python3` (lightgbm, torch 2.15 CPU; install with uv, the venv has no pip).
+  * `loops/<NAME>/`: one loop each, holding solved.tsv, hints/, given/, states/, goals/, results per round,
+    config.json, and NAME.log.
+  * `loops/UL` is the production loop. Its states take 208 GB (17 Nov). Z4's states were deleted on the
+    user's word.
+  * `sets/` (101 goal sets), `models/` (rm*, gnn*, gen*, gc*, lattice*), `sched/` (scheduler models),
+    `given/` (given-rule logs), `abs/` (launch scripts, memwatch.py, curve.py, setcurve.py, zstat.py, merge_ab.sh),
+    `pg/` (parental guidance).
+* `/project/AIM60k`: the benchmark. 51,784 public goal problems in about 129 originals; holdout.names has
+  5,880. Goal files name the line of the original Prover9 proof (abs/goal_lines.tsv).
+* `/project/Prover9-new`: branches studied in REPORT 2d; built serially (make -j4 races).
+* `/project/bin`: the binaries.
+
+**Twee binaries** (each adds to the one before; off-by-default flags):
+
+| binary | date | what it added |
+|---|---|---|
+| h1–h9 | 12 Nov | first hint matching versions |
+| e1–e13 | 12–13 Nov | rule model, given log, stall, state resume, ProofWatch, binary forest, FNV-hashed rule features, generalisation matching |
+| e14 | 13 Nov 09:15 | HINTS-HYP: no generalised lemmas that depend on a conditional goal's hypothesis |
+| e15 | 13 Nov 09:31 | --abstract-time |
+| e16 | 13 Nov 10:10 | HINTLOG, --eqhint-stall-cps |
+| e17 | 13 Nov 10:58 | resume counts old matches silently |
+| e18 | 13 Nov 11:18 | --max-cpu (CPULIMIT with full output) |
+| e19 | 13 Nov 12:50 | task costs in abstract time (newTaskCost) |
+| e20 | 13 Nov 16:17 | resume signature fix |
+| e21 | 13 Nov 17:47 | --multi-goal |
+| e22 | 13 Nov (file 14 Nov 18:44) | RESUMETIME, --no-resume-requeue. The workhorse until 17 Nov; e22.orig is the pre-fix copy |
+| e23–e29 | 14 Nov 13:18–14:05 | fingerprint overlap index, interreduction filter, --queue-cost, --progress (e27 = index + filter) |
+| e30–e36 | 14 Nov 18:07–19:45 | debug and profile builds, USEDAXIOMS (e31), the 100 GB resume fix, --eqhint-consider-open |
+| e37 | 14 Nov 22:49 | HINTS-ASSUMED (sketch gap filling) |
+| e38 | 15 Nov 10:16 | --rule-defer-max |
+| e39 | 15 Nov 14:34 | --print-given-unsolved |
+| e40, e41 | 15 Nov 15:25–15:33 | --eqhint-instances (negative) |
+| e42 | 16 Nov 11:01 | --cp-model-factor (negative) |
+| e43 | 17 Nov 11:10 | no state dump for a solved problem |
+| e44 | 17 Nov 14:47 | incremental hint normalisation (−11% CPU) |
+| e45 | | slower, deleted |
+| e46–e49 | 17 Nov 16:20–16:57 | parental guidance and freezer (--pg-threshold, --pg-log); e48 is the sum-filter binary of the A/B |
+| e50 | 17 Nov 17:00 | --pg-model, additive forest, pgRuleFeatures |
+| e51 | 17 Nov 17:26 | the PG check after unification and before simplifyOverlap, as in E |
+| e52 | 17 Nov 17:32 | Pcat on the rule model's ENIGMA vocabulary |
+| e53 | 17 Nov 17:43 | hashed ENIGMA keys, --pg-enigma B, --pg-anon |
+| e54 | 17 Nov 17:59 | ENIGMA keys on the goal-constant-expanded rule with real names; --pg-anon removed; PGR field `E<keys>` |
+
+Wrappers: `twee-pg` (e48 with $TWEE_PG_ARGS), `twee-pg50` (e50 with $TWEE_PG_ARGS; production).
+
+Models:
+* `models/rm4t.bin/.vocab`: the rule model in production. It is a LightGBM ENIGMA model on given-rule logs,
+  with a theory block, and runs with `--rule-threshold 0.1 --rule-penalty 2`: a new rule predicted useless
+  is deferred once, re-queued at its score times 2.
+* rm7t and rm8h are better offline but not online (2ad). gnn2.pt is GNN v2 (0.887 offline, never online,
+  because model quality does not pay online, 2af).
+* gc1.pt is the hint generator (copy model).
+
+Main scripts in hints/:
+* run.py: parallel runner.
+* loop.py: the loop, the cascade and every scheduling flag.
+* Hints: hintlib.py, hintsel.py (kNN hints).
+* Lemmas: lemmas.py (sibling, kNN and subset lemmas, LemmaIndex).
+* Rule model: given.py, rulemodel.py, lgb2bin.py.
+* Scheduler: schedfeats.py, schedmodel.py.
+* Other tracks: climb.py (sketches and the lattice), latticedata.py, latticepolicy.py, climbab.py,
+  transfer.py (proof steps of other proofs), merge.py, p9loop.py, p9twee.py, uflive.py and unfold.py,
+  gnn.py, gen.py and gencopy.py, deepire.py, stallsim.py, summary.py, timecurve.py.
+* solve_new.sh: the system for new problems.
+* PG: pgdata.py, pgtrain.py, pgdata_enigma.py, pgtrain_enigma.py.
+
+---------------------------------------------------------------------------------------------------------
+
+## 4. The system as it stands
+
+### 4.1 What a run is
+Each goal is one twee run on the goal's problem.
+* **Lemmas:** the 6 nearest proven sibling goals of the same original, on either side by goal order, as
+  axioms. Plus the 30 kNN proven goals of originals with the same axioms or a subset of them (lemmas.py
+  LemmaIndex: idf-weighted Jaccard on term-shape features). Conditional goals with a definitional hypothesis
+  enter as unit forms.
+* **Hints:** the pool of all proof lemmas of the original's solved goals (`--pool original`), as equations
+  with goal constants expanded and skolems as variables. They are kept normalised by the current rules. A
+  critical pair matching a hint gets its score scaled down.
+* **Rule model:** rm4t with a goal block (`--rule-goal`).
+* **Settings:** `--abstract-time 2000 --no-resume-requeue --no-eqhint-consider --max-cpu ...`. `--wall-factor 15`
+  sets the wall-clock safety limit.
+
+### 4.2 The cascade (loop.py)
+* Levels 5, 20, 80 and 320 abstract s. The first is a fresh run; deeper levels resume the saved state, or run
+  fresh when the hint pool grew 25% (`--retry-hints 1.25`) or the kNN lemmas changed (`--retry-knn`).
+* A goal becomes eligible when its context changes: a nearer proven goal below it (line gap at most 80
+  proof lines, `--line-gaps 80,80`), new hints, or new kNN lemmas.
+* Order: `--mix 0.1 --fail-order`. Each kind (near retries, far goals, deeper levels) keeps a share of the
+  workers, and the rest go to the best yield over the last 300 runs. Fresh runs go fewest failures first,
+  then near before far.
+* `--sync 60` takes in proofs that side workers append. `--pass-every 1` limits the full scheduling pass,
+  with an adaptive 8x interval.
+* `--no-fresh-states`: no state dump for fresh runs, which saves 22% of a failing run.
+* The learned scheduler (`--sched-model`) is off by default, because at scale its gain was noise.
+
+### 4.3 Production
+* `abs/ul41.sh` since 17 Nov 17:25 (UL41.log): ul40 (e44, the 17 Nov defaults) plus the PG sum filter.
+  It runs `--twee /project/bin/twee-pg50` with `TWEE_PG_ARGS="--pg-threshold 0.25"`, on 4 workers.
+* Solved: 44,870 of 51,784 at 18:15 on 17 Nov (holdout about 4,900; count the distinct goals in
+  loops/UL/solved.tsv). Plain twee at 4 s gets 31,060.
+* The production lineage is in the headers of abs/ul3.sh … ul41.sh, each with its reason and time:
+  * ul3–ul10: rounds 3–5, adding --no-resume-requeue, --no-eqhint-consider, line gaps, retry-hints and sync.
+  * ul12–ul14: fresh-first, far-retry, line gaps 80.
+  * ul15–ul31: the learned scheduler, heads-first (reverted), a 5 s first level, retry-knn.
+  * ul32–ul38: CPU shares for side batches, 30 kNN lemmas.
+  * ul39: --mix. ul40: e44. ul41: PG.
+* For new problems, `hints/solve_new.sh NAMES CONTEXT OUT [J [HOURS]]` runs the same cascade. The live
+  proof-step transfer runs beside it every 2 minutes. Its defaults are TWEE twee-e44, CASCADE
+  5,20,80,320, STATES --no-fresh-states, and ORDER `--mix 0.1 --fail-order`. REPORT section 5 explains
+  EXCLUDE, SCHED, LOOPARGS and AIM_PROB. **REPORT section 5 item 5 still shows the 15 Nov production
+  command; the current one is ul41.**
+* From zero on the whole benchmark (Z4, abs/z4_test.sh): 15,398 at 10 min, 35,511 at 1 h, 37,713 at 2 h,
+  38,044 at about 4 h.
+
+### 4.4 Conventions to reuse (do not re-decide)
+* **Goal constants:** twee flattens goals (e.g. `ld(x0,e)` becomes a constant `ld2`).
+  * Before matching anything, flattening constants become their definitions and skolems become variables:
+    `expandGoalConsts st_eqhints`, with cycles and size capped by setEqHintGoalConsts.
+  * Hints, given logs, rule-model features and GNN v2 all use this expanded form.
+  * Every feature of a rule or clause is computed on the expanded rule, with real symbol names. The AIM
+    signature is tiny (about 9 symbols) and the symbols matter, so no anonymous features (user, 15 Nov 09:05
+    for the GNN; again 17 Nov 17:56). Since e54, PG's ENIGMA features follow this rule.
+* ENIGMA features are keyed by FNV-1a hashes of the feature names (twee ff4c1c6, 12 Nov). The rule model maps
+  them through its vocabulary. PG folds them to bucket `key mod B`.
+* Hints from conditional goals that depend on the hypothesis go to HINTS-HYP and never into pools
+  (false when generalised).
+* The proof-line distance between goals, not goal-number distance, predicts transfer.
+* A pool's hints count from proofs of unconditional goals only. Old conditional-goal pools carry false
+  hints such as X0 = X1.
+
+---------------------------------------------------------------------------------------------------------
+
+## 5. What helped, and what did not (one line each; numbers in REPORT)
+
+Helped, in rough order of size:
+* the online loop with lemmas from proven siblings: the largest effect (2g, 2o; the ablation in 2q: lemmas
+  49, plain 28);
+* the rule model rm4 and rm4t (2b, 2q);
+* kNN lemmas from same-axiom and subset theories (2l), and 30 rather than 10 (2am);
+* hints (2q: +9–10 over lemmas alone, overlapping ENIGMA);
+* the cascade (90 against 69) with fresh retries when the context changes (2p, 2aa, 2ab, 2ae);
+* the speed work: fingerprint overlap index and interreduction filter 1.8–2x on long runs (2v), consider-emulation
+  off (−25% CPU, 2y), e43, e44, --no-fresh-states (2au);
+* the scheduling order: line gaps (2z); --mix and --fail-order from zero (2at);
+* proof-step transfer, 43 proofs per CPU hour on its first batch (2al);
+* PG with the sum filter: 52 against 29 on the 200 hard goals, and +900 at 50 minutes on half1 (2av; the A/B
+  is still running).
+
+Neutral or negative:
+* ProofWatch boosting; parent features; generalisation matching; hint reranking; frequency-weighted boosts;
+* hint axioms; multi-goal search; SFDF reorientation; the stall cutoff at short limits;
+* retraining on hard proofs and the oracle rule model online;
+* GNN online (never deployed); Deepire;
+* repeated deferral; the rule model ordering the queue (--cp-model-factor);
+* hint instances; the hint generator (it reproduces pool lemmas); conjecture cuts;
+* sketches and climbing as production (about 1–2% of climbs prove; useful only as a filler);
+* learned lattice moves (underpowered); heads-first at 320 s;
+* more than 30 kNN lemmas; MaSh-style lemma dependencies; lemma-pop; hints from kNN lemmas' proofs;
+* a 20 s level from scratch; --orig-rate; --fail-reset;
+* the learned scheduler at scale (noise);
+* the additive PG model in twee (37–39 against the sum's 52);
+* GC flags; the simplify pre-scan; --max-term-size.
+
+Why things fail online when they win offline: twee's search is chaotic, so any change re-randomises which
+hard goals fall. Model quality beyond rm4t buys nothing, even with an oracle (2ad, 2af). What pays is
+context (lemmas, hints from nearby proofs), cost (faster runs mean more runs), and order (first runs before
+repeats).
+
+---------------------------------------------------------------------------------------------------------
+
+## 6. Log by day (why, how, outcome)
+
+### 12 Nov (19:30–24:00): hints in twee, the loop, the rule model
+* Why: the goal. How:
+  * **st_eqhints:** canonical hint variants in both orientations, normalised by oriented rules, with all
+    forms remembered.
+  * **CP matching:** a match gives score × eqhint-factor + weight.
+  * **Fingerprint prefilter:** matching overhead fell from 30% to 7%.
+  * **Goal-constant expansion:** generalised hints never matched under flattening without it.
+  * **--eqhint-requeue:** re-simplifies the queue on new matches, like P9 back-demodulating sos.
+    Self-replay: 2,283 rules fell to 334.
+  * **Scripts:** loop.py, run.py, hintsel.py (kNN by goal statement).
+* The user pointed at the ENIGMA featurizers. So: Twee.Enigma (a LightGBM evaluator, enigmatic features
+  matching hints/enigfeats.py), the rule model with a one-time deferral, given logs, the stall cutoff, state
+  resume, ProofWatch, and the binary forest format (load 0.07 s against 0.39 s). Deferral is keyed by the
+  canonical equation, and features by FNV hashes.
+* Outcome: the rule model is the big gain (holdout at 2 s: 3,049 → 3,177); hint selection recall is capped
+  near 0.84.
+
+### 13 Nov: lemmas, the full benchmark, controls, abstract time, harder eval
+* Lemma import (proven siblings as axioms) and the first full benchmark: plain 31,060; loop + lemmas 33,249.
+* Prover9 control on 2 families: P9 is a good hint user, but twee without hints is far ahead (2i).
+* Hint soundness check: 807/814 sampled hints are theorems. The 6 false ones came from conditional goals,
+  and HINTS-HYP fixes them (e14).
+* User: abstract time → --abstract-time (e15), task costs (e19).
+* User: harder eval → HINTLOG, stallsim, the V2 rounds (whole-pool hints on 68 hard goals: 48 → 64 over 4
+  rounds). Runs stay on hints, and failures die on the CPU cap while still on hints.
+* Axiom groups and subsets: the 129 originals use 68 axiom sets, and 66 have strict subsets among the
+  others. So kNN lemmas from same or weaker theories are sound: r1sim 92 → 176 (2l).
+* SFDF (user): LADR prooftrans expand/directproof is linear; the search-based conversion converts few. No gain
+  either way (2n).
+* Resume fixes (e17, e20); online pools (+25%); the full-benchmark online loop UL started. Multi-goal search lost.
+
+### 14 Nov: cascade, ablation, speed, P9loop/Bigloop, RAM, sketches
+* Cascade 90 against 69; 6 sibling lemmas beat 3; 2x2x2 ablation (2q).
+* ENIGMA loop (user): retraining adds +0.03 AUC offline and nothing online; fixed model + hints beats in-loop
+  retraining (2u). Deepire-style model weak.
+* Slowdown (user): fingerprint index, the interreduction filter, queue cost (2v).
+* P9loop/Bigloop (user, with orderings): resume beats them on the frontier; no requeue wins (2w).
+* 100 GB (user): stale symbol-id tables on resume made goal-constant expansion cyclic. Fixed at the root;
+  -M6g by default (2x).
+* Consider-emulation off (2y). Line distances (user's remark on goal names, 2z). Stalled goals: fresh runs
+  with new hints beat resumes (2aa).
+* Sketch climbing (user): climb.py with laws (user: commutativity), frequent equations, gap filling, sync and
+  live side workers (2ab).
+
+### 15 Nov: scheduling, GNN, generator, cuts, theories, lattice learning
+* Self-correction: the climber's gain was the missing fresh-retry control, which led to --fresh-first and
+  --far-retry.
+* The learned scheduler: A/B 69 against 22 at the time (2ac); later found to be noise at scale.
+* Tail heads analysed; heads-first negative.
+* GNN (user: Chvalovsky, balancing; v2 symbol-aware): 0.887 offline, not deployed (2ad).
+* The stall was an artefact of a frozen kNN index; --retry-knn gave about +160 in 30 minutes (2ae).
+* Unfolding definitions (twee folds them; Prover9's proofs unfold): a side worker for a while (2af).
+* The 5 s first level beat 10 s: 33 against 20 (2ag).
+* Hint generator (user: GNN2Seq): pointer/copy decoders on CPU. It reproduces pool lemmas, and the novel
+  recall plateaus at 1–2% (2ah).
+* Conjecture cuts (user: IWIL 2026): no gain. AIM's sibling chain already supplies the oracle cuts (2ai).
+* Stronger theories and up/down climbing (user: Bol loops, Korovin): family results 3 against 3, but on
+  different goals (2aj). Learned lattice moves and Thompson sampling: underpowered (2ak).
+* hints/exp created (user asked about notes in the repo).
+
+### 16 Nov: transfer, lemmas, replays, from scratch
+* Goals that are steps of existing proofs get those proofs' steps as hints: 32/101 at 43 per CPU hour (2al).
+  The live transfer worker followed.
+* An identical-goal bug fixed in LemmaIndex; 30 kNN lemmas in production (2am).
+* Where proofs come from (2an). A proved tail head raises its original's later rate only from 0.43 to 0.53
+  goals an hour, so the head climber was stopped.
+* Replays of unseen originals from scratch (2aq): the context is worth 5–6%. solve_new.sh was born.
+* The scheduler from scratch starved originals without proofs, so --sweep-first. Its "+30" was noise.
+* The same statement proven in another theory: 13/323 (2ar).
+* Z0 (the whole benchmark from zero) was dispatcher-bound: the ctx cache, the select memo and --pass-every (2as).
+
+### 17 Nov: order, speed, parental guidance
+* --mix and --fail-order (2at): Z4 reached 37,713 at 2 h against 36,552. --fail-reset and --orig-rate gave no gain.
+* The tail needs longer runs; hint statistics do not predict which runs succeed (2au).
+* Speed: e43 (no dump for solved), --lean-states and then --no-fresh-states, e44 (incremental normalisation),
+  and a profile with ghc-prof: pair generation and normalisation take about 55%.
+* ORG/ORH (2 h, half1): --no-fresh-states 18,476 against 18,374, and 4,792 runs an hour against 4,268.
+  Adopted, with CASCADE 5,20,80,320.
+* **Parental guidance** (user, 15:52). See 6.1 for the full thread.
+
+### 6.1 Parental guidance, in detail (17 Nov 15:50 onwards)
+
+**What the paper does** (FroCoS 2021, "Fast and Slow Enigmas and Parental Guidance", arXiv 2107.06750; text
+in /project/hintwork/pg/paper/pg.txt). I should have read this first:
+* **Placement:** the model is called after a clause is generated (an inference found by indexing) and before
+  it is simplified. It judges real inferences only, of two-parent rules (paramodulation; in E that covers
+  resolution).
+* **Freezer:** rejected clauses are generated and then frozen. The freezer is revived when the unprocessed
+  set empties.
+* **Features:** ENIGMA Anonymous vectors, fixed length by feature hashing. E uses sdbm on 64-bit unsigned
+  integers, modulo the base, summing collisions. ENIGMA-NG tried bases 1k–32k; with trees, 8k matched no hashing.
+* **Pair representation:** Pfuse (the sum of the two parents' vectors) or Pcat (their concatenation). Pcat wins.
+* **Labels:** P_proof (parents of proof clauses positive, every other generated clause negative) beats
+  P_given. Negatives are sampled down per problem to ρ, best ρ = 4 for Pfuse and 8 for Pcat.
+* **Models:** the best Pcat models have 100–200 trees and 1,024–8,192 leaves, at threshold 0.05 for large
+  models and 0.2 for small ones.
+* **Result:** holdout +11.7% (Table 8: 1,553 against 1,390; with the GNN 1,623; 3-phase 1,632).
+
+**Twee's version:**
+* Twee runs a DISCOUNT loop: passives hold only parent ids, position and score, and each pair is
+  normalised once at generation, just to score it. Abstract time counts pairs considered, so PG changes
+  which pairs get selected, and the CPU saving comes on top.
+* `--pg-threshold P` keeps a pair when sigmoid(q1 + q2) ≥ P, where q is the rule-model raw score of the
+  critical pair each rule came from. Unscored rules (axioms, interreduced rules, a loaded state) are always paired.
+* **Freezer:** a decision depends only on the two stored scores, so nothing needs storing. When the queue
+  empties, thawPG regenerates every skipped pair (each active with itself and older ones) and turns the
+  filter off; a second empty queue is saturation.
+* **Placement since e51:** indexedOverlaps finds the overlap (overlapAt'), then checks `pgOK` once per
+  partner (lazy memo), then simplifyOverlap.
+* **Logging:** `--pg-log` prints PGR (id, parents, raw score, 10 dense features, `E<keys>`, canonical rule),
+  PGN (a new rule's pairs per partner) and, on success, PGPROOF lines.
+
+**Results so far:**
+* **Sum filter on the 200 hard goals** (base 29, testbed pg/tb):
+
+  | P | proved |
+  |---|---:|
+  | 0.047 | 40 |
+  | 0.119 | 43 |
+  | 0.269 | **52** |
+  | 0.4 | 49 |
+  | 0.6 | 48 |
+  | 0.8 | 45 |
+  | 0.95 | 45 |
+
+  At 0.269 CPU is about equal.
+* **Half1 A/B,** filter at 0.25 (PGA) against the new defaults (PGB):
+
+  | | PGA | PGB |
+  |---|---:|---:|
+  | 10 min | 11,467 | 10,061 |
+  | 20 min | 15,106 | 14,219 |
+  | 30 min | 16,913 | 15,886 |
+  | about 50 min | 18,150 | 17,248 |
+
+  Noise is about 185. The A/B ends about 18:54. Production ul41 already runs the filter.
+* **Learned models:**
+  * Additive model (pga1: interaction constraints, 10 features per rule): offline at 90% proof-pair
+    retention it keeps 11% of overlaps against the sum's 36%. In twee it proves only 37–39.
+  * At pruning matched to the sum's (35.5% of overlaps kept, pgtest5):
+
+    | model | proved | CPU s |
+    |---|---:|---:|
+    | pga1 | 39 | 819 |
+    | pga2 (no queue score) | 39 | 795 |
+    | pgq (q only) | 49 | 1,040 |
+    | pgqh (q and hint) | 45 | 966 |
+    | sum | 52 | 993 |
+    | base | 29 | 933 |
+
+  * Reading: offline proof-pair retention does not predict online proofs. The features copy the selection
+    order (queue score, size), and the plain sum of the rule model's scores is the best signal so far.
+  * The full 21-feature forest costs about 25 µs per evaluation: 3 s on a 2.3 s run.
+* **Next:** Pcat on hashed ENIGMA keys, as in the paper.
+  * e52 used the rule model's vocabulary; e53 hashed the keys (named and anonymous).
+  * e54 takes the keys from the goal-constant-expanded rule with real names (section 4.4; the user objected
+    to anonymous).
+  * In one run: 794 distinct features, 37 per rule. Collisions: 36.6% at base 1k, 14.2% at 4k, 9.9% at 8k.
+    Anonymous features had only 112 distinct.
+  * Re-logging the 1,500 late goals with e54 into pg/d3 (pg/relog5.sh, started 18:00). Then train Pcat
+    (ENIGMA only, and with the 20 dense features) at bases 1k/4k/8k, ρ = 8, about 100 trees and 255+ leaves.
+    Test at matched pruning on the 200 goals, reporting proofs and CPU separately.
+  * Cost is the risk (25 µs per evaluation); then a faster evaluator or a smaller forest.
+
+---------------------------------------------------------------------------------------------------------
+
+## 7. Mistakes, and what to do instead
+
+7.1 **Designing before reading the source** (17 Nov, PG). I built PG from the paper's title idea and
+"improved" it.
+* I scored candidate partners before unification. E scores only real inferences.
+* I used sparse vocabulary features where the paper uses hashing to a small base.
+* I used anonymous features where this project had decided on named, expanded ones.
+* The user had to ask "did you read the paper?" three times.
+* **Instead:** when a method comes from a paper, read the method sections fully, write the exact recipe
+  into section 6 or REPORT, and implement that first. Variants come after, as named variants.
+
+7.2 **Re-deciding settled conventions.** The goal-constant expansion and symbol-awareness were settled for
+the rule model (12 Nov) and the GNN (15 Nov), and I reopened them for PG. **Instead:** grep REPORT.md and
+this file before any feature design.
+
+7.3 **Unmeasured numbers stated as facts.** "Roughly 840k evaluations" was an estimate. **Instead:** say
+"estimate" or measure first.
+
+7.4 **Noise claimed as gains:** the scheduler +30, KN60, Thompson sampling, a time-based A/B of 20 against 18.
+**Instead:** state the noise floor beside every comparison, and replicate when the gain is under about 2x the
+floor.
+
+7.5 **Missing controls and leaks** (section 2). Every probe of stalled goals before 15 Nov 09:40 ran in a
+stale context (--init round 0, a frozen kNN index), so they were invalid.
+
+7.6 **Shell self-kills** with `pkill -f`, `pgrep -f` and `ps | grep` patterns contained in my own command
+(about six times, 12–15 Nov). **Instead:** use exact PIDs and the `desc` function.
+
+7.7 **Production crashes from loop.py edits** (shadowed names, three times). **Instead:** test every loop.py
+change on a copy of a loop directory with production's full option list before restarting production.
+
+7.8 **Wrong times** in REPORT, script headers and memory (at least six times). **Instead:** run `date`
+before writing any time.
+
+7.9 **Misreading a listing:** I reported 6 proofs when there were 3, because three names came from `ls given/`.
+**Instead:** count from the results file.
+
+7.10 **Editing a running script** (queue3.sh; solve_new.sh during LVZ). **Instead:** use private copies.
+
+7.11 **rm -rf on a variable path** (17 Nov, `$S/RTt/states`). **Instead:** use literal paths only.
+
+7.12 **Losing track** of what had already been discussed, which is why this file exists. The compaction
+summaries keep results but lose the reasons and the user's exact words. Keep section 1 current.
+
+---------------------------------------------------------------------------------------------------------
+
+## 8. Open threads (17 Nov 18:10)
+
+Running:
+* production ul41 (UL41.log, PG sum filter 0.25, 4 workers);
+* the PGA/PGB half1 A/B (loops/PGA, PGB), ending about 18:54: then write REPORT 2av, merge PGA's proofs into
+  UL (abs/merge_ab.sh or merge.py), and decide whether PG becomes the solve_new.sh default (TWEE=twee-pg50 with
+  TWEE_PG_ARGS);
+* the e54 re-log of pg/d3 (pg/relog5.sh, 4 workers).
+
+Next:
+1. Pcat ENIGMA models as above (6.1), tested at matched pruning; also several thresholds of the sum
+   filter at scale.
+2. If PG holds at scale: Z5, the whole benchmark from zero with the 17 Nov defaults and PG (abs/z5_test.sh exists).
+3. A faster forest evaluator (flat arrays, Float) if learned PG models need it.
+4. On-policy PG data: logs from runs with the filter on.
+5. Update REPORT section 5 to the ul41 production command.
+
+Waiting for the user: proof steps as lemma axioms.

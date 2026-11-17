@@ -1,0 +1,7 @@
+The 200-goal parental-guidance testbed (17 Nov), copied at 18:05 out of the session scratchpad (which is wiped
+when the session ends). all.goals: the 200 "late hard goals" of REPORT 2av (picked because the current settings
+failed them, so any change tends to win a few). cmds.all: 203 captured loop commands (twee-e43, 5 abstract s,
+rm4t, sibling + kNN lemmas, hints; captured with LOOP_PRINT_CMD), paths rewritten to here.
+Run variants with pg/tm/var51.py: it reads S/tm/all.goals and S/tm/cmds.all for its first argument S, and
+sets the binary in variant(); make a copy pointing at this dir. Base proves 29 of 200; the sum filter at 0.269
+proves 52.

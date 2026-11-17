@@ -94,7 +94,7 @@ data MainFlags =
     flags_rule_model :: Maybe FilePath,
     flags_pg_model :: Maybe FilePath,
     flags_pg_enigma :: Int,
-    flags_pg_anon :: Bool,
+
     flags_rule_vocab :: Maybe FilePath,
     flags_rule_goal :: Maybe FilePath,
     flags_rule_threshold :: Double,
@@ -285,11 +285,7 @@ parseMainFlags = do
   flags_pg_enigma <-
     expert $
     inGroup "Critical pair weighting heuristics" $
-    flag "pg-enigma" ["--pg-model is a Pcat model on hashed ENIGMA features (FroCoS 2021) with this hash base B: the new rule's and the partner's ENIGMA features hashed to B buckets each, then both rules' 10 features and the id gap (hints/pgtrain_enigma.py; 0 = not an ENIGMA model)."] 0 argNum
-  flags_pg_anon <-
-    expert $
-    inGroup "Critical pair weighting heuristics" $
-    bool "pg-anon" ["With --pg-enigma: ENIGMA Anonymous features (function symbols by their arity) instead of symbol names."] False
+    flag "pg-enigma" ["--pg-model is a Pcat model on hashed ENIGMA features (FroCoS 2021) with this hash base B: the new rule's and the partner's ENIGMA features (computed as the rule model's, on the rule with the goal constants expanded) hashed to B buckets each, then both rules' 10 features and the id gap (hints/pgtrain_enigma.py; 0 = not an ENIGMA model)."] 0 argNum
   flags_rule_vocab <-
     expert $
     inGroup "Critical pair weighting heuristics" $
@@ -1258,7 +1254,7 @@ runTwee globals (TSTPFlags tstp) horn precedence config0 flags@MainFlags{..} lat
       Just mfile -> do
         forest <- parseForestBin <$> BS.readFile mfile
         if flags_pg_enigma > 0 then
-          return $! length forest `seq` Just (PGEnigma forest flags_pg_enigma flags_pg_anon)
+          return $! length forest `seq` Just (PGEnigma forest flags_pg_enigma)
         else case splitPGModel forest of
           Just (fr, fa) -> return $! length fr `seq` length fa `seq` Just (PGAdditive fr fa)
           Nothing -> return $! length forest `seq` Just (PGFull forest)
