@@ -87,6 +87,24 @@ Hints: C 9,333, E 9,398, K and V 1,916. Matched: C 1,157, E 1,154, K 530, V 396.
 * For K and V: which chain hints were matched, by sibling distance and by depth. That shows whether the search
   climbs the chain.
 
+**First results** (20:21, one goal: KK_Kcom_to_aK1 299).
+* All four arms fail at 320 s. Each costs 820–1,050 CPU s and peaks at 1.3–1.9 GB.
+* **All four were still finding new hint matches at the end** (the last at 301–320 abstract s), so no stall
+  limit would have stopped them early. That is the same as whole pools on 13 Nov.
+* **The chain is not a ladder here.** The nearest siblings have tiny proofs: 297 has 2 steps, 270, 269 and 268
+  one each. They were proved with lemmas or by instance, and their derivations are missing from the chain. One
+  sibling, rank 5 (271), carries 7,339 of the chain's steps. All arms match the 2 own steps of 297, so "rank 0
+  matched" means little.
+
+**Chain holes** (found 20:23).
+* 127 of the 439 siblings (29%) have no USEDAXIOMS record, so they enter as leaves. Their closures hold a median
+  of 13 unrecorded members (q3 46, max 202).
+* 36 of those 127 were proved by the transfer. transfer.tsv names their source proofs, whose closures are the
+  natural expansion (an instance of, or a step in, a proof from the same or weaker axioms). The transfer keeps
+  no outputs, so expand.py never sees these.
+* The rest are proofs from before USEDAXIOMS was printed (twee-e31).
+* exp3 keeps its chains as built. Following transfer sources is a fix for the next chain experiment.
+
 **Caveats.**
 * 47 goals at 320 s: an arm that proves 2 more is not evidence alone. Any proof is new to the benchmark.
 * C repeats a depth production already tried on 16 goals, in an older context. C's proofs therefore measure the
