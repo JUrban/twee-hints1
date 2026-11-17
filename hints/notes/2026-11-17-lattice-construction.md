@@ -172,6 +172,18 @@ were sketched at 5 s.
 * **Refinement on all goals** (launched 23:19, 2 CPUs, 20 s): `python3 refine.py sketch47b.tsv refine20.tsv -j 2
   --time 20`. There are 144 sketches with at least one plausible instance that is not S itself, plus one run per
   goal with all of them (42 goals).
+  * **Interim (23:47, 133 of 186 runs): rungs exist.** 27 runs proved their goal with only plausible conjectures
+    as assumptions, in 0.5–22 CPU s. They cover 14 of the 47 goals:
+    * aa2_12 517, aK2eq_1243 435, aK2_eq_aK3_o 435, aK2_eq_aK3_q 211, Ka1_eq_Ka2 409, mbol_lem1 387;
+    * nil3_1K 466, nil3_30 508, nslm_to_aa1 1003 and 1267, nsmr_to_aa1 624;
+    * ns_to_aa1_b 651 and 723, ns_to_aa1_e 441.
+  * Most proofs use one conjecture, for example
+    `k(l(l(X0,X1,X2),m(X2,X1),X3),X2) = k(ld(m(X3,m(X2,X1)),m(X3,m(m(X1,X0),X2))),X2)` for aa2_12 517. Such a
+    conjecture is a rung between the chain and the target: if it is provable in T, the goal is solved.
+  * The fault fix made the difference. On goal 299 (20:36) the faulty instances never sufficed.
+* **Stage 2: proving the rungs** (23:47). rungs.py collects the used conjectures: 35 distinct ones in 15 goals.
+  sketch.py runs each as a goal with the goal's production command at 20 s, 2 CPUs (exp5 lowered to 2):
+  `python3 rungs.py refine20.tsv rungs20a.tsv; python3 sketch.py rungs20a.tsv rprove20a.tsv -j 2 --time 20`.
 
 **Down step with sketch hints** (downhints.py, launched 21:57).
 `python3 downhints.py sketch47.tsv down80.tsv -j 2 --time 80 --arms I,U`
