@@ -1044,87 +1044,102 @@ class Loop:
         with open(os.path.join(rdir, 'results.tsv'), 'a') as rf, \
              open(os.path.join(self.dir, 'solved.tsv'), 'a') as sf, \
              ThreadPoolExecutor(a.j) as ex:
+            tm = [0.0, 0.0, 0.0, 0.0]   # the main thread's seconds: scheduling passes, submitting, waiting, results
+            t_r = None
+            retry, deep, far, light, last_full = [], [], [], False, -1e18
             while True:
+                if t_r is not None:
+                    tm[3] += time.time() - t_r
                 if a.sync and time.time() - sync_t >= a.sync:
                     sync(); sync_t = time.time()
                 busy = {n for n, _ in running.values()}
-                if time.time() - t0 < a.cascade_hours * 3600:
-                    g = gaps()
-                    if RK and (time.time() - kgen[1] >= a.knn_refresh or len(self.solved) - kgen[2] >= 300):
-                        t_ = time.time()
-                        self.lemma_index = self.make_lemma_index()
-                        kgen[:] = [kgen[0] + 1, time.time(), len(self.solved)]
-                        print(f'  cascade: --retry-knn: kNN index rebuilt ({len(self.solved)} proofs, '
-                              f'{time.time()-t_:.0f}s)', flush=True)
-                    if SM and RK:
-                        # best predicted first; the kNN check (~27 ms a goal) only as far as needed
-                        free = a.j - len(running)
-                        retry = []; cand = {}; kbudget = [150]   # (uncached kNN checks per pass: ~4 s)
-                        def kcheck(n):
-                            v_ = knn_cur.get(n)
-                            if v_ is None or v_[0] != kgen[0]:
-                                if kbudget[0] <= 0:
-                                    return False
-                                kbudget[0] -= 1
-                            return knnch(n)
-                        for v, n in sorted((-score(n), n) for n in att if n not in busy):
-                            if ctx(n) != att[n][0] or grown(n) or n not in knn_at:
-                                cand[n] = -v
-                            elif -v >= lmin and sc[n][2] <= a.sched_max_lgap and len(retry) < free and kcheck(n):
-                                cand[n] = -v
-                            else:
-                                continue
-                            if -v >= lmin and sc[n][2] <= a.sched_max_lgap and len(retry) < free:
-                                retry.append((v, n))
-                    elif SM:
-                        cand = {n: score(n) for n in att
-                                if n not in busy and (ctx(n) != att[n][0] or grown(n))}
-                        retry = sorted((-v, n) for n, v in cand.items()
-                                       if v >= lmin and sc[n][2] <= a.sched_max_lgap)
-                    else:
-                        retry = sorted((g[n][1], gnum[n][1], n) for n in att
-                                       if n not in busy and (ctx(n) != att[n][0] or grown(n)) and may_retry(n, g))
-                    uset = set()
-                    if SM and a.sweep_first:
-                        # --sweep-first: goals never run in this round go first, in goal order across the
-                        # originals. The scheduler's model was trained on retries; from zero it ranked one
-                        # original's goals first and starved the others (LZ4, 16 Nov: 427 runs, all of
-                        # a_of_aa, 232 proofs at 10 min against 806 without the scheduler)
-                        un = [n for _, _, n in sorted((gnum[n][1], gnum[n][0], n) for n in att
-                                                      if n not in busy and att[n] == (None, -1))]
-                        if un:
-                            uset = set(un)
-                            retry = [(0, n) for n in un] + [x for x in retry if x[-1] not in uset]
-                    deep_running = collections.Counter(orig_of(n) for n, l in running.values() if l > 0)
-                    # --head-first: an original's tail head (the goal after its last proven goal)
-                    # deepens first, and only heads go to levels >= --head-only-from. A head's
-                    # proof starts a chain (the goal above gets a new context, ~50%); at 06:45 the 95
-                    # heads held 4,851 of the 8,335 unsolved goals behind them, and 93 had never run
-                    # beyond 80 s (median 416 wall s in all)
-                    hs = heads() if a.head_first else set()
-                    # (heads first for the levels below --head-only-from, at any level: a head's
-                    # 320 s resume, ~30% x a chain of ~2, pays about as well per CPU-second as an
-                    # 80 s resume of another goal, ~20%; at 06:58 2,185 goals waited for one)
-                    hof = a.head_only_from or len(T)
-                    deep = sorted((int(not (n in hs and att[n][1] + 1 < hof)), att[n][1] + 1,
-                                   deep_running[gnum[n][0]], g[n][1], gnum[n][1], n)
-                                  for n in att
-                                  if n not in busy and ctx(n) == att[n][0] and att[n][1] + 1 < len(T)
-                                  and (may_deepen(n, g) or n in hs) and not grown(n)
-                                  and (n in hs or not a.head_only_from or att[n][1] + 1 < a.head_only_from))
-                    far = []
-                    if SM and a.far_retry and len(running) + len(retry) + len(deep) < a.j:
-                        far = sorted((-v, n) for n, v in cand.items()
-                                     if (v < lmin or sc[n][2] > a.sched_max_lgap) and n not in uset)[:a.j]
-                    elif a.far_retry and len(running) + len(retry) + len(deep) < a.j:
-                        # --far-retry: idle slots retry (fresh) the goals beyond the retry gaps too,
-                        # nearest first, after everything else
-                        far = heapq.nsmallest(a.j, ((g[n][1], gnum[n][1], n) for n in att
-                                                    if n not in busy and (ctx(n) != att[n][0] or grown(n))
-                                                    and not may_retry(n, g)))
+                tq_ = time.time()
+                if tq_ - t0 < a.cascade_hours * 3600:
+                    # --pass-every S: the full pass (every waiting goal: gaps, contexts, pools; on 51,784 goals
+                    # from zero 134 of the main thread's 180 s) at most every S seconds; between them the
+                    # lists it made are used up, each goal checked again when it is taken
+                    light = bool(a.pass_every and (retry or deep or far) and tq_ - last_full < a.pass_every)
+                    if not light:
+                        last_full = tq_
+                        g = gaps()
+                        if RK and (time.time() - kgen[1] >= a.knn_refresh or len(self.solved) - kgen[2] >= 300):
+                            t_ = time.time()
+                            self.lemma_index = self.make_lemma_index()
+                            kgen[:] = [kgen[0] + 1, time.time(), len(self.solved)]
+                            print(f'  cascade: --retry-knn: kNN index rebuilt ({len(self.solved)} proofs, '
+                                  f'{time.time()-t_:.0f}s)', flush=True)
+                        if SM and RK:
+                            # best predicted first; the kNN check (~27 ms a goal) only as far as needed
+                            free = a.j - len(running)
+                            retry = []; cand = {}; kbudget = [150]   # (uncached kNN checks per pass: ~4 s)
+                            def kcheck(n):
+                                v_ = knn_cur.get(n)
+                                if v_ is None or v_[0] != kgen[0]:
+                                    if kbudget[0] <= 0:
+                                        return False
+                                    kbudget[0] -= 1
+                                return knnch(n)
+                            for v, n in sorted((-score(n), n) for n in att if n not in busy):
+                                if ctx(n) != att[n][0] or grown(n) or n not in knn_at:
+                                    cand[n] = -v
+                                elif -v >= lmin and sc[n][2] <= a.sched_max_lgap and len(retry) < free and kcheck(n):
+                                    cand[n] = -v
+                                else:
+                                    continue
+                                if -v >= lmin and sc[n][2] <= a.sched_max_lgap and len(retry) < free:
+                                    retry.append((v, n))
+                        elif SM:
+                            cand = {n: score(n) for n in att
+                                    if n not in busy and (ctx(n) != att[n][0] or grown(n))}
+                            retry = sorted((-v, n) for n, v in cand.items()
+                                           if v >= lmin and sc[n][2] <= a.sched_max_lgap)
+                        else:
+                            retry = sorted((g[n][1], gnum[n][1], n) for n in att
+                                           if n not in busy and (ctx(n) != att[n][0] or grown(n)) and may_retry(n, g))
+                        uset = set()
+                        if SM and a.sweep_first:
+                            # --sweep-first: goals never run in this round go first, in goal order across the
+                            # originals. The scheduler's model was trained on retries; from zero it ranked one
+                            # original's goals first and starved the others (LZ4, 16 Nov: 427 runs, all of
+                            # a_of_aa, 232 proofs at 10 min against 806 without the scheduler)
+                            un = [n for _, _, n in sorted((gnum[n][1], gnum[n][0], n) for n in att
+                                                          if n not in busy and att[n] == (None, -1))]
+                            if un:
+                                uset = set(un)
+                                retry = [(0, n) for n in un] + [x for x in retry if x[-1] not in uset]
+                        deep_running = collections.Counter(orig_of(n) for n, l in running.values() if l > 0)
+                        # --head-first: an original's tail head (the goal after its last proven goal)
+                        # deepens first, and only heads go to levels >= --head-only-from. A head's
+                        # proof starts a chain (the goal above gets a new context, ~50%); at 06:45 the 95
+                        # heads held 4,851 of the 8,335 unsolved goals behind them, and 93 had never run
+                        # beyond 80 s (median 416 wall s in all)
+                        hs = heads() if a.head_first else set()
+                        # (heads first for the levels below --head-only-from, at any level: a head's
+                        # 320 s resume, ~30% x a chain of ~2, pays about as well per CPU-second as an
+                        # 80 s resume of another goal, ~20%; at 06:58 2,185 goals waited for one)
+                        hof = a.head_only_from or len(T)
+                        deep = sorted((int(not (n in hs and att[n][1] + 1 < hof)), att[n][1] + 1,
+                                       deep_running[gnum[n][0]], g[n][1], gnum[n][1], n)
+                                      for n in att
+                                      if n not in busy and ctx(n) == att[n][0] and att[n][1] + 1 < len(T)
+                                      and (may_deepen(n, g) or n in hs) and not grown(n)
+                                      and (n in hs or not a.head_only_from or att[n][1] + 1 < a.head_only_from))
+                        far = []
+                        if SM and a.far_retry and len(running) + len(retry) + len(deep) < a.j:
+                            far = sorted((-v, n) for n, v in cand.items()
+                                         if (v < lmin or sc[n][2] > a.sched_max_lgap) and n not in uset)[:a.j]
+                        elif a.far_retry and len(running) + len(retry) + len(deep) < a.j:
+                            # --far-retry: idle slots retry (fresh) the goals beyond the retry gaps too,
+                            # nearest first, after everything else
+                            far = heapq.nsmallest(a.j, ((g[n][1], gnum[n][1], n) for n in att
+                                                        if n not in busy and (ctx(n) != att[n][0] or grown(n))
+                                                        and not may_retry(n, g)))
+                    tm[0] += time.time() - tq_; tq_ = time.time()
                     while len(running) < a.j and (retry or deep or far):
                         if retry or (far and not deep):
                             n = (retry or far).pop(0)[-1]; lev = 0
+                            if light and (n not in att or n in busy or not (ctx(n) != att[n][0] or grown(n))):
+                                continue
                             att[n] = (ctx(n), 0)
                             if RK:
                                 knn_at[n] = knn_sig(n)
@@ -1142,6 +1157,8 @@ class Loop:
                             _, lev, _, _, _, n = deep.pop(0)
                             if any(m == n for m, _ in running.values()):
                                 continue
+                            if light and (n not in att or att[n][1] + 1 != lev or ctx(n) != att[n][0] or grown(n)):
+                                continue
                             att[n] = (ctx(n), lev)
                             sp = os.path.join(self.dir, 'states', n + '.bin')
                             # --p9loop (P9loop deepening): a fresh run of the level's increment, with the
@@ -1153,13 +1170,19 @@ class Loop:
                         if H and lev == 0:   # (its features, context and predicted success, for observe())
                             x_, c_ = H.feats(n)
                             startctx[n] = (c_, 1 / (1 + math.exp(-score(n))), x_)
+                    tm[1] += time.time() - tq_
+                    if light and len(running) < a.j and not (retry or deep or far):
+                        last_full = -1e18; t_r = None   # (the kept lists ran dry: a full pass now)
+                        continue
                 if not running:
                     if a.sync and time.time() - t0 < a.cascade_hours * 3600:
                         # nothing to run: wait for proofs from the side workers (new contexts)
                         time.sleep(a.sync); sync(); sync_t = time.time()
                         continue
                     break
+                tq_ = time.time()
                 fin, _ = wait(list(running), return_when=FIRST_COMPLETED)
+                tm[2] += time.time() - tq_; t_r = time.time()
                 for f in fin:
                     n0, lev = running.pop(f)
                     n, ok, dt, stats, hs = f.result()
@@ -1201,6 +1224,7 @@ class Loop:
                     if done_n % 50 == 0:
                         print(f'  cascade: {done_n} runs, new={new}, {len(running)} running, '
                               f'{time.time()-t0:.0f}s' + (f', synced={nsync}' if a.sync else '')
+                              + f', main s: pass {tm[0]:.0f} submit {tm[1]:.0f} wait {tm[2]:.0f} results {tm[3]:.0f}'
                               + (f', fresh {calib[2]}/{calib[1]} (predicted {calib[0]:.0f})' if H else ''),
                               file=sys.stderr, flush=True)
         msg = f'cascade: {done_n} runs new {new} total {len(self.solved)}/{len(self.names)} {time.time()-t0:.0f}s'
@@ -1460,6 +1484,9 @@ def make_parser():
                     help='--p9loop: also take the matchers of unconditional sibling goals at most this many places away')
     ap.add_argument('--p9-max', type=int, default=0, help='--p9loop: at most this many lemmas, the most recently derived (0 = all)')
     ap.add_argument('--init', help='import round-0 results (solved.tsv and hints) of another loop dir')
+    ap.add_argument('--pass-every', type=float, default=0, metavar='S',
+                    help='--cascade: the full scheduling pass at most every S seconds, the lists it made used up '
+                         'in between (from zero on 51,784 goals the pass took 75%% of the main thread)')
     ap.add_argument('--far-retry', action='store_true',
                     help='--cascade: slots with nothing else to run retry goals beyond the retry gaps '
                          '(fresh at T0, nearest first) when their context or pool changed')
