@@ -1187,8 +1187,19 @@ data EqHints f =
     -- (recomputed when hints are normalised; not saved with the state)
     eh_open :: !OpenFps,
     -- --eqhint-instances: the hints by their non-variable sides (not saved with the state)
-    eh_inst :: !(InstIndex f) }
+    eh_inst :: !(InstIndex f),
+    -- each live hint's full normal form at the last normalisation (not saved with the state)
+    eh_fulls :: !(FullForms f) }
   deriving (Generic, Binary)
+
+-- | The full normal forms ('fullNormEqn') of the live hints when they were last
+-- normalised: 'normaliseEqHints' skips a hint that no rule added since can rewrite.
+-- Not serialised (zero bytes): after a load every hint is normalised again.
+newtype FullForms f = FullForms (IntMap (Equation f))
+
+instance Binary (FullForms f) where
+  put _ = return ()
+  get = return (FullForms IntMap.empty)
 
 -- | Hints indexed by a non-variable side (stored as side :=: other side), for matching
 -- critical pairs that are instances of a hint. Not serialised.
@@ -1227,7 +1238,7 @@ emptyEqHints = EqHints {
   eh_joined = 0, eh_norm_at = 0, eh_fps = IntSet.empty, eh_goalconsts = IntMap.empty,
   eh_gcfps = IntMap.empty, eh_ntracked = 0, eh_requeued_at = 0, eh_last_match = 0,
   eh_max_gap = 0, eh_last_new_cp = 0, eh_log = [], eh_hgroups = IntMap.empty, eh_gsize = IntMap.empty, eh_gdone = IntMap.empty, eh_open = OpenFps Nothing,
-  eh_factor = IntMap.empty, eh_inst = InstIndex Nothing }
+  eh_factor = IntMap.empty, eh_inst = InstIndex Nothing, eh_fulls = FullForms IntMap.empty }
 
 -- | Add a hint with an optional factor and the proofs (groups) it comes from.
 {-# INLINEABLE addEqHintFull #-}
@@ -1518,6 +1529,15 @@ markResumedHints state@State{st_eqhints = eh0}
         _ -> eh
 
 -- | Normalise all live hints with respect to the oriented rules.
+--
+-- (17 Nov) Incremental: a hint whose sides and full normal form were normal at the
+-- last normalisation stays so unless a rule added since (a higher id) rewrites one of
+-- their subterms (deleting rules cannot make a normal form reducible; interreduction
+-- re-adds a changed rule under a new id). Such hints are skipped: in failing 5 s AIM
+-- runs the full pass took 12% of the CPU. (A full normal form is reached by ordered
+-- rewriting, so in principle a new rule that rewrites only an intermediate term of its
+-- derivation could change it; then the old form stays in the map, as before.)
+-- TWEE_HINTNORM_FULL=1 normalises every hint every time, as before.
 {-# INLINEABLE normaliseEqHints #-}
 normaliseEqHints :: Function f => State f -> State f
 normaliseEqHints state@State{st_eqhints = eh@EqHints{..}, ..}
@@ -1527,16 +1547,31 @@ normaliseEqHints state@State{st_eqhints = eh@EqHints{..}, ..}
       st_eqhints = eh {
         eh_live = live', eh_map = map', eh_joined = eh_joined + joined,
         eh_norm_at = st_next_active,
-        eh_fps = foldl' (flip IntSet.insert) eh_fps (map eqnFingerprint (IntMap.elems live')),
+        eh_fps = foldl' (flip IntSet.insert) eh_fps (map eqnFingerprint changed),
+        eh_fulls = FullForms fulls',
         eh_open = OpenFps (Just (IntSet.fromList
           [ eqnFingerprint e | (n, e) <- IntMap.toList live', n < trackBase, not (IntSet.member n eh_matched) ])) } }
   where
     idx = index_oriented st_rules
-    (live', map', joined) = IntMap.foldlWithKey' step (IntMap.empty, eh_map, 0 :: Int) eh_live
-    step (live, m, j) n eqn@(t :=: u)
-      | t' == u' = (live, m, j+1)
-      | t' == t && u' == u = (IntMap.insert n eqn live, addFull m, j)
-      | otherwise = (IntMap.insert n (t' :=: u') live, addFull (insertEqHintForms n (t' :=: u') m), j)
+    FullForms fulls0 = eh_fulls
+    -- the rules added since the last normalisation (and still there)
+    newIdx = Index.fromList
+      [ (lhs r, r)
+      | n <- [eh_norm_at .. st_next_active - 1],
+        Just a <- [IntMap.lookup (fromIntegral n) st_active_set],
+        r <- activeRules a ]
+    touched (t :=: u) = any hit (subterms t) || any hit (subterms u)
+    hit x = not (Prelude.null (Index.matches x newIdx))
+    (live', map', joined, fulls', changed) =
+      IntMap.foldlWithKey' step (IntMap.empty, eh_map, 0 :: Int, IntMap.empty, []) eh_live
+    step (live, m, j, fs, ch) n eqn@(t :=: u)
+      | not hintNormFull, Just f0 <- IntMap.lookup n fulls0, not (touched eqn), not (touched f0) =
+        (IntMap.insert n eqn live, m, j, IntMap.insert n f0 fs, ch)
+      | t' == u' = (live, m, j+1, fs, ch)
+      | t' == t && u' == u = (IntMap.insert n eqn live, addFull m, j, IntMap.insert n full fs, ch)
+      | otherwise =
+        (IntMap.insert n (t' :=: u') live, addFull (insertEqHintForms n (t' :=: u') m), j,
+         IntMap.insert n full fs, (t' :=: u'):ch)
       where
         t' = simplify idx t
         u' = simplify idx u
@@ -1544,6 +1579,10 @@ normaliseEqHints state@State{st_eqhints = eh@EqHints{..}, ..}
         addFull m
           | t'' == u'' = m
           | otherwise = insertEqHintForms n full m
+
+{-# NOINLINE hintNormFull #-}
+hintNormFull :: Bool
+hintNormFull = unsafePerformIO (fmap isJust (lookupEnv "TWEE_HINTNORM_FULL"))
 
 -- Apply hints to a term.
 applyHints :: Function f => Hints f -> Term f -> Term f

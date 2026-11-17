@@ -4124,7 +4124,7 @@ ORE (e43 + `--lean-states`) and ORF (also 5, 20, 80, 320 s) ran from
   failed.
 * So a fresh run of a goal that may not deepen, dispatched between two
   full passes, raised a TypeError.
-* The heads set is now `hds` (0d0c0c0, below). The bug cannot have
+* The heads set is now `hds` (7d376a2). The bug cannot have
   touched ORA–ORD, which ran without `--lean-states`.
 
 Their first hour is valid:
