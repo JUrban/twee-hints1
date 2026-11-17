@@ -72,9 +72,24 @@ CPU on one failing goal, 5 abstract s:
 The full forest costs about 30 µs per judged pair. In this run the filter kept 143k pairs; the judged
 ones are more, and I did not count them.
 
-Online: pending (pgtest6 about 19:20; pgtest7 after it).
+Online, pgtest6 (twee-e54, 200 testbed goals, 5 abstract s; ended 19:06):
+
+| filter | proved | gained / lost against base | CPU s |
+|---|---:|---:|---:|
+| base | 29 | | 904 |
+| sum 0.269 | **52** | +23 −0 | 977 |
+| pce_1024 (full, ENIGMA only) at 0.0052 | 36 | +8 −1 | 5,960 |
+| pcd_1024 (full, ENIGMA + numbers) at 0.0007 | 39 | +11 −1 | 4,767 |
+
+pgtest7 (additive): running.
 
 **Reading so far.**
+* **The full Pcat models lose online at the same abstract budget** (36 and 39 against the sum's 52), even
+  before their 5–6× CPU cost. This repeats the dense models' pattern (2026-11-17-pg-learned-dense.md): better
+  offline (93.5–97.5% of proof pairs kept against 84.1%), worse online. So the offline test, which ranks the
+  pairs of the old proofs, does not measure what the filter does online. The filter changes which pairs get
+  selected, so the old proofs' pairs are not the ones that matter. On-policy data (pairs logged from runs
+  with the filter on) is the next thing to try, if any.
 * The base does not matter, so 1k buckets are enough for AIM's small signature.
 * Offline, the ENIGMA vectors alone already beat the sum (93.5% against 84.1%). But offline gains have not
   carried over before (2026-11-17-pg-learned-dense.md), so only the online test counts.

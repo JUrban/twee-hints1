@@ -4358,7 +4358,17 @@ An earlier "9,458 against 8,986 at 10 minutes" was read before minute
 10. **At 2 hours: PGA 18,987, PGB 18,410 (+577, three times the noise
 of identical runs).** The gain is front-loaded (+1,406 at 10 minutes)
 and flat over the last 20 minutes. PG at 0.25 is solve_new.sh's
-default from 19:00 (`PG=` turns it off). The additive model is under test on the 200 goals.
+default from 19:00 (`PG=` turns it off).
+
+**Pcat models as in the paper, online (pgtest6, 19:06).** Full forests
+on hashed ENIGMA vectors (named features on the goal-expanded rule,
+1,024 buckets) prove 36 (ENIGMA only) and 39 (with the 20 numbers) of
+the 200, against 52 for the sum filter, at the same abstract budget and
+5–6 times the CPU. Offline they kept 93.5–97.5% of the proof pairs
+against the sum's 84.1%. As with the dense models, offline ranking on
+the old proofs' pairs does not predict the online result
+(notes/2026-11-17-pg-pcat-enigma.md). The additive forms (pgtest7) are
+running. The additive model is under test on the 200 goals.
 
 ## 2c. Long runs: stall cutoff and checkpoints
 

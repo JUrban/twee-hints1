@@ -621,13 +621,54 @@ Waiting for the user: proof steps as lemma axioms.
 
 ## 9. Experiment reports (hints/notes/)
 
-Written from 17 Nov 18:30 on. Experiments before that are in REPORT.md and in the transcript only.
+One report per experiment: the question and who asked, the exact setup (scripts, sets and how they were chosen,
+snapshots, binaries), the numbers, the noise, and what the numbers do not show. Reports for 12–17 Nov 15:50 were
+reconstructed on 17 Nov from REPORT.md, the commits, and the session's commands (exp/findcmd.py). Those say so at
+the top, and corrections found while reconstructing went into REPORT.md as well (2e, 2m). From 17 Nov 18:30 on,
+reports are written as the experiments run.
 
-| report | question | status |
-|---|---|---|
-| notes/2026-11-17-pg-sum-filter.md | does the sum-of-scores parental filter help? (200-goal testbed) | done: 52 against 29 at 0.269 |
-| notes/2026-11-17-pg-learned-dense.md | learned parental models on 10 numbers per rule | done: lose online (37–49) |
-| notes/2026-11-17-pg-pcat-enigma.md | Pcat on hashed ENIGMA features, as the paper (full and additive) | online tests running |
-| notes/2026-11-17-pg-ab-half1.md | the sum filter at scale: half1 from zero, 2 h | done: 18,987 against 18,410; PG default |
-| notes/2026-11-17-lemma-circularity.md | are lemma chains circular? are kNN lemmas from weaker theories? | done: no violations on 67k recorded proofs |
-
+| report | title |
+|---|---|
+| notes/2026-11-12-hint-selection.md | Which hints to give: pools, kNN, and a learned ranking (transfer benchmark T1) |
+| notes/2026-11-12-hints-dev10.md | First hints in twee: baselines, self-replay, and the first hint loops on dev10 |
+| notes/2026-11-12-holdout.md | The AIM60k holdout: plain twee, the rule model, and the hint loop |
+| notes/2026-11-12-long-runs-checkpoints.md | Long runs on hard dev goals: the stall cutoff and checkpoints; what was ported from Prover9-new |
+| notes/2026-11-12-rule-model.md | ENIGMA in twee: a learned filter on new rules |
+| notes/2026-11-13-axiom-groups.md | Lemmas and hints across originals with the same or weaker axioms |
+| notes/2026-11-13-enigma-loop.md | The ENIGMA loop (rm4, rm5, rm4b) and generalisation matching |
+| notes/2026-11-13-full-benchmark.md | The whole public benchmark at 4 s per problem, long runs on hard holdout, and a Prover9 control |
+| notes/2026-11-13-hyp-hints-abstract-time.md | False hints from conditional goals, and abstract time |
+| notes/2026-11-13-lemma-import.md | Proven sibling goals as axioms, resumed runs with lemmas, and sketches |
+| notes/2026-11-13-long-runs-stall.md | Long runs: how long runs stay on hints, the whole-pool advantage, and resumed rounds |
+| notes/2026-11-13-online-pools-cascade.md | Online pools, multi-goal search, the gap to the nearest proof, and the cascade |
+| notes/2026-11-13-p9-sfdf.md | Prover9: SFDF reorientation of proofs before they become hints |
+| notes/2026-11-14-ablation-lemma-count.md | Ablation of ENIGMA, hints and lemmas; how many sibling lemmas; which lemmas proofs use |
+| notes/2026-11-14-enigma-looping-deepire.md | ENIGMA-style looping, a Deepire-style model, and retraining online |
+| notes/2026-11-14-hint-axioms-profile.md | Frequent hints as axioms, a false hint in old pools, where twee's time goes, and the rule penalty |
+| notes/2026-11-14-line-gaps-stalled.md | Distance in proof lines, and stalled goals: run fresh with new hints rather than resume |
+| notes/2026-11-14-long-run-speed.md | Long runs slow down: the overlap index and the interreduction filter |
+| notes/2026-11-14-p9loop-bigloop.md | Veroff's P9loop and Bigloop in twee, against resuming the saved search |
+| notes/2026-11-14-resume-bug-consider-cost.md | A resume bug that grew one run to 100 GB; consider-emulation costs a quarter of the CPU |
+| notes/2026-11-14-sketch-climbing.md | Sketch climbing, gap filling, and the control that undid it |
+| notes/2026-11-15-conjecture-cuts.md | Conjecture cuts, generated and oracle |
+| notes/2026-11-15-heads-fresh-vs-resume.md | Tail heads, the cutoff between fresh runs and resumes, and a 5 s first level |
+| notes/2026-11-15-hint-generator.md | A hint generator (GNN2Seq) and instance matching of hints |
+| notes/2026-11-15-learned-scheduler.md | A learned scheduler for the cascade, stalled goals, and tail heads |
+| notes/2026-11-15-retrain-gnn-p9side.md | Retraining the rule model on hard proofs, a GNN, the oracle test, and Prover9 as a side worker |
+| notes/2026-11-15-retrain-stall-artefact.md | The stall was partly an artefact; unit forms of conditional lemmas; repeated deferral; folding |
+| notes/2026-11-15-sketches-stronger.md | Sketches in stronger theories, climbing up and down |
+| notes/2026-11-16-from-zero-dispatcher.md | The whole benchmark from zero, and a faster dispatcher |
+| notes/2026-11-16-knn-lemma-count.md | How many kNN lemmas, and which; where production's proofs come from; what a head is worth |
+| notes/2026-11-16-lattice-moves.md | Learning the lattice moves of the climber |
+| notes/2026-11-16-queue-model-lemma-proof-hints.md | The rule model ordering the queue; hints from the kNN lemmas' proofs |
+| notes/2026-11-16-replay-unseen.md | From scratch on unseen originals: the replays (rp3, ho8), contexts, the scheduler, and leaks |
+| notes/2026-11-16-same-statement-other-theory.md | The same statement proven in another theory |
+| notes/2026-11-16-step-transfer.md | Goals that are steps of existing proofs: transfer, source lemmas, and a kNN filter bug |
+| notes/2026-11-17-expanded-proofs.md | Expanding lemma-based proofs back to the axioms (Veroff style) |
+| notes/2026-11-17-lemma-circularity.md | Are lemma chains circular? A check of the used lemmas |
+| notes/2026-11-17-mix-fail-order.md | Repeats cost most of the time: `--mix` and `--fail-order` |
+| notes/2026-11-17-pg-ab-half1.md | Parental guidance at scale: half1 from zero, 2 hours, sum filter 0.25 against the defaults |
+| notes/2026-11-17-pg-learned-dense.md | Learned parental models on 10 numbers per rule |
+| notes/2026-11-17-pg-pcat-enigma.md | Pcat parental models on hashed ENIGMA features, as in the paper |
+| notes/2026-11-17-pg-sum-filter.md | Parental guidance with the sum filter, on 200 hard goals |
+| notes/2026-11-17-tail-states-e44.md | The tail: which goals get longer runs; original rates; saved states; noise at scale; e43/e44 |
