@@ -4171,8 +4171,19 @@ are run in `/project/hintwork`, with `venv` holding lightgbm.
      * `EXCLUDE=originals` leaves out every proof of the new goals'
        originals. The replays (2aq) use it to simulate unseen
        originals.
-   * `SCHED=` turns the scheduler off. `LOOPARGS` passes other loop.py
-     options.
+   * `SCHED=` turns the scheduler off. On tens of thousands of goals
+     from zero, turn it off: it needs `--sweep-first` there, which
+     would run every goal once before any retry (2as). `LOOPARGS`
+     passes other loop.py options.
+   * The full scheduling pass runs at most once a second
+     (`PASS_EVERY`, default 1, 2as). With 0 it runs after every run,
+     and on 51,784 goals that left most workers idle.
+   * For the secret part, use a snapshot of loops/UL as CONTEXT (all
+     public proofs). For replays on public originals,
+     `abs/freshctx.py SET OUT` makes a context of today's proofs minus
+     those known to use SET's goals, but it cannot catch every leak
+     (2aq).
+   * The whole public benchmark from zero: `abs/z1_test.sh` (2as).
    * `AIM_PROB` sets the problem directory. For new problems, use one
      with links to both the public and the new `.p` files.
    * A 2-minute test on 20 lra2aa goals with the clean context proved
