@@ -19,6 +19,7 @@ def run(g, a):
     hf = {'C': f'tb/tmp/{g}.hints', 'K': f'h_K/{g}.hints', 'E': f'h_E/{g}.hints', 'V': f'h_K/{g}.hints'}[a]
     w[w.index('--hints-file') + 1] = os.path.abspath(hf)
     if a == 'V': w[1] = f'{PROB}/{g}.p'
+    w += ['--print-hint-matchers']   # output only: each rule that matches a hint (HINTMATCHER), to map matches to the chain
     p = subprocess.run(['/usr/bin/time', '-f', '%U %S %M'] + w, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     u, s_, mem = p.stderr.decode().strip().split('\n')[-1].split()
     out = p.stdout.decode('utf8', 'replace'); ok = 'HINTS-END' in out
