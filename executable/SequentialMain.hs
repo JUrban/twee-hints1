@@ -278,7 +278,7 @@ parseMainFlags = do
     expert $
     inGroup "Critical pair weighting heuristics" $
     flag "pg-model"
-      ["Parental model for --pg-threshold: an additive LightGBM forest (hints/lgb2bin.py format, hints/pgtrain.py: each tree on the new rule's 10 features or on the partner's, twee's pgRuleFeatures) in place of the sum of the two rules' --rule-model scores."]
+      ["Parental model for --pg-threshold: a LightGBM forest (hints/lgb2bin.py format, hints/pgtrain.py) on the two rules' features (twee's pgRuleFeatures, side by side, and the id gap) in place of the sum of their --rule-model scores. An additive forest (each tree on one rule's features) is scored once per rule."]
       Nothing (Just <$> argFile)
   flags_rule_vocab <-
     expert $
@@ -1248,8 +1248,8 @@ runTwee globals (TSTPFlags tstp) horn precedence config0 flags@MainFlags{..} lat
       Just mfile -> do
         forest <- parseForestBin <$> BS.readFile mfile
         case splitPGModel forest of
-          Just m@(fr, fa) -> return $! length fr `seq` length fa `seq` Just m
-          Nothing -> error ("--pg-model " ++ mfile ++ ": a tree mixes the new rule's and the partner's features (train with interaction constraints)")
+          Just (fr, fa) -> return $! length fr `seq` length fa `seq` Just (PGAdditive fr fa)
+          Nothing -> return $! length forest `seq` Just (PGFull forest)
   let
     config = config1 { cfg_rule_model = ruleModel, cfg_pg_model = pgModel }
 

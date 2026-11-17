@@ -26,6 +26,7 @@ import Twee.Task
 import qualified Data.BatchedQueue as Queue
 import Data.BatchedQueue(Queue)
 import qualified Data.IntMap.Strict as IntMap
+import qualified Data.IntMap.Lazy as IntMapL
 import Data.IntMap(IntMap)
 import Data.Maybe
 import Data.List
@@ -139,8 +140,12 @@ data Config f =
     -- | (17 Nov) Trace each new rule's id, parents and raw score (PGR) and its critical
     -- pairs per partner (PGN) on stderr; score every rule (also when not deferring).
     cfg_pg_log                    :: Bool,
-    -- | (17 Nov) Parental model: an additive forest (see 'splitPGModel') in place of the sum of scores.
-    cfg_pg_model                  :: Maybe (Forest, Forest) }
+    -- | (17 Nov) Parental model in place of the sum of scores.
+    cfg_pg_model                  :: Maybe PGModel }
+
+-- | A parental model: an additive forest (see 'splitPGModel'), scored once per rule,
+-- or a full forest on both rules' features ('pgRuleFeatures' twice and the id gap).
+data PGModel = PGAdditive Forest Forest | PGFull Forest
 
 -- | The prover state.
 data State f =
@@ -184,16 +189,18 @@ data PG =
     pg_cur_ps :: !Double,
     -- set once the freezer has been emptied (the filter is then off)
     pg_thawed :: !Bool,
-    -- with --pg-model: the two parts of each active's score, as the new rule of a
-    -- pair and as its partner
-    pg_gh     :: !(IntMap (Double, Double)) }
+    -- with an additive --pg-model: the two parts of each active's score, as the new
+    -- rule of a pair and as its partner
+    pg_gh     :: !(IntMap (Double, Double)),
+    -- with a full --pg-model: each active's features
+    pg_feats  :: !(IntMap (UArray Int Double)) }
 
 instance Binary PG where
   put _ = return ()
   get = return emptyPG
 
 emptyPG :: PG
-emptyPG = PG IntMap.empty Nothing 0 False IntMap.empty
+emptyPG = PG IntMap.empty Nothing 0 False IntMap.empty IntMap.empty
 
 -- | The parental model's features of a rule, made when it is added:
 -- raw score, lhs and rhs size, number of variables, depth, hint match (0 none,
@@ -261,10 +268,22 @@ pgFilter Config{..} PG{..} r1 =
           case IntMap.lookup (fromIntegral (active_id r2)) pg_raw of
             Just q2 -> q1 + q2 >= lim
             Nothing -> True
-        Just _
+        Just PGAdditive{}
           | Just (g1, _) <- IntMap.lookup i1 pg_gh -> Just $ \r2 ->
             case IntMap.lookup (fromIntegral (active_id r2)) pg_gh of
               Just (_, h2) -> g1 + h2 >= lim
+              Nothing -> True
+          | otherwise -> Nothing
+        Just (PGFull forest)
+          | Just f1 <- IntMap.lookup i1 pg_feats -> Just $ \r2 ->
+            case IntMap.lookup (fromIntegral (active_id r2)) pg_feats of
+              Just f2 ->
+                let feat i
+                      | i < 10 = unsafeAt f1 i
+                      | i < 20 = unsafeAt f2 (i - 10)
+                      | i == 20 = unsafeAt f1 7 - unsafeAt f2 7
+                      | otherwise = 0
+                in predictWith forest feat >= lim
               Nothing -> True
           | otherwise -> Nothing
     _ -> Nothing
@@ -574,26 +593,32 @@ indexedOverlaps :: forall f. Function f => Maybe (Active f -> Bool) -> State f -
 indexedOverlaps pgKeep State{..} r1 =
   [ o
   | (d1i, k2, part, n) <- sortCands cands,
-    not (IntSet.member (k2 `shiftR` 1) pgRejected),
     Just r2 <- [IntMap.lookup (k2 `shiftR` 1) st_active_set],
     let d1 = toEnum d1i
         d2 = toEnum (k2 .&. 1)
         eq1 = dirEqn r1' d1
         eq2 = dirEqn (the r2) d2,
-    Just o <- [if part == 0
-               then overlapAt' (How n d1 d2) r1 r2 eq1 eq2 >>= simplifyOverlap idx
-               else overlapAt' (How n d2 d1) r2 r1 eq2 eq1 >>= simplifyOverlap idx] ]
+    Just o0 <- [if part == 0
+                then overlapAt' (How n d1 d2) r1 r2 eq1 eq2
+                else overlapAt' (How n d2 d1) r2 r1 eq2 eq1],
+    pgOK (k2 `shiftR` 1) r2,
+    Just o <- [simplifyOverlap idx o0] ]
   where
     idx = index_oriented st_rules
     OverlapIndex{..} = st_overlaps
-    -- parental guidance: the partners whose pairs are not made, decided once each
-    pgRejected =
+    -- parental guidance, as in E: judged only once an overlap with the partner is
+    -- found (an inference), before it is simplified, and once per partner (lazily)
+    pgOK i r2 =
       case pgKeep of
-        Nothing -> IntSet.empty
+        Nothing -> True
+        Just keep -> IntMapL.findWithDefault (keep r2) i pgMemo
+      where _ = r2
+    pgMemo =
+      case pgKeep of
+        Nothing -> IntMapL.empty
         Just keep ->
-          IntSet.fromList
-            [ i | i <- IntSet.toList (IntSet.fromList [ k2 `shiftR` 1 | (_, k2, _, _) <- cands ]),
-                  Just r2 <- [IntMap.lookup i st_active_set], not (keep r2) ]
+          IntMapL.fromSet (\i -> maybe True keep (IntMap.lookup i st_active_set))
+            (IntSet.fromList [ k2 `shiftR` 1 | (_, k2, _, _) <- cands ])
     bnd = (V (maybe maxBound fst (IntMap.lookupMin oi_minvar)),
            V (maybe minBound fst (IntMap.lookupMax oi_maxvar)))
     r1' :: Rule f
@@ -862,8 +887,11 @@ addActive config state@State{..} active0 =
     pg' = case pg_cur of
             Just q -> st_pg { pg_raw = IntMap.insert (fromIntegral st_next_active) q pg_raw,
                               pg_gh = case (pgF, cfg_pg_model config) of
-                                        (Just f, Just m) -> IntMap.insert (fromIntegral st_next_active) (pgParts m f) pg_gh
-                                        _ -> pg_gh }
+                                        (Just f, Just (PGAdditive fr fa)) -> IntMap.insert (fromIntegral st_next_active) (pgParts (fr, fa) f) pg_gh
+                                        _ -> pg_gh,
+                              pg_feats = case (pgF, cfg_pg_model config) of
+                                        (Just f, Just PGFull{}) -> IntMap.insert (fromIntegral st_next_active) f pg_feats
+                                        _ -> pg_feats }
             Nothing -> st_pg
     pgTrace
       | cfg_pg_log config =

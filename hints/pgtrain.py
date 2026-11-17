@@ -11,12 +11,21 @@ same for the sum-of-scores filter (sigmoid(q1 + q2), twee's --pg-threshold witho
 import sys, subprocess, os
 import numpy as np, lightgbm as lgb
 
+args = sys.argv[1:]
+drop = []   # --drop ps,id: zero these per-rule features in training (in both roles), so no tree uses them
+if '--drop' in args:
+    i = args.index('--drop'); drop = args[i + 1].split(','); del args[i:i + 2]
+sys.argv[1:] = args
 tr, te, out = sys.argv[1:4]
 trees = int(sys.argv[4]) if len(sys.argv) > 4 else 100
 leaves = int(sys.argv[5]) if len(sys.argv) > 5 else 31
 A = np.load(tr); B = np.load(te)
 names = ['%s_%s' % (b, f) for b in ('r', 'a') for f in ('q', 'lsz', 'rsz', 'nv', 'dep', 'hint', 'ori', 'id', 'ps', 'nact')]
-d = lgb.Dataset(A['X'][:, :20], A['y'], feature_name=names, free_raw_data=False)
+FN = ('q', 'lsz', 'rsz', 'nv', 'dep', 'hint', 'ori', 'id', 'ps', 'nact')
+XA = A['X'][:, :20].copy()
+for f in drop:
+    XA[:, FN.index(f)] = 0; XA[:, 10 + FN.index(f)] = 0
+d = lgb.Dataset(XA, A['y'], feature_name=names, free_raw_data=False)
 m = lgb.train({'objective': 'binary', 'num_leaves': leaves, 'learning_rate': 0.1, 'min_data_in_leaf': 50,
                'feature_fraction': 0.9, 'bagging_fraction': 0.8, 'bagging_freq': 1, 'verbose': -1, 'num_threads': 4,
                'interaction_constraints': [list(range(10)), list(range(10, 20))]},
