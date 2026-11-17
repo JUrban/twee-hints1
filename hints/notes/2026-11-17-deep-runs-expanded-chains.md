@@ -107,6 +107,13 @@ Hints: C 9,333, E 9,398, K and V 1,916. Matched: C 1,157, E 1,154, K 530, V 396.
 * Proofs are merged into UL at the end via exp3/tomerge.py, which writes a loop dir of hint files from the
   outputs.
 
+**CPU cap** (22:50, 68 runs). 4 runs hit the cap of 10 × T = 3,200 CPU s before 320 abstract s:
+* C on aa1_45_b 374, at 631k pairs;
+* K and E on aK2_eq_aK3_o 435, at 321k and 318k;
+* V on aK2eq_1243 435, at 520k.
+
+Their rules are big, so each pair costs more. They count as unproved at 320 s, but their search is shorter.
+
 **Chain holes** (found 20:23).
 * 127 of the 439 siblings (29%) have no USEDAXIOMS record, so they enter as leaves. Their closures hold a median
   of 13 unrecorded members (q3 46, max 202).
