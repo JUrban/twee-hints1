@@ -3743,6 +3743,20 @@ finished run. Three changes:
 dispatcher, 12 workers, 10 hours. Z0 was stopped at 66 minutes; its
 curve above is the comparison.
 
+| minutes | 2 | 5 | 10 | 15 | 20 |
+|---|---:|---:|---:|---:|---:|
+| Z0 | 600 | 1,877 | 6,215 | 12,001 | 17,435 |
+| **Z1** | 1,167 | 2,064 | 8,095 | 15,460 | **22,577** |
+| busy workers, Z0 (5-minute windows) | 6.4 | 3.2 | 2.2 | 3.2 | |
+| busy workers, Z1 | 9.6 | 7.4 | 7.4 | 7.6 | |
+
+* +30% at 20 minutes. Z1 reaches Z0's 30-minute count (22,979) about
+  10 minutes earlier.
+* Z1's main thread at 20 minutes: passes 266 s, submitting 329 s,
+  waiting 471 s, results 114 s. Submitting now costs most, largely the
+  kNN picks over an index of 20k proofs. The main thread waits 40% of
+  the time, so the workers are mostly the limit now.
+
 ## 2c. Long runs: stall cutoff and checkpoints
 
 * `--eqhint-stall N` gives up when no new rule has matched a hint for N
