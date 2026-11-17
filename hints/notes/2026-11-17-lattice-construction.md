@@ -172,6 +172,13 @@ were sketched at 5 s.
 * 47 goals × 2 arms. exp3 lowered to 8 workers for it.
 * Control without a run: exp3's C@320 runs the same command, and abstract time is deterministic. So C proves
   within 80 s iff its proof took at most 160,000 critical pairs. None of its 4 proofs did (230k–529k).
+* **Stopped at 22:35, after 20 of 94 runs (10 goals in I, 10 in U), no proofs.**
+  * The sketch steps were 7–470 hints against pools of 2,500–14,000, at the pool's own factor.
+  * Hint matches were about the same in I and U (for example 955/966 and 2,016/2,015). So the runs could only
+    repeat the control, which proves none of these goals within 80 s.
+* **Relaunched with the sketch hints boosted** (hints file column 3 = 0.001, ten times the pool's default 0.01;
+  score = size × factor, lower is better). Arms U then I, 80 s, 2 CPUs:
+  `python3 downhints.py sketch47.tsv down80f.tsv -j 2 --time 80 --arms U,I --factor 0.001`
 
 **Deductions from the goal** (nf.py, launched 22:02, 1 CPU). Move 9, conjectures by deduction from the goal.
 `python3 nf.py /project/hintwork/exp3/goals47 nf20.tsv -j 1 --time 20`

@@ -22,6 +22,7 @@ for l in open(f'{TB}/cmds.all'):
 ap = argparse.ArgumentParser(); ap.add_argument('sketch'); ap.add_argument('out')
 ap.add_argument('-j', type=int, default=2); ap.add_argument('--time', type=float, default=80)
 ap.add_argument('--arms', default='I,U')
+ap.add_argument('--factor', type=float, help="the sketch hints' own score factor (hints file column 3; default: twee's --eqhint-factor, 0.01; lower is stronger)")
 a = ap.parse_args()
 sk = collections.defaultdict(list)
 for l in open(a.sketch):
@@ -40,7 +41,8 @@ def run(job):
             k = min(hintlib.generalize(l, r, sig), hintlib.generalize(r, l, sig))
             if k[0] != k[1] and k not in seen: seen.add(k); extra.append(k)
     od = f'{a.out}.d/{arm}'; os.makedirs(od, exist_ok=True); hf = f'{od}/{g}.hints'
-    open(hf, 'w').write('\n'.join(pool + ['\t'.join(k) for k in extra]) + '\n')
+    fac = [] if a.factor is None else [str(a.factor)]
+    open(hf, 'w').write('\n'.join(pool + ['\t'.join(list(k) + fac) for k in extra]) + '\n')
     w = list(cmds[g]); T = a.time
     w[w.index('--max-time') + 1] = str(T); w[w.index('--max-cpu') + 1] = str(10 * T)
     w[w.index('--hints-file') + 1] = os.path.abspath(hf)
