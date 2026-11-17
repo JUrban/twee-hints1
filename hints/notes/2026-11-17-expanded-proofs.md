@@ -59,14 +59,24 @@ as hints and as training data?
 * 199 of 200 closures reach proofs without a record (about 40 per closure): proofs from before outputs were kept.
   Those enter as leaves, so the expansions are incomplete.
 
-**Results so far** (19:11, partial):
+**Results** (exp1, finished 20:15; exp/exp1_analyze.py):
 
-| arm | proved / run |
-|---|---|
-| N, no hints | 2 / 55 |
-| X, expanded | 4 / 55 |
-| O, own steps | pending |
-| P, whole pool | pending |
+| arm, 20 abstract s, from the axioms alone | proved of 200 | against X | median CPs to proof | steps per proof |
+|---|---:|---|---:|---:|
+| N, no hints | 6 | +2 −14 | 31,931 | 299 |
+| O, the goal's own lemma-based proof steps | 10 | +5 −13 | 32,564 | 322 |
+| P, the original's whole pool | 9 | +4 −13 | 30,000 | 266 |
+| **X, the expansion** | **18** | | 24,148 | 238 |
+
+* **From the axioms, the expansion doubles what the whole pool gives** (+13 −4 against P), in fewer critical
+  pairs. The whole pool holds every sibling's own steps, but not the derivations of the kNN lemmas from other
+  originals. Without those lemmas as axioms, the siblings' steps are out of reach. That is Veroff's reason to
+  expand.
+* The axiom-level proofs are new derivations, not replays. 71% of X's proof steps are not in the goal's own
+  lemma-based proof, and 30% are in neither the expansion nor the pool (23% of X's, 11% of P's, are in neither
+  hint source).
+* Proof costs are similar across arms: about 40 wall s per run, 4,000-hint expansions included.
+* All 18 X proofs use only the problem's own axioms (`sos` in USEDAXIOMS).
 
 **Caveats to keep in mind.**
 * The goals are solved, and the O and X arms contain G's own proof steps, which include G's statement. Matching
@@ -121,8 +131,18 @@ run still has its lemma axioms.
   without those lemmas, the siblings' steps in the pool are out of reach (exp/exp2_mkrel.py).
   * Over all siblings that is a median of 328 missing lemmas and 1,494 extras, nearly the same set as xa.
   * Over the siblings at most 80 goals below the test goal (xr80): 120 lemmas and 1,050 extras.
-* Next arms: xr80 at 5 s with a repeat of base (for noise), then base and xa at 20 s, since Veroff's argument is
-  about long runs.
+| exp2, later arms (5 workers) | proved of 200 | against base | CPU s |
+|---|---:|---|---:|
+| base, repeated at 5 s | 51 (the same 51) | +0 −0 | 868 |
+| xr80 at 5 s | 46 | +3 −8 | 952 |
+| base at 20 s | 86 | | 4,469 |
+| **xa at 20 s** | **90** | +7 −3 | 4,647 |
+
+* Abstract-time runs repeat exactly, so this testbed's spread of about ±5 comes from perturbing the search, not
+  from repeats. 59 goals are proved by some 5 s arm, against base's 51.
+* **The sign turns with the budget:** the extras lose 4 at 5 s and gain 4 at 20 s, for 4% more CPU. That fits
+  Veroff's "it pays in the long run", but +4 is within the perturbation range. Deep runs test it properly
+  (2026-11-17-deep-runs-expanded-chains.md).
 
 **Next.**
 * At the end: compare N/O/X/P. If X beats P and O, the derivations of the lemmas carry information the pool
