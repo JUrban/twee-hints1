@@ -150,6 +150,10 @@ data PGModel = PGAdditive Forest Forest | PGFull Forest
   -- hashed to base b (feature key mod b, see 'pgEnigmaVec'), the partner's (b..2b-1),
   -- then both rules' 'pgRuleFeatures' (2b..2b+19) and the id gap (2b+20).
   | PGEnigma Forest Int
+  -- | An additive Pcat model on hashed ENIGMA features (see 'splitPGModelE'): the trees
+  -- on the new rule's side (its ENIGMA vector 0..b-1 and its features 2b..2b+9) and
+  -- those on the partner's side (b..2b-1, 2b+10..2b+19), each rule scored once.
+  | PGEnigmaAdd Forest Forest Int
 
 -- | The prover state.
 data State f =
@@ -269,6 +273,34 @@ splitPGModel forest
            | all (\f -> f >= 10 && f < 20) fs -> Just 1
            | otherwise -> Just 2
 
+-- | Split a Pcat ENIGMA forest with base b into the new rule's trees and the
+-- partner's, if no tree uses both sides (or the id gap).
+splitPGModelE :: Int -> Forest -> Maybe (Forest, Forest)
+splitPGModelE b forest
+  | all (\t -> side t /= 2) forest = Just ([ t | t <- forest, side t == 0 ], [ t | t <- forest, side t == 1 ])
+  | otherwise = Nothing
+  where
+    newSide f = f < b || (f >= 2 * b && f < 2 * b + 10)
+    partSide f = (f >= b && f < 2 * b) || (f >= 2 * b + 10 && f < 2 * b + 20)
+    side :: Tree -> Int
+    side t =
+      case elems (treeFeatures t) of
+        fs | all newSide fs -> 0
+           | all partSide fs -> 1
+           | otherwise -> 2
+
+-- | A rule's two parts under an additive Pcat ENIGMA model: as the new rule and as
+-- the partner.
+pgPartsE :: (Forest, Forest) -> Int -> UArray Int Double -> UArray Int Double -> (Double, Double)
+pgPartsE (fr, fa) b e f = (predictWith fr fr', predictWith fa fa')
+  where
+    fr' i | i < b = unsafeAt e i
+          | i >= 2 * b && i < 2 * b + 10 = unsafeAt f (i - 2 * b)
+          | otherwise = 0
+    fa' i | i >= b && i < 2 * b = unsafeAt e (i - b)
+          | i >= 2 * b + 10 && i < 2 * b + 20 = unsafeAt f (i - 2 * b - 10)
+          | otherwise = 0
+
 pgParts :: (Forest, Forest) -> UArray Int Double -> (Double, Double)
 pgParts (fr, fa) f = (predictWith fr (\i -> unsafeAt f i), predictWith fa (\i -> unsafeAt f (i - 10)))
 
@@ -291,12 +323,12 @@ pgFilter Config{..} PG{..} r1 =
           case IntMap.lookup (fromIntegral (active_id r2)) pg_raw of
             Just q2 -> q1 + q2 >= lim
             Nothing -> True
-        Just PGAdditive{}
-          | Just (g1, _) <- IntMap.lookup i1 pg_gh -> Just $ \r2 ->
+        Just m | additive m
+          , Just (g1, _) <- IntMap.lookup i1 pg_gh -> Just $ \r2 ->
             case IntMap.lookup (fromIntegral (active_id r2)) pg_gh of
               Just (_, h2) -> g1 + h2 >= lim
               Nothing -> True
-          | otherwise -> Nothing
+        Just m | additive m -> Nothing
         Just (PGEnigma forest c)
           | Just f1 <- IntMap.lookup i1 pg_feats, Just e1 <- IntMap.lookup i1 pg_enig -> Just $ \r2 ->
             let i2 = fromIntegral (active_id r2) in
@@ -328,6 +360,9 @@ pgFilter Config{..} PG{..} r1 =
     _ -> Nothing
   where
     i1 = fromIntegral (active_id r1)
+    additive PGAdditive{} = True
+    additive PGEnigmaAdd{} = True
+    additive _ = False
 
 -- | The freezer: when the queue is empty, make every critical pair that parental
 -- guidance skipped (of each active with itself and its older partners) and turn the
@@ -929,17 +964,21 @@ addActive config state@State{..} active0 =
             _ -> Nothing
     pgEV = case (pgF, cfg_pg_model config) of
              (Just _, Just (PGEnigma _ b)) -> Just (pgEnigmaVec b (pgEnigmaKeys state (cfg_rule_model config) active_rule))
+             (Just _, Just (PGEnigmaAdd _ _ b)) -> Just (pgEnigmaVec b (pgEnigmaKeys state (cfg_rule_model config) active_rule))
              _ -> Nothing
     pg' = case pg_cur of
             Just q -> st_pg { pg_raw = IntMap.insert (fromIntegral st_next_active) q pg_raw,
                               pg_gh = case (pgF, cfg_pg_model config) of
                                         (Just f, Just (PGAdditive fr fa)) -> IntMap.insert (fromIntegral st_next_active) (pgParts (fr, fa) f) pg_gh
+                                        (Just f, Just (PGEnigmaAdd fr fa b)) | Just e <- pgEV -> IntMap.insert (fromIntegral st_next_active) (pgPartsE (fr, fa) b e f) pg_gh
                                         _ -> pg_gh,
                               pg_feats = case (pgF, cfg_pg_model config) of
                                         (Just f, Just PGFull{}) -> IntMap.insert (fromIntegral st_next_active) f pg_feats
                                         (Just f, Just PGEnigma{}) -> IntMap.insert (fromIntegral st_next_active) f pg_feats
                                         _ -> pg_feats,
-                              pg_enig = maybe pg_enig (\e -> IntMap.insert (fromIntegral st_next_active) e pg_enig) pgEV }
+                              pg_enig = case cfg_pg_model config of
+                                          Just PGEnigma{} -> maybe pg_enig (\e -> IntMap.insert (fromIntegral st_next_active) e pg_enig) pgEV
+                                          _ -> pg_enig }
             Nothing -> st_pg
     pgTrace
       | cfg_pg_log config =

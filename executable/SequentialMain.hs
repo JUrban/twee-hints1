@@ -1254,7 +1254,9 @@ runTwee globals (TSTPFlags tstp) horn precedence config0 flags@MainFlags{..} lat
       Just mfile -> do
         forest <- parseForestBin <$> BS.readFile mfile
         if flags_pg_enigma > 0 then
-          return $! length forest `seq` Just (PGEnigma forest flags_pg_enigma)
+          return $! length forest `seq` Just (case splitPGModelE flags_pg_enigma forest of
+                                                Just (fr, fa) -> PGEnigmaAdd fr fa flags_pg_enigma
+                                                Nothing -> PGEnigma forest flags_pg_enigma)
         else case splitPGModel forest of
           Just (fr, fa) -> return $! length fr `seq` length fa `seq` Just (PGAdditive fr fa)
           Nothing -> return $! length forest `seq` Just (PGFull forest)

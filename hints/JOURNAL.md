@@ -520,6 +520,30 @@ in /project/hintwork/pg/paper/pg.txt). I should have read this first:
     (ENIGMA only, and with the 20 dense features) at bases 1k/4k/8k, ρ = 8, about 100 trees and 255+ leaves.
     Test at matched pruning on the 200 goals, reporting proofs and CPU separately.
   * Cost is the risk (25 µs per evaluation); then a faster evaluator or a smaller forest.
+  * **Pcat offline** (pg/pc1.sh, 17 Nov 18:15): 1,440 training runs with ρ = 8 (32,144 rows, 3,105
+    positive), 60 held-out runs with all negatives (1.18M rows, 276 positive), 100 trees, 255 leaves.
+    When each model prunes as hard as the sum filter (38.1% of overlaps kept), the share of proof-parent
+    pairs kept is:
+
+    | model | 1k | 4k | 8k |
+    |---|---:|---:|---:|
+    | ENIGMA vectors only (pce_B) | 93.5% | 93.8% | 91.7% |
+    | ENIGMA + 20 dense numbers (pcd_B) | 97.5% | 96.7% | 97.1% |
+    | sum filter | 84.1% | 84.1% | 84.1% |
+
+    The base does not matter.
+  * **Cost in twee:** one 5 s run took 35.5 s of CPU with pce_1024, 4.5 s base, 5.0 s with the sum filter.
+    That is about 30 µs per judged pair for a 100 × 255 forest. A twee pair costs a few µs to make, so a
+    full Pcat forest cannot pay in CPU. Its quality is tested at a fixed abstract budget anyway
+    (pg/tm/pgtest6.sh, from 18:17).
+  * Cheap variant (from 18:18): an **additive Pcat** model. Interaction constraints put each tree on the new
+    rule's side (its ENIGMA vector and 10 numbers) or the partner's (`pgtrain_enigma.py --additive`). Twee
+    splits the forest at load (splitPGModelE) into PGEnigmaAdd, scores each rule once in both roles
+    (pgPartsE), and a pair costs two lookups. It loses pair interactions; pgtest6 shows what those are worth.
+    Offline at matched pruning: pca_1024 (ENIGMA only) keeps 87.0% of proof-parent pairs, pcad_1024 (with the
+    numbers) 96.4%; the full models keep 93.5% and 97.5%. In twee-e55, CPU on one goal: pca 5.65 s, pcad 4.87 s,
+    sum 5.03 s. With the flags off, e55 matches e44 on 24 goals. The online test (pg/tm/pgtest7.sh, 6 workers)
+    starts when the half1 A/B ends.
 
 ---------------------------------------------------------------------------------------------------------
 
