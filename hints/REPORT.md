@@ -4247,6 +4247,101 @@ search.
     irreducible would cut about 17% of the lookups, about 6% of a
     run. Not done.
 
+## 2av. Parental guidance (17 Nov, from 15:50)
+
+The user suggested this: the "parental guidance" of E (Goertzel,
+Chvalovský, Jakubův, Olšák, Urban, *Fast and Slow Enigmas and Parental
+Guidance*, FroCoS 2021, arXiv 2107.06750). A cheap model judges an
+inference by its two parents, before the child is made. In E, a child
+of a poor pair goes to a freezer. The freezer is emptied only when
+nothing else is left, so the search stays complete. The paper's best
+models are LightGBM forests on the two parents' feature vectors, side
+by side. Positives are the parents of proof clauses; negatives are
+sampled at about 8 to 1. They solved 11.7% more on the holdout set.
+
+**Why it fits twee.** The profile (2au) puts 52–58% of a run in making
+each new rule's critical pairs, mostly normalising them, to score and
+queue about 290,000 pairs, of which 10,000 are ever selected. A pair
+twee does not make costs nothing.
+
+**In twee (e47–e50, branch `hints`).**
+* `--pg-threshold P` makes no critical pairs of a new rule with an
+  active when the pair's probability is below P. That check comes
+  before the overlap is computed. The probability is, by default,
+  sigmoid(q1 + q2), where q is the rule model's raw score of the pair
+  each rule came from. Rules without a score (axioms, rules re-added by
+  interreduction, rules of a loaded state) are always paired.
+* The freezer: each decision depends only on two stored scores, so the
+  skipped pairs need no list. When the queue empties, twee makes them
+  all, each active with itself and its older partners, and turns the
+  filter off. A second empty queue is then saturation as before.
+  * A small satisfiable problem at P = 0.999 emptied the freezer once
+    and ended "Satisfiable" with the same 16 rules as without it.
+* `--pg-model FILE` replaces the sum by a learned additive forest (see
+  below).
+* `--pg-log` traces each rule (id, parents, score, features, canonical
+  form), each new rule's pairs per partner, and the proof's lemmas.
+* With the flags off, the output is identical to e44 on all 200
+  captured runs.
+* Abstract time counts pairs *selected*, so the filter does not lengthen
+  a run in abstract time. It changes which pairs are selected. Skipping
+  their generation saves CPU on top.
+
+**The sum filter on the 200 late hard goals** (5 abstract s, the loop's
+exact commands; this set was picked because the current settings failed
+on it, so any change tends to win a few; model tweaks gave +5):
+
+| P | CPU s | proved | +/− against base |
+|---|---:|---:|---:|
+| off | 749–843 | 29 | |
+| 0.047 | 715 | 40 | +12 −1 |
+| 0.119 | 686 | 43 | +16 −2 |
+| 0.269 | 737 | **52** | +23 −0 |
+| 0.4 | 831 | 49 | +21 −1 |
+| 0.6 | 960 | 48 | +21 −2 |
+| 0.8 | 1,046 | 45 | +20 −4 |
+| 0.95 | 1,067 | 45 | +20 −4 |
+
+On the 29 runs proved without it, the 0.269 filter keeps 32% of the
+generated overlaps and 80% of the parent pairs of the old proofs' steps
+(where both parents have a score). The extra proofs are therefore new
+proofs, not the old ones made cheaper.
+
+**The learned parental model.**
+* Data:
+  * 20 minutes of the loop on half1 from zero (8 workers, every twee
+    command captured). It proved 15,577 goals.
+  * 1,500 random goals of those proved in the second half (harder ones)
+    re-run with `--pg-log`.
+  * Train on 1,300 runs (2,963 positive pairs, 8 negatives each);
+    test on 200 held-out runs with all their 3 million pairs.
+* Features per rule (`pgRuleFeatures`), fixed when the rule is added:
+  raw score, lhs and rhs size, number of variables, depth, hint match
+  (none, tracked, already matched, new), orientation, id, the queue
+  score of its pair, number of actives.
+* A full forest on both rules' features, side by side, was good. But
+  in twee it cost about 3 s of a 2.3 s run: each new rule is judged
+  against every partner the fingerprint index suggests, about 840,000
+  pairs.
+* An *additive* forest is as good offline. Interaction constraints put
+  each tree on the new rule's features or on the partner's. Twee then
+  scores each rule once in both roles and adds two numbers per pair.
+
+| filter | test2, at 95 / 90 / 85% of proof pairs kept: share of overlaps kept | hard 29 runs, same |
+|---|---|---|
+| full forest, 100 trees | 22.0 / 10.8 / 7.4% | 46.5 / 26.1 / 15.4% |
+| additive forest, 100 trees | 19.2 / 11.1 / 7.6% | 45.4 / 30.0 / 16.4% |
+| sum of scores | 50.7 / 36.1 / 30.0% | 62.8 / 48.6 / 39.5% |
+
+The most useful features are the two rules' queue scores, their lhs
+sizes and their raw scores. In twee, the additive model at a near-zero
+threshold costs 10% of a run (2.79 against 2.53 s); at 0.05 that run
+took 1.23 s.
+
+**Running now** (from 16:54): the half1 2-hour A/B, PGA (sum filter at
+0.25) against PGB (the new defaults), 6 workers each. At 10 minutes PGA
+9,458, PGB 8,986. The additive model is under test on the 200 goals.
+
 ## 2c. Long runs: stall cutoff and checkpoints
 
 * `--eqhint-stall N` gives up when no new rule has matched a hint for N
