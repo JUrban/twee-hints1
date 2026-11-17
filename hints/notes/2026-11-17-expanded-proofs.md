@@ -77,6 +77,33 @@ as hints and as training data?
 * 20 abstract s is short for proofs whose closures hold 800 goals. A longer budget for the failures is the
   natural next arm.
 
+**exp2: expanded pools on the frontier** (exp/exp2_mkpools.py, exp/exp2_run.py; from about 19:25).
+
+The question for the benchmark is whether expanded hints prove *new* goals in the production setting, where the
+run still has its lemma axioms.
+
+* **Goals:** the parental-guidance testbed pg/tb (exp/sets/exp2_goals200). 200 random goals that the 2-hour
+  half1 run ORD never proved, whose 5 s first runs failed, and which production proved. The twee commands were
+  captured in ORD's final context: sibling and kNN lemmas, the original's pool, rm4t, 5 abstract s.
+* **Expansion within ORD only** (`expand.py exp2/ord_sibs exp2/xd --loops ORD`):
+  * The 16,328 ORD-solved goals of the 49 originals are expanded through ORD's own 15,645 records.
+  * Production's records are left out, because a closure through them could reach production's proofs of the
+    test goals.
+  * ORD's closures are small: median 4 goals, 14 hints (q3 17 and 55, max 917 and 4,140). Most ORD proofs are
+    short, as in any run from zero.
+* **Extras:** the hints in the siblings' expansions that the captured pool lacks, most frequent over siblings
+  first.
+  * The captured pool already holds every sibling's own steps (checked: 2,076 of 2,076 on aa1_12 345), so the
+    extras are the derivations of kNN lemmas from other originals, and theirs in turn.
+  * Per goal: median 1,509 extras against a median pool of 1,503 (min 479, max 4,470). So the pool doubles.
+* **Arms,** all twee-e48 with `--pg-threshold 0.25` (production since 19:00):
+  * base: the captured hints;
+  * xa: + extras at the default factor 0.01;
+  * xw: + extras at factor 0.1.
+  * On the first two goals the extras roughly doubled the matched hints (548 to 1,057, and 640 to 999), and
+    neither goal proved in any arm.
+* For scale: the sum filter at 0.269 proved 52 of these 200 with twee-e51.
+
 **Next.**
 * At the end: compare N/O/X/P. If X beats P and O, the derivations of the lemmas carry information the pool
   lacks.
