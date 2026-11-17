@@ -1164,17 +1164,19 @@ class Loop:
                         # proof starts a chain (the goal above gets a new context, ~50%); at 06:45 the 95
                         # heads held 4,851 of the 8,335 unsolved goals behind them, and 93 had never run
                         # beyond 80 s (median 416 wall s in all)
-                        hs = heads() if a.head_first else set()
+                        # (hds, not hs: a run's result reuses hs for its hints, None when it failed; ORE and ORF
+                        # died on `n in hs` after 70 min, 17 Nov 14:15)
+                        hds = heads() if a.head_first else set()
                         # (heads first for the levels below --head-only-from, at any level: a head's
                         # 320 s resume, ~30% x a chain of ~2, pays about as well per CPU-second as an
                         # 80 s resume of another goal, ~20%; at 06:58 2,185 goals waited for one)
                         hof = a.head_only_from or len(T)
-                        deep = sorted((int(not (n in hs and att[n][1] + 1 < hof)), att[n][1] + 1,
+                        deep = sorted((int(not (n in hds and att[n][1] + 1 < hof)), att[n][1] + 1,
                                        obd.get(gnum[n][0], 0), deep_running[gnum[n][0]], g[n][1], gnum[n][1], n)
                                       for n in att
                                       if n not in busy and ctx(n) == att[n][0] and att[n][1] + 1 < len(T)
-                                      and (may_deepen(n, g) or n in hs) and not grown(n)
-                                      and (n in hs or not a.head_only_from or att[n][1] + 1 < a.head_only_from))
+                                      and (may_deepen(n, g) or n in hds) and not grown(n)
+                                      and (n in hds or not a.head_only_from or att[n][1] + 1 < a.head_only_from))
                         far = []
                         if SM and a.far_retry and (a.mix or len(running) + len(retry) + len(deep) < a.j):
                             far = sorted((-v, n) for n, v in cand.items()
@@ -1215,7 +1217,10 @@ class Loop:
                             # (--lean-states: a goal that may not deepen now keeps no state; a 10 MB state
                             # took 20-30% of a failing 5 s run's wall time, and 97% of Z4's 13,427 were never
                             # resumed; were it to deepen later, its next level starts over with the full budget)
-                            keep = not a.lean_states or len(T) < 2 or may_deepen(n, g) or n in hs
+                            # (--no-fresh-states: no fresh run keeps one; in the second hour of ORE, 2,000 runs,
+                            # failing fresh runs took 68% of the workers' time and only 1% of runs resumed)
+                            keep = (not a.no_fresh_states and
+                                    (not a.lean_states or len(T) < 2 or may_deepen(n, g) or n in hds))
                             fut = ex.submit(self.run_one, n, self.hints_for(n, pools, None), rnd,
                                             T[0], False if a.p9loop else ('fresh' if keep else 'nosave'),
                                             a.cascade_cpu * T[0])
@@ -1581,6 +1586,9 @@ def make_parser():
     ap.add_argument('--lean-states', action='store_true',
                     help='--cascade: a fresh run of a goal that may not deepen now (beyond --frontier and the '
                          'line gap, not a head) keeps no state (with twee-e43, which keeps none for a proved goal)')
+    ap.add_argument('--no-fresh-states', action='store_true',
+                    help='--cascade: no fresh run keeps a state; a goal\'s first deeper level starts over with its '
+                         'full budget (the deeper levels keep theirs)')
     ap.add_argument('--orig-rate', action='store_true',
                     help='--cascade: within --fail-order\'s failure counts, and within each deeper level, goals of '
                          'originals whose recent runs of that kind proved most go first (in bins of 0.1; Z4 after '

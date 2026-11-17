@@ -4115,8 +4115,55 @@ from zero, 11:04–13:05):
   * Its deeper class got more slots (388 runs against 107) without
     costing first runs (4,031 never run against 3,902).
 
-ORE (e43 + `--lean-states`) and ORF (also 5, 20, 80, 320 s) run from
-13:05 (abs/or_queue.sh). They are judged against this 1% band.
+ORE (e43 + `--lean-states`) and ORF (also 5, 20, 80, 320 s) ran from
+13:05 (abs/or_queue.sh).
+
+**Both died after 70 minutes.** The cause was a bug in `--lean-states`.
+* The check for whether a goal is a head used `hs`. A finished run's
+  result reuses that name for its hints, which is `None` when the run
+  failed.
+* So a fresh run of a goal that may not deepen, dispatched between two
+  full passes, raised a TypeError.
+* The heads set is now `hds` (0d0c0c0, below). The bug cannot have
+  touched ORA–ORD, which ran without `--lean-states`.
+
+Their first hour is valid:
+
+| arm | 10 min | 30 min | 60 min | runs an hour, rows 15,000–17,000 | first runs that proved: median wall s |
+|---|---:|---:|---:|---:|---:|
+| ORD, control, e22 | 9,303 | 15,330 | 17,422 | 4,157 | 1.80 |
+| ORE, e43 + `--lean-states` | **10,282** | 15,858 | 17,596 | 4,455 | 1.22 |
+| ORC, 5, 20, 80, 320 s, e22 | 9,575 | 15,216 | 17,502 | 4,311 | 1.77 |
+| ORF, ORC + e43 + `--lean-states` | 10,094 | 15,891 | **17,733** | 4,832 | 1.24 |
+
+* The gain is e43's, not the lean states'. A proved run no longer
+  writes a state: its median wall time fell by a third. That matters
+  most in the first half hour, when nearly every run proves.
+* `--lean-states` hardly ever applied. ORE kept a state for 1,790 of
+  its 1,815 failed first runs: nearly every failing goal is within 80
+  proof lines of a proof, so it may deepen.
+* Failed first runs still took a median 5.9 s, with their dump. In
+  ORE's second hour they took 68% of the workers' time, while 1% of runs
+  resumed a state.
+
+**`--no-fresh-states`** (new) keeps no state for any fresh run. A goal's
+first deeper level then starts over with its full budget, for example
+20 s instead of the 15 s left after a resume. The deeper levels keep
+their states.
+
+**Where the 2-hour run falls short of production.** Production has
+proved 3,785 half1 goals that ORD did not:
+* 3,074 had failed one 5 s run and were never run again;
+* 660 were never run;
+* 51 had also failed an 80 s run.
+
+ORD never retried a failed goal fresh. With `--fail-order`, a goal that
+has never run comes first, and new ones kept coming as proofs moved the
+frontier on. In ORD's last 2,400 runs, 18% of first runs proved.
+
+ORG (as ORF: e43, `--lean-states`, 5, 20, 80, 320 s) and ORH (the same
+with `--no-fresh-states` instead) run from 14:19, side by side under
+the same load.
 
 ## 2c. Long runs: stall cutoff and checkpoints
 
