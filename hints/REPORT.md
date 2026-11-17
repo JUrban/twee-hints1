@@ -4055,7 +4055,23 @@ Details:
 (`--orig-rate`), both from zero (abs/or_test.sh, from 09:02). They run
 on sets/half1: 64 of the 129 originals, chosen at random with seed 17,
 25,937 goals. Z4 proved 18,887 of them and production 22,291. Each arm
-has 6 workers, a transfer every 5 minutes, and 2 hours. Results follow.
+has 6 workers, a transfer every 5 minutes, and 2 hours.
+
+| arm | 10 min | 30 min | 60 min | 90 min | 120 min | never run | 80 s runs (proved) |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| ORA, control | 9,412 | 15,349 | 17,381 | 18,074 | **18,319** | 3,923 | 103 (37) |
+| ORB, `--orig-rate` | 9,105 | 15,401 | 17,356 | 18,015 | 18,228 | 4,107 | 122 (58) |
+
+* No gain, so it stays off. The arms are level to 1 hour, as
+  expected: while most runs prove, every rate is in the top bin.
+* After that ORB's 80 s runs proved more (58 against 37), but its
+  first runs proved fewer.
+* The rate predicts well on its own. But putting a promising
+  original's far goals ahead of other originals' near goals does not
+  pay: a predictive feature can still lose to the order in place. The
+  AUCs above should have been measured within the existing key.
+* A repeat of the control (ORD) is running beside a 20 s level (ORC)
+  to measure the noise at this scale.
 
 ## 2c. Long runs: stall cutoff and checkpoints
 
