@@ -1049,10 +1049,15 @@ class Loop:
             retry, deep, far, light, last_full = [], [], [], False, -1e18
             # --mix M: runs of three kinds, near retries (r), goals beyond the retry gaps (f: far, and goals
             # never run) and deeper levels (d); each kind with waiting goals keeps M of the workers, the
-            # other slots go to the kind with the most proofs per run second over its last 300 runs
+            # other slots go to the kind with the most proofs per run second over its last 300 runs; the
+            # seconds its running jobs have taken so far count as spent without a proof (a 320 s resume takes
+            # ~25 wall minutes: until one ended, the prior kept the deeper levels first, ul39 17 Nov)
             ycls = {c: collections.deque(maxlen=300) for c in 'rfd'}; rcls = {}; ncls = collections.Counter()
+            rt0 = {}   # future -> its start
             def yld(c):
-                return (sum(x[0] for x in ycls[c]) + 0.5) / (sum(x[1] for x in ycls[c]) + 5.0)
+                now = time.time()
+                return (sum(x[0] for x in ycls[c]) + 0.5) / (sum(x[1] for x in ycls[c]) + 5.0
+                                                             + sum(now - rt0[f] for f in rt0 if rcls.get(f) == c))
             while True:
                 if t_r is not None:
                     tm[3] += time.time() - t_r
@@ -1182,7 +1187,7 @@ class Loop:
                             b = T[lev] - T[lev - 1] if (a.p9loop or os.path.exists(sp)) else T[lev]
                             fut = ex.submit(self.run_one, n, self.hints_for(n, pools, None), rnd,
                                             b, not a.p9loop, a.cascade_cpu * b)
-                        running[fut] = (n, lev); rcls[fut] = cl; ncls[cl] += 1
+                        running[fut] = (n, lev); rcls[fut] = cl; ncls[cl] += 1; rt0[fut] = time.time()
                         if H and lev == 0:   # (its features, context and predicted success, for observe())
                             x_, c_ = H.feats(n)
                             startctx[n] = (c_, 1 / (1 + math.exp(-score(n))), x_)
@@ -1202,7 +1207,7 @@ class Loop:
                 for f in fin:
                     n0, lev = running.pop(f)
                     n, ok, dt, stats, hs = f.result()
-                    ycls[rcls.pop(f, 'r')].append((1 if ok else 0, dt))
+                    ycls[rcls.pop(f, 'r')].append((1 if ok else 0, dt)); rt0.pop(f, None)
                     done_n += 1
                     if H:
                         c_, p_, x_ = startctx.pop(n, (None, 0.0, None)) if lev == 0 else (None, 0.0, None)
