@@ -4161,9 +4161,53 @@ ORD never retried a failed goal fresh. With `--fail-order`, a goal that
 has never run comes first, and new ones kept coming as proofs moved the
 frontier on. In ORD's last 2,400 runs, 18% of first runs proved.
 
+Would retries have paid there? 200 random goals of these failed ones
+got a fresh 5 s run with ORD's 20,026 proofs as context
+(`solve_new.sh`). 29 proved (14.5%), against 18% for first runs at
+the end. So putting never-run goals first is about right. Only 135 of
+ORD's 3,529 failed goals saw their nearest proven goal below change
+after they failed, 79 of them before the last 10 minutes.
+
 ORG (as ORF: e43, `--lean-states`, 5, 20, 80, 320 s) and ORH (the same
 with `--no-fresh-states` instead) run from 14:19, side by side under
 the same load.
+
+**Where a failing run's time goes.** 30 of those 200 goals that failed
+again, with the loop's exact twee commands (`LOOP_PRINT_CMD`,
+`LOOP_KEEP_TMP`), 5 abstract s, 3 at a time, mean CPU seconds:
+
+| variant | CPU s | peak memory |
+|---|---:|---:|
+| as in the loop, without the dump | 5.45–5.61 | 93 MB |
+| + `--dump-state` (6.8 MB states) | 6.66 | 349 MB |
+| without the rule model | 4.87 | 91 MB |
+| hints at `--eqhint-factor 1` (matched, but the search unchanged) | 4.34 | 88 MB |
+| `--no-eqhint-normalise` | 4.45 | 75 MB |
+| without hints | 3.29 | 70 MB |
+| startup only | 0.17 | 42 MB |
+
+* Hints cost 2.3 s of 5.6:
+  * about 1.3 s is the hinted search itself, which is dearer per
+    pair (bigger queue);
+  * about 1 s is overhead. Twee's own timer puts renormalising the
+    hints at 12% of the CPU (0.58 of 4.78 s). It redid every live
+    hint against every rule whenever new rules had come.
+* The dump adds 22% and 3.7× the peak memory.
+
+**twee-e44** (99dbf15) renormalises incrementally. A hint is skipped
+when no rule added since its last normalisation rewrites a subterm of
+it or of its full normal form. Deleting a rule cannot make a normal
+form reducible, and interreduction re-adds a changed rule under a new
+id. The full forms are kept outside the saved state, so states from
+e43 still load. `TWEE_HINTNORM_FULL=1` restores the full pass.
+
+On the 203 captured runs (29 proved, 174 failed) against e43:
+* 186 outputs are byte-identical.
+* 11 differ only in 2–6 fewer extra hint forms, out of 2,000–8,000.
+  These are full normal forms reached through a term that a new rule
+  rewrites. Their searches are the same.
+* 3 searches diverge slightly. The same goals prove.
+* Proved 29 against 29; CPU 851 s against 960 s (**−11%**).
 
 ## 2c. Long runs: stall cutoff and checkpoints
 
