@@ -6,6 +6,11 @@ branch `hints`, and REPORT.md. REPORT.md is the outward report, with results and
 resuming the work. It says why each thread was started, how it was done, what came out, where the
 pieces are, and what went wrong.
 
+**This file is the map, not the journal.** Each experiment gets its own report in hints/notes/ (user, 17 Nov
+18:30: this file read as "a compressed version of REPORT.md"; "write a short report about every experiment we
+do"). Those reports carry the detail: the question and who asked, the exact setup, how the goal sets were
+chosen, the numbers, the noise, and what the numbers do not show. The index is section 9.
+
 **When resuming:** read sections 1, 2 and 8 first. Before designing anything, grep this file and REPORT.md for
 the topic (section 7 lists the mistakes this rule prevents). Add to the log in section 6 when a thread
 starts, changes or ends.
@@ -611,3 +616,18 @@ Next:
 5. Update REPORT section 5 to the ul41 production command.
 
 Waiting for the user: proof steps as lemma axioms.
+
+---------------------------------------------------------------------------------------------------------
+
+## 9. Experiment reports (hints/notes/)
+
+Written from 17 Nov 18:30 on. Experiments before that are in REPORT.md and in the transcript only.
+
+| report | question | status |
+|---|---|---|
+| notes/2026-11-17-pg-sum-filter.md | does the sum-of-scores parental filter help? (200-goal testbed) | done: 52 against 29 at 0.269 |
+| notes/2026-11-17-pg-learned-dense.md | learned parental models on 10 numbers per rule | done: lose online (37–49) |
+| notes/2026-11-17-pg-pcat-enigma.md | Pcat on hashed ENIGMA features, as the paper (full and additive) | online tests running |
+| notes/2026-11-17-pg-ab-half1.md | the sum filter at scale: half1 from zero, 2 h | ends 18:54; +596 at 100 min, shrinking |
+| notes/2026-11-17-lemma-circularity.md | are lemma chains circular? are kNN lemmas from weaker theories? | done: no violations on 67k recorded proofs |
+

@@ -4266,8 +4266,10 @@ twee does not make costs nothing.
 
 **In twee (e47–e50, branch `hints`).**
 * `--pg-threshold P` makes no critical pairs of a new rule with an
-  active when the pair's probability is below P. That check comes
-  before the overlap is computed. The probability is, by default,
+  active when the pair's probability is below P. Since e51 the check
+  comes, as in E, after the overlap is found and before it is
+  simplified, once per partner (e47–e50 checked before unification;
+  the same pairs are made). The probability is, by default,
   sigmoid(q1 + q2), where q is the rule model's raw score of the pair
   each rule came from. Rules without a score (axioms, rules re-added by
   interreduction, rules of a loaded state) are always paired.
@@ -4320,9 +4322,11 @@ proofs, not the old ones made cheaper.
   (none, tracked, already matched, new), orientation, id, the queue
   score of its pair, number of actives.
 * A full forest on both rules' features, side by side, was good. But
-  in twee it cost about 3 s of a 2.3 s run: each new rule is judged
-  against every partner the fingerprint index suggests, about 840,000
-  pairs.
+  in twee it cost about 3 s of a 2.3 s run. The cause is about 25 µs
+  per evaluation of a 100-tree forest. (I first blamed "about 840,000
+  candidate partners" judged before unification; that was an
+  unmeasured estimate, and after the move to the paper's placement,
+  e51, the cost was the same.)
 * An *additive* forest is as good offline. Interaction constraints put
   each tree on the new rule's features or on the partner's. Twee then
   scores each rule once in both roles and adds two numbers per pair.
@@ -4339,8 +4343,11 @@ threshold costs 10% of a run (2.79 against 2.53 s); at 0.05 that run
 took 1.23 s.
 
 **Running now** (from 16:54): the half1 2-hour A/B, PGA (sum filter at
-0.25) against PGB (the new defaults), 6 workers each. At 10 minutes PGA
-9,458, PGB 8,986. The additive model is under test on the 200 goals.
+0.25) against PGB (the new defaults), 6 workers each. Measured with
+abs/setcurve.py: PGA 11,467 / 18,529 / 18,912 at 10 / 60 / 100
+minutes, PGB 10,061 / 17,608 / 18,316 (notes/2026-11-17-pg-ab-half1.md).
+An earlier "9,458 against 8,986 at 10 minutes" was read before minute
+10. The additive model is under test on the 200 goals.
 
 ## 2c. Long runs: stall cutoff and checkpoints
 
