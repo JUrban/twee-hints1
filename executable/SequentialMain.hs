@@ -89,6 +89,7 @@ data MainFlags =
     flags_stitch :: Maybe FilePath,
     flags_print_hints :: Bool,
     flags_print_hint_matchers :: Bool,
+    flags_print_goal_nf :: Int,
     flags_hints_file :: Maybe FilePath,
     flags_track_hints :: Maybe FilePath,
     flags_rule_model :: Maybe FilePath,
@@ -270,6 +271,12 @@ parseMainFlags = do
     bool "print-hint-matchers"
       ["Print each rule that matches a hint, as it is added (a HINTMATCHER line with a TPTP clause), for Veroff's P9loop: the matchers of a failed run become lemmas of the next."]
       False
+  flags_print_goal_nf <-
+    expert $
+    inGroup "Output options" $
+    flag "print-goal-nf"
+      ["When the goal is not proved, print the N smallest normal forms of each side of each goal (GOALNF L|R lines with a TPTP clause t = t), for subgoal conjectures (0 by default)."]
+      0 argNum
   flags_rule_model <-
     expert $
     inGroup "Critical pair weighting heuristics" $
@@ -1516,6 +1523,15 @@ runTwee globals (TSTPFlags tstp) horn precedence config0 flags@MainFlags{..} lat
     forM_ (allLemmas (map (derivation . pg_proof) (solutions state))) $ \p ->
       putStrLn ("PGPROOF " ++ pgCanon (equation p))
 
+  when (not (solved state) && flags_print_goal_nf > 0) $ do
+    let showT t =
+          showProblem
+            [Input Nothing "nf" (Jukebox.Ax Jukebox.Axiom) Unknown $
+               toForm $ clause [Pos (jukeboxTerm ctx t Jukebox.:=: jukeboxTerm ctx t)]]
+        pick m = take flags_print_goal_nf (sortBy (comparing (\t -> (KBO.size t, t))) (Map.keys m))
+    forM_ (st_goals state) $ \g -> do
+      forM_ (pick (goal_lhs g)) $ \t -> putStrLn ("GOALNF L " ++ showT t)
+      forM_ (pick (goal_rhs g)) $ \t -> putStrLn ("GOALNF R " ++ showT t)
   when (solved state && flags_print_hints) $ do
     let
       sols = map (eliminateDefinitionsFromGoal defs) (solutions state)

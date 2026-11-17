@@ -160,6 +160,17 @@ were sketched at 5 s.
 * Control without a run: exp3's C@320 runs the same command, and abstract time is deterministic. So C proves
   within 80 s iff its proof took at most 160,000 critical pairs. None of its 4 proofs did (230k–529k).
 
+**Deductions from the goal** (nf.py, launched 22:02, 1 CPU). Move 9, conjectures by deduction from the goal.
+`python3 nf.py /project/hintwork/exp3/goals47 nf20.tsv -j 1 --time 20`
+* twee-e56 (e55 plus `--print-goal-nf N`) runs the goal's production command for 20 abstract s, with
+  `--no-flatten-goal`. With flattening, the goal's normal forms are just the constants that name its sides. On
+  failure it prints the 3 smallest normal forms of each side.
+* Each pair of normal forms is decomposed where the heads agree: f(u..) = f(v..) follows from the uᵢ = vᵢ that
+  differ. Every cut of that tree is a sufficient set of subgoals.
+* A set is kept when Mace4 refutes none of its subgoals (sizes up to 12, 10 s each).
+* Goal 299: the normal forms are m(m(x1,x0), k(x2,m(x0,x1))) and m(k(x0,x1), t(m(x0,x1),x2)). Their one
+  decomposition needs m(x0,x1) = k(x1,x0), which is false.
+
 **Launch** (stage 1, 20:33): `cd /project/hintwork/exp4; nohup bash stage1.sh > stage1.out 2>&1 &`.
 
 **Resources.** exp3 holds 12 workers until about midnight. Stage 1 starts with Mace4 (cheap, 1–2 CPUs) and tries

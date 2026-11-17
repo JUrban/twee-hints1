@@ -229,6 +229,8 @@ Repositories and directories:
 | e52 | 17 Nov 17:32 | Pcat on the rule model's ENIGMA vocabulary |
 | e53 | 17 Nov 17:43 | hashed ENIGMA keys, --pg-enigma B, --pg-anon |
 | e54 | 17 Nov 17:59 | ENIGMA keys on the goal-constant-expanded rule with real names; --pg-anon removed; PGR field `E<keys>` |
+| e55 | 17 Nov | additive Pcat ENIGMA parental model (PGEnigmaAdd) |
+| e56 | 17 Nov 21:59 | e55 + --print-goal-nf N: on failure, the N smallest normal forms of each goal side (GOALNF L/R lines); use with --no-flatten-goal (exp4 nf.py) |
 
 Wrappers: `twee-pg` (e48 with $TWEE_PG_ARGS), `twee-pg50` (e50 with $TWEE_PG_ARGS; production).
 
