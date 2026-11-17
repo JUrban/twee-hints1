@@ -4372,6 +4372,61 @@ the old proofs' pairs does not predict the online result
 the sum). So every learned parental model tried, dense or ENIGMA, full
 or additive, has lost to the untrained sum filter. The sum stays. The additive model is under test on the 200 goals.
 
+## 2aw. Expanded proofs, deep runs and a lattice with small steps (17 Nov, from 19:00)
+
+Three of the user's questions, one experiment each. The records are in notes/2026-11-17-expanded-proofs.md,
+-deep-runs-expanded-chains.md and -lattice-construction.md. Scripts are exp/exp1_* to exp/exp4_*.
+
+**Expanded proofs (exp1, exp2).** Veroff expands lemma-based proofs back to the axioms for more hints.
+expand.py closes each proof under the proofs of the lemmas it used. On 200 sampled goals the closures have a
+median of 817 proven goals, 15 levels deep, and 4,134 distinct hints.
+* From the axioms alone at 20 s, the expansion proves 18 of 200. Without hints the runs prove 6, with the
+  goal's own lemma-based proof steps 10, and with the original's whole pool 9. So expansion is worth twice the
+  pool, as Veroff says.
+* In production's setting (lemmas as axioms, the pool as hints) the extras are mostly redundant: 51 → 47 at
+  5 s, and 86 → 90 at 20 s (+7 −3). Not adopted.
+
+**Deep runs on late goals (exp3).** Veroff's question: can hints guide a search from the axioms to a late goal,
+with the rate of hint matches as the signal to stop or go on? Arms:
+* C: production's command;
+* K: lemmas with the expanded chain of the 10 nearest proven siblings as the only hints;
+* E: the pool plus that chain;
+* V: from the axioms with the chain.
+
+47 late goals no loop has proved, 320 abstract s each, deterministic pick (exp/sets/exp3_goals47). Interim
+(68 of 188 runs):
+* the first proofs are new to the benchmark: R1dist_to_aa1 619, aK2_eq_aK3_q 252, aK2_eq_aK3_t 369 and 372;
+* V, from the axioms, proved aK2_eq_aK3_q 211, which no other arm proved, and proved 372 with the fewest pairs;
+* unproved runs still find new hint matches at the end (median 313–317 s), so a stall rule would stop none of
+  them early. A stall limit of 40 abstract s keeps every proof and saves about 5% of the work.
+* 29% of the chain's siblings lack a record of their used lemmas. These are older proofs and transfer proofs, so
+  the chains have holes.
+
+**A lattice with small steps (exp4).** The user: if the assumptions that help are as hard as the target, there
+is no lattice with reasonable steps, so build one. Moves follow Korovin and Hernandez (IJCAR 2018):
+* signature grouping and argument filtering;
+* loop laws;
+* weaker goals (instances of the goal);
+* generalisations of the goal;
+* subgoals by decomposing the goal's normal forms (twee-e56 --print-goal-nf).
+
+Mace4 screens out moves that collapse the theory or force a group, and conjectures with a countermodel in T.
+Results on the 47 goals:
+* weaker goals: in every goal some instance proves within 5 s (178 of 377; median 26 lemmas). Setting a
+  variable to e proves 142 of 238, identifying two variables 36 of 139;
+* strengthenings: 382 of 654 sketches prove within 5 s, in 45 goals, with proofs of median 39 lemmas, but none
+  without its assumption. Almost all used instances of the assumption have countermodels in T (re-screen with
+  corrected extraction running);
+* on the first goal, giving only the plausible used instances proves nothing. So a sketch's route needs
+  statements false in T;
+* generalisations: 36 of 214 survive Mace4 and none proves in 20 s;
+* decompositions of the goal's normal forms: none survives Mace4 (31 of 47 goals so far);
+* the steps of the sketches as hints for the real goal at 80 s: 0 of 20 runs at the pool's factor (the sketch
+  adds under 5% of hints). A boosted arm (factor 0.001) is running.
+
+So far the cheap syntactic moves make no lattice with small, true steps around these goals. They give easy
+special cases below, and false theories above.
+
 ## 2c. Long runs: stall cutoff and checkpoints
 
 * `--eqhint-stall N` gives up when no new rule has matched a hint for N
