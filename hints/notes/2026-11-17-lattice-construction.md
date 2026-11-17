@@ -216,6 +216,21 @@ inventor's paradox).
   `python3 sketch.py gen47.tsv gsketch20.tsv -j 1 --time 20`.
 * **Result (22:33): none of the 36 proves in 20 s.** Where true, they are no easier than the goal.
 
+**A model-based conjecturer** (conj.py, launched 23:12, 1 CPU). The user's "generating intermediate lemmas that
+might be useful for the goal by some conjecturer". The idea is QuickSpec's (whose prover is twee), and also how
+Kinyon and Veroff found AIM lemmas, from finite models.
+* Mace4 collects models of the goal's theory:
+  * non-associative ones, up to 25 per size from 2 to 12, 15 s per size. The smallest exist at 6–8 elements,
+    found in 0.3–2.7 s on 6 goals;
+  * any models (groups among them), up to 10 per size from 2 to 8.
+* Candidate terms: the subterms of the goal's sides and of their normal forms (nf.py's outputs), plus the
+  variables and e.
+* Conjectures: the equations between two candidates that hold in every model, evaluated with numpy over all
+  assignments. The goal and its normal-form pairs are excluded.
+* `python3 conj.py /project/hintwork/exp3/goals47 conj47.tsv -j 1 --nf nf20.tsv`
+* First goal (R1dist_to_aa1 619): 52 models, 148 candidate equations, 5 kept. They are basic identities among the
+  goal's subterms, such as `ld(rd(e,X0),e) = X0` (the right inverse of the left inverse). No left-to-right bridge.
+
 **Launch** (stage 1, 20:33): `cd /project/hintwork/exp4; nohup bash stage1.sh > stage1.out 2>&1 &`.
 
 **Resources.** exp3 holds 12 workers until about midnight. Stage 1 starts with Mace4 (cheap, 1–2 CPUs) and tries
