@@ -4073,6 +4073,32 @@ has 6 workers, a transfer every 5 minutes, and 2 hours.
 * A repeat of the control (ORD) is running beside a 20 s level (ORC)
   to measure the noise at this scale.
 
+**Saved states cost a fifth of a failing run.** Every fresh run dumps its
+search state so that a deeper level can resume it.
+* Z4 left 13,427 states, about 10 MB each (123 GB on disk). Only 545
+  goals were ever resumed.
+* On a goal Z4 never proved (aa1_14 goal 505, 5 s, rule model, twee
+  alone), the dump adds 0.6–0.9 s to a 2.7–2.9 s run and raises its
+  peak memory from 67 MB to 267 MB. Proved runs dumped too (a 0.3 MB
+  state took 0.1 s of a 0.3 s run), and loop.py then deleted the state.
+* Breakdown of that run: plain 2.0 s, with hints 2.3 s, with the rule
+  model 2.9 s, both 3.05 s, with the dump 3.6 s. In the loop such runs
+  take a median 6–6.5 wall seconds: real runs have hundreds of hints,
+  36 lemma axioms and bigger states, on a loaded machine.
+
+Two fixes (0903499):
+* **twee-e43** writes no state when the problem is solved. On 150 AIM
+  goals with sibling hints it gives the same result, work counts and
+  hints as e22 (124 proved, 26 not).
+* **`loop.py --lean-states`**: a fresh run of a goal that may not
+  deepen now keeps no state, and an older state of the goal is removed.
+  Such a goal is beyond `--frontier` and the line gap, and not a head.
+  If it deepens later, its next level starts over with the full
+  budget.
+
+ORE (e43 + `--lean-states`) and ORF (also 5, 20, 80, 320 s) start when
+ORC and ORD end (abs/or_queue.sh).
+
 ## 2c. Long runs: stall cutoff and checkpoints
 
 * `--eqhint-stall N` gives up when no new rule has matched a hint for N
