@@ -971,11 +971,12 @@ class Loop:
                 # a goal with no fresh run in this round only resumed states of earlier rounds and
                 # contexts (--cascade-start 0): a fresh T0 run first (on 97 goals that failed L1 this
                 # way, fresh 20 s proved 28/63 of those without one, 8/34 of the others)
-                nf = 0
+                # (a count of its own: nf is the --fail-order counter; UL40 died on it, 17 Nov 16:24)
+                nff = 0
                 for n in att:
                     if n not in fresh:
-                        att[n] = (None, -1); nf += 1
-                print(f'  cascade: --fresh-first: {nf} goals without a fresh run in round {rnd}', flush=True)
+                        att[n] = (None, -1); nff += 1
+                print(f'  cascade: --fresh-first: {nff} goals without a fresh run in round {rnd}', flush=True)
         # --retry-hints G: also retry (fresh, at T0) a goal whose original's hint pool has grown by
         # the factor G since its last fresh run. Resuming does not use new hints well (the saved
         # queue was scored without them): on 32 gap-1 goals that failed L1, resuming to 320 s
