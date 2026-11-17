@@ -129,7 +129,14 @@ data Config f =
     cfg_eqhint_instance_factor    :: Float,
     -- (16 Nov) score factor F ** q for each critical pair, q = the rule model's probability that it is a proof
     -- rule (1 = off)
-    cfg_cp_model_factor           :: Float }
+    cfg_cp_model_factor           :: Float,
+    -- | (17 Nov) Parental guidance: no critical pairs of a new rule with an active rule
+    -- when sigmoid of their --rule-model raw scores' sum is below this (Nothing = off). A rule without a
+    -- score (an axiom, a rule from interreduction) is always paired.
+    cfg_pg_threshold              :: Maybe Double,
+    -- | (17 Nov) Trace each new rule's id, parents and raw score (PGR) and its critical
+    -- pairs per partner (PGN) on stderr; score every rule (also when not deferring).
+    cfg_pg_log                    :: Bool }
 
 -- | The prover state.
 data State f =
@@ -157,8 +164,54 @@ data State f =
     st_complete       :: !(Index f (Rule f)),
     st_messages_rev   :: ![Message f],
     st_random_seed    :: Maybe (ReadShowBinary QCGen),
-    st_problem_term   :: Maybe (ConfluenceFailure f) }
+    st_problem_term   :: Maybe (ConfluenceFailure f),
+    st_pg             :: !PG }
   deriving (Generic, Binary)
+
+-- | Parental guidance (--pg-threshold): the --rule-model raw score of each active by
+-- id, and the score of the critical pair being added (for the rules made from it).
+-- Not serialised (zero bytes): after a load no rule has a score, so all are paired.
+-- The third field is set once the freezer has been emptied (the filter is then off).
+data PG = PG !(IntMap Double) !(Maybe Double) !Bool
+
+instance Binary PG where
+  put _ = return ()
+  get = return emptyPG
+
+emptyPG :: PG
+emptyPG = PG IntMap.empty Nothing False
+
+-- | Parental guidance: are the critical pairs of these two actives made now?
+-- Each pair's decision depends only on the two stored scores, so the skipped pairs
+-- (the freezer) can be made again later by 'thawPG'.
+pgKeepPair :: Maybe Double -> PG -> Active f -> Active f -> Bool
+pgKeepPair pgThr (PG pgRaw _ thawed) r1 r2 =
+  case pgThr of
+    Just thr | not thawed,
+               Just q1 <- IntMap.lookup (fromIntegral (active_id r1)) pgRaw,
+               Just q2 <- IntMap.lookup (fromIntegral (active_id r2)) pgRaw ->
+      q1 + q2 >= log (thr / (1 - thr))
+    _ -> True
+
+-- | The freezer: when the queue is empty, make every critical pair that parental
+-- guidance skipped (of each active with itself and its older partners) and turn the
+-- filter off, so that an empty queue afterwards means saturation as before.
+{-# INLINEABLE thawPG #-}
+thawPG :: Function f => Config f -> State f -> State f
+thawPG config state@State{..} =
+  foldl' one state{st_pg = PG pgRaw Nothing True} (IntMap.elems st_active_set)
+  where
+    PG pgRaw _ _ = st_pg
+    frozen r1 r2 = active_id r2 <= active_id r1 && not (pgKeepPair (cfg_pg_threshold config) st_pg r1 r2)
+    one st r =
+      case [ makePassive config st o | o <- indexedOverlaps (frozen r) st r ] of
+        [] -> st
+        ps -> enqueue st (the r) ps
+
+-- | An equation in a form that does not depend on its orientation or variable names
+-- (for matching PGR rules with PGPROOF lemmas).
+pgCanon :: Function f => Equation f -> String
+pgCanon (t :=: u) = min (prettyShow (canonicalise (t :=: u))) (prettyShow (canonicalise (u :=: t)))
 
 -- | The default prover configuration.
 defaultConfig :: Function f => Config f
@@ -212,7 +265,9 @@ defaultConfig =
     cfg_eqhint_generalise = False,
     cfg_eqhint_instances = False,
     cfg_eqhint_instance_factor = 0.1,
-    cfg_cp_model_factor = 1 }
+    cfg_cp_model_factor = 1,
+    cfg_pg_threshold = Nothing,
+    cfg_pg_log = False }
 
 -- | Compute cfg_score_cp from the CP configuration.
 {-# INLINE scoreCP #-}
@@ -271,7 +326,8 @@ initialState Config{..} =
       case cfg_random_mode of
         False -> Nothing
         True -> Just (ReadShowBinary (mkQCGen 12345)),
-    st_problem_term = Nothing }
+    st_problem_term = Nothing,
+    st_pg = emptyPG }
 
 ----------------------------------------------------------------------
 -- * Messages.
@@ -366,7 +422,7 @@ makePassives config@Config{..} state@State{..} rule
   | cfg_overlap_index && cfg_max_cp_depth == maxBound =
   stampWith "make critical pair" length
   [ makePassive config state overlap
-  | overlap <- indexedOverlaps state rule ]
+  | overlap <- indexedOverlaps (pgKeepPair cfg_pg_threshold st_pg rule) state rule ]
   | otherwise =
 -- XXX factor out depth calculation
   stampWith "make critical pair" length
@@ -436,11 +492,12 @@ rebuildOverlapIndex state =
 -- the same ones and in the same order as 'overlaps', but only rules whose
 -- fingerprints are compatible are tried.
 {-# INLINEABLE indexedOverlaps #-}
-indexedOverlaps :: forall f. Function f => State f -> Active f -> [Overlap (Active f) f]
-indexedOverlaps State{..} r1 =
+indexedOverlaps :: forall f. Function f => (Active f -> Bool) -> State f -> Active f -> [Overlap (Active f) f]
+indexedOverlaps pgKeep State{..} r1 =
   [ o
   | (d1i, k2, part, n) <- sortCands cands,
     Just r2 <- [IntMap.lookup (k2 `shiftR` 1) st_active_set],
+    pgKeep r2,
     let d1 = toEnum d1i
         d2 = toEnum (k2 .&. 1)
         eq1 = dirEqn r1' d1
@@ -712,10 +769,20 @@ addActive config state@State{..} active0 =
     mscore
       | cfg_print_score config = Just (activeScore config state active)
       | otherwise = Nothing
+    PG pgRaw pgCur pgThawed = st_pg
+    pg' = case pgCur of
+            Just q -> PG (IntMap.insert (fromIntegral st_next_active) q pgRaw) pgCur pgThawed
+            Nothing -> st_pg
+    pgTrace
+      | cfg_pg_log config =
+        Debug.Trace.trace ("PGR " ++ show (fromIntegral st_next_active :: Int) ++ " " ++ show (fst st_cur_parents) ++ " " ++
+                           show (snd st_cur_parents) ++ " " ++ maybe "-" show pgCur ++ " " ++ pgCanon (unorient active_rule))
+      | otherwise = id
     state' =
+      pgTrace $
       recordEqHintMatch active $
       message (NewActive mscore active) $
-      addActiveOnly config state{st_next_active = st_next_active+1} active
+      addActiveOnly config state{st_next_active = st_next_active+1, st_pg = pg'} active
     logGiven st
       | cfg_log_given config = st{st_given = (unorient active_rule, fst st_cur_parents, snd st_cur_parents) : st_given}
       | otherwise = st
@@ -726,10 +793,19 @@ addActive config state@State{..} active0 =
     enqueueRule (logGiven state') active
   where
     enqueueRule state rule =
+      pgPairs $
       sample (length passives) passives $
       enqueue state (the rule) passives
       where
         passives = makePassives config state rule
+        me = fromIntegral (active_id rule) :: Int
+        pgPairs
+          | cfg_pg_log config =
+            let cnt = IntMap.fromListWith (+)
+                        [ (if fromIntegral (passive_rule1 p) == me then fromIntegral (passive_rule2 p) else fromIntegral (passive_rule1 p), 1 :: Int)
+                        | p <- passives ]
+            in Debug.Trace.trace ("PGN " ++ show me ++ concat [ " " ++ show k ++ ":" ++ show v | (k, v) <- IntMap.toList cnt ])
+          | otherwise = id
 
 -- Update the list of sampled critical pairs.
 {-# INLINEABLE sample #-}
@@ -827,26 +903,37 @@ considerUsing rules config@Config{..} state@State{..} info cp0 =
         Just cp -> addJoinable state' (cp_eqn cp)
         Nothing -> state'
 
-    Left (cp, model)
-      | Just rm <- cfg_rule_model,
-        Just p <- st_cur_passive,
-        let key = canonicalise (cp_eqn cp),
-        Map.findWithDefault 0 key st_deferred < rm_defer_max rm,
-        let t :=: u = fromMaybe (cp_eqn cp) (expandGoalConsts st_eqhints (cp_eqn cp)),
-        let expand e = fromMaybe e (expandGoalConsts st_eqhints e),
-        let parents = [ (pt, pu) | rm_parents rm, r <- [passive_rule1 p, passive_rule2 p],
-                                   Just a <- [IntMap.lookup (fromIntegral r) st_active_set],
-                                   let pt :=: pu = expand (unorient (active_rule a)) ],
-        let raw = ruleModelRaw rm (fromIntegral st_next_active - 1) t u parents,
-        (if rm_debug rm then Debug.Trace.trace ("RULEPRED " ++ show raw ++ " " ++ show (st_next_active - 1) ++ " " ++ prettyShow (t :=: u)) else id) (raw < rm_threshold rm) ->
-        state {
-          st_cur_passive = Nothing,
-          st_deferred = Map.insertWith (+) key 1 st_deferred,
-          st_ndeferred = st_ndeferred + 1,
-          st_queue = Queue.insert (passive_rule1 p) [p{passive_score = passive_score p * rm_penalty rm}] st_queue }
-      | otherwise ->
-      generaliseCP cp $
-      foldl' (\state cp -> addCP config model state info cp) state{st_cur_passive = Nothing} (split cp)
+    Left (cp, model) ->
+      let
+        key = canonicalise (cp_eqn cp)
+        t :=: u = fromMaybe (cp_eqn cp) (expandGoalConsts st_eqhints (cp_eqn cp))
+        expand e = fromMaybe e (expandGoalConsts st_eqhints e)
+        rawWith rm p =
+          let parents = [ (pt, pu) | rm_parents rm, r <- [passive_rule1 p, passive_rule2 p],
+                                     Just a <- [IntMap.lookup (fromIntegral r) st_active_set],
+                                     let pt :=: pu = expand (unorient (active_rule a)) ]
+          in ruleModelRaw rm (fromIntegral st_next_active - 1) t u parents
+        -- the rule model's raw score (lazy: computed only when needed, as before)
+        mraw = case (cfg_rule_model, st_cur_passive) of
+                 (Just rm, Just p) -> Just (rawWith rm p)
+                 _ -> Nothing
+        -- --pg-threshold / --pg-log: remember the score for the rules made from this pair
+        PG pgRaw _ pgThawed = st_pg
+        pgCur = if isJust cfg_pg_threshold || cfg_pg_log then mraw else Nothing
+        accept =
+          (\st@State{st_pg = PG r _ th} -> st { st_pg = PG r Nothing th }) $
+          generaliseCP cp $
+          foldl' (\state cp -> addCP config model state info cp) state{st_cur_passive = Nothing, st_pg = PG pgRaw pgCur pgThawed} (split cp)
+      in case (cfg_rule_model, st_cur_passive, mraw) of
+        (Just rm, Just p, Just raw)
+          | Map.findWithDefault 0 key st_deferred < rm_defer_max rm,
+            (if rm_debug rm then Debug.Trace.trace ("RULEPRED " ++ show raw ++ " " ++ show (st_next_active - 1) ++ " " ++ prettyShow (t :=: u)) else id) (raw < rm_threshold rm) ->
+            state {
+              st_cur_passive = Nothing,
+              st_deferred = Map.insertWith (+) key 1 st_deferred,
+              st_ndeferred = st_ndeferred + 1,
+              st_queue = Queue.insert (passive_rule1 p) [p{passive_score = passive_score p * rm_penalty rm}] st_queue }
+        _ -> accept
 
   where
     generaliseCP cp state
@@ -1831,7 +1918,11 @@ complete1 config@Config{..} state
     case st_random_seed state of
       Nothing -> -- normal mode
         case dequeue config state of
-          (Nothing, state) -> (False, state)
+          (Nothing, state)
+            | isJust cfg_pg_threshold, PG _ _ False <- st_pg state ->
+              -- parental guidance: empty the freezer and go on
+              (if cfg_pg_log then Debug.Trace.trace "PGTHAW" else id) (True, thawPG config state)
+            | otherwise -> (False, state)
           (Just (info, overlap, _, _, passive), state) ->
             (True, (consider config state{st_cur_passive = Just passive,
                                           st_cur_parents = (fromIntegral (passive_rule1 passive), fromIntegral (passive_rule2 passive))}

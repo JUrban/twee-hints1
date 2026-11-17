@@ -562,6 +562,14 @@ parseConfig = do
     expert $
     inGroup "Critical pair weighting heuristics" $
     defaultFlag "max-cpu" "Real-CPU safety limit in seconds (0 = none); it stops the run like --max-time and prints CPULIMIT; for runs in abstract time" cfg_max_cpu argNum
+  cfg_pg_threshold <-
+    expert $
+    inGroup "Critical pair weighting heuristics" $
+    flag "pg-threshold" ["Parental guidance: no critical pairs of a new rule with an active rule when sigmoid of the sum of their --rule-model raw scores is below this probability (off by default). Rules without a score (axioms, rules from interreduction) are always paired."] Nothing (Just <$> argNum)
+  cfg_pg_log <-
+    expert $
+    inGroup "Debugging options" $
+    bool "pg-log" ["Trace each new rule's id, parents and --rule-model raw score (PGR lines) and its critical pairs per partner (PGN) on stderr, and on success the proof's lemmas (PGPROOF). Scores every rule."] False
   cfg_overlap_index <-
     expert $
     inGroup "Critical pair weighting heuristics" $
@@ -1478,6 +1486,10 @@ runTwee globals (TSTPFlags tstp) horn precedence config0 flags@MainFlags{..} lat
       " forms=" ++ show (Map.size eh_map) ++ " rules=" ++ show (st_next_active state) ++
       " lastmatch=" ++ show eh_last_match ++ " maxgap=" ++ show eh_max_gap ++
       " deferred=" ++ show (st_ndeferred state)
+
+  when (solved state && cfg_pg_log config) $
+    forM_ (allLemmas (map (derivation . pg_proof) (solutions state))) $ \p ->
+      putStrLn ("PGPROOF " ++ pgCanon (equation p))
 
   when (solved state && flags_print_hints) $ do
     let

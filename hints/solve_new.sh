@@ -27,12 +27,17 @@
 # about 25 in 1,320). PASS_EVERY (default 1 s; 0 = a full scheduling pass after every run, which on tens of
 # thousands of goals leaves workers idle, REPORT 2as). LOOPARGS adds other loop.py options. Solved goals end up in
 # OUT/solved.tsv, proofs in OUT/hints.
+# (17 Nov 16:30) TWEE default twee-e44 (e43: no state dump for a proved goal; e44: incremental hint renormalisation,
+# -11% CPU, same output), CASCADE 5,20,80,320 and STATES (default --no-fresh-states: a goal's first deeper level
+# starts over with its full budget instead of resuming a fresh run's state; ORH 18,476 against ORG's 18,374 at
+# 2 hours, 4,792 runs an hour against 4,268; REPORT 2au). STATES= keeps the fresh runs' states.
 set -e
 H=$(cd "$(dirname "$0")" && pwd)
 NAMES=$1; CTX=$2; OUT=$3; J=${4:-4}; HOURS=${5:-1}
 M=${MODEL:-/project/hintwork/models/rm4t}
-TWEE=${TWEE:-/project/bin/twee-e22}
-CASCADE=${CASCADE:-5,80,320}
+TWEE=${TWEE:-/project/bin/twee-e44}
+CASCADE=${CASCADE:-5,20,80,320}
+STATES=${STATES---no-fresh-states}
 KNN=${KNN:-30}
 XEVERY=${XEVERY:-120}
 XTWEE=${XTWEE:-/project/bin/twee-e39}   # the transfer worker's twee (as abs/rpx.sh)
@@ -61,7 +66,7 @@ EOF
 MOD="--model --model-fixed $M.bin,$M.vocab --model-theory --lemmas 6 --lemma-knn $KNN --lemma-subsets --lemma-after"
 python3 -u "$H/loop.py" "$NAMES" "$OUT" --init "$OUT.ctx" --start 1 --cascade "$CASCADE" --cascade-start -1 --retry-gap 3 \
   $MOD --twee "$TWEE" --keep-out -j "$J" --reserve 0 --pool original --wall-factor 15 --line-gaps 80,80 \
-  --retry-hints 1.25 --fresh-first --far-retry --retry-knn --sync 60 --cascade-hours "$HOURS" --pass-every "$PASS" $ORDER $SCHED $LOOPARGS \
+  --retry-hints 1.25 --fresh-first --far-retry --retry-knn --sync 60 --cascade-hours "$HOURS" --pass-every "$PASS" $ORDER $SCHED $STATES $LOOPARGS \
   --args="--abstract-time 2000 --no-resume-requeue --no-eqhint-consider" > "$OUT.log" 2>&1 &
 LOOP=$!
 until [ -f "$OUT/config.json" ] || ! kill -0 $LOOP 2>/dev/null; do sleep 2; done
