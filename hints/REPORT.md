@@ -3869,6 +3869,65 @@ keeps a share for the deeper levels.
   --mix 0.25`, against 383 with `--mix 0.25` alone. At most 2 runs per
   goal, against 6.
 
+**Z3** (`abs/z3_test.sh`): Z2 plus `--fail-order`.
+
+| minutes | 2 | 5 | 10 | 15 | 20 | 22 |
+|---|---:|---:|---:|---:|---:|---:|
+| Z1 | 1,167 | 2,064 | 7,942 | 15,094 | 22,165 | 24,678 |
+| Z3 | 1,438 | 5,975 | 11,825 | 19,224 | 22,953 | 24,876 |
+
+* Far ahead early (+65% at 10 minutes), level at 22 minutes.
+* **The dispatcher was the limit again.** Only 4.6–7.8 of the 12
+  workers were busy. The new list holds every waiting goal and is
+  sorted in every pass, so a pass took 0.2–0.35 s; passes took 409 of
+  the main thread's 1,431 s.
+* A cProfile (4 workers, 4 minutes) puts the time in the list's
+  generator and in `ctx()`. `ctx()` is called twice per goal per pass:
+  once for this list and once for the deeper levels' list.
+* **Fix (5b15fc9):** with `--pass-every`, the full pass now waits at
+  least 8 times its own last length. The time of a kNN index rebuild
+  is left out of that length. On rp3 (2 workers, 2.4 minutes) 619
+  against 617. Z3 was stopped at 24 minutes. **Z4** (`abs/z4_test.sh`)
+  is Z3 with this fix.
+* At 3.7 minutes Z4 had made 8,250 runs, against 13,150 in Z3's first
+  9.5 minutes. Its loop.py is at 100% CPU: one Python process
+  (main thread plus the worker threads' file and output handling) is
+  now the limit. Its main thread at 224 s: passes 41 s, submitting 67,
+  waiting 71, results 45.
+
+| minutes | 5 | 10 | 15 | 20 | 25 | 30 |
+|---|---:|---:|---:|---:|---:|---:|
+| Z1 | 2,064 | 7,942 | 15,094 | 22,165 | 26,339 | 28,996 |
+| **Z4** | **8,101** | **15,398** | 20,785 | 24,215 | 27,397 | 29,814 |
+| busy workers, Z1 (5-minute windows) | 9.6 | 7.4 | 7.4 | 8.0 | 9.8 | 10.4 |
+| busy workers, Z4 | 6.8 | 7.3 | 8.1 | 8.6 | 12.7 | 6.8 |
+
+* **Twice Z1's count at 10 minutes, 3% more at 30.**
+* In the first 30 minutes 25,250 of Z4's 25,527 runs proved their goal,
+  yet 21,646 goals had not run at all. In this phase every run is a
+  proof, so the limits are how fast one Python process hands out runs
+  and the chains: a goal becomes easy only once the goal below it is
+  proved.
+* Repeats in Z1 after 30 minutes, split by whether a sibling among the
+  10 goals below was proved since the goal's last run: 11.0% (50 an
+  hour) with one, 4.6% (20 an hour) without. Both are far below a
+  first run, so ordering by failures alone loses little.
+
+**rp3 over an hour** (from zero, 4 workers, no scheduler):
+
+| run | 15 min | 30 min | 45 min | 60 min |
+|---|---:|---:|---:|---:|
+| LVZ | 830 | 871 | 885 | 890 |
+| MX60, `--mix 0.25` | 828 | 872 | 887 | **914** |
+| FO60, `--mix 0.25 --fail-order` | 828 | 872 | 888 | 891 |
+
+* MX60's gain came after 45 minutes: 22 first-level proofs then,
+  against none in LVZ, whose last 15 minutes gave 5 deeper proofs.
+* FO60 ran every goal at least once (LVZ left 385 of its 430 unsolved
+  goals never run, MX60 194) but proved no more. On this small set
+  the goals that never ran are mostly ones a 5 s run does not prove.
+  MX60 against FO60 (914 against 891) is one run each.
+
 ## 2c. Long runs: stall cutoff and checkpoints
 
 * `--eqhint-stall N` gives up when no new rule has matched a hint for N
