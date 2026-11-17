@@ -1,6 +1,6 @@
 # Working record: hint guidance for twee (internal)
 
-Written 17 Nov 2026, 18:10, from the whole session transcript (12 Nov 19:30 to now: 68 user messages,
+Written 17 Nov 2026, 18:08, from the whole session transcript (12 Nov 19:30 to now: 68 user messages,
 32 more sent mid-turn, 940 replies, 4,974 tool calls, 24 context compactions), the 334 commits on
 branch `hints`, and REPORT.md. REPORT.md is the outward report, with results and numbers. This file is for
 resuming the work. It says why each thread was started, how it was done, what came out, where the
@@ -281,7 +281,7 @@ Each goal is one twee run on the goal's problem.
 ### 4.3 Production
 * `abs/ul41.sh` since 17 Nov 17:25 (UL41.log): ul40 (e44, the 17 Nov defaults) plus the PG sum filter.
   It runs `--twee /project/bin/twee-pg50` with `TWEE_PG_ARGS="--pg-threshold 0.25"`, on 4 workers.
-* Solved: 44,870 of 51,784 at 18:15 on 17 Nov (holdout about 4,900; count the distinct goals in
+* Solved: 44,870 of 51,784 at 18:05 on 17 Nov (holdout about 4,900; count the distinct goals in
   loops/UL/solved.tsv). Plain twee at 4 s gets 31,060.
 * The production lineage is in the headers of abs/ul3.sh … ul41.sh, each with its reason and time:
   * ul3–ul10: rounds 3–5, adding --no-resume-requeue, --no-eqhint-consider, line gaps, retry-hints and sync.
@@ -514,7 +514,9 @@ in /project/hintwork/pg/paper/pg.txt). I should have read this first:
     to anonymous).
   * In one run: 794 distinct features, 37 per rule. Collisions: 36.6% at base 1k, 14.2% at 4k, 9.9% at 8k.
     Anonymous features had only 112 distinct.
-  * Re-logging the 1,500 late goals with e54 into pg/d3 (pg/relog5.sh, started 18:00). Then train Pcat
+  * The 1,500 late goals were re-logged with e54 into pg/d3 (pg/relog5.sh, 18:00–18:09): 1,482 proved,
+    551,947 scored rules, the same as d2. The keys are signed 64-bit integers, often negative, so grep for
+    `E-?[0-9]`. With the flags off, e54 matches e44 on 24 testbed goals (exp/pg/eqchk54.sh). Then train Pcat
     (ENIGMA only, and with the 20 dense features) at bases 1k/4k/8k, ρ = 8, about 100 trees and 255+ leaves.
     Test at matched pruning on the 200 goals, reporting proofs and CPU separately.
   * Cost is the risk (25 µs per evaluation); then a faster evaluator or a smaller forest.
@@ -567,14 +569,14 @@ summaries keep results but lose the reasons and the user's exact words. Keep sec
 
 ---------------------------------------------------------------------------------------------------------
 
-## 8. Open threads (17 Nov 18:10)
+## 8. Open threads (17 Nov 18:10; `date` checked)
 
 Running:
 * production ul41 (UL41.log, PG sum filter 0.25, 4 workers);
 * the PGA/PGB half1 A/B (loops/PGA, PGB), ending about 18:54: then write REPORT 2av, merge PGA's proofs into
   UL (abs/merge_ab.sh or merge.py), and decide whether PG becomes the solve_new.sh default (TWEE=twee-pg50 with
   TWEE_PG_ARGS);
-* the e54 re-log of pg/d3 (pg/relog5.sh, 4 workers).
+* (done 18:09) the e54 re-log of pg/d3.
 
 Next:
 1. Pcat ENIGMA models as above (6.1), tested at matched pruning; also several thresholds of the sum

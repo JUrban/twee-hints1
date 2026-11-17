@@ -1,5 +1,5 @@
 #!/bin/bash
-# (17 Nov 18:20) e54 with the PG flags off against e44: identical stdout (proof, hints) and WORK on 24 testbed goals
+# (17 Nov 18:06) e54 with the PG flags off against e44: identical stdout (proof, hints) and WORK on 24 testbed goals
 cd /project/hintwork/pg/eqchk54
 for g in $(head -24 ../tb/all.goals); do
   w=$(grep "/$g.p " ../tb/cmds.all | cut -d' ' -f2-)
