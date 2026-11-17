@@ -3566,9 +3566,13 @@ with the clean context. The control is LVD.
   runs at 5 s and 51 at 80 s in the hour, against 1,439 and 86 for
   LVS. 260 of its 783 cascade proofs are goals that the transfer
   proves too. Within the noise, so it stays in the default.
-* **From zero, 2 hours**: LZ4 (scheduler with sweep-first) 937, LVZ
-  (no scheduler, 1 hour) 890. At 60 minutes 906 against 890; at equal
-  cascade work (7,000 abstract s) 879 against 884, the same.
+* **From zero, 4 hours** (LZ4, scheduler with sweep-first, to 00:50):
+  **977**. Minutes: 60 906, 90 928, 120 955, 180 974, 240 977. LVZ (no
+  scheduler, 1 hour) 890; at 60 minutes 906 against 890, at equal
+  cascade work (7,000 abstract s) 879 against 884, the same. In all:
+  2,426 runs at 5 s (875 proved, 3.2 h), 272 at 80 s (89, 8.2 h), 26 at
+  320 s (8, 5.7 h). So from zero the 3 originals pass the 13 Nov
+  context's 2-hour 952, without any other original's proofs.
 
 **Why the replays level off near 950** (21:50). LV4 had 948 at 2 hours
 (stopped there) and LZ4 937. Production has 1,111 of the 1,320, and
@@ -3686,6 +3690,58 @@ holds for the goal if neither it nor its lemmas use the missing axioms.
 * So the lemma chains carry the dependence, even when the final proof
   does not show it. Exact reuse works within the same or weaker
   axioms (2al, 2am) and rarely across them.
+
+## 2as. The whole benchmark from zero, and a faster dispatcher (16–17 Nov night)
+
+**Z0** (`abs/z0_test.sh`, from 23:49): the final system from zero on
+all 51,784 public problems. `solve_new.sh` with an empty context,
+without the learned scheduler (from zero it needs `--sweep-first`,
+which at this size would run every goal once before any retry), the
+transfer every 5 minutes, 12 workers.
+
+| minutes | 5 | 10 | 20 | 30 | 40 | 50 | 60 | 66 |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| Z0, proved | 1,877 | 6,215 | 17,435 | 22,979 | 27,397 | 30,275 | 32,475 | 33,459 |
+
+* **In 50 minutes on 14 CPUs it matches plain twee at 4 s on the whole
+  benchmark** (31,060, 28 CPU h). At 66 minutes 33,459, past the 2 + 2 s
+  loop of 13 Nov (33,249, 24.5 CPU h).
+* The transfer did 12k of them: goals that are instances of proven
+  goals of other originals with the same or weaker axioms, or steps of
+  their proofs.
+* **But the dispatcher was the bottleneck.** Busy workers (summed run
+  wall time over the window) by 10-minute window: 4.8, 2.7, 3.7, 5.3,
+  7.3 of 12. Most runs were proofs in under a second, and loop.py's
+  main thread ran at 100% CPU.
+
+**Where the main thread's time went.** A cProfile of the same start (3
+workers, 4 minutes) put most of it in `ctx()`, the goal's sibling-lemma
+context: 43M calls, 260 of 472 s. It ran for every waiting goal,
+several times in every scheduling pass, and the pass ran after every
+finished run. Three changes:
+
+| change | runs in the first 1 / 2 / 3 minutes (12 workers) |
+|---|---|
+| none (Z0) | 872 / 1,403 / 1,765 |
+| `ctx()` cached per original (b1bb8c5) | 1,030 / 1,596 / 1,905 |
+| + kNN picks memoised in the lemma index (c9d1341): each run's picks were computed at dispatch and again when its problem was written; same picks, 30.7 → 16.8 ms a goal | 1,058 / 1,605 / 1,916 |
+| + **`--pass-every 1`** (a2b03ec): the full pass at most once a second, its lists used up in between, each goal checked again when taken | **1,454** / 1,872 / 2,079 |
+
+* Timers in the status line (`main s: pass … submit … wait …
+  results …`) showed the cause before the last change: the passes took
+  134 of the main thread's 180 s. After it 29 of 170, and the main
+  thread mostly waits for workers.
+* The first two help most later, with tens of thousands of proofs in
+  the index; the 3-minute tests start with almost none.
+* **No proofs lost:** PE1 (rp3 from zero, 4 workers, `--pass-every
+  1`) gave 733, 809 and 830 at 4, 10 and 15 minutes, against LVZ's 732,
+  806 and 830.
+* `solve_new.sh` now passes `--pass-every 1` (`PASS_EVERY`); production
+  keeps 0.
+
+**Z1** (`abs/z1_test.sh`, from 00:56): Z0 again with the new
+dispatcher, 12 workers, 10 hours. Z0 was stopped at 66 minutes; its
+curve above is the comparison.
 
 ## 2c. Long runs: stall cutoff and checkpoints
 
