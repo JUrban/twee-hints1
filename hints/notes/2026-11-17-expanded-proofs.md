@@ -76,6 +76,10 @@ as hints and as training data?
   are inert.
 * 20 abstract s is short for proofs whose closures hold 800 goals. A longer budget for the failures is the
   natural next arm.
+* Reproducibility: exp1's draw is deterministic (exp/exp1_pick.py: a sorted list, seed 1), given UL's state at
+  18:59. The committed set is the record. Pool files (exp1_mkpool.py, exp2_mkpools.py) break frequency ties in
+  set-iteration order, which depends on the hash seed. Every hint gets the same factor, so only the hints'
+  numbering in a run can differ.
 
 **exp2: expanded pools on the frontier** (exp/exp2_mkpools.py, exp/exp2_run.py; from about 19:25).
 
@@ -103,6 +107,22 @@ run still has its lemma axioms.
   * On the first two goals the extras roughly doubled the matched hints (548 to 1,057, and 640 to 999), and
     neither goal proved in any arm.
 * For scale: the sum filter at 0.269 proved 52 of these 200 with twee-e51.
+
+| exp2, 5 abstract s, 5 workers (19:31–19:41) | proved of 200 | against base | CPU s | mean matched hints |
+|---|---:|---|---:|---:|
+| base | **51** | | 838 | 481 |
+| xa, + all extras at 0.01 | 47 | +4 −8 | 966 | 784 |
+| xw, + all extras at 0.1 | 43 | +3 −11 | 972 | 777 |
+
+* **No gain.** The extras are matched (+300 matched hints a run) but cost 15% more CPU and prove fewer. On this
+  testbed tweaks have moved results by about ±5, so xa is within noise and xw leans negative.
+* Most of the extras derive kNN lemmas that the run already has as axioms, so they are redundant there. **The
+  relevant part** (Veroff's reason) is the derivations of lemmas that the siblings' proofs used and the run lacks:
+  without those lemmas, the siblings' steps in the pool are out of reach (exp/exp2_mkrel.py).
+  * Over all siblings that is a median of 328 missing lemmas and 1,494 extras, nearly the same set as xa.
+  * Over the siblings at most 80 goals below the test goal (xr80): 120 lemmas and 1,050 extras.
+* Next arms: xr80 at 5 s with a repeat of base (for noise), then base and xa at 20 s, since Veroff's argument is
+  about long runs.
 
 **Next.**
 * At the end: compare N/O/X/P. If X beats P and O, the derivations of the lemmas carry information the pool

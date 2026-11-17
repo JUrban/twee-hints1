@@ -665,6 +665,7 @@ reports are written as the experiments run.
 | notes/2026-11-16-same-statement-other-theory.md | The same statement proven in another theory |
 | notes/2026-11-16-step-transfer.md | Goals that are steps of existing proofs: transfer, source lemmas, and a kNN filter bug |
 | notes/2026-11-17-expanded-proofs.md | Expanding lemma-based proofs back to the axioms (Veroff style) |
+| notes/2026-11-17-deep-runs-expanded-chains.md | Deep runs on late unsolved goals, guided by expanded proof chains (Veroff's question) |
 | notes/2026-11-17-lemma-circularity.md | Are lemma chains circular? A check of the used lemmas |
 | notes/2026-11-17-mix-fail-order.md | Repeats cost most of the time: `--mix` and `--fail-order` |
 | notes/2026-11-17-pg-ab-half1.md | Parental guidance at scale: half1 from zero, 2 hours, sum filter 0.25 against the defaults |
