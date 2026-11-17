@@ -2,7 +2,7 @@
 """exp4/reinst.py SKETCH.tsv OUT.tsv [-j J] [--secs S] [--end N] [--cache R.tsv...]: the used instances of S,
 extracted again from sketch.py's saved proofs (SKETCH.tsv.d/<goal>.<id>.out), and screened with Mace4 in T.
 
-Fixes two faults of sketch.py's extraction (found 22:20):
+Fixes two faults of sketch.py's extraction (found 22:15):
 * the instance is the redex of the step: the deepest position, on the path where the two terms differ, at which
   (before, after) is an instance of S (either orientation, one substitution for both sides). sketch.py took the
   innermost differing position, which for an argument filtering f(..X..) = f(..Y..) is inside the redex, so every

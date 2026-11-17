@@ -150,7 +150,7 @@ were sketched at 5 s.
 * **Weaker goals are real steps down.** In every goal some instance of the goal (two variables identified, or one
   set to e) proves in 5 s, with proofs of median 26 lemmas. These are true lemmas.
 
-**Fault in the instance extraction** (found 22:20; the stage 1 instance counts above are affected).
+**Fault in the instance extraction** (found 22:15; the stage 1 instance counts above are affected).
 * sketch.py took the innermost position where the terms before and after an S step differ. For an argument
   filtering f(..X..) = f(..Y..) that position is inside the redex, so every filtering "instance" came out as a
   false x = y. The table's "all refuted" for filterings is that fault.
