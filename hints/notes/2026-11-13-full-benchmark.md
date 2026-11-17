@@ -84,4 +84,4 @@ Controls on the round-0 failures, 8 s:
 * The 300 are a random sample, so the 60 s numbers are clean of selection, but with ±3 noise.
 
 **Decision and next.** The loop with lemmas becomes the benchmark loop; the full run continues in rounds
-(2026-11-14-online-pools.md, 2026-11-14-cascade.md). REPORT 2h, 2i.
+(2026-11-13-online-pools-cascade.md). REPORT 2h, 2i.

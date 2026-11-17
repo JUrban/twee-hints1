@@ -77,6 +77,6 @@ candidates hold 0.856.
 * This kNN later became the lemma selection (REPORT 2l: `lemma_knn 30`). For hints, production went back to
   the whole original's pool (`--pool original` in abs/ul41.sh). On 13–14 Nov, at 20 abstract s with online
   pools, the whole pool beat kNN 30:100 (60 against 55 of 189 goals, REPORT 2o): at 2 s a big pool hurts,
-  at 20 s it does not (2026-11-14-online-pools.md).
+  at 20 s it does not (2026-11-13-online-pools-cascade.md).
 
 **Decision and next.** kNN 30:100 for the loops of 12–13 Nov. REPORT 2.
