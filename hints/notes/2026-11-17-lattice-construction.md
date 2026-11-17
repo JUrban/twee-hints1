@@ -194,6 +194,16 @@ were sketched at 5 s.
 * A set is kept when Mace4 refutes none of its subgoals (sizes up to 12, 10 s each).
 * Goal 299: the normal forms are m(m(x1,x0), k(x2,m(x0,x1))) and m(k(x0,x1), t(m(x0,x1),x2)). Their one
   decomposition needs m(x0,x1) = k(x1,x0), which is false.
+* **Result (finished 23:06, all 47 goals; none proved in the 20 s run).**
+  * 78 distinct subgoal sets: 58 of size 1, 18 of size 2 and 2 of size 3.
+  * Mace4 kept 49 sets. But all except 2 are a pair of the goal's own normal forms, which is equivalent to the
+    goal, not a step (nf2moves.py drops those).
+  * The 3 remaining subgoals:
+    * mbol_lem1 387 splits into `k(X0,X1) = a(X2,X3,k(X0,X1))` and `ld(l(k(X0,X1),X2,X3),X4) = X4`. The first
+      has a countermodel of size 8, found by a 30 s screen.
+    * nslm_to_aa1 1003 reduces to `rd(m(t(X0,X1),X1),t(X0,X1)) = ld(k(X1,X0),X1)`.
+  * The two survivors do not prove as goals in 20 s (sketch.py, nfsketch20.tsv).
+  * So the goals' normal forms almost never share a head below the top. Decomposition gives no steps here.
 
 **Generalisations of the goal** (genmoves.py, 22:05). Korovin's generalisation, applied to the goal itself (Polya's
 inventor's paradox).
