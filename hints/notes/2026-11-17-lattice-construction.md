@@ -184,6 +184,20 @@ were sketched at 5 s.
 * **Stage 2: proving the rungs** (23:47). rungs.py collects the used conjectures: 35 distinct ones in 15 goals.
   sketch.py runs each as a goal with the goal's production command at 20 s, 2 CPUs (exp5 lowered to 2):
   `python3 rungs.py refine20.tsv rungs20a.tsv; python3 sketch.py rungs20a.tsv rprove20a.tsv -j 2 --time 20`.
+  * The refinement finished at 23:58. 47 of 186 runs proved their goal from plausible conjectures, covering 16
+    goals, with 48 distinct conjectures. No run proved a goal without its assumptions. The 13 conjectures from
+    runs after the interim are in rungs20b.tsv, launched 23:59 (rprove20b.tsv).
+  * **First 35 conjectures at 20 s (finished 23:59): 6 proved.** closure.py checks the goals whose refinement
+    proof has all its conjectures proved.
+    * **aa2_12 517 is solved through a rung.** Conjecture 4000,
+      `k(l(l(X0,X1,X2),m(X2,X1),X3),X2) = k(ld(m(X3,m(X2,X1)),m(X3,m(m(X1,X0),X2))),X2)`, proves as a goal in
+      20.9 CPU s (316 lemmas), and the goal follows from it alone in 1.6 s.
+    * The commutation lemma `m(k(X0,X1),m(X1,X0)) = m(m(X1,X0),k(X0,X1))` also proves (1.4 s). From it alone
+      the goal takes 21.6 s, a second route.
+    * For comparison, exp3's K and E arms proved 517 directly at about 17 abstract s with chain hints; C and V
+      did not (V fails at 320 s).
+    * ns_to_aa1_e 441: 3 of the conjectures its refinement proofs use are proved; each proof still has one open.
+    * The other 14 goals have 1–2 open conjectures each.
 
 **Down step with sketch hints** (downhints.py, launched 21:57).
 `python3 downhints.py sketch47.tsv down80.tsv -j 2 --time 80 --arms I,U`
