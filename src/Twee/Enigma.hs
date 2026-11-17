@@ -7,7 +7,7 @@
 {-# LANGUAGE BangPatterns, RecordWildCards #-}
 module Twee.Enigma(
   Tree, Forest, parseForest, parseForestBin, predictRaw, predictDense, predictWith, treeFeatures,
-  eqnFeatures, eqnFeaturesH, RuleModel(..), mkRuleModel, ruleModelRow, ruleModelRaw, ruleEnigma) where
+  eqnFeatures, eqnFeaturesH, eqnFeaturesHWith, anonSym, RuleModel(..), mkRuleModel, ruleModelRow, ruleModelRaw) where
 
 import Data.Array.Unboxed
 import Data.Array.ST(runSTUArray, newArray, writeArray)
@@ -203,10 +203,20 @@ hkey = fromIntegral . fnvStr fnvStart
 
 -- | eqnFeatures with hashed names: all features, and the V, H and C keys.
 eqnFeaturesH :: (f -> String) -> Term f -> Term f -> (IntMap Double, IntSet, IntSet, IntSet)
-eqnFeaturesH name tl tr =
+eqnFeaturesH name = eqnFeaturesHWith sym
+  where
+    sym (Var _) = "*"
+    sym (App f _) = name (unintern f)
+
+-- | ENIGMA Anonymous symbol names: a function symbol by its arity.
+anonSym :: Term f -> String
+anonSym (Var _) = "*"
+anonSym (App _ ts) = 'f' : show (length (unpack ts))
+
+-- | eqnFeaturesH with the symbol names given by a function on terms.
+eqnFeaturesHWith :: (Term f -> String) -> Term f -> Term f -> (IntMap Double, IntSet, IntSet, IntSet)
+eqnFeaturesHWith symName tl tr =
   let
-    symName (Var _) = "*"
-    symName (App f _) = name (unintern f)
     hV = fnvStep fnvStart 'V'
     hH = fnvStep fnvStart 'H'
     hC = fnvStep fnvStart 'C'
@@ -311,12 +321,6 @@ ruleModelRowS RuleModel{..} idx t u parents =
       pf = Map.unionsWith (+) [ eqnFeatures rm_name pt pu | rm_parents, (pt, pu) <- parents ]
       ps = [ (i, v) | (k, v) <- Map.toList pf, Just i <- [Map.lookup ("p:" ++ k) rm_vocab] ]
   in IntMap.fromList (fixed ++ cs ++ ps ++ rm_goal)
-
--- | The ENIGMA features of an equation in the rule model's "c:" vocabulary: (column, value).
-ruleEnigma :: RuleModel f -> Term f -> Term f -> [(Int, Double)]
-ruleEnigma RuleModel{..} t u =
-  let (hf, _, _, _) = eqnFeaturesH rm_name t u
-  in [ (i, v) | (k, v) <- IntMap.toList hf, Just i <- [IntMap.lookup k rm_hvocab_c] ]
 
 ruleModelRaw :: RuleModel f -> Int -> Term f -> Term f -> [(Term f, Term f)] -> Double
 ruleModelRaw rm idx t u parents = predictRaw (rm_forest rm) (ruleModelRow rm idx t u parents)

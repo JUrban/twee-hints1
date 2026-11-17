@@ -4,7 +4,7 @@ module Twee where
 
 import Twee.Base
 import Twee.Enigma
-import Data.Array.Unboxed(UArray, listArray, elems, (!))
+import Data.Array.Unboxed(UArray, listArray, elems, accumArray)
 import Data.Array.Base(unsafeAt)
 import qualified Data.Set as Set
 import Twee.Rule hiding (normalForms)
@@ -146,10 +146,11 @@ data Config f =
 -- | A parental model: an additive forest (see 'splitPGModel'), scored once per rule,
 -- or a full forest on both rules' features ('pgRuleFeatures' twice and the id gap).
 data PGModel = PGAdditive Forest Forest | PGFull Forest
-  -- | Pcat on ENIGMA features (FroCoS 2021): the new rule's ENIGMA vector (the rule
-  -- model's "c:" features, columns renumbered 0..c-1 by this map), the partner's
-  -- (c..2c-1), then both rules' 'pgRuleFeatures' (2c..2c+19) and the id gap (2c+20).
-  | PGEnigma Forest (IntMap Int) Int
+  -- | Pcat on hashed ENIGMA features (FroCoS 2021): the new rule's ENIGMA features
+  -- hashed to base b (feature key mod b, see 'pgEnigmaVec'), the partner's (b..2b-1),
+  -- then both rules' 'pgRuleFeatures' (2b..2b+19) and the id gap (2b+20). The Bool:
+  -- ENIGMA Anonymous (symbols by arity) instead of symbol names.
+  | PGEnigma Forest Int Bool
 
 -- | The prover state.
 data State f =
@@ -198,8 +199,8 @@ data PG =
     pg_gh     :: !(IntMap (Double, Double)),
     -- with a full --pg-model: each active's features
     pg_feats  :: !(IntMap (UArray Int Double)),
-    -- with an ENIGMA --pg-model: each active's ENIGMA vector (renumbered columns)
-    pg_enig   :: !(IntMap (IntMap Double)) }
+    -- with an ENIGMA --pg-model: each active's hashed ENIGMA vector
+    pg_enig   :: !(IntMap (UArray Int Double)) }
 
 instance Binary PG where
   put _ = return ()
@@ -236,6 +237,20 @@ pgRuleFeatures State{..} Active{..} q ps =
             WeaklyOriented{} -> 1
             Permutative{} -> 2
             Unoriented -> 3
+
+-- | A rule's ENIGMA features (hashed keys), with symbol names or anonymous.
+pgEnigmaKeys :: Function f => Maybe (RuleModel f) -> Bool -> Rule f -> [(Int, Double)]
+pgEnigmaKeys rm anon r =
+  let (hf, _, _, _) =
+        if anon then eqnFeaturesHWith anonSym (lhs r) (rhs r)
+        else case rm of
+               Just RuleModel{rm_name = name} -> eqnFeaturesH name (lhs r) (rhs r)
+               Nothing -> eqnFeaturesHWith anonSym (lhs r) (rhs r)
+  in IntMap.toList hf
+
+-- | Hashed ENIGMA features folded to base b (key mod b).
+pgEnigmaVec :: Int -> [(Int, Double)] -> UArray Int Double
+pgEnigmaVec b ks = accumArray (+) 0 (0, b - 1) [ (k `mod` b, v) | (k, v) <- ks ]
 
 -- | An additive parental model (trained with interaction constraints): the trees on
 -- the new rule's features (0-9) and those on the partner's (10-19). A pair's raw
@@ -280,14 +295,14 @@ pgFilter Config{..} PG{..} r1 =
               Just (_, h2) -> g1 + h2 >= lim
               Nothing -> True
           | otherwise -> Nothing
-        Just (PGEnigma forest _ c)
+        Just (PGEnigma forest c _)
           | Just f1 <- IntMap.lookup i1 pg_feats, Just e1 <- IntMap.lookup i1 pg_enig -> Just $ \r2 ->
             let i2 = fromIntegral (active_id r2) in
             case (IntMap.lookup i2 pg_feats, IntMap.lookup i2 pg_enig) of
               (Just f2, Just e2) ->
                 let feat i
-                      | i < c = IntMap.findWithDefault 0 i e1
-                      | i < 2 * c = IntMap.findWithDefault 0 (i - c) e2
+                      | i < c = unsafeAt e1 i
+                      | i < 2 * c = unsafeAt e2 (i - c)
                       | j < 10 = unsafeAt f1 j
                       | j < 20 = unsafeAt f2 (j - 10)
                       | j == 20 = unsafeAt f1 7 - unsafeAt f2 7
@@ -906,13 +921,14 @@ addActive config state@State{..} active0 =
     pgF = case pg_cur of
             Just q | isJust (cfg_pg_model config) || cfg_pg_log config -> Just (pgRuleFeatures state active q pg_cur_ps)
             _ -> Nothing
-    -- the rule's ENIGMA features in the rule model's vocabulary (raw columns)
-    pgE = case (pgF, cfg_rule_model config) of
-            (Just _, Just rm) | cfg_pg_log config || isPGEnigma (cfg_pg_model config) ->
-              Just (ruleEnigma rm (lhs active_rule) (rhs active_rule))
+    -- the rule's hashed ENIGMA features (for the log: named and anonymous)
+    pgE = case pgF of
+            Just _ | cfg_pg_log config -> Just (pgEnigmaKeys (cfg_rule_model config) False active_rule,
+                                                 pgEnigmaKeys (cfg_rule_model config) True active_rule)
             _ -> Nothing
-    isPGEnigma (Just PGEnigma{}) = True
-    isPGEnigma _ = False
+    pgEV = case (pgF, cfg_pg_model config) of
+             (Just _, Just (PGEnigma _ b anon)) -> Just (pgEnigmaVec b (pgEnigmaKeys (cfg_rule_model config) anon active_rule))
+             _ -> Nothing
     pg' = case pg_cur of
             Just q -> st_pg { pg_raw = IntMap.insert (fromIntegral st_next_active) q pg_raw,
                               pg_gh = case (pgF, cfg_pg_model config) of
@@ -922,20 +938,17 @@ addActive config state@State{..} active0 =
                                         (Just f, Just PGFull{}) -> IntMap.insert (fromIntegral st_next_active) f pg_feats
                                         (Just f, Just PGEnigma{}) -> IntMap.insert (fromIntegral st_next_active) f pg_feats
                                         _ -> pg_feats,
-                              pg_enig = case (pgE, cfg_pg_model config) of
-                                        (Just e, Just (PGEnigma _ rank _)) ->
-                                          IntMap.insert (fromIntegral st_next_active)
-                                            (IntMap.fromListWith (+) [ (r, v) | (col, v) <- e, Just r <- [IntMap.lookup col rank] ]) pg_enig
-                                        _ -> pg_enig }
+                              pg_enig = maybe pg_enig (\e -> IntMap.insert (fromIntegral st_next_active) e pg_enig) pgEV }
             Nothing -> st_pg
     pgTrace
       | cfg_pg_log config =
         Debug.Trace.trace ("PGR " ++ show (fromIntegral st_next_active :: Int) ++ " " ++ show (fst st_cur_parents) ++ " " ++
                            show (snd st_cur_parents) ++ " " ++ maybe "-" show pg_cur ++ " " ++
                            maybe "-" (intercalate "," . map show . elems) pgF ++ " " ++
-                           maybe "E-" (\e -> 'E' : intercalate "," [ show col ++ ":" ++ show v | (col, v) <- e ]) pgE ++ " " ++
+                           maybe "E- A-" (\(e, an) -> 'E' : keys e ++ " A" ++ keys an) pgE ++ " " ++
                            pgCanon (unorient active_rule))
       | otherwise = id
+    keys ks = intercalate "," [ show k ++ ":" ++ show v | (k, v) <- ks ]
     state' =
       pgTrace $
       recordEqHintMatch active $

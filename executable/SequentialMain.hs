@@ -93,7 +93,8 @@ data MainFlags =
     flags_track_hints :: Maybe FilePath,
     flags_rule_model :: Maybe FilePath,
     flags_pg_model :: Maybe FilePath,
-    flags_pg_enigma :: Bool,
+    flags_pg_enigma :: Int,
+    flags_pg_anon :: Bool,
     flags_rule_vocab :: Maybe FilePath,
     flags_rule_goal :: Maybe FilePath,
     flags_rule_threshold :: Double,
@@ -284,7 +285,11 @@ parseMainFlags = do
   flags_pg_enigma <-
     expert $
     inGroup "Critical pair weighting heuristics" $
-    bool "pg-enigma" ["--pg-model is a Pcat model on ENIGMA features (FroCoS 2021): the new rule's and the partner's ENIGMA vectors in --rule-model's c: vocabulary (renumbered in column order), then both rules' 10 features and the id gap (hints/pgtrain_enigma.py)."] False
+    flag "pg-enigma" ["--pg-model is a Pcat model on hashed ENIGMA features (FroCoS 2021) with this hash base B: the new rule's and the partner's ENIGMA features hashed to B buckets each, then both rules' 10 features and the id gap (hints/pgtrain_enigma.py; 0 = not an ENIGMA model)."] 0 argNum
+  flags_pg_anon <-
+    expert $
+    inGroup "Critical pair weighting heuristics" $
+    bool "pg-anon" ["With --pg-enigma: ENIGMA Anonymous features (function symbols by their arity) instead of symbol names."] False
   flags_rule_vocab <-
     expert $
     inGroup "Critical pair weighting heuristics" $
@@ -1252,13 +1257,8 @@ runTwee globals (TSTPFlags tstp) horn precedence config0 flags@MainFlags{..} lat
       Nothing -> return Nothing
       Just mfile -> do
         forest <- parseForestBin <$> BS.readFile mfile
-        if flags_pg_enigma then
-          case ruleModel of
-            Nothing -> error "--pg-enigma needs --rule-model (its c: vocabulary)"
-            Just rm ->
-              let cols = Set.toList (Set.fromList (IntMap.elems (rm_hvocab_c rm)))
-                  rank = IntMap.fromList (zip cols [0..])
-              in return $! length forest `seq` Just (PGEnigma forest rank (length cols))
+        if flags_pg_enigma > 0 then
+          return $! length forest `seq` Just (PGEnigma forest flags_pg_enigma flags_pg_anon)
         else case splitPGModel forest of
           Just (fr, fa) -> return $! length fr `seq` length fa `seq` Just (PGAdditive fr fa)
           Nothing -> return $! length forest `seq` Just (PGFull forest)
