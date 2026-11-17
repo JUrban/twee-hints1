@@ -14,7 +14,7 @@ S = [g for g in S if '--load-state' not in last[g]]
 random.Random(1).shuffle(S); S = S[:n]
 os.makedirs(outd, exist_ok=True)
 def run(g):
-    w = ['/project/bin/twee-e48'] + last[g][1:] + ['--pg-log']
+    w = [os.environ.get('RELOG_TWEE', '/project/bin/twee-e48')] + last[g][1:] + ['--pg-log']
     with open(os.path.join(outd, g + '.out'), 'w') as fo, open(os.path.join(outd, g + '.err'), 'w') as fe:
         subprocess.run(w, stdout=fo, stderr=fe)
     return g

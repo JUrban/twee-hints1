@@ -146,6 +146,10 @@ data Config f =
 -- | A parental model: an additive forest (see 'splitPGModel'), scored once per rule,
 -- or a full forest on both rules' features ('pgRuleFeatures' twice and the id gap).
 data PGModel = PGAdditive Forest Forest | PGFull Forest
+  -- | Pcat on ENIGMA features (FroCoS 2021): the new rule's ENIGMA vector (the rule
+  -- model's "c:" features, columns renumbered 0..c-1 by this map), the partner's
+  -- (c..2c-1), then both rules' 'pgRuleFeatures' (2c..2c+19) and the id gap (2c+20).
+  | PGEnigma Forest (IntMap Int) Int
 
 -- | The prover state.
 data State f =
@@ -193,14 +197,16 @@ data PG =
     -- rule of a pair and as its partner
     pg_gh     :: !(IntMap (Double, Double)),
     -- with a full --pg-model: each active's features
-    pg_feats  :: !(IntMap (UArray Int Double)) }
+    pg_feats  :: !(IntMap (UArray Int Double)),
+    -- with an ENIGMA --pg-model: each active's ENIGMA vector (renumbered columns)
+    pg_enig   :: !(IntMap (IntMap Double)) }
 
 instance Binary PG where
   put _ = return ()
   get = return emptyPG
 
 emptyPG :: PG
-emptyPG = PG IntMap.empty Nothing 0 False IntMap.empty IntMap.empty
+emptyPG = PG IntMap.empty Nothing 0 False IntMap.empty IntMap.empty IntMap.empty
 
 -- | The parental model's features of a rule, made when it is added:
 -- raw score, lhs and rhs size, number of variables, depth, hint match (0 none,
@@ -273,6 +279,22 @@ pgFilter Config{..} PG{..} r1 =
             case IntMap.lookup (fromIntegral (active_id r2)) pg_gh of
               Just (_, h2) -> g1 + h2 >= lim
               Nothing -> True
+          | otherwise -> Nothing
+        Just (PGEnigma forest _ c)
+          | Just f1 <- IntMap.lookup i1 pg_feats, Just e1 <- IntMap.lookup i1 pg_enig -> Just $ \r2 ->
+            let i2 = fromIntegral (active_id r2) in
+            case (IntMap.lookup i2 pg_feats, IntMap.lookup i2 pg_enig) of
+              (Just f2, Just e2) ->
+                let feat i
+                      | i < c = IntMap.findWithDefault 0 i e1
+                      | i < 2 * c = IntMap.findWithDefault 0 (i - c) e2
+                      | j < 10 = unsafeAt f1 j
+                      | j < 20 = unsafeAt f2 (j - 10)
+                      | j == 20 = unsafeAt f1 7 - unsafeAt f2 7
+                      | otherwise = 0
+                      where j = i - 2 * c
+                in predictWith forest feat >= lim
+              _ -> True
           | otherwise -> Nothing
         Just (PGFull forest)
           | Just f1 <- IntMap.lookup i1 pg_feats -> Just $ \r2 ->
@@ -884,6 +906,13 @@ addActive config state@State{..} active0 =
     pgF = case pg_cur of
             Just q | isJust (cfg_pg_model config) || cfg_pg_log config -> Just (pgRuleFeatures state active q pg_cur_ps)
             _ -> Nothing
+    -- the rule's ENIGMA features in the rule model's vocabulary (raw columns)
+    pgE = case (pgF, cfg_rule_model config) of
+            (Just _, Just rm) | cfg_pg_log config || isPGEnigma (cfg_pg_model config) ->
+              Just (ruleEnigma rm (lhs active_rule) (rhs active_rule))
+            _ -> Nothing
+    isPGEnigma (Just PGEnigma{}) = True
+    isPGEnigma _ = False
     pg' = case pg_cur of
             Just q -> st_pg { pg_raw = IntMap.insert (fromIntegral st_next_active) q pg_raw,
                               pg_gh = case (pgF, cfg_pg_model config) of
@@ -891,13 +920,21 @@ addActive config state@State{..} active0 =
                                         _ -> pg_gh,
                               pg_feats = case (pgF, cfg_pg_model config) of
                                         (Just f, Just PGFull{}) -> IntMap.insert (fromIntegral st_next_active) f pg_feats
-                                        _ -> pg_feats }
+                                        (Just f, Just PGEnigma{}) -> IntMap.insert (fromIntegral st_next_active) f pg_feats
+                                        _ -> pg_feats,
+                              pg_enig = case (pgE, cfg_pg_model config) of
+                                        (Just e, Just (PGEnigma _ rank _)) ->
+                                          IntMap.insert (fromIntegral st_next_active)
+                                            (IntMap.fromListWith (+) [ (r, v) | (col, v) <- e, Just r <- [IntMap.lookup col rank] ]) pg_enig
+                                        _ -> pg_enig }
             Nothing -> st_pg
     pgTrace
       | cfg_pg_log config =
         Debug.Trace.trace ("PGR " ++ show (fromIntegral st_next_active :: Int) ++ " " ++ show (fst st_cur_parents) ++ " " ++
                            show (snd st_cur_parents) ++ " " ++ maybe "-" show pg_cur ++ " " ++
-                           maybe "-" (intercalate "," . map show . elems) pgF ++ " " ++ pgCanon (unorient active_rule))
+                           maybe "-" (intercalate "," . map show . elems) pgF ++ " " ++
+                           maybe "E-" (\e -> 'E' : intercalate "," [ show col ++ ":" ++ show v | (col, v) <- e ]) pgE ++ " " ++
+                           pgCanon (unorient active_rule))
       | otherwise = id
     state' =
       pgTrace $

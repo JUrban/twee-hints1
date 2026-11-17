@@ -93,6 +93,7 @@ data MainFlags =
     flags_track_hints :: Maybe FilePath,
     flags_rule_model :: Maybe FilePath,
     flags_pg_model :: Maybe FilePath,
+    flags_pg_enigma :: Bool,
     flags_rule_vocab :: Maybe FilePath,
     flags_rule_goal :: Maybe FilePath,
     flags_rule_threshold :: Double,
@@ -280,6 +281,10 @@ parseMainFlags = do
     flag "pg-model"
       ["Parental model for --pg-threshold: a LightGBM forest (hints/lgb2bin.py format, hints/pgtrain.py) on the two rules' features (twee's pgRuleFeatures, side by side, and the id gap) in place of the sum of their --rule-model scores. An additive forest (each tree on one rule's features) is scored once per rule."]
       Nothing (Just <$> argFile)
+  flags_pg_enigma <-
+    expert $
+    inGroup "Critical pair weighting heuristics" $
+    bool "pg-enigma" ["--pg-model is a Pcat model on ENIGMA features (FroCoS 2021): the new rule's and the partner's ENIGMA vectors in --rule-model's c: vocabulary (renumbered in column order), then both rules' 10 features and the id gap (hints/pgtrain_enigma.py)."] False
   flags_rule_vocab <-
     expert $
     inGroup "Critical pair weighting heuristics" $
@@ -1247,7 +1252,14 @@ runTwee globals (TSTPFlags tstp) horn precedence config0 flags@MainFlags{..} lat
       Nothing -> return Nothing
       Just mfile -> do
         forest <- parseForestBin <$> BS.readFile mfile
-        case splitPGModel forest of
+        if flags_pg_enigma then
+          case ruleModel of
+            Nothing -> error "--pg-enigma needs --rule-model (its c: vocabulary)"
+            Just rm ->
+              let cols = Set.toList (Set.fromList (IntMap.elems (rm_hvocab_c rm)))
+                  rank = IntMap.fromList (zip cols [0..])
+              in return $! length forest `seq` Just (PGEnigma forest rank (length cols))
+        else case splitPGModel forest of
           Just (fr, fa) -> return $! length fr `seq` length fa `seq` Just (PGAdditive fr fa)
           Nothing -> return $! length forest `seq` Just (PGFull forest)
   let

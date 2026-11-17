@@ -7,7 +7,7 @@
 {-# LANGUAGE BangPatterns, RecordWildCards #-}
 module Twee.Enigma(
   Tree, Forest, parseForest, parseForestBin, predictRaw, predictDense, predictWith, treeFeatures,
-  eqnFeatures, eqnFeaturesH, RuleModel(..), mkRuleModel, ruleModelRow, ruleModelRaw) where
+  eqnFeatures, eqnFeaturesH, RuleModel(..), mkRuleModel, ruleModelRow, ruleModelRaw, ruleEnigma) where
 
 import Data.Array.Unboxed
 import Data.Array.ST(runSTUArray, newArray, writeArray)
@@ -311,6 +311,12 @@ ruleModelRowS RuleModel{..} idx t u parents =
       pf = Map.unionsWith (+) [ eqnFeatures rm_name pt pu | rm_parents, (pt, pu) <- parents ]
       ps = [ (i, v) | (k, v) <- Map.toList pf, Just i <- [Map.lookup ("p:" ++ k) rm_vocab] ]
   in IntMap.fromList (fixed ++ cs ++ ps ++ rm_goal)
+
+-- | The ENIGMA features of an equation in the rule model's "c:" vocabulary: (column, value).
+ruleEnigma :: RuleModel f -> Term f -> Term f -> [(Int, Double)]
+ruleEnigma RuleModel{..} t u =
+  let (hf, _, _, _) = eqnFeaturesH rm_name t u
+  in [ (i, v) | (k, v) <- IntMap.toList hf, Just i <- [IntMap.lookup k rm_hvocab_c] ]
 
 ruleModelRaw :: RuleModel f -> Int -> Term f -> Term f -> [(Term f, Term f)] -> Double
 ruleModelRaw rm idx t u parents = predictRaw (rm_forest rm) (ruleModelRow rm idx t u parents)
