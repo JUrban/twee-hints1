@@ -207,9 +207,9 @@ Repositories and directories:
 | e19 | 13 Nov 12:50 | task costs in abstract time (newTaskCost) |
 | e20 | 13 Nov 16:17 | resume signature fix |
 | e21 | 13 Nov 17:47 | --multi-goal |
-| e22 | 13 Nov (file 14 Nov 18:44) | RESUMETIME, --no-resume-requeue. The workhorse until 17 Nov; e22.orig is the pre-fix copy |
-| e23–e29 | 14 Nov 13:18–14:05 | fingerprint overlap index, interreduction filter, --queue-cost, --progress (e27 = index + filter) |
-| e30–e36 | 14 Nov 18:07–19:45 | debug and profile builds, USEDAXIOMS (e31), the 100 GB resume fix, --eqhint-consider-open |
+| e22 | 13 Nov 18:33 | RESUMETIME, --no-resume-requeue. **The file /project/bin/twee-e22 was overwritten in place** so running loops picked up new code with an identical search: e27's code at 14 Nov 13:39, e31's at 16:15, and the 100 GB resume fix at 18:44. The original e22 is twee-e22.orig. Production's binary until 17 Nov |
+| e23–e29 | 14 Nov 13:18–14:05 | e23 --progress; e24 fingerprint overlap index (Twee/FPIndex.hs); e26 interreduction filter; e27 --queue-cost (so e27 has all three) |
+| e30–e36 | 14 Nov 18:07–19:45 | e30 --print-hint-matchers (P9loop); e31 USEDAXIOMS; debug and profile builds (e32prof uses twee's own stamp profiler, not GHC -prof); the 100 GB resume fix; --eqhint-consider-open |
 | e37 | 14 Nov 22:49 | HINTS-ASSUMED (sketch gap filling) |
 | e38 | 15 Nov 10:16 | --rule-defer-max |
 | e39 | 15 Nov 14:34 | --print-given-unsolved |
