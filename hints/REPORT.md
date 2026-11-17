@@ -4379,6 +4379,39 @@ rounds of 30 s or more, but about 40% overhead for 8 s rounds.
 
 ## 4. Next steps
 
+*17 Nov, 15:20:*
+
+* **Since 23:55:**
+  * From zero on the whole benchmark, the dispatcher was the
+    bottleneck. Then repeats of failed goals were (2as, 2at).
+    `--mix` and `--fail-order` fixed both. Z4 reached 35,511 in 1 hour,
+    37,713 in 2 hours and 38,044 at 3 h 56 min. Production has 44,858.
+  * 70% of production's extra goals needed runs longer than 5 s (2au).
+  * Ordering by an original's recent rate gained nothing, and neither
+    did `--fail-reset`. On the 2-hour half1 test, identical runs
+    differ by 1% (185).
+  * Speed, the same search for less time (2au):
+    * twee-e43 writes no state for a proved goal, so proved runs are a
+      third faster: +700–1,000 proofs at 10 minutes.
+    * twee-e44 renormalises hints incrementally: −11% CPU, same
+      proofs.
+    * `--no-fresh-states` drops the state dump of first runs, which
+      was 22% of a failing run and 3.7× its memory.
+  * Neither larger GC allocation areas (slower) nor hint lookups (1%)
+    are worth more work.
+  * The 20 s level leans positive (+48 at 2 h).
+  * Z4's saved states (123 GB) are deleted, with the user's OK.
+* **Next:**
+  * ORG against ORH (ends 16:20) decides on `--no-fresh-states`.
+  * Then `solve_new.sh` defaults: e44, 5, 20, 80, 320 s, and that
+    flag if it holds.
+  * Z5 (`abs/z5_test.sh`): the whole benchmark from zero with them, to
+    set against Z4's curve.
+  * Production restarts on e44 (`abs/ul40.sh`, 4 workers). It keeps
+    its states, since it resumes them across rounds.
+* Open for the user: proof steps as lemma axioms (2al), worth at most
+  about 39 proofs.
+
 *16 Nov, 23:55:*
 
 * **Since 19:00:**
