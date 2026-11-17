@@ -18,10 +18,15 @@
 # MODEL (default /project/hintwork/models/rm4t, with .bin and .vocab), TWEE (default /project/bin/twee-e22) and
 # XTWEE (the transfer's, default /project/bin/twee-e39), CASCADE (the levels, default 5,80,320), KNN (kNN lemmas,
 # default 30) and XEVERY (the transfer's cycle in seconds, default 120: 942 against 933 at 600, REPORT 2aq) can
-# be set in the environment. SCHED holds the learned scheduler's options (production's, abs/ul36.sh; from scratch
-# 972 against 942 without it, REPORT 2aq); SCHED= turns it off. PASS_EVERY (default 1 s; 0 = a full scheduling pass
-# after every run, which on tens of thousands of goals leaves workers idle, REPORT 2as). LOOPARGS adds other loop.py
-# options. Solved goals end up in OUT/solved.tsv, proofs in OUT/hints.
+# be set in the environment. ORDER (default --mix 0.1 --fail-order) orders the runs: each goal's first fresh run
+# before any repeat, near before far, and a share of the workers for the deeper levels (REPORT 2at: on the whole
+# benchmark from zero Z4 37,713 at 2 hours against Z1's 36,552 without it; the rp3 replay with today's context LVF
+# 1,095 against LVU's 1,085 with the learned scheduler). SCHED (default empty) holds the learned scheduler's options,
+# e.g. production's (abs/ul36.sh) "--sched-model /project/hintwork/sched/m4.json --sched-max-lgap 320 --sched-retrain
+# 200 --sched-pmin 0.011 --sched-pmin-auto 400 --sweep-first" (then --fail-order is idle; scheduler runs vary by
+# about 25 in 1,320). PASS_EVERY (default 1 s; 0 = a full scheduling pass after every run, which on tens of
+# thousands of goals leaves workers idle, REPORT 2as). LOOPARGS adds other loop.py options. Solved goals end up in
+# OUT/solved.tsv, proofs in OUT/hints.
 set -e
 H=$(cd "$(dirname "$0")" && pwd)
 NAMES=$1; CTX=$2; OUT=$3; J=${4:-4}; HOURS=${5:-1}
@@ -32,7 +37,8 @@ KNN=${KNN:-30}
 XEVERY=${XEVERY:-120}
 XTWEE=${XTWEE:-/project/bin/twee-e39}   # the transfer worker's twee (as abs/rpx.sh)
 PASS=${PASS_EVERY:-1}   # loop.py --pass-every: the full scheduling pass at most once a second (REPORT 2as)
-SCHED=${SCHED---sched-model /project/hintwork/sched/m4.json --sched-max-lgap 320 --sched-retrain 200 --sched-pmin 0.011 --sched-pmin-auto 400 --sweep-first}
+SCHED=${SCHED:-}
+ORDER=${ORDER---mix 0.1 --fail-order}
 [ -n "$OUT" ] && [ -f "$NAMES" ] && [ -f "$CTX/solved.tsv" ] || { sed -n 2,20p "$0"; exit 1; }
 [ -e "$OUT" ] && { echo "$OUT exists"; exit 1; }
 mkdir -p "$OUT.ctx/hints"
@@ -55,7 +61,7 @@ EOF
 MOD="--model --model-fixed $M.bin,$M.vocab --model-theory --lemmas 6 --lemma-knn $KNN --lemma-subsets --lemma-after"
 python3 -u "$H/loop.py" "$NAMES" "$OUT" --init "$OUT.ctx" --start 1 --cascade "$CASCADE" --cascade-start -1 --retry-gap 3 \
   $MOD --twee "$TWEE" --keep-out -j "$J" --reserve 0 --pool original --wall-factor 15 --line-gaps 80,80 \
-  --retry-hints 1.25 --fresh-first --far-retry --retry-knn --sync 60 --cascade-hours "$HOURS" --pass-every "$PASS" $SCHED $LOOPARGS \
+  --retry-hints 1.25 --fresh-first --far-retry --retry-knn --sync 60 --cascade-hours "$HOURS" --pass-every "$PASS" $ORDER $SCHED $LOOPARGS \
   --args="--abstract-time 2000 --no-resume-requeue --no-eqhint-consider" > "$OUT.log" 2>&1 &
 LOOP=$!
 until [ -f "$OUT/config.json" ] || ! kill -0 $LOOP 2>/dev/null; do sleep 2; done

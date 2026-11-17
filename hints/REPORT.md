@@ -3543,9 +3543,10 @@ with the clean context. The control is LVD.
 * The wall-clock hour is not the cause. Counting each run's abstract
   seconds (`abs/workcurve.py`) gives LVS 947 and LV4 917 at 7,000
   abstract seconds of cascade work.
-* `solve_new.sh` keeps it by default (`SCHED`), because with
-  `--sweep-first` it is no worse from scratch and production's
-  long-run evidence (2ac) is for it. A single 1-hour run of the
+* `solve_new.sh` kept it by default (`SCHED`) until 17 Nov, because
+  with `--sweep-first` it is no worse from scratch and production's
+  long-run evidence (2ac) is for it. Since then the default is
+  `--mix 0.1 --fail-order` without it (2at). A single 1-hour run of the
   scheduler on this testbed cannot tell effects under about 50 proofs.
 * **From zero it starved originals** (LZ4, first try, 19:52–20:03:
   232 proofs at 10 minutes against 806). All 427 runs were a_of_aa
@@ -4363,10 +4364,16 @@ are run in `/project/hintwork`, with `venv` holding lightgbm.
      * `EXCLUDE=originals` leaves out every proof of the new goals'
        originals. The replays (2aq) use it to simulate unseen
        originals.
-   * `SCHED=` turns the scheduler off. On tens of thousands of goals
-     from zero, turn it off: it needs `--sweep-first` there, which
-     would run every goal once before any retry (2as). `LOOPARGS`
-     passes other loop.py options.
+   * Run order (`ORDER`, default `--mix 0.1 --fail-order`, 2at): every
+     goal's first fresh run before any repeat, near goals before far
+     ones, and a share of the workers for the deeper levels. On the
+     whole benchmark from zero it made 37,713 in 2 hours, against
+     36,552 without it. On the rp3 replay with today's context it made
+     1,095, against 1,085 with the learned scheduler.
+   * `SCHED` (default empty) takes the learned scheduler's options, for
+     example production's (the comment in `solve_new.sh` has them).
+     With it, `--fail-order` is idle. `LOOPARGS` passes other loop.py
+     options.
    * The full scheduling pass runs at most once a second
      (`PASS_EVERY`, default 1, 2as). With 0 it runs after every run,
      and on 51,784 goals that left most workers idle.
@@ -4375,7 +4382,8 @@ are run in `/project/hintwork`, with `venv` holding lightgbm.
      `abs/freshctx.py SET OUT` makes a context of today's proofs minus
      those known to use SET's goals, but it cannot catch every leak
      (2aq).
-   * The whole public benchmark from zero: `abs/z1_test.sh` (2as).
+   * The whole public benchmark from zero: `abs/z4_test.sh` (2at; Z1,
+     `abs/z1_test.sh`, is the run without the new order, 2as).
    * `AIM_PROB` sets the problem directory. For new problems, use one
      with links to both the public and the new `.p` files.
    * A 2-minute test on 20 lra2aa goals with the clean context proved
