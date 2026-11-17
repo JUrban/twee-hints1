@@ -162,6 +162,16 @@ were sketched at 5 s.
 * The faulty re-screen (rescreen.py, 146 of 317 done) was stopped at 22:15, and its countermodels are reused.
 * Launched 22:16: `python3 reinst.py sketch47.tsv sketch47b.tsv -j 2 --cache rescreen47.tsv`.
 * refine.py now drops instances that are S itself up to renaming and orientation.
+* **Result (23:19).** 1,692 used instances. Mace4 refutes 1,408 (83%): groupings 892 of 1,018, filterings 165 of
+  186, laws 351 of 488.
+  * 14 sketches in 10 goals used only instances it cannot refute. Five are in nil3_30 508, each a single instance
+    of a loop law (flexible, LIP, RIP, left Bol, right Bol). Six are filterings of k or t, for example
+    `k(ld(X0,ld(X1,X2)),X1) = k(ld(m(X1,X0),X2),X1)` for aK2eq_1243 435.
+  * Each such instance, if true and if the sketch's proof goes through with it, is an intermediate lemma that gives
+    the goal.
+* **Refinement on all goals** (launched 23:19, 2 CPUs, 20 s): `python3 refine.py sketch47b.tsv refine20.tsv -j 2
+  --time 20`. There are 144 sketches with at least one plausible instance that is not S itself, plus one run per
+  goal with all of them (42 goals).
 
 **Down step with sketch hints** (downhints.py, launched 21:57).
 `python3 downhints.py sketch47.tsv down80.tsv -j 2 --time 80 --arms I,U`
