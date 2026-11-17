@@ -37,12 +37,14 @@ hints/exp/sets.
     production runs: 356 at 5 s, 118 at 80 s, 13 at 320 s).
 * **Commands, captured in production's context** (exp/exp3_solve_cap.sh = solve_new.sh with H fixed):
   * `LOOP_PRINT_CMD=1 LOOP_KEEP_TMP=1 SCHED= XEVERY=100000 CASCADE=5 timeout 900 bash solve_cap.sh goals48
-    /project/hintwork/loops/UL exp3/CAP 3 0.05`. The context was 44,907 UL proofs at 19:55.
+    /project/hintwork/loops/UL exp3/CAP 3 0.05`. The context was 44,907 UL proofs (capture started about
+    20:00).
   * The first command printed per goal was kept, with its problem file (sibling and kNN lemmas), hints file
     (the original's pool) and rule-goal file. All were copied to exp3/tb (cmds.all, tmp/, goals/) and the paths
     rewritten. The loop was stopped once all 48 were captured (20:01).
   * **One goal proved in its 5 s capture run:** aK2_eq_aK3_o 495, with 13,927 pool hints. It is new to the
-    benchmark (UL lacks it) and will be merged. That leaves **47 goals** (exp/sets/exp3_goals47).
+    benchmark: UL lacked it, and it was merged with its given log at 20:05 (`merge.py loops/UL exp3/CAP
+    --given`). That leaves **47 goals** (exp/sets/exp3_goals47).
   * The commands are solve_new.sh's defaults: twee-e48, `--pg-threshold 0.25`, rm4t at 0.1 with penalty 2,
     `--abstract-time 2000 --no-resume-requeue --no-eqhint-consider`, `--print-hints --print-given`.
 * **Chains** (exp/exp3_mkhints.py):
