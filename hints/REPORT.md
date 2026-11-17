@@ -26,6 +26,16 @@ With today's proofs it solves 4,106 (87.0%), against 4,203 (89.0%) for
 of one batch, so 87.0% is an upper bound; the other batch (1,085 of
 1,320, 82.2%) is nearly clean.
 
+**From zero on the whole benchmark** (2as, 2at): `solve_new.sh` with an
+empty context on all 51,784 problems, 12 workers plus the transfer.
+
+* With the current run order (Z4), it proves 15,398 in 10 minutes,
+  29,814 in 30 minutes (plain twee at 4 s gets 31,060 in 28 CPU hours),
+  35,511 in 1 hour and 37,713 in 2 hours.
+* Without the new order and the faster dispatcher (Z0, Z1), it proved
+  6,215 and 7,942 in 10 minutes, and Z1 had 36,552 at 2 hours.
+* Production needed 3.5 days and many side methods for its 44,844.
+
 \* Starts from 33,720 proofs: the third round plus 52 from long runs on
 two families (2m). Its time is the summed wall time of the runs, close
 to their CPU time.
