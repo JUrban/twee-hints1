@@ -879,6 +879,16 @@ class Loop:
         if VL:
             print(f'  cascade: --variants: levels {list(zip(LAB, T))}', flush=True)
         IDX = {l: k for k, l in enumerate(LAB)}   # results label -> internal level
+        # --ratio-order: each level's yield in proofs per CPU hour, from priors worth YW CPU hours (measured 18 Nov:
+        # production's L1 and L2-like runs, the 80 s variants on the walls exp11's chain failed, exp21's 5 s variants
+        # on goals whose fresh run failed) and this round's results since --chain-since-row
+        YP = {'L1': 1.16, 'L2': 0.21, 'Vk60': 1.24, 'Vtwo': 0.76, 'Vunf': 0.49, 'Vsub': 0.42, 'Vsj': 0.3, 'Vpool': 0.5,
+              'Vunf@0': 3.8, 'Vk60@0': 1.9}
+        YW = 2.0
+        ystat = collections.defaultdict(lambda: [0, 0.0])   # label -> [proofs, CPU s]
+        def lyield(l):
+            k, c = ystat[l]
+            return (k + YW * YP.get(l, 1.0)) / (c / 3600 + YW)
         pools = self.build_pools(); cnt = self.pool_cnt
         if a.model:
             self.train_model(rnd)
@@ -1015,6 +1025,8 @@ class Loop:
             k0 = 0; fresh = set(); kc = 0
             for ri, line in enumerate(open(os.path.join(rdir, 'results.tsv'))):
                 f = line.rstrip('\n').split('\t')
+                if len(f) >= 5 and f[4] in IDX and ri >= a.chain_since_row:
+                    ystat[f[4]][0] += f[1] == 'THM'; ystat[f[4]][1] += float(f[2])
                 if len(f) >= 5 and f[0] in att and f[4] in IDX:
                     lev = ORIG[IDX[f[4]]]   # (the cascade's own level number)
                     if a.chain_since_row and ri < a.chain_since_row and lev >= max(1, a.chain_level):
@@ -1237,11 +1249,17 @@ class Loop:
                         # 320 s resume, ~30% x a chain of ~2, pays about as well per CPU-second as an
                         # 80 s resume of another goal, ~20%; at 06:58 2,185 goals waited for one)
                         hof = IDX.get('L%d' % a.head_only_from, len(T)) if a.head_only_from else len(T)
-                        deep = sorted((int(not (n in hds and att[n][1] + 1 < hof)), att[n][1] + 1,
-                                       obd.get(gnum[n][0], 0), deep_running[gnum[n][0]], g[n][1], gnum[n][1], n)
+                        # (--variants NAME@0 levels are open to every goal whose fresh run failed, not only those
+                        # near the frontier: exp21, 4 of 300 such goals proved unfolded at 5 s, 3.8 per CPU hour)
+                        # (--ratio-order: by the estimated yield of the goal's next level, highest first; the level
+                        # itself is the second-to-last entry)
+                        deep = sorted((int(not (n in hds and att[n][1] + 1 < hof)),
+                                       -lyield(LAB[att[n][1] + 1]) if a.ratio_order else att[n][1] + 1,
+                                       obd.get(gnum[n][0], 0), deep_running[gnum[n][0]], g[n][1], gnum[n][1],
+                                       att[n][1] + 1, n)
                                       for n in att
                                       if n not in busy and ctx(n) == att[n][0] and att[n][1] + 1 < len(T)
-                                      and (may_deepen(n, g) or n in hds) and not grown(n)
+                                      and (may_deepen(n, g) or n in hds or ORIG[att[n][1] + 1] == 0) and not grown(n)
                                       and (n in hds or not a.head_only_from or att[n][1] + 1 < hof))
                         far = []
                         if SM and a.far_retry and (a.mix or len(running) + len(retry) + len(deep) < a.j):
@@ -1298,7 +1316,7 @@ class Loop:
                         else:
                             if sum(1 for _, l in running.values() if l > 0) >= a.j - a.reserve:
                                 break
-                            x_ = deep.pop(0); lev, n = x_[1], x_[-1]
+                            x_ = deep.pop(0); lev, n = x_[-2], x_[-1]
                             if any(m == n for m, _ in running.values()):
                                 continue
                             if light and (n not in att or att[n][1] + 1 != lev or ctx(n) != att[n][0] or grown(n)):
@@ -1376,6 +1394,7 @@ class Loop:
                     if H and a.sched_pmin_auto:
                         (auto0 if lev == 0 else auto1).append((ok, dt, p_ if lev == 0 else 0.0))
                     rf.write(f'{n}\t{"THM" if ok else "NO"}\t{dt:.2f}\t{stats}\t{LAB[lev]}\tt={time.time()-t0:.0f}\n'); rf.flush()
+                    ystat[LAB[lev]][0] += 1 if ok else 0; ystat[LAB[lev]][1] += dt
                     if ok and n in self.solved:
                         pass   # (synced from another process meanwhile: keep its row and hints)
                     elif ok:
@@ -1547,6 +1566,11 @@ def make_parser():
                          '(their proofs expanded through the proven goals they used; sibchain.py) instead of the pool')
     ap.add_argument('--chain-sibs', type=int, default=10, help='--chain-level: how many nearest proven siblings')
     ap.add_argument('--chain-max', type=int, default=100000, help='--chain-level: at most this many chain hints')
+    ap.add_argument('--ratio-order', action='store_true',
+                    help='(18 Nov, portfolio) order the deep queue by the yield (proofs per CPU hour) of each goal\'s next '
+                         'level, estimated from built-in priors (the walls and production, notes/2026-11-18-portfolio-'
+                         'review.md) worth 2 CPU hours and this round\'s results since --chain-since-row, instead of by '
+                         'level (the ratio rule of optimal search); heads still go first')
     ap.add_argument('--variants', default='',
                     help='(18 Nov, portfolio) levels after --chain-level, each a fresh run of that budget with one change, '
                          'tried in this order before the next level (results rows V<name>): two (two-sided chain), '
