@@ -4740,6 +4740,40 @@ level.
 * **The unfolded 5 s level, live:** 3 of 390 runs from 18:30 to 19:20, 2.15 per CPU hour. All 3 came in the first
   142 runs, because the queue takes the goals nearest a proof first. Its online estimate follows the decline.
 
+**A throughput bug (20:25).**
+* ul51 had 15 runs in flight on 16 workers but only 1-3 twee processes.
+* Each unfolded run unfolded its 20-30k hints in Python, 5-6 s a run, and the worker threads did that serially under
+  the GIL. ul48-ul50 had the same limit on fewer workers.
+* Unfolded hints are now memoised per definition set (loop.py a5949d1). A second goal of an original takes 0.02 s
+  instead of 3.5 s.
+* **ul53 (20:34-21:35, 16 workers) then made 56 new in an hour**, against 10-14 an hour before. 53 of them came in
+  the first 46 minutes, mostly from the 5 s levels' backlog:
+  * L0: 24 in 1476 runs, 6.1 per CPU hour;
+  * unfolded 5 s: 29 in 2057 runs, 4.0 per CPU hour.
+
+**Prover9 + chain back in, as a cascade level (20:38).**
+* I had stopped the P9C side worker at 19:38 on its last 217 runs (1 proof): a drop of the kind under review.
+* Split by what the goals had failed in production, its 487 live runs gave:
+  * 4 proofs in 350 runs on goals that had failed the 160 or 320 s level, about 0.7 per CPU hour;
+  * 6 proofs in 121 runs on goals that had failed only 80 s.
+* Its decline came from an exhausted nearest-first list. It is now `--variants p9` (loop.py bc450f8): Prover9 at 60 s
+  with the level's chain hints and 6 siblings either side, once per goal and context, after k60.
+
+**No rule model (exp22 N80):** 4 new of the 92 walls alone (0.72 per CPU hour), and 1 after the rest. Conditional
+yields on the walls in production's order:
+
+| member | runs | new | conditional per CPU h |
+|---|---:|---:|---:|
+| chain to 160 s | 92 | 12 | 1.77 |
+| 60 kNN lemmas | 80 | 5 | 1.19 |
+| Prover9 + chain | 75 | 2 | 1.62 |
+| unfolded | 73 | 5 | 0.40 |
+| two-sided chain | 68 | 1 | 0.25 |
+| no PG | 67 | 0 | 0 |
+| no model | 67 | 1 | 0.23 |
+
+The union is 26 of 92. **ul54 (21:35)** has 19 workers and adds `nom` as the last 80 s variant before 320 s.
+
 ## 2c. Long runs: stall cutoff and checkpoints
 
 * `--eqhint-stall N` gives up when no new rule has matched a hint for N
