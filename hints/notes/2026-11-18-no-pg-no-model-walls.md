@@ -35,4 +35,10 @@ bash stage.sh 2452454   # then: python3 run.py G80.cmds G80 4; python3 run.py N8
 
 ## Results
 
-(pending)
+**G80 (no PG), the 92 walls exp11 failed (19:37):**
+* 2 new at 4.6 CPU h, 0.43 per CPU hour: aK2_eq_aK3_a 455 (111,103 pairs) and a_instances 363 (122,855).
+* Of these, a_instances 363 was also proved by an 80 s variant (60 kNN lemmas). After k60, two, unf and sub, no PG
+  adds 1, about 0.22 per CPU hour. aK2_eq_aK3_a 455 is also among exp20's 160 s proofs.
+* Of exp11's 15, G80 proved aK2_eq_aK3_1243 339 at 26,007 pairs. The rest of the 15 and N80 follow.
+* Merged at 19:38: aK2_eq_aK3_a 455 and mbol_nil3_a 476 (`exp3/tomerge.py exp22/out_G80 exp22/xm`, then merge.py).
+* **Production:** `nopg` is the last 80 s variant in ul50, with prior 0.22 (19:39).

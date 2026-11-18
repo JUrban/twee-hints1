@@ -271,4 +271,8 @@ All four together prove 17 new walls. With Prover9 + chain first, 18 (k60 then a
   * The unfolded 5 s level since 18:30: 3 in 390 runs, 2.15 per CPU hour. All 3 were in its first 142 runs.
     Within a level the queue takes the goals nearest a proof first, so its rate falls as it moves to harder goals
     (exp21 sampled all such goals, so its 1.3% is the average). The online estimate follows.
-* **Pending:** exp20 (to 92), exp22 (no PG, no model).
+* **19:37: exp22 G80** (no PG): 2 new of 92, 0.43 alone, about 0.22 after the 80 s variants. Added last as `nopg`.
+* **19:39: ul50**, 10 workers. P9C stopped and its 4 CPUs moved to production. ul49 made 8 new in 43 minutes on
+  6 workers.
+* Merged at 19:38: exp22 1, exp20 5 (the 160 s proofs so far).
+* **Pending:** exp20 (to 92), exp22 N80 (no model).

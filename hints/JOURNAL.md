@@ -293,14 +293,16 @@ Each goal is one twee run on the goal's problem.
 ### 4.3 Production
 * Side worker `abs/p9c.sh` (loops/P9C, P9C.log), running since 16:46: Prover9 with chain hints on
   twee's stalled goals, 2 workers, proofs straight into UL (exp16: 4 of 107 walls, 3 of them twee-failed).
-* `abs/ul49.sh` since 18 Nov 18:53:40 (UL49.log): ul48 plus an 80 -> 160 s resume level right after the 80 s chain run
+* `abs/ul50.sh` since 18 Nov 19:38:58 (UL50.log): ul49 on **10 workers** with `nopg` as the last 80 s variant. P9C was
+  stopped at 19:38 (1 proof in 217 runs on 4 workers, 0.28 per CPU hour), and its CPUs moved here.
+* `abs/ul49.sh` from 18 Nov 18:53:40 to 19:38 (UL49.log, new=8 in 43 min on 6 workers): ul48 plus an 80 -> 160 s resume level right after the 80 s chain run
   (`--cascade 5,80,160,320 --variants-after 2`), `--pass-every 1`, and conditional priors (loop.py baa52c7). Levels:
   L0 5, Vunf@0, Vk60@0, L1 80 (chain, fresh), L2 160 (resume), Vk60, Vtwo, Vunf, Vsub (80 s each), L3 320 (resume).
 * `abs/ul48.sh` from 18 Nov 18:30:32 to 18:53 (UL48.log, new=5 in 22 min on 6 workers, deep class 6 per worker-hour): ul47 on **6 workers** with `--variants unf@0,k60@0,k60,two,unf,sub
   --ratio-order` (loop.py b67d828). Every goal whose fresh run failed, near the frontier or not, gets an unfolded and a
   60-lemma 5 s run (exp21: unfolding 4 of 300 at 3.8 per CPU hour). The deep queue is ordered by the next level's
   estimated yield, heads first. The 2 extra workers come from exp19, paused.
-* `abs/p9c4.sh` since 18:25:55 (P9C4.log): P9C on 4 workers (it was 1.44 per CPU hour live on 2).
+* `abs/p9c4.sh` from 18:25:55 to 19:38 (P9C4.log): P9C on 4 workers; 1 proof in 217 runs, stopped.
 * `abs/ul47.sh` from 18 Nov 17:13:49 to 18:30 (UL47.log, new=14 in 76 min on 4 workers): ul46 plus `--variants k60,two,unf,sub` (loop.py 551f563): after a
   failed 80 s chain run, four more 80 s fresh runs in the same context (60 kNN lemmas, the two-sided chain,
   definitions unfolded, subsumption matching) before the 320 s level; results rows Vk60/Vtwo/Vunf/Vsub. The portfolio
