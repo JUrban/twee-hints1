@@ -375,7 +375,7 @@ thawPG config state@State{..} =
   where
     frozen r1 r2 = active_id r2 <= active_id r1 && not (pgKeepPair config st_pg r1 r2)
     one st r =
-      case [ makePassive config st o | o <- indexedOverlaps (Just (frozen r)) st r ] of
+      case [ makePassive config st o | o <- indexedOverlaps True (Just (frozen r)) st r ] of
         [] -> st
         ps -> enqueue st (the r) ps
 
@@ -595,7 +595,7 @@ makePassives config@Config{..} state@State{..} rule
   | cfg_overlap_index && cfg_max_cp_depth == maxBound =
   stampWith "make critical pair" length
   [ makePassive config state overlap
-  | overlap <- indexedOverlaps (pgFilter config st_pg rule) state rule ]
+  | overlap <- indexedOverlaps pgEarly (pgFilter config st_pg rule) state rule ]
   | otherwise =
 -- XXX factor out depth calculation
   stampWith "make critical pair" length
@@ -603,6 +603,7 @@ makePassives config@Config{..} state@State{..} rule
   | ok rule,
     overlap <- overlaps (index_oriented st_rules) (filter ok rules) rule ]
   where
+    pgEarly = case cfg_pg_model of { Just PGFull{} -> False; _ -> True }
     rules = IntMap.elems st_active_set
     ok rule = the rule < Depth cfg_max_cp_depth
 
@@ -665,10 +666,16 @@ rebuildOverlapIndex state =
 -- the same ones and in the same order as 'overlaps', but only rules whose
 -- fingerprints are compatible are tried.
 {-# INLINEABLE indexedOverlaps #-}
-indexedOverlaps :: forall f. Function f => Maybe (Active f -> Bool) -> State f -> Active f -> [Overlap (Active f) f]
-indexedOverlaps pgKeep State{..} r1 =
+-- | EARLY: judge the parental filter on each candidate partner before unification (e50,
+-- for cheap filters: the sum of scores, an additive model, the freezer), not only once an
+-- overlap is found (e51, as in E; for a full forest, where each judgement is costly).
+-- The same pairs are made either way; judging early saves the unifications of rejected
+-- pairs (e51 cost about 10% CPU on an 80 s AIM run with the sum filter).
+indexedOverlaps :: forall f. Function f => Bool -> Maybe (Active f -> Bool) -> State f -> Active f -> [Overlap (Active f) f]
+indexedOverlaps early pgKeep State{..} r1 =
   [ o
   | (d1i, k2, part, n) <- sortCands cands,
+    not early || pgOK0 (k2 `shiftR` 1),
     Just r2 <- [IntMap.lookup (k2 `shiftR` 1) st_active_set],
     let d1 = toEnum d1i
         d2 = toEnum (k2 .&. 1)
@@ -677,7 +684,7 @@ indexedOverlaps pgKeep State{..} r1 =
     Just o0 <- [if part == 0
                 then overlapAt' (How n d1 d2) r1 r2 eq1 eq2
                 else overlapAt' (How n d2 d1) r2 r1 eq2 eq1],
-    pgOK (k2 `shiftR` 1) r2,
+    early || pgOK (k2 `shiftR` 1) r2,
     Just o <- [simplifyOverlap idx o0] ]
   where
     idx = index_oriented st_rules
@@ -689,6 +696,10 @@ indexedOverlaps pgKeep State{..} r1 =
         Nothing -> True
         Just keep -> IntMapL.findWithDefault (keep r2) i pgMemo
       where _ = r2
+    pgOK0 i =
+      case pgKeep of
+        Nothing -> True
+        Just _ -> IntMapL.findWithDefault True i pgMemo
     pgMemo =
       case pgKeep of
         Nothing -> IntMapL.empty
