@@ -254,4 +254,11 @@ All four together prove 17 new walls. With Prover9 + chain first, 18 (k60 then a
 * **Queued:**
   * exp22: no PG / no rule model at 80 s on the walls, after exp21;
   * P9C to 4 workers when exp21 ends (abs/p9c4.sh: the best deep member live, 1.44 per CPU hour).
-* **Pending:** exp20 (the 160 s control; extension cost by increment), exp15 (unfolded), exp19 (set-join).
+* **18:30: ul48** (6 workers): `--variants unf@0,k60@0,k60,two,unf,sub --ratio-order`. Every goal whose fresh run
+  failed gets the unfolded and the 60-lemma 5 s runs. Over its 22 minutes the deep class made 6 proofs per
+  worker-hour (5 new in all).
+* **18:47: exp15 stopped** after the 92 failed walls: 7 new at 0.43 per CPU hour.
+* **18:50: the conditional yields** (above). The priors were corrected.
+* **18:53: ul49**: an 80 -> 160 s resume level right after the chain run, from exp20's interim (6 new on 44 failed
+  walls at 1.52 per CPU hour on the increment; 1 overlap with 60 kNN lemmas' 4). Also `--pass-every 1`.
+* **Pending:** exp20 (to 92), exp22 (no PG, no model).
