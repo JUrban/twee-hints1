@@ -4492,7 +4492,9 @@ using an index of hint forms by top symbols to depth 1.
   loops (39,554 records); new proofs' records are added live.
 * A resumed state takes new hints only for new pairs (`--no-resume-requeue`), so the setting to test is L = 1:
   production's 80 s level is a fresh run whose state the 320 s level resumes.
-* exp8 tests that budget, chain against pool at 80 s on 78 stalled goals: 2 against 2 after 31.
+* exp8 tests that budget, chain against pool at 80 s on 78 stalled goals: **chain 9, pool 5 (+6 −2)**, CPU +10%.
+  With exp3 the chain wins at both deep budgets, so production uses it from 08:28 (ul43; ul44 at -j 8 from 09:23).
+* On exp6's stalled goals the branch limit changes nothing (5 = 5, identical pairs; no hang without it).
 * exp9 tests the short levels on 198 frontier goals: at 5 s, 0 against 0 (chain +20% CPU); 20 s running.
 
 ## 2c. Long runs: stall cutoff and checkpoints
