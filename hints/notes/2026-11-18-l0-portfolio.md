@@ -84,3 +84,33 @@ Production comparison: L0 makes 11.3 per CPU hour and L1 1.16.
 * (A stop rule at 150 goals, written at 17:48, was withdrawn at 17:49. Its bound was pooled over the arms. Per
   arm, 0 of 150 still allows about 2% a run, which is about 11 proofs per CPU hour. So all 300 run: 0 of 300 bounds
   an arm at about 1% a run.)
+* **Complete at 18:25, all 9 arms on all 300 goals** (exp21/res_A.tsv, out_P9/results.tsv; `python3 ana.py`):
+
+| arm | proved | not by C | CPU h | new per CPU h |
+|---|---:|---:|---:|---:|
+| C, control | 0 | | 0.51 | |
+| K60, 60 kNN lemmas | 1 | 1 | 0.52 | 1.9 |
+| **U, definitions unfolded** | **4** | **4** | 1.05 | **3.8** |
+| S, subsumption matching | 0 | 0 | 0.70 | 0 |
+| R2, rule threshold 0.2 | 0 | 0 | 0.50 | 0 |
+| N, no rule model | 0 | 0 | 0.64 | 0 |
+| G, no PG | 0 | 0 | 0.66 | 0 |
+| X, chain hints | 0 | 0 | 0.65 | 0 |
+| P9, Prover9 + pool, 8 s | 0 | 0 | 0.68 | 0 |
+
+* **The control proves none.** On these goals the context has not changed since their failed run, so a rerun
+  fails too.
+* **Unfolding proves 4 of 300 (1.3%) at 3.8 new proofs per CPU hour**: three times production's 80 s chain level
+  (1.16), and above every deep member (1.2-2.0).
+  * The proofs: aK2_eq_aK3_t 374, ns_to_aa1_b 643, ns_to_aK1 565 and 627.
+  * An unfolded run costs twice a folded one (12.6 against 6.1 CPU s): the problem is larger.
+  * Unfolding is the one arm that changes the problem's equations, not the search settings. That matches 2af:
+    stalled goals that are a rewrite step apart once their definitions are unfolded.
+* 60 kNN lemmas proved nslm_to_aa1 968, one goal, so its rate is uncertain.
+* The six search-setting changes and Prover9 at 8 s proved nothing in 1,800 runs. Each is bounded at about 1% a
+  run, 5 per CPU hour; pooled at about 0.17% a run. At the cheap level a different search does not get through
+  where the same problem failed.
+* The 5 proofs were merged at 18:25: arm prefixes stripped into exp21/xin, then `exp3/tomerge.py xin xm` and
+  `merge.py loops/UL xm`.
+* **Production:** an unfolded 5 s level for every goal whose fresh run failed (`--variants unf@0`), on all 5,869
+  such goals, not only those near the frontier: 1.3% of them is about 75 proofs at about 20 CPU hours.
