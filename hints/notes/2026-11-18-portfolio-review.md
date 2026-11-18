@@ -261,4 +261,9 @@ All four together prove 17 new walls. With Prover9 + chain first, 18 (k60 then a
 * **18:50: the conditional yields** (above). The priors were corrected.
 * **18:53: ul49**: an 80 -> 160 s resume level right after the chain run, from exp20's interim (6 new on 44 failed
   walls at 1.52 per CPU hour on the increment; 1 overlap with 60 kNN lemmas' 4). Also `--pass-every 1`.
+* **19:09: P9C's yield has fallen.** Its first 126 runs (from 16:46) proved 3. On 4 workers since 18:26 it made 0 in 172
+  runs (2.9 CPU h). It takes the nearest goals first, so the best candidates came early; its conditional yield is
+  now near 0. Its 4 CPUs go to production at the next restart.
+* **Unfolded 5 s level in production:** ul48 3 of 190, ul49 0 of 160 in its first 13 minutes. That is 3 in 350
+  (0.9%) at 2.5 per CPU hour, still above L1 (1.16), and `--ratio-order` follows it online.
 * **Pending:** exp20 (to 92), exp22 (no PG, no model).
