@@ -232,6 +232,17 @@ were sketched at 5 s.
     cache (refuted47b.tsv from sketch47b.tsv, and rescreen47.tsv). Then the refinement at 20 s, chained:
     `python3 reinst.py lsketch1.tsv lsketch1b.tsv -j 3 --secs 20 --cache rescreen47.tsv refuted47b.tsv;
     python3 refine.py lsketch1b.tsv lrefine1.tsv -j 3 --time 20`
+  * **Result (01:44).** 156 refinement runs. 104 proved their rung conjecture from plausible instances. But many
+    of those used the target itself: the instance of the strengthening was the conjecture, which is circular.
+    The others are second-level rungs, for example mbol_lem1 387's open `e = k(X0,t(X1,m(k(X1,X2),...)))`
+    follows from `t(X0,X1) = t(X0,l(k(X0,X2),X3,X4))` in 0.5 s.
+  * rungs2.py collects the second-level conjectures that are not circular and not tried before: 43 in 12 goals.
+    They are proved at 20 s (3 CPUs, launched 01:44):
+    `python3 rungs2.py lrefine1.tsv rprove20a.tsv rprove20b.tsv rprove80.tsv rungs2a.tsv;
+    python3 sketch.py rungs2a.tsv r2prove20.tsv -j 3 --time 20`
+  * closure2.py takes the closure over the ladder to a fixpoint. A conjecture is proved directly, or by a ladder
+    proof whose conjectures are all proved. A goal is solved when a refinement proof of it uses only proved
+    conjectures.
 
 **Down step with sketch hints** (downhints.py, launched 21:57).
 `python3 downhints.py sketch47.tsv down80.tsv -j 2 --time 80 --arms I,U`
