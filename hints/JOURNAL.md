@@ -627,7 +627,7 @@ summaries keep results but lose the reasons and the user's exact words. Keep sec
 Running:
 * production ul45 (abs/ul45.sh, loops/UL45.log, -j 8, twee-pg61): chain L1 as fresh 80 s runs,
   `--chain-since-row 47530` (pre-chain goals get a chain L1); started 12:02. About 16 proofs an hour at 13:20
-  (UL 45,520).
+  (UL 45,510 distinct proofs; solved.tsv has 10 duplicate rows).
 * exp12 (notes/2026-11-18-gap-heads.md): the 96 gap heads. Stage A (80 s) proved only 1 of the first 89; stage B
   (320 s on the rest) starts by itself.
 * exp13 (notes/2026-11-18-chain-size.md): smaller chains; neither arm ahead of the full chain at 13:20.

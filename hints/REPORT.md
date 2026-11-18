@@ -16,6 +16,7 @@ in `/project/hintwork` (not in git).
 | + cascade round 4, 6 lemmas (2r), 14 Nov 08:31–17:25 | 41,074 (+32.2% over plain) | 4460 | +123.7 |
 | + cascade round 5 (2w–2ac), from 14 Nov 17:26; at 15 Nov 07:00 | **43,462** (+39.9% over plain) | **4717** (+47.3%) | +199.5 (+15.4 side workers) |
 | + round 5 continued: climbers, proof-step transfer, 30 kNN lemmas (2aj–2an); at 16 Nov 14:00 | **44,710** (+43.9% over plain) | **4898** (+52.9%) | – |
+| + round 5 continued: --mix, parental guidance, deep runs with chain hints and their merges (2at–2ay); at 18 Nov 14:37 | **45,510** (+46.5% over plain) | **4991** (+55.8%) | – |
 
 **On unseen originals** (2aq): the 11 whole holdout originals from
 scratch, in 1 hour per batch on 4 workers plus the transfer. Plain twee
@@ -69,10 +70,24 @@ written in loops/UL. Merged proofs count from their merge.
 | 16 Nov 06:30 | 44,434 | 4858 | proof-step transfer (2al): about 110 merged; long climbs on heads 12 of 65; production at 10 workers from 05:12 |
 | 16 Nov 10:28 | 44,630 | 4882 | production with 30 kNN lemmas from 07:20 (2am), 152 new; live transfer 21; head climbs 17 of 111 (14.7 CPU h), then the live head climber 4 of 55 (8.5 CPU h) |
 | 16 Nov 14:00 | 44,710 | 4898 | production on 16 workers from 11:05 (2an): 49 new by 14:00, about 16 an hour, fresh retries now 0 of 281; live transfer 27 of 35 in all; replays on 4–6 CPUs (2aq) |
+| 16 Nov 18:00 | 44,798 | 4914 | production on 12, then 8 workers (ul35 15:10, ul36 17:20); replays of unseen originals (2aq); same statement in other theories (2ar) |
+| 17 Nov 00:00 | 44,838 | 4919 | production on 4–6 workers beside the 4-hour from-zero curves (2as) |
+| 17 Nov 12:00 | 44,858 | 4921 | --mix 0.25 (ul39, 03:30), e44 (ul40); most CPUs on from-zero runs (Z4, ORG/ORH; 2at, 2au) |
+| 17 Nov 20:00 | 44,906 | 4925 | parental guidance in production from 17:25 (ul41, 2av); the half1 A/B PGA/PGB |
+| 18 Nov 04:00 | 44,987 | 4933 | deep runs on late goals from 20:03 (exp3, 320 s), the lattice (exp4), 640 s runs (exp5) (2aw) |
+| 18 Nov 07:00 | 44,995 | 4934 | 1–4 an hour since 02:00 |
+| 18 Nov 08:00 | 45,172 | 4952 | exp3's deep proofs merged at 07:09; 152 cheap 5 s proofs followed by 08:20 (2ax); twee-e61 (ul42, 07:30) |
+| 18 Nov 10:00 | 45,385 | 4979 | chain hints at the 80 s level from 08:28 (ul43; ul44 on 8 workers from 09:47) (2ax) |
+| 18 Nov 12:00 | 45,486 | 4991 | merged deep proofs: exp8–exp10, and 15 walls from exp11 (2ax, 2ay) |
+| 18 Nov 14:37 | 45,510 | 4991 | ul45 (fresh 80 s chain level, 12:02); one gap head (exp12) merged at 12:12 and 6 proofs above it; none since about 13:20 (2ay) |
 
 From 15 Nov 05:30 the rate fell from hundreds an hour to 50–100. The
 cheap new contexts are used up; 58% of the unsolved goals sit behind the
 95 originals' tail heads (2ac).
+
+On 18 Nov the merged deep proofs and the chain hints raised it again, to
+about 130 an hour from 07:00 to 10:00 (2ax). Since then it has fallen
+back to tens an hour, and to none after about 13:20 (2ay).
 
 The loop's first round is twee with a learned ENIGMA-style rule filter
 plus kNN hints from training proofs. Its second round adds hints from its
