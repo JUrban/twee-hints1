@@ -558,6 +558,8 @@ class Loop:
             self.captured[name] = [canon_key(x[0], x[1], sig_) for x in givenlib.parse_given_parents(out)
                                    if x and x[0] != x[1]]
         ok = 'HINTS-END' in out
+        if ok and getattr(self, 'chains', None) is not None:
+            self.chains.add_record(name, out)   # (--chain-level: the new proof's lemma record)
         if ok and hasattr(self, 'used'):
             # (climb.py) the axiom and lemma names the proof uses
             for line in out.splitlines():
@@ -759,6 +761,19 @@ class Loop:
         return lemmas.LemmaIndex(sorted(self.solved), subsets=a.lemma_subsets, uses=uses, pop=a.lemma_pop,
                                  deps=deps, dep_w=a.lemma_deps, dep_n=a.lemma_dep_n)
 
+    def deep_hints(self, n, lev, pools):
+        """A deeper level's hints: with --chain-level, from that level on the goal's chain (sibchain.py) once
+        the records are in, else (or when the chain is empty) the usual hints."""
+        a = self.a
+        C = getattr(self, 'chains', None)
+        if C is not None and lev >= a.chain_level and C.ready() and '__goal_' in n:
+            import lemmas
+            o, _ = lemmas.split(n)
+            hs = C.chain(n, self.lemma_src.get(o, set()), a.chain_sibs, a.chain_max)
+            if hs:
+                return hs
+        return self.hints_for(n, pools, None)
+
     def hints_for(self, n, pools, knn):
         a = self.a
         hs = self.hints_for1(n, pools, knn)
@@ -835,6 +850,13 @@ class Loop:
         self.lemma_src = {o: set(v) for o, v in lemmas.by_original(self.solved).items()}
         if a.lemma_knn:
             self.lemma_index = self.make_lemma_index()
+        if a.chain_level >= 0:
+            # (18 Nov, exp3/exp8) runs at level >= --chain-level take the chain of the goal's nearest proven
+            # siblings below as hints (sibchain.py), not the original's pool; records load in the background
+            import sibchain
+            self.chains = sibchain.Chains(self.dir, records=a.chain_records or None)
+            print(f'  cascade: --chain-level {a.chain_level}: chain hints of the {a.chain_sibs} nearest proven siblings'
+                  f' (records {a.chain_records or "of this loop"})', flush=True)
         # --retry-knn (15 Nov): fresh 20 s runs in the full current context proved 6 of 35 goals the
         # cascade held as stalled (~30 proofs/CPU-h); all six used kNN lemmas from other originals
         # proven since their last run, a change the sibling context and pool growth do not see
@@ -1238,7 +1260,7 @@ class Loop:
                             # --p9loop (P9loop deepening): a fresh run of the level's increment, with the
                             # matcher lemmas of the goal's earlier runs and its next ordering, not a resume
                             b = T[lev] - T[lev - 1] if (a.p9loop or os.path.exists(sp)) else T[lev]
-                            fut = ex.submit(self.run_one, n, self.hints_for(n, pools, None), rnd,
+                            fut = ex.submit(self.run_one, n, self.deep_hints(n, lev, pools), rnd,
                                             b, not a.p9loop, a.cascade_cpu * b)
                         running[fut] = (n, lev); rcls[fut] = cl; ncls[cl] += 1; rt0[fut] = time.time()
                         if H and lev == 0:   # (its features, context and predicted success, for observe())
@@ -1453,6 +1475,13 @@ def make_parser():
     ap.add_argument('--timeout', default='2', help='seconds, or a list per round: 2,8,30')
     ap.add_argument('--model', action='store_true', help='train and use the ENIGMA rule model')
     ap.add_argument('--model-args', default='--rule-threshold 0.1 --rule-penalty 2')
+    ap.add_argument('--chain-level', type=int, default=-1,
+                    help='(18 Nov) cascade levels >= L take the chain of the goal\'s nearest proven siblings below as hints '
+                         '(their proofs expanded through the proven goals they used; sibchain.py) instead of the pool')
+    ap.add_argument('--chain-sibs', type=int, default=10, help='--chain-level: how many nearest proven siblings')
+    ap.add_argument('--chain-max', type=int, default=100000, help='--chain-level: at most this many chain hints')
+    ap.add_argument('--chain-records', default='',
+                    help='--chain-level: a records file of sibchain.py --build (all loops; default: this loop\'s outputs)')
     ap.add_argument('--retry-knn', action='store_true',
                     help='--cascade: a change in a goal\'s kNN lemmas (--lemma-knn) since its last fresh run makes it '
                          'eligible for a fresh retry, like a new sibling context; the kNN index is rebuilt every '
