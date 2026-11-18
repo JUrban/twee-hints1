@@ -293,7 +293,10 @@ Each goal is one twee run on the goal's problem.
 ### 4.3 Production
 * Side worker `abs/p9c.sh` (loops/P9C, P9C.log), running since 16:46: Prover9 with chain hints on
   twee's stalled goals, 2 workers, proofs straight into UL (exp16: 4 of 107 walls, 3 of them twee-failed).
-* `abs/ul50.sh` since 18 Nov 19:38:58 (UL50.log): ul49 on **10 workers** with `nopg` as the last 80 s variant. P9C was
+* `abs/ul51.sh` since 18 Nov 20:15:19 (UL51.log): ul50 on **16 workers** (exp20 done). The 80 s variants after the
+  160 s level are k60, unf, two; sub and nopg are dropped (0 of 68 each after the 160 s run, exp20). Priors are the
+  conditional yields (loop.py fc74100).
+* `abs/ul50.sh` from 18 Nov 19:38:58 to 20:15 (UL50.log, new=7 in 36 min on 10 workers): ul49 on **10 workers** with `nopg` as the last 80 s variant. P9C was
   stopped at 19:38 (1 proof in 217 runs on 4 workers, 0.28 per CPU hour), and its CPUs moved here.
 * `abs/ul49.sh` from 18 Nov 18:53:40 to 19:38 (UL49.log, new=8 in 43 min on 6 workers): ul48 plus an 80 -> 160 s resume level right after the 80 s chain run
   (`--cascade 5,80,160,320 --variants-after 2`), `--pass-every 1`, and conditional priors (loop.py baa52c7). Levels:
