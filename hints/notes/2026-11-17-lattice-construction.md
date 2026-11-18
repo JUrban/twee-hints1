@@ -198,6 +198,11 @@ were sketched at 5 s.
       did not (V fails at 320 s).
     * ns_to_aa1_e 441: 3 of the conjectures its refinement proofs use are proved; each proof still has one open.
     * The other 14 goals have 1–2 open conjectures each.
+  * The 13 later conjectures at 20 s (finished 00:01): 6 proved, mostly trivial ones (`ld(X0,X0) = rd(X0,X0)`,
+    `m(X0,e) = rd(X0,e)`). No further goal closes, so 1 of 16 is solved.
+  * **Open conjectures at 80 s** (18 Nov 00:02, 3 CPUs). These are the conjectures of every refinement proof with
+    at most 2 still open: 34 conjectures in 16 goals.
+    `python3 sketch.py rungs80.tsv rprove80.tsv -j 3 --time 80`
 
 **Down step with sketch hints** (downhints.py, launched 21:57).
 `python3 downhints.py sketch47.tsv down80.tsv -j 2 --time 80 --arms I,U`
