@@ -293,7 +293,10 @@ Each goal is one twee run on the goal's problem.
 ### 4.3 Production
 * Side worker `abs/p9c.sh` (loops/P9C, P9C.log), running since 16:46: Prover9 with chain hints on
   twee's stalled goals, 2 workers, proofs straight into UL (exp16: 4 of 107 walls, 3 of them twee-failed).
-* `abs/ul53.sh` since 18 Nov 20:34:50 (UL53.log): ul52 with Prover9 + chain as the cascade level `p9` after k60 (loop.py
+* `abs/ul54.sh` since 18 Nov 21:35:49 (UL54.log): ul53 on **19 workers** with `nom` (no rule model, 80 s) as the last
+  variant before 320 s. exp22 is done; the only other job is transfer.py live (xfrlive2, -j 2, about 0.2 CPU on average).
+* `abs/ul53.sh` from 18 Nov 20:34:50 to 21:35 (UL53.log, 4600 runs, **new=56** in 60 min on 16 workers; 53 in its
+  first 46 min, while the 5 s levels had untried goals): ul52 with Prover9 + chain as the cascade level `p9` after k60 (loop.py
   bc450f8). Proofs and inputs go to loops/UL/p9var. Levels: L0, Vunf@0, Vk60@0, L1 80, L2 160, Vk60, Vp9 (60 s
   Prover9), Vunf, Vtwo, L3 320.
 * `abs/ul52.sh` from 18 Nov 20:27:05 to 20:34 (UL52.log, 400 runs, new=5 in 6.6 min): ul51 restarted for memoised hint unfolding (loop.py a5949d1).

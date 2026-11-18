@@ -306,4 +306,6 @@ All four together prove 17 new walls. With Prover9 + chain first, 18 (k60 then a
   * L0: 24 in 1476 runs, 6.1 per CPU hour;
   * unfolded 5 s: 29 in 2057 runs, 4.0 per CPU hour.
   * The 80 s levels wait until these fall below their yields.
-* **Pending:** ul53's deeper levels (Vk60@0, L1, L2, Vp9).
+* **21:35: ul53 ended at new=56 in 60 min.** Only 3 came after 21:21, so the 5 s levels were close to exhausted.
+* **21:36: ul54**: 19 workers, `nom` last before 320 s.
+* **Pending:** ul54's deeper levels (Vk60@0, L1, L2, Vp9), checked at 22:35.
