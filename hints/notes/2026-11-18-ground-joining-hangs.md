@@ -88,7 +88,7 @@ python3 run.py pg200_e57.cmds gb100 1 --ground-joining-branch-limit 100
     out of heap). That is 169 goals (cap/stalled_r5.tsv), 92 of them still unsolved in UL at 05:22 (cap/goals).
   * Commands captured in production's context as exp3 did:
     `LOOP_PRINT_CMD=1 LOOP_KEEP_TMP=1 SCHED= XEVERY=100000 CASCADE=5 timeout 900 bash exp3/solve_cap.sh
-    cap/goals loops/UL cap/CAP 3 0.05`. The context was 44,912 UL proofs. Commands came for 79 goals within the
+    cap/goals loops/UL cap/CAP 3 0.05`. The context was 44,992 UL proofs (lines of UL/solved.tsv). Commands came for 79 goals within the
     3 minutes; the 5 s capture runs proved none.
   * tbify.py turned them into 78 commands (stall78_*.cmds; files in cap/tb) at production's L1: 80 abstract s,
     CPU cap 800 s. The runner's wall limit is 1,260 s; production's at L1 is 1,230 s.
