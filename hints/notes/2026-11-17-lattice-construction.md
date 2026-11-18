@@ -243,6 +243,16 @@ were sketched at 5 s.
   * closure2.py takes the closure over the ladder to a fixpoint. A conjecture is proved directly, or by a ladder
     proof whose conjectures are all proved. A goal is solved when a refinement proof of it uses only proved
     conjectures.
+  * **Result (01:57): 3 of 43 proved, no further goal solved** (still aa2_12 517 and nil3_30 508).
+  * The second level circles back. For mbol_lem1 387, `t(X0,X1) = t(X0,l(k(X0,X2),X3,X4))` and
+    `k(X0,X1) = k(X0,l(k(X0,X2),X3,X4))` each follow from the other. They are restatements of the same hard core
+    ("an inner map fixes commutators"), not a smaller step.
+* **Are the rungs easier than their goals?** (launched 01:57, 3 CPUs, about 3 hours.) For the 14 goals still
+  unsolved (production has meanwhile proved 374 and 508), the conjectures that are the only open piece of a
+  refinement proof, up to 3 per goal, shortest first: 20 conjectures. Each runs at 320 s, the deep runs' budget,
+  in the same context as exp3's C arm (the goal's production command, conjecture replaced). A rung that proves
+  where its goal failed at 320 s means the lattice helps.
+  `python3 sketch.py rungs320.tsv rprove320.tsv -j 3 --time 320`
 
 **Down step with sketch hints** (downhints.py, launched 21:57).
 `python3 downhints.py sketch47.tsv down80.tsv -j 2 --time 80 --arms I,U`
