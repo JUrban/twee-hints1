@@ -622,24 +622,23 @@ summaries keep results but lose the reasons and the user's exact words. Keep sec
 
 ---------------------------------------------------------------------------------------------------------
 
-## 8. Open threads (17 Nov 18:10; `date` checked)
+## 8. Open threads (18 Nov 13:27; `date` checked)
 
 Running:
-* production ul41 (UL41.log, PG sum filter 0.25, 4 workers);
-* the PGA/PGB half1 A/B (loops/PGA, PGB), ending about 18:54: then write REPORT 2av, merge PGA's proofs into
-  UL (abs/merge_ab.sh or merge.py), and decide whether PG becomes the solve_new.sh default (TWEE=twee-pg50 with
-  TWEE_PG_ARGS);
-* (done 18:09) the e54 re-log of pg/d3.
+* production ul45 (abs/ul45.sh, loops/UL45.log, -j 8, twee-pg61): chain L1 as fresh 80 s runs,
+  `--chain-since-row 47530` (pre-chain goals get a chain L1); started 12:02. About 16 proofs an hour at 13:20
+  (UL 45,520).
+* exp12 (notes/2026-11-18-gap-heads.md): the 96 gap heads. Stage A (80 s) proved only 1 of the first 89; stage B
+  (320 s on the rest) starts by itself.
+* exp13 (notes/2026-11-18-chain-size.md): smaller chains; neither arm ahead of the full chain at 13:20.
+* exp14 (notes/2026-11-18-two-sided-chain.md): two-sided chains on the 107 walls, launched 13:24.
 
 Next:
-1. Pcat ENIGMA models as above (6.1), tested at matched pruning; also several thresholds of the sum
-   filter at scale.
-2. If PG holds at scale: Z5, the whole benchmark from zero with the 17 Nov defaults and PG (abs/z5_test.sh exists).
-3. A faster forest evaluator (flat arrays, Float) if learned PG models need it.
-4. On-policy PG data: logs from runs with the filter on.
-5. Update REPORT section 5 to the ul41 production command.
-
-Waiting for the user: proof steps as lemma axioms.
+1. If exp14's two-sided chain wins, add it to loop.py as a flag and restart production with it.
+2. At the next production restart, rebuild chain_records.tsv with `--extra` for the merged experiment outputs
+   (exp8 out_s_K_re5 and out_s_b0_re, exp9, exp10 out_X, exp11 out_s1, exp12 out_A and out_B, exp14 out_T).
+3. Count the production proofs that follow each merged gap head (exp12).
+4. Bring REPORT 2ax up to date with exp11 to exp14.
 
 ---------------------------------------------------------------------------------------------------------
 
