@@ -291,6 +291,8 @@ Each goal is one twee run on the goal's problem.
 * The learned scheduler (`--sched-model`) is off by default, because at scale its gain was noise.
 
 ### 4.3 Production
+* Side worker `abs/p9c.sh` (loops/P9C, P9C.log), queued 15:45 to start when exp18 ends: Prover9 with chain hints on
+  twee's stalled goals, 2 workers, proofs straight into UL (exp16: 4 of 107 walls, 3 of them twee-failed).
 * `abs/ul46.sh` since 18 Nov 14:46 (UL46.log; its header says 14:50, written before the start): ul45 on 4 workers
   with chain_records2.tsv (+40 records of merged experiment proofs, 39,884 in all). ul45 had proved nothing from
   13:20 to 14:37 (its 5 s classes had no candidates; all 8 workers on 80 s chain runs), then 2 by 14:46; new=22 in all. The other 4
