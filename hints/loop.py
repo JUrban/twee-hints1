@@ -518,10 +518,12 @@ class Loop:
             k = (self.p9_attempt(name, rnd) * max(1, a.p9_parallel) + variant + a.p9_order_offset) % a.p9_orders
             if k:
                 cmd += ['--precedence', ','.join(self.p9_precedence(orig_path, k))]
-        if self.model:
+        if self.model and var != 'nom':
             m, v, gdir = self.model
-            cmd += ['--rule-model', m, '--rule-vocab', v, '--rule-goal', os.path.join(gdir, name)] + \
-                   a.model_args.split()
+            ma = a.model_args.split()
+            if var == 'r2':   # (--variants r2) rule-model threshold 0.2
+                i_ = ma.index('--rule-threshold'); ma[i_ + 1] = '0.2'
+            cmd += ['--rule-model', m, '--rule-vocab', v, '--rule-goal', os.path.join(gdir, name)] + ma
         if hints and a.stall:
             cmd += ['--eqhint-stall', str(a.stall)]
         if var == 'sub':
@@ -858,14 +860,23 @@ class Loop:
         # VAR[lev] is the variant of internal level lev (None for the cascade's own levels), LAB[lev] its results label
         # (the cascade's own levels keep their L<k>, so results of earlier runs map onto the same levels)
         VL = [v for v in a.variants.split(',') if v]
-        assert all(v in ('two', 'unf', 'sub', 'sj', 'k60', 'pool') for v in VL), VL
-        assert not VL or (0 <= a.chain_level < len(T) and not a.p9loop), '--variants needs --chain-level'
         CL_ = a.chain_level
-        VAR = [None] * len(T); LAB = ['L%d' % k for k in range(len(T))]
+        assert not VL or (0 <= a.chain_level < len(T) and not a.p9loop), '--variants needs --chain-level'
+        VB = []   # (variant, the cascade level it follows)
+        for v in VL:
+            nm, _, at = v.partition('@')
+            assert nm in ('two', 'unf', 'sub', 'sj', 'k60', 'pool', 'r2', 'nom', 'x'), v
+            VB.append((nm, int(at) if at else CL_))
+            assert 0 <= VB[-1][1] < len(T), v
+        # internal levels: each cascade level k, then the variants that follow it (in the order given); ORIG: the
+        # cascade level of an internal level (for a variant: the level it follows, whose budget and hints it takes)
+        T0_ = T; T, VAR, LAB, ORIG = [], [], [], []
+        for k in range(len(T0_)):
+            T.append(T0_[k]); VAR.append(None); LAB.append('L%d' % k); ORIG.append(k)
+            for nm, at in VB:
+                if at == k:
+                    T.append(T0_[k]); VAR.append(nm); LAB.append('V' + nm + ('' if at == CL_ else f'@{at}')); ORIG.append(k)
         if VL:
-            T = T[:CL_ + 1] + [T[CL_]] * len(VL) + T[CL_ + 1:]
-            VAR = VAR[:CL_ + 1] + VL + VAR[CL_ + 1:]
-            LAB = LAB[:CL_ + 1] + ['V' + v for v in VL] + LAB[CL_ + 1:]
             print(f'  cascade: --variants: levels {list(zip(LAB, T))}', flush=True)
         IDX = {l: k for k, l in enumerate(LAB)}   # results label -> internal level
         pools = self.build_pools(); cnt = self.pool_cnt
@@ -1005,11 +1016,11 @@ class Loop:
             for ri, line in enumerate(open(os.path.join(rdir, 'results.tsv'))):
                 f = line.rstrip('\n').split('\t')
                 if len(f) >= 5 and f[0] in att and f[4] in IDX:
-                    lev = int(f[4][1:]) if f[4][:1] == 'L' else CL_   # (the cascade's own level number)
+                    lev = ORIG[IDX[f[4]]]   # (the cascade's own level number)
                     if a.chain_since_row and ri < a.chain_since_row and lev >= max(1, a.chain_level):
                         # (--chain-since-row R: a deep run before row R had the pool's hints; the goal gets
                         # its chain-level run again, fresh with the chain; 1,032 unsolved goals at 11:55)
-                        lev = max(0, a.chain_level - 1); kc += 1
+                        lev = IDX['L%d' % max(0, a.chain_level - 1)]; kc += 1
                     else:
                         lev = IDX[f[4]]
                     if lev == 0:
@@ -1299,18 +1310,24 @@ class Loop:
                             # (--chain-level L: level L runs fresh with the chain, the setting exp3/exp8 tested;
                             # resuming the 5 s pool state kept the queue's pool scores, --no-resume-requeue, so
                             # the chain reached only new pairs; ul43/ul44 ran that way, 08:28-12:00)
-                            fc = (getattr(self, 'chains', None) is not None and lev == a.chain_level
+                            ol = ORIG[lev]   # (the cascade level; for a variant, the one it follows)
+                            fc = (getattr(self, 'chains', None) is not None and ol == a.chain_level and not VAR[lev]
                                   and not a.p9loop)
                             v_ = VAR[lev]
                             if v_:
-                                # (--variants) fresh, at the chain level's budget, no state: the chain run's
-                                # state stays for the level after the variants
-                                hv = (self.hints_for(n, pools, None) if v_ == 'pool' else
-                                      self.deep_hints(n, lev, pools, two_sided=(v_ == 'two')))
+                                # (--variants) fresh, at the budget of the level it follows, with that level's hints
+                                # (the pool below the chain level; x and two: the chain at any level), no state: the
+                                # state of the level it follows stays for the next level
+                                if v_ == 'pool':
+                                    hv = self.hints_for(n, pools, None)
+                                elif v_ in ('two', 'x'):
+                                    hv = self.deep_hints(n, max(ol, a.chain_level), pools, two_sided=(v_ == 'two'))
+                                else:
+                                    hv = self.deep_hints(n, ol, pools) if ol > 0 else self.hints_for(n, pools, None)
                                 fut = ex.submit(self.run_one, n, hv, rnd, T[lev], False, a.cascade_cpu * T[lev], 0, v_)
                             else:
                                 b = T[lev] if fc else (T[lev] - T[lev - 1] if (a.p9loop or os.path.exists(sp)) else T[lev])
-                                fut = ex.submit(self.run_one, n, self.deep_hints(n, lev, pools), rnd,
+                                fut = ex.submit(self.run_one, n, self.deep_hints(n, ol, pools), rnd,
                                                 b, 'fresh' if fc else not a.p9loop, a.cascade_cpu * b)
                         running[fut] = (n, lev); rcls[fut] = cl; ncls[cl] += 1; rt0[fut] = time.time()
                         if H and lev == 0:   # (its features, context and predicted success, for observe())
@@ -1534,7 +1551,9 @@ def make_parser():
                     help='(18 Nov, portfolio) levels after --chain-level, each a fresh run of that budget with one change, '
                          'tried in this order before the next level (results rows V<name>): two (two-sided chain), '
                          'unf (definitions unfolded), sub (--eqhint-subsume), sj (--set-join), k60 (60 kNN lemmas), '
-                         'pool (the pool\'s hints). They keep no state, so the next level resumes the chain run\'s')
+                         'pool (the pool\'s hints), r2 (rule-model threshold 0.2), nom (no rule model), x (the chain\'s '
+                         'hints). They keep no state, so the next level resumes the chain run\'s. NAME@L: after level L '
+                         'instead, at its budget and with its hints (rows V<name>@L)')
     ap.add_argument('--chain-since-row', type=int, default=0,
                     help='--chain-level with --cascade-continue: deep rows of the round before this row (pool-era runs) '
                          'are ignored, so those goals get a fresh chain-level run')
