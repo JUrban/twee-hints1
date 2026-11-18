@@ -51,4 +51,4 @@ python3 run.py stall78_K.cmds s_K 2
     are steps its siblings' proofs share.
   * The s_K runner started before run.py kept proved outputs (07:47), so 587 and 628 were rerun (08:25,
     `python3 run.py re2.cmds s_K_re 1`, exp/exp8_re2.cmds): the same pairs (47,691, 89,245). Merged into UL at
-    08:26 (`exp3/tomerge.py exp8/out_s_K_re exp8/xm1`, `merge.py loops/UL exp8/xm1`).
+    08:27 (`exp3/tomerge.py exp8/out_s_K_re exp8/xm1`, `merge.py loops/UL exp8/xm1`).
