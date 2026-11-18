@@ -1074,6 +1074,37 @@ class Loop:
         att = {n: ((ctx(n, False if a.cascade_was_below else None), a.cascade_start) if a.cascade_start >= 0
                    else (None, -1))
                for n in self.names if n not in self.solved}
+        # (18 Nov 22:40) tiers: the variants that follow one cascade level form a tier; a goal tries them in any order (with
+        # --ratio-order the untried one of highest yield first) and passes the tier once it tried all. VTRIED: goal -> the
+        # variant levels it tried since its last fresh run. (A fixed order made every goal run the unfolded 5 s level, down to
+        # 0.39 per CPU hour in ul54, before the 60-lemma one, 5.5; and a restart with the order swapped would skip the
+        # second for the goals past the first.)
+        TIER = {}
+        for k_ in range(len(T)):
+            if VAR[k_]:
+                j0, j1 = k_, k_
+                while VAR[j0 - 1]:
+                    j0 -= 1
+                while j1 + 1 < len(T) and VAR[j1 + 1]:
+                    j1 += 1
+                TIER[k_] = list(range(j0, j1 + 1))
+        vtried = collections.defaultdict(set)
+        def nxt(n):
+            """N's next internal level (len(T): none left)."""
+            j = att[n][1] + 1
+            while j < len(T):
+                if not VAR[j]:
+                    return j
+                un = [x for x in TIER[j] if x not in vtried[n]]
+                if un:
+                    return max(un, key=lambda x: (lyield(LAB[x]), -x)) if a.ratio_order else un[0]
+                j = TIER[j][-1] + 1
+            return len(T)
+        def vlev(n, lev):
+            """the level att records once N tried variant level LEV: the tier's last if N tried all of it, else the
+            cascade level before the tier"""
+            vtried[n].add(lev); tr = TIER[lev]
+            return tr[-1] if all(x in vtried[n] for x in tr) else tr[0] - 1
         running = {}   # future -> (name, level)
         nf = collections.Counter()   # goal -> its failed fresh (T0) runs in this round (--fail-order)
         nfb = {}   # --fail-reset: goal -> its places after the nearest proven goal below at its last failure
@@ -1106,6 +1137,8 @@ class Loop:
                         lev = IDX['L%d' % max(0, a.chain_level - 1)]; kc += 1
                     else:
                         lev = IDX[f[4]]
+                        if VAR[lev]:
+                            lev = vlev(f[0], lev)
                     if lev == 0:
                         fresh.add(f[0])
                         if f[1] == 'NO':
@@ -1324,14 +1357,16 @@ class Loop:
                         # near the frontier: exp21, 4 of 300 such goals proved unfolded at 5 s, 3.8 per CPU hour)
                         # (--ratio-order: by the estimated yield of the goal's next level, highest first; the level
                         # itself is the second-to-last entry)
-                        deep = sorted((int(not (n in hds and att[n][1] + 1 < hof)),
-                                       -lyield(LAB[att[n][1] + 1]) if a.ratio_order else att[n][1] + 1,
+                        deep = sorted((int(not (n in hds and j_ < hof)),
+                                       -lyield(LAB[j_]) if a.ratio_order else j_,
                                        obd.get(gnum[n][0], 0), deep_running[gnum[n][0]], g[n][1], gnum[n][1],
-                                       att[n][1] + 1, n)
+                                       j_, n)
                                       for n in att
-                                      if n not in busy and ctx(n) == att[n][0] and att[n][1] + 1 < len(T)
-                                      and (may_deepen(n, g) or n in hds or ORIG[att[n][1] + 1] == 0) and not grown(n)
-                                      and (n in hds or not a.head_only_from or att[n][1] + 1 < hof))
+                                      if n not in busy and ctx(n) == att[n][0]
+                                      for j_ in (nxt(n),)
+                                      if j_ < len(T)
+                                      and (may_deepen(n, g) or n in hds or ORIG[j_] == 0) and not grown(n)
+                                      and (n in hds or not a.head_only_from or j_ < hof))
                         far = []
                         if SM and a.far_retry and (a.mix or len(running) + len(retry) + len(deep) < a.j):
                             far = sorted((-v, n) for n, v in cand.items()
@@ -1365,7 +1400,7 @@ class Loop:
                                 continue
                             if light and (n not in att or n in busy or not (ctx(n) != att[n][0] or grown(n))):
                                 continue
-                            att[n] = (ctx(n), 0)
+                            att[n] = (ctx(n), 0); vtried.pop(n, None)
                             if RK:
                                 knn_at[n] = knn_sig(n)
                                 kf.write(f'{n}\t{",".join(sorted(knn_at[n]))}\n'); kf.flush()
@@ -1390,9 +1425,9 @@ class Loop:
                             x_ = deep.pop(0); lev, n = x_[-2], x_[-1]
                             if any(m == n for m, _ in running.values()):
                                 continue
-                            if light and (n not in att or att[n][1] + 1 != lev or ctx(n) != att[n][0] or grown(n)):
+                            if light and (n not in att or nxt(n) != lev or ctx(n) != att[n][0] or grown(n)):
                                 continue
-                            att[n] = (ctx(n), lev)
+                            att[n] = (ctx(n), vlev(n, lev) if VAR[lev] else lev)
                             sp = os.path.join(self.dir, 'states', n + '.bin')
                             # --p9loop (P9loop deepening): a fresh run of the level's increment, with the
                             # matcher lemmas of the goal's earlier runs and its next ordering, not a resume
