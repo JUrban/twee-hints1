@@ -291,7 +291,10 @@ Each goal is one twee run on the goal's problem.
 * The learned scheduler (`--sched-model`) is off by default, because at scale its gain was noise.
 
 ### 4.3 Production
-* `abs/ul44.sh` since 18 Nov 09:47 (UL44.log): ul43 on 8 workers instead of 4 (load had fallen to 13.5). Its first
+* `abs/ul45.sh` since 18 Nov 12:02 (UL45.log): ul44 with loop.py running the chain level (80 s) **fresh** with the
+  chain, and `--chain-since-row 47530`, so goals whose deep runs all predate the chain (3,845 rows capped) get a
+  fresh 80 s chain run.
+* `abs/ul44.sh` from 18 Nov 09:47 (UL44.log): ul43 on 8 workers instead of 4 (load had fallen to 13.5). Its first
   start (09:23) died at 09:29 (log loops/UL44a.log): loop.py could send a goal deep and then fresh in the same
   pass. The two runs shared tmp/<goal>.hints (the fresh run read the chain), and the second unlink failed.
   Fixed in loop.py at 09:47, so production was down 09:29-09:47.
@@ -314,12 +317,12 @@ Each goal is one twee run on the goal's problem.
   * ul12–ul14: fresh-first, far-retry, line gaps 80.
   * ul15–ul31: the learned scheduler, heads-first (reverted), a 5 s first level, retry-knn.
   * ul32–ul38: CPU shares for side batches, 30 kNN lemmas.
-  * ul39: --mix. ul40: e44. ul41: PG. ul42: e61 and the ground-joining branch limit. ul43: chain hints at 80 s. ul44: -j 8.
+  * ul39: --mix. ul40: e44. ul41: PG. ul42: e61 and the ground-joining branch limit. ul43: chain hints at 80 s. ul44: -j 8. ul45: fresh chain level, --chain-since-row.
 * For new problems, `hints/solve_new.sh NAMES CONTEXT OUT [J [HOURS]]` runs the same cascade. The live
   proof-step transfer runs beside it every 2 minutes. Its defaults are TWEE twee-e44, CASCADE
   5,20,80,320, STATES --no-fresh-states, and ORDER `--mix 0.1 --fail-order`. REPORT section 5 explains
   EXCLUDE, SCHED, LOOPARGS and AIM_PROB. **REPORT section 5 item 5 still shows the 15 Nov production
-  command; the current one is ul44.**
+  command; the current one is ul45.**
 * From zero on the whole benchmark (Z4, abs/z4_test.sh): 15,398 at 10 min, 35,511 at 1 h, 37,713 at 2 h,
   38,044 at about 4 h.
 
