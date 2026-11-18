@@ -114,6 +114,19 @@ Hints: C 9,333, E 9,398, K and V 1,916. Matched: C 1,157, E 1,154, K 530, V 396.
 
 Their rules are big, so each pair costs more. They count as unproved at 320 s, but their search is shorter.
 
+**Hung runs** (killed 05:03, 18 Nov). Five runs went far past the CPU cap without ending:
+* V on aK2_eq_aK3_d 506 (8.7 CPU h), aa_to_nil3 516, com_Ralt 348 and nil3_23_32_to_25 499;
+* C on aa_to_nil3 516.
+
+twee checks its limits only between main-loop steps, and one step never ended: unbounded ground joinability
+(notes/2026-11-18-ground-joining-hangs.md). I killed them (exp3/hung_killed.txt); their rows count as unproved.
+Workers were lowered to 6 (05:16), 5, 4 and 3 (06:16) to make room for exp6/exp7.
+
+**Merged into UL** (07:09, 153 of 188 runs done). 12 goals proved so far: 619, 252, 369, 372, 491, 537,
+nil3_27 472, 508, 374, 517, nil4_19K 368 and 211. The 10 that UL lacked were merged
+(`tomerge.py out_C@320 out_K@320 out_E@320 out_V@320 exp3/xm2`, then `merge.py loops/UL exp3/xm2`): UL now has
+45,006. 374 and 508 were already proved by production.
+
 **Chain holes** (found 20:23).
 * 127 of the 439 siblings (29%) have no USEDAXIOMS record, so they enter as leaves. Their closures hold a median
   of 13 unrecorded members (q3 46, max 202).
