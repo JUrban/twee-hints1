@@ -53,7 +53,7 @@ python3 run.py stall78_K.cmds s_K 2
     `python3 run.py re2.cmds s_K_re 1`, exp/exp8_re2.cmds): the same pairs (47,691, 89,245). Merged into UL at
     08:27 (`exp3/tomerge.py exp8/out_s_K_re exp8/xm1`, `merge.py loops/UL exp8/xm1`).
 
-* **Final (complete 09:38): chain 9, pool 5 (+6 −2) on all 78.**
+* **Final (complete by 09:40): chain 9, pool 5 (+6 −2) on all 78.**
   * Against the exact control s_b0 (e48, same commands, pool hints): CPU 16,822 s against 15,263 (+10%). Against
     s_gb100 (e57 with the branch limit, same proofs as s_b0): 18,031 s.
   * Chain only: aK2_eq_aK3_q 252, nsmr_to_aa1 623 and 624, nsmr_to_aK1 455 (12,006 pairs), ns_to_aa1_b 587 and
