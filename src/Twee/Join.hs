@@ -23,7 +23,8 @@ data Config =
     cfg_use_connectedness_in_ground_joining :: !Bool,
     cfg_set_join :: !Bool,
     cfg_ground_join_limit :: !Int,
-    cfg_ground_join_incomplete_limit :: !Int }
+    cfg_ground_join_incomplete_limit :: !Int,
+    cfg_ground_join_branch_limit :: !Int }
 
 defaultConfig :: Config
 defaultConfig =
@@ -33,7 +34,8 @@ defaultConfig =
     cfg_use_connectedness_in_ground_joining = False,
     cfg_set_join = False,
     cfg_ground_join_limit = maxBound,
-    cfg_ground_join_incomplete_limit = maxBound }
+    cfg_ground_join_incomplete_limit = maxBound,
+    cfg_ground_join_branch_limit = maxBound }
 
 {-# INLINEABLE joinCriticalPair #-}
 joinCriticalPair ::
@@ -206,6 +208,11 @@ groundJoinFrom config@Config{..} ticks eqns idx model ctx cp@CriticalPair{cp_eqn
         weaken x = x
         ctx' = formAnd (diag (modelToLiterals model')) ctx in
 
+      -- each failed model multiplies the case split by up to its number of literals: with permutation laws
+      -- over many variables the split grows without bound inside one step of the main loop, where the
+      -- time limits are not checked; past the branch limit, assume not ground joinable (as at the tick limit)
+      if cfg_ground_join_branch_limit < maxBound && length ctx' > cfg_ground_join_branch_limit
+      then (ticks, Left model) else
       case groundJoin config ticks eqns idx ctx' cp of
         (ticks', Right (_, cps)) | not (modelOK model) ->
           (ticks', Right (Nothing, cps))

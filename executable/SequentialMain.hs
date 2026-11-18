@@ -410,6 +410,9 @@ parseConfig = do
     cfg_ground_join_incomplete_limit <-
       inGroup "Critical pair joining heuristics" $
       flag "ground-joining-incomplete-limit" ["Assume ground joinable after considering this many orderings (unlimited by default)."] maxBound argNum
+    cfg_ground_join_branch_limit <-
+      inGroup "Critical pair joining heuristics" $
+      flag "ground-joining-branch-limit" ["Assume not ground joinable when the case split has more than this many branches (unlimited by default)."] maxBound argNum
     return Join.Config{..}
 
   cfg_proof_presentation <- do
