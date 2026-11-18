@@ -175,6 +175,48 @@ hints/exp/portfolio_ul47.sh). Started 17:13:49. Startup: 364 level updates again
 **Measure:** the V rows' proofs per CPU hour, against L1 and f in the same period, and how many proofs each
 variant adds that the chain run had missed (all of them, by construction).
 
+## Design principle: the ratio rule (17:55)
+
+For one goal, independent attempts with success chances p_i and costs c_i are best tried in decreasing order of
+p_i/c_i. This is the classic rule for optimal sequential search: it minimises the expected cost to the first
+success. Over many goals and a fixed CPU budget, the same greedy order maximises expected proofs.
+
+Here p_i is the chance that member i proves a goal **that every earlier member failed in the same context**. So
+p_i/c_i is that member's yield of new proofs per CPU hour on that population. That is the number to rank by, not
+its count against the best method.
+
+Measured at 17:55 (walls: the 92 that exp11's 80 s chain failed; production: UL r5 12:02-17:13):
+
+| member | population | n | proved | p | CPU s a run | new per CPU h |
+|---|---|---:|---:|---:|---:|---:|
+| L0, 5 s fresh run in a new context | production | 7,939 | 192 | 2.4% | 7.7 | **11.3** |
+| Prover9 + chain, 60 s (exp16) | failed walls | 92 | 3 | 3.3% | 59 | **1.98** |
+| Vk60 (exp17) | failed walls | 92 | 6 | 6.5% | 189 | 1.24 |
+| L1, 80 s chain, fresh | production, after L0 failed | 656 | 40 | 6.1% | 190 | 1.16 |
+| chain to 160 s (exp20, 12 so far) | failed walls | 12 | 2 | 17% | 546 (fresh) | 1.10 (on the full cost) |
+| Vtwo (exp14) | failed walls | 92 | 4 | 4.3% | 205 | 0.76 |
+| Vunf (exp15, 71 so far) | failed walls | 71 | 6 | 8.5% | 621 | 0.49 |
+| Vsub (exp18) | failed walls | 92 | 3 | 3.3% | 282 | 0.42 |
+| L2, 320 s chain on gap heads (exp12 B) | heads | 34 | 3 | 8.8% | 1,540 | 0.21 |
+
+* The 5 s fresh run in a changed context is ten times the rest. That is why the mix scheduler's r class takes
+  most of production's workers, rightly.
+* Among the deep members, the ratio order is:
+  * Prover9 + chain (a side worker);
+  * then 60 kNN lemmas, about level with the chain level itself;
+  * then the two-sided chain, unfolded, subsumption;
+  * and the 320 s level last.
+  ul47's variant order (k60, two, unf, sub, then L2) is this order.
+* **Extending to 160 s** may rank near the top. In production it would resume the 80 s state, so its cost is the
+  increment, about 546 − 190 = 356 s a run. With 2 of 12 that gives about 1.7 per CPU hour (early).
+  * exp20 decides this. If it holds, the portfolio gets an 80 → 160 s resume level before the variants, in place
+    of jumping to 320 s.
+* Unfolding has the highest p (8.5%) but costs three times as much a run. Unfolded problems are larger and
+  slower.
+* **Next in the loop:** order the deep queue by estimated p/c per (goal state, member), not by level. Estimate p
+  online per member from production's own V rows (a Beta-Binomial over the member's runs on goals that failed
+  everything before it). The mix classes are a coarse version of this.
+
 ## Results
 
 (pending)
