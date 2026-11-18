@@ -308,4 +308,20 @@ All four together prove 17 new walls. With Prover9 + chain first, 18 (k60 then a
   * The 80 s levels wait until these fall below their yields.
 * **21:35: ul53 ended at new=56 in 60 min.** Only 3 came after 21:21, so the 5 s levels were close to exhausted.
 * **21:36: ul54**: 19 workers, `nom` last before 320 s.
-* **Pending:** ul54's deeper levels (Vk60@0, L1, L2, Vp9), checked at 22:35.
+* **22:35: ul54 after an hour:** new=28. By level:
+  * L0: 10 in 1799 runs, 2.2 per CPU hour;
+  * **60 kNN lemmas at 5 s: 14 in 1588 runs, 5.5** (prior 1.9);
+  * unfolded 5 s: 4 in 3064 runs, 0.39, used up.
+* **The ordering problem:** the ratio rule chose which goal ran next, but each goal's levels were in a fixed order.
+  So every goal had to run the used-up unfolded level before the 60-lemma one.
+  * A restart with the order swapped would not help. Replay keeps only a goal's highest tried level, so about 3,500
+    goals that had run unfolded would skip the 60-lemma run.
+* **Fix: tiers** (loop.py a0a4486).
+  * The variants after one cascade level form a tier, and a goal tries them in any order. With `--ratio-order`, the
+    next is the untried one of highest current yield.
+  * The goal passes the tier when it has tried all of them. Replay records tried variants per goal.
+  * Smoke tests: the 80 s tier ran k60 (1.19) before two (0.23) although the list names two first. A restart after
+    L0 and Vunf@0 continued with Vk60@0, then the rest.
+  * This is the Simon-Kadane order (decreasing p/c) per goal as well as across goals.
+* **22:39: ul54 ended at new=37 in 63 min. ul55** = ul54 with tiers.
+* **Pending:** ul55's level mix and yields.
