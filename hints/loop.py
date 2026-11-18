@@ -1074,7 +1074,7 @@ class Loop:
         att = {n: ((ctx(n, False if a.cascade_was_below else None), a.cascade_start) if a.cascade_start >= 0
                    else (None, -1))
                for n in self.names if n not in self.solved}
-        # (18 Nov 22:40) tiers: the variants that follow one cascade level form a tier; a goal tries them in any order (with
+        # (18 Nov 22:38) tiers: the variants that follow one cascade level form a tier; a goal tries them in any order (with
         # --ratio-order the untried one of highest yield first) and passes the tier once it tried all. VTRIED: goal -> the
         # variant levels it tried since its last fresh run. (A fixed order made every goal run the unfolded 5 s level, down to
         # 0.39 per CPU hour in ul54, before the 60-lemma one, 5.5; and a restart with the order swapped would skip the
