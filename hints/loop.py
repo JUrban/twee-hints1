@@ -28,6 +28,8 @@ def canon_key(l, r, sig):
     b = hintlib.generalize(r, l, sig)
     return min(a, b)
 
+_UNF_CACHE = {}   # (run_one, unfolded runs) repr of a definition set -> {hint side: its unfolding}
+
 class Loop:
     def __init__(self, a):
         self.a = a
@@ -491,7 +493,18 @@ class Loop:
             with open(path, 'w') as f:
                 f.write(txt)
             if hints and defs:
-                hints = [tuple(unfold.unfold_eq(x, defs) for x in h[:2]) + tuple(h[2:]) for h in hints]
+                # (18 Nov 20:30) unfolded hints memoised per definition set: unfold_eq is ~0.25 ms a hint, 5-6 s for a
+                # 20-30k pool, and the worker threads did it under the GIL (ul51: 1-3 of 16 workers in twee). Goals of
+                # one original share their definitions and most of their pool.
+                C_ = _UNF_CACHE.setdefault(repr(sorted(defs.items())), {})
+                if len(C_) > 400000:
+                    C_.clear()
+                def uf_(x, C_=C_, defs=defs):
+                    y = C_.get(x)
+                    if y is None:
+                        y = C_[x] = unfold.unfold_eq(x, defs)
+                    return y
+                hints = [(uf_(h[0]), uf_(h[1])) + tuple(h[2:]) for h in hints]
         if a.gen_model and resume is True:
             if a.gen_cuts:
                 path = self.gen_cuts_problem(name, path, tag, hints)
