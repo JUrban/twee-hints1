@@ -34,6 +34,16 @@ So a wall proof is the most valuable deep proof there is.
 * Proofs are merged into UL as they come (exp3/tomerge.py, merge.py). For each merged wall, I count the proofs
   production then finds behind it.
 
+## Launch (10:38)
+
+* Capture: commands for all 107 walls; none proved at 5 s.
+* `exp6/tbify.py cap/CAP.log cap/CAP cap/tb s1_pool.cmds 80` (and s2_pool.cmds at 320), then
+  `mkchain.py s1_pool.cmds s1.cmds` and `mkchain.py s2_pool.cmds s2_all.cmds`. On average 7,276 chain hints
+  against 6,110 pool hints; no chain is empty (sizes.tsv).
+* `bash stage.sh` (exp/exp11_stage.sh): `run.py s1.cmds s1 4`, then the unproved walls in `run.py s2.cmds s2 4`.
+  Every 10 minutes, and after each stage, `exp3/tomerge.py out_s1 out_s2 xm` + `merge.py loops/UL xm`; times in
+  merges.log.
+
 ## Results
 
 (pending)
