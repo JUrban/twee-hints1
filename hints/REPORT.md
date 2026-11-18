@@ -4463,11 +4463,12 @@ using an index of hint forms by top symbols to depth 1.
 * A likely reason: a pair more general than a hint is smaller than the hint, so twee's size weight already
   ranks it well.
 
-**Deep runs on late goals (exp3, 320 s, 47 goals; 177 of 188 runs at 08:23).**
-* Proved: K (lemmas + the expanded chain of the 10 nearest proven siblings as the only hints) 12 of 44 in
-  14.4 CPU h. E (pool + chain) 10 of 45 in 15.6 h. C (production's command) 9 of 45 in 20.0 h. V (axioms + chain)
-  4 of 43 in 41.4 h.
-* At the 07:10 count, every goal C proved K proved too.
+**Deep runs on late goals (exp3, 320 s, 47 goals; complete 09:30).**
+* Proved: K (lemmas + the expanded chain of the 10 nearest proven siblings as the only hints) 12 of 47 in
+  15.3 CPU h. E (pool + chain) 10 of 47 in 16.7 h. C (production's command) 9 of 47 in 20.7 h. V (axioms + chain)
+  4 of 47 in 42.8 h.
+* Every goal C proved K proved too, plus three more, with 26% less CPU. The last new one (nsmr_to_aa1 624) was
+  merged at 09:30.
 * The 10 proofs that UL lacked were merged at 07:09.
 * **What that set off.** UL had gained 1–4 proofs an hour from 02:00 to 07:00. Between 07:10 and 08:20 it gained
   152, all from 5 s runs of goals that had failed at 5 s two to eight times.

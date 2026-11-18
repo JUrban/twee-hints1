@@ -140,6 +140,22 @@ nil3_27 472, 508, 374, 517, nil4_19K 368 and 211. The 10 that UL lacked were mer
 * Still, the lesson matches the head counts of 17 Nov: one deep proof at a stalled place can open a run of cheap
   5 s proofs around it, in both directions, since lemmas from goals above are allowed.
 
+**Final result** (complete 09:30, 18 Nov; all 188 runs, hung runs counted unproved).
+
+| arm | proved | CPU h |
+|---|---|---|
+| K: lemmas + chain only | 12 of 47 | 15.3 |
+| E: lemmas + pool + chain | 10 of 47 | 16.7 |
+| C: production's command | 9 of 47 | 20.7 |
+| V: axioms + chain | 4 of 47 | 42.8 |
+
+* K proves every goal C proves, plus aa1_45_b 374, nil4_19K 368 and nsmr_to_aa1 624, with 26% less CPU.
+* V's one goal no other arm proves is aK2_eq_aK3_q 211.
+* nsmr_to_aa1 624 (K and E) was the one proof UL still lacked. Merged at 09:30 (`tomerge.py out_K@320 out_E@320
+  out_C@320 out_V@320 exp3/xm3`, `merge.py loops/UL exp3/xm3`). The other 12 are in UL, from the 07:09 merge or
+  from production.
+* This result made K's hints production's 80 s hints (abs/ul43.sh, `loop.py --chain-level 1`, 08:28).
+
 **Chain holes** (found 20:23).
 * 127 of the 439 siblings (29%) have no USEDAXIOMS record, so they enter as leaves. Their closures hold a median
   of 13 unrecorded members (q3 46, max 202).
