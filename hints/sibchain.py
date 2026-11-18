@@ -11,8 +11,10 @@ Records: goal -> the proven goals its proof used, from the USEDAXIOMS lines of a
 names map to no goal (assumed or cut conjectures) are left out, as in expand.py.
 
   python3 sibchain.py LOOPDIR GOAL [N]   prints GOAL's chain (lhs<TAB>rhs) from LOOPDIR's records
-  python3 sibchain.py --build OUT.tsv [LOOPS]   the records of all loops (expand.py's LOOPS; first loop with a
-      clean record of a goal and its hint file wins), as rows goal<TAB>loop dir<TAB>source goals (comma-separated)
+  python3 sibchain.py --build OUT.tsv [LOOPS] [--extra DIR,...]   the records of all loops (expand.py's LOOPS; first
+      loop with a clean record of a goal and its hint file wins), as rows goal<TAB>loop dir<TAB>source goals
+      (comma-separated). --extra: also experiment output dirs (files <goal> or <goal>.out, as exp3/exp6 run.py keep
+      them) for goals that have a hint file in the first loop but no record yet: proofs merged with merge.py.
   Chains(LOOPDIR, records=OUT.tsv) starts from such a file (fast) instead of LOOPDIR's own outputs; hint files
   come from the record's loop (as in expand.py), else from LOOPDIR/hints.
 """
@@ -132,7 +134,8 @@ class Chains:
         return out
 
 
-def build(out, loops='UL,Z4,Z3,Z2,Z1,Z0,PGA,PGB,ORH,ORG,ORF,ORE,ORD,ORC,ORB,ORA', base='/project/hintwork/loops'):
+def build(out, loops='UL,Z4,Z3,Z2,Z1,Z0,PGA,PGB,ORH,ORG,ORF,ORE,ORD,ORC,ORB,ORA', base='/project/hintwork/loops',
+          extra=''):
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
     import depcheck
     rec = {}
@@ -143,6 +146,21 @@ def build(out, loops='UL,Z4,Z3,Z2,Z1,Z0,PGA,PGB,ORH,ORG,ORF,ORE,ORD,ORC,ORB,ORA'
         for g, (src, unm) in depcheck.used_lemmas(d).items():
             if g not in rec and not unm and os.path.exists(os.path.join(d, 'hints', g)):
                 rec[g] = (d, src)
+    first = os.path.join(base, loops.split(',')[0]); nx = 0
+    for ed in filter(None, extra.split(',')):
+        # (18 Nov) merged experiment proofs: merge.py copies their hint files, not their outputs
+        for f in sorted(os.listdir(ed)):
+            g = f[:-4] if f.endswith('.out') else f
+            if '__goal_' not in g or g in rec or not os.path.exists(os.path.join(first, 'hints', g)):
+                continue
+            for line in open(os.path.join(ed, f), errors='replace'):
+                if line.startswith('USEDAXIOMS'):
+                    src = parse_used(g, line[len('USEDAXIOMS'):])
+                    if src is not None:
+                        rec[g] = (first, src); nx += 1
+                    break
+    if extra:
+        print(nx, 'records from --extra', file=sys.stderr)
     with open(out + '.tmp', 'w') as f:
         for g in sorted(rec):
             f.write(f'{g}\t{rec[g][0]}\t{",".join(sorted(rec[g][1]))}\n')
@@ -152,7 +170,10 @@ def build(out, loops='UL,Z4,Z3,Z2,Z1,Z0,PGA,PGB,ORH,ORG,ORF,ORE,ORD,ORC,ORB,ORA'
 
 if __name__ == '__main__':
     if sys.argv[1] == '--build':
-        build(sys.argv[2], *sys.argv[3:4])
+        ex = ''
+        if '--extra' in sys.argv:
+            i = sys.argv.index('--extra'); ex = sys.argv[i + 1]; del sys.argv[i:i + 2]
+        build(sys.argv[2], *sys.argv[3:4], extra=ex)
         sys.exit()
     recs = None
     if '--records' in sys.argv:
