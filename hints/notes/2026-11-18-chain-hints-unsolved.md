@@ -52,3 +52,13 @@ python3 run.py stall78_K.cmds s_K 2
   * The s_K runner started before run.py kept proved outputs (07:47), so 587 and 628 were rerun (08:25,
     `python3 run.py re2.cmds s_K_re 1`, exp/exp8_re2.cmds): the same pairs (47,691, 89,245). Merged into UL at
     08:27 (`exp3/tomerge.py exp8/out_s_K_re exp8/xm1`, `merge.py loops/UL exp8/xm1`).
+
+## In production (ul43 from 08:28, ul44 from 09:23)
+
+* Check (09:25): production's L1 rows since 08:28 carry chain-sized hint counts (HINTSTATS `hints=`); 3 of
+  10 sampled equal the chain sibchain gives now, the others differ by siblings proven since.
+* L1 yield, 09:25: **6 of 24 L1 runs proved** (0.9 wall h). Pool L1 before: 11 of 385 in ul41's 2,200 runs
+  before the 07:09 burst (19.3 wall h), 2 of 20 during the burst and ul42.
+* Not an A/B: the scheduler picks different goals at different times, and after the burst many goals had new
+  contexts. The A/B evidence is exp3 and this experiment's arms.
+
