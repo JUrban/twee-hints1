@@ -871,20 +871,25 @@ class Loop:
         VL = [v for v in a.variants.split(',') if v]
         CL_ = a.chain_level
         assert not VL or (0 <= a.chain_level < len(T) and not a.p9loop), '--variants needs --chain-level'
-        VB = []   # (variant, the cascade level it follows)
+        VB = []   # (variant, the cascade level whose budget and hints it takes, the cascade level it follows)
+        VA_ = a.variants_after if a.variants_after >= 0 else CL_
         for v in VL:
             nm, _, at = v.partition('@')
             assert nm in ('two', 'unf', 'sub', 'sj', 'k60', 'pool', 'r2', 'nom', 'nopg', 'x'), v
-            VB.append((nm, int(at) if at else CL_))
-            assert 0 <= VB[-1][1] < len(T), v
+            VB.append((nm, int(at), int(at)) if at else (nm, CL_, VA_))
+            assert 0 <= VB[-1][1] < len(T) and 0 <= VB[-1][2] < len(T), v
         # internal levels: each cascade level k, then the variants that follow it (in the order given); ORIG: the
         # cascade level of an internal level (for a variant: the level it follows, whose budget and hints it takes)
-        T0_ = T; T, VAR, LAB, ORIG = [], [], [], []
+        # PREV: for a cascade level, the internal index of the cascade level before it (a resume's increment is
+        # counted from that level's budget, not from a variant run in between)
+        T0_ = T; T, VAR, LAB, ORIG, PREV = [], [], [], [], []; lastown = -1
         for k in range(len(T0_)):
-            T.append(T0_[k]); VAR.append(None); LAB.append('L%d' % k); ORIG.append(k)
-            for nm, at in VB:
-                if at == k:
-                    T.append(T0_[k]); VAR.append(nm); LAB.append('V' + nm + ('' if at == CL_ else f'@{at}')); ORIG.append(k)
+            T.append(T0_[k]); VAR.append(None); LAB.append('L%d' % k); ORIG.append(k); PREV.append(lastown)
+            lastown = len(T) - 1
+            for nm, bl, af in VB:
+                if af == k:
+                    T.append(T0_[bl]); VAR.append(nm); LAB.append('V' + nm + ('' if bl == CL_ else f'@{bl}'))
+                    ORIG.append(bl); PREV.append(-1)
         if VL:
             print(f'  cascade: --variants: levels {list(zip(LAB, T))}', flush=True)
         IDX = {l: k for k, l in enumerate(LAB)}   # results label -> internal level
@@ -893,8 +898,13 @@ class Loop:
         # on goals whose fresh run failed) and this round's results since --chain-since-row
         # (18 Nov 18:50: the 80 s variants' priors are their yields conditional on the earlier members' failures, in the
         # order k60, two, unf, sub on the walls; alone they were 1.24, 0.76, 0.49, 0.42)
-        YP = {'L1': 1.16, 'L2': 0.21, 'Vk60': 1.24, 'Vtwo': 0.60, 'Vunf': 0.48, 'Vsub': 0.16, 'Vsj': 0.3, 'Vpool': 0.5,
+        YP = {'Vk60': 1.24, 'Vtwo': 0.60, 'Vunf': 0.48, 'Vsub': 0.16, 'Vsj': 0.3, 'Vpool': 0.5,
               'Vunf@0': 3.8, 'Vk60@0': 1.9}
+        # the cascade's own levels by budget: the 80 s chain (production), its resume to 160 s (exp20, on the
+        # increment), to 320 s (exp12 stage B)
+        for k_, l_ in enumerate(LAB):
+            if not VAR[k_] and k_ > 0:
+                YP[l_] = {80.0: 1.16, 160.0: 1.5, 320.0: 0.21}.get(T[k_], 1.0)
         YW = 2.0
         ystat = collections.defaultdict(lambda: [0, 0.0])   # label -> [proofs, CPU s]
         def lyield(l):
@@ -1355,7 +1365,7 @@ class Loop:
                                     hv = self.deep_hints(n, ol, pools) if ol > 0 else self.hints_for(n, pools, None)
                                 fut = ex.submit(self.run_one, n, hv, rnd, T[lev], False, a.cascade_cpu * T[lev], 0, v_)
                             else:
-                                b = T[lev] if fc else (T[lev] - T[lev - 1] if (a.p9loop or os.path.exists(sp)) else T[lev])
+                                b = T[lev] if fc else (T[lev] - T[PREV[lev]] if (a.p9loop or os.path.exists(sp)) else T[lev])
                                 fut = ex.submit(self.run_one, n, self.deep_hints(n, ol, pools), rnd,
                                                 b, 'fresh' if fc else not a.p9loop, a.cascade_cpu * b)
                         running[fut] = (n, lev); rcls[fut] = cl; ncls[cl] += 1; rt0[fut] = time.time()
@@ -1582,6 +1592,9 @@ def make_parser():
                          'level, estimated from built-in priors (the walls and production, notes/2026-11-18-portfolio-'
                          'review.md) worth 2 CPU hours and this round\'s results since --chain-since-row, instead of by '
                          'level (the ratio rule of optimal search); heads still go first')
+    ap.add_argument('--variants-after', type=int, default=-1, metavar='P',
+                    help='--variants without @L go after cascade level P (default --chain-level), still at the chain '
+                         'level\'s budget and with its hints (18 Nov: 80 s variants after an 80 -> 160 s resume level)')
     ap.add_argument('--variants', default='',
                     help='(18 Nov, portfolio) levels after --chain-level, each a fresh run of that budget with one change, '
                          'tried in this order before the next level (results rows V<name>): two (two-sided chain), '
