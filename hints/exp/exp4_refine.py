@@ -16,8 +16,12 @@ TB = '/project/hintwork/exp3/tb'
 cmds = {}
 for l in open(f'{TB}/cmds.all'):
     w = l.split(); cmds[os.path.basename(w[1])[:-2]] = w
-def run(g, src, conj, T, out_dir):
+def run(g, src, conj, T, out_dir, target=None):
     w = list(cmds[g]); prob = open(w[1]).read()
+    if target:   # a rung conjecture as the goal (sketch.py's 12th column)
+        vs = sorted(set(re.findall(r'\bX\d+\b', target)), key=lambda v: int(v[1:]))
+        cj = f"fof(goals,conjecture,{'! [' + ','.join(vs) + '] : ' if vs else ''}{target})."
+        prob = re.sub(r'fof\(goals,conjecture,.*?\)\.\s*$', lambda m: cj, prob, flags=re.M | re.S)
     for i, c in enumerate(conj):
         vs = sorted(set(re.findall(r'\bX\d+\b', c)), key=lambda v: int(v[1:]))
         prob += f"\nfof(assume_{i},axiom,{'! [' + ','.join(vs) + '] : ' if vs else ''}{c}).\n"
@@ -49,17 +53,19 @@ def canon(eq):
         pat = r'\b(X\d+|[A-H])\b'
         return re.sub(pat, f, x) + ' = ' + re.sub(pat, f, y)
     return min(ren(l, r), ren(r, l))
-jobs, per_goal = [], collections.defaultdict(list)
+jobs, per_goal, tg_id = [], collections.defaultdict(list), {}
 for l in open(a.sketch):
     w = l.rstrip('\n').split('\t')
     if len(w) < 11 or w[4] != '1' or w[5] != '1': continue
     conj = [c for c in w[10].split('; ') if c and not c.startswith('x ') and (w[0], c) not in refuted
             and canon(c) != canon(w[3])]
     if not conj: continue
-    jobs.append((w[0], w[1], conj))
+    tg = w[11] if len(w) > 11 and w[11] else None
+    jobs.append((w[0], w[1], conj, tg))
     for c in conj:
-        if c not in per_goal[w[0]]: per_goal[w[0]].append(c)
-jobs += [(g, 'all', cs) for g, cs in per_goal.items()]
+        if c not in per_goal[(w[0], tg)]: per_goal[(w[0], tg)].append(c)
+jobs += [(g, 'all' if not tg else f'all_{tg_id[tg]}', cs, tg) for (g, tg), cs in per_goal.items()
+         for _ in [tg_id.setdefault(tg, len(tg_id))]]
 with cf.ThreadPoolExecutor(a.j) as ex, open(a.out, 'a') as f:
-    for res in ex.map(lambda x: run(*x, a.time, a.out + '.d'), jobs):
+    for res in ex.map(lambda x: run(x[0], x[1], x[2], a.time, a.out + '.d', x[3]) + ([x[3]] if x[3] else []), jobs):
         f.write('\t'.join(map(str, res)) + '\n'); f.flush()

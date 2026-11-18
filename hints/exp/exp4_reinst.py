@@ -98,5 +98,5 @@ with open(a.out, 'w') as f:
     for r, inst in zip(rows, per_row):
         if r[4] == '1' and r[5] == '1':
             marked = [('x ' if known.get((r[0], c)) else '') + c for c in inst]
-            r = r[:8] + [str(len(inst)), str(sum(m.startswith('x ') for m in marked)), '; '.join(marked)]
+            r = r[:8] + [str(len(inst)), str(sum(m.startswith('x ') for m in marked)), '; '.join(marked)] + r[11:]
         f.write('\t'.join(r) + '\n')

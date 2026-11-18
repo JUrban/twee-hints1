@@ -10,7 +10,10 @@ the instances of S the proof used: at each step 'by axiom k (assume_S)' the two 
 the redex; (redex = contractum), with the goal's constants generalised to variables, is the instance. Each
 instance is screened with Mace4 in the real theory (a countermodel up to size 8 in 5 s = false).
 OUT.tsv: goal, move id, kind, move, proved, S used, proof lemmas, CPU s, instances used, of them refuted, the
-instances (; separated, 'x' marks a refuted one). Outputs in OUT.d/<goal>.<id>."""
+instances (; separated, 'x' marks a refuted one). Outputs in OUT.d/<goal>.<id>.
+A 7th column in MOVES (optional) is a target conjecture (LADR/TPTP term syntax, variables X<i>): it replaces the
+problem's conjecture, so a rung conjecture can be climbed like a goal (the ladder, recursively); it is copied to
+OUT's 12th column."""
 import argparse, concurrent.futures as cf, os, re, subprocess, sys
 sys.path.insert(0, '/project/twee/hints'); sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import hintlib
@@ -58,9 +61,17 @@ def instances(out, ax_no):
                 if r: res.append((show(r[0]), show(r[1])))
             prev, pend = t, False
     return res
+def setconj(prob, body):
+    vs = sorted(set(re.findall(r'\bX\d+\b', body)), key=lambda v: int(v[1:]))
+    conj = f"fof(goals,conjecture,{'! [' + ','.join(vs) + '] : ' if vs else ''}{body})."
+    new = re.sub(r'fof\(goals,conjecture,.*?\)\.\s*$', lambda m: conj, prob, flags=re.M | re.S)
+    assert new != prob or conj in prob
+    return new
 def run(row, T):
     g, mid, kind, mv = row[:4]
+    target = row[6] if len(row) > 6 and row[6] else None
     w = list(cmds[g]); prob = open(w[1]).read()
+    if target: prob = setconj(prob, target)
     os.makedirs(f'{a.out}.d', exist_ok=True); pp = f'{a.out}.d/{g}.{mid}.p'
     if kind in ('inst', 'gen'):
         body = mv.strip().rstrip('.').strip()
@@ -91,7 +102,7 @@ def run(row, T):
             A, _G = ladr(g)
             c = mace(A, f'{k[0]} = {k[1]}', 5)
             bad += c is not None; inst.append(('x ' if c else '') + f'{k[0]} = {k[1]}')
-    return [g, mid, kind, mv, int(ok), int(used), len(L), f'{cpu:.1f}', len(inst), bad, '; '.join(inst)]
+    return [g, mid, kind, mv, int(ok), int(used), len(L), f'{cpu:.1f}', len(inst), bad, '; '.join(inst)] + ([target] if target else [])
 ap = argparse.ArgumentParser(); ap.add_argument('moves'); ap.add_argument('out')
 ap.add_argument('-j', type=int, default=2); ap.add_argument('--time', type=float, default=5)
 a = ap.parse_args()
