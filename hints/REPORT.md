@@ -4774,6 +4774,16 @@ yields on the walls in production's order:
 
 The union is 26 of 92. **ul54 (21:35)** has 19 workers and adds `nom` as the last 80 s variant before 320 s.
 
+**The order within a goal (22:38).**
+* The ratio rule picked which goal ran next, but each goal's levels came in a fixed order.
+* By ul54's first hour, the unfolded 5 s level was used up (4 in 3064 runs, 0.39 per CPU hour). The 60-lemma 5 s
+  level behind it was paying 5.5 (14 in 1588). Every goal still had to pass the first to reach the second.
+* **Now the variants after one cascade level form a tier** (loop.py a0a4486). A goal tries them by current yield,
+  each once per context, and the restart replay records which it has tried.
+* That is the decreasing-p/c order within each goal as well as across goals. ul55 (22:39) started on the 60-lemma
+  5 s level, with 4 new in its first minute.
+* ul54 made 37 new in 63 minutes.
+
 ## 2c. Long runs: stall cutoff and checkpoints
 
 * `--eqhint-stall N` gives up when no new rule has matched a hint for N
