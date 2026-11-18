@@ -43,7 +43,20 @@ All at 5 abstract s with `--max-cpu 50`, one command file, ids ARM:goal, goal-ma
 | G | no parental guidance |
 | X | chain hints (production's 80 s hints) instead of the pool |
 
-Runner: exp11/run.py, 2 workers (2,400 runs, about 5 CPU hours).
+Runner: exp11/run.py on **6 workers** (2,400 runs, about 5 CPU hours). exp12 stage B was paused at 17:24 for
+them.
+
+Build details:
+* The first mk.py run (stage.sh, 17:21) stopped on its own check: the K60 commands point to their capture's
+  copies of the goal and hint files (tbK60/).
+* mk.py now builds K60 as C's command with only the problem file swapped. It checks that the rest matches up to
+  that path and that the hint files are identical.
+* Rerun: 17:22-17:31, 300 goals, 8 arms, 2,400 commands.
+  * K60 problems have 60 kNN lemmas, against 30.
+  * All 300 goals have definitions to unfold.
+  * Mean pool 7,794 hints, mean chain 11,744 (sizes.tsv).
+* Arm N (no rule model) checked on one goal: it runs cleanly, and PG then has no scores to use.
+* Started by hand at 17:32:35 (`python3 run.py A.cmds A 6`).
 
 ```
 cd /project/hintwork
