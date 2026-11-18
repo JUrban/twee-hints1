@@ -393,6 +393,8 @@ class Loop:
         """One twee run. BUDGET (default: the round's timeout), RESUME (default --resume)
         and MAX_CPU (replaces --max-cpu in --args) are for --cascade. VARIANT: which of the
         --p9-parallel runs of this goal in this round (Bigloop). VAR: a --variants level's change."""
+        if var == 'p9':
+            return self.run_p9(name, hints)
         a = self.a
         tag = name + (f'.v{variant}' if variant else '')   # tmp file names
         T = budget if budget is not None else self.timeout(rnd)
@@ -673,6 +675,36 @@ class Loop:
             os.unlink(path)
         return name, ok, dt, stats, res
 
+    def run_p9(self, name, hints):
+        """(--variants p9, 18 Nov 20:40) Prover9 with the level's hints (the chain), 6 proven siblings either side as
+        assumptions, 60 s: p9twee.py --live --chain as it ran beside production (exp16 on the 92 walls exp11's chain
+        failed: 3 new, none of them among exp20's 160 s proofs; live, 4 in 350 runs on goals that had failed the 160 or
+        320 s level). Inputs and proofs under LOOPDIR/p9var."""
+        import p9twee, types
+        P = getattr(self, '_p9', None)
+        if P is None:
+            ns = types.SimpleNamespace(loopdir=self.dir, outdir=os.path.join(self.dir, 'p9var'), lemmas=6, timeout=60.0,
+                                       max_given=0, no_hints=False, prover9='/project/bin/prover9-new', chain=None,
+                                       chain_sibs=10)
+            P = self._p9 = p9twee.P9(ns); P._n = -1
+        if P._n != len(self.solved):
+            P.update(set(self.solved)); P._n = len(self.solved)
+        n, ok, dt, rc, nh, nl, hl = P.run(name, hints or [])
+        stats = f'P9 rc={rc} hints={nh} lemmas={nl}'
+        res = None
+        if ok:
+            sig = self.signature(name)
+            seen, res = set(), []
+            for h in hl:
+                l, r = h.split('\t', 1)
+                k = canon_key(l, r, sig)
+                if k[0] != k[1] and k not in seen:
+                    seen.add(k); res.append(k)
+            spath = os.path.join(self.dir, 'states', name + '.bin')
+            if os.path.exists(spath):
+                os.unlink(spath)   # (as for the other variants: the chain run's state is not needed)
+        return name, ok, dt, stats, res
+
     def run_multi(self, names, hints, rnd):
         """--multi: one twee --multi-goal run for a window of unconditional goals of one
         original, with the union of their lemmas and the budget of all of them. Returns one
@@ -888,7 +920,7 @@ class Loop:
         VA_ = a.variants_after if a.variants_after >= 0 else CL_
         for v in VL:
             nm, _, at = v.partition('@')
-            assert nm in ('two', 'unf', 'sub', 'sj', 'k60', 'pool', 'r2', 'nom', 'nopg', 'x'), v
+            assert nm in ('two', 'unf', 'sub', 'sj', 'k60', 'pool', 'r2', 'nom', 'nopg', 'x', 'p9'), v
             VB.append((nm, int(at), int(at)) if at else (nm, CL_, VA_))
             assert 0 <= VB[-1][1] < len(T) and 0 <= VB[-1][2] < len(T), v
         # internal levels: each cascade level k, then the variants that follow it (in the order given); ORIG: the
@@ -913,7 +945,8 @@ class Loop:
         # order k60, two, unf, sub on the walls; alone they were 1.24, 0.76, 0.49, 0.42)
         # (18 Nov 20:14: conditional on the 80 s chain and its 160 s resume failing, exp20: k60 1.19, two 0.23, unf 0.47,
         # sub and nopg 0 of 68 each)
-        YP = {'Vk60': 1.19, 'Vtwo': 0.23, 'Vunf': 0.47, 'Vsub': 0.05, 'Vnopg': 0.05, 'Vsj': 0.3, 'Vpool': 0.5,
+        # (20:40) Vp9: the live P9C worker, 4 proofs in 350 runs (~5.8 CPU h) on goals that had failed L2 or L3
+        YP = {'Vk60': 1.19, 'Vp9': 0.7, 'Vtwo': 0.23, 'Vunf': 0.47, 'Vsub': 0.05, 'Vnopg': 0.05, 'Vsj': 0.3, 'Vpool': 0.5,
               'Vunf@0': 3.8, 'Vk60@0': 1.9}
         # the cascade's own levels by budget: the 80 s chain (production), its resume to 160 s (exp20, on the
         # increment), to 320 s (exp12 stage B)

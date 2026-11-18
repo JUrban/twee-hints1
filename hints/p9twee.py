@@ -121,7 +121,7 @@ class P9:
             self.pools[o] = (len(self.byo[o]), hs)
         return self.pools[o][1]
 
-    def problem(self, n):
+    def problem(self, n, hints=None):
         a = self.a
         o, k = split(n)
         ax, conj = tptp_parts(n)
@@ -135,7 +135,9 @@ class P9:
                     lem.append(ladr(c))
             except OSError:
                 pass
-        hs = [] if a.no_hints else (self.chains.chain(n, self.byo[o], a.chain_sibs) if self.chains else self.pool(o))
+        # (HINTS: given (lhs, rhs, ..) hints, loop.py --variants p9)
+        hs = [h[:2] for h in hints] if hints is not None else \
+            ([] if a.no_hints else (self.chains.chain(n, self.byo[o], a.chain_sibs) if self.chains else self.pool(o)))
         txt = f'set(prolog_style_variables).\nclear(print_given).\nassign(max_seconds, {int(a.timeout)}).\n'
         if a.max_given:
             txt += f'assign(max_given, {a.max_given}).\n'
@@ -145,9 +147,9 @@ class P9:
             txt += 'formulas(hints).\n' + ''.join(f'{l} = {r}.\n' for l, r in hs) + 'end_of_list.\n'
         return txt, len(hs), len(lem)
 
-    def run(self, n):
+    def run(self, n, hints=None):
         a = self.a
-        txt, nh, nl = self.problem(n)
+        txt, nh, nl = self.problem(n, hints)
         p = os.path.join(a.outdir, 'in', n)
         open(p, 'w').write(txt)
         t0 = time.time(); rc = -1
