@@ -45,3 +45,14 @@ python3 run.py chain5.cmds chain5 1; python3 run.py chain20.cmds chain20 1
 * **Binary check (08:29): e48 = e61 at 5 s.** The pool5 commands with twee-e61 and `--ground-joining-branch-limit
   100` (pool5_e61.cmds, 2 workers): 0 proved, identical pair counts on all 199, CPU 1,081 s against 1,030. So
   the binary did not cause production's burst after 07:09 (REPORT 2ax).
+* **20 s (complete by 10:28): pool 3, chain 2 (+0 −1).**
+  * Both prove R1dist_to_aa1 654 (16,715 pairs with the pool, 21,361 with the chain) and aK2_eq_aK3_t 403
+    (15,672 against 31,907); only the pool proves nil3_25 474 (16,072 pairs).
+  * CPU 7,913 s against 7,426 (+7%). All 398 runs ended normally.
+* **So the chain does not help at the short budgets.** At 20 s it needs more pairs where both prove; at 5 s
+  neither proves anything. That matches what production now does (`--chain-level 1`): the pool at 5 s, the
+  chain from 80 s up, where exp3 (320 s: 12 against 9) and exp8 (80 s: 9 against 5) found it better. A likely
+  reason: the chain is larger (11,554 hints against 7,907 here), and a short run cannot use the longer
+  derivations it holds, while the pool's frequent steps match early.
+* The three proofs were new to UL. Merged at 10:28 (`exp3/tomerge.py exp9/out_pool20 exp9/out_chain20 exp9/xm1`,
+  `merge.py loops/UL exp9/xm1`; UL 45,414 distinct).
