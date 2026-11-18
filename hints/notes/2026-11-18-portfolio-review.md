@@ -299,4 +299,11 @@ All four together prove 17 new walls. With Prover9 + chain first, 18 (k60 then a
   * So Prover9 + chain is now a cascade level: `--variants p9` (loop.py bc450f8, p9twee.P9 with the level's chain
     hints, 60 s, 6 siblings either side, prior 0.7). It gets each goal once per context, after k60.
 * **20:35: ul53** = ul52 with `--variants unf@0,k60@0,k60,p9,unf,two`.
-* **Pending:** exp22 N80 (no model); ul53's per-level yields.
+* **21:20: exp22 N80** (no model): 4 new of 92 alone (0.72), 1 after the others (0.23). It goes in as `nom`, last.
+  With Prover9 + chain in the order, its conditional yield on the walls is 1.62, second only to the 160 s run.
+* **21:21: ul53 after 46 min:** 3500 runs, **new=53** on 16 workers (about 69 an hour; ul49-ul51 made 10-14).
+  With the unfolding bottleneck gone, the queue is still on the 5 s levels:
+  * L0: 24 in 1476 runs, 6.1 per CPU hour;
+  * unfolded 5 s: 29 in 2057 runs, 4.0 per CPU hour.
+  * The 80 s levels wait until these fall below their yields.
+* **Pending:** ul53's deeper levels (Vk60@0, L1, L2, Vp9).

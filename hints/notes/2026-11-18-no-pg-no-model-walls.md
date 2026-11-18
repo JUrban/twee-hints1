@@ -41,4 +41,23 @@ bash stage.sh 2452454   # then: python3 run.py G80.cmds G80 4; python3 run.py N8
   adds 1, about 0.22 per CPU hour. aK2_eq_aK3_a 455 is also among exp20's 160 s proofs.
 * Of exp11's 15, G80 proved aK2_eq_aK3_1243 339 at 26,007 pairs. The rest of the 15 and N80 follow.
 * Merged at 19:38: aK2_eq_aK3_a 455 and mbol_nil3_a 476 (`exp3/tomerge.py exp22/out_G80 exp22/xm`, then merge.py).
-* **Production:** `nopg` is the last 80 s variant in ul50, with prior 0.22 (19:39).
+**N80 (no rule model, so no PG either), the 92 walls (21:20):**
+* 4 new at 5.5 CPU h, 0.72 per CPU hour: aK2_eq_aK3_a 455 (69,989 pairs), a_instances 363 (105,893),
+  gbol_to_osb 196 (43,401) and mbol_lem2 508 (49,237). Two of these are also G80's.
+* Of exp11's 15, N80 proves 3 of the 7 run so far.
+* **Conditional, in production's order** (160 s increment, k60, Prover9 + chain, unf, two, nopg, nom):
+
+| member | runs | new | CPU h | conditional per CPU h |
+|---|---:|---:|---:|---:|
+| chain to 160 s | 92 | 12 | 6.79 | 1.77 |
+| 60 kNN lemmas | 80 | 5 | 4.19 | 1.19 |
+| Prover9 + chain | 75 | 2 | 1.23 | 1.62 |
+| unfolded | 73 | 5 | 12.65 | 0.40 |
+| two-sided chain | 68 | 1 | 4.04 | 0.25 |
+| no PG | 67 | 0 | 3.48 | 0 |
+| no model | 67 | 1 | 4.38 | 0.23 |
+
+* The union is 26 of 92 at 36.8 CPU h. No model adds 1 after the rest, about as much as the two-sided chain. It
+  becomes the last 80 s variant (`nom`, prior 0.23) at the next restart. No PG stays out: 0 after the rest.
+* Merged at 21:21: mbol_nil3_a 476 (already proved in G80's output, now from N80's too: 1 merged).
+* **Production (earlier):** `nopg` was the last 80 s variant in ul50, with prior 0.22 (19:39).
