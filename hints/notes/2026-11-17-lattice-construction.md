@@ -203,6 +203,25 @@ were sketched at 5 s.
   * **Open conjectures at 80 s** (18 Nov 00:02, 3 CPUs). These are the conjectures of every refinement proof with
     at most 2 still open: 34 conjectures in 16 goals.
     `python3 sketch.py rungs80.tsv rprove80.tsv -j 3 --time 80`
+  * **Result (00:44): 4 of 34 proved, and a second goal is solved: nil3_30 508.**
+    * Three of its rung conjectures prove at 80 s (152–233 CPU s, proofs of 453–1,260 lemmas). Each is one
+      used instance of a loop law, and each alone gives the goal in about 1 s:
+      * from LIP (law 37): `l(t(X0,X1),X2,X3) = m(ld(rd(e,X0),e),m(rd(e,X0),l(t(X0,X1),X2,X3)))`;
+      * from RIP (38): `l(t(X0,X1),X2,X3) = m(m(l(t(X0,X1),X2,X3),ld(X0,e)),rd(e,ld(X0,e)))`;
+      * from flexibility (34): `m(X0,m(ld(X0,l(t(X0,X1),X2,X3)),X0)) = m(m(X0,ld(X0,l(t(X0,X1),X2,X3))),X0)`.
+    * 508 is one of the 47 goals production's loops never proved. exp3 has not reached it yet.
+    * The proof is in two parts:
+      * refine20.tsv.d/nil3_30__goal_508.34.out: the goal from the conjecture. USEDAXIOMS: assume_0,
+        lemma_knn_13_nil3_31__goal_139, sos.
+      * rprove80.tsv.d/nil3_30__goal_508.5012.out: the conjecture. It uses production's proven sibling and kNN
+        lemmas, among them goals 501, 502, 509, 525 and 541 of nil3_30, which production proved earlier.
+    * ns_to_aa1_e 476: the commutation lemma `m(k(X0,X1),m(X1,X0)) = m(m(X1,X0),k(X0,X1))` proves at 80 s
+      (45.9 s), but its best refinement proof needs another conjecture.
+* **The ladder, recursively** (ladder.py, launched 00:46, 3 CPUs). The 30 rung conjectures still open are climbed
+  like goals: each goal's screened up moves, with the conjecture as target. That is 456 sketches at 5 s, then
+  reinst.py and refine.py.
+  `python3 ladder.py rungs80.tsv rprove20a.tsv rprove20b.tsv rprove80.tsv ladder1.tsv;
+  python3 sketch.py ladder1.tsv lsketch1.tsv -j 3 --time 5`
 
 **Down step with sketch hints** (downhints.py, launched 21:57).
 `python3 downhints.py sketch47.tsv down80.tsv -j 2 --time 80 --arms I,U`
