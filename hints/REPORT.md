@@ -4427,6 +4427,14 @@ Results on the 47 goals:
 So far the cheap syntactic moves make no lattice with small, true steps around these goals. They give easy
 special cases below, and false theories above.
 
+Update (18 Nov 01:15). After fixing a fault in the instance extraction (filterings' instances had come out as
+x = y), rungs appear.
+* The refinement proves 16 of the 47 goals from plausible conjectures alone (47 of 186 runs).
+* Proving those conjectures closes 2 goals: aa2_12 517 (conjecture in 21 s, goal from it in 1.6 s) and
+  nil3_30 508 (conjecture at 80 s, goal from it in 1 s).
+* Neither is new. exp3's K and E arms proved 517 in about 17 s, and production proved 508 itself at 00:15.
+* The open rung conjectures are being climbed recursively (ladder.py).
+
 ## 2c. Long runs: stall cutoff and checkpoints
 
 * `--eqhint-stall N` gives up when no new rule has matched a hint for N

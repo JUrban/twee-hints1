@@ -203,13 +203,18 @@ were sketched at 5 s.
   * **Open conjectures at 80 s** (18 Nov 00:02, 3 CPUs). These are the conjectures of every refinement proof with
     at most 2 still open: 34 conjectures in 16 goals.
     `python3 sketch.py rungs80.tsv rprove80.tsv -j 3 --time 80`
-  * **Result (00:44): 4 of 34 proved, and a second goal is solved: nil3_30 508.**
+  * **Result (00:44): 4 of 34 proved, and a second goal is solved through a rung: nil3_30 508** (production proved it
+    too, see the correction).
     * Three of its rung conjectures prove at 80 s (152–233 CPU s, proofs of 453–1,260 lemmas). Each is one
       used instance of a loop law, and each alone gives the goal in about 1 s:
       * from LIP (law 37): `l(t(X0,X1),X2,X3) = m(ld(rd(e,X0),e),m(rd(e,X0),l(t(X0,X1),X2,X3)))`;
       * from RIP (38): `l(t(X0,X1),X2,X3) = m(m(l(t(X0,X1),X2,X3),ld(X0,e)),rd(e,ld(X0,e)))`;
       * from flexibility (34): `m(X0,m(ld(X0,l(t(X0,X1),X2,X3)),X0)) = m(m(X0,ld(X0,l(t(X0,X1),X2,X3))),X0)`.
-    * 508 is one of the 47 goals production's loops never proved. exp3 has not reached it yet.
+    * 508 was one of the 47 goals production's loops had not proved when the set was picked (17 Nov). **Correction
+      (01:13): production proved it itself at 00:15 on 18 Nov** (loops/UL solved.tsv: round 5, 150.28 s; the hints
+      file is dated 00:15), half an hour before the rung route closed it (00:44). So the route gives a second,
+      independent proof, not a new one. Production also proved aa1_45_b 374 in the meantime. exp3 has not
+      reached 508 yet.
     * The proof is in two parts:
       * refine20.tsv.d/nil3_30__goal_508.34.out: the goal from the conjecture. USEDAXIOMS: assume_0,
         lemma_knn_13_nil3_31__goal_139, sos.
