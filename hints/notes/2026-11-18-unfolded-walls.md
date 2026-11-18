@@ -1,6 +1,6 @@
 # Unfolded definitions with chain hints on the walls (exp15)
 
-Prepared 18 Nov 2026, 13:32 UTC; it starts when exp13's two runners end. Directory /project/hintwork/exp15; scripts
+Prepared 18 Nov 2026, 13:31 UTC; it starts when exp13's two runners end. Directory /project/hintwork/exp15; scripts
 and data in hints/exp/exp15_*.
 
 ## Why
