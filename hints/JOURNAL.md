@@ -638,27 +638,38 @@ summaries keep results but lose the reasons and the user's exact words. Keep sec
 
 ---------------------------------------------------------------------------------------------------------
 
-## 8. Open threads (18 Nov 13:27; `date` checked)
+## 8. Open threads (18 Nov 18:49; `date` checked)
+
+**The portfolio task** (the user, 17:00: keep complementary methods; notes/2026-11-18-portfolio-review.md, REPORT
+2az). The principle is the ratio rule: rank each member by its new proofs per CPU hour on the goals every earlier
+member failed in the same context. The measured order is in REPORT 2az.
 
 Running:
-* production ul46 since 14:46 (abs/ul46.sh, loops/UL46.log, -j 4, chain_records2.tsv); before it ul45 (-j 8, twee-pg61): chain L1 as fresh 80 s runs,
-  `--chain-since-row 47530` (pre-chain goals get a chain L1); started 12:02. About 16 proofs an hour at 13:20
-  (UL 45,510 distinct proofs; solved.tsv has 10 duplicate rows).
-* exp12 (notes/2026-11-18-gap-heads.md): the 96 gap heads. Stage A (80 s) proved only 1 of the first 89; stage B
-  (320 s on the rest) starts by itself.
-* exp13 (notes/2026-11-18-chain-size.md): smaller chains; neither arm ahead of the full chain at 13:20.
-* exp14 (notes/2026-11-18-two-sided-chain.md): two-sided chains on the 107 walls, launched 13:24.
-* Queued on the same walls, each by a stage script that waits for the one before: exp15 (unfolded definitions
-  with the chain; after exp13), exp16 (Prover9 with chain hints and with the pool; after exp14), exp17 (60 kNN
-  lemmas; after exp16). Together with exp14 they ask which deep-run setting proves the most hard holes, against
-  exp11's exact control. The winners go into production's 80 s level or a side worker.
+* **production ul48** since 18:30:32: abs/ul48.sh, loops/UL48.log, 6 workers, `--variants
+  unf@0,k60@0,k60,two,unf,sub --ratio-order`. Watch its V rows with `levyield.py loops/UL/r5/results.tsv ROW`, ROW
+  being ul48's first row (57029). The expected yields are the priors in loop.py (YP).
+* **P9C on 4 workers** since 18:25:55 (abs/p9c4.sh, loops/P9C4.log).
+* **exp20** (notes/2026-11-18-time-matched-control.md): exp11's chain at 160 s on the 92 failed walls, 4 workers,
+  from 17:16. Measure the gain on the increment over 80 s (exp20/ana.py).
+  * If it holds (about 1.4 per CPU hour on the first 22), add an 80 → 160 s resume level, e.g. `--cascade
+    5,80,160,320`, and place it by the ratio rule.
+* **exp22** (notes/2026-11-18-no-pg-no-model-walls.md): no PG (G80), then no rule model (N80), at 80 s on the walls,
+  4 workers, from 18:25.
+
+Paused (both resumable; their run.py skips done ids):
+* exp12 stage B: 320 s on gap heads, 34 of 95 done, 0.21 per CPU hour.
+* exp19: set-join on the walls, 37 of 107 done, 0.31 per CPU hour.
+
+Done today: exp13, exp14, exp15 (the 92 failed walls), exp16, exp17, exp18, exp21. All their new proofs are merged.
 
 Next:
-1. If exp14's two-sided chain wins, add it to loop.py as a flag and restart production with it.
-2. At the next production restart, rebuild chain_records.tsv with `--extra` for the merged experiment outputs
-   (exp8 out_s_K_re5 and out_s_b0_re, exp9, exp10 out_X, exp11 out_s1, exp12 out_A and out_B, exp14 out_T).
-3. Count the production proofs that follow each merged gap head (exp12).
-4. Bring REPORT 2ax up to date with exp11 to exp14.
+1. At the next production restart: `--pass-every 1`. ul48's full pass takes 0.51 s a run against ul47's 0.29,
+   since every failed-fresh goal is now a deep candidate.
+2. When exp20 ends, decide on the 160 s level. When exp22 ends, add G80/N80 as variants if they pay (for them
+   loop.py needs variants `nopg` and `nom` at 80 s; `nom` exists).
+3. After about an hour of ul48, compare the V rows' yields with the priors. Correct the priors in loop.py if they
+   are far off (the online stats already do this within a run).
+4. CPU: 18 in use at 18:47 (ul48 6, P9C 4, exp20 4, exp22 4).
 
 ---------------------------------------------------------------------------------------------------------
 
