@@ -55,7 +55,8 @@ Build details:
   * K60 problems have 60 kNN lemmas, against 30.
   * All 300 goals have definitions to unfold.
   * Mean pool 7,794 hints, mean chain 11,744 (sizes.tsv).
-* Arm N (no rule model) checked on one goal: it runs cleanly, and PG then has no scores to use.
+* Arm N (no rule model) checked on one goal: it runs cleanly. PG pairs a rule without a model score with
+  everything (src/Twee.hs, pgFilter), so N is also without PG: G minus the rule filter.
 * Started by hand at 17:32:35 (`python3 run.py A.cmds A 6`).
 
 ```
