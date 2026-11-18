@@ -4582,6 +4582,30 @@ later pairs of a 320 s run cost about twice the early ones. Candidates: queue re
 GC on a heap 3-4 times larger, and per-pair costs that grow with the rule set (rule model, PG, hint lookups). A
 `--progress` profile of one 320 s head would tell them apart.
 
+**The wall study (16:50).** Settings for deep runs on hard holes, all on exp11's 107 walls with exp11's
+commands, so exp11 is an exact control (twee is deterministic in abstract time: exp14's 7 unchanged walls
+reproduced exactly).
+
+| variant (80 s unless noted) | proved | against exp11 | new to UL | CPU h | note |
+|---|---:|---|---:|---:|---|
+| exp11: below-only chain (control) | 15 | | 15 | 4.8 | |
+| exp14: two-sided chain | 16 | +4 −3 | 4 | 5.7 | −15% pairs where both prove |
+| exp18: subsumption matching (the user's point) | 13 | +3 −5 | 2 | 7.9 | −21% pairs where both prove (−0.6% at 20 s, exp7), +63% CPU |
+| exp16: Prover9 + chain, 60 s | 4 | 3 twee failed | 3 | 1.8 | Prover9 + pool: 2 (1 new) |
+| exp15: unfolded definitions | running | | 1 so far | | about 4 times slower per pair |
+| exp17: 60 kNN lemmas | running | | | | |
+| exp19: --set-join (Waldmeister 4.3) | running | | | | |
+
+* No variant so far beats the control in count.
+* But each proves 2-4 walls that every other run failed. Twee's search is chaotic, so a change of setting
+  re-randomises which hard goals fall. As a **portfolio on stalled holes** that is worth about 0.5-1 new proof
+  per CPU hour, and **Prover9 with the chain is the cheapest member (2.3 per CPU hour)**.
+* So from 16:46 a Prover9 side worker with chain hints (abs/p9c.sh, 2 workers) runs on twee's stalled goals,
+  writing its proofs into UL.
+* The Waldmeister paper (the user, 16:24; notes/2026-11-18-waldmeister-paper.md): twee already has most of its
+  techniques. The one it lacks (ground-joined equations kept for rewriting) cannot matter here: 29 ground-joined
+  equations against 20,751 rules in an 80 s run. --set-join is exp19.
+
 **Running (13:32):**
 * chain size (exp13);
 * two-sided chains on the walls (exp14);
