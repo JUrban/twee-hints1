@@ -4554,6 +4554,34 @@ proven (B), and whether one of the three above is (A).
 The cheap retries next to a proof pay best. The 80 s chain level pays about as little as the retries inside
 gaps. Some of the L0 proofs are the chain behind 421 above.
 
+**Throughput at depth (measured 15:55, the user's question).** In pairs considered per CPU second (run.py's CPU and
+pairs columns), whole runs:
+
+| runs | n | median | p10 | p90 | CPU-capped |
+|---|---:|---:|---:|---:|---:|
+| 80 s, walls, folded chain (exp11) | 107 | 969 | 677 | 1,540 | 0 |
+| 80 s, gap heads (exp12 A) | 95 | 842 | 417 | 1,223 | 4 |
+| 80 s, walls, unfolded (exp15, first 36) | 36 | 256 | 148 | 458 | 10 |
+| 320 s, gap heads (exp12 B, first 20) | 20 | 458 | 160 | 861 | 2 |
+| 320 s, late goals (exp3, 4 arms) | 181 | 553 | 259 | 978 | 0 |
+| 640 s, late goals (exp5) | 15 | 612 | 393 | 1,006 | 0 |
+
+The same command at two budgets shows how much slower the later part of a run is, because twee is deterministic in
+abstract time:
+* **80 s → 320 s** (17 gap heads that ran to the limit in both stages): 901 pairs/s for the first 160,000 pairs and
+  491 for the next 480,000. That is 1.9 times slower (the median of the per-goal ratios). So 4 times the budget
+  costs 6.7 times the CPU. Peak memory goes from 677 MB to 2,282 MB.
+* **320 s → 640 s** (exp5's 15 goals against their exp3 C runs): 739 pairs/s, then 528. 2 times the budget costs
+  2.4 times the CPU.
+* Outliers are much worse: down to 24-40 pairs/s (Ka_eq_aK3 403 hit the 3,200 s cap at 128,524 pairs).
+* Unfolded problems run at a quarter of the folded speed.
+
+So the 9-fold slowdown of 14 Nov (2v: 3.0 → 26 CPU s per abstract s by 130 abstract s, fixed by the overlap index
+and the interreduction filter) is gone. But the population is not flat, as the single goal in 2v suggested: the
+later pairs of a 320 s run cost about twice the early ones. Candidates: queue renormalisation (2v: about +25%),
+GC on a heap 3-4 times larger, and per-pair costs that grow with the rule set (rule model, PG, hint lookups). A
+`--progress` profile of one 320 s head would tell them apart.
+
 **Running (13:32):**
 * chain size (exp13);
 * two-sided chains on the walls (exp14);
