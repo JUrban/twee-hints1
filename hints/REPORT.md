@@ -4612,6 +4612,74 @@ reproduced exactly).
 * unfolded definitions with chain hints on the walls (exp15, from about 14:30);
 * exp12 stage B.
 
+## 2az. Portfolios: complementary methods kept, not dropped (user's request, 18 Nov 17:00)
+
+The user: when a method loses 2 of the best method's proofs but adds 3 of its own, running both for a share of the
+time usually beats running the best one all the time. **The record agrees.** Since 12 Nov I decided almost every A/B by
+the better arm's count and called the second arm's unique proofs noise. Notes:
+notes/2026-11-18-portfolio-review.md (the full table), -time-matched-control.md (exp20), -l0-portfolio.md (exp21).
+
+**Dropped methods with a measured unique share** (best arm's count, the dropped arm's, its gains and losses
+against the best, the union):
+
+| setting | best | dropped arm | +/− | union |
+|---|---:|---:|---|---:|
+| rule-model settings, 345 at 8 s (2b) | 69 | 65-67 | | 93 |
+| rm4b, 4 times the model (2f) | 61-63 | 65 | +9 −7 | about 72 |
+| 45 frequent hints as axioms (2s) | 76 | 73 | +3 −6 | 79 |
+| kNN lemma selections (2am) | 6 | 7 / 5 | +3 −2 / +1 −2 | 10 |
+| 60 kNN lemmas, two tests (2am) | 19 of 450 | 17 | +4 −1, +1 −3 | 24 |
+| expansion hints at 20 s (2aw) | 86 | 90 | +7 −3 | 93 |
+| subsumption matching at 20 s (2ax) | 87 | 87 | +2 −2 | 89 |
+| pool against chain at 80 s (exp8) | 9 | 5 | +2 | 11 |
+| two-sided chain, 107 walls (exp14) | 15 | 16 | +4 −3 | 19 |
+| subsumption matching, walls (exp18) | 15 | 13 | +3 −5 | 18 |
+| Prover9 + chain, walls (exp16) | 15 | 4 | +3 | 18 |
+
+Genuine negatives, where the variant proved nothing the others did not:
+* the 20 s portfolio on stalled goals (2ac);
+* the tail-head probes (2ag);
+* `--hint-goal` (2aj);
+* chain hints at 5 s on stalled goals (exp9).
+
+**On the walls** (the 92 that exp11's 80 s chain run failed), each 80 s variant proves 3-6 of them. Per CPU hour:
+
+| variant | new | new per CPU h |
+|---|---:|---:|
+| 60 kNN lemmas (exp17) | 6 | 1.27 |
+| two-sided chain (exp14) | 4 | 0.76 |
+| unfolded (exp15, 58 so far) | 6 | 0.61 |
+| subsumption (exp18) | 3 | 0.42 |
+
+Greedily by new proofs per CPU hour, the union grows:
+* the twee chain: 15 at 4.8 CPU h;
+* then Prover9 + chain: 18 at 6.6 h;
+* then Prover9 + pool: 19 at 8.3 h;
+* then the two-sided chain: 22 at 14.0 h;
+* then subsumption: 24 at 21.9 h;
+* then unfolded and 60 kNN lemmas: about 30.
+
+The time-matched control is pending: exp20, exp11's command at 160 s on the 92.
+
+**Production at 17:12** (UL r5 since 12:02):
+* the 5 s fresh level made 11.3 proofs per CPU hour;
+* the 80 s chain level 1.16;
+* the 320 s level never ran (the deep class had about one worker).
+
+So a variant competes with the far retries and the chain level (about 1 per worker-hour each), not with a deeper
+level.
+
+**Deployed (17:13): variant levels.**
+* loop.py `--variants` inserts levels of the chain level's budget after it. Each is a fresh run in the same context
+  with one change, keeps no state, and is labelled V<name> in results.tsv.
+* The deep queue goes breadth first: every waiting goal gets the first variant before any gets the second.
+* Production **ul47** = ul46 + `--variants k60,two,unf,sub`, in the order of the wall yields. The Prover9 + chain
+  side worker (P9C) keeps running beside it.
+
+**Next:** exp21, 8 arms at 5 s on 300 goals that failed their 5 s fresh run:
+* a cheap level at 8 CPU s a run;
+* a 1% hit rate there would be worth about 4.5 proofs per CPU hour.
+
 ## 2c. Long runs: stall cutoff and checkpoints
 
 * `--eqhint-stall N` gives up when no new rule has matched a hint for N
@@ -4716,7 +4784,8 @@ rounds of 30 s or more, but about 40% overhead for 8 s rounds.
        production's 1,111 after 3.5 days; 2aq).
   3. **Hints from all of the original's proofs**, and the ENIGMA rule
      filter in the short runs.
-* **What did not help** (16 Nov additions to the list below):
+* **What did not help** (16 Nov additions to the list below; *18 Nov correction: several of these, and of the
+  list below, are complementary, with unique proofs, and belong in a portfolio rather than out; 2az*):
   * more than 30 kNN lemmas;
   * use-count or MaSh-style dependency selection of lemmas (2am);
   * similar proofs' steps as hints from other originals (2ap);
@@ -4762,7 +4831,8 @@ rounds of 30 s or more, but about 40% overhead for 8 s rounds.
   hints at 300 s. A hint's precision rises with the number of sibling
   proofs it comes from (0.8% from one proof, 51% from 20 or more), but
   weaker boosts for rare hints do not help (60 = 60).
-* **What did not help** (each within noise or worse): sketches and
+* **What did not help** (each within noise or worse; *18 Nov: within noise in count, but several had unique
+  proofs, 2az*): sketches and
   chained sketches; kNN/goal-statement/ProofWatch hints on top of the
   model; more model data or capacity (rm5, rm4b); portfolios; P9 SFDF
   reorientation (2n); multi-goal search, which lacks the restart with the
