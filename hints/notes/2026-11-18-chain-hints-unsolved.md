@@ -41,7 +41,7 @@ python3 run.py stall78_K.cmds s_K 2
 
 ## Results
 
-* **Interim (08:27, 36 of 78 s_K rows; s_b0 has 55).** On the 36 goals both arms have run:
+* **Interim (08:24, 36 of 78 s_K rows; s_b0 has 55).** On the 36 goals both arms have run:
   * chain proves 4 (aK2_eq_aK3_q 252, nil3_1K_d 364, ns_to_aa1_b 587 and 628), the pool 2 (aK2_eq_aK3_o 422,
     364); exp6's gb100 arm (pool, branch limit) proves the same 2;
   * 364: 6,001 pairs with the chain against 22,476; 422 fails with the chain at 160,000;
