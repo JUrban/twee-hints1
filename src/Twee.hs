@@ -1520,15 +1520,19 @@ instance Binary (InstIndex f) where
 -- symbol or a wildcard; a variable side is the key -2 (only a variable can match it). A
 -- critical pair's key has its arguments' tops (-1 for a variable), so one lookup gives
 -- the forms that agree with it to depth 1; then they are matched. Not serialised.
-newtype SubIndex f = SubIndex (Maybe (Map [Int] [(Term f, Term f, Int)]))
+newtype SubIndex f = SubIndex (Maybe (IntMap [(Term f, Term f, Int)]))
 
 instance Binary (SubIndex f) where
   put _ = return ()
   get = return (SubIndex Nothing)
 
+-- (keys are hashed into an Int; a collision only adds candidates, which are matched anyway)
+subHash :: [Int] -> Int
+subHash = foldl' (\h v -> h * 1000003 + v + 7) 17
+
 {-# INLINEABLE subStoreKeys #-}
-subStoreKeys :: Term f -> Term f -> [[Int]]
-subStoreKeys t u = [ k ++ (-3) : k' | k <- left t, k' <- right u ]
+subStoreKeys :: Term f -> Term f -> [Int]
+subStoreKeys t u = [ subHash (k ++ (-3) : k') | k <- left t, k' <- right u ]
   where
     left (App f ts) = [ symId f : ks | ks <- mapM opt (unpack ts) ]
     left _ = [[-2]]
@@ -1538,8 +1542,8 @@ subStoreKeys t u = [ k ++ (-3) : k' | k <- left t, k' <- right u ]
     right _ = [[-2], [-1]]
 
 {-# INLINE subQueryKey #-}
-subQueryKey :: Term f -> Term f -> [Int]
-subQueryKey t u = left t ++ (-3) : right u
+subQueryKey :: Term f -> Term f -> Int
+subQueryKey t u = subHash (left t ++ (-3) : right u)
   where
     left (App f ts) = symId f : [ case a of { App g _ -> symId g; _ -> -1 } | a <- unpack ts ]
     left _ = [-2]
@@ -1554,7 +1558,7 @@ insertSubForm n (t :=: u) (SubIndex (Just m))
   | n >= trackBase || t == u = SubIndex (Just m)
   | otherwise = SubIndex (Just (foldl' ins m [(t, u), (u, t)]))
   where
-    ins m0 (a, b) = foldl' (\m1 k -> Map.insertWith (++) k [(a, b, n)] m1) m0 (subStoreKeys a b)
+    ins m0 (a, b) = foldl' (\m1 k -> IntMap.insertWith (++) k [(a, b, n)] m1) m0 (subStoreKeys a b)
 
 -- | Start the subsumption index from all forms of all hints (--eqhint-subsume).
 {-# INLINEABLE addEqHintSubIndex #-}
@@ -1564,10 +1568,10 @@ addEqHintSubIndex state =
   where
     eh = st_eqhints state
     -- eh_map holds both orientations of every form already
-    m = foldl' ins Map.empty [ (e, n) | (e, n) <- Map.toList (eh_map eh), n < trackBase ]
+    m = foldl' ins IntMap.empty [ (e, n) | (e, n) <- Map.toList (eh_map eh), n < trackBase ]
     ins m0 (a :=: b, n)
       | a == b = m0
-      | otherwise = foldl' (\m1 k -> Map.insertWith (++) k [(a, b, n)] m1) m0 (subStoreKeys a b)
+      | otherwise = foldl' (\m1 k -> IntMap.insertWith (++) k [(a, b, n)] m1) m0 (subStoreKeys a b)
 
 -- | The hint a critical pair subsumes (--eqhint-subsume). A pair whose two sides are
 -- variables is never asked about.
@@ -1579,7 +1583,8 @@ subsumedHint EqHints{eh_sub = SubIndex (Just m)} (t :=: u) =
     (a, b):_ ->
       listToMaybe
         [ n
-        | (s, s', n) <- Map.findWithDefault [] (subQueryKey a b) m,
+        | (s, s', n) <- IntMap.findWithDefault [] (subQueryKey a b) m,
+          len a <= len s, len b <= len s',
           Just sub <- [match a s], isJust (matchIn sub b s') ]
 subsumedHint _ _ = Nothing
 
