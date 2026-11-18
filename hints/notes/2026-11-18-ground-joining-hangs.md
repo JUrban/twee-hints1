@@ -83,6 +83,23 @@ python3 run.py hang5_e57.cmds a_gb100 2 --ground-joining-branch-limit 100
 python3 run.py pg200_e57.cmds gb100 1 --ground-joining-branch-limit 100
 ```
 
+* **C, production's stalled goals (launched 05:27).**
+  * Set: goals with an L1 or L2 run in production round r5 that ended without a WORK/HINTSTATS line (killed or
+    out of heap). That is 169 goals (cap/stalled_r5.tsv), 92 of them still unsolved in UL at 05:22 (cap/goals).
+  * Commands captured in production's context as exp3 did:
+    `LOOP_PRINT_CMD=1 LOOP_KEEP_TMP=1 SCHED= XEVERY=100000 CASCADE=5 timeout 900 bash exp3/solve_cap.sh
+    cap/goals loops/UL cap/CAP 3 0.05`. The context was 44,912 UL proofs. Commands came for 79 goals within the
+    3 minutes; the 5 s capture runs proved none.
+  * tbify.py turned them into 78 commands (stall78_*.cmds; files in cap/tb) at production's L1: 80 abstract s,
+    CPU cap 800 s. The runner's wall limit is 1,260 s; production's at L1 is 1,230 s.
+  * Arms: s_b0 (e48 as captured) and s_gb100 (e57 with `--ground-joining-branch-limit 100`).
+
+```
+python3 run.py stall78_e57.cmds s_gb100 2 --ground-joining-branch-limit 100
+python3 run.py stall78_e48.cmds s_b0 1
+python3 run.py pg200_e57.cmds gb10 1 --ground-joining-branch-limit 10    # B: also the limit 10
+```
+
 ## Results
 
 (pending)
