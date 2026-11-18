@@ -58,6 +58,10 @@ Build details:
 * Arm N (no rule model) checked on one goal: it runs cleanly. PG pairs a rule without a model score with
   everything (src/Twee.hs, pgFilter), so N is also without PG: G minus the rule filter.
 * Started by hand at 17:32:35 (`python3 run.py A.cmds A 6`).
+* **Arm P9 (added 17:37):** Prover9 with the pool hints and 6 sibling lemmas (p9twee.py batch, as exp16 but with the
+  pool), on the capture's context snapshot (exp21/cap/B.ctx), `--timeout 8`: about the CPU of a twee 5 s run
+  (about 8 CPU s). 1 worker, so 21 CPUs for about 40 minutes:
+  `python3 /project/twee/hints/p9twee.py exp21/goals300 exp21/cap/B.ctx exp21/out_P9 --timeout 8 -j 1`.
 
 ```
 cd /project/hintwork
