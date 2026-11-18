@@ -129,6 +129,7 @@ data Config f =
     cfg_eqhint_watch              :: Float,
     cfg_eqhint_generalise         :: Bool,
     cfg_eqhint_instances          :: Bool,
+    cfg_eqhint_subsume            :: Bool,
     cfg_eqhint_instance_factor    :: Float,
     -- (16 Nov) score factor F ** q for each critical pair, q = the rule model's probability that it is a proof
     -- rule (1 = off)
@@ -434,6 +435,7 @@ defaultConfig =
     cfg_eqhint_watch = 0,
     cfg_eqhint_generalise = False,
     cfg_eqhint_instances = False,
+    cfg_eqhint_subsume = False,
     cfg_eqhint_instance_factor = 0.1,
     cfg_cp_model_factor = 1,
     cfg_pg_threshold = Nothing,
@@ -1488,7 +1490,9 @@ data EqHints f =
     -- --eqhint-instances: the hints by their non-variable sides (not saved with the state)
     eh_inst :: !(InstIndex f),
     -- each live hint's full normal form at the last normalisation (not saved with the state)
-    eh_fulls :: !(FullForms f) }
+    eh_fulls :: !(FullForms f),
+    -- --eqhint-subsume: all forms of the hints, for subsumption matching (not saved with the state)
+    eh_sub :: !(SubIndex f) }
   deriving (Generic, Binary)
 
 -- | The full normal forms ('fullNormEqn') of the live hints when they were last
@@ -1507,6 +1511,77 @@ newtype InstIndex f = InstIndex (Maybe (Index f (Equation f)))
 instance Binary (InstIndex f) where
   put _ = return ()
   get = return (InstIndex Nothing)
+
+-- | --eqhint-subsume (Prover9's hint matching): a critical pair matches a hint if it
+-- subsumes the hint, i.e. the hint is an instance of it, in either orientation; under
+-- variant matching a more general critical pair got no boost. The forms of the hints
+-- (both orientations, side :=: other side) are filed under keys made of the first side's
+-- top symbol with each argument's top symbol or a wildcard (-1), and the other side's top
+-- symbol or a wildcard; a variable side is the key -2 (only a variable can match it). A
+-- critical pair's key has its arguments' tops (-1 for a variable), so one lookup gives
+-- the forms that agree with it to depth 1; then they are matched. Not serialised.
+newtype SubIndex f = SubIndex (Maybe (Map [Int] [(Term f, Term f, Int)]))
+
+instance Binary (SubIndex f) where
+  put _ = return ()
+  get = return (SubIndex Nothing)
+
+{-# INLINEABLE subStoreKeys #-}
+subStoreKeys :: Term f -> Term f -> [[Int]]
+subStoreKeys t u = [ k ++ (-3) : k' | k <- left t, k' <- right u ]
+  where
+    left (App f ts) = [ symId f : ks | ks <- mapM opt (unpack ts) ]
+    left _ = [[-2]]
+    opt (App g _) = [symId g, -1]
+    opt _ = [-1]
+    right (App g _) = [[symId g], [-1]]
+    right _ = [[-2], [-1]]
+
+{-# INLINE subQueryKey #-}
+subQueryKey :: Term f -> Term f -> [Int]
+subQueryKey t u = left t ++ (-3) : right u
+  where
+    left (App f ts) = symId f : [ case a of { App g _ -> symId g; _ -> -1 } | a <- unpack ts ]
+    left _ = [-2]
+    right (App g _) = [symId g]
+    right _ = [-1]
+
+-- | File both orientations of a hint form.
+{-# INLINEABLE insertSubForm #-}
+insertSubForm :: Int -> Equation f -> SubIndex f -> SubIndex f
+insertSubForm _ _ si@(SubIndex Nothing) = si
+insertSubForm n (t :=: u) (SubIndex (Just m))
+  | n >= trackBase || t == u = SubIndex (Just m)
+  | otherwise = SubIndex (Just (foldl' ins m [(t, u), (u, t)]))
+  where
+    ins m0 (a, b) = foldl' (\m1 k -> Map.insertWith (++) k [(a, b, n)] m1) m0 (subStoreKeys a b)
+
+-- | Start the subsumption index from all forms of all hints (--eqhint-subsume).
+{-# INLINEABLE addEqHintSubIndex #-}
+addEqHintSubIndex :: Function f => State f -> State f
+addEqHintSubIndex state =
+  state { st_eqhints = eh { eh_sub = SubIndex (Just m) } }
+  where
+    eh = st_eqhints state
+    -- eh_map holds both orientations of every form already
+    m = foldl' ins Map.empty [ (e, n) | (e, n) <- Map.toList (eh_map eh), n < trackBase ]
+    ins m0 (a :=: b, n)
+      | a == b = m0
+      | otherwise = foldl' (\m1 k -> Map.insertWith (++) k [(a, b, n)] m1) m0 (subStoreKeys a b)
+
+-- | The hint a critical pair subsumes (--eqhint-subsume). A pair whose two sides are
+-- variables is never asked about.
+{-# INLINEABLE subsumedHint #-}
+subsumedHint :: EqHints f -> Equation f -> Maybe Int
+subsumedHint EqHints{eh_sub = SubIndex (Just m)} (t :=: u) =
+  case [ (a, b) | (a, b) <- [(t, u), (u, t)], isApp a ] of
+    [] -> Nothing
+    (a, b):_ ->
+      listToMaybe
+        [ n
+        | (s, s', n) <- Map.findWithDefault [] (subQueryKey a b) m,
+          Just sub <- [match a s], isJust (matchIn sub b s') ]
+subsumedHint _ _ = Nothing
 
 -- | Not serialised (zero bytes), so states saved before the field existed
 -- still load. Nothing: not computed yet (use all fingerprints).
@@ -1537,7 +1612,7 @@ emptyEqHints = EqHints {
   eh_joined = 0, eh_norm_at = 0, eh_fps = IntSet.empty, eh_goalconsts = IntMap.empty,
   eh_gcfps = IntMap.empty, eh_ntracked = 0, eh_requeued_at = 0, eh_last_match = 0,
   eh_max_gap = 0, eh_last_new_cp = 0, eh_log = [], eh_hgroups = IntMap.empty, eh_gsize = IntMap.empty, eh_gdone = IntMap.empty, eh_open = OpenFps Nothing,
-  eh_factor = IntMap.empty, eh_inst = InstIndex Nothing, eh_fulls = FullForms IntMap.empty }
+  eh_factor = IntMap.empty, eh_inst = InstIndex Nothing, eh_fulls = FullForms IntMap.empty, eh_sub = SubIndex Nothing }
 
 -- | Add a hint with an optional factor and the proofs (groups) it comes from.
 {-# INLINEABLE addEqHintFull #-}
@@ -1680,6 +1755,23 @@ lookupEqHintG eh eqn =
     Just n -> Just n
     Nothing -> expandGoalConsts eh eqn >>= lookupEqHint eh
 
+-- | 'subsumedHint', also with the goal constants expanded.
+{-# INLINEABLE subsumedHintG #-}
+subsumedHintG :: Function f => EqHints f -> Equation f -> Maybe Int
+subsumedHintG eh eqn =
+  case subsumedHint eh eqn of
+    Just n -> Just n
+    Nothing -> expandGoalConsts eh eqn >>= subsumedHint eh
+
+-- | A variant of a hint, or with --eqhint-subsume (the index is there) a hint it subsumes.
+{-# INLINEABLE matchEqHintG #-}
+matchEqHintG :: Function f => EqHints f -> Equation f -> Maybe Int
+matchEqHintG eh eqn =
+  case lookupEqHintG eh eqn of
+    Just n -> Just n
+    Nothing | SubIndex (Just _) <- eh_sub eh -> subsumedHintG eh eqn
+            | otherwise -> Nothing
+
 -- | Add an equation hint.
 {-# INLINEABLE addEqHint #-}
 addEqHint :: Function f => State f -> Equation f -> State f
@@ -1722,6 +1814,7 @@ eqHintScore config@Config{..} state top eqn s
   where
     eh = st_eqhints state
     inst
+      | cfg_eqhint_subsume, Just n <- subsumedHintG eh eqn = dbg n "subsume" (hinted n)
       | cfg_eqhint_instances, Just n <- instanceHint eh eqn = dbg n "instance" (cfg_eqhint_weight + s * cfg_eqhint_instance_factor)
       | otherwise = s
     open
@@ -1794,7 +1887,7 @@ recordEqHintMatch :: Function f => Active f -> State f -> State f
 recordEqHintMatch active state@State{st_eqhints = eh}
   | Map.null (eh_map eh) = state
   | otherwise =
-    case lookupEqHintG eh (unorient (active_rule active)) of
+    case matchEqHintG eh (unorient (active_rule active)) of
       Nothing -> state
       Just n ->
         message (HintMatched n active) $
@@ -1821,7 +1914,7 @@ markResumedHints state@State{st_eqhints = eh0}
   where
     eh1 = foldl' mark eh0 (IntMap.elems (st_active_set state))
     mark eh active =
-      case lookupEqHintG eh (unorient (active_rule active)) of
+      case matchEqHintG eh (unorient (active_rule active)) of
         Just n | n < trackBase, not (IntSet.member n (eh_matched eh)) ->
           eh { eh_matched = IntSet.insert n (eh_matched eh),
                eh_gdone = foldl' (\m g -> IntMap.insertWith (+) g 1 m) (eh_gdone eh) (IntMap.findWithDefault [] n (eh_hgroups eh)) }
@@ -1846,6 +1939,9 @@ normaliseEqHints state@State{st_eqhints = eh@EqHints{..}, ..}
       st_eqhints = eh {
         eh_live = live', eh_map = map', eh_joined = eh_joined + joined,
         eh_norm_at = st_next_active,
+        eh_sub = case eh_sub of
+          SubIndex Nothing -> eh_sub
+          _ -> foldl' (\si (n, e) -> insertSubForm n e si) eh_sub newForms,
         eh_fps = foldl' (flip IntSet.insert) eh_fps (map eqnFingerprint changed),
         eh_fulls = FullForms fulls',
         eh_open = OpenFps (Just (IntSet.fromList
@@ -1861,17 +1957,25 @@ normaliseEqHints state@State{st_eqhints = eh@EqHints{..}, ..}
         r <- activeRules a ]
     touched (t :=: u) = any hit (subterms t) || any hit (subterms u)
     hit x = not (Prelude.null (Index.matches x newIdx))
-    (live', map', joined, fulls', changed) =
-      IntMap.foldlWithKey' step (IntMap.empty, eh_map, 0 :: Int, IntMap.empty, []) eh_live
-    step (live, m, j, fs, ch) n eqn@(t :=: u)
+    (live', map', joined, fulls', changed, newForms) =
+      IntMap.foldlWithKey' step (IntMap.empty, eh_map, 0 :: Int, IntMap.empty, [], []) eh_live
+    -- (newForms: the forms not in the map before, for --eqhint-subsume)
+    isNew m e = not (canonicalise e `Map.member` m)
+    subOn = case eh_sub of { SubIndex (Just _) -> True; _ -> False }
+    step (live, m, j, fs, ch, nf) n eqn@(t :=: u)
       | not hintNormFull, Just f0 <- IntMap.lookup n fulls0, not (touched eqn), not (touched f0) =
-        (IntMap.insert n eqn live, m, j, IntMap.insert n f0 fs, ch)
-      | t' == u' = (live, m, j+1, fs, ch)
-      | t' == t && u' == u = (IntMap.insert n eqn live, addFull m, j, IntMap.insert n full fs, ch)
+        (IntMap.insert n eqn live, m, j, IntMap.insert n f0 fs, ch, nf)
+      | t' == u' = (live, m, j+1, fs, ch, nf)
+      | t' == t && u' == u = (IntMap.insert n eqn live, addFull m, j, IntMap.insert n full fs, ch, fullNew m nf)
       | otherwise =
-        (IntMap.insert n (t' :=: u') live, addFull (insertEqHintForms n (t' :=: u') m), j,
-         IntMap.insert n full fs, (t' :=: u'):ch)
+        let m1 = insertEqHintForms n (t' :=: u') m
+            nf1 = if subOn && isNew m (t' :=: u') then (n, t' :=: u') : nf else nf in
+        (IntMap.insert n (t' :=: u') live, addFull m1, j,
+         IntMap.insert n full fs, (t' :=: u'):ch, fullNew m1 nf1)
       where
+        fullNew m0 nf0
+          | subOn, t'' /= u'', isNew m0 full = (n, full) : nf0
+          | otherwise = nf0
         t' = simplify idx t
         u' = simplify idx u
         full@(t'' :=: u'') = fullNormEqn state (t' :=: u')

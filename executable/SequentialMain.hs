@@ -565,6 +565,10 @@ parseConfig = do
     expert $
     inGroup "Critical pair weighting heuristics" $
     bool "eqhint-instances" ["Also match critical pairs that are instances of a hint (term index over the hints' sides; score factor --eqhint-instance-factor)."] False
+  cfg_eqhint_subsume <-
+    expert $
+    inGroup "Critical pair weighting heuristics" $
+    bool "eqhint-subsume" ["Prover9's hint matching: a critical pair or rule also matches a hint it subsumes (the hint is an instance of it), not only a variant of it."] False
   cfg_eqhint_instance_factor <-
     expert $
     inGroup "Critical pair weighting heuristics" $
@@ -1314,7 +1318,8 @@ runTwee globals (TSTPFlags tstp) horn precedence config0 flags@MainFlags{..} lat
   trackHints <- readHintFile flags_track_hints
   let
     withHints0 = foldl' (addHint config) (initialState config) [toTerm (varNums h) h | h <- hints']
-    withHints1 = (if cfg_eqhint_instances config then addEqHintInstanceIndex else id) $
+    withHints1 = (if cfg_eqhint_subsume config then addEqHintSubIndex else id) $
+      (if cfg_eqhint_instances config then addEqHintInstanceIndex else id) $
       (if cfg_eqhint_generalise config then addEqHintGeneralisations else id) $
       finishEqHintGroups $
       foldl' addEqHintFull withHints0 ([ (toEquation h, Nothing, []) | h <- eqHints' ] ++ fileHints)

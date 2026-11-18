@@ -232,6 +232,7 @@ Repositories and directories:
 | e55 | 17 Nov | additive Pcat ENIGMA parental model (PGEnigmaAdd) |
 | e56 | 17 Nov 21:59 | e55 + --print-goal-nf N: on failure, the N smallest normal forms of each goal side (GOALNF L/R lines); use with --no-flatten-goal (exp4 nf.py) |
 | e57 | 18 Nov 05:20 | e56 + --ground-joining-branch-limit B: assume not ground joinable once the case split has more than B branches (exp6, runs that never end) |
+| e58 | 18 Nov 06:11 | e57 + --eqhint-subsume: a critical pair or rule that subsumes a hint matches it (Prover9's semantics; exp7) |
 
 Wrappers: `twee-pg` (e48 with $TWEE_PG_ARGS), `twee-pg50` (e50 with $TWEE_PG_ARGS; production).
 
@@ -672,6 +673,7 @@ reports are written as the experiments run.
 | notes/2026-11-17-lattice-construction.md | Building a lattice with reasonable steps: strengthenings, weaker goals and conjectures (design and stage 1) |
 | notes/2026-11-17-long-runs-late-goals.md | Long runs (640 s) on the late goals no deep run proved, and the hint-match signal (exp5) |
 | notes/2026-11-18-ground-joining-hangs.md | Runs that never end: unbounded ground joinability, and a limit for it (exp6) |
+| notes/2026-11-18-subsumption-matching.md | Hint matching by subsumption, as in Prover9 (exp7, twee-e58 --eqhint-subsume) |
 | notes/2026-11-17-lemma-circularity.md | Are lemma chains circular? A check of the used lemmas |
 | notes/2026-11-17-mix-fail-order.md | Repeats cost most of the time: `--mix` and `--fail-order` |
 | notes/2026-11-17-pg-ab-half1.md | Parental guidance at scale: half1 from zero, 2 hours, sum filter 0.25 against the defaults |
