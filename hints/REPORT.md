@@ -4884,6 +4884,23 @@ rounds of 30 s or more, but about 40% overhead for 8 s rounds.
 
 ## 4. Next steps
 
+*18 Nov, 18:50 (the portfolio, 2az):*
+
+* Production is a **portfolio ordered by the ratio rule**: each member is ranked by its new proofs per CPU hour on
+  the goals every earlier member failed in the same context.
+  * ul48: unfolded and 60-lemma 5 s runs on every goal whose fresh run failed;
+  * after a failed 80 s chain run: 60 kNN lemmas, two-sided chain, unfolded, subsumption;
+  * then 320 s;
+  * the deep queue is ordered by each member's yield, from measured priors updated online;
+  * Prover9 + chain as a 4-worker side worker.
+* **Open:**
+  * an 80 → 160 s resume level (exp20, about 1.4 per CPU hour on the increment so far);
+  * no-PG and no-model 80 s members (exp22);
+  * `--pass-every 1` at the next restart (the full pass now takes 0.5 s a run).
+* **Rule from now on:** every A/B reports +/−, the union, and the second arm's unique proofs per CPU hour. A
+  method is dropped only when it proves nothing the others don't. Otherwise it becomes a portfolio member at
+  the share its yield earns.
+
 *17 Nov, 15:20:*
 
 * **Since 23:55:**
