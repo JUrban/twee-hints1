@@ -6,15 +6,15 @@ hint matches tell which runs to continue?
 Goals: exp3/goals47 in order, each as soon as all four exp3 arms (C, K, E, V at 320) have it and none proved it.
 The script polls exp3's result files every 60 s and ends when exp3 is complete and every eligible goal ran.
 Command: exp3's (exp3/tb, production's context: twee-e48, PG 0.25, rm4t, sibling and kNN lemmas, the pool) for
-arm ARM (C, K, E or V as in exp3), at T abstract s, CPU cap 10 T, --print-hint-matchers, and --dump-state
-states_<ARM>@T/<g>.state (written only when unproved, for a later --load-state extension), +RTS -M<HEAP> (default 12g).
+arm ARM (C, K, E or V as in exp3), at T abstract s, CPU cap 10 T, --print-hint-matchers, +RTS -M<HEAP> (default 6g,
+the binaries' own). No state dump: at 640 s it needs over 7 GB and memwatch.py kills it.
 Workers: at most J; the file exp5/J sets the current limit, read before each run starts.
 Writes res_<ARM>@T.tsv (goal, proved, CPU s, peak MB, considered pairs, matched hints, hints), out_<ARM>@T/<g>
 (output without the given log), given_<ARM>@T/<g> for proofs."""
 import concurrent.futures as cf, os, re, subprocess, sys, threading, time
 E3 = '/project/hintwork/exp3'
 arm, T, J = sys.argv[1], sys.argv[2], int(sys.argv[3])
-HEAP = sys.argv[4] if len(sys.argv) > 4 else '12g'   # the binaries' default -M6g is exhausted before 640 s (23:59)
+HEAP = sys.argv[4] if len(sys.argv) > 4 else '6g'   # the binaries' own default, as in production
 order = open(f'{E3}/goals47').read().split()
 cmds = {}
 for l in open(f'{E3}/tb/cmds.all'):
@@ -28,7 +28,8 @@ def run(g):
     hf = {'C': f'tb/tmp/{g}.hints', 'K': f'h_K/{g}.hints', 'E': f'h_E/{g}.hints', 'V': f'h_K/{g}.hints'}[arm]
     w[w.index('--hints-file') + 1] = f'{E3}/{hf}'
     if arm == 'V': w[1] = f'{PROB}/{g}.p'
-    w += ['--print-hint-matchers', '--dump-state', os.path.abspath(f'states_{tag}/{g}.state'), '+RTS', f'-M{HEAP}', '-RTS']
+    # no --dump-state: dumping a 640 s state takes over 7 GB, and memwatch.py (7 GB per twee) kills it (18 Nov 01:09)
+    w += ['--print-hint-matchers', '+RTS', f'-M{HEAP}', '-RTS']
     p = subprocess.run(['/usr/bin/time', '-f', '%U %S %M'] + w, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     u, s_, mem = p.stderr.decode().strip().split('\n')[-1].split()
     out = p.stdout.decode('utf8', 'replace'); ok = 'HINTS-END' in out

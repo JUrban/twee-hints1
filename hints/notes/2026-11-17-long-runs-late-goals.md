@@ -18,8 +18,7 @@ and none proved it. The final set is therefore fixed: every exp3 goal that no ar
 * twee-e48, PG 0.25, rm4t, sibling and kNN lemmas, the original's pool;
 * 640 abstract s, CPU cap 6,400 s;
 * `--print-hint-matchers` (output only);
-* `--dump-state states_C@640/<g>.state`, written only when unproved, so a later run can resume it with
-  --load-state.
+* (first `--dump-state` as well, dropped at 01:10, see below).
 
 Abstract time is deterministic, so the first 320 s repeat exp3's C run exactly, and a proof within 640 s costs
 fewer than 1,280,000 pairs.
@@ -50,6 +49,18 @@ fewer than 1,280,000 pairs.
 * Stopped at 00:47. A run of mbol_lem1 387 in progress was lost.
 * Reproduction: 299 at 640 s twice, with and without --dump-state, with stderr and the exit status kept
   (exp5/dbg/a.* and b.*; the command is in exp5/dbg/cmd).
+
+**Cause found** (01:09): the state dump and memwatch.py.
+* With --dump-state the run was killed by signal 9 during the dump: RSS rose from 2.4 GB to 7.5 GB.
+* Without it, the same run ended normally: 1,280,000 pairs, unproved, 1,272 CPU s, peak 2.3 GB.
+* The killer is my own watchdog, `abs/memwatch.py 7 45` (running since 14 Nov). It kills any twee over 7 GB to
+  protect the loops. REPORT 2au had measured that a dump takes about 4 times a run's peak memory.
+* So every exp5 run with --dump-state died after its search had ended, with its output cut at the last full stdout
+  block. The heap limit was a wrong first diagnosis.
+* **Fix:** no --dump-state, and the binaries' own heap limit (-M6g, as in production). The faulty runs' files are
+  in exp5/broken/. Goal 299's row is the debugging run without the dump (exp5/dbg/b.*); its command is the same
+  apart from the heap limit, which it never reached.
+* Relaunched at 01:10 with 2 workers: `nohup python3 run.py C 640 8 > run_C640.out 2>&1 &`.
 
 **Analysis planned.**
 * Proved at 640 s against the late-match count of the C@320 run (HINTLOG first matches after 480,000 pairs).
