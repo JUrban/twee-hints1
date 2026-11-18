@@ -700,6 +700,7 @@ reports are written as the experiments run.
 | notes/2026-11-18-wall-breaking.md | The 107 walls (first unsolved goal of each original; 6,263 of the 6,370 unsolved are behind them) with chain hints at 80 s and 320 s (exp11) |
 | notes/2026-11-18-gap-heads.md | The heads of the 96 gaps of >= 20 unsolved goals (4,045 goals) with chain hints at 80 s and 320 s (exp12) |
 | notes/2026-11-18-chain-size.md | Smaller chains: 5 siblings (S5) and the siblings' own proofs without expansion (D) against the 10-sibling chain, exp8's 78 goals at 80 s (exp13) |
+| notes/2026-11-18-two-sided-chain.md | Two-sided chains (the 10 nearest proven siblings above or below) against the below-only chain, exp11's 107 walls at 80 s (exp14) |
 | notes/2026-11-17-lemma-circularity.md | Are lemma chains circular? A check of the used lemmas |
 | notes/2026-11-17-mix-fail-order.md | Repeats cost most of the time: `--mix` and `--fail-order` |
 | notes/2026-11-17-pg-ab-half1.md | Parental guidance at scale: half1 from zero, 2 hours, sum filter 0.25 against the defaults |

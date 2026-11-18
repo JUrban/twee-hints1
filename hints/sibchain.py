@@ -122,11 +122,15 @@ class Chains:
             self.cache[g] = out
         return out
 
-    def chain(self, goal, solved_nums, n=10, max_hints=100000):
+    def chain(self, goal, solved_nums, n=10, max_hints=100000, two_sided=False):
         """GOAL's chain: the expansions of its N nearest proven siblings below (SOLVED_NUMS: the goal numbers of
-        GOAL's original that are proven), nearest first, duplicates dropped."""
+        GOAL's original that are proven), nearest first, duplicates dropped. TWO_SIDED (exp14): the N nearest by
+        goal-number distance above or below, ties below first."""
         o, k = goal.rsplit('__goal_', 1); k = int(k)
-        sibs = sorted((j for j in solved_nums if j < k), reverse=True)[:n]
+        if two_sided:
+            sibs = sorted((j for j in solved_nums if j != k), key=lambda j: (abs(j - k), j > k))[:n]
+        else:
+            sibs = sorted((j for j in solved_nums if j < k), reverse=True)[:n]
         seen, out = set(), []
         for j in sibs:
             for h in self.expansion(f'{o}__goal_{j}'):
