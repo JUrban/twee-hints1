@@ -675,7 +675,7 @@ indexedOverlaps :: forall f. Function f => Bool -> Maybe (Active f -> Bool) -> S
 indexedOverlaps early pgKeep State{..} r1 =
   [ o
   | (d1i, k2, part, n) <- sortCands cands,
-    not early || pgOK0 (k2 `shiftR` 1),
+    not early || not (IntSet.member (k2 `shiftR` 1) pgRejected),
     Just r2 <- [IntMap.lookup (k2 `shiftR` 1) st_active_set],
     let d1 = toEnum d1i
         d2 = toEnum (k2 .&. 1)
@@ -696,10 +696,14 @@ indexedOverlaps early pgKeep State{..} r1 =
         Nothing -> True
         Just keep -> IntMapL.findWithDefault (keep r2) i pgMemo
       where _ = r2
-    pgOK0 i =
+    -- (early, as e50: the partners whose pairs are not made, decided once each, strictly)
+    pgRejected =
       case pgKeep of
-        Nothing -> True
-        Just _ -> IntMapL.findWithDefault True i pgMemo
+        Just keep | early ->
+          IntSet.fromList
+            [ i | i <- IntSet.toList (IntSet.fromList [ k2 `shiftR` 1 | (_, k2, _, _) <- cands ]),
+                  Just r2 <- [IntMap.lookup i st_active_set], not (keep r2) ]
+        _ -> IntSet.empty
     pgMemo =
       case pgKeep of
         Nothing -> IntMapL.empty
