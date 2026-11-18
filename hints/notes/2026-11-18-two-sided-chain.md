@@ -40,4 +40,19 @@ python3 run.py T.cmds T 4
 
 ## Results
 
-(pending)
+Complete at 14:50, all 107 walls (exp14/res_T.tsv):
+
+* **Two-sided 16, below-only (exp11) 15: +4 −3, within noise.**
+  * Gained: aK2_eq_aK3_t 367, aa1_12 510, mbol_12lemmas 503 and nil3_1K_a 340 (45,147 to 105,384 pairs). Each has
+    4 or 5 siblings above among its 10.
+  * Lost: aKperms_1 344, aa1_14 482 and mbol_nil3_a 476.
+* Where both prove (12 walls): 1,003,587 pairs against 1,176,700 (−15%). The time column is 17% higher, but it is
+  wall time on a busier machine, and the pair counts are the fair measure.
+* **Reproducibility:** the 7 walls with no sibling above have exactly exp11's chain, and gave exactly exp11's
+  results: the same proved/unproved and the same pairs (160,000 or 160,001; uflex_to_aaip 80 proved at 147,759
+  pairs in both). Only wall time and memory differ. So exp11 is an exact control whenever only the hints change.
+* The 4 gains were new to UL and were merged at 14:50 (`exp3/tomerge.py exp14/out_T exp14/xm`, `merge.py loops/UL
+  exp14/xm`). All 4 are isolated holes (the goal above is proven), so they open nothing.
+* **Decision:** no production change. The two-sided chain is not better in count, so the evidence does not justify
+  a restart. Its gains are different goals, though: as a second chain variant for goals that failed the first,
+  it gave 4 new proofs out of 92 failed walls in about 5 CPU h.
