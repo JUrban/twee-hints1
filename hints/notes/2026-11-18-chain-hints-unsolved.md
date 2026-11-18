@@ -34,11 +34,19 @@ python3 run.py stall78_K.cmds s_K 2
 
 ## Caveats
 
-* UL has proofs that were found with these goals' siblings in context, but none of the 78 is proved in UL, so
-  no chain contains a proof of its own goal.
+* UL has proofs that were found with these goals' siblings in context. Of the 78, only aK2_eq_aK3_q 252 was
+  proved in UL when the siblings were picked (merged from exp3 at 07:09); see the interim result.
 * exp6's s_b0 runs at 1 worker and s_K at 2, so they share the machine differently. The comparison is by
   proved goals and pairs to proof, which do not depend on load.
 
 ## Results
 
-(pending)
+* **Interim (08:27, 36 of 78 s_K rows; s_b0 has 55).** On the 36 goals both arms have run:
+  * chain proves 4 (aK2_eq_aK3_q 252, nil3_1K_d 364, ns_to_aa1_b 587 and 628), the pool 2 (aK2_eq_aK3_o 422,
+    364); exp6's gb100 arm (pool, branch limit) proves the same 2;
+  * 364: 6,001 pairs with the chain against 22,476; 422 fails with the chain at 160,000;
+  * 587 (47,691 pairs) and 628 (89,245) are new to UL. 252 is not new: exp3 proved it at 320 s and it was merged
+    into UL at 07:09, two minutes before the siblings were picked. Its own proof is not in its siblings'
+    closure (781 goals, chain_records.tsv), so its chain holds no proof of it; 317 of its 1,079 proof lines
+    are steps its siblings' proofs share.
+  * The s_K runner started before run.py kept proved outputs (07:47), so 587 and 628 must be rerun to merge.
