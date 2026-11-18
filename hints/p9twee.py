@@ -94,6 +94,13 @@ class P9:
         self.pools = {}   # original -> (number of solved goals it was built from, hints)
         for d in ('in', 'out', 'hints'):
             os.makedirs(os.path.join(a.outdir, d), exist_ok=True)
+        self.chains = None
+        if getattr(a, 'chain', None):
+            # (18 Nov, exp16) hints: the goal's chain (sibchain.py: the proofs of its --chain-sibs nearest proven
+            # siblings below, expanded through their lemma records) instead of the original's whole pool
+            sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+            import sibchain
+            self.chains = sibchain.Chains(a.loopdir, background=False, records=a.chain)
 
     def update(self, solved):
         byo = collections.defaultdict(set)
@@ -128,7 +135,7 @@ class P9:
                     lem.append(ladr(c))
             except OSError:
                 pass
-        hs = [] if a.no_hints else self.pool(o)
+        hs = [] if a.no_hints else (self.chains.chain(n, self.byo[o], a.chain_sibs) if self.chains else self.pool(o))
         txt = f'set(prolog_style_variables).\nclear(print_given).\nassign(max_seconds, {int(a.timeout)}).\n'
         if a.max_given:
             txt += f'assign(max_given, {a.max_given}).\n'
@@ -160,9 +167,12 @@ class P9:
         return n, ok and bool(hl), dt, rc, nh, nl, hl
 
 
-def read_solved(d):
+def read_solved(d, rows=0):
+    """ROWS > 0: only the first ROWS rows of solved.tsv (an earlier state; exp16)."""
     S, R = set(), 0
-    for l in open(os.path.join(d, 'solved.tsv')):
+    for i, l in enumerate(open(os.path.join(d, 'solved.tsv'))):
+        if rows and i >= rows:
+            break
         w = l.split('\t')
         if len(w) >= 2 and l.endswith('\n'):
             S.add(w[0]); R = max(R, int(w[1]))
@@ -171,7 +181,7 @@ def read_solved(d):
 
 def batch(a):
     names = [l.split()[0] for l in open(a.names) if l.strip()]
-    solved, _ = read_solved(a.loopdir)
+    solved, _ = read_solved(a.loopdir, a.solved_rows)
     P = P9(a); P.update(solved)
     todo = [n for n in names if n not in solved]
     print(f'{len(todo)} of {len(names)} goals unsolved in {a.loopdir}', flush=True)
@@ -278,6 +288,11 @@ def main():
     ap.add_argument('--retry-grow', type=float, default=1.25)
     ap.add_argument('--no-hints', action='store_true')
     ap.add_argument('--prover9', default='/project/bin/prover9-new')
+    ap.add_argument('--chain', default=None, metavar='RECORDS',
+                    help='hints: the goal\'s chain (sibchain.py, this records file) instead of the pool (batch mode)')
+    ap.add_argument('--chain-sibs', type=int, default=10)
+    ap.add_argument('--solved-rows', type=int, default=0,
+                    help='batch mode: the proven state is the first N rows of LOOPDIR/solved.tsv')
     a = ap.parse_args()
     if a.live:
         a.loopdir, a.outdir = a.args
