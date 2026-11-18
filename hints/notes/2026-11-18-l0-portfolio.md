@@ -81,6 +81,6 @@ Production comparison: L0 makes 11.3 per CPU hour and L1 1.16.
 ## Results
 
 * **Interim (17:47): 0 proofs in any arm on the first 79 complete goals** (711 runs of about 6.4 CPU s).
-* **Stop rule, set at 17:48 before more data:** at 150 complete goals (1,350 runs), if all arms together have
-  at most 1 proof, stop. The 95% upper bound would then be about 0.35% a run, under 2 proofs per CPU hour for
-  any arm, below the 80 s variants on the walls. Otherwise run all 300.
+* (A stop rule at 150 goals, written at 17:48, was withdrawn at 17:49. Its bound was pooled over the arms. Per
+  arm, 0 of 150 still allows about 2% a run, which is about 11 proofs per CPU hour. So all 300 run: 0 of 300 bounds
+  an arm at about 1% a run.)
