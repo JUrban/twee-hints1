@@ -4502,6 +4502,49 @@ using an index of hint forms by top symbols to depth 1.
 * exp9 tests the short levels on 199 frontier goals: at 5 s, 0 against 0 (chain +20% CPU); at 20 s pool 3, chain 2
   (+0 −1), and the chain needs more pairs where both prove. So the chain stays out of the 5 s level.
 
+## 2ay. The hard tail: walls, gap heads, and where production's proofs come from (18 Nov, from 10:30)
+
+**Walls (exp11, notes/2026-11-18-wall-breaking.md).** Each original's first unsolved goal at 10:29 (107), with
+the below-only chain at 80 s: **15 of 107 proved, 4.8 CPU h, 3.1 proofs per CPU hour.** Production's pool runs
+had failed on all 107 at 80 s and on 86 at 320 s. But nearly all walls are isolated holes, so their proofs open
+nothing, except through the transfer: Ka1_eq_Ka2 400, merged at 10:48, gave aKperms_1 344 (another original)
+at 10:53.
+
+**Gap structure (11:21).** A gap is a maximal run of consecutive unsolved goals of an original. There are 812:
+* by length, 338 of 1, 228 of 2-4, 150 of 5-19, 92 of 20-99 and 4 of 100+;
+* the 96 gaps of 20 or more hold 4,045 of the 6,370 unsolved goals;
+* 83 of those 96 reach the original's top goal.
+
+**Gap heads (exp12, notes/2026-11-18-gap-heads.md).** These are the first goals of the 96 long gaps, with the
+chain at 80 s.
+* Stage A: **1 of 96, 6.3 CPU h.** Most runs used the full 160,000 pairs.
+* But the one proof paid. aK2_eq_aK3_b 421 heads a gap of 40 and was merged at 12:12. Production then proved 422,
+  426, 425 and 435 in 3.3-4.9 s each, then 423 and 424 (UL rows 45,504-45,514), all within about an hour. That is
+  **7 proofs for the one deep proof**, and 6 of production's first 20 under ul45.
+* Stage B (320 s on the other 95) started at 13:31.
+
+**Where production's proofs come from (ul45, its first 1,774 runs, 12:03-13:26).** 20 proofs in about 13 worker
+hours, about 1.5 per worker hour. "Position" uses UL's state at 13:26: whether the sibling directly below is
+proven (B), and whether one of the three above is (A).
+
+| level | position | runs | proved | worker h | proofs per worker h |
+|---|---|---:|---:|---:|---:|
+| L0 (5 s) | B, A | 204 | 3 | 0.5 | 6.6 |
+| L0 | B only | 97 | 1 | 0.2 | 4.6 |
+| L0 | A only | 343 | 5 | 0.8 | 6.5 |
+| L0 | neither | 1,001 | 3 | 2.3 | 1.3 |
+| L1 (80 s chain) | B, A | 97 | 6 | 5.1 | 1.2 |
+| L1 | B only | 32 | 2 | 1.9 | 1.1 |
+
+The cheap retries next to a proof pay best. The 80 s chain level pays about as little as the retries inside
+gaps. Some of the L0 proofs are the chain behind 421 above.
+
+**Running (13:35):**
+* chain size (exp13);
+* two-sided chains on the walls (exp14);
+* unfolded definitions with chain hints on the walls (exp15, from about 14:30);
+* exp12 stage B.
+
 ## 2c. Long runs: stall cutoff and checkpoints
 
 * `--eqhint-stall N` gives up when no new rule has matched a hint for N
