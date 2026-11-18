@@ -29,7 +29,7 @@ python3 mk.py
 bash stage.sh 2434820     # then: python3 run.py C160.cmds C160 4
 ```
 
-## Cost accounting (17:55)
+## Cost accounting (17:49)
 
 * exp20 runs fresh 160 s runs, but in production the second 80 s would resume the 80 s state.
 * So the yield of extending is counted on the **increment**: a goal's CPU at 160 s minus exp11's CPU on the same

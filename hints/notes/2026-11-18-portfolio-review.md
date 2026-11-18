@@ -175,7 +175,7 @@ hints/exp/portfolio_ul47.sh). Started 17:13:49. Startup: 364 level updates again
 **Measure:** the V rows' proofs per CPU hour, against L1 and f in the same period, and how many proofs each
 variant adds that the chain run had missed (all of them, by construction).
 
-## Design principle: the ratio rule (17:55)
+## Design principle: the ratio rule (17:49)
 
 For one goal, independent attempts with success chances p_i and costs c_i are best tried in decreasing order of
 p_i/c_i. This is the classic rule for optimal sequential search: it minimises the expected cost to the first
@@ -185,7 +185,7 @@ Here p_i is the chance that member i proves a goal **that every earlier member f
 p_i/c_i is that member's yield of new proofs per CPU hour on that population. That is the number to rank by, not
 its count against the best method.
 
-Measured at 17:55 (walls: the 92 that exp11's 80 s chain failed; production: UL r5 12:02-17:13):
+Measured at 17:49 (walls: the 92 that exp11's 80 s chain failed; production: UL r5 12:02-17:13):
 
 | member | population | n | proved | p | CPU s a run | new per CPU h |
 |---|---|---:|---:|---:|---:|---:|
