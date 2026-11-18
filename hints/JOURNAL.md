@@ -632,6 +632,10 @@ Running:
   (320 s on the rest) starts by itself.
 * exp13 (notes/2026-11-18-chain-size.md): smaller chains; neither arm ahead of the full chain at 13:20.
 * exp14 (notes/2026-11-18-two-sided-chain.md): two-sided chains on the 107 walls, launched 13:24.
+* Queued on the same walls, each by a stage script that waits for the one before: exp15 (unfolded definitions
+  with the chain; after exp13), exp16 (Prover9 with chain hints and with the pool; after exp14), exp17 (60 kNN
+  lemmas; after exp16). Together with exp14 they ask which deep-run setting proves the most hard holes, against
+  exp11's exact control. The winners go into production's 80 s level or a side worker.
 
 Next:
 1. If exp14's two-sided chain wins, add it to loop.py as a flag and restart production with it.
