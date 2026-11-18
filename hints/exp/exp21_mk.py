@@ -3,7 +3,8 @@
 5 s commands (B_5.cmds: production's fresh run, 30 kNN lemmas; K60_5.cmds: the same with 60). One command file
 A.cmds, ids ARM:goal, goal-major (every arm of a goal before the next goal), so a partial run is balanced.
   C    control: the captured command as it is
-  K60  60 kNN lemmas (K60 capture; everything but the problem file must match C)
+  K60  60 kNN lemmas: C's command with the K60 capture's problem file (the rest must match C up to the
+       capture's own paths, and the hint files must be identical)
   U    definitions unfolded (unfold.py, problem and hints, as loop.py --variants unf and exp15)
   S    --eqhint-subsume
   R2   rule-model threshold 0.2 instead of 0.1
@@ -34,9 +35,13 @@ with open('A.cmds', 'w') as f, open('sizes.tsv', 'w') as z:
     for g in G:
         w = B[g].split(); wk = K[g].split()
         assert w[0] == '/project/bin/twee-e61' and w[w.index('--max-time') + 1] == '5'
-        assert [x for i, x in enumerate(w) if i != 1] == [x for i, x in enumerate(wk) if i != 1], g
+        # (the K60 capture's goal and hint files are its own copies, tbK60/: the same up to that path, and the hint
+        # files must be identical; K60 is then C's command with only the problem file swapped)
+        assert [x for i, x in enumerate(w) if i != 1] == [x.replace('/tbK60/', '/tbB/') for i, x in enumerate(wk) if i != 1], g
         hi = w.index('--hints-file')
-        arms = {'C': w, 'K60': wk, 'S': w + ['--eqhint-subsume']}
+        assert open(w[hi + 1]).read() == open(wk[hi + 1]).read(), g
+        kk = list(w); kk[1] = wk[1]
+        arms = {'C': w, 'K60': kk, 'S': w + ['--eqhint-subsume']}
         r = list(w); i = r.index('--rule-threshold'); assert r[i + 1] == '0.1'; r[i + 1] = '0.2'; arms['R2'] = r
         n = list(w)
         for fl in ('--rule-model', '--rule-vocab', '--rule-goal', '--rule-threshold', '--rule-penalty'):
