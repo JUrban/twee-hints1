@@ -119,6 +119,62 @@ These are the only cases where dropping was clearly right.
 4. Correct the record: JOURNAL section 5 ("Neutral or negative") and REPORT 2d's "What did not help" list
    complementary methods as such, with their unique share.
 
+## Production yields at the time (17:12)
+
+From UL r5's results since row 47530 (ul44's start, 12:02):
+
+| level | runs | proofs | CPU h | proofs per CPU h |
+|---|---:|---:|---:|---:|
+| L0 (5 s) | 7,928 | 192 | 17.0 | 11.3 |
+| L1 (80 s chain, fresh) | 655 | 40 | 34.5 | 1.16 |
+| L2 (320 s) | 0 | | | |
+
+* ul46 (14:46 to 17:13, 4 workers) proved 12 in 2.4 hours. Its mix line ended "r 1250 6/h f 1402 1/h d 51 1/h", so the
+  deep class ran on about one worker, and the 320 s level never ran.
+* So a variant level competes with the far retries (1 per worker-hour) and the chain level, not with the 320 s level.
+
+## Variant yields on the failed walls (17:10)
+
+New proofs among the 92 walls exp11's chain run failed:
+
+| variant | runs on failed walls | new | CPU h | new per CPU h |
+|---|---:|---:|---:|---:|
+| k60: 60 kNN lemmas (exp17) | 90 | 6 | 4.7 | **1.27** |
+| two: two-sided chain (exp14) | 92 | 4 | 5.2 | 0.76 |
+| unf: definitions unfolded (exp15, running) | 58 | 6 | 9.8 | 0.61 |
+| sub: subsumption matching (exp18) | 92 | 3 | 7.2 | 0.42 |
+| sj: --set-join (exp19, running) | 10 | 0 | 0.6 | |
+
+All four are near production's own L1 yield (1.16), and each proves walls the others do not.
+
+## Deployed: variant levels (17:13)
+
+**loop.py `--variants LIST`** (commit 551f563):
+* Levels of the chain level's budget (80 s) are inserted after it, one per variant.
+* Each is a fresh run in the same context, keeping no state. So the 320 s level still resumes the chain run's state.
+* Results rows are labelled `V<name>`. The cascade's own levels keep `L<k>`, so earlier results map onto the same
+  levels on restart. schedfeats reads V rows as deep rows.
+* The deep queue sorts by level. So every waiting goal gets its first variant before any goal gets its second:
+  breadth first over the variants, in the order given.
+* Variants available:
+  * `k60`: 60 kNN lemmas;
+  * `two`: two-sided chain;
+  * `unf`: all definitions unfolded, the hints too;
+  * `sub`: `--eqhint-subsume`;
+  * `sj`: `--set-join`;
+  * `pool`: the original's pool at 80 s.
+
+**Smoke test** (cascade 2,4,8 on 3 unsolved walls):
+* The levels ran in order: L0, L1, Vtwo, Vunf, Vsub, Vsj, Vk60, Vpool, L2.
+* The commands differ as intended: the .u.p problem for unf, the flag for sub and sj, no state for the variants,
+  and L2 with `--load-state` and the 4 s increment.
+
+**Production ul47** = ul46 + `--variants k60,two,unf,sub`, in the order of the wall yields (abs/ul47.sh,
+hints/exp/portfolio_ul47.sh). Started 17:13:49. Startup: 364 level updates against ul46's 372.
+
+**Measure:** the V rows' proofs per CPU hour, against L1 and f in the same period, and how many proofs each
+variant adds that the chain run had missed (all of them, by construction).
+
 ## Results
 
 (pending)
