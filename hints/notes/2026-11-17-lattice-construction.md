@@ -328,6 +328,14 @@ Kinyon and Veroff found AIM lemmas, from finite models.
   then per goal the survivors together as assumptions at 20 s, as in refine.py. The ones the proof uses are rungs,
   proved by rungs.py and sketch.py as before.
   `python3 conjrefine.py conj47.tsv conjref20.tsv -j 1 --time 20`
+* **Result (02:00).** Mace4 refutes only 1 of the 202 conjectures: the models already filtered them. With all of a
+  goal's survivors as assumptions, **18 of 38 goals prove** (0.6–22 s), using 1–5 conjectures. Many of these
+  are strong statements, for example:
+  * `k(X0,k(X1,X2)) = e` (commutators central) for nil3_1K_e 526 and ns_to_aa1_b 723;
+  * `ld(X0,X1) = rd(X1,X0)` for com_Ralt 348;
+  * `l(k(X0,X1),X2,X3) = k(X0,X1)` and `k(X1,X0) = k(X0,X1)` for mbol_lem1 387.
+* Their 49 conjectures, in 18 goals, are proved at 20 s (1 CPU, launched 02:00):
+  `python3 rungs.py conjref20.tsv rungsC.tsv; python3 sketch.py rungsC.tsv rCprove20.tsv -j 1 --time 20`
 
 **Launch** (stage 1, 20:33): `cd /project/hintwork/exp4; nohup bash stage1.sh > stage1.out 2>&1 &`.
 
