@@ -296,7 +296,7 @@ Each goal is one twee run on the goal's problem.
   pass. The two runs shared tmp/<goal>.hints (the fresh run read the chain), and the second unlink failed.
   Fixed in loop.py at 09:47, so production was down 09:29-09:47.
 * `abs/ul43.sh` from 18 Nov 08:28 (UL43.log; 90 new in 50 min on 4 workers): ul42 with `--chain-level 1 --chain-records
-  /project/hintwork/chain_records.tsv`. The 80 s level (fresh; the 320 s level resumes its state) takes the
+  /project/hintwork/chain_records.tsv`. The 80 s level (which resumes the 5 s run's state, so the chain reached only new pairs; corrected 11:57, fixed in ul45) takes the
   goal's chain (hints/sibchain.py: the proofs of its 10 nearest proven siblings below, expanded through the
   proven goals they used) instead of the pool (notes/2026-11-18-chain-hints-unsolved.md, exp3's K arm).
   The records file is read at start; rebuild it after merges (merge.py copies hint files, not outputs):

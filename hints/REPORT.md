@@ -4490,8 +4490,10 @@ using an index of hint forms by top symbols to depth 1.
 * `loop.py --chain-level L` (with `--chain-sibs`, `--chain-max`, `--chain-records`) gives levels ≥ L the
   goal's chain as hints instead of the pool. The chain comes from hints/sibchain.py over a records file of all 16
   loops (39,554 records); new proofs' records are added live.
-* A resumed state takes new hints only for new pairs (`--no-resume-requeue`), so the setting to test is L = 1:
-  production's 80 s level is a fresh run whose state the 320 s level resumes.
+* A resumed state takes new hints only for new pairs (`--no-resume-requeue`). I took production's 80 s level
+  for a fresh run. **It is not** (found 11:57): it resumes the 5 s run's state, so under ul43/ul44 the chain
+  reached only pairs made after 5 s, and the queue kept its pool scores. loop.py now runs the chain level fresh
+  (ul45).
 * exp8 tests that budget, chain against pool at 80 s on 78 stalled goals: **chain 9, pool 5 (+6 −2)**, CPU +10%.
   With exp3 the chain wins at both deep budgets, so production uses it from 08:28 (ul43; ul44 at -j 8 from 09:23).
 * On exp6's stalled goals the branch limit changes nothing (5 = 5, identical pairs; no hang without it).
