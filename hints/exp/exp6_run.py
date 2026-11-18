@@ -23,6 +23,11 @@ def run(job):
     m = re.search(r'TIME ([\d.]+) ([\d.]+) (\d+)', err)
     cpu, mem = (float(m.group(1)) + float(m.group(2)), int(m.group(3)) // 1024) if m else (time.time() - t0, 0)
     ok = 'HINTS-END' in out
+    if ok:   # (18 Nov 07:50) proved runs keep their output (for tomerge.py), without the given log
+        import os
+        os.makedirs(f'out_{arm}', exist_ok=True)
+        gi, gj = out.find('GIVEN-BEGIN'), out.find('GIVEN-END')
+        open(f'out_{arm}/{i}', 'w').write(out[:gi] + out[gj:] if 0 <= gi < gj else out)
     c = re.search(r'WORK considered=(\d+)', out)
     end = 'KILLED' if killed else 'HEAP' if 'Heap exhausted' in out + err else 'CPULIMIT' if 'CPULIMIT' in out else 'ok' if c else 'other'
     return i, int(ok), f'{cpu:.1f}', mem, c.group(1) if c else '', end, f'{time.time() - t0:.0f}'

@@ -681,6 +681,7 @@ reports are written as the experiments run.
 | notes/2026-11-18-ground-joining-hangs.md | Runs that never end: unbounded ground joinability, and a limit for it (exp6) |
 | notes/2026-11-18-subsumption-matching.md | Hint matching by subsumption, as in Prover9 (exp7, twee-e58 --eqhint-subsume) |
 | notes/2026-11-18-chain-hints-unsolved.md | Chain hints (expanded proofs of the nearest proven siblings) against the pool on 78 unsolved goals at 80 s (exp8) |
+| notes/2026-11-18-chain-hints-short.md | Chain hints against the pool at 5 s and 20 s on 200 frontier goals (exp9) |
 | notes/2026-11-17-lemma-circularity.md | Are lemma chains circular? A check of the used lemmas |
 | notes/2026-11-17-mix-fail-order.md | Repeats cost most of the time: `--mix` and `--fail-order` |
 | notes/2026-11-17-pg-ab-half1.md | Parental guidance at scale: half1 from zero, 2 hours, sum filter 0.25 against the defaults |
