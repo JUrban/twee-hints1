@@ -980,18 +980,24 @@ class Loop:
         rdir = os.path.join(self.dir, 'r%d' % rnd); os.makedirs(rdir, exist_ok=True)
         if a.cascade_continue and os.path.exists(os.path.join(rdir, 'results.tsv')):
             # a restarted round: the levels this round already tried (in the current context)
-            k0 = 0; fresh = set()
-            for line in open(os.path.join(rdir, 'results.tsv')):
+            k0 = 0; fresh = set(); kc = 0
+            for ri, line in enumerate(open(os.path.join(rdir, 'results.tsv'))):
                 f = line.rstrip('\n').split('\t')
                 if len(f) >= 5 and f[0] in att and f[4][:1] == 'L' and f[4][1:].isdigit():
                     lev = int(f[4][1:])
+                    if a.chain_since_row and ri < a.chain_since_row and lev >= max(1, a.chain_level):
+                        # (--chain-since-row R: a deep run before row R had the pool's hints; the goal gets
+                        # its chain-level run again, fresh with the chain; 1,032 unsolved goals at 11:55)
+                        lev = max(0, a.chain_level - 1); kc += 1
                     if lev == 0:
                         fresh.add(f[0])
                         if f[1] == 'NO':
                             nf[f[0]] += 1
                     if lev > att[f[0]][1]:
                         att[f[0]] = (ctx(f[0]), lev); k0 += 1
-            print(f'  cascade: continuing round {rnd}, {k0} level updates from its results', flush=True)
+            print(f'  cascade: continuing round {rnd}, {k0} level updates from its results'
+                  + (f' ({kc} deep rows before row {a.chain_since_row} capped below --chain-level)' if a.chain_since_row else ''),
+                  flush=True)
             if a.fresh_first:
                 # a goal with no fresh run in this round only resumed states of earlier rounds and
                 # contexts (--cascade-start 0): a fresh T0 run first (on 97 goals that failed L1 this
@@ -1267,9 +1273,14 @@ class Loop:
                             sp = os.path.join(self.dir, 'states', n + '.bin')
                             # --p9loop (P9loop deepening): a fresh run of the level's increment, with the
                             # matcher lemmas of the goal's earlier runs and its next ordering, not a resume
-                            b = T[lev] - T[lev - 1] if (a.p9loop or os.path.exists(sp)) else T[lev]
+                            # (--chain-level L: level L runs fresh with the chain, the setting exp3/exp8 tested;
+                            # resuming the 5 s pool state kept the queue's pool scores, --no-resume-requeue, so
+                            # the chain reached only new pairs; ul43/ul44 ran that way, 08:28-12:00)
+                            fc = (getattr(self, 'chains', None) is not None and lev == a.chain_level
+                                  and not a.p9loop)
+                            b = T[lev] if fc else (T[lev] - T[lev - 1] if (a.p9loop or os.path.exists(sp)) else T[lev])
                             fut = ex.submit(self.run_one, n, self.deep_hints(n, lev, pools), rnd,
-                                            b, not a.p9loop, a.cascade_cpu * b)
+                                            b, 'fresh' if fc else not a.p9loop, a.cascade_cpu * b)
                         running[fut] = (n, lev); rcls[fut] = cl; ncls[cl] += 1; rt0[fut] = time.time()
                         if H and lev == 0:   # (its features, context and predicted success, for observe())
                             x_, c_ = H.feats(n)
@@ -1488,6 +1499,9 @@ def make_parser():
                          '(their proofs expanded through the proven goals they used; sibchain.py) instead of the pool')
     ap.add_argument('--chain-sibs', type=int, default=10, help='--chain-level: how many nearest proven siblings')
     ap.add_argument('--chain-max', type=int, default=100000, help='--chain-level: at most this many chain hints')
+    ap.add_argument('--chain-since-row', type=int, default=0,
+                    help='--chain-level with --cascade-continue: deep rows of the round before this row (pool-era runs) '
+                         'are ignored, so those goals get a fresh chain-level run')
     ap.add_argument('--chain-records', default='',
                     help='--chain-level: a records file of sibchain.py --build (all loops; default: this loop\'s outputs)')
     ap.add_argument('--retry-knn', action='store_true',
