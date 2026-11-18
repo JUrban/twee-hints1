@@ -4539,7 +4539,7 @@ proven (B), and whether one of the three above is (A).
 The cheap retries next to a proof pay best. The 80 s chain level pays about as little as the retries inside
 gaps. Some of the L0 proofs are the chain behind 421 above.
 
-**Running (13:35):**
+**Running (13:32):**
 * chain size (exp13);
 * two-sided chains on the walls (exp14);
 * unfolded definitions with chain hints on the walls (exp15, from about 14:30);
