@@ -34,4 +34,21 @@ bash stage.sh 2427900 2427969     # exp13's runners; then: python3 run.py U.cmds
 
 ## Results
 
-(pending)
+**Stopped at 18:47 after the 92 walls exp11 failed** (exp15/res_U.tsv; 4 workers, not 2 as I had noted elsewhere).
+The 15 walls exp11 proved were not run: they would only measure losses, which exp11 covers in a portfolio.
+
+| | proved of the 92 | CPU s |
+|---|---:|---:|
+| exp11, folded (control) | 0 | 15,941 |
+| **U, unfolded** | **7** | 58,109 (3.6 times) |
+
+* **New (7):** Ka_eq_aK3 380, aK2_eq_aK3_g 347, aK2_eq_aK3_j 382, aa1_45_c 292, aa2_to_aa3 265, mbol_KK_b 161 and
+  nil3_25 432.
+  * nil3_25 432 was merged at 18:46.
+  * The others went in at 17:01 (four) or were already in UL.
+* **0.43 new proofs per CPU hour.** Unfolded problems are much slower per pair: 30 of the 92 runs ended at the 800 s
+  CPU cap before their 160,000 pairs, and 1 was killed.
+* So at 80 s unfolding is a portfolio member with the highest hit rate (7.6%) but a low yield per CPU.
+* At 5 s on goals whose fresh run failed (exp21) it is the best member: 4 of 300 at 3.8 per CPU hour.
+* Production ul48 has both: `unf@0` early, and `unf` after the chain level, ranked by `--ratio-order` (prior
+  0.49).
