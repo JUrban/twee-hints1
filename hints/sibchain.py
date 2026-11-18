@@ -15,6 +15,9 @@ names map to no goal (assumed or cut conjectures) are left out, as in expand.py.
       loop with a clean record of a goal and its hint file wins), as rows goal<TAB>loop dir<TAB>source goals
       (comma-separated). --extra: also experiment output dirs (files <goal> or <goal>.out, as exp3/exp6 run.py keep
       them) for goals that have a hint file in the first loop but no record yet: proofs merged with merge.py.
+      --transfer: then goals still without a record that a transfer proved (a THM row of BASE/*/transfer.tsv, the
+      first file in name order) get the transfer's source goals as their record: the goal is a step or an
+      instance of a step of those proofs (transfer.py), so their expansion holds its derivation.
   Chains(LOOPDIR, records=OUT.tsv) starts from such a file (fast) instead of LOOPDIR's own outputs; hint files
   come from the record's loop (as in expand.py), else from LOOPDIR/hints.
 """
@@ -135,7 +138,7 @@ class Chains:
 
 
 def build(out, loops='UL,Z4,Z3,Z2,Z1,Z0,PGA,PGB,ORH,ORG,ORF,ORE,ORD,ORC,ORB,ORA', base='/project/hintwork/loops',
-          extra=''):
+          extra='', transfer=False):
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
     import depcheck
     rec = {}
@@ -161,6 +164,17 @@ def build(out, loops='UL,Z4,Z3,Z2,Z1,Z0,PGA,PGB,ORH,ORG,ORF,ORE,ORD,ORC,ORB,ORA'
                     break
     if extra:
         print(nx, 'records from --extra', file=sys.stderr)
+    if transfer:
+        import glob
+        nt = 0
+        for f in sorted(glob.glob(os.path.join(base, '*', 'transfer.tsv'))):
+            for l in open(f):
+                w = l.rstrip('\n').split('\t')
+                if len(w) >= 5 and w[1] == 'THM' and w[0] not in rec and os.path.exists(os.path.join(first, 'hints', w[0])):
+                    src = set(x for x in w[4].split(',') if '__goal_' in x) - {w[0]}
+                    if src:
+                        rec[w[0]] = (first, src); nt += 1
+        print(nt, 'records from transfer sources', file=sys.stderr)
     with open(out + '.tmp', 'w') as f:
         for g in sorted(rec):
             f.write(f'{g}\t{rec[g][0]}\t{",".join(sorted(rec[g][1]))}\n')
@@ -170,10 +184,12 @@ def build(out, loops='UL,Z4,Z3,Z2,Z1,Z0,PGA,PGB,ORH,ORG,ORF,ORE,ORD,ORC,ORB,ORA'
 
 if __name__ == '__main__':
     if sys.argv[1] == '--build':
-        ex = ''
+        ex = ''; tr = '--transfer' in sys.argv
+        if tr:
+            sys.argv.remove('--transfer')
         if '--extra' in sys.argv:
             i = sys.argv.index('--extra'); ex = sys.argv[i + 1]; del sys.argv[i:i + 2]
-        build(sys.argv[2], *sys.argv[3:4], extra=ex)
+        build(sys.argv[2], *sys.argv[3:4], extra=ex, transfer=tr)
         sys.exit()
     recs = None
     if '--records' in sys.argv:
