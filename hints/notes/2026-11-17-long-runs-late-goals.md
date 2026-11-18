@@ -65,3 +65,11 @@ fewer than 1,280,000 pairs.
 **Analysis planned.**
 * Proved at 640 s against the late-match count of the C@320 run (HINTLOG first matches after 480,000 pairs).
 * The stall replay of exp3 on the 640 s runs.
+
+## Result (stopped 06:13, 18 Nov)
+
+* **0 of 15 goals proved at 640 s** (1,280,000 pairs each, 1,234–3,785 CPU s, 2.2–4.1 GB peak). All 15 had
+  failed in all four exp3 arms at 320 s. Doubling the deep budget does not reach these goals.
+* I stopped the runner at 06:13 to free its CPU for exp6/exp7. Its last result row is com_Ralt 348; the run that
+  was going (one goal) was killed and has no row.
+* The late-match analysis is moot: there is no proof at 640 s to compare against.
