@@ -119,11 +119,12 @@ python3 run.py pg200_e57.cmds gb10 1 --ground-joining-branch-limit 10    # B: al
   run (ns_to_aa1_c 312 from an e50 state: e50 29.4/29.7 s, e60 31.0/32.1 s). e61 uses e50's strict rejected set
   for the early check: 29.8/30.4 s against 29.7/29.9 s. On 8 testbed goals (20 s, branch limit 100) e61's
   output is byte-identical to e50's. e61 also resumes a state saved by e50 with the same search.
-* **A, the real hangs (4 of 5 at 07:20).** With the branch limit every one ends, and none proves:
+* **A, the real hangs (complete, 07:37).** With the branch limit every one ends, and none proves:
   * aK2_eq_aK3_d 506 V: 640,001 pairs in 2,347 s, normal end (with e48: 8.7 CPU h and still going);
   * com_Ralt 348 V: 640,000 pairs in 1,054 s, normal end (with e48: 6.3 h);
   * aa_to_nil3 516 C: 520,015 pairs at the CPU cap, 3,930 s;
   * aa_to_nil3 516 V: 600,010 pairs at the CPU cap, 3,495 s.
+  * nil3_23_32_to_25 499 V: 637,190 pairs at the CPU cap, 3,201 s (with e48: 4 h and still going).
 * **Production switched (07:30):** abs/ul42.sh = ul41 with /project/bin/twee-pg61 (twee-e61,
   `TWEE_PG_ARGS="--pg-threshold 0.25 --ground-joining-branch-limit 100"`), log loops/UL42.log. ul41's last
   status line: 9,600 runs, 185 new in 50,526 s. The restart also loads the 10 exp3 proofs merged at 07:09.
