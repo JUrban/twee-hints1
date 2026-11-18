@@ -4884,7 +4884,7 @@ rounds of 30 s or more, but about 40% overhead for 8 s rounds.
 
 ## 4. Next steps
 
-*18 Nov, 18:50 (the portfolio, 2az):*
+*18 Nov, 18:49 (the portfolio, 2az):*
 
 * Production is a **portfolio ordered by the ratio rule**: each member is ranked by its new proofs per CPU hour on
   the goals every earlier member failed in the same context.
