@@ -17,7 +17,7 @@ in `/project/hintwork` (not in git).
 | + cascade round 5 (2w–2ac), from 14 Nov 17:26; at 15 Nov 07:00 | **43,462** (+39.9% over plain) | **4717** (+47.3%) | +199.5 (+15.4 side workers) |
 | + round 5 continued: climbers, proof-step transfer, 30 kNN lemmas (2aj–2an); at 16 Nov 14:00 | **44,710** (+43.9% over plain) | **4898** (+52.9%) | – |
 | + round 5 continued: --mix, parental guidance, deep runs with chain hints and their merges (2at–2ay); at 18 Nov 14:37 | **45,510** (+46.5% over plain) | **4991** (+55.8%) | – |
-| + round 5 continued: wall experiments merged, Prover9 + chain side worker, variant levels (2ay–2az); at 18 Nov 17:36 | **45,556** (+46.7% over plain) | **4996** (+56.0%) | – |
+| + round 5 continued: wall experiments merged, a ratio-ordered portfolio of variant levels, 160 s resume (2ay–2az); at 18 Nov 20:16 | **45,608** (+46.8% over plain) | **5003** (+56.2%) | – |
 
 **On unseen originals** (2aq): the 11 whole holdout originals from
 scratch, in 1 hour per batch on 4 workers plus the transfer. Plain twee
@@ -4711,6 +4711,34 @@ level.
 * The deep queue is ordered by each goal's next level's yield: measured priors, updated online.
 * Weak members were paused to make room: exp12's 320 s heads (0.21) and exp19's set-join (0.31). Prover9 + chain
   went from 2 to 4 workers.
+
+**The time-matched control (exp20, complete 20:13).** Each of the 92 failed walls got the 80 s chain resumed to 160 s.
+* **12 new, at 1.77 per CPU hour on the increment.** That is more than any 80 s variant gives from the same CPU: the
+  best, 60 kNN lemmas, gives 6 at 1.24.
+* **The variants stay complementary to it.** Their yields conditional on the 160 s run failing, in this order:
+
+| member after the 160 s run | runs | new | conditional per CPU h |
+|---|---:|---:|---:|
+| 60 kNN lemmas | 80 | 5 | 1.19 |
+| two-sided chain | 75 | 1 | 0.23 |
+| unfolded | 74 | 6 | 0.47 |
+| subsumption | 68 | 0 | 0 |
+| no PG (exp22) | 68 | 0 | 0 |
+
+* The union is 24 of 92 at 37 CPU h, twice the 160 s run alone. After the longer run, subsumption and no PG prove
+  nothing new in this sample. That makes them real negatives in this position, though not alone: subsumption 3 new,
+  no PG 2.
+* exp22's no-PG arm alone: 2 new of 92 at 0.43 per CPU hour, 1 after the 80 s variants.
+
+**Production.**
+* **ul49 (18:53)**: an 80 -> 160 s resume level right after the chain run, then the 80 s variants
+  (`--variants-after 2`, loop.py baa52c7), and `--pass-every 1`. new=8 in 43 min on 6 workers.
+* **ul50 (19:38)**: 10 workers, with no PG as the last 80 s variant. Prover9 + chain stopped: 1 proof in 217 runs on
+  4 workers since 18:26, 0.28 per CPU hour. Its nearest-first order took the best candidates early. new=7 in 36 min.
+* **ul51 (20:15)**: 16 workers, using exp20's 4 CPUs. The 80 s variants are k60, unf, two; sub and nopg are
+  dropped. The priors are the conditional yields above.
+* **The unfolded 5 s level, live:** 3 of 390 runs from 18:30 to 19:20, 2.15 per CPU hour. All 3 came in the first
+  142 runs, because the queue takes the goals nearest a proof first. Its online estimate follows the decline.
 
 ## 2c. Long runs: stall cutoff and checkpoints
 
