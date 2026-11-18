@@ -66,3 +66,13 @@ So a wall proof is the most valuable deep proof there is.
   * **aKperms_1 344 came first through the live transfer, at 10:53** (loops/XFL/transfer.tsv: THM in 1.52 s,
     source Ka1_eq_Ka2 400). That is five minutes after 400 was merged. So one wall proof broke a wall of another
     original (50 unsolved behind it) by transfer. exp11's own proof of 344 followed at 11:05.
+* **Stage 1 final (complete by 11:52): 15 of 107 walls proved at 80 s in 4.8 CPU h (3.1 proofs per CPU h).**
+  * The 15: Ka1_eq_Ka2 400, aK2_eq_aK3_1243 339, aK2_eq_aK3_1243b 372, aKperms_1 344, aa1_14 482,
+    mbol_aa1sqrd_to_aa1 528, mbol_nil3_a 476, nil3_18 318, nil3_1K_e 412, nil3_23_32_to_28 392, ns_to_aa1_b 588,
+    nslm_to_aa1 781, nsmr_to_aK1 458, osb_Kcom_to_aK1 406, uflex_to_aaip 80. Their proofs took 23,570 to 153,278
+    pairs.
+  * All were isolated holes: the ten proved after 11:21 head gaps of length 1 in gaps.tsv, and the goals above
+    the first five were already proven. So they add 15 proofs but open no runs, apart from the transfer from 400.
+  * The last 10 were merged at 11:52 by exp12's runner (exp12/merges.log); with the four from the merge loop and
+    344 from the transfer, all 15 are in UL.
+  * By comparison, production's pool runs had failed on all 107 at 80 s and on 86 at 320 s.
