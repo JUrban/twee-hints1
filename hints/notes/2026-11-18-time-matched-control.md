@@ -39,4 +39,39 @@ bash stage.sh 2434820     # then: python3 run.py C160.cmds C160 4
 
 ## Results
 
-(pending)
+**Complete at 20:13, all 92 failed walls** (exp20/res_C160.tsv, `python3 ana.py`).
+
+* **12 new at 160 s.** On the increment over exp11's 80 s runs that is 6.79 CPU h, **1.77 new per CPU hour**. On
+  the full fresh cost it is 11.2 CPU h, 1.07.
+  * The new walls: aK1_nil3_b 161, aK2_eq_aK3_a 455, aK2_eq_aK3_d 435, aK2_eq_aK3_p 302, aK2_eq_aK3_t 367,
+    aK2rev 375, im2_24_to_25 405, mbol_12lemmas 503, mbol_KK_b 161, mbol_lem2 508, mbol_to_nil3 572 and
+    nil3_23_32_to_25 485. They were proved at 172,846-315,915 pairs.
+* **Against the 80 s variants on the same 92** (each alone, on its full cost, then the overlap with the 160 s 12):
+
+| member | new | per CPU h | also at 160 s |
+|---|---:|---:|---:|
+| chain to 160 s (increment) | **12** | **1.77** | |
+| Prover9 + chain, 60 s | 3 | 1.98 | 0 |
+| 60 kNN lemmas | 6 | 1.24 | 1 |
+| two-sided chain | 4 | 0.76 | 2 |
+| unfolded | 7 | 0.43 | 1 |
+| subsumption | 3 | 0.42 | 2 |
+| no PG | 2 | 0.43 | 1 |
+
+* **So the time-matched answer has two parts.**
+  * Giving the best method another 80 s, resumed, beats any second 80 s method per CPU: 12 new at 1.77 against
+    6 at 1.24 for the best variant.
+  * The variants are still complementary to it. In the order 160 s, k60, two, unf, sub, nopg, the union is 24
+    of 92 at 37 CPU h, against 12 for the 160 s run alone.
+* **Conditional yields in that order:**
+  * 160 s: 1.77;
+  * k60: 1.19;
+  * two: 0.23;
+  * unf: 0.47;
+  * sub: 0 of 68 runs;
+  * nopg: 0 of 68 runs.
+  * After the longer run, subsumption and no-PG prove nothing the others don't. In this position they are real
+    negatives. The two-sided chain is mostly covered.
+* Production since 18:53 (ul49, ul50) has the 160 s resume level right after the 80 s chain. The next restart
+  orders the variants k60, unf, two and drops sub and nopg (priors set 20:14).
+* All 12 are in UL: 5 merged at 19:38, the others were already there or came from other runs.

@@ -898,13 +898,15 @@ class Loop:
         # on goals whose fresh run failed) and this round's results since --chain-since-row
         # (18 Nov 18:50: the 80 s variants' priors are their yields conditional on the earlier members' failures, in the
         # order k60, two, unf, sub on the walls; alone they were 1.24, 0.76, 0.49, 0.42)
-        YP = {'Vk60': 1.24, 'Vtwo': 0.60, 'Vunf': 0.48, 'Vsub': 0.16, 'Vnopg': 0.22, 'Vsj': 0.3, 'Vpool': 0.5,
+        # (18 Nov 20:14: conditional on the 80 s chain and its 160 s resume failing, exp20: k60 1.19, two 0.23, unf 0.47,
+        # sub and nopg 0 of 68 each)
+        YP = {'Vk60': 1.19, 'Vtwo': 0.23, 'Vunf': 0.47, 'Vsub': 0.05, 'Vnopg': 0.05, 'Vsj': 0.3, 'Vpool': 0.5,
               'Vunf@0': 3.8, 'Vk60@0': 1.9}
         # the cascade's own levels by budget: the 80 s chain (production), its resume to 160 s (exp20, on the
         # increment), to 320 s (exp12 stage B)
         for k_, l_ in enumerate(LAB):
             if not VAR[k_] and k_ > 0:
-                YP[l_] = {80.0: 1.16, 160.0: 1.5, 320.0: 0.21}.get(T[k_], 1.0)
+                YP[l_] = {80.0: 1.16, 160.0: 1.77, 320.0: 0.21}.get(T[k_], 1.0)
         YW = 2.0
         ystat = collections.defaultdict(lambda: [0, 0.0])   # label -> [proofs, CPU s]
         def lyield(l):
