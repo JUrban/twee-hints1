@@ -4554,7 +4554,7 @@ proven (B), and whether one of the three above is (A).
 The cheap retries next to a proof pay best. The 80 s chain level pays about as little as the retries inside
 gaps. Some of the L0 proofs are the chain behind 421 above.
 
-**Throughput at depth (measured 15:55, the user's question).** In pairs considered per CPU second (run.py's CPU and
+**Throughput at depth (measured 16:15, the user's question).** In pairs considered per CPU second (run.py's CPU and
 pairs columns), whole runs:
 
 | runs | n | median | p10 | p90 | CPU-capped |
