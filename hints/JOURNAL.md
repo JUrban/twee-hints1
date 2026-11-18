@@ -293,7 +293,12 @@ Each goal is one twee run on the goal's problem.
 ### 4.3 Production
 * Side worker `abs/p9c.sh` (loops/P9C, P9C.log), running since 16:46: Prover9 with chain hints on
   twee's stalled goals, 2 workers, proofs straight into UL (exp16: 4 of 107 walls, 3 of them twee-failed).
-* `abs/ul47.sh` since 18 Nov 17:13:49 (UL47.log): ul46 plus `--variants k60,two,unf,sub` (loop.py 551f563): after a
+* `abs/ul48.sh` since 18 Nov 18:30:32 (UL48.log): ul47 on **6 workers** with `--variants unf@0,k60@0,k60,two,unf,sub
+  --ratio-order` (loop.py b67d828). Every goal whose fresh run failed, near the frontier or not, gets an unfolded and a
+  60-lemma 5 s run (exp21: unfolding 4 of 300 at 3.8 per CPU hour). The deep queue is ordered by the next level's
+  estimated yield, heads first. The 2 extra workers come from exp19, paused.
+* `abs/p9c4.sh` since 18:25:55 (P9C4.log): P9C on 4 workers (it was 1.44 per CPU hour live on 2).
+* `abs/ul47.sh` from 18 Nov 17:13:49 to 18:30 (UL47.log, new=14 in 76 min on 4 workers): ul46 plus `--variants k60,two,unf,sub` (loop.py 551f563): after a
   failed 80 s chain run, four more 80 s fresh runs in the same context (60 kNN lemmas, the two-sided chain,
   definitions unfolded, subsumption matching) before the 320 s level; results rows Vk60/Vtwo/Vunf/Vsub. The portfolio
   task: notes/2026-11-18-portfolio-review.md. P9C keeps running beside it.

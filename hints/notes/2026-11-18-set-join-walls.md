@@ -28,4 +28,11 @@ python3 run.py SJ.cmds SJ 2
 
 ## Results
 
-(pending)
+* **Paused at 18:29 after 37 of 107 walls, all of them walls exp11 failed: 1 proved, 3.2 CPU h, 0.31 new proofs per
+  CPU hour** (exp19/res_SJ.tsv).
+  * The proof: aa1_12 510 at 37,911 pairs. exp17's 60-lemma run had proved it too, and it is in UL, so nothing new
+    was merged.
+* **Why paused:** it is the weakest running member per CPU (the portfolio's ratio rule,
+  notes/2026-11-18-portfolio-review.md). Its 2 workers went to production (ul48, -j 6), where unfolded 5 s runs on
+  failed fresh runs make 3.8 per CPU hour (exp21).
+* To resume: `cd exp19; python3 run.py SJ.cmds SJ 2` (it skips the done ids; the 2 runs in flight were killed).
