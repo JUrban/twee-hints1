@@ -125,6 +125,10 @@ python3 run.py pg200_e57.cmds gb10 1 --ground-joining-branch-limit 10    # B: al
   * aa_to_nil3 516 C: 520,015 pairs at the CPU cap, 3,930 s;
   * aa_to_nil3 516 V: 600,010 pairs at the CPU cap, 3,495 s.
   * nil3_23_32_to_25 499 V: 637,190 pairs at the CPU cap, 3,201 s (with e48: 4 h and still going).
+* **C, production's stalled goals (complete, 09:38).** 78 captured goals at 80 s, e48 without the limit (s_b0)
+  against e57 with branch limit 100 (s_gb100). Both prove 5, the same 5, with identical pair counts. No s_b0 run
+  hung: 77 ended normally and 1 at the CPU cap. So these stalls were not ground-joining hangs in this context.
+  gb100 used 18,031 CPU s against 15,263 (+18%): e57's speed regression, which e61 removes.
 * **Production switched (07:30):** abs/ul42.sh = ul41 with /project/bin/twee-pg61 (twee-e61,
   `TWEE_PG_ARGS="--pg-threshold 0.25 --ground-joining-branch-limit 100"`), log loops/UL42.log. ul41's last
   status line: 9,600 runs, 185 new in 50,526 s. The restart also loads the 10 exp3 proofs merged at 07:09.

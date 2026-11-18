@@ -53,6 +53,17 @@ python3 run.py stall78_K.cmds s_K 2
     `python3 run.py re2.cmds s_K_re 1`, exp/exp8_re2.cmds): the same pairs (47,691, 89,245). Merged into UL at
     08:27 (`exp3/tomerge.py exp8/out_s_K_re exp8/xm1`, `merge.py loops/UL exp8/xm1`).
 
+* **Final (complete 09:38): chain 9, pool 5 (+6 −2) on all 78.**
+  * Against the exact control s_b0 (e48, same commands, pool hints): CPU 16,822 s against 15,263 (+10%). Against
+    s_gb100 (e57 with the branch limit, same proofs as s_b0): 18,031 s.
+  * Chain only: aK2_eq_aK3_q 252, nsmr_to_aa1 623 and 624, nsmr_to_aK1 455 (12,006 pairs), ns_to_aa1_b 587 and
+    628. Pool only: aK2_eq_aK3_o 422 and nslm_to_aa1 932. Both: nil3_1K_d 364 (6,001 against 22,476 pairs),
+    nslm_to_aa1 921 and nsmr_to_aa1 641.
+  * Chain run ends: 73 normal, 4 at the CPU cap, 1 out of heap.
+  * Combined with exp3 (320 s: 12 against 9, the pool's proofs a subset), the chain wins at both deep budgets.
+  * Seven of the proofs were not in UL (364, 921, 623, 641, 455 from the chain; 422, 932 from the pool). The arms
+    kept no outputs, so they are rerun with outputs (re5.cmds as s_K_re5, re2p.cmds as s_b0_re) to merge.
+
 ## In production (ul43 from 08:28, ul44 from 09:23)
 
 * Check (09:25): production's L1 rows since 08:28 carry chain-sized hint counts (HINTSTATS `hints=`); 3 of
