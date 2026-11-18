@@ -17,8 +17,10 @@ below them. Does the chain also beat the pool there? If so it would go into ever
   loops/UL cap/CAP 3 0.1`. The twee is e48 with PG 0.25, the hints are the original's pool, and the lemmas are
   production's siblings and kNN.
 
-* Capture result (07:54): commands for 199 of the 200 goals (the missing one never ran in the 6 minutes). One
-  goal proved in its 5 s capture run: aK2_eq_aK3_l 519, new to UL. Its command stays in the test.
+* Capture result (07:54): commands for 199 of the 200 goals (the missing one never ran in the 6 minutes). The
+  report's "1 of 200 solved" is aK2_eq_aK3_l 519. Its row in cap/CAP/solved.tsv is round 0: production proved
+  it between the sampling (07:48) and the context copy, so it came in with the context. Its own proof may be in
+  its hints, so **519 is left out of the comparison** (198 goals).
 
 ## Arms (launched 07:55)
 
