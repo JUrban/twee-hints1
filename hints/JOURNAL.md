@@ -291,7 +291,8 @@ Each goal is one twee run on the goal's problem.
 * The learned scheduler (`--sched-model`) is off by default, because at scale its gain was noise.
 
 ### 4.3 Production
-* `abs/ul43.sh` since 18 Nov 08:28 (UL43.log): ul42 with `--chain-level 1 --chain-records
+* `abs/ul44.sh` since 18 Nov 09:23 (UL44.log): ul43 on 8 workers instead of 4 (load had fallen to 13.5).
+* `abs/ul43.sh` from 18 Nov 08:28 (UL43.log; 90 new in 50 min on 4 workers): ul42 with `--chain-level 1 --chain-records
   /project/hintwork/chain_records.tsv`. The 80 s level (fresh; the 320 s level resumes its state) takes the
   goal's chain (hints/sibchain.py: the proofs of its 10 nearest proven siblings below, expanded through the
   proven goals they used) instead of the pool (notes/2026-11-18-chain-hints-unsolved.md, exp3's K arm).
@@ -310,12 +311,12 @@ Each goal is one twee run on the goal's problem.
   * ul12–ul14: fresh-first, far-retry, line gaps 80.
   * ul15–ul31: the learned scheduler, heads-first (reverted), a 5 s first level, retry-knn.
   * ul32–ul38: CPU shares for side batches, 30 kNN lemmas.
-  * ul39: --mix. ul40: e44. ul41: PG. ul42: e61 and the ground-joining branch limit. ul43: chain hints at 80 s.
+  * ul39: --mix. ul40: e44. ul41: PG. ul42: e61 and the ground-joining branch limit. ul43: chain hints at 80 s. ul44: -j 8.
 * For new problems, `hints/solve_new.sh NAMES CONTEXT OUT [J [HOURS]]` runs the same cascade. The live
   proof-step transfer runs beside it every 2 minutes. Its defaults are TWEE twee-e44, CASCADE
   5,20,80,320, STATES --no-fresh-states, and ORDER `--mix 0.1 --fail-order`. REPORT section 5 explains
   EXCLUDE, SCHED, LOOPARGS and AIM_PROB. **REPORT section 5 item 5 still shows the 15 Nov production
-  command; the current one is ul43.**
+  command; the current one is ul44.**
 * From zero on the whole benchmark (Z4, abs/z4_test.sh): 15,398 at 10 min, 35,511 at 1 h, 37,713 at 2 h,
   38,044 at about 4 h.
 
