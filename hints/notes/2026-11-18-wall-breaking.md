@@ -44,6 +44,25 @@ So a wall proof is the most valuable deep proof there is.
   Every 10 minutes, and after each stage, `exp3/tomerge.py out_s1 out_s2 xm` + `merge.py loops/UL xm`; times in
   merges.log.
 
+## Correction and change of plan (11:21)
+
+* **The "6,263 unsolved behind the walls" overstated what a wall blocks.** It counts every unsolved goal above
+  an original's first unsolved goal. Those goals form many separate gaps, each with its own first goal.
+* Gap structure at 11:21 (gaps.tsv; a gap is a maximal run of consecutive unsolved goals of an original):
+  * 812 gaps: 338 of length 1, 228 of 2-4, 150 of 5-19, 92 of 20-99, 4 of 100+.
+  * The 96 gaps of length >= 20 hold 4,045 of the unsolved goals; 83 gaps reach the original's top goal.
+* **Only 2 of the 107 walls head a gap of 20 or more** (12 head one of 5 or more). Most walls are isolated holes:
+  in four of the first five walls stage 1 proved (Ka1_eq_Ka2 400, aK2_eq_aK3_1243 339 and 1243b 372, aa1_14
+  482), the five goals above were already proven. So their proofs unlock nothing new.
+* So stage 1 (80 s, cheap) runs to its end, but **stage 2 (320 s on the walls, about 30 CPU h) is cancelled**.
+  At 11:21 I stopped stage.sh and its merge loop; its run.py for stage 1 continues on its own. Its proofs are
+  merged by hand at the end.
+* The deep budget goes to the heads of the 96 long gaps instead (exp12, notes/2026-11-18-gap-heads.md).
+
 ## Results
 
-(pending)
+* Stage 1 interim (11:20, 57 of 107): 5 proved, namely Ka1_eq_Ka2 400 (145,609 pairs), aK2_eq_aK3_1243 339,
+  aK2_eq_aK3_1243b 372, aKperms_1 344 and aa1_14 482. Four were merged (10:48: 400, 339, 372; 11:08: 482).
+  * **aKperms_1 344 came first through the live transfer, at 10:53** (loops/XFL/transfer.tsv: THM in 1.52 s,
+    source Ka1_eq_Ka2 400). That is five minutes after 400 was merged. So one wall proof broke a wall of another
+    original (50 unsolved behind it) by transfer. exp11's own proof of 344 followed at 11:05.
