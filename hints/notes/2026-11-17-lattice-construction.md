@@ -268,6 +268,12 @@ were sketched at 5 s.
     SKETCH_TWEE and SKETCH_ARGS):
     `SKETCH_TWEE=/project/bin/twee-e57 SKETCH_ARGS="--ground-joining-branch-limit 100" python3 sketch.py
     rungsC320.tsv rCprove320.tsv -j 2 --time 320`
+  * **Result (07:20): 1 of 4 proved.** aK2_eq_aK3_q 252's `l(X2,X1,k(rd(e,X0),X0)) = X2` took 59 CPU s, and
+    that closes 252: its refinement proof used three conjectures, all now proved (two at 20 s, this one at 320 s).
+    closure.py: 1 goal solved through the conjecture lattice. The other three (723, 1003, 631) ran 1,428–2,340
+    CPU s without a proof.
+  * 252 is not new to us: exp3's C and K arms proved it directly at 320 s (merged into UL at 07:09). The lattice
+    route is a second, independent decomposition of it into three provable conjectures.
 
 **Down step with sketch hints** (downhints.py, launched 21:57).
 `python3 downhints.py sketch47.tsv down80.tsv -j 2 --time 80 --arms I,U`
