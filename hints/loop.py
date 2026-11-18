@@ -547,7 +547,16 @@ class Loop:
             print('CMD', ' '.join(cmd), file=sys.stderr, flush=True)
         t0 = time.time()
         try:
-            p = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+            env_ = None
+            if var in ('nopg', 'nom'):
+                # (--variants nopg/nom) no parental guidance: none in the arguments, and none from the twee-pg wrapper's
+                # TWEE_PG_ARGS (production's binary appends them); nom has no model, so PG would be idle anyway
+                import re as re_
+                env_ = dict(os.environ, TWEE_PG_ARGS=re_.sub(r'--pg-threshold\s+\S+', '', os.environ.get('TWEE_PG_ARGS', '')))
+                i_ = [k for k, x in enumerate(cmd) if x == '--pg-threshold']
+                for k in reversed(i_):
+                    del cmd[k:k + 2]
+            p = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, env=env_,
                                timeout=T * (a.wall_factor if "--abstract-time" in self.a.args else 1) + 30)
             out = p.stdout.decode('utf8', 'replace')
         except subprocess.TimeoutExpired as e:
@@ -865,7 +874,7 @@ class Loop:
         VB = []   # (variant, the cascade level it follows)
         for v in VL:
             nm, _, at = v.partition('@')
-            assert nm in ('two', 'unf', 'sub', 'sj', 'k60', 'pool', 'r2', 'nom', 'x'), v
+            assert nm in ('two', 'unf', 'sub', 'sj', 'k60', 'pool', 'r2', 'nom', 'nopg', 'x'), v
             VB.append((nm, int(at) if at else CL_))
             assert 0 <= VB[-1][1] < len(T), v
         # internal levels: each cascade level k, then the variants that follow it (in the order given); ORIG: the
@@ -1575,7 +1584,8 @@ def make_parser():
                     help='(18 Nov, portfolio) levels after --chain-level, each a fresh run of that budget with one change, '
                          'tried in this order before the next level (results rows V<name>): two (two-sided chain), '
                          'unf (definitions unfolded), sub (--eqhint-subsume), sj (--set-join), k60 (60 kNN lemmas), '
-                         'pool (the pool\'s hints), r2 (rule-model threshold 0.2), nom (no rule model), x (the chain\'s '
+                         'pool (the pool\'s hints), r2 (rule-model threshold 0.2), nom (no rule model), nopg (no parental '
+                         'guidance, also not from TWEE_PG_ARGS), x (the chain\'s '
                          'hints). They keep no state, so the next level resumes the chain run\'s. NAME@L: after level L '
                          'instead, at its budget and with its hints (rows V<name>@L)')
     ap.add_argument('--chain-since-row', type=int, default=0,
