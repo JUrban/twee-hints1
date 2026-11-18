@@ -19,7 +19,11 @@ checked the twee source (branch hints, src/).
 
 ## Candidates to try
 
-1. **Ground-joined equations as simplifiers without critical pairs** (4.1). In twee: when a critical pair is
+1. **Measured 16:48, and dropped.** In an 80 s run of TLRproperties_2 358 (its exp12 A command without
+   --quiet), twee ground-joined only **29 equations ("(hard)" lines) against 20,751 rules**. With so few, keeping
+   them for rewriting cannot change much on AIM; the paper's gains came from problems where many unorientable
+   equations are ground-joinable. What follows is the original candidate.
+   **Ground-joined equations as simplifiers without critical pairs** (4.1). In twee: when a critical pair is
    ground-joined, also add it as an unoriented rule for rewriting only (ordered instances), and keep it out of the
    overlap index. Test on the 107 walls at 80 s, against exp11's exact control.
 2. **`--set-join` for critical pairs**, a flag that already exists. It is cheap to test on the same walls.
