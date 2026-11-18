@@ -231,6 +231,7 @@ Repositories and directories:
 | e54 | 17 Nov 17:59 | ENIGMA keys on the goal-constant-expanded rule with real names; --pg-anon removed; PGR field `E<keys>` |
 | e55 | 17 Nov | additive Pcat ENIGMA parental model (PGEnigmaAdd) |
 | e56 | 17 Nov 21:59 | e55 + --print-goal-nf N: on failure, the N smallest normal forms of each goal side (GOALNF L/R lines); use with --no-flatten-goal (exp4 nf.py) |
+| e57 | 18 Nov 05:20 | e56 + --ground-joining-branch-limit B: assume not ground joinable once the case split has more than B branches (exp6, runs that never end) |
 
 Wrappers: `twee-pg` (e48 with $TWEE_PG_ARGS), `twee-pg50` (e50 with $TWEE_PG_ARGS; production).
 
