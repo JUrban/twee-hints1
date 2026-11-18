@@ -4463,7 +4463,7 @@ using an index of hint forms by top symbols to depth 1.
 * A likely reason: a pair more general than a hint is smaller than the hint, so twee's size weight already
   ranks it well.
 
-**Deep runs on late goals (exp3, 320 s, 47 goals; 177 of 188 runs at 08:25).**
+**Deep runs on late goals (exp3, 320 s, 47 goals; 177 of 188 runs at 08:23).**
 * Proved: K (lemmas + the expanded chain of the 10 nearest proven siblings as the only hints) 12 of 44 in
   14.4 CPU h. E (pool + chain) 10 of 45 in 15.6 h. C (production's command) 9 of 45 in 20.0 h. V (axioms + chain)
   4 of 43 in 41.4 h.
