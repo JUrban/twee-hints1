@@ -1,0 +1,124 @@
+# Complementary methods: a review of what I dropped, and portfolio approaches (research task)
+
+Started 18 Nov 2026, 17:05 UTC.
+
+## The user's point (17:00)
+
+> "I have a bit of a problem with throwing out complementary methods like you routinely do (now for subsumption
+> matching): if one method loses 2 on the best method but adds 3 solutions overall, it's typically better to run
+> the two methods in a portfolio for some share of the overall time, than to run just the best method for the whole
+> time; could you go over your previous decisions (notes/record) and see where you threw useful complementary things
+> out and think about good portfolio approaches? you can make this into another research task"
+
+The user is right. Since 12 Nov I decided almost every A/B by the count of the better arm. The record mostly kept the
++/− numbers, but I read them as noise ("within noise", "neutral", "left off") instead of as the size of the second
+method's own share.
+
+The right question for a portfolio is different. For the CPU a second method costs, does it add more new proofs
+than the best method would add with that same CPU? The best method could spend it on a deeper level, a repeat,
+or more goals.
+
+## Why this matters more for twee than usual
+
+* In abstract time twee is deterministic: identical inputs give identical runs (exp14 reproduced 7 walls
+  exactly).
+* But the search is chaotic. Any change of setting, hint set, lemma set or prover re-randomises which hard goals
+  fall (JOURNAL 5). So nearly every variant has unique solutions, partly from its own merit and partly as a
+  perturbation.
+* A portfolio gets both. Its value is greatest where the context has stopped changing: stalled goals and the
+  tail. There production's retries no longer perturb anything, and the best method run longer does very little:
+  * exp5: 0 of 15 at 640 s that had failed at 320 s;
+  * ul36's header (16 Nov): the 320 s level made 0.3 proofs per CPU hour.
+
+## Review: decisions with a measured complementary share
+
+Each row gives the best arm's count, the dropped arm's count, its unique gains (+) and losses (−) against the
+best, and the union where known.
+
+| where | setting | kept | dropped | dropped arm | +/− | union | decision then |
+|---|---|---:|---|---:|---|---:|---|
+| 2b | rule-model thresholds and penalties, 345 goals, 8 s | 69 | the other settings | 65-67 | | **93** (of all variants) | best setting only |
+| 2b | ProofWatch (F = 0.3), 345 at 8 s | 69 | ProofWatch | 67 | +2 −4 | 71 | dropped |
+| 2f | rm4b, 4 times the model, 345 at 8 s | 61-63 | rm4b | 65 | +9 −7 | about 72 | not worth the load time |
+| 2f | rm5, retrained on hard proofs | 61-63 | rm5 | 58 | +2 −7 | about 65 | rm4 stays |
+| 2g | chained sketches, 20 s | 28 | sketches | 29 | +2 −1 | 30 | "within noise" |
+| 2s | frequent hints as axioms, nil3_31 at 20 s | 76 | 10 / 45 axioms | 72 / 73 | +1 −5 / +3 −6 | 77 / 79 | dropped |
+| 2u | ENIGMA retrained online (EHL) against fixed (FHL) | 987 | EHL | 971 | 3 only in EHL, 19 only in FHL | 990 | fixed model |
+| 2ab | sketch-climb arms against fresh runs, 32 stalled | 8 | CL2-CL4 | 4-6 | | **9** of 32 | climbing as a filler |
+| 2ac | learned scheduler A/B 1 (two arms) | | | | only 30 proofs common at 29 min | 255 | the winner only |
+| 2af | unfolded definitions (stalled goals, 20 s) | 2 of 9 | unfolded | 7 of 9 | | | side worker; stopped 15 Nov 15:17 at 0-1 per 24-goal cycle |
+| 2ad/2af | Prover9 side worker with the pool | | Prover9 | 9 of 283 | goals twee failed | | replaced by the unfolded worker |
+| 2am | kNN lemma selection, 150 goals at 20 s | 6 | use counts / MaSh | 7 / 5 | +3 −2 / +1 −2 | **10** distinct | plain similarity |
+| 2am | 60 kNN lemmas against 30 (two tests) | 19 of 450 | 60 | 17 | +4 −1, +1 −3 | 24 | 30 |
+| 2ap | hints from kNN lemmas' proofs, 150 at 20 s | 6 | F = 0.1 / 0.01 | 5 / 5 | +1 −2 each | 7-8 | dropped |
+| 2an | live head climber | | | 4 of 55, 0.47 per CPU h | | | stopped: production then made about 4 per CPU h; now it makes about 1 |
+| 2au | --orig-rate, 2 h on half of the benchmark | 18,319 | ORB | 18,228 | its 80 s runs proved 58 against 37 | | off |
+| 2aw | expansion hints in production's setting, 20 s | 86 | expansion | 90 | +7 −3 | 93 | "not adopted" (it was ahead) |
+| 2ax / exp7 | subsumption matching, 200 hard goals at 20 s | 87 | --eqhint-subsume | 87 | +2 −2 | 89 | off |
+| exp3 | deep arms at 320 s, 47 late goals | K 12 | C, E, V | 9, 10, 4 | V: aK2_eq_aK3_q 211 only | 13 | K |
+| exp8 | chain against pool at 80 s, 78 stalled | chain 9 | pool | 5 | pool +2 | 11 | chain |
+| exp10 | transfer-filled chain, same 78 | 9 | X | 7 | +1 −3 | 10 | off |
+| exp13 | 5-sibling chain / no expansion, same 78 | 9 | S5 / D | 7 / 4 | +1 −3 / +1 −6 | 10 / 10 | full chain |
+| exp14 | two-sided chain, 107 walls at 80 s | 15 | T | 16 | +4 −3 | 19 | "no production change" |
+| exp16 | Prover9 + chain / + pool, 107 walls at 60 s | twee 15 | Q / P | 4 / 2 | 3 / 1 not twee's | 19 | P9C side worker (kept) |
+| exp18 | subsumption matching, 107 walls at 80 s | 15 | SU | 13 | +3 −5 | 18 | "not in production" |
+| exp15 | unfolded + chain, 107 walls at 80 s | 15 | U | 5 of the first 51 failed walls | +5 so far | | running |
+
+Genuine negatives, where the variant added nothing new:
+* the 20 s portfolio of orderings, rule settings and lemma counts on stalled goals (2ac: every variant proved the
+  same single goal);
+* the tail-head probes (2ag: 0 of 30);
+* `--hint-goal` (2aj: the same 3 proofs);
+* chain hints at 5 s (exp9: 0 against 0).
+
+These are the only cases where dropping was clearly right.
+
+## The comparison that was missing
+
+* **The walls so far.** Ordered greedily by new proofs per CPU hour:
+  * exp11 (twee chain): 15 at 4.8 CPU h;
+  * then Prover9 + chain: 18 at 6.6 h;
+  * then Prover9 + pool: 19 at 8.3 h;
+  * then the two-sided chain: 22 at 14.0 h;
+  * then subsumption: 24 at 21.9 h;
+  * unfolded's 5 or more come on top.
+* **What I don't have:** the control given the same extra CPU. For that, exp20 runs exp11's commands at 160 s
+  on the 92 failed walls. Twee is deterministic in abstract time, so exp11's 15 are proved again and only the 92
+  need running.
+* **Weak comparisons I do have:**
+  * exp5: 320 → 640 s, 0 of 15;
+  * exp12 B: 80 → 320 s on gap heads, 2 of 30 by 17:01.
+
+## Portfolio approaches to test
+
+1. **Variant levels instead of a longer run.** Production's cascade is 5 s pool, then 80 s chain, then 320 s.
+   Replace or share the 320 s level with a rotation of 80 s variants, each tried once per goal and context:
+   * Prover9 + chain (60 s);
+   * unfolded + chain;
+   * the two-sided chain;
+   * subsumption matching;
+   * 60 kNN lemmas;
+   * the pool at 80 s.
+   The order comes from their measured new-proof yields on goals that every earlier member failed.
+2. **Shares by online yield.** The mix scheduler already estimates proofs per worker hour for its classes (r, f,
+   d). Variants become classes too, so each gets workers in proportion to its recent yield of new proofs: a
+   bandit over methods, not only over goals.
+3. **Side workers for the different provers.** Prover9 + chain (running since 16:46) and unfolded twee, each on
+   2 CPUs, on twee's stalled goals. Proofs go into UL, where they become context for everything else.
+4. **Short-level portfolios:** the rule-model settings (2b's union of 93 against 69) and kNN selections (10
+   against 7). At short budgets production already perturbs through changing contexts, so these probably matter
+   less. To check on a replay (rp3, 2aq).
+
+## Plan
+
+1. exp20: the control at 160 s on the 92 failed walls (after exp17, when 4 CPUs are free).
+2. When exp15, exp17 and exp19 end: the full union curve on the walls, greedy against exp20's time-matched control.
+   Also the per-variant yield of new proofs on goals all earlier members failed.
+3. loop.py: variant levels (approach 1) with per-variant yields in the mix scheduler (approach 2). Then
+   production, watched against ul46's rates.
+4. Correct the record: JOURNAL section 5 ("Neutral or negative") and REPORT 2d's "What did not help" list
+   complementary methods as such, with their unique share.
+
+## Results
+
+(pending)

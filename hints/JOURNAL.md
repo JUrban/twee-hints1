@@ -366,7 +366,8 @@ Helped, in rough order of size:
 * PG with the sum filter: 52 against 29 on the 200 hard goals, and +900 at 50 minutes on half1 (2av; the A/B
   is still running).
 
-Neutral or negative:
+Neutral or negative *in count* (18 Nov, the user: many of these are complementary, with unique solutions, and belong in
+a portfolio; notes/2026-11-18-portfolio-review.md lists each one's share):
 * ProofWatch boosting; parent features; generalisation matching; hint reranking; frequency-weighted boosts;
 * hint axioms; multi-goal search; SFDF reorientation; the stall cutoff at short limits;
 * retraining on hard proofs and the oracle rule model online;
@@ -716,6 +717,7 @@ reports are written as the experiments run.
 | notes/2026-11-18-subsumption-deep.md | Subsumption hint matching (--eqhint-subsume) at 80 s with chain hints, the 107 walls (exp18; the user's remark) |
 | notes/2026-11-18-waldmeister-paper.md | Reading: Hillenbrand's Waldmeister lessons, technique by technique against twee; candidates (ground-joined equations as simplifiers) and a 320 s profile |
 | notes/2026-11-18-set-join-walls.md | Successor sets for critical pairs (--set-join, Waldmeister 4.3) at 80 s on the 107 walls (exp19) |
+| notes/2026-11-18-portfolio-review.md | Complementary methods: every dropped variant's unique share, the missing time-matched comparison, and portfolio approaches (the user's request, 17:00) |
 | notes/2026-11-17-lemma-circularity.md | Are lemma chains circular? A check of the used lemmas |
 | notes/2026-11-17-mix-fail-order.md | Repeats cost most of the time: `--mix` and `--fail-order` |
 | notes/2026-11-17-pg-ab-half1.md | Parental guidance at scale: half1 from zero, 2 hours, sum filter 0.25 against the defaults |
