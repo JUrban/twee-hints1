@@ -127,7 +127,7 @@ nil3_27 472, 508, 374, 517, nil4_19K 368 and 211. The 10 that UL lacked were mer
 (`tomerge.py out_C@320 out_K@320 out_E@320 out_V@320 exp3/xm2`, then `merge.py loops/UL exp3/xm2`): UL now has
 45,006. 374 and 508 were already proved by production.
 
-**What the merge set off in production** (measured 08:30, 18 Nov).
+**What the merge set off in production** (measured 08:20, 18 Nov).
 * UL gained 1-4 proofs an hour from 02:00 to 07:00, then 152 between 07:10 and 08:20, all from 5 s runs (L0) of
   goals that had failed at 5 s two to eight times before.
 * Lemma records (depcheck.used_lemmas) of those 152:
