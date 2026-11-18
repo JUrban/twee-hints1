@@ -18,6 +18,7 @@ in `/project/hintwork` (not in git).
 | + round 5 continued: climbers, proof-step transfer, 30 kNN lemmas (2aj–2an); at 16 Nov 14:00 | **44,710** (+43.9% over plain) | **4898** (+52.9%) | – |
 | + round 5 continued: --mix, parental guidance, deep runs with chain hints and their merges (2at–2ay); at 18 Nov 14:37 | **45,510** (+46.5% over plain) | **4991** (+55.8%) | – |
 | + round 5 continued: wall experiments merged, a ratio-ordered portfolio of variant levels, 160 s resume (2ay–2az); at 18 Nov 20:16 | **45,608** (+46.8% over plain) | **5003** (+56.2%) | – |
+| + variant tiers ordered by live yield (2az); at 18 Nov 23:41 | **45,901** (+47.8% over plain) | **5043** (+57.4%) | – |
 
 **On unseen originals** (2aq): the 11 whole holdout originals from
 scratch, in 1 hour per batch on 4 workers plus the transfer. Plain twee
@@ -4783,6 +4784,9 @@ The union is 26 of 92. **ul54 (21:35)** has 19 workers and adds `nom` as the las
 * That is the decreasing-p/c order within each goal as well as across goals. ul55 (22:39) started on the 60-lemma
   5 s level, with 4 new in its first minute.
 * ul54 made 37 new in 63 minutes.
+* **ul55's first hour made 146 new** (23:40), the best production hour so far. L0 paid 17.5 per CPU hour, mostly
+  on goals reopened by new sibling proofs. The 60-lemma 5 s level fell from 5.5 to 1.3, and the unfolded one rose
+  from 0.4 to 6.2 on the goals that reach it now. The tiers followed both changes.
 
 ## 2c. Long runs: stall cutoff and checkpoints
 

@@ -324,4 +324,17 @@ All four together prove 17 new walls. With Prover9 + chain first, 18 (k60 then a
     L0 and Vunf@0 continued with Vk60@0, then the rest.
   * This is the Simon-Kadane order (decreasing p/c) per goal as well as across goals.
 * **22:39: ul54 ended at new=37 in 63 min. ul55** = ul54 with tiers.
-* **Pending:** ul55's level mix and yields.
+* **23:40: ul55's first hour: new=146 in 61 min**, four times ul54 (37) and the best production hour so far
+  (ul53 56). By level since its restart (levyield.py from results row 70875):
+  * L0: 108 in 2799 runs, **17.5 per CPU hour**. Most of these came from goals reopened by new sibling proofs (the
+    mix's r column ran at 15-67 an hour). Each new proof gives its neighbours a new context and a fresh 5 s run.
+  * 60 kNN lemmas at 5 s: 8 in 3910 runs, 1.29 (5.5 in ul54's hour). The tier took it first, while it was the best
+    5 s variant, and it is now near the 80 s level's prior (1.16).
+  * Unfolded 5 s: 30 in 1667 runs, **6.2** (0.39 in ul54). Not checked yet, but probably because its runs now
+    come on reopened goals and after the 60-lemma run: a different, conditional population.
+  * No 80 s or deeper level ran yet: the 5 s levels still pay more.
+  * The proofs are spread over many originals: aK2_eq_aK3_s 22, aK2_eq_aK3_gen 15, nil3_30 12, then nil3_* by 4-7.
+  * Solved at 23:41: 45,901 distinct goals, holdout 5043. Memory 1.4 GB.
+* **Reading:** with the order per goal set by yield, a cheap level is tried again when it pays, and is not
+  pushed through when it doesn't. The per-level numbers change within the hour, so fixed priors would have ordered
+  them wrongly twice already. Online conditional yields do the work.

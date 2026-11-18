@@ -291,10 +291,12 @@ Each goal is one twee run on the goal's problem.
 * The learned scheduler (`--sched-model`) is off by default, because at scale its gain was noise.
 
 ### 4.3 Production
-* Side worker `abs/p9c.sh` (loops/P9C, P9C.log), running since 16:46: Prover9 with chain hints on
-  twee's stalled goals, 2 workers, proofs straight into UL (exp16: 4 of 107 walls, 3 of them twee-failed).
+* No side workers. Prover9 with chain hints (the P9C side worker, abs/p9c.sh and p9c4.sh, 16:46–19:38) is now the
+  cascade's `p9` level.
 * `abs/ul55.sh` since 18 Nov 22:39:20 (UL55.log): ul54 with variant tiers (loop.py a0a4486). The variants after a
   cascade level are taken by current yield, each once per context, and replay records the tried ones.
+  First hour (23:40): 8350 runs, **new=146** on 19 workers. L0 17.5 per CPU hour (mostly reopened goals), 60
+  kNN lemmas at 5 s 1.3, unfolded 5 s 6.2; no 80 s runs yet. Solved 45,901 (holdout 5043).
 * `abs/ul54.sh` from 18 Nov 21:35:49 to 22:39 (UL54.log, 7050 runs, new=37 in 63 min on 19 workers): ul53 on **19 workers** with `nom` (no rule model, 80 s) as the last
   variant before 320 s. exp22 is done; the only other job is transfer.py live (xfrlive2, -j 2, about 0.2 CPU on average).
 * `abs/ul53.sh` from 18 Nov 20:34:50 to 21:35 (UL53.log, 4600 runs, **new=56** in 60 min on 16 workers; 53 in its
