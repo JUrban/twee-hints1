@@ -1,5 +1,5 @@
 #!/bin/bash
-# (18 Nov 14:50) ul45 on 4 workers instead of 8, with chain_records2.tsv (chain_records.tsv plus the records of the
+# (18 Nov 14:46) ul45 on 4 workers instead of 8, with chain_records2.tsv (chain_records.tsv plus the records of the
 # merged experiment proofs: sibchain.py --build --extra exp3, exp8-exp12, exp14 out dirs). From 13:20 to 14:40 ul45 proved
 # nothing: its 5 s classes had no candidates and all 8 workers ran 80 s chain runs (about 130, none proved). The 4
 # freed workers run exp18 (subsumption matching at 80 s on the walls).

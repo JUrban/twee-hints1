@@ -291,7 +291,11 @@ Each goal is one twee run on the goal's problem.
 * The learned scheduler (`--sched-model`) is off by default, because at scale its gain was noise.
 
 ### 4.3 Production
-* `abs/ul45.sh` since 18 Nov 12:02 (UL45.log): ul44 with loop.py running the chain level (80 s) **fresh** with the
+* `abs/ul46.sh` since 18 Nov 14:46 (UL46.log; its header says 14:50, written before the start): ul45 on 4 workers
+  with chain_records2.tsv (+40 records of merged experiment proofs, 39,884 in all). ul45 had proved nothing from
+  13:20 to 14:37 (its 5 s classes had no candidates; all 8 workers on 80 s chain runs), then 2 by 14:46; new=22 in all. The other 4
+  workers run exp18.
+* `abs/ul45.sh` from 18 Nov 12:02 to 14:46 (UL45.log): ul44 with loop.py running the chain level (80 s) **fresh** with the
   chain, and `--chain-since-row 47530`, so goals whose deep runs all predate the chain (3,845 rows capped) get a
   fresh 80 s chain run.
 * `abs/ul44.sh` from 18 Nov 09:47 (UL44.log): ul43 on 8 workers instead of 4 (load had fallen to 13.5). Its first
@@ -625,7 +629,7 @@ summaries keep results but lose the reasons and the user's exact words. Keep sec
 ## 8. Open threads (18 Nov 13:27; `date` checked)
 
 Running:
-* production ul45 (abs/ul45.sh, loops/UL45.log, -j 8, twee-pg61): chain L1 as fresh 80 s runs,
+* production ul46 since 14:46 (abs/ul46.sh, loops/UL46.log, -j 4, chain_records2.tsv); before it ul45 (-j 8, twee-pg61): chain L1 as fresh 80 s runs,
   `--chain-since-row 47530` (pre-chain goals get a chain L1); started 12:02. About 16 proofs an hour at 13:20
   (UL 45,510 distinct proofs; solved.tsv has 10 duplicate rows).
 * exp12 (notes/2026-11-18-gap-heads.md): the 96 gap heads. Stage A (80 s) proved only 1 of the first 89; stage B

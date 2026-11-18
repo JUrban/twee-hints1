@@ -1,6 +1,6 @@
 # Subsumption matching at a deep budget on the walls (exp18)
 
-Prepared 18 Nov 2026, 14:45 UTC. Directory /project/hintwork/exp18; scripts and data in hints/exp/exp18_*.
+Started 18 Nov 2026, 14:47 UTC. Directory /project/hintwork/exp18; scripts and data in hints/exp/exp18_*.
 
 ## Why
 
