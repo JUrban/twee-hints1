@@ -253,6 +253,21 @@ were sketched at 5 s.
   in the same context as exp3's C arm (the goal's production command, conjecture replaced). A rung that proves
   where its goal failed at 320 s means the lattice helps.
   `python3 sketch.py rungs320.tsv rprove320.tsv -j 3 --time 320`
+  * **Result (05:00): 0 of 20 proved.** Every one used its full budget (860–1,075 CPU s), so these rungs are not
+    easier than their goals. closure2 still solves only 517 and 508.
+* **Result (05:33): conjecture rungs.** Of the conjecturer's 49 rung conjectures (rungsC.tsv), **6 are proved at
+  20 s**, and no goal closes (closure.py on conjref20.tsv). Two com_Ralt 348 runs (4003, 4004) never ended. That
+  is how the unbounded ground-joinability case of notes/2026-11-18-ground-joining-hangs.md was found. Both count as
+  unproved here.
+  * In four goals not otherwise solved, a single conjecture is open:
+    * aK2_eq_aK3_q 252: `l(X2,X1,k(rd(e,X0),X0)) = X2`;
+    * ns_to_aa1_b 723: `e = k(X2,k(X0,X1))`;
+    * nslm_to_aa1 1003: `rd(m(t(X0,X1),X1),t(X0,X1)) = ld(k(X1,X0),X1)`;
+    * nsmr_to_aa1 631: `l(rd(r(X1,X2,X3),X1),X1,X0) = rd(r(X1,X2,X3),X1)`.
+  * These run at 320 s with twee-e57 and `--ground-joining-branch-limit 100` (launched 05:34; sketch.py now takes
+    SKETCH_TWEE and SKETCH_ARGS):
+    `SKETCH_TWEE=/project/bin/twee-e57 SKETCH_ARGS="--ground-joining-branch-limit 100" python3 sketch.py
+    rungsC320.tsv rCprove320.tsv -j 2 --time 320`
 
 **Down step with sketch hints** (downhints.py, launched 21:57).
 `python3 downhints.py sketch47.tsv down80.tsv -j 2 --time 80 --arms I,U`

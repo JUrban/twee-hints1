@@ -84,6 +84,8 @@ def run(row, T):
     open(pp, 'w').write(prob)
     w[1] = pp; w[w.index('--max-time') + 1] = str(T); w[w.index('--max-cpu') + 1] = str(10 * T)
     w = [x for x in w if x not in ('--no-proof', '--print-given')]
+    if os.environ.get('SKETCH_TWEE'): w[0] = os.environ['SKETCH_TWEE']    # e.g. twee-e57 (exp6)
+    w += os.environ.get('SKETCH_ARGS', '').split()                         # e.g. --ground-joining-branch-limit 100
     p = subprocess.run(['/usr/bin/time', '-f', '%U %S'] + w, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     cpu = sum(float(x) for x in p.stderr.decode().strip().split('\n')[-1].split())
     out = p.stdout.decode('utf8', 'replace'); open(f'{a.out}.d/{g}.{mid}.out', 'w').write(out)

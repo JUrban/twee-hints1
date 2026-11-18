@@ -1,0 +1,4 @@
+aK2_eq_aK3_q__goal_252	8000	gen	l(X2,X1,k(rd(e,X0),X0)) = X2	ok	single open conjecture (conj.py), failed at 20 s
+ns_to_aa1_b__goal_723	8001	gen	e = k(X2,k(X0,X1))	ok	single open conjecture (conj.py), failed at 20 s
+nslm_to_aa1__goal_1003	8002	gen	rd(m(t(X0,X1),X1),t(X0,X1)) = ld(k(X1,X0),X1)	ok	single open conjecture (conj.py), failed at 20 s
+nsmr_to_aa1__goal_631	8003	gen	l(rd(r(X1,X2,X3),X1),X1,X0) = rd(r(X1,X2,X3),X1)	ok	single open conjecture (conj.py), failed at 20 s
