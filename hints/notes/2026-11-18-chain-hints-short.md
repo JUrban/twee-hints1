@@ -20,7 +20,7 @@ below them. Does the chain also beat the pool there? If so it would go into ever
 * Capture result (07:54): commands for 199 of the 200 goals. The 200th, aK2_eq_aK3_l 519, is the report's
   "1 of 200 solved": production proved it between the sampling (07:48) and the context copy, so it came in
   proven (round 0 in cap/CAP/solved.tsv) and never ran. The test has the other **199 goals**.
-  (Corrected 08:31: I first wrote that 519 had a command and was to be left out.)
+  (Corrected 08:29: I first wrote that 519 had a command and was to be left out.)
 
 ## Arms (launched 07:55)
 
@@ -42,6 +42,6 @@ python3 run.py chain5.cmds chain5 1; python3 run.py chain20.cmds chain20 1
 * **5 s (complete, 08:16): 0 against 0.** No arm proves any of the 199; chain5 used 1,238 CPU s against 1,030.
   All runs reached their 10,000 pairs. These goals had all failed production's 5 s runs in the same context, so
   a 5 s test here measures little. Production's 5 s proofs come from goals whose context just changed.
-* **Binary check (08:31): e48 = e61 at 5 s.** The pool5 commands with twee-e61 and `--ground-joining-branch-limit
+* **Binary check (08:29): e48 = e61 at 5 s.** The pool5 commands with twee-e61 and `--ground-joining-branch-limit
   100` (pool5_e61.cmds, 2 workers): 0 proved, identical pair counts on all 199, CPU 1,081 s against 1,030. So
   the binary did not cause production's burst after 07:09 (REPORT 2ax).
