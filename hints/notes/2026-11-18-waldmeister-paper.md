@@ -39,5 +39,9 @@ TLRproperties_2 358 (an exp12 gap head; its B command with `--progress 20`), CPU
 | 560-600 | 57 | 0 | 7 | 50 | 57,697 | 11.4 |
 
 The rest of the main loop grows about 1.6 times from 160k to 600k pairs, with the rule set: normalising new
-pairs, joining tests, the rule model and PG. Hint upkeep is 4.3 s in all. A GC measurement (`+RTS -s`) at 80 s
-and 320 s is running.
+pairs, joining tests, the rule model and PG. Hint upkeep is 4.3 s in all. GC is not the cause (`+RTS -s`, the same command, 16:30-16:44):
+* 80 s: GC 8.3 of 164.6 s (5%), maximum residency 191 MB;
+* 320 s: GC 43.9 of 719.1 s (6%), maximum residency 631 MB.
+* twee allocates about 1 MB per pair considered (167 GB, then 631 GB), nearly all of it short-lived.
+* On this goal the mutator time grew 4.3-fold for 4 times the pairs, so the goal itself slows little; the
+  population median is 1.9-fold (REPORT 2ay).
