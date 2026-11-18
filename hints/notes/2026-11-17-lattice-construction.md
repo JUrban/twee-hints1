@@ -222,6 +222,11 @@ were sketched at 5 s.
   reinst.py and refine.py.
   `python3 ladder.py rungs80.tsv rprove20a.tsv rprove20b.tsv rprove80.tsv ladder1.tsv;
   python3 sketch.py ladder1.tsv lsketch1.tsv -j 3 --time 5`
+  * Sketches done at 01:10: 231 of 456 prove their rung conjecture in a strengthened theory.
+  * The instance screen is next: 217 new instances, 20 s each, 3 CPUs, with all countermodels found so far as a
+    cache (refuted47b.tsv from sketch47b.tsv, and rescreen47.tsv). Then the refinement at 20 s, chained:
+    `python3 reinst.py lsketch1.tsv lsketch1b.tsv -j 3 --secs 20 --cache rescreen47.tsv refuted47b.tsv;
+    python3 refine.py lsketch1b.tsv lrefine1.tsv -j 3 --time 20`
 
 **Down step with sketch hints** (downhints.py, launched 21:57).
 `python3 downhints.py sketch47.tsv down80.tsv -j 2 --time 80 --arms I,U`
