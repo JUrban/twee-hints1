@@ -17,6 +17,7 @@ in `/project/hintwork` (not in git).
 | + cascade round 5 (2w–2ac), from 14 Nov 17:26; at 15 Nov 07:00 | **43,462** (+39.9% over plain) | **4717** (+47.3%) | +199.5 (+15.4 side workers) |
 | + round 5 continued: climbers, proof-step transfer, 30 kNN lemmas (2aj–2an); at 16 Nov 14:00 | **44,710** (+43.9% over plain) | **4898** (+52.9%) | – |
 | + round 5 continued: --mix, parental guidance, deep runs with chain hints and their merges (2at–2ay); at 18 Nov 14:37 | **45,510** (+46.5% over plain) | **4991** (+55.8%) | – |
+| + round 5 continued: wall experiments merged, Prover9 + chain side worker, variant levels (2ay–2az); at 18 Nov 17:36 | **45,556** (+46.7% over plain) | **4996** (+56.0%) | – |
 
 **On unseen originals** (2aq): the 11 whole holdout originals from
 scratch, in 1 hour per batch on 4 workers plus the transfer. Plain twee
