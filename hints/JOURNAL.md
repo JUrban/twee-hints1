@@ -293,7 +293,10 @@ Each goal is one twee run on the goal's problem.
 ### 4.3 Production
 * Side worker `abs/p9c.sh` (loops/P9C, P9C.log), running since 16:46: Prover9 with chain hints on
   twee's stalled goals, 2 workers, proofs straight into UL (exp16: 4 of 107 walls, 3 of them twee-failed).
-* `abs/ul51.sh` since 18 Nov 20:15:19 (UL51.log): ul50 on **16 workers** (exp20 done). The 80 s variants after the
+* `abs/ul52.sh` since 18 Nov 20:27:05 (UL52.log): ul51 restarted for memoised hint unfolding (loop.py a5949d1).
+  ul51 was prep-bound: the threads unfolded 20-30k hints a run in Python, 5-6 s each, under the GIL, so 1-3 of its
+  16 workers ran twee.
+* `abs/ul51.sh` from 18 Nov 20:15:19 to 20:27 (UL51.log): ul50 on **16 workers** (exp20 done). The 80 s variants after the
   160 s level are k60, unf, two; sub and nopg are dropped (0 of 68 each after the 160 s run, exp20). Priors are the
   conditional yields (loop.py fc74100).
 * `abs/ul50.sh` from 18 Nov 19:38:58 to 20:15 (UL50.log, new=7 in 36 min on 10 workers): ul49 on **10 workers** with `nopg` as the last 80 s variant. P9C was

@@ -275,4 +275,18 @@ All four together prove 17 new walls. With Prover9 + chain first, 18 (k60 then a
 * **19:39: ul50**, 10 workers. P9C stopped and its 4 CPUs moved to production. ul49 made 8 new in 43 minutes on
   6 workers.
 * Merged at 19:38: exp22 1, exp20 5 (the 160 s proofs so far).
-* **Pending:** exp20 (to 92), exp22 N80 (no model).
+* **20:13: exp20 complete.** 12 of 92 at 1.77 per CPU hour on the increment. After it: k60 1.19, unf 0.47, two 0.23,
+  sub and nopg 0 (notes/2026-11-18-time-matched-control.md).
+* **20:15: ul51**, 16 workers, variants k60, unf, two after the 160 s level.
+* **20:25: the unfolded level was prep-bound.** ul51 had 15 runs in flight but only 1-3 twee processes. 13 of its 16
+  threads waited on the GIL, and the loop process used 104% CPU in user mode.
+  * Each unfolded run unfolded its hints in Python: 19-29k pool hints at 0.25 ms each, 5-6 s a run, serial
+    across the threads.
+  * ul51 managed 58 unfolded 5 s runs in 7 minutes (0.14 a second). ul48-ul50 were limited the same way, by less
+    because they had fewer workers.
+  * The level's yield per twee CPU hour is still right. Its real cost was higher by the loop's prep, about as much
+    again.
+  * Fix (loop.py a5949d1): unfolded hints are memoised per definition set. A second goal of the same original
+    takes 0.02 s instead of 3.5 s, with identical output.
+* **20:27: ul52** = ul51 with the fix.
+* **Pending:** exp22 N80 (no model).
