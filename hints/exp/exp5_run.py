@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""exp5/run.py ARM T J: long runs on the exp3 goals that no arm proved at 320 abstract s.
+"""exp5/run.py ARM T J [HEAP]: long runs on the exp3 goals that no arm proved at 320 abstract s.
 
 Veroff's question (user, 17 Nov 19:xx): do much longer, hint-guided runs prove late goals, and does the rate of new
 hint matches tell which runs to continue?
@@ -7,13 +7,14 @@ Goals: exp3/goals47 in order, each as soon as all four exp3 arms (C, K, E, V at 
 The script polls exp3's result files every 60 s and ends when exp3 is complete and every eligible goal ran.
 Command: exp3's (exp3/tb, production's context: twee-e48, PG 0.25, rm4t, sibling and kNN lemmas, the pool) for
 arm ARM (C, K, E or V as in exp3), at T abstract s, CPU cap 10 T, --print-hint-matchers, and --dump-state
-states_<ARM>@T/<g>.state (written only when unproved, for a later --load-state extension).
+states_<ARM>@T/<g>.state (written only when unproved, for a later --load-state extension), +RTS -M<HEAP> (default 12g).
 Workers: at most J; the file exp5/J sets the current limit, read before each run starts.
 Writes res_<ARM>@T.tsv (goal, proved, CPU s, peak MB, considered pairs, matched hints, hints), out_<ARM>@T/<g>
 (output without the given log), given_<ARM>@T/<g> for proofs."""
 import concurrent.futures as cf, os, re, subprocess, sys, threading, time
 E3 = '/project/hintwork/exp3'
 arm, T, J = sys.argv[1], sys.argv[2], int(sys.argv[3])
+HEAP = sys.argv[4] if len(sys.argv) > 4 else '12g'   # the binaries' default -M6g is exhausted before 640 s (23:59)
 order = open(f'{E3}/goals47').read().split()
 cmds = {}
 for l in open(f'{E3}/tb/cmds.all'):
@@ -27,7 +28,7 @@ def run(g):
     hf = {'C': f'tb/tmp/{g}.hints', 'K': f'h_K/{g}.hints', 'E': f'h_E/{g}.hints', 'V': f'h_K/{g}.hints'}[arm]
     w[w.index('--hints-file') + 1] = f'{E3}/{hf}'
     if arm == 'V': w[1] = f'{PROB}/{g}.p'
-    w += ['--print-hint-matchers', '--dump-state', os.path.abspath(f'states_{tag}/{g}.state')]
+    w += ['--print-hint-matchers', '--dump-state', os.path.abspath(f'states_{tag}/{g}.state'), '+RTS', f'-M{HEAP}', '-RTS']
     p = subprocess.run(['/usr/bin/time', '-f', '%U %S %M'] + w, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     u, s_, mem = p.stderr.decode().strip().split('\n')[-1].split()
     out = p.stdout.decode('utf8', 'replace'); ok = 'HINTS-END' in out

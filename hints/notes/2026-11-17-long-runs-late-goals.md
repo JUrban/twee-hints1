@@ -30,6 +30,16 @@ fewer than 1,280,000 pairs.
 * Output: res_C@640.tsv (goal, proved, CPU s, peak MB, considered pairs, matched hints, hints), out_C@640/,
   given_C@640/.
 
+**Heap limit** (found 18 Nov 00:02).
+* The first three runs (299, 320, 409) ended without WORK or RESULT lines. All three had a peak of 6.4 GB: the
+  binaries are built with `-with-rtsopts=-M6g`, production's deliberate default. Production counts a heap
+  exhaustion as a failure.
+* At 320 s exp3's runs stay under it (peak at most 3.7 GB, every row has its pair count). At 640 s they do not.
+* Stopped at 00:03. The rows, outputs and partial states are kept as res_C@640.heap6g.tsv, out_C@640.heap6g/ and
+  states_C@640.heap6g/.
+* Relaunched at 00:03 with `+RTS -M12g -RTS` (run.py's 4th argument, default 12g) and 2 workers (24 GB at
+  most): `nohup python3 run.py C 640 8 12g > run_C640.out 2>&1 &`.
+
 **Analysis planned.**
 * Proved at 640 s against the late-match count of the C@320 run (HINTLOG first matches after 480,000 pairs).
 * The stall replay of exp3 on the 640 s runs.
