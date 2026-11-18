@@ -29,4 +29,14 @@ python3 run.py X.cmds X 2
 
 ## Results
 
-(pending)
+* **Complete (by 12:13): worse.** On all 78 goals, chain + transfer records prove 7 against the chain's 9 (+1 −3),
+  with 18,353 CPU s against 16,822 (+9%).
+  * Lost: aK2_eq_aK3_q 252, nsmr_to_aa1 623 and 641. Gained: nil3_23_32_to_25 485 (116,229 pairs).
+  * Where both prove, the larger chain mostly needs more pairs: ns_to_aa1_b 587 102,837 against 47,691; 628
+    148,085 against 89,245; nsmr_to_aa1 624 117,851 against 48,970; nslm_to_aa1 921 62,285 against 49,666. 364
+    and 455 are equal.
+  * Ends: 72 normal, 5 at the CPU cap, 1 killed at the wall limit.
+* So filling the holes with transfer sources dilutes the chain: about 15% more hints, drawn from other
+  originals' proofs. `--transfer` stays off; production keeps chain_records.tsv.
+* nil3_23_32_to_25 485 was new to UL and is an exp11 wall (a hole). Merged at 12:13 (`exp3/tomerge.py exp10/out_X
+  exp10/xm`, `merge.py loops/UL exp10/xm`).

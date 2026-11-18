@@ -4497,6 +4497,8 @@ using an index of hint forms by top symbols to depth 1.
 * exp8 tests that budget, chain against pool at 80 s on 78 stalled goals: **chain 9, pool 5 (+6 −2)**, CPU +10%.
   With exp3 the chain wins at both deep budgets, so production uses it from 08:28 (ul43; ul44 at -j 8 from 09:23).
 * On exp6's stalled goals the branch limit changes nothing (5 = 5, identical pairs; no hang without it).
+* Filling chain holes with transfer sources (exp10, same 78 goals): 7 against 9 (+1 −3), more pairs and +9% CPU.
+  A bigger chain is not a better one; off.
 * exp9 tests the short levels on 199 frontier goals: at 5 s, 0 against 0 (chain +20% CPU); at 20 s pool 3, chain 2
   (+0 −1), and the chain needs more pairs where both prove. So the chain stays out of the 5 s level.
 
