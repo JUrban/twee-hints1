@@ -552,7 +552,10 @@ class Loop:
             with open(os.path.join(od, tag), 'w') as f:
                 f.write(out[:i] + out[j:] if 0 <= i < j else out)  # without the given rules
         if hints and not os.environ.get('LOOP_KEEP_TMP'):
-            os.unlink(hpath)
+            try:
+                os.unlink(hpath)
+            except FileNotFoundError:
+                pass
         if cap:
             sig_ = self.signature(name)   # (in the hints' canonical form)
             self.captured[name] = [canon_key(x[0], x[1], sig_) for x in givenlib.parse_given_parents(out)
@@ -1226,6 +1229,11 @@ class Loop:
                             cl = ('r' if retry else 'f') if retry or (far and not deep) else 'd'
                         if cl != 'd':
                             n = (retry if cl == 'r' else far).pop(0)[-1]; lev = 0
+                            # (never a goal already running: a full pass's lists predate this pass's own
+                            # submissions, so a goal taken as deep first came round again as a retry; both runs
+                            # share tmp/<goal>.hints, and ul44 died on the second unlink, 18 Nov 09:29)
+                            if any(m == n for m, _ in running.values()):
+                                continue
                             if light and (n not in att or n in busy or not (ctx(n) != att[n][0] or grown(n))):
                                 continue
                             att[n] = (ctx(n), 0)
