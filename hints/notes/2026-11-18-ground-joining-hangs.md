@@ -31,6 +31,24 @@ Started 18 Nov 2026, 05:16 UTC. Directory /project/hintwork/exp6; scripts in hin
 * With `--ground-joining-limit 100` the same run passes rule 2900, reaches rule 3544 and ends normally by
   CPULIMIT at 200 s, with 36,005 pairs considered. That is still slow: about 180 pairs/s. With 10,000 it stalls
   at rule 2900 as before (600 s wall). 1,000: see the results.
+* Where the time goes (src/Twee/Join.hs, `groundJoinFrom`): every model in which the pair fails adds
+  `diag (modelToLiterals model')` to the case split by `formAnd`. That multiplies the number of branches by up to
+  the number of literals, and every later tick solves all branches. The tick limit bounds the number of models,
+  not the size of the split.
+* **twee-e57** (commit 2eb8fbd): `--ground-joining-branch-limit B` assumes "not ground joinable" (as at the tick
+  limit) once the split has more than B branches. On the repro, 20 abstract s, CPU cap 200 s:
+
+  | setting | pairs considered | CPU s | end |
+  |---|---|---|---|
+  | unlimited (e48) | stalls after rule 2900 | > 600 | killed |
+  | tick limit 10,000 | stalls after rule 2900 | > 600 | killed |
+  | tick limit 1,000 | 28,661 (one step of about 245 s at rule 2901) | 320 | CPU cap |
+  | tick limit 100 | 36,005 | 205 | CPU cap |
+  | **branch limit 100 (e57)** | **40,000** | **43** | **normal** |
+  | branch limit 1,000 (e57) | (pending) | | |
+* Watchdog abs/cpuwatch.py (from 05:17, PID 2391999) kills experiment runs (not production) past 1.5 x
+  --max-cpu + 60 s CPU, logging to abs/cpuwatch.log. Its first kill was another com_Ralt 348 refinement run (4004,
+  997 s CPU against a cap of 200).
 * Not yet known: whether the HEAP runs (most of the L2 loss) have the same cause, and whether gdb or perf could
   show it. ptrace and perf are not allowed in this sandbox for processes outside the session's own tree.
 
@@ -50,6 +68,15 @@ cd /project/hintwork/exp6
 python3 run.py hang5.cmds a_g100 2 --ground-joining-limit 100
 python3 run.py pg200.cmds b0 1
 python3 run.py pg200.cmds g100 1 --ground-joining-limit 100
+```
+
+* **05:21, changed to the branch limit.** Its repro result is far better, so the tick-limit arms were stopped:
+  a_g100 had finished no run; g100 had finished 17 of 203 (kept as partial_res_g100.tsv). They were replaced by
+  e57 arms with `--ground-joining-branch-limit 100`. b0 continues.
+
+```
+python3 run.py hang5_e57.cmds a_gb100 2 --ground-joining-branch-limit 100
+python3 run.py pg200_e57.cmds gb100 1 --ground-joining-branch-limit 100
 ```
 
 ## Results
