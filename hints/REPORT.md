@@ -4435,6 +4435,65 @@ x = y), rungs appear.
 * Neither is new. exp3's K and E arms proved 517 in about 17 s, and production proved 508 itself at 00:15.
 * The open rung conjectures are being climbed recursively (ladder.py).
 
+## 2ax. Hangs, Prover9's subsumption matching, and chain hints (18 Nov, from 04:00)
+
+Records: notes/2026-11-18-ground-joining-hangs.md (exp6), -subsumption-matching.md (exp7),
+-chain-hints-unsolved.md (exp8), -chain-hints-short.md (exp9); notes/2026-11-17-long-runs-late-goals.md (exp5),
+-deep-runs-expanded-chains.md (exp3) and -lattice-construction.md (exp4).
+
+**Runs that ignored their limits.** Some twee runs went on for hours past --max-time and --max-cpu (up to 8.7
+CPU h for a 320 s run).
+* twee checks its limits only between main-loop steps, and one step never ended. Ground joinability
+  (Join.hs, groundJoinFrom) splits on cases and adds a model's literals to the case context at each split. With
+  permutation laws over many variables that context grows without bound (44,992 literals in one dump).
+* twee-e57 adds `--ground-joining-branch-limit B`: past B literals the pair counts as not ground-joinable and is
+  kept, as when the existing tick limit runs out.
+* With B = 100, on the PG testbed's 200 hard goals at 20 s: the same 87 proofs with identical pair counts on all
+  87. All 5 known hangs now end, at 1,054–3,930 CPU s; none of them proves.
+* A watchdog (abs/cpuwatch.py) kills experiment runs at 1.5 × their CPU cap + 60 s.
+* On the way I found a 10% slowdown from e51 (the parental filter judged after unification). twee-e61 judges it
+  before again, using e50's strict set, and its output is byte-identical to e50's.
+* **Production since 07:30** is abs/ul42.sh: twee-e61 with the branch limit 100.
+
+**Hint matching by subsumption (the user: "in P9 the hint matchers subsume the hints").** twee boosted a pair
+only when it was a variant of a hint. twee-e58/e59 `--eqhint-subsume` also boosts a pair that subsumes a hint,
+using an index of hint forms by top symbols to depth 1.
+* On the 200 hard goals at 20 s: 87 against 87 (+2 −2), with pairs to proof about equal (873k against 878k) and
+  17% more CPU. Neutral, so it stays off.
+* A likely reason: a pair more general than a hint is smaller than the hint, so twee's size weight already
+  ranks it well.
+
+**Deep runs on late goals (exp3, 320 s, 47 goals; 177 of 188 runs at 08:25).**
+* Proved: K (lemmas + the expanded chain of the 10 nearest proven siblings as the only hints) 12 of 44 in
+  14.4 CPU h. E (pool + chain) 10 of 45 in 15.6 h. C (production's command) 9 of 45 in 20.0 h. V (axioms + chain)
+  4 of 43 in 41.4 h.
+* At the 07:10 count, every goal C proved K proved too.
+* The 10 proofs that UL lacked were merged at 07:09.
+* **What that set off.** UL had gained 1–4 proofs an hour from 02:00 to 07:00. Between 07:10 and 08:20 it gained
+  152, all from 5 s runs of goals that had failed at 5 s two to eight times.
+  * 13 of the 152 descend from merged proofs through their lemma records (nil3_27 472 opened nil3_27 462–477,
+    aK2_eq_aK3_t 372 opened 368 and 373).
+  * 72 use a new proof of their own original.
+  * Other chains started with no merged ancestor, and the 07:30 restart overlaps the rest.
+  * So a deep proof at a stalled place can open a run of cheap proofs around it, in both directions.
+
+**Longer is not the answer (exp5).** 15 late goals at 640 s (1.28M pairs each): 0 proved, 1,234–3,785 CPU s and
+2.2–4.1 GB each.
+
+**The lattice (exp4), continued.**
+* The open rung conjectures at 320 s: 0 of 20 proved, so they are not easier than their goals.
+* The conjecturer's rungs: 6 of 49 proved at 20 s, then 1 of 4 at 320 s. That closes aK2_eq_aK3_q 252 through
+  its refinement proof, which is not new (exp3's C and K proved it directly).
+
+**Chain hints in production (in progress).**
+* `loop.py --chain-level L` (with `--chain-sibs`, `--chain-max`, `--chain-records`) gives levels ≥ L the
+  goal's chain as hints instead of the pool. The chain comes from hints/sibchain.py over a records file of all 16
+  loops (39,554 records); new proofs' records are added live.
+* A resumed state takes new hints only for new pairs (`--no-resume-requeue`), so the setting to test is L = 1:
+  production's 80 s level is a fresh run whose state the 320 s level resumes.
+* exp8 tests that budget, chain against pool at 80 s on 78 stalled goals: 2 against 2 after 31.
+* exp9 tests the short levels on 198 frontier goals: at 5 s, 0 against 0 (chain +20% CPU); 20 s running.
+
 ## 2c. Long runs: stall cutoff and checkpoints
 
 * `--eqhint-stall N` gives up when no new rule has matched a hint for N
