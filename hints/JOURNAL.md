@@ -296,7 +296,7 @@ Each goal is one twee run on the goal's problem.
   goal's chain (hints/sibchain.py: the proofs of its 10 nearest proven siblings below, expanded through the
   proven goals they used) instead of the pool (notes/2026-11-18-chain-hints-unsolved.md, exp3's K arm).
   The records file is read at start; rebuild it after merges (merge.py copies hint files, not outputs):
-  `python3 hints/sibchain.py --build chain_records.tsv.new --extra exp3/out_K@320,...` then mv (08:32: 39,643
+  `python3 hints/sibchain.py --build chain_records.tsv.new --extra exp3/out_K@320,...` then mv (08:31: 39,643
   records, 12 of them from the merged exp3/exp8 outputs).
 * `abs/ul42.sh` from 18 Nov 07:30 (UL42.log): ul41 with `--twee /project/bin/twee-pg61` (twee-e61) and
   `TWEE_PG_ARGS="--pg-threshold 0.25 --ground-joining-branch-limit 100"`, on 4 workers. The branch limit stops
