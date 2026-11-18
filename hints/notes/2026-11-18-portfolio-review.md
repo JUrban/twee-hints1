@@ -289,4 +289,14 @@ All four together prove 17 new walls. With Prover9 + chain first, 18 (k60 then a
   * Fix (loop.py a5949d1): unfolded hints are memoised per definition set. A second goal of the same original
     takes 0.02 s instead of 3.5 s, with identical output.
 * **20:27: ul52** = ul51 with the fix.
-* **Pending:** exp22 N80 (no model).
+* **20:34: ul52's throughput** was 400 runs, 5 new, in 6.6 min (ul51: 50 runs in the same time).
+* **20:38: stopping P9C was a mistake of the kind under review.** I judged it on its last 217 runs (1 proof). Split by
+  what the goals had failed in production, its 487 live runs since 16:46 were:
+  * 4 proofs in 350 runs on goals that had failed the 160 or 320 s level, about 0.7 per CPU hour;
+  * 6 proofs in 121 on goals that had failed only the 80 s level.
+  * After the 160 s level that is above unf (0.47) and two (0.23). The decline came from its nearest-first list,
+    which it had exhausted, not from the method.
+  * So Prover9 + chain is now a cascade level: `--variants p9` (loop.py bc450f8, p9twee.P9 with the level's chain
+    hints, 60 s, 6 siblings either side, prior 0.7). It gets each goal once per context, after k60.
+* **20:35: ul53** = ul52 with `--variants unf@0,k60@0,k60,p9,unf,two`.
+* **Pending:** exp22 N80 (no model); ul53's per-level yields.
