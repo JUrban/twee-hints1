@@ -271,6 +271,13 @@ Kinyon and Veroff found AIM lemmas, from finite models.
 * `python3 conj.py /project/hintwork/exp3/goals47 conj47.tsv -j 1 --nf nf20.tsv`
 * First goal (R1dist_to_aa1 619): 52 models, 148 candidate equations, 5 kept. They are basic identities among the
   goal's subterms, such as `ld(rd(e,X0),e) = X0` (the right inverse of the left inverse). No left-to-right bridge.
+* On 42 goals (00:03): 175 conjectures (43 equate a left subterm with a right one). Some are strong, for example
+  `r(X0,X1,X2) = l(X0,X1,X2)` for aa3_12 491 and `ld(X0,X1) = rd(X1,X0)` for com_Ralt 348. They were checked only
+  against the 48–114 collected models.
+* Next, launched when conj.py ends (conjrefine.py, 1 CPU): a full Mace4 screen of each conjecture (up to 12, 30 s),
+  then per goal the survivors together as assumptions at 20 s, as in refine.py. The ones the proof uses are rungs,
+  proved by rungs.py and sketch.py as before.
+  `python3 conjrefine.py conj47.tsv conjref20.tsv -j 1 --time 20`
 
 **Launch** (stage 1, 20:33): `cd /project/hintwork/exp4; nohup bash stage1.sh > stage1.out 2>&1 &`.
 
