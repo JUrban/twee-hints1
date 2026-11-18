@@ -291,7 +291,10 @@ Each goal is one twee run on the goal's problem.
 * The learned scheduler (`--sched-model`) is off by default, because at scale its gain was noise.
 
 ### 4.3 Production
-* `abs/ul44.sh` since 18 Nov 09:23 (UL44.log): ul43 on 8 workers instead of 4 (load had fallen to 13.5).
+* `abs/ul44.sh` since 18 Nov 09:47 (UL44.log): ul43 on 8 workers instead of 4 (load had fallen to 13.5). Its first
+  start (09:23) died at 09:29 (log loops/UL44a.log): loop.py could send a goal deep and then fresh in the same
+  pass. The two runs shared tmp/<goal>.hints (the fresh run read the chain), and the second unlink failed.
+  Fixed in loop.py at 09:47, so production was down 09:29-09:47.
 * `abs/ul43.sh` from 18 Nov 08:28 (UL43.log; 90 new in 50 min on 4 workers): ul42 with `--chain-level 1 --chain-records
   /project/hintwork/chain_records.tsv`. The 80 s level (fresh; the 320 s level resumes its state) takes the
   goal's chain (hints/sibchain.py: the proofs of its 10 nearest proven siblings below, expanded through the
