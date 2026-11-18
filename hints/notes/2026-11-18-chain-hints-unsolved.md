@@ -49,4 +49,6 @@ python3 run.py stall78_K.cmds s_K 2
     into UL at 07:09, two minutes before the siblings were picked. Its own proof is not in its siblings'
     closure (781 goals, chain_records.tsv), so its chain holds no proof of it; 317 of its 1,079 proof lines
     are steps its siblings' proofs share.
-  * The s_K runner started before run.py kept proved outputs (07:47), so 587 and 628 must be rerun to merge.
+  * The s_K runner started before run.py kept proved outputs (07:47), so 587 and 628 were rerun (08:25,
+    `python3 run.py re2.cmds s_K_re 1`, exp/exp8_re2.cmds): the same pairs (47,691, 89,245). Merged into UL at
+    08:26 (`exp3/tomerge.py exp8/out_s_K_re exp8/xm1`, `merge.py loops/UL exp8/xm1`).
