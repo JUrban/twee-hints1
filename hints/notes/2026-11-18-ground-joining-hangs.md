@@ -44,8 +44,12 @@ Started 18 Nov 2026, 05:16 UTC. Directory /project/hintwork/exp6; scripts in hin
   | tick limit 10,000 | stalls after rule 2900 | > 600 | killed |
   | tick limit 1,000 | 28,661 (one step of about 245 s at rule 2901) | 320 | CPU cap |
   | tick limit 100 | 36,005 | 205 | CPU cap |
+  | branch limit 1,000 (e57) | 35,932 | 216 | CPU cap |
   | **branch limit 100 (e57)** | **40,000** | **43** | **normal** |
-  | branch limit 1,000 (e57) | (pending) | | |
+  | branch limit 30 (e57) | 40,000 | 35 | normal |
+  | branch limit 10 (e57) | 40,000 | 30 | normal |
+
+  At 10, 30 and 100 the search is the same (3,870 rules, 40,000 pairs). Only the time differs.
 * Watchdog abs/cpuwatch.py (from 05:17, PID 2391999) kills experiment runs (not production) past 1.5 x
   --max-cpu + 60 s CPU, logging to abs/cpuwatch.log. Its first kill was another com_Ralt 348 refinement run (4004,
   997 s CPU against a cap of 200).
