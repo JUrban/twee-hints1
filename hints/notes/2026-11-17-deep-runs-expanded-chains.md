@@ -127,6 +127,19 @@ nil3_27 472, 508, 374, 517, nil4_19K 368 and 211. The 10 that UL lacked were mer
 (`tomerge.py out_C@320 out_K@320 out_E@320 out_V@320 exp3/xm2`, then `merge.py loops/UL exp3/xm2`): UL now has
 45,006. 374 and 508 were already proved by production.
 
+**What the merge set off in production** (measured 08:30, 18 Nov).
+* UL gained 1-4 proofs an hour from 02:00 to 07:00, then 152 between 07:10 and 08:20, all from 5 s runs (L0) of
+  goals that had failed at 5 s two to eight times before.
+* Lemma records (depcheck.used_lemmas) of those 152:
+  * 6 use a merged proof directly: nil3_27 472 three times (for nil3_27 462, 463 and 466, below it),
+    aK2_eq_aK3_t 372 twice, nil3_30 508 once.
+  * 13 reach a merged proof through other new proofs: the nil3_27 462-477 and aK2_eq_aK3_t 368/373 chains.
+  * 72 use a new proof of the same original; 41 use one of another original (kNN).
+* Other chains started with no merged ancestor (nil3_31 458 at 07:16, aK2_eq_aK3_l 490 at 07:14), and the
+  ul42 restart at 07:30 overlaps the rest. So the merge explains part of the burst, not all of it.
+* Still, the lesson matches the head counts of 17 Nov: one deep proof at a stalled place can open a run of cheap
+  5 s proofs around it, in both directions, since lemmas from goals above are allowed.
+
 **Chain holes** (found 20:23).
 * 127 of the 439 siblings (29%) have no USEDAXIOMS record, so they enter as leaves. Their closures hold a median
   of 13 unrecorded members (q3 46, max 202).
