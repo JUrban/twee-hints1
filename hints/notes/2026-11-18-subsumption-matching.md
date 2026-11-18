@@ -60,4 +60,11 @@ python3 run.py pg200_e58.cmds su100 2 --ground-joining-branch-limit 100 --eqhint
 
 ## Results
 
-(pending)
+* **Test A (complete, 07:00): neutral.**
+  * su100 proves 87, the same as the control gb100 (+2 -2).
+  * On the 85 goals both prove: 872,649 pairs against 878,065 in total; fewer pairs on 25 goals, more on 58.
+  * CPU 5,383 s against 4,615 s (+17%, e58).
+* So at 20 s on these 200 hard goals, Prover9's subsumption matching does not beat variant matching, just as the
+  one-step `--eqhint-generalise` did not (2f). A likely reason: a pair more general than a hint is smaller than
+  the hint, so twee's size-based weight already ranks it well. The boost adds little.
+* It stays available as `--eqhint-subsume` (e59/e60, about +15% CPU per pair) and is off by default.
