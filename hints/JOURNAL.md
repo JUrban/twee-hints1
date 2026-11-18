@@ -723,6 +723,7 @@ reports are written as the experiments run.
 | notes/2026-11-18-set-join-walls.md | Successor sets for critical pairs (--set-join, Waldmeister 4.3) at 80 s on the 107 walls (exp19) |
 | notes/2026-11-18-portfolio-review.md | Complementary methods: every dropped variant's unique share, the missing time-matched comparison, and portfolio approaches (the user's request, 17:00) |
 | notes/2026-11-18-time-matched-control.md | exp11's chain at 160 s on the 92 failed walls: the time-matched control for 80 s + 80 s portfolios (exp20) |
+| notes/2026-11-18-l0-portfolio.md | 8 arms at 5 s (control, 60 kNN lemmas, unfolded, subsumption, rule threshold 0.2, no rule model, no PG, chain hints) on 300 goals that failed their 5 s fresh run (exp21) |
 | notes/2026-11-17-lemma-circularity.md | Are lemma chains circular? A check of the used lemmas |
 | notes/2026-11-17-mix-fail-order.md | Repeats cost most of the time: `--mix` and `--fail-order` |
 | notes/2026-11-17-pg-ab-half1.md | Parental guidance at scale: half1 from zero, 2 hours, sum filter 0.25 against the defaults |
