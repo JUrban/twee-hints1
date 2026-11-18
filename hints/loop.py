@@ -1074,37 +1074,45 @@ class Loop:
         att = {n: ((ctx(n, False if a.cascade_was_below else None), a.cascade_start) if a.cascade_start >= 0
                    else (None, -1))
                for n in self.names if n not in self.solved}
-        # (18 Nov 22:38) tiers: the variants that follow one cascade level form a tier; a goal tries them in any order (with
-        # --ratio-order the untried one of highest yield first) and passes the tier once it tried all. VTRIED: goal -> the
-        # variant levels it tried since its last fresh run. (A fixed order made every goal run the unfolded 5 s level, down to
-        # 0.39 per CPU hour in ul54, before the 60-lemma one, 5.5; and a restart with the order swapped would skip the
-        # second for the goals past the first.)
-        TIER = {}
+        # (18 Nov 22:38) tiers; (23:48) optional attempts. A variant level is an attempt a goal may take at any time after
+        # the cascade level it follows, once per context. Only the cascade's own levels are ordered: a resume needs the
+        # state of the level before it. With --ratio-order a goal's next attempt is its option of highest current yield, so
+        # a variant that has stopped paying no longer holds back the goal's next level. (With tiers, 22:38-23:48, a goal had
+        # to try every variant after a level before the next level; before them, 22:38, the order was fixed, and every goal
+        # ran the unfolded 5 s level, 0.39 per CPU hour in ul54, before the 60-lemma one, 5.5.) Without --ratio-order: the
+        # order given, the lowest internal level first. att[n][1]: the highest cascade level N ran in its current context;
+        # VTRIED[n]: the variant levels N ran in that context (both start over with each fresh run).
+        FOL = []   # internal level -> the internal index of the cascade level it follows (its own for a cascade level)
         for k_ in range(len(T)):
-            if VAR[k_]:
-                j0, j1 = k_, k_
-                while VAR[j0 - 1]:
-                    j0 -= 1
-                while j1 + 1 < len(T) and VAR[j1 + 1]:
-                    j1 += 1
-                TIER[k_] = list(range(j0, j1 + 1))
+            FOL.append(k_ if not VAR[k_] else FOL[k_ - 1])
+        NOWN = []   # internal level -> the internal index of the next cascade level after it (len(T): none)
+        for k_ in range(len(T)):
+            j_ = k_ + 1
+            while j_ < len(T) and VAR[j_]:
+                j_ += 1
+            NOWN.append(j_)
+        VLEVS = [k_ for k_ in range(len(T)) if VAR[k_]]
         vtried = collections.defaultdict(set)
-        def nxt(n):
-            """N's next internal level (len(T): none left)."""
-            j = att[n][1] + 1
-            while j < len(T):
-                if not VAR[j]:
-                    return j
-                un = [x for x in TIER[j] if x not in vtried[n]]
-                if un:
-                    return max(un, key=lambda x: (lyield(LAB[x]), -x)) if a.ratio_order else un[0]
-                j = TIER[j][-1] + 1
-            return len(T)
-        def vlev(n, lev):
-            """the level att records once N tried variant level LEV: the tier's last if N tried all of it, else the
-            cascade level before the tier"""
-            vtried[n].add(lev); tr = TIER[lev]
-            return tr[-1] if all(x in vtried[n] for x in tr) else tr[0] - 1
+        import zlib
+        def chs(c):
+            """a context's short hash, for the results rows (c=)"""
+            return '%08x' % (zlib.crc32(repr(c).encode()) & 0xffffffff)
+        def opts(n):
+            """N's possible next internal levels: its next cascade level, and the untried variants after the cascade
+            levels it ran"""
+            h = att[n][1]
+            if h < 0:
+                return [0]
+            o_ = [v for v in VLEVS if FOL[v] <= h and v not in vtried[n]]
+            if NOWN[h] < len(T):
+                o_.append(NOWN[h])
+            return o_
+        def nxt(n, ok=None):
+            """N's next internal level of those OK allows (len(T): none left)."""
+            o_ = [x for x in opts(n) if ok is None or ok(x)]
+            if not o_:
+                return len(T)
+            return max(o_, key=lambda x: (lyield(LAB[x]), -x)) if a.ratio_order else min(o_)
         running = {}   # future -> (name, level)
         nf = collections.Counter()   # goal -> its failed fresh (T0) runs in this round (--fail-order)
         nfb = {}   # --fail-reset: goal -> its places after the nearest proven goal below at its last failure
@@ -1124,7 +1132,7 @@ class Loop:
         rdir = os.path.join(self.dir, 'r%d' % rnd); os.makedirs(rdir, exist_ok=True)
         if a.cascade_continue and os.path.exists(os.path.join(rdir, 'results.tsv')):
             # a restarted round: the levels this round already tried (in the current context)
-            k0 = 0; fresh = set(); kc = 0
+            k0 = 0; fresh = set(); kc = 0; kold = 0
             for ri, line in enumerate(open(os.path.join(rdir, 'results.tsv'))):
                 f = line.rstrip('\n').split('\t')
                 if len(f) >= 5 and f[4] in IDX and ri >= a.chain_since_row:
@@ -1137,15 +1145,26 @@ class Loop:
                         lev = IDX['L%d' % max(0, a.chain_level - 1)]; kc += 1
                     else:
                         lev = IDX[f[4]]
-                        if VAR[lev]:
-                            lev = vlev(f[0], lev)
+                    if lev == 0 and f[1] == 'NO':
+                        nf[f[0]] += 1
+                    # (18 Nov 23:48) rows from 23:48 on name their run's context (c=): a row of another context is not an
+                    # attempt in the current one. A fresh run (L0) starts its context's attempts over, so a goal reopened by
+                    # a new proof keeps its deeper levels to go after a restart. (Replay kept the round's highest level: at
+                    # 23:45, 892 unsolved goals had deeper runs only before their latest fresh run.)
+                    cf = f[6][2:] if len(f) >= 7 and f[6].startswith('c=') else None
+                    n_ = f[0]
+                    if cf is not None and cf != chs(ctx(n_)):
+                        kold += 1
+                        continue
                     if lev == 0:
-                        fresh.add(f[0])
-                        if f[1] == 'NO':
-                            nf[f[0]] += 1
-                    if lev > att[f[0]][1]:
-                        att[f[0]] = (ctx(f[0]), lev); k0 += 1
-            print(f'  cascade: continuing round {rnd}, {k0} level updates from its results'
+                        fresh.add(n_); att[n_] = (ctx(n_), 0); vtried.pop(n_, None); k0 += 1
+                    elif VAR[lev]:
+                        vtried[n_].add(lev); k0 += 1
+                        if FOL[lev] > att[n_][1]:
+                            att[n_] = (ctx(n_), FOL[lev])
+                    elif lev > att[n_][1]:
+                        att[n_] = (ctx(n_), lev); k0 += 1
+            print(f'  cascade: continuing round {rnd}, {k0} level updates from its results, {kold} rows of older contexts'
                   + (f' ({kc} deep rows before row {a.chain_since_row} capped below --chain-level)' if a.chain_since_row else ''),
                   flush=True)
             if a.fresh_first:
@@ -1362,11 +1381,13 @@ class Loop:
                                        obd.get(gnum[n][0], 0), deep_running[gnum[n][0]], g[n][1], gnum[n][1],
                                        j_, n)
                                       for n in att
-                                      if n not in busy and ctx(n) == att[n][0]
-                                      for j_ in (nxt(n),)
-                                      if j_ < len(T)
-                                      and (may_deepen(n, g) or n in hds or ORIG[j_] == 0) and not grown(n)
-                                      and (n in hds or not a.head_only_from or j_ < hof))
+                                      if n not in busy and ctx(n) == att[n][0] and not grown(n)
+                                      # (the levels open to N: a goal far from the frontier only gets the variants of
+                                      # the fresh level; chosen among those, as a variant no longer comes first)
+                                      for md_ in (may_deepen(n, g) or n in hds,)
+                                      for j_ in (nxt(n, lambda x, n=n, md_=md_: (md_ or ORIG[x] == 0)
+                                                     and (n in hds or not a.head_only_from or x < hof)),)
+                                      if j_ < len(T))
                         far = []
                         if SM and a.far_retry and (a.mix or len(running) + len(retry) + len(deep) < a.j):
                             far = sorted((-v, n) for n, v in cand.items()
@@ -1425,9 +1446,12 @@ class Loop:
                             x_ = deep.pop(0); lev, n = x_[-2], x_[-1]
                             if any(m == n for m, _ in running.values()):
                                 continue
-                            if light and (n not in att or nxt(n) != lev or ctx(n) != att[n][0] or grown(n)):
+                            if light and (n not in att or lev not in opts(n) or ctx(n) != att[n][0] or grown(n)):
                                 continue
-                            att[n] = (ctx(n), vlev(n, lev) if VAR[lev] else lev)
+                            if VAR[lev]:
+                                vtried[n].add(lev); att[n] = (ctx(n), max(att[n][1], FOL[lev]))
+                            else:
+                                att[n] = (ctx(n), lev)
                             sp = os.path.join(self.dir, 'states', n + '.bin')
                             # --p9loop (P9loop deepening): a fresh run of the level's increment, with the
                             # matcher lemmas of the goal's earlier runs and its next ordering, not a resume
@@ -1499,7 +1523,8 @@ class Loop:
                                 print(f'  cascade: --sched-retrain: model retrained on {len(H.rows)} rows', flush=True)
                     if H and a.sched_pmin_auto:
                         (auto0 if lev == 0 else auto1).append((ok, dt, p_ if lev == 0 else 0.0))
-                    rf.write(f'{n}\t{"THM" if ok else "NO"}\t{dt:.2f}\t{stats}\t{LAB[lev]}\tt={time.time()-t0:.0f}\n'); rf.flush()
+                    rf.write(f'{n}\t{"THM" if ok else "NO"}\t{dt:.2f}\t{stats}\t{LAB[lev]}\tt={time.time()-t0:.0f}'
+                             f'\tc={chs(att[n][0]) if n in att else "-"}\n'); rf.flush()
                     ystat[LAB[lev]][0] += 1 if ok else 0; ystat[LAB[lev]][1] += dt
                     if ok and n in self.solved:
                         pass   # (synced from another process meanwhile: keep its row and hints)
