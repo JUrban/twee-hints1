@@ -4677,9 +4677,40 @@ level.
 * Production **ul47** = ul46 + `--variants k60,two,unf,sub`, in the order of the wall yields. The Prover9 + chain
   side worker (P9C) keeps running beside it.
 
-**Next:** exp21, 8 arms at 5 s on 300 goals that failed their 5 s fresh run:
-* a cheap level at 8 CPU s a run;
-* a 1% hit rate there would be worth about 4.5 proofs per CPU hour.
+**The cheap level (exp21, 18:25).** 9 arms at 5 s on 300 goals whose 5 s fresh run had failed:
+
+| arm | proved of 300 | new per CPU h |
+|---|---:|---:|
+| **unfolded definitions** | **4** | **3.8** |
+| 60 kNN lemmas | 1 | 1.9 |
+| control, rule threshold 0.2, no rule model, no PG, subsumption, chain hints, Prover9 at 8 s | 0 each | |
+
+* Changing the search does nothing at 5 s where the same problem just failed. Changing the problem (unfolding)
+  does, at three times the 80 s chain level's yield.
+
+**The ratio rule.**
+* Independent attempts are best tried in decreasing order of success chance over cost. Here that is each member's
+  new proofs per CPU hour on the goals every earlier member failed in the same context.
+* Measured order:
+  * fresh retry in a new context: 11.3;
+  * unfolded at 5 s: 3.8;
+  * Prover9 + chain: 2.0 (on the walls; 1.44 live);
+  * 60 kNN lemmas at 5 s: 1.9;
+  * 60 kNN lemmas at 80 s: 1.24;
+  * the 80 s chain: 1.16;
+  * two-sided chain: 0.76;
+  * unfolded at 80 s: 0.49;
+  * subsumption: 0.42;
+  * set-join: 0.31;
+  * 320 s on gap heads: 0.21.
+* Extending the chain run from 80 to 160 s (exp20, on the increment) is about 1.4 on its first 22 walls.
+
+**ul48 (18:30)**, on 6 workers:
+* `--variants unf@0,k60@0,k60,two,unf,sub --ratio-order`.
+* Every goal whose fresh run failed, near the frontier or not, gets the unfolded and the 60-lemma 5 s runs.
+* The deep queue is ordered by each goal's next level's yield: measured priors, updated online.
+* Weak members were paused to make room: exp12's 320 s heads (0.21) and exp19's set-join (0.31). Prover9 + chain
+  went from 2 to 4 workers.
 
 ## 2c. Long runs: stall cutoff and checkpoints
 
