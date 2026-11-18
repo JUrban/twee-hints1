@@ -253,7 +253,7 @@ were sketched at 5 s.
   in the same context as exp3's C arm (the goal's production command, conjecture replaced). A rung that proves
   where its goal failed at 320 s means the lattice helps.
   `python3 sketch.py rungs320.tsv rprove320.tsv -j 3 --time 320`
-  * **Result (05:00): 0 of 20 proved.** Every one used its full budget (860–1,075 CPU s), so these rungs are not
+  * **Result (05:00): 0 of 20 proved.** They took 574–3,515 CPU s each (the CPU cap is 3,200 s), so these rungs are not
     easier than their goals. closure2 still solves only 517 and 508.
 * **Result (05:33): conjecture rungs.** Of the conjecturer's 49 rung conjectures (rungsC.tsv), **6 are proved at
   20 s**, and no goal closes (closure.py on conjref20.tsv). Two com_Ralt 348 runs (4003, 4004) never ended. That
