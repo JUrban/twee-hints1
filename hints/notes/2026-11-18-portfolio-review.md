@@ -217,7 +217,7 @@ Measured at 17:49 (walls: the 92 that exp11's 80 s chain failed; production: UL 
   online per member from production's own V rows (a Beta-Binomial over the member's runs on goals that failed
   everything before it). The mix classes are a coarse version of this.
 
-## Conditional yields (18:52, an independent check of the priors)
+## Conditional yields (18:50, an independent check of the priors)
 
 In production the 80 s members run in sequence. So each later member only gets credit for walls every earlier
 member failed: its yield conditional on the earlier failures, not alone. On the 92 walls exp11 failed, in ul48's
