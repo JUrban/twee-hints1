@@ -387,10 +387,10 @@ class Loop:
                                                    for j, i in enumerate(proved)])
         return cpath
 
-    def run_one(self, name, hints, rnd, budget=None, resume=None, max_cpu=None, variant=0):
+    def run_one(self, name, hints, rnd, budget=None, resume=None, max_cpu=None, variant=0, var=None):
         """One twee run. BUDGET (default: the round's timeout), RESUME (default --resume)
         and MAX_CPU (replaces --max-cpu in --args) are for --cascade. VARIANT: which of the
-        --p9-parallel runs of this goal in this round (Bigloop)."""
+        --p9-parallel runs of this goal in this round (Bigloop). VAR: a --variants level's change."""
         a = self.a
         tag = name + (f'.v{variant}' if variant else '')   # tmp file names
         T = budget if budget is not None else self.timeout(rnd)
@@ -399,7 +399,8 @@ class Loop:
         if (a.lemmas or a.lemma_knn) and rnd > 0 and self.lemma_src:
             import lemmas
             if a.lemma_knn:
-                txt, nl = lemmas.lemma_problem_knn(name, self.lemma_src, a.lemmas, self.lemma_index, a.lemma_knn, a.lemma_after)
+                txt, nl = lemmas.lemma_problem_knn(name, self.lemma_src, a.lemmas, self.lemma_index,
+                                                   60 if var == 'k60' else a.lemma_knn, a.lemma_after)
             else:
                 txt, nl = lemmas.lemma_problem(name, self.lemma_src, a.lemmas, a.lemma_after)
             if nl:
@@ -478,14 +479,14 @@ class Loop:
             path = os.path.join(self.dir, 'tmp', tag + '.p')
             with open(path, 'w') as f:
                 f.write(txt)
-        if a.unfold:
+        if a.unfold or var == 'unf':
             # (unfold.py) the definitions substituted away: twee's KBO folds them, Prover9 unfolds;
             # some stalled goals are a rewrite step apart once unfolded. Hints are unfolded with the
             # problem's definitions (proofs of unfolded runs give unfolded hints; folded runs
             # normalise them back with the definition rules).
             import unfold
             txt, defs = unfold.unfold_text(open(path).read(),
-                                           only=None if a.unfold == 'all' else set(a.unfold.split(',')))
+                                           only=None if var == 'unf' or a.unfold == 'all' else set(a.unfold.split(',')))
             path = os.path.join(self.dir, 'tmp', tag + '.u.p')
             with open(path, 'w') as f:
                 f.write(txt)
@@ -523,6 +524,10 @@ class Loop:
                    a.model_args.split()
         if hints and a.stall:
             cmd += ['--eqhint-stall', str(a.stall)]
+        if var == 'sub':
+            cmd += ['--eqhint-subsume']
+        elif var == 'sj':
+            cmd += ['--set-join']
         spath = os.path.join(self.dir, 'states', name + '.bin')
         if resume:   # True: continue the saved state; 'fresh': start over but save (replaces the old state);
             # 'nosave': start over and keep no state (an older one is removed: it is of an older context)
@@ -585,6 +590,8 @@ class Loop:
                 n0 = int(open(ap).read()) if os.path.exists(ap) else 0
                 with open(ap, 'w') as fh:
                     fh.write(str(n0 + 1))
+        if var and ok and os.path.exists(spath):
+            os.unlink(spath)   # (a variant level proved it: the chain run's state is not needed)
         if resume:
             if ok or resume == 'nosave':
                 for p in (spath, spath + '.tmp'):
@@ -764,7 +771,7 @@ class Loop:
         return lemmas.LemmaIndex(sorted(self.solved), subsets=a.lemma_subsets, uses=uses, pop=a.lemma_pop,
                                  deps=deps, dep_w=a.lemma_deps, dep_n=a.lemma_dep_n)
 
-    def deep_hints(self, n, lev, pools):
+    def deep_hints(self, n, lev, pools, two_sided=False):
         """A deeper level's hints: with --chain-level, from that level on the goal's chain (sibchain.py) once
         the records are in, else (or when the chain is empty) the usual hints."""
         a = self.a
@@ -772,7 +779,7 @@ class Loop:
         if C is not None and lev >= a.chain_level and C.ready() and '__goal_' in n:
             import lemmas
             o, _ = lemmas.split(n)
-            hs = C.chain(n, self.lemma_src.get(o, set()), a.chain_sibs, a.chain_max)
+            hs = C.chain(n, self.lemma_src.get(o, set()), a.chain_sibs, a.chain_max, two_sided=two_sided)
             if hs:
                 return hs
         return self.hints_for(n, pools, None)
@@ -847,6 +854,20 @@ class Loop:
         a = self.a
         rnd = a.start
         T = [float(x) for x in a.cascade.split(',')]
+        # --variants (18 Nov, portfolio): levels of the chain level's budget inserted after it, one per variant;
+        # VAR[lev] is the variant of internal level lev (None for the cascade's own levels), LAB[lev] its results label
+        # (the cascade's own levels keep their L<k>, so results of earlier runs map onto the same levels)
+        VL = [v for v in a.variants.split(',') if v]
+        assert all(v in ('two', 'unf', 'sub', 'sj', 'k60', 'pool') for v in VL), VL
+        assert not VL or (0 <= a.chain_level < len(T) and not a.p9loop), '--variants needs --chain-level'
+        CL_ = a.chain_level
+        VAR = [None] * len(T); LAB = ['L%d' % k for k in range(len(T))]
+        if VL:
+            T = T[:CL_ + 1] + [T[CL_]] * len(VL) + T[CL_ + 1:]
+            VAR = VAR[:CL_ + 1] + VL + VAR[CL_ + 1:]
+            LAB = LAB[:CL_ + 1] + ['V' + v for v in VL] + LAB[CL_ + 1:]
+            print(f'  cascade: --variants: levels {list(zip(LAB, T))}', flush=True)
+        IDX = {l: k for k, l in enumerate(LAB)}   # results label -> internal level
         pools = self.build_pools(); cnt = self.pool_cnt
         if a.model:
             self.train_model(rnd)
@@ -983,12 +1004,14 @@ class Loop:
             k0 = 0; fresh = set(); kc = 0
             for ri, line in enumerate(open(os.path.join(rdir, 'results.tsv'))):
                 f = line.rstrip('\n').split('\t')
-                if len(f) >= 5 and f[0] in att and f[4][:1] == 'L' and f[4][1:].isdigit():
-                    lev = int(f[4][1:])
+                if len(f) >= 5 and f[0] in att and f[4] in IDX:
+                    lev = int(f[4][1:]) if f[4][:1] == 'L' else CL_   # (the cascade's own level number)
                     if a.chain_since_row and ri < a.chain_since_row and lev >= max(1, a.chain_level):
                         # (--chain-since-row R: a deep run before row R had the pool's hints; the goal gets
                         # its chain-level run again, fresh with the chain; 1,032 unsolved goals at 11:55)
                         lev = max(0, a.chain_level - 1); kc += 1
+                    else:
+                        lev = IDX[f[4]]
                     if lev == 0:
                         fresh.add(f[0])
                         if f[1] == 'NO':
@@ -1028,7 +1051,7 @@ class Loop:
                     if not m:
                         continue
                     h = int(m.group(1)); latest[self.pool_key(f[0])] = h
-                    if (f[4] if len(f) >= 5 and f[4][:1] == 'L' else 'L0') == 'L0':
+                    if (f[4] if len(f) >= 5 and f[4][:1] in ('L', 'V') else 'L0') == 'L0':   # (V<name>: --variants)
                         lastL0[f[0]] = h
             for n in att:
                 k = self.pool_key(n)
@@ -1202,13 +1225,13 @@ class Loop:
                         # (heads first for the levels below --head-only-from, at any level: a head's
                         # 320 s resume, ~30% x a chain of ~2, pays about as well per CPU-second as an
                         # 80 s resume of another goal, ~20%; at 06:58 2,185 goals waited for one)
-                        hof = a.head_only_from or len(T)
+                        hof = IDX.get('L%d' % a.head_only_from, len(T)) if a.head_only_from else len(T)
                         deep = sorted((int(not (n in hds and att[n][1] + 1 < hof)), att[n][1] + 1,
                                        obd.get(gnum[n][0], 0), deep_running[gnum[n][0]], g[n][1], gnum[n][1], n)
                                       for n in att
                                       if n not in busy and ctx(n) == att[n][0] and att[n][1] + 1 < len(T)
                                       and (may_deepen(n, g) or n in hds) and not grown(n)
-                                      and (n in hds or not a.head_only_from or att[n][1] + 1 < a.head_only_from))
+                                      and (n in hds or not a.head_only_from or att[n][1] + 1 < hof))
                         far = []
                         if SM and a.far_retry and (a.mix or len(running) + len(retry) + len(deep) < a.j):
                             far = sorted((-v, n) for n, v in cand.items()
@@ -1278,9 +1301,17 @@ class Loop:
                             # the chain reached only new pairs; ul43/ul44 ran that way, 08:28-12:00)
                             fc = (getattr(self, 'chains', None) is not None and lev == a.chain_level
                                   and not a.p9loop)
-                            b = T[lev] if fc else (T[lev] - T[lev - 1] if (a.p9loop or os.path.exists(sp)) else T[lev])
-                            fut = ex.submit(self.run_one, n, self.deep_hints(n, lev, pools), rnd,
-                                            b, 'fresh' if fc else not a.p9loop, a.cascade_cpu * b)
+                            v_ = VAR[lev]
+                            if v_:
+                                # (--variants) fresh, at the chain level's budget, no state: the chain run's
+                                # state stays for the level after the variants
+                                hv = (self.hints_for(n, pools, None) if v_ == 'pool' else
+                                      self.deep_hints(n, lev, pools, two_sided=(v_ == 'two')))
+                                fut = ex.submit(self.run_one, n, hv, rnd, T[lev], False, a.cascade_cpu * T[lev], 0, v_)
+                            else:
+                                b = T[lev] if fc else (T[lev] - T[lev - 1] if (a.p9loop or os.path.exists(sp)) else T[lev])
+                                fut = ex.submit(self.run_one, n, self.deep_hints(n, lev, pools), rnd,
+                                                b, 'fresh' if fc else not a.p9loop, a.cascade_cpu * b)
                         running[fut] = (n, lev); rcls[fut] = cl; ncls[cl] += 1; rt0[fut] = time.time()
                         if H and lev == 0:   # (its features, context and predicted success, for observe())
                             x_, c_ = H.feats(n)
@@ -1316,7 +1347,7 @@ class Loop:
                     done_n += 1
                     if H:
                         c_, p_, x_ = startctx.pop(n, (None, 0.0, None)) if lev == 0 else (None, 0.0, None)
-                        H.observe(n, ok, 'L%d' % lev, c_, x_); over[orig_of(n)] += 1
+                        H.observe(n, ok, LAB[lev], c_, x_); over[orig_of(n)] += 1
                         if lev == 0:
                             calib[0] += p_; calib[1] += 1; calib[2] += ok
                             if a.sched_retrain and calib[1] % a.sched_retrain == 0:
@@ -1327,7 +1358,7 @@ class Loop:
                                 print(f'  cascade: --sched-retrain: model retrained on {len(H.rows)} rows', flush=True)
                     if H and a.sched_pmin_auto:
                         (auto0 if lev == 0 else auto1).append((ok, dt, p_ if lev == 0 else 0.0))
-                    rf.write(f'{n}\t{"THM" if ok else "NO"}\t{dt:.2f}\t{stats}\tL{lev}\tt={time.time()-t0:.0f}\n'); rf.flush()
+                    rf.write(f'{n}\t{"THM" if ok else "NO"}\t{dt:.2f}\t{stats}\t{LAB[lev]}\tt={time.time()-t0:.0f}\n'); rf.flush()
                     if ok and n in self.solved:
                         pass   # (synced from another process meanwhile: keep its row and hints)
                     elif ok:
@@ -1499,6 +1530,11 @@ def make_parser():
                          '(their proofs expanded through the proven goals they used; sibchain.py) instead of the pool')
     ap.add_argument('--chain-sibs', type=int, default=10, help='--chain-level: how many nearest proven siblings')
     ap.add_argument('--chain-max', type=int, default=100000, help='--chain-level: at most this many chain hints')
+    ap.add_argument('--variants', default='',
+                    help='(18 Nov, portfolio) levels after --chain-level, each a fresh run of that budget with one change, '
+                         'tried in this order before the next level (results rows V<name>): two (two-sided chain), '
+                         'unf (definitions unfolded), sub (--eqhint-subsume), sj (--set-join), k60 (60 kNN lemmas), '
+                         'pool (the pool\'s hints). They keep no state, so the next level resumes the chain run\'s')
     ap.add_argument('--chain-since-row', type=int, default=0,
                     help='--chain-level with --cascade-continue: deep rows of the round before this row (pool-era runs) '
                          'are ignored, so those goals get a fresh chain-level run')

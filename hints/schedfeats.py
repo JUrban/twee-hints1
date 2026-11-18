@@ -162,7 +162,7 @@ class History:
                 if len(f) < 4 or f[0] not in self.R.pos:
                     continue
                 n, ok = f[0], f[1] == 'THM'
-                lev = f[4] if len(f) >= 5 and f[4][:1] == 'L' else 'L0'
+                lev = f[4] if len(f) >= 5 and f[4][:1] in ('L', 'V') else 'L0'   # (V<name>: loop.py --variants)
                 ctx = None
                 if lev == 'L0' or (out and lev in levels):
                     m = re.search(r'hints=(\d+)', f[3])
