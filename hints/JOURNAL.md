@@ -670,6 +670,7 @@ reports are written as the experiments run.
 | notes/2026-11-17-deep-runs-expanded-chains.md | Deep runs on late unsolved goals, guided by expanded proof chains (Veroff's question) |
 | notes/2026-11-17-lattice-construction.md | Building a lattice with reasonable steps: strengthenings, weaker goals and conjectures (design and stage 1) |
 | notes/2026-11-17-long-runs-late-goals.md | Long runs (640 s) on the late goals no deep run proved, and the hint-match signal (exp5) |
+| notes/2026-11-18-ground-joining-hangs.md | Runs that never end: unbounded ground joinability, and a limit for it (exp6) |
 | notes/2026-11-17-lemma-circularity.md | Are lemma chains circular? A check of the used lemmas |
 | notes/2026-11-17-mix-fail-order.md | Repeats cost most of the time: `--mix` and `--fail-order` |
 | notes/2026-11-17-pg-ab-half1.md | Parental guidance at scale: half1 from zero, 2 hours, sum filter 0.25 against the defaults |
