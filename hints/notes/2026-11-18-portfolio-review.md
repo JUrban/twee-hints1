@@ -217,6 +217,18 @@ Measured at 17:49 (walls: the 92 that exp11's 80 s chain failed; production: UL 
   online per member from production's own V rows (a Beta-Binomial over the member's runs on goals that failed
   everything before it). The mix classes are a coarse version of this.
 
-## Results
+## Results and actions (running record)
 
-(pending)
+* **17:13: production ul47**, variant levels k60, two, unf, sub after the 80 s chain level (above).
+* **17:16: exp17 final.** 60 kNN lemmas at 80 s on the walls: 17 against the control's 14 (+7 −4), union 21. It
+  is the best twee variant per CPU. 4 new proofs merged.
+* **17:24: exp12 stage B paused** at 34 of 95 heads. It made 3 proofs at 0.21 per CPU hour, the weakest member
+  per CPU. Its 4 workers went to exp21.
+* **exp21** (5 s variants on 300 goals that failed their 5 s fresh run): **one proof in 1,521 runs** at 169 goals
+  (unfolded, aK2_eq_aK3_t 374). At the cheap level, on goals whose context has not changed, no variant pays. The
+  portfolio's value is at the deep level, where the walls show 3-7 unique proofs a variant. Final numbers:
+  notes/2026-11-18-l0-portfolio.md.
+* **Queued:**
+  * exp22: no PG / no rule model at 80 s on the walls, after exp21;
+  * P9C to 4 workers when exp21 ends (abs/p9c4.sh: the best deep member live, 1.44 per CPU hour).
+* **Pending:** exp20 (the 160 s control; extension cost by increment), exp15 (unfolded), exp19 (set-join).
