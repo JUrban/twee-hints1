@@ -898,7 +898,7 @@ class Loop:
         # on goals whose fresh run failed) and this round's results since --chain-since-row
         # (18 Nov 18:50: the 80 s variants' priors are their yields conditional on the earlier members' failures, in the
         # order k60, two, unf, sub on the walls; alone they were 1.24, 0.76, 0.49, 0.42)
-        YP = {'Vk60': 1.24, 'Vtwo': 0.60, 'Vunf': 0.48, 'Vsub': 0.16, 'Vsj': 0.3, 'Vpool': 0.5,
+        YP = {'Vk60': 1.24, 'Vtwo': 0.60, 'Vunf': 0.48, 'Vsub': 0.16, 'Vnopg': 0.22, 'Vsj': 0.3, 'Vpool': 0.5,
               'Vunf@0': 3.8, 'Vk60@0': 1.9}
         # the cascade's own levels by budget: the 80 s chain (production), its resume to 160 s (exp20, on the
         # increment), to 320 s (exp12 stage B)
