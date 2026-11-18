@@ -217,6 +217,29 @@ Measured at 17:49 (walls: the 92 that exp11's 80 s chain failed; production: UL 
   online per member from production's own V rows (a Beta-Binomial over the member's runs on goals that failed
   everything before it). The mix classes are a coarse version of this.
 
+## Conditional yields (18:52, an independent check of the priors)
+
+In production the 80 s members run in sequence. So each later member only gets credit for walls every earlier
+member failed: its yield conditional on the earlier failures, not alone. On the 92 walls exp11 failed, in ul48's
+order:
+
+| member | new alone | new after the earlier members | runs | CPU h | conditional per CPU h |
+|---|---:|---:|---:|---:|---:|
+| k60 | 6 | 6 | 92 | 4.83 | 1.24 |
+| two | 4 | 3 | 86 | 4.98 | 0.60 |
+| unf | 7 | 7 | 83 | 14.55 | 0.48 |
+| sub | 3 | **1** | 76 | 6.19 | **0.16** |
+
+All four together prove 17 new walls. With Prover9 + chain first, 18 (k60 then adds 5, at 1.06).
+* **Subsumption matching is nearly covered by the others.** After them it adds 1 at 0.16 per CPU hour, below the
+  320 s level (0.21). Its standalone 0.42 overstated it.
+* The two-sided chain falls to 0.60. 60 kNN lemmas and unfolding are hardly covered.
+* So **a member's prior must be its conditional yield in its position**, and every new member should be measured
+  after the members before it. loop.py's priors are corrected (YP: Vtwo 0.60, Vunf 0.48, Vsub 0.16; at the next
+  restart).
+* sub stays in the list, but `--ratio-order` ranks it last. Most of its runs will wait while anything better is
+  queued.
+
 ## Results and actions (running record)
 
 * **17:13: production ul47**, variant levels k60, two, unf, sub after the 80 s chain level (above).
