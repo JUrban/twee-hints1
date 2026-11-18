@@ -701,6 +701,7 @@ reports are written as the experiments run.
 | notes/2026-11-18-chain-size.md | Smaller chains: 5 siblings (S5) and the siblings' own proofs without expansion (D) against the 10-sibling chain, exp8's 78 goals at 80 s (exp13) |
 | notes/2026-11-18-two-sided-chain.md | Two-sided chains (the 10 nearest proven siblings above or below) against the below-only chain, exp11's 107 walls at 80 s (exp14) |
 | notes/2026-11-17-lemma-circularity.md | Are lemma chains circular? A check of the used lemmas |
+| notes/2026-11-18-unfolded-walls.md | Unfolded definitions with chain hints against the folded chain, exp11's 107 walls at 80 s (exp15) |
 | notes/2026-11-17-mix-fail-order.md | Repeats cost most of the time: `--mix` and `--fail-order` |
 | notes/2026-11-17-pg-ab-half1.md | Parental guidance at scale: half1 from zero, 2 hours, sum filter 0.25 against the defaults |
 | notes/2026-11-17-pg-learned-dense.md | Learned parental models on 10 numbers per rule |
