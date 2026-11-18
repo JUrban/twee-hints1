@@ -234,6 +234,7 @@ Repositories and directories:
 | e57 | 18 Nov 05:20 | e56 + --ground-joining-branch-limit B: assume not ground joinable once the case split has more than B branches (exp6, runs that never end) |
 | e58 | 18 Nov 06:11 | e57 + --eqhint-subsume: a critical pair or rule that subsumes a hint matches it (Prover9's semantics; exp7) |
 | e59 | 18 Nov 06:17 | e58 with the subsumption index in an IntMap of hashed keys and a size check before matching: same results on 3 goals, CPU over flag-off +15% instead of +30% |
+| e60 | 18 Nov 07:06 | e59 + the parental filter judged before unification again unless it is a full forest (e51 had moved it after unification for all filters: +10% CPU, +8% memory for the same pairs with the sum filter). On aa1_45_c 292 at 80 s: e48 83.0 s, e60 86.5 s, e59 96.6 s; output identical to e48 |
 
 Wrappers: `twee-pg` (e48 with $TWEE_PG_ARGS), `twee-pg50` (e50 with $TWEE_PG_ARGS; production).
 

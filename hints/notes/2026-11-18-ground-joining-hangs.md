@@ -102,4 +102,16 @@ python3 run.py pg200_e57.cmds gb10 1 --ground-joining-branch-limit 10    # B: al
 
 ## Results
 
-(pending)
+* **B, side effects (complete, 07:00).** All 203 runs of b0 (e48) ended normally: no hang on this testbed. The
+  branch limit changes nothing here. gb100 and b0 both prove 87 (+0 -0) with identical pair counts on all 87
+  (935,809 in total); gb10 matches b0 on its 152 finished runs (81 = 81, identical pairs). CPU was 4,517 s for
+  b0 against 4,615 s for gb100.
+* **A speed regression found on the way.** On the stalled goals, e57 used about 20% more CPU than e48 for the
+  same pairs. A bisection on aa1_45_c 292 (80 s, the same 160,000 pairs in every run) gave:
+  * e48 87.2 s and e50 88.8 s (production runs e50);
+  * e51 97.2 s, e53 101.2 s, e55 97.5 s, e56 94.8 s;
+  * e57 96.7 s, and 94.5 s with the limit.
+  The cause is e51 (b85a580). It judges the parental filter after unification, for E's sake, so pairs that the
+  sum filter rejects are unified first. **twee-e60** judges cheap filters (sum, additive, the freezer) before
+  unification again. Re-measured at the same time: e48 83.0 s, e60 86.5 s, e59 96.6 s. e60's output is
+  identical to e48's. Production (e50) and the experiments on e48 were not affected.
