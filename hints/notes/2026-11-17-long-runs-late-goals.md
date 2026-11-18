@@ -40,6 +40,17 @@ fewer than 1,280,000 pairs.
 * Relaunched at 00:03 with `+RTS -M12g -RTS` (run.py's 4th argument, default 12g) and 2 workers (24 GB at
   most): `nohup python3 run.py C 640 8 12g > run_C640.out 2>&1 &`.
 
+**Not the heap** (00:47).
+* With -M12g, goal 299 again ended without WORK or RESULT: 1,326 CPU s, peak 7.3 GB, so well under the limit.
+* Its output stops at the same HINTMATCHER line as the 6 GB run. The search is deterministic, so both runs died
+  at the same point. stdout to a pipe is block-buffered, so whatever was printed after the last full block was
+  lost.
+* The state file was written (26 MB, at the run's end).
+* A 20 s run with --dump-state ends normally.
+* Stopped at 00:47. A run of mbol_lem1 387 in progress was lost.
+* Reproduction: 299 at 640 s twice, with and without --dump-state, with stderr and the exit status kept
+  (exp5/dbg/a.* and b.*; the command is in exp5/dbg/cmd).
+
 **Analysis planned.**
 * Proved at 640 s against the late-match count of the C@320 run (HINTLOG first matches after 480,000 pairs).
 * The stall replay of exp3 on the 640 s runs.
