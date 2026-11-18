@@ -62,7 +62,10 @@ python3 run.py stall78_K.cmds s_K 2
   * Chain run ends: 73 normal, 4 at the CPU cap, 1 out of heap.
   * Combined with exp3 (320 s: 12 against 9, the pool's proofs a subset), the chain wins at both deep budgets.
   * Seven of the proofs were not in UL (364, 921, 623, 641, 455 from the chain; 422, 932 from the pool). The arms
-    kept no outputs, so they are rerun with outputs (re5.cmds as s_K_re5, re2p.cmds as s_b0_re) to merge.
+    kept no outputs, so they were rerun with outputs (re5.cmds as s_K_re5, re2p.cmds as s_b0_re): all seven
+    proved again with the same pair counts. Merged into UL at 09:45 (`exp3/tomerge.py exp8/out_s_K_re5
+    exp8/out_s_b0_re exp8/xm2`, `merge.py loops/UL exp8/xm2`); UL has 45,361 distinct proven goals.
+    Their lemma records reach the chains at the next records rebuild (`--extra exp8/out_s_K_re5,exp8/out_s_b0_re`).
 
 ## In production (ul43 from 08:28, ul44 from 09:23)
 
