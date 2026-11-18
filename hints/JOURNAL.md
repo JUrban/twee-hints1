@@ -233,6 +233,7 @@ Repositories and directories:
 | e56 | 17 Nov 21:59 | e55 + --print-goal-nf N: on failure, the N smallest normal forms of each goal side (GOALNF L/R lines); use with --no-flatten-goal (exp4 nf.py) |
 | e57 | 18 Nov 05:20 | e56 + --ground-joining-branch-limit B: assume not ground joinable once the case split has more than B branches (exp6, runs that never end) |
 | e58 | 18 Nov 06:11 | e57 + --eqhint-subsume: a critical pair or rule that subsumes a hint matches it (Prover9's semantics; exp7) |
+| e59 | 18 Nov 06:17 | e58 with the subsumption index in an IntMap of hashed keys and a size check before matching: same results on 3 goals, CPU over flag-off +15% instead of +30% |
 
 Wrappers: `twee-pg` (e48 with $TWEE_PG_ARGS), `twee-pg50` (e50 with $TWEE_PG_ARGS; production).
 

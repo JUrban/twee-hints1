@@ -43,6 +43,9 @@ The user (06:00): "in P9 the hint matchers subsume the hints, they dont have to 
   | nil3_30 370 (unproved) | 433 → 495 | 40,000 → 40,000 | 47.1 → 61.4 |
 
   Each pair costs about 30% more CPU on 370; candidate lists of general pairs are matched one by one.
+* **twee-e59** (06:17): the same index in an IntMap of hashed keys (a collision only adds candidates), with
+  `len a <= len s` and `len b <= len s'` checked before matching. Same results on the 3 goals (8,259 / 14,045 /
+  40,000 pairs, 393 / 416 / 495 matched); CPU 4.6 / 11.0 / 54.2 s, so about +15% over the flag off on 370.
 
 ## Test A: the 200 hard goals of the PG testbed
 
