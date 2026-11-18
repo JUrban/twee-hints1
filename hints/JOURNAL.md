@@ -235,8 +235,9 @@ Repositories and directories:
 | e58 | 18 Nov 06:11 | e57 + --eqhint-subsume: a critical pair or rule that subsumes a hint matches it (Prover9's semantics; exp7) |
 | e59 | 18 Nov 06:17 | e58 with the subsumption index in an IntMap of hashed keys and a size check before matching: same results on 3 goals, CPU over flag-off +15% instead of +30% |
 | e60 | 18 Nov 07:06 | e59 + the parental filter judged before unification again unless it is a full forest (e51 had moved it after unification for all filters: +10% CPU, +8% memory for the same pairs with the sum filter). On aa1_45_c 292 at 80 s: e48 83.0 s, e60 86.5 s, e59 96.6 s; output identical to e48 |
+| e61 | 18 Nov 07:25 | e60 with e50's strict rejected set for the early parental check (e60's lazy memo cost 6-8%): e50's speed; output byte-identical to e50 on 8 goals; resumes e50 states. **Production since 18 Nov 07:30** (twee-pg61) |
 
-Wrappers: `twee-pg` (e48 with $TWEE_PG_ARGS), `twee-pg50` (e50 with $TWEE_PG_ARGS; production).
+Wrappers: `twee-pg` (e48 with $TWEE_PG_ARGS), `twee-pg50` (e50 with $TWEE_PG_ARGS; production until 18 Nov 07:30), `twee-pg61` (e61 with $TWEE_PG_ARGS; production since 18 Nov 07:30).
 
 Models:
 * `models/rm4t.bin/.vocab`: the rule model in production. It is a LightGBM ENIGMA model on given-rule logs,
@@ -290,8 +291,11 @@ Each goal is one twee run on the goal's problem.
 * The learned scheduler (`--sched-model`) is off by default, because at scale its gain was noise.
 
 ### 4.3 Production
-* `abs/ul41.sh` since 17 Nov 17:25 (UL41.log): ul40 (e44, the 17 Nov defaults) plus the PG sum filter.
-  It runs `--twee /project/bin/twee-pg50` with `TWEE_PG_ARGS="--pg-threshold 0.25"`, on 4 workers.
+* `abs/ul42.sh` since 18 Nov 07:30 (UL42.log): ul41 with `--twee /project/bin/twee-pg61` (twee-e61) and
+  `TWEE_PG_ARGS="--pg-threshold 0.25 --ground-joining-branch-limit 100"`, on 4 workers. The branch limit stops
+  one-step hangs in ground joining (notes/2026-11-18-ground-joining-hangs.md); the search is otherwise identical.
+* Before that, `abs/ul41.sh` from 17 Nov 17:25 (UL41.log): ul40 (e44, the 17 Nov defaults) plus the PG sum filter,
+  via `twee-pg50`.
 * Solved: 44,870 of 51,784 at 18:05 on 17 Nov (holdout about 4,900; count the distinct goals in
   loops/UL/solved.tsv). Plain twee at 4 s gets 31,060.
 * The production lineage is in the headers of abs/ul3.sh … ul41.sh, each with its reason and time:
@@ -299,12 +303,12 @@ Each goal is one twee run on the goal's problem.
   * ul12–ul14: fresh-first, far-retry, line gaps 80.
   * ul15–ul31: the learned scheduler, heads-first (reverted), a 5 s first level, retry-knn.
   * ul32–ul38: CPU shares for side batches, 30 kNN lemmas.
-  * ul39: --mix. ul40: e44. ul41: PG.
+  * ul39: --mix. ul40: e44. ul41: PG. ul42: e61 and the ground-joining branch limit.
 * For new problems, `hints/solve_new.sh NAMES CONTEXT OUT [J [HOURS]]` runs the same cascade. The live
   proof-step transfer runs beside it every 2 minutes. Its defaults are TWEE twee-e44, CASCADE
   5,20,80,320, STATES --no-fresh-states, and ORDER `--mix 0.1 --fail-order`. REPORT section 5 explains
   EXCLUDE, SCHED, LOOPARGS and AIM_PROB. **REPORT section 5 item 5 still shows the 15 Nov production
-  command; the current one is ul41.**
+  command; the current one is ul42.**
 * From zero on the whole benchmark (Z4, abs/z4_test.sh): 15,398 at 10 min, 35,511 at 1 h, 37,713 at 2 h,
   38,044 at about 4 h.
 
