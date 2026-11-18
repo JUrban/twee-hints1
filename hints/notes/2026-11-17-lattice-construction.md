@@ -211,7 +211,7 @@ were sketched at 5 s.
       * from RIP (38): `l(t(X0,X1),X2,X3) = m(m(l(t(X0,X1),X2,X3),ld(X0,e)),rd(e,ld(X0,e)))`;
       * from flexibility (34): `m(X0,m(ld(X0,l(t(X0,X1),X2,X3)),X0)) = m(m(X0,ld(X0,l(t(X0,X1),X2,X3))),X0)`.
     * 508 was one of the 47 goals production's loops had not proved when the set was picked (17 Nov). **Correction
-      (01:13): production proved it itself at 00:15 on 18 Nov** (loops/UL solved.tsv: round 5, 150.28 s; the hints
+      (01:11): production proved it itself at 00:15 on 18 Nov** (loops/UL solved.tsv: round 5, 150.28 s; the hints
       file is dated 00:15), half an hour before the rung route closed it (00:44). So the route gives a second,
       independent proof, not a new one. Production also proved aa1_45_b 374 in the meantime. exp3 has not
       reached 508 yet.
