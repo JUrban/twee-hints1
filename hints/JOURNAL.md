@@ -702,6 +702,7 @@ reports are written as the experiments run.
 | notes/2026-11-18-two-sided-chain.md | Two-sided chains (the 10 nearest proven siblings above or below) against the below-only chain, exp11's 107 walls at 80 s (exp14) |
 | notes/2026-11-18-unfolded-walls.md | Unfolded definitions with chain hints against the folded chain, exp11's 107 walls at 80 s (exp15) |
 | notes/2026-11-18-prover9-chain-walls.md | Prover9 with chain hints against Prover9 with the pool, exp11's 107 walls at 60 s (exp16) |
+| notes/2026-11-18-knn60-walls.md | 60 kNN lemmas against 30 at 80 s with exp11's chain hints, the 107 walls (exp17) |
 | notes/2026-11-17-lemma-circularity.md | Are lemma chains circular? A check of the used lemmas |
 | notes/2026-11-17-mix-fail-order.md | Repeats cost most of the time: `--mix` and `--fail-order` |
 | notes/2026-11-17-pg-ab-half1.md | Parental guidance at scale: half1 from zero, 2 hours, sum filter 0.25 against the defaults |
