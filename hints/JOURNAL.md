@@ -747,6 +747,7 @@ Next:
 0. exp37 (19:50): retrained rule models (rm9*) on today's data with the papers' sampling tricks; offline on the 400
    newest proofs, then a paired test (control loops/MR_rm4t_20), then members `m9*@0`
    ([notes/2026-11-19-retrained-models.md](notes/2026-11-19-retrained-models.md)). exp35 stopped at 19:43 (no unique proof).
+   ul71 (20:30, J=10) = ul70 + member m9a@0 (rm9a: AUC 0.876 on the 400, rm4t 0.835). exp36 ended: sketch hints +3 −0 of 54.
 1. ul70 (17:58, 15 workers while exp36 runs; ul69 + the climbs' hints as members sk@0 and sk@1:0,
    [notes/2026-11-19-climber-outputs.md](notes/2026-11-19-climber-outputs.md)). Before it, ul69 (16:33, 17 workers beside exp32's climber): the deep tail had not run since 06:00 (portfolio notes). Fresh
    pool runs at 40 and 80 s, every label explored, and `--reexplore 150:0.25` (periodic re-measuring). Read the

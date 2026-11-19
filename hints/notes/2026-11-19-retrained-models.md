@@ -155,4 +155,15 @@ abs/rm9wave2.sh, started 20:09:41 (its header says 20:11, written before checkin
 
 ## Results
 
-(running)
+**Offline, on the 400 held-out newest production proofs:**
+
+| model | rows, positives, logs | AUC | at 0.1: proof rules kept | other rules deferred | train | peak memory |
+|---|---|---:|---:|---:|---:|---:|
+| rm4t (production) | | 0.835 | 93.5% | 30.0% | | |
+| rm7t (14 Nov) | | 0.874 | 98.4% | 14.3% | | |
+| rm9a | 4.76 M, 2.10 M, 21,125 | **0.876** | 99.5% | 6.6% | 39.5 min | 22.7 GB |
+
+* rm9a ranks as well as rm7t, and is calibrated higher: at production's thresholds it defers and freezes much
+  less. A threshold matched to rm4t's deferral share would differ. That is the same caveat as exp33's rmO.
+* **Member:** ul71 (20:30, production rows from 174,090) = ul70 + `m9a@0`, J=10 while exp37 trains and runs its
+  arms. Its arm on the 400 (loops/MR_rm9a_20) started at 20:30 beside the control.
