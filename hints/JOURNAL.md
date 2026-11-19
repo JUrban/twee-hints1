@@ -301,6 +301,8 @@ Each goal is one twee run on the goal's problem.
     attempts over at each fresh run. The old replay kept the round's highest level, so 892 unsolved goals reopened by
     new proofs had lost their deeper levels at each restart.
   * Smoke test: hints/exp/optvar_smoke.sh on 3 nil3_15 goals at cascade 1,2,4,8.
+  * First hour (01:05): 8300 runs, new=90. L0 11.4 per CPU hour, 60 lemmas at 5 s 3.2, unfolded 5 s 1.2. Then the
+    80 s chain runs took over, using about 2 GB each.
 * `abs/ul55.sh` from 18 Nov 22:39:20 to 23:59 (UL55.log, 10,350 runs, **new=184 in 80 min** on 19 workers): ul54 with
   variant tiers (loop.py a0a4486). The variants after a cascade level are taken by current yield, each once per
   context, and replay records the tried ones.

@@ -380,3 +380,15 @@ So these are genuine negatives by the portfolio rule, since they prove nothing n
 * Far goals (`--frontier 0`, line gap above F): L0 and the two 5 s variants only.
 
 **00:00: ul56** = ul55 with these fixes. ul55 ended at 10,350 runs, **new=184 in 80 minutes**.
+
+**01:05: ul56's first hour: new=90** (ul55's first hour 146). By level since its first row (81268):
+* L0: 63 in 2393 runs, 11.4 per CPU hour;
+* 60 kNN lemmas at 5 s: 19 in 3737 runs, **3.2** (1.3 in ul55's hour);
+* unfolded 5 s: 8 in 2177 runs, **1.2** (6.2 in ul55's hour);
+* L2: 5 runs, 0.
+* ul55 and ul56 ran about the same number of reopened 5 s runs (1148 against 1177), but ul56's proved fewer. The
+  supply varies: ul55's burst was in a few nil3 and aK2 originals.
+* By 01:03 the 5 s classes paid little (r 5 an hour, d 0), and the 80 s chain runs began on all workers. Memory rose
+  to 22.8 GB, about 2 GB per 80 s run. memwatch caps the total at 45 GB.
+* The fresh-run predictor overpredicts in ul56: 63 proved against 103 predicted (ul55: 108 against 113).
+* Solved at 01:06: 46,050 rows in solved.tsv.
