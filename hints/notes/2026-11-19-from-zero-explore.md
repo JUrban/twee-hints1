@@ -39,3 +39,7 @@ Written 19 Nov 2026, 10:21 UTC. Started 10:38:51 (loops/PGD), after exp28 ended.
 ## Results
 
 (running; ends about 12:40)
+
+* **Caveat:** from 10:46 to 10:55, a LightGBM fit with default threads ran at 9,000% CPU (load 135; portfolio
+  review). This run's minutes 7-16 had less CPU than PGC's had. Its 10 and 20 minute points are biased against
+  it; the 60 and 120 minute points less so.
