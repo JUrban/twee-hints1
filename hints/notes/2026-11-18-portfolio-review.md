@@ -551,3 +551,19 @@ Vk60@0 2,201 runs (8.5 per CPU hour).
   with less than H CPU hours of runs in the round is estimated at max(its estimate, the best label's). Every member
   then gets H CPU hours before its own yield decides. exp27's from-zero run shows the same starvation: its 40 s
   chain level ran 4 times in an hour behind Vunf@0 (50 per CPU hour there). Not built yet; the priors do it by hand.
+
+**ul60 08:50-09:19: 100 kNN lemmas became the best 5 s member (09:25).** Once goals had used up their Vk60@0 option
+in the current context, Vk100@0 (prior 3) was their best remaining option, so it ran. Its live yield then put it
+first:
+
+| member (from row 117,865 on) | runs | proved | conditional on |
+|---|---:|---:|---|
+| Vk100@0 | 1,354 | 32 (2.4%) | Vk60@0 failed before, same context |
+| Vk100@0 | 372 | 10 (2.7%) | no Vk60@0 before |
+| Vk60@0 | 697 | 6 (0.9%) | no Vk100@0 before |
+
+* Vk100@0 overall: 42 proofs in 2.95 CPU hours, 14 per CPU hour, the highest of any deep member.
+* On 16 Nov, 100 lemmas were dropped on count, at 5 of 150 against 30 lemmas' 6 (+1 −2). As a member after k60 it
+  proves goals k60 does not.
+* Next: k200@0, once kp@0 and kd@0 (prior 9 in ul61) are measured. Each lemma count is a different problem, cheap
+  at 5 s.
