@@ -168,6 +168,7 @@ abs/rm9wave2.sh, started 20:09:41 (its header says 20:11, written before checkin
 | **rm9f (rm9a's data, Suda's per-log weighting)** | 4.76 M, 2.10 M, 21,139 | **0.892** | 99.4% | 13.2% | 19.8 min | 20.3 GB |
 | rm9g (rm9a's data, 255 leaves) | 4.76 M, 2.10 M, 21,140 | 0.886 | 99.0% | 14.4% | 20.8 min | 20.0 GB |
 | rm9h (long2, 16 negatives, 255 leaves, Suda's weighting) | 6.03 M, 4.64 M, 89,155 | 0.891 | 98.7% | 20.7% | 29.6 min | 24.9 GB |
+| **rm9i (rm9a's data, Suda's weighting, 255 leaves)** | | **0.900** | | | | |
 
 * rm9a ranks as well as rm7t, and is calibrated higher: at production's thresholds it defers and freezes much
   less. A threshold matched to rm4t's deferral share would differ. That is the same caveat as exp33's rmO.
@@ -227,6 +228,25 @@ abs/rm9wave2.sh, started 20:09:41 (its header says 20:11, written before checkin
   * Arms (23:10): rm9aC and rm9fC. rm9gC and rm9hC follow when the control and rm9a arms end
     (abs/rm9calarms.sh). To make room, the rm9b arm (+7 −23 on 246) and the rm9c arm (+5 −10 on 171) were stopped
     at 23:10; their rows stay.
+* **The control ended at 23:30: rm4t proves 202 of 400 at 20 s (2.45 CPU h).** Against it at 23:30:
+
+| model | goals | + | − |
+|---|---:|---:|---:|
+| rm9a | 335 | 11 | 27 |
+| rm9aC (rm9a shifted) | 76 | 1 | 7 |
+| rm9b (stopped) | 253 | 7 | 23 |
+| rm9c (stopped) | 181 | 6 | 12 |
+| rm9e | 272 | 9 | 19 |
+| **rm9f** | 246 | **9** | **5** |
+| rm9fC | 91 | 2 | 2 |
+| rm9g | 156 | 4 | 6 |
+| **rm9h** | 106 | **5** | **1** |
+| rm9i | 27 | 1 | 0 |
+
+  * The weighted models (f, h, i) gain, the unweighted ones lose.
+  * The calibration shift has not helped rm9a so far (76 goals), so the deferral share is not the whole story. The
+    weighted models rank differently.
+* **ul72 (23:30, production rows from 183,986) = ul71 + m9f@0, m9h@0, m9i@0**, J=8.
 * Interim at 22:14: rm9a +9 −11 on 213, rm9b +5 −14 on 182, rm9c +2 −5 on 67, rm9e +5 −3 on 143.
 * CPU: 5 arms + training 4 + climber 4: production restarted at 21:54 with J=8 (rows from 179,422; earlier log loops/UL71a.log).
 * **The first paired design was broken (found 20:58).** The snapshot loops/ULsN19 (production's solved rows before
