@@ -94,6 +94,48 @@ Read 19 Nov 19:30-19:50; PDFs and text in /project/hintwork/papers/<arXiv id>/.
 * **Members:** models that prove goals the control does not become production variants `mX@0`
   (`rmX.bin/.vocab` beside rm4t). They get the exploration hour, then CPU by their measured yield.
 
+## The selections (20:08)
+
+* **The index** (20:08): 643,782 logs with a proof, 47,482 goals.
+  * Distinct proofs per goal: 1 for 5,722 goals, 2–9 for 26,980, and 10 or more for 14,756.
+  * Proofs are mostly short: the median goal's shortest proof has 4 positives, its longest 19.
+  * The 100 originals that still have unsolved goals hold 42,353 of these goals, so a tail-only model would keep
+    almost everything. Not trained.
+* givensel.py over the index, with the 400 test goals excluded:
+
+| list | logs | from production | positives | rows at 100 / 150 negatives per log |
+|---|---:|---:|---:|---:|
+| short3 (the 3 shortest) | 129,293 | 7,714 | 3.0 M | 12.0 / 15.0 M |
+| slm (shortest, medium, longest) | 129,293 | 9,840 | 4.6 M | 13.9 / 17.2 M |
+| rand6 (up to 6 random) | 240,091 | 10,450 | 6.1 M | 24.4 / 30.7 M |
+| long3 (the 3 longest) | 129,293 | 10,029 | 5.6 M | 15.7 / 19.4 M |
+
+* So the multi-proof models take fewer negatives per log (32–64), and rand6 is left out for memory.
+* rulemodel.py `--jobs N --vocab-from V` (20:05): forked feature workers over a frozen vocab (rm9a's). On the smoke
+  set it gives the same rows and positives as the serial path.
+
+## Models and arms
+
+abs/rm9wave2.sh, started 20:09:41 (its header says 20:11, written before checking the clock):
+* It waits for rm9a, then starts rm9a's paired arm.
+* Then it trains, one at a time on 4 workers, each model followed by its arm on 1 worker:
+
+| model | data | negatives per log | weighting | leaves |
+|---|---|---|---|---:|
+| rm9a | base + production (one proof per goal) | 150 | none | 63 |
+| rm9b | short3 | 64 | none | 63 |
+| rm9d | short3 | 64 | Suda: per log, half positives | 63 |
+| rm9c | slm | max(32, positives) | long proofs up (exponent 0.5) | 255 |
+| rm9e | long3 | 64 | none | 255 |
+
+* rm9a → rm9b is the data effect (all loops, 3 proofs per goal), rm9b → rm9d the weighting effect, and rm9c and
+  rm9e the long-proof and tree-size variants.
+* The control arm loops/MR_rm4t_20 has run since 19:52.
+* Offline baseline on the 400 test logs: rm4t AUC 0.835, keeping 93.5% of proof rules at 0.1. rm7t AUC 0.874,
+  keeping 98.4%.
+* CPU: production 13 + climber 4 + training 4 + arms 1–5. When the arms pile up, production goes down
+  accordingly.
+
 ## Results
 
 (running)

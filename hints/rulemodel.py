@@ -54,6 +54,26 @@ def goal_feats(name, lits=None):
         f['TLaxioms'] = len(axs)
     return f
 
+_W = None   # (the model whose frozen vocab forked feature workers use)
+
+def _log_part(args):
+    """One log's rows for train(): (CSR part, labels, (positives, negatives)) or None."""
+    n, path, negmax, negratio, seed = args
+    m = _W
+    rnd = random.Random(f'{seed}:{n}')
+    rows = [x for x in load(path, m.parents) if x[0] >= 0]
+    pos = [x for x in rows if x[0] == 1]
+    neg = [x for x in rows if x[0] == 0]
+    if not pos:
+        return None
+    k = max(negmax, int(round(negratio * len(pos)))) if negratio > 0 else negmax
+    if len(neg) > k:
+        neg = rnd.sample(neg, k)
+    sel = pos + neg
+    part = m.rows(n.split('@')[0], [x[1:] for x in sel])   # (NAME@K: K-th proof of NAME, --list)
+    part = tuple(np.asarray(z, t) for z, t in zip(part, (np.float32, np.int32, np.int64)))
+    return part, np.array([x[0] for x in sel], dtype=np.int8), (len(pos), len(neg))
+
 class RuleModel:
     def __init__(self, parents=False):
         self.vocab = enigfeats.Vocab()
@@ -107,7 +127,7 @@ class RuleModel:
                               np.concatenate(ptrs)), shape=(nrow, ncol))
 
     def train(self, givendir, names, negmax=400, rounds=200, leaves=63, seed=1, threads=8,
-              weighting='none', negratio=0.0, longexp=0.0, depth=-1, min_data=20, lr=0.1):
+              weighting='none', negratio=0.0, longexp=0.0, depth=-1, min_data=20, lr=0.1, jobs=1):
         """givendir: a directory, or a dict name -> path. All positives of a log are kept; its negatives are
         subsampled to negmax, or with negratio R > 0 to max(negmax, R x its positives) (negatives scale with the
         proof; the papers' negative/positive ratio as a hyperparameter, Isabelle ENIGMA 4.2).
@@ -117,6 +137,22 @@ class RuleModel:
         import lightgbm as lgb
         rnd = random.Random(seed)
         parts, ys, logs = [], [], []
+        if jobs > 1:
+            # (19 Nov) forked workers over the logs; the vocab must be frozen first (--vocab-from), so that every
+            # worker codes features the same way
+            assert self.vocab.frozen, 'jobs > 1 needs a frozen vocab (--vocab-from)'
+            global _W
+            _W = self
+            import multiprocessing as mp_
+            todo = [(n, givendir[n] if isinstance(givendir, dict) else os.path.join(givendir, n), negmax, negratio,
+                     seed) for n in names]
+            with mp_.get_context('fork').Pool(jobs) as P:
+                for k, r in enumerate(P.imap(_log_part, todo, chunksize=8)):
+                    if r is not None:
+                        parts.append(r[0]); ys.extend(r[1].tolist()); logs.append(r[2])
+                    if k % 20000 == 0:
+                        print(f'  {k} of {len(todo)} logs', flush=True)
+            names = []
         for n in names:
             path = givendir[n] if isinstance(givendir, dict) else os.path.join(givendir, n)
             rows = [x for x in load(path, self.parents) if x[0] >= 0]
@@ -193,6 +229,8 @@ def main():
     ap.add_argument('--max-depth', type=int, default=-1)
     ap.add_argument('--min-data', type=int, default=20)
     ap.add_argument('--lr', type=float, default=0.1)
+    ap.add_argument('--jobs', type=int, default=1, help='feature workers (needs --vocab-from)')
+    ap.add_argument('--vocab-from', help="a model's vocab file, frozen: features outside it are dropped")
     ap.add_argument('--threads', type=int, default=8)
     ap.add_argument('--theory', action='store_true', help='add the theory block (axiom features)')
     ap.add_argument('--all', action='store_true')
@@ -243,8 +281,13 @@ def main():
         m.model = lgb.Booster(model_file=mp)
         m.ncol = m.model.num_feature()
     else:
+        if a.vocab_from:
+            for line in open(a.vocab_from):
+                i, k = line.rstrip('\n').split('\t', 1)
+                m.vocab.idx[k] = int(i) - NFIX
+            m.vocab.frozen = True
         print('train', m.train(paths, train, a.negmax, a.rounds, a.leaves, a.seed, a.threads, a.weighting,
-                               a.negratio, a.long_exp, a.max_depth, a.min_data, a.lr), flush=True)
+                               a.negratio, a.long_exp, a.max_depth, a.min_data, a.lr, a.jobs), flush=True)
     if a.test_only:
         test = sorted(test_n & set(names))
     if a.save:

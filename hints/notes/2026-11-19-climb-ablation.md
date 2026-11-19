@@ -47,7 +47,25 @@ that sounds strange - presumably they helped inside the climb (that's why we did
 
 ## Results
 
-(running)
+Ended about 20:05. 54 of the 55 targets have both arms (CPU: P 2.12 h, S 2.12 h).
+
+| | targets |
+|---|---:|
+| both arms prove | 35 |
+| neither | 16 |
+| S only (sketch steps first) | 3: aip_to_aK1 185, mbol_nil3_a 494, ns_to_aa1_b 610, all CLU at 20 s |
+| P only (pool) | 0 |
+
+* On the 35 shared proofs, S takes the same time as P (median ratio 0.97).
+* **The sketch hints are a cause of 3 of the 54 climber proofs (+3 −0).** That is fewer than the decision's 5, but
+  all in one direction.
+* **35 of the 54 need no climb today.** Today's binary (PG 0.25) and the production context of the time prove them
+  from the pool alone. When the climber found them, the binary was older (e39) and had no PG.
+* **16 are not reproduced by either arm.** They need what the arms lack: the fill lemmas (not saved before today),
+  the climb's assumptions, or the old binary's search.
+* Reading: inside the climb, the sketch steps help a little, as the user expected. The sk member carries them
+  to production, and since 18:25 the fill lemmas too. It had 0 proofs in its first 2.7 CPU h, before the fill
+  lemmas, and is re-explored periodically.
 
 * **Interim (18:09, 26 of 55 targets):** both arms 16, neither 7, S only 3 (ns_to_aa1_b 610, aip_to_aK1 185,
   mbol_nil3_a 494, all CLU at 20 s), P only 0.
