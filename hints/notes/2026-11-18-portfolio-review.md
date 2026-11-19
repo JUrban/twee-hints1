@@ -662,3 +662,9 @@ hints more than the pool (none on R1dist_to_aa1, as the offline count predicted)
   only adds noise. No change to the ratio rule.
 * The hand-set priors rank worse than no information at all. That supports `--explore` with data over hand-set
   priors for new members.
+* **The prior's weight (10:42).** Production's priors inside the cumulative estimate are a little better than flat
+  ones (−1,093 against −1,099 at 1,000 rows). A lighter prior weight is a little better still: YW 0.25 −1,078, 0.5
+  −1,081, 1 −1,086, 2 (production) −1,093, 8 −1,108.
+  * loop.py `--prior-weight` (default 2, cfb748e).
+  * With `--explore` giving each new member at least 1 CPU hour of its own data, 0.5 is safe. It goes into the
+    next production script.
