@@ -162,8 +162,20 @@ abs/rm9wave2.sh, started 20:09:41 (its header says 20:11, written before checkin
 | rm4t (production) | | 0.835 | 93.5% | 30.0% | | |
 | rm7t (14 Nov) | | 0.874 | 98.4% | 14.3% | | |
 | rm9a | 4.76 M, 2.10 M, 21,125 | **0.876** | 99.5% | 6.6% | 39.5 min | 22.7 GB |
+| rm9b (short3, 32 negatives) | 6.90 M, 3.01 M, 129,293 | 0.740 | 98.8% | 3.0% | 26.5 min | 28.7 GB |
 
 * rm9a ranks as well as rm7t, and is calibrated higher: at production's thresholds it defers and freezes much
   less. A threshold matched to rm4t's deferral share would differ. That is the same caveat as exp33's rmO.
+* **rm9b is much worse: the 3 shortest proofs of every goal over all loops hurt.** 122,000 of its 129,293 logs come
+  from the from-zero and A/B loops, mostly easy goals at 2 s (median shortest proof 4 positives). With 32 negatives
+  per log it sees few of the negatives a hard search makes. A model trained on easy proofs ranks the rules of hard
+  ones badly. That fits what the user said on 15 Nov: later long proofs are worth more than many easy ones.
+* So rm9d (the same data, Suda's weighting) was stopped at its start (20:57), and abs/rm9wave3.sh (20:58) runs, in
+  order:
+  * rm9e: the 2 longest proofs per goal, 255 leaves;
+  * rm9c: shortest, medium and longest, long proofs up, 255 leaves;
+  * rm9f: rm9a's data with Suda's weighting;
+  * rm9g: rm9a's data with 255 leaves.
+* rm9b's paired arm runs anyway: a weak model can still prove other goals (portfolio rule).
 * **Member:** ul71 (20:30, production rows from 174,090) = ul70 + `m9a@0`, J=10 while exp37 trains and runs its
   arms. Its arm on the 400 (loops/MR_rm9a_20) started at 20:30 beside the control.
