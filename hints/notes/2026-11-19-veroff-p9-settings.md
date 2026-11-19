@@ -62,3 +62,8 @@ At Q's conditional rate (1.62 per CPU hour) about 1 proof was due in that time, 
 CPU went to exp24, the first measurement of deep runs on far goals (notes/2026-11-19-far-goals-deep.md).
 * To resume: V40 on the 68 walls not in out_V40/results.tsv, then V100 on all 107 (p9twee.py has no skip of done
   goals, so it needs a list of the rest).
+
+**V40 final (07:02, resumed 05:54 by stage3.sh on walls_V40_rest): 0 of 107 at 6,437 CPU s.** Every run hit the
+60 s limit (exit code 4). That includes the 4 walls the default settings prove (exp16 Q). At Q's conditional rate
+about 2.9 proofs were due, so seeing none has a chance of about 5%. A negative by the portfolio rule: no unique proof.
+V100 (Veroff's settings at the default weight limit) started at 07:02 on all 107 (about 1.8 h at 1 worker).

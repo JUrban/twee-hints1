@@ -48,3 +48,14 @@ notes/2026-11-19-hint-cost.md (exp25).
 * 06:02: production went on as ul58, with the cascade 5,40,80,160,320 (40 s chain level; abs/ul58.sh). The A/B goes
   on unchanged, and is measured from ul58's first row (103428): L1 (40 s), L2 (the 40 -> 80 s resume), L3 (160 s)
   and the 80 s variants, each by arm. ul57's 10 minutes (rows 102781-103427) are too few to count.
+
+**07:05, ul58's first hour (rows from 103428):**
+
+| level | arm | runs | proofs | CPU h | per CPU h | CPU s a run |
+|---|---|---:|---:|---:|---:|---:|
+| L1 (40 s) | A | 114 | 6 | 3.01 | 1.99 | 95 |
+| L1 (40 s) | B | 97 | 4 | 2.05 | 1.95 | 76 |
+
+* B costs 20% less a run, as exp25 found at 80 s (25%). Its proofs a run are 4.1% against A's 5.3%. With 10 proofs
+  in all, that difference is noise (Fisher p about 0.75).
+* No L2 (the 40 -> 80 s resume) or 80 s variant rows yet: after the restart most workers ran 5 s levels.
