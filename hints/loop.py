@@ -1053,7 +1053,7 @@ class Loop:
         # goal's 80 s run counts as this cascade's 80 s level and its saved 80 s state resumes to 160 s
         RL = dict(x_.split('=') for x_ in a.relabel.split(',') if x_)
         assert all(v_ in IDX for v_ in RL.values()), RL
-        # (19 Nov 10:45, --prior-weight) the prior's weight in CPU hours. In hints/exp/estcmp.py (predicting how each
+        # (19 Nov 10:42, --prior-weight) the prior's weight in CPU hours. In hints/exp/estcmp.py (predicting how each
         # window's proofs split among the members that ran in it, production's rows from 47,531) lighter is a little
         # better: 0.25 -1078, 0.5 -1081, 1 -1086, 2 -1093, 8 -1108
         YW = a.prior_weight
