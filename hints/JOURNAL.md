@@ -694,53 +694,51 @@ summaries keep results but lose the reasons and the user's exact words. Keep sec
 
 ---------------------------------------------------------------------------------------------------------
 
-## 8. Open threads (19 Nov 12:41; `date` checked)
+## 8. Open threads (19 Nov 12:56; `date` checked)
 
-**The portfolio task** (the user, 18 Nov 17:00: keep complementary methods; [notes/2026-11-18-portfolio-review.md](notes/2026-11-18-portfolio-review.md),
-REPORT 2az). The principle is the ratio rule: rank each member by its new proofs per CPU hour on the goals every
-earlier member failed in the same context. In production the order is online (`--ratio-order`, levyield), and
-variant levels are optional attempts (loop.py 119c3d1).
+**The portfolio task** (the user, 18 Nov 17:00: keep complementary methods;
+[notes/2026-11-18-portfolio-review.md](notes/2026-11-18-portfolio-review.md), REPORT 2az). The principle is the ratio
+rule: rank each member by its new proofs per CPU hour on the goals every earlier member failed in the same context.
+Production orders members online (`--ratio-order`), and new members get measured first (`--explore H`).
 
 Running:
-* **exp30** (12:45 - about 14:45, loops/P2A and P2D,
+* **exp30** (12:43 - about 14:45, loops/P2A and loops/P2D,
   [notes/2026-11-19-half2-replication.md](notes/2026-11-19-half2-replication.md)): half2 from zero, the 17 Nov
-  system against solve_new.sh's new defaults, at once; production on 4 workers meanwhile.
-* exp29 ended 12:39 ([notes/2026-11-19-from-zero-explore.md](notes/2026-11-19-from-zero-explore.md)): half1 from
-  zero, PGD 19,309 at 2 hours against PGC 18,917 (+392) and PGA 18,987 (+322); 485 goals neither control proved.
-  solve_new.sh's defaults are now PGD's setting (DEEP).
-* exp28 ended 10:38: E with chain-hint watchlists proved 0 of the 107 walls (60 s each). A genuine negative.
-* **production ul64** since 19 Nov 12:40:20 (abs/ul64.sh, loops/UL64.log, 19 workers; first results row 145787).
-  Crash watcher on PID 2795637. ul63 plus k1000@0, k2000@0, s40@0, s200@0 and k400 at 80 s, all explored, and
-  `--prior-weight 0.5`.
-  * lemma sets: k100, k200, k400, kp, kd, s12, k200s12;
-  * hl, the kNN lemmas' proof steps as hints;
-  * search settings: m7t, m4b (other rule models), r2, nopg, nom.
-  Watch `levyield.py loops/UL/r5/results.tsv 130377` and `exp/condvar.py loops/UL/r5/results.tsv 130377 LABELS`. New: the lemma-set variants Vkp@0, Vkd@0, Vk100@0 (watch them in
-  levyield), `--knn-refresh 600`. Cascade 5,40,80,160,320 (section 4.3). With the A/B test exp26 ([notes/2026-11-19-queue-renorm-ab.md](notes/2026-11-19-queue-renorm-ab.md)):
-  watch `levyield.py loops/UL/r5/results.tsv 103428`, L1 against L1/B and L2 against L2/B.
-* exp27 ended 09:18 ([notes/2026-11-19-from-zero-portfolio.md](notes/2026-11-19-from-zero-portfolio.md)): half1 from zero with today's system, PGC 18,917
-  against PGA's 18,987 (−70, noise about 185). Neutral: the deep class ran Vunf@0 (28 per CPU hour), and L1 only 4
-  times (4 proved), starved by the ratio order's priors.
-* exp23 ended 08:50: V40 and V100 0 of 107 each, so Veroff's settings are a genuine negative. Then exp28 (E with chain-hint watchlists on the
-  walls, [notes/2026-11-19-eprover-watchlist.md](notes/2026-11-19-eprover-watchlist.md)) on that CPU, queued at 07:28.
-* exp24 ended 05:29: far goals 0 of 40 at 80 s (2.9 CPU h). `--far-deep` (5f8fd4a) stays off.
-* exp25 ended 05:49 ([notes/2026-11-19-hint-cost.md](notes/2026-11-19-hint-cost.md)): without queue renormalisation 80 s runs cost 25% less, with a
-  different search; hence exp26.
+  system against solve_new.sh's new defaults, both at once (2 × 6 workers + transfers). Crash watcher on PIDs
+  2796889 (P2D) and 2796890 (P2A). Read it with `abs/setcurve.py sets/half2 P2A P2D` and exp29/ana.py, adapted.
+* **production ul64** on 4 workers since 12:42:51 (abs/ul64.sh with J=4, loops/UL64.log; the 19-worker start
+  12:40:20 is in UL64a.log; first rows 145787 and 145962). Crash watcher on PID 2796866. Back to 19 workers when
+  exp30 ends (`bash abs/ul64.sh`, J defaults to 19).
+  * 18 explored 5 s members (`--explore 1`, `--prior-weight 0.5`):
+    * lemma counts: k100, k200, k400, k1000, k2000;
+    * lemma selections: kp, kd, s12, s40, s200, k200s12;
+    * hl, the kNN lemmas' proof steps as hints;
+    * search settings: m7t, m4b, r2, nopg, nom.
+  * Also k400 at 80 s. Watch `levyield.py loops/UL/r5/results.tsv 145787` and `exp/condvar.py ...`.
+  * The exp26 A/B (`--ab-args`, [notes/2026-11-19-queue-renorm-ab.md](notes/2026-11-19-queue-renorm-ab.md)) is
+    still on the deep runs. L1 runs rarely now, so it is stalled. Read L1 against L1/B from row 103428.
+
+Ended today:
+* exp29 12:39: half1 from zero with the explored portfolio, 19,309 at 2 hours, against 18,917 and 18,987 (+392).
+  solve_new.sh's defaults are now its setting (`DEEP`).
+* exp28 10:38: E with chain-hint watchlists, 0 of 107 walls. A genuine negative.
+* exp27 09:18: today's tail system from zero without exploration, neutral (18,917 against 18,987).
+* exp23 08:50: Veroff's Prover9 settings, 0 of 107 at max_weight 5, 40 and 100. A genuine negative.
+* exp24 and exp25 (05:29, 05:49): far goals 0 of 40 at 80 s; 80 s runs without queue renormalisation cost 25% less.
+* Offline (portfolio review):
+  * the cumulative yield estimate ranks members best (discounted, time-normalised and per-original estimates
+    are worse);
+  * a learned lemma ranker gives a modest lift, from popularity, and is not built.
 
 Paused:
-* exp23 ([notes/2026-11-19-veroff-p9-settings.md](notes/2026-11-19-veroff-p9-settings.md)): Veroff's Prover9 settings. max_weight 5 is a genuine negative
-  (0 of 107); 40 is paused at 0 of 39; 100 is to do. Resume them when CPUs free up (p9twee.py needs a list of the
-  walls not done).
 * exp12 stage B: 320 s on gap heads, 34 of 95 done, 0.21 per CPU hour (run.py skips done ids).
 * exp19: set-join on the walls, 37 of 107 done, 0.31 per CPU hour (run.py skips done ids).
 
 Next:
-1. exp24's result decides the far-goal option (above).
-2. (Checked 04:11.) The fresh-run predictor's overprediction in ul56 (145 against 185 at 03:50) was all in its
-   first hour (63 against 103, a model trained on ul55's burst). From 01:05 to 03:50 it was 82 against 82, and
-   --sched-retrain keeps it current. No action.
-3. (Dropped 08:50.) A twee mode for strict hint following: exp23's V5, V40 and V100 proved none of the walls.
-4. CPU: 19 in use at 12:41 (ul64 19).
+1. exp30's result: confirm or qualify solve_new.sh's new defaults.
+2. ul64's new members after 1 CPU hour each: k1000@0, k2000@0, s40@0, s200@0, Vk400 at 80 s.
+3. A longer from-zero run (4-6 hours) with the new defaults, where the tail starts.
+4. CPU: 20 in use at 12:56 (exp30 16, ul64 4).
 
 ---------------------------------------------------------------------------------------------------------
 
