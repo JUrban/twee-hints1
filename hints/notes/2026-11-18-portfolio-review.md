@@ -546,3 +546,8 @@ Vk60@0 2,201 runs (8.5 per CPU hour).
   priors to 9.
 * If one of them yields about 1, its estimate falls below Vk60@0's within 2-4 CPU hours, about 3 CPU hours of 5 s
   runs for all three.
+* The general form of this is exploration in the ratio rule. With one global sort and optimistic-free estimates, a
+  member is measured only if its prior beats the best live member. A candidate mechanism is `--explore H`: a label
+  with less than H CPU hours of runs in the round is estimated at max(its estimate, the best label's). Every member
+  then gets H CPU hours before its own yield decides. exp27's from-zero run shows the same starvation: its 40 s
+  chain level ran 4 times in an hour behind Vunf@0 (50 per CPU hour there). Not built yet; the priors do it by hand.
