@@ -552,7 +552,7 @@ Vk60@0 2,201 runs (8.5 per CPU hour).
   then gets H CPU hours before its own yield decides. exp27's from-zero run shows the same starvation: its 40 s
   chain level ran 4 times in an hour behind Vunf@0 (50 per CPU hour there). Not built yet; the priors do it by hand.
 
-**ul60 08:50-09:19: 100 kNN lemmas became the best 5 s member (09:25).** Once goals had used up their Vk60@0 option
+**ul60 08:50-09:19: 100 kNN lemmas became the best 5 s member (measured 09:21).** Once goals had used up their Vk60@0 option
 in the current context, Vk100@0 (prior 3) was their best remaining option, so it ran. Its live yield then put it
 first:
 
