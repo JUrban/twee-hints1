@@ -293,7 +293,11 @@ Each goal is one twee run on the goal's problem.
 ### 4.3 Production
 * No side workers. Prover9 with chain hints (the P9C side worker, abs/p9c.sh and p9c4.sh, 16:46–19:38) is now the
   cascade's `p9` level.
-* `abs/ul56.sh` since 18 Nov 23:59:50 (UL56.log): ul55 restarted for loop.py 119c3d1.
+* `abs/ul57.sh` since 19 Nov 05:52:34 (UL57.log, first results row 102781): ul56 restarted for loop.py 516f416,
+  with the A/B test exp26 (`--ab-args="--cp-renormalise-threshold 1000"`: half the goals' deep runs never renormalise
+  the queue; rows ab=1; notes/2026-11-19-queue-renorm-ab.md). The restart flagged 1 goal as pool-grown (the fixed
+  check). ul56 ended at new=289 in 5 h 52 min.
+* `abs/ul56.sh` 18 Nov 23:59:50 - 19 Nov 05:52 (UL56.log): ul55 restarted for loop.py 119c3d1.
   * Variant levels are optional attempts. A goal's next attempt is its eligible option of highest live yield: its
     next cascade level, or any untried variant after a level it ran. Goals far from the frontier choose among the
     fresh level's variants only.
@@ -678,12 +682,12 @@ earlier member failed in the same context. In production the order is online (`-
 variant levels are optional attempts (loop.py 119c3d1).
 
 Running:
-* **production ul56** since 18 Nov 23:59:50 (abs/ul56.sh, loops/UL56.log, 19 workers). Crash watcher on PID
-  2524870. 233 new by 03:50. Watch with `levyield.py loops/UL/r5/results.tsv 81268`. loop.py since then: chain-hint
-  levels wait for the chain records (2b5d7d8; takes effect at the next restart).
-* **exp24** (notes/2026-11-19-far-goals-deep.md): production's 80 s chain level on 40 far goals, 2 workers, from
-  03:58. 4,176 of 5,588 unsolved goals are far, and production never deepens them. If they pay, loop.py needs a
-  far-goal deep option with its own yield label (so the ratio rule ranks it apart from the near goals' L1).
+* **production ul57** since 19 Nov 05:52:34 (abs/ul57.sh, loops/UL57.log, 19 workers). Crash watcher on PID
+  2579765. With the A/B test exp26 (notes/2026-11-19-queue-renorm-ab.md): watch `levyield.py
+  loops/UL/r5/results.tsv 102781`, L1 against L1/B.
+* exp24 ended 05:29: far goals 0 of 40 at 80 s (2.9 CPU h). `--far-deep` (5f8fd4a) stays off.
+* exp25 ended 05:49 (notes/2026-11-19-hint-cost.md): without queue renormalisation 80 s runs cost 25% less, with a
+  different search; hence exp26.
 
 Paused:
 * exp23 (notes/2026-11-19-veroff-p9-settings.md): Veroff's Prover9 settings. max_weight 5 is a genuine negative
@@ -699,7 +703,7 @@ Next:
    --sched-retrain keeps it current. No action.
 3. A twee mode for strict hint following (a size cap that hint matchers bypass, as Prover9's max_weight with
    hints) only if exp23's V40 or V100 show unique proofs. V5 showed that sibling hints do not suit it.
-4. CPU: 21 in use at 04:01 (ul56 19, exp24 2).
+4. CPU: 19 in use at 05:53 (ul57). exp23's stage3.sh can take 1 now.
 
 ---------------------------------------------------------------------------------------------------------
 
@@ -774,6 +778,7 @@ reports are written as the experiments run.
 | notes/2026-11-19-veroff-p9-settings.md | Prover9 with Veroff's AIM settings and chain hints on the 107 walls (exp23, from 02:15, 1 worker): max_weight 5 0 of 107; 40 paused at 0 of 39 (03:54); 100 to do |
 | notes/2026-11-19-far-goals-deep.md | production's 80 s chain level on 40 far goals, which production never deepens (exp24, 03:58-05:29): 0 of 40 at 2.9 CPU h; found the chain-records race at loop start |
 | notes/2026-11-19-hint-cost.md | what chain hints cost per abstract second; the profile; queue renormalisation under the abstract clock (exp25) |
+| notes/2026-11-19-queue-renorm-ab.md | deep runs without queue renormalisation, an A/B test in production ul57 (exp26, from 05:52) |
 | notes/2026-11-17-lemma-circularity.md | Are lemma chains circular? A check of the used lemmas |
 | notes/2026-11-17-mix-fail-order.md | Repeats cost most of the time: `--mix` and `--fail-order` |
 | notes/2026-11-17-pg-ab-half1.md | Parental guidance at scale: half1 from zero, 2 hours, sum filter 0.25 against the defaults |
