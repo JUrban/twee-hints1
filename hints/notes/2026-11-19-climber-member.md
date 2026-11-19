@@ -67,3 +67,10 @@ The user forwarded a message about the climber at 15:20. Checked against the rec
   ([notes/2026-11-19-climb-ablation.md](2026-11-19-climb-ablation.md)).
 * 17:40 tally: 5 proofs in 3.50 CPU h (1.43 per CPU h, above the 0.25 threshold). In the same rows (from 156,424)
   production's members: L0 4.1, Vpool@1:0 2.7, Vs40@0 1.9, Vkd@0 0.6 per CPU h, and the rest 0.
+* **18:10 tally:**
+  * The climber: 6 proofs (845, 518, 434, 458, lra2aa 291, aK2_eq_aK3_1243 356) in 4.48 CPU h, 1.34 per CPU h.
+  * Production in the same rows (from 156,424): 23 proofs in 38.0 CPU h, 0.61 per CPU h. Its members at 80 s and
+    above: 0 in 13.9 CPU h.
+  * Production had run 44-80 times on each of the 6 (483-2,818 CPU s), mostly 5 s members, at most 10 runs beyond
+    5 s.
+  * So far the climber passes the decision rule (0.25) by five times, and doubles production's average.

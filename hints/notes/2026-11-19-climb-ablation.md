@@ -48,3 +48,6 @@ that sounds strange - presumably they helped inside the climb (that's why we did
 ## Results
 
 (running)
+
+* **Interim (18:09, 26 of 55 targets):** both arms 16, neither 7, S only 3 (ns_to_aa1_b 610, aip_to_aK1 185,
+  mbol_nil3_a 494, all CLU at 20 s), P only 0.
