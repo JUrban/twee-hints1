@@ -4864,6 +4864,22 @@ hints as a static watchlist (`-xUseWatchlist`). On two walls it fails both at 60
 including one twee proves in 21 CPU s. It runs on all 107 walls after exp23, to see whether it proves any no other
 member does.
 
+**The dropped lemma selections as 5 s members (ul60, 08:05; loop.py 92d60c4).** exp21 found that at 5 s only the
+variants that change the problem pay, and the 60-lemma 5 s variant makes 5-20 per CPU hour live. 16 Nov dropped
+three lemma selections that each proved goals plain similarity did not (150 unsolved at 20 s: 6 plain; use counts 7,
++3 −2; proof dependencies 5, +1 −2; 100 lemmas 5, +1 −2). They are now variants:
+* `kp@0` (use counts), `kd@0` (proof dependencies) and `k100@0`, at prior 3 each, measured live by the ratio rule;
+* their indexes are built in a background thread, 37 s on UL.
+
+**Restart bursts are cascades, not a scheduler defect** (portfolio review, 19 Nov). ul58 made 40 new in its first
+57 minutes and 129 in its last 16, and ul59 went on with it. Ruled out:
+* stale scores;
+* proofs synced from other processes;
+* the threshold.
+The cascade was spread over many originals of the same axiom families (aK2_eq_aK3_*, nil3_*). 392 of 401 proofs
+since ul58 used a kNN lemma of another original, and for 171 the youngest was under 30 minutes old. So the kNN
+index is now rebuilt every 10 minutes, not 30 (about 1 s a rebuild).
+
 ## 2c. Long runs: stall cutoff and checkpoints
 
 * `--eqhint-stall N` gives up when no new rule has matched a hint for N
