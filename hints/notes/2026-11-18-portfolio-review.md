@@ -591,3 +591,8 @@ first:
 
 **ul62 (10:05):** k200@0 and s12@0 added; `--explore 1` on the five lemma-set labels. In its first minute the deep
 class ran Vk200@0 (99) and Vs12@0 (75), the unmeasured ones, first.
+* **Complementary, measured (10:10):**
+  * All 10 Vkd@0 proofs (ul61 to ul62's start) came after Vk100@0 had failed in the same context, 6 of them after
+    Vk60@0 too.
+  * ul62's first Vk200@0 and Vs12@0 proofs came after k100, kd and kp (and k60) had failed.
+  * Each lemma selection is a different problem, and a 5 s run on it proves goals that the others' runs did not.
