@@ -9,6 +9,10 @@ f_, R, W, TAU = sys.argv[1], int(sys.argv[2]), int(sys.argv[3]), float(sys.argv[
 YW = 2.0
 P = collections.defaultdict(lambda: 1.0, {'Vunf@0': 3.8, 'Vk60@0': 1.9, 'L1': 1.73, 'L2': 1.1, 'L3': 1.77, 'Vk60': 1.19,
      'Vp9': 0.7, 'Vunf': 0.47, 'Vtwo': 0.23, 'Vnom': 0.23, 'L4': 0.21})
+import os
+if os.environ.get('FLATP'):   # all priors 1.0
+    P = collections.defaultdict(lambda: 1.0)
+YW = float(os.environ.get('YW', YW))
 rows = []
 for i, l in enumerate(open(f_), 1):
     if i < R: continue

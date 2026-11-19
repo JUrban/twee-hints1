@@ -1053,7 +1053,10 @@ class Loop:
         # goal's 80 s run counts as this cascade's 80 s level and its saved 80 s state resumes to 160 s
         RL = dict(x_.split('=') for x_ in a.relabel.split(',') if x_)
         assert all(v_ in IDX for v_ in RL.values()), RL
-        YW = 2.0
+        # (19 Nov 10:45, --prior-weight) the prior's weight in CPU hours. In hints/exp/estcmp.py (predicting how each
+        # window's proofs split among the members that ran in it, production's rows from 47,531) lighter is a little
+        # better: 0.25 -1078, 0.5 -1081, 1 -1086, 2 -1093, 8 -1108
+        YW = a.prior_weight
         ystat = collections.defaultdict(lambda: [0, 0.0])   # label -> [proofs, CPU s]
         def lyield0(l):
             k, c = ystat[l]
@@ -1983,6 +1986,8 @@ def make_parser():
                     help='--cascade: deepen goals at most this many places after a proven sibling')
     ap.add_argument('--variant-budget', type=float, default=0,
                     help='(19 Nov) --variants: the budget of the variants after the chain level (default: its own)')
+    ap.add_argument('--prior-weight', type=float, default=2.0, metavar='H',
+                    help='--ratio-order: the weight of a label\'s prior, in CPU hours of its own runs')
     ap.add_argument('--hl-factor', type=float, default=0.1,
                     help='--variants hl: the score factor of the kNN lemmas\' proof steps as hints')
     ap.add_argument('--explore', type=float, default=0.0, metavar='H',
