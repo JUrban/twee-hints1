@@ -392,3 +392,48 @@ So these are genuine negatives by the portfolio rule, since they prove nothing n
   to 22.8 GB, about 2 GB per 80 s run. memwatch caps the total at 45 GB.
 * The fresh-run predictor overpredicts in ul56: 63 proved against 103 predicted (ul55: 108 against 113).
 * Solved at 01:06: 46,050 rows in solved.tsv.
+
+**03:50: ul56 at 3 h 50 min: new=233** (about 60 an hour). By level since row 81268:
+
+| level | runs | proofs | CPU h | per CPU h |
+|---|---:|---:|---:|---:|
+| L0 (5 s) | 6,195 | 145 | 14.3 | 10.1 |
+| L1 (80 s chain) | 380 | 40 | 24.9 | **1.61** |
+| L2 (160 s resume) | 30 | 0 | 1.7 | 0 |
+| Vk60 (80 s) | 30 | 1 | 1.2 | 0.82 |
+| Vk60@0 (5 s) | 7,073 | 29 | 11.2 | 2.59 |
+| Vunf@0 (5 s) | 5,236 | 20 | 16.2 | 1.24 |
+
+* A burst at about 03:15 (new 168 to 199 in a few minutes, the r class at 59 an hour): one deep proof reopens its
+  neighbours, and their fresh 5 s runs prove more.
+* Memory 8 GB, no memwatch kills. Solved: 46,207 rows.
+
+## Far goals and two loop.py fixes (19 Nov 03:50 - 04:08)
+
+**Far goals, the unmeasured member.** 4,176 of the 5,588 unsolved goals are far from the frontier, and 3,683 of them never
+had a run over 30 CPU s, because production never deepens them. exp24 (notes/2026-11-19-far-goals-deep.md) runs
+production's L1 on 40 of them. exp23 (Veroff's Prover9 settings) is paused to free its CPU: max_weight 5 proved 0 of 107,
+a genuine negative, and max_weight 40 had 0 of 39.
+
+**`--far-deep K`** (loop.py 5f8fd4a, off in production): far goals may also take the cascade's own levels 1..K. Their
+yield is counted apart as `L<k>f` (rows get a column `f=1`; levyield.py shows them), so the ratio rule ranks a far goal's
+80 s run by far goals' own record, from a prior `--far-deep-prior` (default 0.5). Smoke test (hints/exp/fardeep_smoke.sh):
+far goals ran L0, Vunf@0, Vk60@0, then L1 marked f=1, and nothing deeper. A restart made 0 runs. Without the flag, far
+goals got the 5 s levels only, as before. exp24's result sets the prior, or keeps the flag off.
+
+**Bug 1: chain records race at the start.** The chain records load in a background thread. Deep runs dispatched before
+they were in got the original's pool instead of the chain (exp24's first launch: 3,113 and 10,573 hints against chains
+of 7,738 and 3,631). Now such a level waits for the records, for up to 2 minutes (2b5d7d8). At production restarts most
+early runs are 5 s fresh runs, so few deep runs were hit.
+
+**Bug 2: spurious pool growth at a restart (the larger one).** At a restart `--retry-hints` estimates each goal's pool size
+at its last fresh run from the hints= of that run and of the original's latest run. The latest run could be a deep or
+variant run, whose hints= counts its chain, 60 lemmas' or unfolded hints, not the pool. The pool then looked grown by
+1.25x, and the goal got a fresh 5 s run in an unchanged context. That run resets the goal's attempts, so all its 5 s
+variants and deep levels ran again, and twee is deterministic, so they failed again identically.
+* Past restarts: ul45 flagged 970 goals, ul46 3,142, ul47 265, ul48 527; ul49 to ul56 0 (their originals' latest rows were
+  fresh runs). A restart now would have flagged about 2,553 of the 5,583 unsolved goals, since the deep phase wrote
+  most originals' latest rows.
+* So part of ul45-ul48's runs repeated themselves, and their yields per CPU hour are understated by that.
+* Fix: both sizes from fresh (L0) rows only (5f8fd4a). The smoke test's restart went from 12 repeated runs to 0, and
+  production's current results would flag 1 goal.
