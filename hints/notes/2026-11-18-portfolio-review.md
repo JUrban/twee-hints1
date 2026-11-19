@@ -437,3 +437,39 @@ variants and deep levels ran again, and twee is deterministic, so they failed ag
 * So part of ul45-ul48's runs repeated themselves, and their yields per CPU hour are understated by that.
 * Fix: both sizes from fresh (L0) rows only (5f8fd4a). The smoke test's restart went from 12 repeated runs to 0, and
   production's current results would flag 1 goal.
+
+## A 40 s chain level: splitting the 80 s run (19 Nov 05:45 - 06:03)
+
+**The data.** ul56's 833 L1 runs (80 s chain, fresh) from row 81268: 81 proofs, 752 failures at 259 CPU s each. The
+proofs' abstract times (considered pairs / 2,000, from their kept outputs) have quartiles 13, 29 and 46 s:
+
+| within | 20 s | 40 s | 60 s | 80 s |
+|---|---:|---:|---:|---:|
+| proofs | 28 | 50 | 73 | 81 |
+
+**Why this is exact.** Twee is deterministic in abstract time, so a 40 s run is the first half of the 80 s run: it
+proves exactly the 50, and a resume to 80 s proves the other 31. The CPU of a failing run grows about in proportion to
+its abstract time (36 s at 20 s against 135 s at 80 s on one wall).
+
+| first deep level | proofs | CPU h (est.) | per CPU h |
+|---|---:|---:|---:|
+| 80 s (ul56) | 81 | 55.8 | 1.45 |
+| 40 s | 50 | 28.9 | **1.73** |
+| 20 s | 28 | 15.8 | 1.77 |
+| then 40 -> 80 s resume | 31 | 28 | 1.1 |
+| or 20 -> 80 s resume | 53 | 42.6 | 1.24 |
+
+* A shorter first level pays about 20% more per CPU hour, and the second half becomes a member of its own at about
+  1.1, level with the 80 s variants (k60 1.19, p9 0.7). The ratio rule can then run another goal's first half before
+  finishing this one's.
+* 40 s rather than 20 s: the same rate, half the resume overhead per proof, and states stay small. 20 s would add a
+  third resume (20 -> 40 -> 80) for about the same rate.
+* That is the cascade's own portfolio question: a level's members are "the first half" and "the second half", and
+  the second half competes with the variants.
+
+**Deployed as ul58** (06:02, loop.py 1bb0a0f): `--cascade 5,40,80,160,320 --variants-after 3 --variant-budget 80
+--priors L1=1.73,L2=1.1 --relabel L1=L2,L2=L3,L3=L4 --relabel-until 103427 --relabel-nostat L2`.
+* Old rows count as the levels of the same budget (an old 80 s run is the new L2, and its state resumes to 160 s).
+* The old fresh 80 s rows do not count in the new L2's yield, since that is now a resume.
+* Smoke test (hints/exp/relabel_smoke.sh, cascade 1,1.5,2,4,8 after 1,2,4,8): goals with old deep rows went on from the
+  right level with the right increments, and a goal without one ran the new first level fresh.

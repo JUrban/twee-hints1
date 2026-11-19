@@ -4831,6 +4831,12 @@ The union is 26 of 92. **ul54 (21:35)** has 19 workers and adds `nom` as the las
 * **exp26** is an A/B test of that in production (ul57, from 05:52, loop.py `--ab-args`). Half the goals, by a hash
   of the name, run their deep levels without renormalisation. The measure is each arm's proofs per CPU hour at L1.
 
+**A 40 s chain level (19 Nov 06:02, ul58).** ul56's 81 proofs at the 80 s chain level came at a median abstract time of
+29 s: 50 within 40 s and 28 within 20 s. Twee is deterministic in abstract time, so a 40 s first level proves exactly
+those 50 at about half the CPU: 1.73 per CPU hour against 1.45. The resume to 80 s then makes about 1.1 and competes
+with the variants. Production now runs `--cascade 5,40,80,160,320`. Old results rows map to the levels of the same budget
+(`--relabel`), and the variants stay at 80 s.
+
 ## 2c. Long runs: stall cutoff and checkpoints
 
 * `--eqhint-stall N` gives up when no new rule has matched a hint for N
