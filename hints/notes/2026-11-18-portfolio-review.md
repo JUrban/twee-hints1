@@ -550,7 +550,14 @@ Vk60@0 2,201 runs (8.5 per CPU hour).
   member is measured only if its prior beats the best live member. A candidate mechanism is `--explore H`: a label
   with less than H CPU hours of runs in the round is estimated at max(its estimate, the best label's). Every member
   then gets H CPU hours before its own yield decides. exp27's from-zero run shows the same starvation: its 40 s
-  chain level ran 4 times in an hour behind Vunf@0 (50 per CPU hour there). Not built yet; the priors do it by hand.
+  chain level ran 4 times in an hour behind Vunf@0 (50 per CPU hour there).
+* **Built (loop.py 3f95f59, 09:24): `--explore H [--explore-labels L,...]`.** A label with less than H CPU hours
+  of runs in the round is estimated at max(its own estimate, the best estimate among labels with H or more). The best
+  is recomputed only when the stats change. Ties go to the lower internal level.
+  * Smoke test: hints/exp/explore_smoke.sh.
+  * ul62 uses it for the lemma-set variants (`--explore 1 --explore-labels Vk100@0,Vk200@0,Vkp@0,Vkd@0,Vs12@0`),
+    with two more of them: k200@0 and s12@0 (12 sibling lemmas; loop.py e2986e3, variants `kNsM`).
+  * Measured-prior members (the 80 s variants, L3, L4) are left to their priors.
 
 **ul60 08:50-09:19: 100 kNN lemmas became the best 5 s member (measured 09:21).** Once goals had used up their Vk60@0 option
 in the current context, Vk100@0 (prior 3) was their best remaining option, so it ran. Its live yield then put it
