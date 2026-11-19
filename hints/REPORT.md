@@ -4700,6 +4700,8 @@ reproduced exactly).
 
 ## 2az. Portfolios: complementary methods kept, not dropped (user's request, 18 Nov 17:00)
 
+*Notes: [notes/2026-11-19-enigmawatch.md](notes/2026-11-19-enigmawatch.md).*
+
 *Notes: [notes/2026-11-19-half2-replication.md](notes/2026-11-19-half2-replication.md).*
 
 *Notes: [notes/2026-11-18-no-pg-no-model-walls.md](notes/2026-11-18-no-pg-no-model-walls.md), [notes/2026-11-19-far-goals-deep.md](notes/2026-11-19-far-goals-deep.md), [notes/2026-11-19-from-zero-explore.md](notes/2026-11-19-from-zero-explore.md), [notes/2026-11-19-queue-renorm-ab.md](notes/2026-11-19-queue-renorm-ab.md).*

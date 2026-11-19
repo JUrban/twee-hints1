@@ -91,6 +91,48 @@ proof or not):
 * the given log prints the vector;
 * retrain, then online tests at 5 s against rm4t, and as a portfolio member.
 
+## The ceiling from the record (read before launching)
+
+* ENIGMAWatch makes the rule model better. twee's rule model acts only through the defer-once filter, and REPORT 2ad
+  and 2af tested that filter's ceiling.
+  * A near-oracle model rmO was trained on the test goals' own logs (AUC 0.956; at 0.1 it keeps 99.3% of proof rules
+    and defers 57.3% of the others).
+  * rmO: 273 against rm4t's 271 of 400 (defer once), and 270 against 269 with deferral up to 3 times at penalty 5.
+  * Ordering the queue by the model (2ao, `--cp-model-factor`) costs about 10x the wall time.
+* So even a large AUC lift is unlikely to pay through today's hooks. The offline test measures whether the
+  proof-state vector carries information twee's model lacks. An online test follows only if the lift is large, and
+  through a hook the oracle has not closed.
+* **ProofWatch's own part** (the hints' boost follows their source proofs' completion) acts on hints, which do pay in
+  this system. The 13 Nov test was +2 −4 at F = 0.3: two goals no other setting proved. Under the portfolio rule
+  that is a member to measure, not a negative. So:
+  * **`--variants pw`** (loop.py, commit 3362943): each pool hint lists the solved siblings whose proofs contain
+    it (4th column of the hints file), and twee runs with `--eqhint-watch F`.
+  * `--pw-factor` defaults to 0.05: hints of unstarted proofs get a factor of 0.05, moving to the default 0.01 as
+    their proof completes. All hints stay boosted, and relevance orders them, as E's PreferWatchlistRelevant
+    orders matched clauses.
+  * Smoke test (exp/pw_smoke.sh, 13:40): all 4,679 pool hints of nil3_15 328 carry groups (352 sibling proofs, a
+    median of 13 steps each), and the runs ended normally.
+  * It joins production's explored members at the restart after exp30 (ul65).
+
+## exp31 setting (launched 13:45)
+
+* `venv/bin/python3 exp/ew_offline.py loops/UL/given loops/UL/hints exp31/ew_mvr.jsonl --ntrain 1000 --ntest 300
+  --nsel 800 --rounds 200 --threads 2` in /project/hintwork, log exp31/ew_mvr.log.
+* Split: rulemodel.py's default, seed 1, a third of the 129 originals held out (43). Training and test problems are
+  random given logs of their originals (seed 1).
+* Watchlists: 32,127 proofs of the 86 training originals' proven goals (median 17 steps).
+* Rows: rm4t's features (theory block). Training uses all positives and 200 sampled negatives a problem; testing
+  uses every rule of the test problems.
+* LightGBM: rulemodel.py's parameters (63 leaves, rate 0.1, 200 rounds), 2 threads; the same rows with and without
+  the 512 columns.
+* **Smoke test finding (40 problems): Mean selection degenerates on AIM.**
+  * 98% of (problem, watchlist) pairs are partly matched.
+  * The 512 highest-mean proofs are tiny (median 5 steps) and complete early (mean completion 0.97). They are
+    nearly constant, and the trees used 53 of them.
+  * AIM's theories share their basic steps, where Mizar's proofs are diverse.
+  * So the run tests the paper's three selections: Mean, Var (mean completion 0.39, median 14 steps) and Rand
+    (0.53, median 16).
+
 ## Results
 
 (running)
