@@ -1448,6 +1448,20 @@ class Loop:
                                 continue
                             if light and (n not in att or lev not in opts(n) or ctx(n) != att[n][0] or grown(n)):
                                 continue
+                            # (19 Nov 03:56) a level that takes chain hints waits for the chain records, which load in a
+                            # background thread: before they are in, deep_hints falls back to the original's pool. exp24's
+                            # first 80 s runs, dispatched at the start, got the pool that way, and so would a production
+                            # restart's first deep runs.
+                            # It waits (up to 2 minutes, then the pool as before); skipping it instead ended exp24's loop at
+                            # once, with nothing else to run.
+                            C_ = getattr(self, 'chains', None)
+                            if (C_ is not None and not C_.ready() and '__goal_' in n
+                                    and (ORIG[lev] >= a.chain_level or VAR[lev] in ('two', 'x'))):
+                                t_ = time.time()
+                                while not C_.ready() and time.time() - t_ < 120:
+                                    time.sleep(0.1)
+                                print(f'  cascade: waited {time.time() - t_:.1f} s for the chain records'
+                                      f' ({"in" if C_.ready() else "not in; the pool instead"})', flush=True)
                             if VAR[lev]:
                                 vtried[n].add(lev); att[n] = (ctx(n), max(att[n][1], FOL[lev]))
                             else:

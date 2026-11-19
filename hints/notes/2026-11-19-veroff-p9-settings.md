@@ -52,3 +52,13 @@ cd /project/hintwork/exp23; bash stage.sh
 * **Change of plan (02:46).** V10 and V20 dropped. stage2.sh runs V40, Veroff's settings with a usable weight limit,
   and then V100, his settings at the default weight, which isolates KBO, lex_order_vars, no back_demod,
   restrict_denials, para_from_small and no cac_redundancy from the weight limit. V5 finishes its 107 first.
+
+**V5 final (03:14): 0 of 107 at 3,484 CPU s.** 76 runs used up their search, and 31 hit the 60 s limit. A genuine
+negative by the portfolio rule: it proves nothing.
+
+**V40, paused at 03:54 after 39 of 107: 0 proved at about 2,300 CPU s.** Every run hit the 60 s limit. It failed
+aK2_eq_aK3_j 382 at 60 s, which the default settings prove in 21 s; the other three walls Q proves were not reached yet.
+At Q's conditional rate (1.62 per CPU hour) about 1 proof was due in that time, so this says little either way. Its
+CPU went to exp24, the first measurement of deep runs on far goals (notes/2026-11-19-far-goals-deep.md).
+* To resume: V40 on the 68 walls not in out_V40/results.tsv, then V100 on all 107 (p9twee.py has no skip of done
+  goals, so it needs a list of the rest).
