@@ -3451,6 +3451,10 @@ The cheap end is twee-e62 `--pg-order F`: score × F ** sigmoid(q1 + q2), from t
 per pair. exp35 tests it paired on the 400 ultest goals, from about 18:45
 ([notes/2026-11-19-pg-order.md](notes/2026-11-19-pg-order.md)).
 
+**Result (stopped 19:43): the cheap end does not pay either.** Against exp33's rm4t arm on the same goals, F = 0.5
+proved 228 of 284 (control 240, +0 −12) at 2.2× the CPU, and F = 0.1 proved 56 of 83 (control 69, +0 −13) at 6.8×.
+Neither arm proved a goal the control missed, so neither is a member.
+
 ## 2ap. Hints from the kNN lemmas' proofs (16 Nov, 11:35): no gain
 
 The cross-original hint pools of earlier tests were never measured
@@ -5038,6 +5042,11 @@ climber ([notes/2026-11-19-climber-member.md](notes/2026-11-19-climber-member.md
 (Corrected 17:50: I first wrote that its "plain 160 s control runs" proved 3 of them. Those `direct` runs come after a
 successful final run, with that run's own proof steps among the hints, so they are no control. exp36,
 [notes/2026-11-19-climb-ablation.md](notes/2026-11-19-climb-ablation.md), is the real ablation.)
+**exp36 result (20:05): the sketch hints caused 3 of 54 climber proofs.** Each climber proof was rerun twice at its
+final budget, in production's context as of the proof: the pool only, and the sketch steps saved before the proof
+first. Both arms prove 35, neither 16, the sketch arm alone 3 (all CLU at 20 s), the pool alone 0, at equal speed on
+the shared ones. Today's binary and context prove 35 of the 54 without any climb. The 16 that neither proves need
+what the arms lack: fill lemmas, assumptions, or the old binary's search.
 * Since ul58 (06:02), L2-L4 and the 80 s variants k60, p9, unf, two and nom never ran. Their hand-set priors (L2 1.1)
   sat below the live 5 s members (1-3 per CPU hour), and a label that never runs is never re-measured.
 * ul67/ul68 add fresh pool runs at 40 and 80 s right after the 5 s level (`pool@1:0`, `pool@2:0`; new syntax
