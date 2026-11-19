@@ -315,7 +315,7 @@ Each goal is one twee run on the goal's problem.
   by budget (L1=L2, L2=L3, L3=L4). The A/B test exp26 goes on.
 * `abs/ul57.sh` 19 Nov 05:52:34 - 06:02 (UL57.log, first results row 102781): ul56 restarted for loop.py 516f416,
   with the A/B test exp26 (`--ab-args="--cp-renormalise-threshold 1000"`: half the goals' deep runs never renormalise
-  the queue; rows ab=1; notes/2026-11-19-queue-renorm-ab.md). The restart flagged 1 goal as pool-grown (the fixed
+  the queue; rows ab=1; [notes/2026-11-19-queue-renorm-ab.md](notes/2026-11-19-queue-renorm-ab.md)). The restart flagged 1 goal as pool-grown (the fixed
   check). ul56 ended at new=289 in 5 h 52 min.
 * `abs/ul56.sh` 18 Nov 23:59:50 - 19 Nov 05:52 (UL56.log): ul55 restarted for loop.py 119c3d1.
   * Variant levels are optional attempts. A goal's next attempt is its eligible option of highest live yield: its
@@ -357,7 +357,7 @@ Each goal is one twee run on the goal's problem.
 * `abs/ul47.sh` from 18 Nov 17:13:49 to 18:30 (UL47.log, new=14 in 76 min on 4 workers): ul46 plus `--variants k60,two,unf,sub` (loop.py 551f563): after a
   failed 80 s chain run, four more 80 s fresh runs in the same context (60 kNN lemmas, the two-sided chain,
   definitions unfolded, subsumption matching) before the 320 s level; results rows Vk60/Vtwo/Vunf/Vsub. The portfolio
-  task: notes/2026-11-18-portfolio-review.md. P9C keeps running beside it.
+  task: [notes/2026-11-18-portfolio-review.md](notes/2026-11-18-portfolio-review.md). P9C keeps running beside it.
 * `abs/ul46.sh` from 18 Nov 14:46 to 17:13 (UL46.log, new=12; its header says 14:50, written before the start): ul45 on 4 workers
   with chain_records2.tsv (+40 records of merged experiment proofs, 39,884 in all). ul45 had proved nothing from
   13:20 to 14:37 (its 5 s classes had no candidates; all 8 workers on 80 s chain runs), then 2 by 14:46; new=22 in all. The other 4
@@ -372,13 +372,13 @@ Each goal is one twee run on the goal's problem.
 * `abs/ul43.sh` from 18 Nov 08:28 (UL43.log; 90 new in 50 min on 4 workers): ul42 with `--chain-level 1 --chain-records
   /project/hintwork/chain_records.tsv`. The 80 s level (which resumes the 5 s run's state, so the chain reached only new pairs; corrected 11:55, fixed in ul45) takes the
   goal's chain (hints/sibchain.py: the proofs of its 10 nearest proven siblings below, expanded through the
-  proven goals they used) instead of the pool (notes/2026-11-18-chain-hints-unsolved.md, exp3's K arm).
+  proven goals they used) instead of the pool ([notes/2026-11-18-chain-hints-unsolved.md](notes/2026-11-18-chain-hints-unsolved.md), exp3's K arm).
   The records file is read at start; rebuild it after merges (merge.py copies hint files, not outputs):
   `python3 hints/sibchain.py --build chain_records.tsv.new --extra exp3/out_K@320,...` then mv (08:31: 39,643
   records, 12 of them from the merged exp3/exp8 outputs).
 * `abs/ul42.sh` from 18 Nov 07:30 (UL42.log): ul41 with `--twee /project/bin/twee-pg61` (twee-e61) and
   `TWEE_PG_ARGS="--pg-threshold 0.25 --ground-joining-branch-limit 100"`, on 4 workers. The branch limit stops
-  one-step hangs in ground joining (notes/2026-11-18-ground-joining-hangs.md); the search is otherwise identical.
+  one-step hangs in ground joining ([notes/2026-11-18-ground-joining-hangs.md](notes/2026-11-18-ground-joining-hangs.md)); the search is otherwise identical.
 * Before that, `abs/ul41.sh` from 17 Nov 17:25 (UL41.log): ul40 (e44, the 17 Nov defaults) plus the PG sum filter,
   via `twee-pg50`.
 * Solved: 44,870 of 51,784 at 18:05 on 17 Nov (holdout about 4,900; count the distinct goals in
@@ -432,7 +432,7 @@ Helped, in rough order of size:
   is still running).
 
 Neutral or negative *in count* (18 Nov, the user: many of these are complementary, with unique solutions, and belong in
-a portfolio; notes/2026-11-18-portfolio-review.md lists each one's share):
+a portfolio; [notes/2026-11-18-portfolio-review.md](notes/2026-11-18-portfolio-review.md) lists each one's share):
 * ProofWatch boosting; parent features; generalisation matching; hint reranking; frequency-weighted boosts;
 * hint axioms; multi-goal search; SFDF reorientation; the stall cutoff at short limits;
 * retraining on hard proofs and the oracle rule model online;
@@ -696,13 +696,13 @@ summaries keep results but lose the reasons and the user's exact words. Keep sec
 
 ## 8. Open threads (19 Nov 10:40; `date` checked)
 
-**The portfolio task** (the user, 18 Nov 17:00: keep complementary methods; notes/2026-11-18-portfolio-review.md,
+**The portfolio task** (the user, 18 Nov 17:00: keep complementary methods; [notes/2026-11-18-portfolio-review.md](notes/2026-11-18-portfolio-review.md),
 REPORT 2az). The principle is the ratio rule: rank each member by its new proofs per CPU hour on the goals every
 earlier member failed in the same context. In production the order is online (`--ratio-order`, levyield), and
 variant levels are optional attempts (loop.py 119c3d1).
 
 Running:
-* **exp29** (10:38:51 - about 12:40, loops/PGD, notes/2026-11-19-from-zero-explore.md): half1 from zero, PGC plus the
+* **exp29** (10:38:51 - about 12:40, loops/PGD, [notes/2026-11-19-from-zero-explore.md](notes/2026-11-19-from-zero-explore.md)): half1 from zero, PGC plus the
   5 s lemma members k100@0, k200@0, k400@0 and kd@0, with `--explore 0.2` for them and L1. Crash watcher on PID
   2710082. Then production back to 19 workers.
 * exp28 ended 10:38: E with chain-hint watchlists proved 0 of the 107 walls (60 s each). A genuine negative.
@@ -712,19 +712,19 @@ Running:
   * hl, the kNN lemmas' proof steps as hints;
   * search settings: m7t, m4b (other rule models), r2, nopg, nom.
   Watch `levyield.py loops/UL/r5/results.tsv 130377` and `exp/condvar.py loops/UL/r5/results.tsv 130377 LABELS`. New: the lemma-set variants Vkp@0, Vkd@0, Vk100@0 (watch them in
-  levyield), `--knn-refresh 600`. Cascade 5,40,80,160,320 (section 4.3). With the A/B test exp26 (notes/2026-11-19-queue-renorm-ab.md):
+  levyield), `--knn-refresh 600`. Cascade 5,40,80,160,320 (section 4.3). With the A/B test exp26 ([notes/2026-11-19-queue-renorm-ab.md](notes/2026-11-19-queue-renorm-ab.md)):
   watch `levyield.py loops/UL/r5/results.tsv 103428`, L1 against L1/B and L2 against L2/B.
-* exp27 ended 09:18 (notes/2026-11-19-from-zero-portfolio.md): half1 from zero with today's system, PGC 18,917
+* exp27 ended 09:18 ([notes/2026-11-19-from-zero-portfolio.md](notes/2026-11-19-from-zero-portfolio.md)): half1 from zero with today's system, PGC 18,917
   against PGA's 18,987 (−70, noise about 185). Neutral: the deep class ran Vunf@0 (28 per CPU hour), and L1 only 4
   times (4 proved), starved by the ratio order's priors.
 * exp23 ended 08:50: V40 and V100 0 of 107 each, so Veroff's settings are a genuine negative. Then exp28 (E with chain-hint watchlists on the
-  walls, notes/2026-11-19-eprover-watchlist.md) on that CPU, queued at 07:28.
+  walls, [notes/2026-11-19-eprover-watchlist.md](notes/2026-11-19-eprover-watchlist.md)) on that CPU, queued at 07:28.
 * exp24 ended 05:29: far goals 0 of 40 at 80 s (2.9 CPU h). `--far-deep` (5f8fd4a) stays off.
-* exp25 ended 05:49 (notes/2026-11-19-hint-cost.md): without queue renormalisation 80 s runs cost 25% less, with a
+* exp25 ended 05:49 ([notes/2026-11-19-hint-cost.md](notes/2026-11-19-hint-cost.md)): without queue renormalisation 80 s runs cost 25% less, with a
   different search; hence exp26.
 
 Paused:
-* exp23 (notes/2026-11-19-veroff-p9-settings.md): Veroff's Prover9 settings. max_weight 5 is a genuine negative
+* exp23 ([notes/2026-11-19-veroff-p9-settings.md](notes/2026-11-19-veroff-p9-settings.md)): Veroff's Prover9 settings. max_weight 5 is a genuine negative
   (0 of 107); 40 is paused at 0 of 39; 100 is to do. Resume them when CPUs free up (p9twee.py needs a list of the
   walls not done).
 * exp12 stage B: 320 s on gap heads, 34 of 95 done, 0.21 per CPU hour (run.py skips done ids).
@@ -742,6 +742,8 @@ Next:
 
 ## 9. Experiment reports (hints/notes/)
 
+Conventions for a report: [notes/README.md](notes/README.md).
+
 One report per experiment: the question and who asked, the exact setup (scripts, sets and how they were chosen,
 snapshots, binaries), the numbers, the noise, and what the numbers do not show. Reports for 12–17 Nov 15:50 were
 reconstructed on 17 Nov from REPORT.md, the commits, and the session's commands (exp/findcmd.py). Those say so at
@@ -750,75 +752,75 @@ reports are written as the experiments run.
 
 | report | title |
 |---|---|
-| notes/2026-11-12-hint-selection.md | Which hints to give: pools, kNN, and a learned ranking (transfer benchmark T1) |
-| notes/2026-11-12-hints-dev10.md | First hints in twee: baselines, self-replay, and the first hint loops on dev10 |
-| notes/2026-11-12-holdout.md | The AIM60k holdout: plain twee, the rule model, and the hint loop |
-| notes/2026-11-12-long-runs-checkpoints.md | Long runs on hard dev goals: the stall cutoff and checkpoints; what was ported from Prover9-new |
-| notes/2026-11-12-rule-model.md | ENIGMA in twee: a learned filter on new rules |
-| notes/2026-11-13-axiom-groups.md | Lemmas and hints across originals with the same or weaker axioms |
-| notes/2026-11-13-enigma-loop.md | The ENIGMA loop (rm4, rm5, rm4b) and generalisation matching |
-| notes/2026-11-13-full-benchmark.md | The whole public benchmark at 4 s per problem, long runs on hard holdout, and a Prover9 control |
-| notes/2026-11-13-hyp-hints-abstract-time.md | False hints from conditional goals, and abstract time |
-| notes/2026-11-13-lemma-import.md | Proven sibling goals as axioms, resumed runs with lemmas, and sketches |
-| notes/2026-11-13-long-runs-stall.md | Long runs: how long runs stay on hints, the whole-pool advantage, and resumed rounds |
-| notes/2026-11-13-online-pools-cascade.md | Online pools, multi-goal search, the gap to the nearest proof, and the cascade |
-| notes/2026-11-13-p9-sfdf.md | Prover9: SFDF reorientation of proofs before they become hints |
-| notes/2026-11-14-ablation-lemma-count.md | Ablation of ENIGMA, hints and lemmas; how many sibling lemmas; which lemmas proofs use |
-| notes/2026-11-14-enigma-looping-deepire.md | ENIGMA-style looping, a Deepire-style model, and retraining online |
-| notes/2026-11-14-hint-axioms-profile.md | Frequent hints as axioms, a false hint in old pools, where twee's time goes, and the rule penalty |
-| notes/2026-11-14-line-gaps-stalled.md | Distance in proof lines, and stalled goals: run fresh with new hints rather than resume |
-| notes/2026-11-14-long-run-speed.md | Long runs slow down: the overlap index and the interreduction filter |
-| notes/2026-11-14-p9loop-bigloop.md | Veroff's P9loop and Bigloop in twee, against resuming the saved search |
-| notes/2026-11-14-resume-bug-consider-cost.md | A resume bug that grew one run to 100 GB; consider-emulation costs a quarter of the CPU |
-| notes/2026-11-14-sketch-climbing.md | Sketch climbing, gap filling, and the control that undid it |
-| notes/2026-11-15-conjecture-cuts.md | Conjecture cuts, generated and oracle |
-| notes/2026-11-15-heads-fresh-vs-resume.md | Tail heads, the cutoff between fresh runs and resumes, and a 5 s first level |
-| notes/2026-11-15-hint-generator.md | A hint generator (GNN2Seq) and instance matching of hints |
-| notes/2026-11-15-learned-scheduler.md | A learned scheduler for the cascade, stalled goals, and tail heads |
-| notes/2026-11-15-retrain-gnn-p9side.md | Retraining the rule model on hard proofs, a GNN, the oracle test, and Prover9 as a side worker |
-| notes/2026-11-15-retrain-stall-artefact.md | The stall was partly an artefact; unit forms of conditional lemmas; repeated deferral; folding |
-| notes/2026-11-15-sketches-stronger.md | Sketches in stronger theories, climbing up and down |
-| notes/2026-11-16-from-zero-dispatcher.md | The whole benchmark from zero, and a faster dispatcher |
-| notes/2026-11-16-knn-lemma-count.md | How many kNN lemmas, and which; where production's proofs come from; what a head is worth |
-| notes/2026-11-16-lattice-moves.md | Learning the lattice moves of the climber |
-| notes/2026-11-16-queue-model-lemma-proof-hints.md | The rule model ordering the queue; hints from the kNN lemmas' proofs |
-| notes/2026-11-16-replay-unseen.md | From scratch on unseen originals: the replays (rp3, ho8), contexts, the scheduler, and leaks |
-| notes/2026-11-16-same-statement-other-theory.md | The same statement proven in another theory |
-| notes/2026-11-16-step-transfer.md | Goals that are steps of existing proofs: transfer, source lemmas, and a kNN filter bug |
-| notes/2026-11-17-expanded-proofs.md | Expanding lemma-based proofs back to the axioms (Veroff style) |
-| notes/2026-11-17-deep-runs-expanded-chains.md | Deep runs on late unsolved goals, guided by expanded proof chains (Veroff's question) |
-| notes/2026-11-17-lattice-construction.md | Building a lattice with reasonable steps: strengthenings, weaker goals and conjectures (design and stage 1) |
-| notes/2026-11-17-long-runs-late-goals.md | Long runs (640 s) on the late goals no deep run proved, and the hint-match signal (exp5) |
-| notes/2026-11-18-ground-joining-hangs.md | Runs that never end: unbounded ground joinability, and a limit for it (exp6) |
-| notes/2026-11-18-subsumption-matching.md | Hint matching by subsumption, as in Prover9 (exp7, twee-e58 --eqhint-subsume) |
-| notes/2026-11-18-chain-hints-unsolved.md | Chain hints (expanded proofs of the nearest proven siblings) against the pool on 78 unsolved goals at 80 s (exp8) |
-| notes/2026-11-18-chain-hints-short.md | Chain hints against the pool at 5 s and 20 s on 200 frontier goals (exp9) |
-| notes/2026-11-18-chain-transfer-records.md | Chains whose holes are filled with transfer sources, against exp8's chains, 78 goals at 80 s (exp10) |
-| notes/2026-11-18-wall-breaking.md | The 107 walls (first unsolved goal of each original; 6,263 of the 6,370 unsolved are behind them) with chain hints at 80 s and 320 s (exp11) |
-| notes/2026-11-18-gap-heads.md | The heads of the 96 gaps of >= 20 unsolved goals (4,045 goals) with chain hints at 80 s and 320 s (exp12) |
-| notes/2026-11-18-chain-size.md | Smaller chains: 5 siblings (S5) and the siblings' own proofs without expansion (D) against the 10-sibling chain, exp8's 78 goals at 80 s (exp13) |
-| notes/2026-11-18-two-sided-chain.md | Two-sided chains (the 10 nearest proven siblings above or below) against the below-only chain, exp11's 107 walls at 80 s (exp14) |
-| notes/2026-11-18-unfolded-walls.md | Unfolded definitions with chain hints against the folded chain, exp11's 107 walls at 80 s (exp15) |
-| notes/2026-11-18-prover9-chain-walls.md | Prover9 with chain hints against Prover9 with the pool, exp11's 107 walls at 60 s (exp16) |
-| notes/2026-11-18-knn60-walls.md | 60 kNN lemmas against 30 at 80 s with exp11's chain hints, the 107 walls (exp17) |
-| notes/2026-11-18-subsumption-deep.md | Subsumption hint matching (--eqhint-subsume) at 80 s with chain hints, the 107 walls (exp18; the user's remark) |
-| notes/2026-11-18-waldmeister-paper.md | Reading: Hillenbrand's Waldmeister lessons, technique by technique against twee; candidates (ground-joined equations as simplifiers) and a 320 s profile |
-| notes/2026-11-18-set-join-walls.md | Successor sets for critical pairs (--set-join, Waldmeister 4.3) at 80 s on the 107 walls (exp19) |
-| notes/2026-11-18-portfolio-review.md | Complementary methods: every dropped variant's unique share, the missing time-matched comparison, and portfolio approaches (the user's request, 17:00) |
-| notes/2026-11-18-time-matched-control.md | exp11's chain at 160 s on the 92 failed walls: the time-matched control for 80 s + 80 s portfolios (exp20) |
-| notes/2026-11-18-l0-portfolio.md | 8 arms at 5 s (control, 60 kNN lemmas, unfolded, subsumption, rule threshold 0.2, no rule model, no PG, chain hints) on 300 goals that failed their 5 s fresh run (exp21) |
-| notes/2026-11-18-no-pg-no-model-walls.md | No PG / no rule model at 80 s on the 107 walls as portfolio members (exp22, queued after exp21) |
-| notes/2026-11-19-veroff-p9-settings.md | Prover9 with Veroff's AIM settings and chain hints on the 107 walls (exp23, from 02:15, 1 worker): max_weight 5 0 of 107; 40 paused at 0 of 39 (03:54); 100 to do |
-| notes/2026-11-19-far-goals-deep.md | production's 80 s chain level on 40 far goals, which production never deepens (exp24, 03:58-05:29): 0 of 40 at 2.9 CPU h; found the chain-records race at loop start |
-| notes/2026-11-19-hint-cost.md | what chain hints cost per abstract second; the profile; queue renormalisation under the abstract clock (exp25) |
-| notes/2026-11-19-queue-renorm-ab.md | deep runs without queue renormalisation, an A/B test in production ul57 (exp26, from 05:52) |
-| notes/2026-11-19-eprover-watchlist.md | E 3.5.9 with chain hints as a static watchlist on the 107 walls, 60 s (exp28): 0 of 107, a genuine negative |
-| notes/2026-11-19-from-zero-explore.md | exp29: half1 from zero with the explored 5 s lemma members, against PGC (10:38 - about 12:40) |
-| notes/2026-11-19-from-zero-portfolio.md | half1 from zero in 2 hours with today's deep portfolio (PGC), against PGA's 18,987 (exp27, from 07:18) |
-| notes/2026-11-17-lemma-circularity.md | Are lemma chains circular? A check of the used lemmas |
-| notes/2026-11-17-mix-fail-order.md | Repeats cost most of the time: `--mix` and `--fail-order` |
-| notes/2026-11-17-pg-ab-half1.md | Parental guidance at scale: half1 from zero, 2 hours, sum filter 0.25 against the defaults |
-| notes/2026-11-17-pg-learned-dense.md | Learned parental models on 10 numbers per rule |
-| notes/2026-11-17-pg-pcat-enigma.md | Pcat parental models on hashed ENIGMA features, as in the paper |
-| notes/2026-11-17-pg-sum-filter.md | Parental guidance with the sum filter, on 200 hard goals |
-| notes/2026-11-17-tail-states-e44.md | The tail: which goals get longer runs; original rates; saved states; noise at scale; e43/e44 |
+| [notes/2026-11-12-hint-selection.md](notes/2026-11-12-hint-selection.md) | Which hints to give: pools, kNN, and a learned ranking (transfer benchmark T1) |
+| [notes/2026-11-12-hints-dev10.md](notes/2026-11-12-hints-dev10.md) | First hints in twee: baselines, self-replay, and the first hint loops on dev10 |
+| [notes/2026-11-12-holdout.md](notes/2026-11-12-holdout.md) | The AIM60k holdout: plain twee, the rule model, and the hint loop |
+| [notes/2026-11-12-long-runs-checkpoints.md](notes/2026-11-12-long-runs-checkpoints.md) | Long runs on hard dev goals: the stall cutoff and checkpoints; what was ported from Prover9-new |
+| [notes/2026-11-12-rule-model.md](notes/2026-11-12-rule-model.md) | ENIGMA in twee: a learned filter on new rules |
+| [notes/2026-11-13-axiom-groups.md](notes/2026-11-13-axiom-groups.md) | Lemmas and hints across originals with the same or weaker axioms |
+| [notes/2026-11-13-enigma-loop.md](notes/2026-11-13-enigma-loop.md) | The ENIGMA loop (rm4, rm5, rm4b) and generalisation matching |
+| [notes/2026-11-13-full-benchmark.md](notes/2026-11-13-full-benchmark.md) | The whole public benchmark at 4 s per problem, long runs on hard holdout, and a Prover9 control |
+| [notes/2026-11-13-hyp-hints-abstract-time.md](notes/2026-11-13-hyp-hints-abstract-time.md) | False hints from conditional goals, and abstract time |
+| [notes/2026-11-13-lemma-import.md](notes/2026-11-13-lemma-import.md) | Proven sibling goals as axioms, resumed runs with lemmas, and sketches |
+| [notes/2026-11-13-long-runs-stall.md](notes/2026-11-13-long-runs-stall.md) | Long runs: how long runs stay on hints, the whole-pool advantage, and resumed rounds |
+| [notes/2026-11-13-online-pools-cascade.md](notes/2026-11-13-online-pools-cascade.md) | Online pools, multi-goal search, the gap to the nearest proof, and the cascade |
+| [notes/2026-11-13-p9-sfdf.md](notes/2026-11-13-p9-sfdf.md) | Prover9: SFDF reorientation of proofs before they become hints |
+| [notes/2026-11-14-ablation-lemma-count.md](notes/2026-11-14-ablation-lemma-count.md) | Ablation of ENIGMA, hints and lemmas; how many sibling lemmas; which lemmas proofs use |
+| [notes/2026-11-14-enigma-looping-deepire.md](notes/2026-11-14-enigma-looping-deepire.md) | ENIGMA-style looping, a Deepire-style model, and retraining online |
+| [notes/2026-11-14-hint-axioms-profile.md](notes/2026-11-14-hint-axioms-profile.md) | Frequent hints as axioms, a false hint in old pools, where twee's time goes, and the rule penalty |
+| [notes/2026-11-14-line-gaps-stalled.md](notes/2026-11-14-line-gaps-stalled.md) | Distance in proof lines, and stalled goals: run fresh with new hints rather than resume |
+| [notes/2026-11-14-long-run-speed.md](notes/2026-11-14-long-run-speed.md) | Long runs slow down: the overlap index and the interreduction filter |
+| [notes/2026-11-14-p9loop-bigloop.md](notes/2026-11-14-p9loop-bigloop.md) | Veroff's P9loop and Bigloop in twee, against resuming the saved search |
+| [notes/2026-11-14-resume-bug-consider-cost.md](notes/2026-11-14-resume-bug-consider-cost.md) | A resume bug that grew one run to 100 GB; consider-emulation costs a quarter of the CPU |
+| [notes/2026-11-14-sketch-climbing.md](notes/2026-11-14-sketch-climbing.md) | Sketch climbing, gap filling, and the control that undid it |
+| [notes/2026-11-15-conjecture-cuts.md](notes/2026-11-15-conjecture-cuts.md) | Conjecture cuts, generated and oracle |
+| [notes/2026-11-15-heads-fresh-vs-resume.md](notes/2026-11-15-heads-fresh-vs-resume.md) | Tail heads, the cutoff between fresh runs and resumes, and a 5 s first level |
+| [notes/2026-11-15-hint-generator.md](notes/2026-11-15-hint-generator.md) | A hint generator (GNN2Seq) and instance matching of hints |
+| [notes/2026-11-15-learned-scheduler.md](notes/2026-11-15-learned-scheduler.md) | A learned scheduler for the cascade, stalled goals, and tail heads |
+| [notes/2026-11-15-retrain-gnn-p9side.md](notes/2026-11-15-retrain-gnn-p9side.md) | Retraining the rule model on hard proofs, a GNN, the oracle test, and Prover9 as a side worker |
+| [notes/2026-11-15-retrain-stall-artefact.md](notes/2026-11-15-retrain-stall-artefact.md) | The stall was partly an artefact; unit forms of conditional lemmas; repeated deferral; folding |
+| [notes/2026-11-15-sketches-stronger.md](notes/2026-11-15-sketches-stronger.md) | Sketches in stronger theories, climbing up and down |
+| [notes/2026-11-16-from-zero-dispatcher.md](notes/2026-11-16-from-zero-dispatcher.md) | The whole benchmark from zero, and a faster dispatcher |
+| [notes/2026-11-16-knn-lemma-count.md](notes/2026-11-16-knn-lemma-count.md) | How many kNN lemmas, and which; where production's proofs come from; what a head is worth |
+| [notes/2026-11-16-lattice-moves.md](notes/2026-11-16-lattice-moves.md) | Learning the lattice moves of the climber |
+| [notes/2026-11-16-queue-model-lemma-proof-hints.md](notes/2026-11-16-queue-model-lemma-proof-hints.md) | The rule model ordering the queue; hints from the kNN lemmas' proofs |
+| [notes/2026-11-16-replay-unseen.md](notes/2026-11-16-replay-unseen.md) | From scratch on unseen originals: the replays (rp3, ho8), contexts, the scheduler, and leaks |
+| [notes/2026-11-16-same-statement-other-theory.md](notes/2026-11-16-same-statement-other-theory.md) | The same statement proven in another theory |
+| [notes/2026-11-16-step-transfer.md](notes/2026-11-16-step-transfer.md) | Goals that are steps of existing proofs: transfer, source lemmas, and a kNN filter bug |
+| [notes/2026-11-17-expanded-proofs.md](notes/2026-11-17-expanded-proofs.md) | Expanding lemma-based proofs back to the axioms (Veroff style) |
+| [notes/2026-11-17-deep-runs-expanded-chains.md](notes/2026-11-17-deep-runs-expanded-chains.md) | Deep runs on late unsolved goals, guided by expanded proof chains (Veroff's question) |
+| [notes/2026-11-17-lattice-construction.md](notes/2026-11-17-lattice-construction.md) | Building a lattice with reasonable steps: strengthenings, weaker goals and conjectures (design and stage 1) |
+| [notes/2026-11-17-long-runs-late-goals.md](notes/2026-11-17-long-runs-late-goals.md) | Long runs (640 s) on the late goals no deep run proved, and the hint-match signal (exp5) |
+| [notes/2026-11-18-ground-joining-hangs.md](notes/2026-11-18-ground-joining-hangs.md) | Runs that never end: unbounded ground joinability, and a limit for it (exp6) |
+| [notes/2026-11-18-subsumption-matching.md](notes/2026-11-18-subsumption-matching.md) | Hint matching by subsumption, as in Prover9 (exp7, twee-e58 --eqhint-subsume) |
+| [notes/2026-11-18-chain-hints-unsolved.md](notes/2026-11-18-chain-hints-unsolved.md) | Chain hints (expanded proofs of the nearest proven siblings) against the pool on 78 unsolved goals at 80 s (exp8) |
+| [notes/2026-11-18-chain-hints-short.md](notes/2026-11-18-chain-hints-short.md) | Chain hints against the pool at 5 s and 20 s on 200 frontier goals (exp9) |
+| [notes/2026-11-18-chain-transfer-records.md](notes/2026-11-18-chain-transfer-records.md) | Chains whose holes are filled with transfer sources, against exp8's chains, 78 goals at 80 s (exp10) |
+| [notes/2026-11-18-wall-breaking.md](notes/2026-11-18-wall-breaking.md) | The 107 walls (first unsolved goal of each original; 6,263 of the 6,370 unsolved are behind them) with chain hints at 80 s and 320 s (exp11) |
+| [notes/2026-11-18-gap-heads.md](notes/2026-11-18-gap-heads.md) | The heads of the 96 gaps of >= 20 unsolved goals (4,045 goals) with chain hints at 80 s and 320 s (exp12) |
+| [notes/2026-11-18-chain-size.md](notes/2026-11-18-chain-size.md) | Smaller chains: 5 siblings (S5) and the siblings' own proofs without expansion (D) against the 10-sibling chain, exp8's 78 goals at 80 s (exp13) |
+| [notes/2026-11-18-two-sided-chain.md](notes/2026-11-18-two-sided-chain.md) | Two-sided chains (the 10 nearest proven siblings above or below) against the below-only chain, exp11's 107 walls at 80 s (exp14) |
+| [notes/2026-11-18-unfolded-walls.md](notes/2026-11-18-unfolded-walls.md) | Unfolded definitions with chain hints against the folded chain, exp11's 107 walls at 80 s (exp15) |
+| [notes/2026-11-18-prover9-chain-walls.md](notes/2026-11-18-prover9-chain-walls.md) | Prover9 with chain hints against Prover9 with the pool, exp11's 107 walls at 60 s (exp16) |
+| [notes/2026-11-18-knn60-walls.md](notes/2026-11-18-knn60-walls.md) | 60 kNN lemmas against 30 at 80 s with exp11's chain hints, the 107 walls (exp17) |
+| [notes/2026-11-18-subsumption-deep.md](notes/2026-11-18-subsumption-deep.md) | Subsumption hint matching (--eqhint-subsume) at 80 s with chain hints, the 107 walls (exp18; the user's remark) |
+| [notes/2026-11-18-waldmeister-paper.md](notes/2026-11-18-waldmeister-paper.md) | Reading: Hillenbrand's Waldmeister lessons, technique by technique against twee; candidates (ground-joined equations as simplifiers) and a 320 s profile |
+| [notes/2026-11-18-set-join-walls.md](notes/2026-11-18-set-join-walls.md) | Successor sets for critical pairs (--set-join, Waldmeister 4.3) at 80 s on the 107 walls (exp19) |
+| [notes/2026-11-18-portfolio-review.md](notes/2026-11-18-portfolio-review.md) | Complementary methods: every dropped variant's unique share, the missing time-matched comparison, and portfolio approaches (the user's request, 17:00) |
+| [notes/2026-11-18-time-matched-control.md](notes/2026-11-18-time-matched-control.md) | exp11's chain at 160 s on the 92 failed walls: the time-matched control for 80 s + 80 s portfolios (exp20) |
+| [notes/2026-11-18-l0-portfolio.md](notes/2026-11-18-l0-portfolio.md) | 8 arms at 5 s (control, 60 kNN lemmas, unfolded, subsumption, rule threshold 0.2, no rule model, no PG, chain hints) on 300 goals that failed their 5 s fresh run (exp21) |
+| [notes/2026-11-18-no-pg-no-model-walls.md](notes/2026-11-18-no-pg-no-model-walls.md) | No PG / no rule model at 80 s on the 107 walls as portfolio members (exp22, queued after exp21) |
+| [notes/2026-11-19-veroff-p9-settings.md](notes/2026-11-19-veroff-p9-settings.md) | Prover9 with Veroff's AIM settings and chain hints on the 107 walls (exp23, from 02:15, 1 worker): max_weight 5 0 of 107; 40 paused at 0 of 39 (03:54); 100 to do |
+| [notes/2026-11-19-far-goals-deep.md](notes/2026-11-19-far-goals-deep.md) | production's 80 s chain level on 40 far goals, which production never deepens (exp24, 03:58-05:29): 0 of 40 at 2.9 CPU h; found the chain-records race at loop start |
+| [notes/2026-11-19-hint-cost.md](notes/2026-11-19-hint-cost.md) | what chain hints cost per abstract second; the profile; queue renormalisation under the abstract clock (exp25) |
+| [notes/2026-11-19-queue-renorm-ab.md](notes/2026-11-19-queue-renorm-ab.md) | deep runs without queue renormalisation, an A/B test in production ul57 (exp26, from 05:52) |
+| [notes/2026-11-19-eprover-watchlist.md](notes/2026-11-19-eprover-watchlist.md) | E 3.5.9 with chain hints as a static watchlist on the 107 walls, 60 s (exp28): 0 of 107, a genuine negative |
+| [notes/2026-11-19-from-zero-explore.md](notes/2026-11-19-from-zero-explore.md) | exp29: half1 from zero with the explored 5 s lemma members, against PGC (10:38 - about 12:40) |
+| [notes/2026-11-19-from-zero-portfolio.md](notes/2026-11-19-from-zero-portfolio.md) | half1 from zero in 2 hours with today's deep portfolio (PGC), against PGA's 18,987 (exp27, from 07:18) |
+| [notes/2026-11-17-lemma-circularity.md](notes/2026-11-17-lemma-circularity.md) | Are lemma chains circular? A check of the used lemmas |
+| [notes/2026-11-17-mix-fail-order.md](notes/2026-11-17-mix-fail-order.md) | Repeats cost most of the time: `--mix` and `--fail-order` |
+| [notes/2026-11-17-pg-ab-half1.md](notes/2026-11-17-pg-ab-half1.md) | Parental guidance at scale: half1 from zero, 2 hours, sum filter 0.25 against the defaults |
+| [notes/2026-11-17-pg-learned-dense.md](notes/2026-11-17-pg-learned-dense.md) | Learned parental models on 10 numbers per rule |
+| [notes/2026-11-17-pg-pcat-enigma.md](notes/2026-11-17-pg-pcat-enigma.md) | Pcat parental models on hashed ENIGMA features, as in the paper |
+| [notes/2026-11-17-pg-sum-filter.md](notes/2026-11-17-pg-sum-filter.md) | Parental guidance with the sum filter, on 200 hard goals |
+| [notes/2026-11-17-tail-states-e44.md](notes/2026-11-17-tail-states-e44.md) | The tail: which goals get longer runs; original rates; saved states; noise at scale; e43/e44 |

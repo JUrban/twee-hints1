@@ -3,6 +3,8 @@
 Branch `hints` of the twee repo. Scripts are in `hints/`. Runs and data are
 in `/project/hintwork` (not in git).
 
+**Detailed reports.** Each experiment has its own report in [notes/](notes/): the question and who asked, the exact setup, the numbers, the noise, and what they do not show. The index is [JOURNAL.md section 9](JOURNAL.md#9-experiment-reports-hintsnotes). Each section below links the notes it rests on.
+
 **Summary.** On all 51,784 public AIM60k problems, with 4 s per problem:
 
 | system | solved | holdout | CPU h |
@@ -180,6 +182,8 @@ runs. Section 5 has the commands.
 
 ## 2. Results so far
 
+*Notes: [notes/2026-11-12-hint-selection.md](notes/2026-11-12-hint-selection.md), [notes/2026-11-12-hints-dev10.md](notes/2026-11-12-hints-dev10.md).*
+
 The dev10 set has all 3052 goals of 10 originals of mixed difficulty:
 `aK1_to_aK2 mbol_com aa1_15 aK2_eq_aK3_q a_of_aa aa2_to_aa3 nil3_15
 aa1_45_c Ka_eq_aK3 aK2_eq_aK3_b`. All runs use 20 processes in parallel.
@@ -260,6 +264,8 @@ Reranking gains little, because kNN candidates already cap recall at 0.856.
 The missing lemmas are in no neighbour's proof.
 
 ## 2b. ENIGMA for twee: a learned rule filter
+
+*Notes: [notes/2026-11-12-rule-model.md](notes/2026-11-12-rule-model.md).*
 
 ENIGMA's "enigmatic" featurizer (E prover, ai4reason `enigma` branch,
 `che_enigmaticvectors.c`) is ported for unit equations:
@@ -364,7 +370,7 @@ trained or tuned on it:
   holds two whole holdout originals (aK1_to_aK2, a_of_aa: 380 problems)
   and 66 moved late goals. The tuning set of 818 held 22 moved late
   goals. The training data and hint pools were clean
-  (notes/2026-11-12-holdout.md).
+  ([notes/2026-11-12-holdout.md](notes/2026-11-12-holdout.md)).
 
 All runs use 20 processes in parallel on a 112-core machine.
 
@@ -386,6 +392,8 @@ twee in 1–2 s. The model's overhead is now about 6% of throughput, after a
 binary model file, a dense feature array and hashed feature names.
 
 ## 2f. The ENIGMA loop, and generalisation matching
+
+*Notes: [notes/2026-11-13-enigma-loop.md](notes/2026-11-13-enigma-loop.md).*
 
 * **ENIGMA loop.** Guided runs (rm3, kNN hints, 4 s) on the 5355 training
   problems that plain twee leaves unsolved at 2 s solved 757 of them.
@@ -420,6 +428,8 @@ binary model file, a dense feature array and hashed feature names.
   68 against 69 without it. Neutral, left off.
 
 ## 2g. Lemma import: proven sibling goals as axioms
+
+*Notes: [notes/2026-11-13-lemma-import.md](notes/2026-11-13-lemma-import.md), [notes/2026-11-17-lemma-circularity.md](notes/2026-11-17-lemma-circularity.md).*
 
 All goals `X__goal_N` of one original `X` have the same axioms (checked).
 A sibling goal that twee has proven is therefore a theorem of the theory
@@ -501,6 +511,8 @@ unsound as a proof but sound as a source of hints.
   sketches, so the chains have gaps.
 
 ## 2h. The full public benchmark (all 51,784 problems, 4 s per problem)
+
+*Notes: [notes/2026-11-13-full-benchmark.md](notes/2026-11-13-full-benchmark.md).*
 
 Every system gets at most 4 s per problem:
 
@@ -612,6 +624,8 @@ Controls on the round-0 failures, 8 s each:
 
 ## 2j. Skolem-free hints, and conditional goals
 
+*Notes: [notes/2026-11-13-hyp-hints-abstract-time.md](notes/2026-11-13-hyp-hints-abstract-time.md).*
+
 Veroff turns each proof into a strictly forward, demodulation-free (SFDF)
 proof before using it as hints. He iterates Prover9 until the proof no
 longer uses the denial, so the hints contain no skolems and carry over to
@@ -707,6 +721,8 @@ That is part of the ±3 noise on 345 problems (section 2f).
 
 ## 2l. Axiom groups: lemmas and hints across originals
 
+*Notes: [notes/2026-11-13-axiom-groups.md](notes/2026-11-13-axiom-groups.md).*
+
 Lemma import (2g) used only proven siblings of the same original, because
 those have the same axioms. But originals share axioms too.
 
@@ -786,6 +802,8 @@ those have the same axioms. But originals share axioms too.
     on r1sim are real.
 
 ## 2m. Long runs: how long do runs stay on hints?
+
+*Notes: [notes/2026-11-13-long-runs-stall.md](notes/2026-11-13-long-runs-stall.md).*
 
 Veroff keeps a hinted run going while it keeps matching hints, with gaps
 of up to about a minute, and stops it when it falls off. With abstract
@@ -931,6 +949,8 @@ Hints are all proof steps of the solved siblings (`p9_long.sh`).
 
 ## 2n. Prover9: SFDF reorientation of proofs
 
+*Notes: [notes/2026-11-13-p9-sfdf.md](notes/2026-11-13-p9-sfdf.md).*
+
 Veroff turns each proof into a strictly forward, demodulation-free
 (SFDF) proof before using its steps as hints. `p9loop.py` now does this
 without search:
@@ -972,6 +992,8 @@ no hints) solves 237 in every version.
   adds steps that the guided search never keeps.
 
 ## 2o. Online pools on the unsolved frontier
+
+*Notes: [notes/2026-11-13-online-pools-cascade.md](notes/2026-11-13-online-pools-cascade.md).*
 
 `sets/u3`: all 996 goals of three originals (R1dist_to_aa1,
 aK2_eq_aK3_a, nil3_31) that the 4 s benchmark loop left unsolved (after
@@ -1120,6 +1142,8 @@ on 14 cores (twee-e20, kill after 15× the limit, CPU cap 400 s).
 
 ## 2q. Ablation: ENIGMA, hints and lemmas
 
+*Notes: [notes/2026-11-14-ablation-lemma-count.md](notes/2026-11-14-ablation-lemma-count.md).*
+
 The user asked how far the ENIGMA guidance gets, alone or with hints. The
 test set is the 189 aK2_eq_aK3_a goals of sets/u3 (one hard original).
 Each goal gets 20 abstract s, in an online loop that starts from the
@@ -1246,6 +1270,8 @@ new nearby proofs exploit.
 
 ## 2s. Frequent hints as axioms: no gain, and false hints in old pools
 
+*Notes: [notes/2026-11-14-hint-axioms-profile.md](notes/2026-11-14-hint-axioms-profile.md).*
+
 `loop.py --hint-axioms K:F` adds the K most frequent pool hints that
 occur in at least F sibling proofs to the problem as axioms. Pool hints
 are consequences of the axioms and proven lemmas, so the proofs stay
@@ -1310,6 +1336,8 @@ time does not change. Penalty 2 stays.
 
 ## 2u. ENIGMA-style looping and a Deepire-style model (user's question, 14 Nov)
 
+*Notes: [notes/2026-11-14-enigma-looping-deepire.md](notes/2026-11-14-enigma-looping-deepire.md).*
+
 **Offline, in the loop setting.** The test set is the 298 proofs of
 nil3_31, aK2_eq_aK3_a and R1dist_to_aa1 goals that the full loop found
 in rounds 1–4. These are later goals of originals whose earlier goals
@@ -1368,6 +1396,8 @@ AUC on the proofs' rules:
   (2r), so the full loop keeps the fixed rm4t.
 
 ## 2v. Long runs slow down: overlap index and interreduction filter (user's question, 14 Nov)
+
+*Notes: [notes/2026-11-14-long-run-speed.md](notes/2026-11-14-long-run-speed.md).*
 
 **How much slower.** `twee --progress N` (twee-e23) prints a PROGRESS line
 every N abstract seconds. Each line gives critical pairs, rules, active
@@ -1464,6 +1494,8 @@ noise of the loaded machine).
 
 ## 2w. Veroff's P9loop and Bigloop in twee (user's question, 14 Nov)
 
+*Notes: [notes/2026-11-14-p9loop-bigloop.md](notes/2026-11-14-p9loop-bigloop.md).*
+
 **What Veroff does** (AITP 2026 slides). A P9loop reruns the *target*
 theorem over and over. At the end of each failed run, every derived
 clause that matches a hint (a *hint matcher*) is kept, and all later runs
@@ -1547,6 +1579,8 @@ its own.
 
 ## 2x. A resume bug that grew one run to 100 GB (14 Nov)
 
+*Notes: [notes/2026-11-14-resume-bug-consider-cost.md](notes/2026-11-14-resume-bug-consider-cost.md).*
+
 A resumed run of the full loop grew to 100 GB before the user killed it.
 
 **The cause.** Twee numbers its symbols when it interns them, and it
@@ -1613,6 +1647,8 @@ of at most a few goals per hundred. Rewriting `simplifyOutermost` so that
 it does not rebuild unchanged terms was 0–5% slower and was reverted.
 
 ## 2z. Distance in proof lines, not goal numbers (user's remark, 14 Nov)
+
+*Notes: [notes/2026-11-14-line-gaps-stalled.md](notes/2026-11-14-line-gaps-stalled.md).*
 
 A goal's name gives its position among the goals selected from the
 original's Prover9 proof. Its LADR file also gives the proof line
@@ -1685,6 +1721,8 @@ to 75%. Success follows that growth:
   22:28. 1,633 unsolved goals qualify, most of them far from a proof.
 
 ## 2ab. Sketch climbing (user's suggestion, 14 Nov)
+
+*Notes: [notes/2026-11-14-sketch-climbing.md](notes/2026-11-14-sketch-climbing.md).*
 
 The idea: make a hard goal easy with extra assumptions, then climb the
 lattice of assumption sets down to the empty set. Hints from every solved
@@ -1883,6 +1921,8 @@ only from `--far-retry`, after every L1 run. UL14 (`abs/ul14.sh`) uses
 still had no fresh run in round 5.
 
 ## 2ac. A learned scheduler for the cascade (15 Nov)
+
+*Notes: [notes/2026-11-15-learned-scheduler.md](notes/2026-11-15-learned-scheduler.md).*
 
 UL14 (`--line-gaps 80,13`) made 258 new proofs in its first 25
 minutes, about 610 an hour, against UL13's 243 an hour. Moving the fresh
@@ -2120,6 +2160,8 @@ UL21 (`abs/ul21.sh`, 07:36) goes back to level order:
 
 ## 2ad. Retraining the guidance on hard proofs, and a GNN (user's questions, 15 Nov)
 
+*Notes: [notes/2026-11-15-retrain-gnn-p9side.md](notes/2026-11-15-retrain-gnn-p9side.md).*
+
 **Is ENIGMA retrained?** No. Production has used rm4t, fixed, since
 round 4, because three earlier tests found no online gain from
 retraining:
@@ -2315,6 +2357,8 @@ Production runs beside it on 17 workers (UL24).
 
 ## 2ae. The stall was partly an artefact: kNN lemmas the cascade did not see (15 Nov)
 
+*Notes: [notes/2026-11-15-retrain-stall-artefact.md](notes/2026-11-15-retrain-stall-artefact.md).*
+
 **Control in the full context.** Snapshot loops/ULsN is UL at 09:30
 with every row imported. On sets/st79u (goals whose fresh run and resume
 failed in round 5 with an unchanged nearest proven goal below), fresh
@@ -2474,6 +2518,8 @@ about 4.5 proofs per CPU-hour. Production makes about 4 per CPU-hour
 
 ## 2ag. Tail heads, and the cutoff between fresh runs and resumes (15 Nov)
 
+*Notes: [notes/2026-11-15-heads-fresh-vs-resume.md](notes/2026-11-15-heads-fresh-vs-resume.md).*
+
 **Tail heads** are the first unsolved goal after an original's last
 proof. There are 92, with lines gaps 13–68 (median 34), and most
 unsolved goals sit behind them. On 30 random heads (sets/heads30,
@@ -2584,6 +2630,8 @@ per CPU-hour counting what follows. That is below production's current
 heads.
 
 ## 2ah. A hint generator (user's suggestion, 15 Nov)
+
+*Notes: [notes/2026-11-15-hint-generator.md](notes/2026-11-15-hint-generator.md).*
 
 The user asked whether the GNN2Seq model of Chvalovský, Suda and Urban
 ("Neural Conjecturing for Saturation Theorem Provers", IWIL 2026;
@@ -2730,6 +2778,8 @@ is 1.6–5 times slower in wall time. Dropped.
 
 ## 2ai. Conjecture cuts (user's suggestion after IWIL 2026, 15 Nov)
 
+*Notes: [notes/2026-11-15-conjecture-cuts.md](notes/2026-11-15-conjecture-cuts.md).*
+
 The IWIL 2026 paper (Chvalovsky, Suda, Urban) proves generated
 conjectures separately and uses them as cuts. On Mizar60 that gave
 +582 of 11,881 hard or unsolved problems, with the first useful
@@ -2793,6 +2843,8 @@ is already in its state. Only a cut proved by a differently guided
 search adds information.
 
 ## 2aj. Sketches in stronger theories, climbing up and down (user's suggestions, 15 Nov evening)
+
+*Notes: [notes/2026-11-15-sketches-stronger.md](notes/2026-11-15-sketches-stronger.md).*
 
 The user's points:
 
@@ -2928,6 +2980,8 @@ order with `--chain`, 1 worker.
   r 268, 269; nsmr 735, 737.
 
 ## 2ak. Learning the lattice moves (user, 15 Nov: "what are the best steps in the lattice given a problem")
+
+*Notes: [notes/2026-11-16-lattice-moves.md](notes/2026-11-16-lattice-moves.md).*
 
 The climb walks a lattice of (assumptions, goal) nodes. Going up adds
 assumptions: a stronger theory's axioms and lemmas, siblings, kNN goals
@@ -3087,6 +3141,8 @@ Now every other free slot goes to an original's first unsolved goal
 
 ## 2al. Goals that are steps of existing proofs (16 Nov, 04:20)
 
+*Notes: [notes/2026-11-16-step-transfer.md](notes/2026-11-16-step-transfer.md).*
+
 **The observation.** 2,905 of the 7,543 unsolved goals are, up to
 variable names, a step of a proof found earlier. 101 of those proofs
 come from goals with the same or weaker axioms, so the goal is a theorem
@@ -3208,6 +3264,8 @@ workers): 2 of the first 8 heads proved (KK_Kcom_to_aK1 255, Ka1_eq_Ka2
 361) in 4,128 CPU s, about 1.7 per CPU hour.
 
 ## 2am. How many kNN lemmas (16 Nov, 06:50)
+
+*Notes: [notes/2026-11-16-knn-lemma-count.md](notes/2026-11-16-knn-lemma-count.md).*
 
 **Use by rank.** Production's outputs (`--keep-out`, r*/out) list each
 proof's used axioms (USEDAXIOMS), and the kNN lemma names carry their
@@ -3357,6 +3415,8 @@ own proof.
 
 ## 2ao. The rule model ordering the queue (16 Nov, 11:20): too slow, and the oracle says no
 
+*Notes: [notes/2026-11-16-queue-model-lemma-proof-hints.md](notes/2026-11-16-queue-model-lemma-proof-hints.md).*
+
 2ad left a stronger hook for a learned model open: ordering twee's queue
 instead of deferring a rule once. **twee-e42 `--cp-model-factor F`**
 does this. It multiplies each new critical pair's score by F ** q,
@@ -3409,6 +3469,8 @@ exact: a goal that is a step of another proof (2al), or a proven goal as
 a lemma axiom (2am). Similar proofs' steps as hints do not.
 
 ## 2aq. From scratch on unseen originals: a replay (16 Nov, from 11:55)
+
+*Notes: [notes/2026-11-16-replay-unseen.md](notes/2026-11-16-replay-unseen.md).*
 
 What would the final system do on a new benchmark part, such as the
 secret 10,016 problems? The replay (abs/replay.sh) takes 3 whole holdout
@@ -3713,6 +3775,8 @@ axioms.
 
 ## 2ar. The same statement proven in another theory (16 Nov, 16:20)
 
+*Notes: [notes/2026-11-16-same-statement-other-theory.md](notes/2026-11-16-same-statement-other-theory.md).*
+
 `transfer.py find --same-other` lists the unsolved goals whose statement,
 up to renaming, is a proven goal of an original whose axioms are not
 within theirs. On 16 Nov that is **1,887 of 7,025**. For 1,361 of them
@@ -3736,6 +3800,8 @@ holds for the goal if neither it nor its lemmas use the missing axioms.
   axioms (2al, 2am) and rarely across them.
 
 ## 2as. The whole benchmark from zero, and a faster dispatcher (16–17 Nov night)
+
+*Notes: [notes/2026-11-16-from-zero-dispatcher.md](notes/2026-11-16-from-zero-dispatcher.md).*
 
 **Z0** (`abs/z0_test.sh`, from 23:49): the final system from zero on
 all 51,784 public problems. `solve_new.sh` with an empty context,
@@ -3843,6 +3909,8 @@ count read then (22,577) is now 22,165.
   proofs, mostly from 320 s resumes.
 
 ## 2at. Repeats cost most of the time: `--mix` and `--fail-order` (17 Nov, from 03:10)
+
+*Notes: [notes/2026-11-17-mix-fail-order.md](notes/2026-11-17-mix-fail-order.md).*
 
 **`--mix M`** (f065848, 187832f) splits the runs into three kinds:
 
@@ -4009,6 +4077,8 @@ proof of rp3's originals left out, 4 workers, 1 hour, 2aq):
   at 12. `SCHED` turns the scheduler back on.
 
 ## 2au. The tail: which goals get the longer runs (17 Nov, from 08:40)
+
+*Notes: [notes/2026-11-17-tail-states-e44.md](notes/2026-11-17-tail-states-e44.md).*
 
 **`--fail-reset` (FR60)** gives no gain. A goal's failure count restarts
 when the nearest proven goal below it changes (rp3 from zero, 4 workers,
@@ -4282,6 +4352,8 @@ search.
 
 ## 2av. Parental guidance (17 Nov, from 15:50)
 
+*Notes: [notes/2026-11-17-pg-learned-dense.md](notes/2026-11-17-pg-learned-dense.md), [notes/2026-11-17-pg-sum-filter.md](notes/2026-11-17-pg-sum-filter.md).*
+
 The user suggested this: the "parental guidance" of E (Goertzel,
 Chvalovský, Jakubův, Olšák, Urban, *Fast and Slow Enigmas and Parental
 Guidance*, FroCoS 2021, arXiv 2107.06750). A cheap model judges an
@@ -4378,7 +4450,7 @@ took 1.23 s.
 **Running now** (from 16:54): the half1 2-hour A/B, PGA (sum filter at
 0.25) against PGB (the new defaults), 6 workers each. Measured with
 abs/setcurve.py: PGA 11,467 / 18,529 / 18,912 at 10 / 60 / 100
-minutes, PGB 10,061 / 17,608 / 18,316 (notes/2026-11-17-pg-ab-half1.md).
+minutes, PGB 10,061 / 17,608 / 18,316 ([notes/2026-11-17-pg-ab-half1.md](notes/2026-11-17-pg-ab-half1.md)).
 An earlier "9,458 against 8,986 at 10 minutes" was read before minute
 10. **At 2 hours: PGA 18,987, PGB 18,410 (+577, three times the noise
 of identical runs).** The gain is front-loaded (+1,406 at 10 minutes)
@@ -4392,15 +4464,15 @@ the 200, against 52 for the sum filter, at the same abstract budget and
 5–6 times the CPU. Offline they kept 93.5–97.5% of the proof pairs
 against the sum's 84.1%. As with the dense models, offline ranking on
 the old proofs' pairs does not predict the online result
-(notes/2026-11-17-pg-pcat-enigma.md). The additive forms (pgtest7,
+([notes/2026-11-17-pg-pcat-enigma.md](notes/2026-11-17-pg-pcat-enigma.md)). The additive forms (pgtest7,
 19:12) cost what the sum costs and prove 36–38 (each −16 or −17 against
 the sum). So every learned parental model tried, dense or ENIGMA, full
 or additive, has lost to the untrained sum filter. The sum stays. The additive model is under test on the 200 goals.
 
 ## 2aw. Expanded proofs, deep runs and a lattice with small steps (17 Nov, from 19:00)
 
-Three of the user's questions, one experiment each. The records are in notes/2026-11-17-expanded-proofs.md,
--deep-runs-expanded-chains.md and -lattice-construction.md. Scripts are exp/exp1_* to exp/exp4_*.
+Three of the user's questions, one experiment each. The records are in [notes/2026-11-17-expanded-proofs.md](notes/2026-11-17-expanded-proofs.md),
+[notes/2026-11-17-deep-runs-expanded-chains.md](notes/2026-11-17-deep-runs-expanded-chains.md) and [notes/2026-11-17-lattice-construction.md](notes/2026-11-17-lattice-construction.md). Scripts are exp/exp1_* to exp/exp4_*.
 
 **Expanded proofs (exp1, exp2).** Veroff expands lemma-based proofs back to the axioms for more hints.
 expand.py closes each proof under the proofs of the lemmas it used. On 200 sampled goals the closures have a
@@ -4462,9 +4534,11 @@ x = y), rungs appear.
 
 ## 2ax. Hangs, Prover9's subsumption matching, and chain hints (18 Nov, from 04:00)
 
-Records: notes/2026-11-18-ground-joining-hangs.md (exp6), -subsumption-matching.md (exp7),
--chain-hints-unsolved.md (exp8), -chain-hints-short.md (exp9); notes/2026-11-17-long-runs-late-goals.md (exp5),
--deep-runs-expanded-chains.md (exp3) and -lattice-construction.md (exp4).
+*Notes: [notes/2026-11-18-chain-transfer-records.md](notes/2026-11-18-chain-transfer-records.md).*
+
+Records: [notes/2026-11-18-ground-joining-hangs.md](notes/2026-11-18-ground-joining-hangs.md) (exp6), [notes/2026-11-18-subsumption-matching.md](notes/2026-11-18-subsumption-matching.md) (exp7),
+[notes/2026-11-18-chain-hints-unsolved.md](notes/2026-11-18-chain-hints-unsolved.md) (exp8), [notes/2026-11-18-chain-hints-short.md](notes/2026-11-18-chain-hints-short.md) (exp9); [notes/2026-11-17-long-runs-late-goals.md](notes/2026-11-17-long-runs-late-goals.md) (exp5),
+[notes/2026-11-17-deep-runs-expanded-chains.md](notes/2026-11-17-deep-runs-expanded-chains.md) (exp3) and [notes/2026-11-17-lattice-construction.md](notes/2026-11-17-lattice-construction.md) (exp4).
 
 **Runs that ignored their limits.** Some twee runs went on for hours past --max-time and --max-cpu (up to 8.7
 CPU h for a 320 s run).
@@ -4529,7 +4603,9 @@ using an index of hint forms by top symbols to depth 1.
 
 ## 2ay. The hard tail: walls, gap heads, and where production's proofs come from (18 Nov, from 10:30)
 
-**Walls (exp11, notes/2026-11-18-wall-breaking.md).** Each original's first unsolved goal at 10:29 (107), with
+*Notes: [notes/2026-11-18-chain-size.md](notes/2026-11-18-chain-size.md), [notes/2026-11-18-knn60-walls.md](notes/2026-11-18-knn60-walls.md), [notes/2026-11-18-prover9-chain-walls.md](notes/2026-11-18-prover9-chain-walls.md), [notes/2026-11-18-set-join-walls.md](notes/2026-11-18-set-join-walls.md), [notes/2026-11-18-subsumption-deep.md](notes/2026-11-18-subsumption-deep.md), [notes/2026-11-18-two-sided-chain.md](notes/2026-11-18-two-sided-chain.md), [notes/2026-11-18-unfolded-walls.md](notes/2026-11-18-unfolded-walls.md).*
+
+**Walls (exp11, [notes/2026-11-18-wall-breaking.md](notes/2026-11-18-wall-breaking.md)).** Each original's first unsolved goal at 10:29 (107), with
 the below-only chain at 80 s: **15 of 107 proved, 4.8 CPU h, 3.1 proofs per CPU hour.** Production's pool runs
 had failed on all 107 at 80 s and on 86 at 320 s. But nearly all walls are isolated holes, so their proofs open
 nothing, except through the transfer: Ka1_eq_Ka2 400, merged at 10:48, gave aKperms_1 344 (another original)
@@ -4540,7 +4616,7 @@ at 10:53.
 * the 96 gaps of 20 or more hold 4,045 of the 6,370 unsolved goals;
 * 83 of those 96 reach the original's top goal.
 
-**Gap heads (exp12, notes/2026-11-18-gap-heads.md).** These are the first goals of the 96 long gaps, with the
+**Gap heads (exp12, [notes/2026-11-18-gap-heads.md](notes/2026-11-18-gap-heads.md)).** These are the first goals of the 96 long gaps, with the
 chain at 80 s.
 * Stage A: **1 of 96, 6.3 CPU h.** Most runs used the full 160,000 pairs.
 * But the one proof paid. aK2_eq_aK3_b 421 heads a gap of 40 and was merged at 12:12. Production then proved 422,
@@ -4612,7 +4688,7 @@ reproduced exactly).
   per CPU hour, and **Prover9 with the chain is the cheapest member (2.3 per CPU hour)**.
 * So from 16:46 a Prover9 side worker with chain hints (abs/p9c.sh, 2 workers) runs on twee's stalled goals,
   writing its proofs into UL.
-* The Waldmeister paper (the user, 16:24; notes/2026-11-18-waldmeister-paper.md): twee already has most of its
+* The Waldmeister paper (the user, 16:24; [notes/2026-11-18-waldmeister-paper.md](notes/2026-11-18-waldmeister-paper.md)): twee already has most of its
   techniques. The one it lacks (ground-joined equations kept for rewriting) cannot matter here: 29 ground-joined
   equations against 20,751 rules in an 80 s run. --set-join is exp19.
 
@@ -4624,10 +4700,12 @@ reproduced exactly).
 
 ## 2az. Portfolios: complementary methods kept, not dropped (user's request, 18 Nov 17:00)
 
+*Notes: [notes/2026-11-18-no-pg-no-model-walls.md](notes/2026-11-18-no-pg-no-model-walls.md), [notes/2026-11-19-far-goals-deep.md](notes/2026-11-19-far-goals-deep.md), [notes/2026-11-19-from-zero-explore.md](notes/2026-11-19-from-zero-explore.md), [notes/2026-11-19-queue-renorm-ab.md](notes/2026-11-19-queue-renorm-ab.md).*
+
 The user: when a method loses 2 of the best method's proofs but adds 3 of its own, running both for a share of the
 time usually beats running the best one all the time. **The record agrees.** Since 12 Nov I decided almost every A/B by
 the better arm's count and called the second arm's unique proofs noise. Notes:
-notes/2026-11-18-portfolio-review.md (the full table), -time-matched-control.md (exp20), -l0-portfolio.md (exp21).
+[notes/2026-11-18-portfolio-review.md](notes/2026-11-18-portfolio-review.md) (the full table), [notes/2026-11-18-time-matched-control.md](notes/2026-11-18-time-matched-control.md) (exp20), [notes/2026-11-18-l0-portfolio.md](notes/2026-11-18-l0-portfolio.md) (exp21).
 
 **Dropped methods with a measured unique share** (best arm's count, the dropped arm's, its gains and losses
 against the best, the union):
@@ -4828,7 +4906,7 @@ The union is 26 of 92. **ul54 (21:35)** has 19 workers and adds `nom` as the las
 * **exp24: far goals do not pay at 80 s.** 0 of 40 in 2.9 CPU hours, against about 4.7 due at the near goals' rate
   (1.61). `--far-deep` stays off; a far goal is reached when its neighbour below is proved.
 
-**Where a deep run's CPU goes (19 Nov 05:11-05:49; notes/2026-11-19-hint-cost.md).**
+**Where a deep run's CPU goes (19 Nov 05:11-05:49; [notes/2026-11-19-hint-cost.md](notes/2026-11-19-hint-cost.md)).**
 * The same 20 abstract s cost 36.1 CPU s with 7,668 chain hints and 19.3 s without. A cost-centre profile puts the
   hints' own bookkeeping at about 7%. The rest is the search: the hinted run makes twice the critical pairs for the
   same pairs considered, and renormalising the queue takes 27% of it.
@@ -4851,14 +4929,14 @@ with the variants. Production now runs `--cascade 5,40,80,160,320`. Old results 
   the same output. Only the deep levels can gain from B.
 
 **Two negatives on the way (19 Nov 07:00-07:30).**
-* Veroff's Prover9 settings (exp23, notes/2026-11-19-veroff-p9-settings.md). With max_weight 40 they proved 0 of
+* Veroff's Prover9 settings (exp23, [notes/2026-11-19-veroff-p9-settings.md](notes/2026-11-19-veroff-p9-settings.md)). With max_weight 40 they proved 0 of
   the 107 walls at 6,437 CPU s, so did max_weight 5 (3,484 s). The default settings prove 4.
 * A per-goal predictor for the deep runs. The failed 5 s run's HINTSTATS (matched share, lastmatch, maxgap,
   deferred) and the goal's distance to the nearest proof below separate L1 successes from failures with AUC
   0.4-0.7, not consistently across ul56 and ul58. Within the near goals, 0 and 1 places away both prove about 10%.
   The deep order stays by level yield.
 
-**The system from zero (exp27, from 07:18; notes/2026-11-19-from-zero-portfolio.md).** Everything since 17 Nov was
+**The system from zero (exp27, from 07:18; [notes/2026-11-19-from-zero-portfolio.md](notes/2026-11-19-from-zero-portfolio.md)).** Everything since 17 Nov was
 measured on production's tail. PGC runs half1 from zero for 2 hours on 6 workers with today's deep portfolio:
 * the chain levels;
 * the variants;
@@ -4872,7 +4950,7 @@ It is compared with PGA (17 Nov, the same script: 18,987).
 * The tail portfolio neither helps nor hurts the first 2 hours from zero. The starvation it shows is the same
   exploration gap as production's new variants.
 
-**E as a member (exp28; notes/2026-11-19-eprover-watchlist.md): a genuine negative.** E 3.5.9 was built from
+**E as a member (exp28; [notes/2026-11-19-eprover-watchlist.md](notes/2026-11-19-eprover-watchlist.md)): a genuine negative.** E 3.5.9 was built from
 ext/eprover and given the chain hints as a static watchlist (`-xUseWatchlist`).
 * It proved 0 of the 107 walls at 60 CPU s each (1.79 CPU h). Prover9 with the same hints proved 4 (exp16).
 * E processes about 500 clauses a second on these problems. It stays out of the portfolio.
@@ -4923,6 +5001,8 @@ index is now rebuilt every 10 minutes, not 30 (about 1 s a rebuild).
     no parental guidance, no rule model.
 
 ## 2c. Long runs: stall cutoff and checkpoints
+
+*Notes: [notes/2026-11-12-long-runs-checkpoints.md](notes/2026-11-12-long-runs-checkpoints.md).*
 
 * `--eqhint-stall N` gives up when no new rule has matched a hint for N
   rules. This is Veroff's practice of stopping lost jobs. `HINTSTATS` now
