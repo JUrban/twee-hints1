@@ -1030,9 +1030,23 @@ class Loop:
         assert all(v_ in IDX for v_ in RL.values()), RL
         YW = 2.0
         ystat = collections.defaultdict(lambda: [0, 0.0])   # label -> [proofs, CPU s]
-        def lyield(l):
+        def lyield0(l):
             k, c = ystat[l]
             return (k + YW * YP.get(l, 1.0)) / (c / 3600 + YW)
+        # (19 Nov 09:35, --explore H) exploration in the ratio order: a label with less than H CPU hours of runs in this
+        # round is estimated at no less than the best label that has H. With one global sort, a member whose estimate is
+        # below the best live member never comes up, so it is never measured (ul60's lemma-set variants at prior 3 ran
+        # 7-9 times in 45 minutes behind Vk60@0; exp27's 40 s chain level ran 4 times in an hour behind Vunf@0).
+        EXL = set(a.explore_labels.split(',')) - {''} if a.explore_labels else None
+        xbest = [0.0, -1]   # (the best measured label's estimate, the ystat version it was computed at)
+        xver = [0]
+        def lyield(l):
+            if not a.explore or (EXL is not None and l not in EXL) or ystat[l][1] >= a.explore * 3600:
+                return lyield0(l)
+            if xbest[1] != xver[0]:
+                xbest[:] = [max([lyield0(m) for m in list(ystat) if m != 'L0' and ystat[m][1] >= a.explore * 3600]
+                                or [0.0]), xver[0]]
+            return max(lyield0(l), xbest[0])
         pools = self.build_pools(); cnt = self.pool_cnt
         if a.model:
             self.train_model(rnd)
@@ -1226,7 +1240,7 @@ class Loop:
                 if (len(f) >= 5 and f[4] in IDX and ri >= a.chain_since_row
                         and not (rl_ and f[4] in a.relabel_nostat.split(','))):
                     l_ = f[4] + 'f' if 'f=1' in f[7:] else f[4]
-                    ystat[l_][0] += f[1] == 'THM'; ystat[l_][1] += float(f[2])
+                    ystat[l_][0] += f[1] == 'THM'; ystat[l_][1] += float(f[2]); xver[0] += 1
                 if len(f) >= 5 and f[0] in att and f[4] in IDX:
                     lev = ORIG[IDX[f[4]]]   # (the cascade's own level number)
                     if a.chain_since_row and ri < a.chain_since_row and lev >= max(1, a.chain_level):
@@ -1641,7 +1655,7 @@ class Loop:
                              f'\tc={chs(att[n][0]) if n in att else "-"}' + ('\tf=1' if fl_ else '')
                              + ('\tab=1' if T[lev] > T[0] and VAR[lev] != 'p9' and self.ab_arm(n) else '') + '\n'); rf.flush()
                     l_ = LAB[lev] + 'f' if fl_ else LAB[lev]
-                    ystat[l_][0] += 1 if ok else 0; ystat[l_][1] += dt
+                    ystat[l_][0] += 1 if ok else 0; ystat[l_][1] += dt; xver[0] += 1
                     if ok and n in self.solved:
                         pass   # (synced from another process meanwhile: keep its row and hints)
                     elif ok:
@@ -1939,6 +1953,11 @@ def make_parser():
                     help='--cascade: deepen goals at most this many places after a proven sibling')
     ap.add_argument('--variant-budget', type=float, default=0,
                     help='(19 Nov) --variants: the budget of the variants after the chain level (default: its own)')
+    ap.add_argument('--explore', type=float, default=0.0, metavar='H',
+                    help='--ratio-order: a label with less than H CPU hours of runs in this round is estimated at no '
+                         'less than the best label with H or more (each member gets measured; 0 = off)')
+    ap.add_argument('--explore-labels', default='',
+                    help='--explore: only these labels (comma-separated; default all)')
     ap.add_argument('--priors', default='',
                     help='--ratio-order: LABEL=YIELD,... priors in proofs per CPU hour, over the built-in ones')
     ap.add_argument('--relabel', default='',
