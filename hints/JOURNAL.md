@@ -694,8 +694,9 @@ Paused:
 
 Next:
 1. exp24's result decides the far-goal option (above).
-2. The fresh-run predictor overpredicts in ul56 (145 proved against 185 predicted at 03:50; ul55 108 against 113).
-   Check the scheduler model's calibration on recent rows before trusting its pmin.
+2. (Checked 04:11.) The fresh-run predictor's overprediction in ul56 (145 against 185 at 03:50) was all in its
+   first hour (63 against 103, a model trained on ul55's burst). From 01:05 to 03:50 it was 82 against 82, and
+   --sched-retrain keeps it current. No action.
 3. A twee mode for strict hint following (a size cap that hint matchers bypass, as Prover9's max_weight with
    hints) only if exp23's V40 or V100 show unique proofs. V5 showed that sibling hints do not suit it.
 4. CPU: 21 in use at 04:01 (ul56 19, exp24 2).
