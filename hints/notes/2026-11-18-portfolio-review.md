@@ -610,3 +610,19 @@ class ran Vk200@0 (99) and Vs12@0 (75), the unmeasured ones, first.
   (hints/exp/hl_count.py).
 * ul63.sh (prepared): ul62 plus hl@0 under `--explore 1`. It starts once ul62 has measured k200@0 and s12@0, about
   an hour.
+
+**ul62's first 10 minutes (10:05-10:15): exploration measured both new members at once.**
+
+| member | runs | proved | CPU h | per CPU h |
+|---|---:|---:|---:|---:|
+| Vk200@0 | 463 | 14 | 1.01 | 13.8 |
+| Vs12@0 | 539 | 5 | 1.02 | 4.9 |
+
+* All 14 Vk200@0 proofs came after Vk100@0 had failed on the goal in the same context, 12 after Vk60@0 too, and 13
+  after Vkd@0 (hints/exp/condvar.py).
+* All 5 Vs12@0 proofs came after Vk100@0 and Vkd@0.
+* So each lemma count is its own problem: 60, 100 and 200 kNN lemmas each prove goals the smaller sets did not. On
+  16 Nov "more than 30 kNN lemmas did not help" was a count comparison of single settings. As members after one
+  another, they keep paying.
+* ul63 (prepared) adds k400@0 and k200s12@0, and the search-setting members (m7t@0, m4b@0, r2@0, nopg@0, nom@0) and
+  hl@0, all under `--explore 1`.

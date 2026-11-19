@@ -5,6 +5,8 @@
 # Also five search-setting variants at 5 s, each dropped on count before (loop.py 4d3baca): m7t@0 (rule model rm7t,
 # retrained with the loop's proofs, 2u), m4b@0 (rm4b, 4 times the trees, +9 -7 at 8 s, 2f), r2@0 (rule threshold 0.2),
 # nopg@0 (no parental guidance) and nom@0 (no rule model). Each under --explore 1.
+# And k400@0 and k200s12@0: in ul62's first 10 minutes Vk200@0 proved 14 in 1.01 CPU h, all after Vk100@0 had failed in
+# the same context (hints/exp/condvar.py).
 # (19 Nov 10:06) ul62: ul61 with two more lemma-set variants at 5 s, k200@0 (200 kNN lemmas) and s12@0
 # (12 sibling lemmas; loop.py e2986e3), and --explore 1 for the lemma-set variants (loop.py 3f95f59) instead of priors
 # set by hand: each is estimated at no less than the best measured member until it has 1 CPU hour of runs. In ul60
@@ -90,5 +92,5 @@ cd /project/hintwork
 python3 -u /project/twee/hints/loop.py sets/all loops/UL --start 5 --cascade 5,40,80,160,320 --cascade-start 0 --cascade-continue --retry-gap 3 \
   --model --model-fixed /project/hintwork/models/rm4t.bin,/project/hintwork/models/rm4t.vocab --model-theory \
   --lemmas 6 --lemma-knn 30 --lemma-subsets --lemma-after --twee /project/bin/twee-pg61 --keep-out -j ${J:-19} --reserve 0 \
-  --pool original --wall-factor 15 "$@" --line-gaps 80,80 --retry-hints 1.25 --sync 60 --fresh-first --far-retry --mix 0.25 --sched-model /project/hintwork/sched/m4.json --sched-max-lgap 320 --sched-retrain 200 --sched-pmin 0.011 --sched-pmin-auto 400 --retry-knn --knn-refresh 600 --chain-level 1 --chain-records /project/hintwork/chain_records2.tsv --chain-since-row 47530 --variants unf@0,k60@0,k100@0,k200@0,kp@0,kd@0,s12@0,hl@0,m7t@0,m4b@0,r2@0,nopg@0,nom@0,k60,p9,unf,two,nom --variants-after 3 --variant-budget 80 --priors L1=1.73,L2=1.1 --explore 1 --explore-labels Vk100@0,Vk200@0,Vkp@0,Vkd@0,Vs12@0,Vhl@0,Vm7t@0,Vm4b@0,Vr2@0,Vnopg@0,Vnom@0 --relabel L1=L2,L2=L3,L3=L4 --relabel-until 103427 --relabel-nostat L2 --ratio-order --pass-every 1 --ab-args="--cp-renormalise-threshold 1000" --args="--abstract-time 2000 --no-resume-requeue --no-eqhint-consider" > loops/UL63.log 2>&1
+  --pool original --wall-factor 15 "$@" --line-gaps 80,80 --retry-hints 1.25 --sync 60 --fresh-first --far-retry --mix 0.25 --sched-model /project/hintwork/sched/m4.json --sched-max-lgap 320 --sched-retrain 200 --sched-pmin 0.011 --sched-pmin-auto 400 --retry-knn --knn-refresh 600 --chain-level 1 --chain-records /project/hintwork/chain_records2.tsv --chain-since-row 47530 --variants unf@0,k60@0,k100@0,k200@0,k400@0,kp@0,kd@0,s12@0,k200s12@0,hl@0,m7t@0,m4b@0,r2@0,nopg@0,nom@0,k60,p9,unf,two,nom --variants-after 3 --variant-budget 80 --priors L1=1.73,L2=1.1 --explore 1 --explore-labels Vk100@0,Vk200@0,Vk400@0,Vk200s12@0,Vkp@0,Vkd@0,Vs12@0,Vhl@0,Vm7t@0,Vm4b@0,Vr2@0,Vnopg@0,Vnom@0 --relabel L1=L2,L2=L3,L3=L4 --relabel-until 103427 --relabel-nostat L2 --ratio-order --pass-every 1 --ab-args="--cp-renormalise-threshold 1000" --args="--abstract-time 2000 --no-resume-requeue --no-eqhint-consider" > loops/UL63.log 2>&1
 echo "UL63: $(tail -1 loops/UL63.log) $(date +%T)" | tee loops/UL63.done
