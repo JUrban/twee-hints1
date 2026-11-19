@@ -41,6 +41,21 @@ Two walls, 60 CPU s:
 * Its conditional yield per CPU hour, against Prover9's 1.62 (exp16 Q). If it proves nothing, it is a genuine
   negative. If it proves walls nothing else did, it joins the portfolio as a variant like p9.
 
-## Results
+## Results (08:50:51 - 10:38)
 
-(queued)
+**0 of 107 walls: a genuine negative** (hints/exp/exp28_results.tsv).
+* All 107 ended ResourceOut at 60 CPU s: 6,436 CPU s in all (1.79 CPU h). Peak RSS was 2.3 GB.
+* One wall (aK2_eq_aK3_d 435) failed first on a hint TPTP cannot read (`-e`). mkwl.py now skips such hints (1 of
+  its 10,709), and the rerun was ResourceOut too.
+* Prover9 with the same chain hints proved 4 of the 107 at 60 s (exp16 Q, 1.62 per CPU hour). E's 95% upper bound
+  is about 1.7 per CPU hour (3 proofs in 1.79 h), so the sample cannot rule out a small rate. But it shows nothing
+  that would put E beside p9.
+
+## Reading
+
+* E's watchlist guidance (ProofWatch's static form, `UseWatchlist`) does not reach these walls in 60 s. It runs at
+  about 500 processed clauses a second, against twee's thousands of rules, with hundreds of thousands of clauses
+  unprocessed.
+* Not tried: E's dynamic watchlists and its auto schedule with the watchlist, longer limits, and smaller watchlists
+  (the 10 nearest siblings' proofs give 3,000-10,000 clauses). None of these is cheap to test in a way that could
+  change the verdict, so E stays out of the portfolio.

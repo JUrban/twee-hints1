@@ -1,7 +1,7 @@
 # From zero with the explored 5 s lemma members (exp29)
 
-Written 19 Nov 2026, 10:21 UTC. Queued to start when exp28 ends (about 10:40). Production goes to 12 workers for
-its 2 hours. Script abs/exp29.sh (hints/exp/exp29_run.sh). Part of the portfolio task
+Written 19 Nov 2026, 10:21 UTC. Started 10:38:51 (loops/PGD), after exp28 ended. Production went to 12 workers at
+10:38:39 for its 2 hours (ul63 with J=12; first results row 133503). Script abs/exp29.sh (hints/exp/exp29_run.sh). Part of the portfolio task
 (notes/2026-11-18-portfolio-review.md); it follows exp27 (notes/2026-11-19-from-zero-portfolio.md).
 
 ## Why
@@ -38,4 +38,4 @@ its 2 hours. Script abs/exp29.sh (hints/exp/exp29_run.sh). Part of the portfolio
 
 ## Results
 
-(queued)
+(running; ends about 12:40)

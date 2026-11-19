@@ -694,7 +694,7 @@ summaries keep results but lose the reasons and the user's exact words. Keep sec
 
 ---------------------------------------------------------------------------------------------------------
 
-## 8. Open threads (19 Nov 10:20; `date` checked)
+## 8. Open threads (19 Nov 10:40; `date` checked)
 
 **The portfolio task** (the user, 18 Nov 17:00: keep complementary methods; notes/2026-11-18-portfolio-review.md,
 REPORT 2az). The principle is the ratio rule: rank each member by its new proofs per CPU hour on the goals every
@@ -702,8 +702,12 @@ earlier member failed in the same context. In production the order is online (`-
 variant levels are optional attempts (loop.py 119c3d1).
 
 Running:
-* **production ul63** since 19 Nov 10:16:50 (abs/ul63.sh, loops/UL63.log, 19 workers; first results row 130377).
-  Crash watcher on PID 2702659. 15 members at 5 s, 13 of them under `--explore 1`:
+* **exp29** (10:38:51 - about 12:40, loops/PGD, notes/2026-11-19-from-zero-explore.md): half1 from zero, PGC plus the
+  5 s lemma members k100@0, k200@0, k400@0 and kd@0, with `--explore 0.2` for them and L1. Crash watcher on PID
+  2710082. Then production back to 19 workers.
+* exp28 ended 10:38: E with chain-hint watchlists proved 0 of the 107 walls (60 s each). A genuine negative.
+* **production ul63** since 19 Nov 10:16:50 (abs/ul63.sh, loops/UL63a.log), restarted 10:38:39 with J=12 for exp29
+  (loops/UL63.log; first results row 133503). Crash watcher on PID 2710056. 15 members at 5 s, 13 of them under `--explore 1`:
   * lemma sets: k100, k200, k400, kp, kd, s12, k200s12;
   * hl, the kNN lemmas' proof steps as hints;
   * search settings: m7t, m4b (other rule models), r2, nopg, nom.
@@ -732,7 +736,7 @@ Next:
    first hour (63 against 103, a model trained on ul55's burst). From 01:05 to 03:50 it was 82 against 82, and
    --sched-retrain keeps it current. No action.
 3. (Dropped 08:50.) A twee mode for strict hint following: exp23's V5, V40 and V100 proved none of the walls.
-4. CPU: 20 in use at 09:20 (ul61 19, exp28 1).
+4. CPU: 20 in use at 10:39 (ul63 12, exp29 6 + its transfer's 2 at times).
 
 ---------------------------------------------------------------------------------------------------------
 
@@ -808,8 +812,8 @@ reports are written as the experiments run.
 | notes/2026-11-19-far-goals-deep.md | production's 80 s chain level on 40 far goals, which production never deepens (exp24, 03:58-05:29): 0 of 40 at 2.9 CPU h; found the chain-records race at loop start |
 | notes/2026-11-19-hint-cost.md | what chain hints cost per abstract second; the profile; queue renormalisation under the abstract clock (exp25) |
 | notes/2026-11-19-queue-renorm-ab.md | deep runs without queue renormalisation, an A/B test in production ul57 (exp26, from 05:52) |
-| notes/2026-11-19-eprover-watchlist.md | E 3.5.9 with chain hints as a static watchlist on the 107 walls, 60 s (exp28, queued after exp23) |
-| notes/2026-11-19-from-zero-explore.md | exp29: half1 from zero with the explored 5 s lemma members, against PGC (queued 10:21) |
+| notes/2026-11-19-eprover-watchlist.md | E 3.5.9 with chain hints as a static watchlist on the 107 walls, 60 s (exp28): 0 of 107, a genuine negative |
+| notes/2026-11-19-from-zero-explore.md | exp29: half1 from zero with the explored 5 s lemma members, against PGC (10:38 - about 12:40) |
 | notes/2026-11-19-from-zero-portfolio.md | half1 from zero in 2 hours with today's deep portfolio (PGC), against PGA's 18,987 (exp27, from 07:18) |
 | notes/2026-11-17-lemma-circularity.md | Are lemma chains circular? A check of the used lemmas |
 | notes/2026-11-17-mix-fail-order.md | Repeats cost most of the time: `--mix` and `--fail-order` |

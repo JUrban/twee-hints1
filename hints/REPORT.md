@@ -4872,10 +4872,10 @@ It is compared with PGA (17 Nov, the same script: 18,987).
 * The tail portfolio neither helps nor hurts the first 2 hours from zero. The starvation it shows is the same
   exploration gap as production's new variants.
 
-**E as a member (exp28, queued; notes/2026-11-19-eprover-watchlist.md).** E 3.5.9 built from ext/eprover, with chain
-hints as a static watchlist (`-xUseWatchlist`). On two walls it fails both at 60 s, with and without the watchlist,
-including one twee proves in 21 CPU s. It runs on all 107 walls after exp23, to see whether it proves any no other
-member does.
+**E as a member (exp28; notes/2026-11-19-eprover-watchlist.md): a genuine negative.** E 3.5.9 was built from
+ext/eprover and given the chain hints as a static watchlist (`-xUseWatchlist`).
+* It proved 0 of the 107 walls at 60 CPU s each (1.79 CPU h). Prover9 with the same hints proved 4 (exp16).
+* E processes about 500 clauses a second on these problems. It stays out of the portfolio.
 
 **The dropped lemma selections as 5 s members (ul60, 08:05; loop.py 92d60c4).** exp21 found that at 5 s only the
 variants that change the problem pay, and the 60-lemma 5 s variant makes 5-20 per CPU hour live. 16 Nov dropped
