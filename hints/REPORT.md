@@ -4818,6 +4818,18 @@ The union is 26 of 92. **ul54 (21:35)** has 19 workers and adds `nom` as the las
 * Prover9 with Veroff's own AIM settings (KBO, no back-demodulation, restrict_denials, para_from_small,
   max_weight 5) and chain hints proved 0 of the 107 walls (exp23), where the defaults prove 4. Strict hint
   following needs the goal's own earlier hints, as in Veroff's loops, not its siblings'.
+* **exp24: far goals do not pay at 80 s.** 0 of 40 in 2.9 CPU hours, against about 4.7 due at the near goals' rate
+  (1.61). `--far-deep` stays off; a far goal is reached when its neighbour below is proved.
+
+**Where a deep run's CPU goes (19 Nov 05:11-05:49; notes/2026-11-19-hint-cost.md).**
+* The same 20 abstract s cost 36.1 CPU s with 7,668 chain hints and 19.3 s without. A cost-centre profile puts the
+  hints' own bookkeeping at about 7%. The rest is the search: the hinted run makes twice the critical pairs for the
+  same pairs considered, and renormalising the queue takes 27% of it.
+* Under `--abstract-time` queue renormalisation is free in abstract time, so its 5% budget never binds. At 20 s
+  turning it off changed nothing in the output. At 80 s (exp25, 6 walls) it saved 25% of the CPU (613 against
+  823 s) with no higher peak memory, but the search differs (it kept 2 of the 3 proofs).
+* **exp26** is an A/B test of that in production (ul57, from 05:52, loop.py `--ab-args`). Half the goals, by a hash
+  of the name, run their deep levels without renormalisation. The measure is each arm's proofs per CPU hour at L1.
 
 ## 2c. Long runs: stall cutoff and checkpoints
 
