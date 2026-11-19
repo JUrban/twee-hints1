@@ -60,3 +60,10 @@ The user forwarded a message about the climber at 15:20. Checked against the rec
 * (17:05) The climber was restarted at 17:00:52 and 17:03:00 with climb.py's new records (true.tsv, fillhints/,
   assume.tsv, used.tsv; [notes/2026-11-19-climber-outputs.md](2026-11-19-climber-outputs.md)). Its fill lemmas from 15:40 to 17:00 were lost,
   and the 2 climbs in flight were cut. The rate is still read per CPU hour from climb.tsv.
+* **(17:50) Correction: `direct` is not a control.** climb.py runs it only after a successful final run, by which
+  point that run's own proof steps are already among the sketch hints: 1,573 hints in 845's direct run, against 51
+  in its final. The "direct" credit above means nothing. All 5 proofs so far are the climb's own (final runs): 845,
+  518, 434, 458 and lra2aa 291. Whether their sketch hints were needed is exp36
+  ([notes/2026-11-19-climb-ablation.md](2026-11-19-climb-ablation.md)).
+* 17:40 tally: 5 proofs in 3.50 CPU h (1.43 per CPU h, above the 0.25 threshold). In the same rows (from 156,424)
+  production's members: L0 4.1, Vpool@1:0 2.7, Vs40@0 1.9, Vkd@0 0.6 per CPU h, and the rest 0.

@@ -5024,8 +5024,10 @@ Mean, Var, Rand and Corr; Mean was best, +8.8% over ENIGMA in loop 0 on Mizar40.
   as an explored member.
 
 **The deep tail starved from 06:00 to 16:24, and is now explored (portfolio notes, 19 Nov 16:20).** exp32's
-climber ([notes/2026-11-19-climber-member.md](notes/2026-11-19-climber-member.md)) proved 4 stuck heads by 16:19. Its plain 160 s control runs proved 3 of
-them in 19.6-75 s with the pool hints. Production had run 22-24 fresh 5 s runs on each, but nothing beyond 40 s.
+climber ([notes/2026-11-19-climber-member.md](notes/2026-11-19-climber-member.md)) proved 4 stuck heads by 16:19. Production had run 22-24 fresh 5 s runs on each, but nothing beyond 40 s.
+(Corrected 17:50: I first wrote that its "plain 160 s control runs" proved 3 of them. Those `direct` runs come after a
+successful final run, with that run's own proof steps among the hints, so they are no control. exp36,
+[notes/2026-11-19-climb-ablation.md](notes/2026-11-19-climb-ablation.md), is the real ablation.)
 * Since ul58 (06:02), L2-L4 and the 80 s variants k60, p9, unf, two and nom never ran. Their hand-set priors (L2 1.1)
   sat below the live 5 s members (1-3 per CPU hour), and a label that never runs is never re-measured.
 * ul67/ul68 add fresh pool runs at 40 and 80 s right after the 5 s level (`pool@1:0`, `pool@2:0`; new syntax

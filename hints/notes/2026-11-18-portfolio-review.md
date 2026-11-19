@@ -760,8 +760,9 @@ hints more than the pool (none on R1dist_to_aa1, as the offline count predicted)
 
 ## The deep tail starved since 06:00 (found 16:20 through exp32)
 
-* exp32's climber proved 4 heads by 16:19. Its plain 160 s control runs, which run only after a climb has
-  proved its goal, proved 3 of the 4, in 19.6, 40.5 and 75 s, with the pool hints.
+* exp32's climber proved 4 heads by 16:19. (Corrected 17:50: its `direct` runs, which I took for plain 160 s
+  controls, carry the final run's own proof steps as hints. That they proved 3 of the 4 shows nothing; exp36 is
+  the ablation.)
 * Production had run 22-24 fresh 5 s pool runs on each of these heads, 1-4 40 s chain runs (L1) and dozens of 5 s
   members, but never a pool run beyond 5 s, nor anything at 80, 160 or 320 s.
 * **Since ul58 (06:02, row 103428):** L0 ran 12,742 times (488 proofs), L1 213 times (10 proofs), Vk400 at 80 s 11
