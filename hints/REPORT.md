@@ -4477,6 +4477,12 @@ the old proofs' pairs does not predict the online result
 the sum). So every learned parental model tried, dense or ENIGMA, full
 or additive, has lost to the untrained sum filter. The sum stays. The additive model is under test on the 200 goals.
 
+**The near-oracle through PG (exp33, 19 Nov 16:44-18:22; [notes/2026-11-19-oracle-pg.md](notes/2026-11-19-oracle-pg.md)).** On the 400
+ultest goals at 20 s, with PG 0.25 in both arms, rmO (trained on these goals' own logs) proves 307 against rm4t's
+317 (+8 −18), with 9% more CPU on shared proofs. PG and today's binary lift rm4t from 15 Nov's 271 to 317 on the same
+goals. A better rule model adds nothing at either hook. Still unchecked: a threshold matched to rm4t's freeze rate
+(rmO's raw scores are spread differently).
+
 ## 2aw. Expanded proofs, deep runs and a lattice with small steps (17 Nov, from 19:00)
 
 Three of the user's questions, one experiment each. The records are in [notes/2026-11-17-expanded-proofs.md](notes/2026-11-17-expanded-proofs.md),
