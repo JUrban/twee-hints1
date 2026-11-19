@@ -293,7 +293,13 @@ Each goal is one twee run on the goal's problem.
 ### 4.3 Production
 * No side workers. Prover9 with chain hints (the P9C side worker, abs/p9c.sh and p9c4.sh, 16:46–19:38) is now the
   cascade's `p9` level.
-* `abs/ul57.sh` since 19 Nov 05:52:34 (UL57.log, first results row 102781): ul56 restarted for loop.py 516f416,
+* `abs/ul58.sh` since 19 Nov 06:02:46 (UL58.log; its first results row is 103428, 1-based, and `--relabel-until`
+  103427, 0-based). A **restart must keep `--relabel-until 103427` fixed**: the script computes it from the file's
+  length, so a later script must hardcode it. ul57 with the cascade 5,40,80,160,320 (loop.py 1bb0a0f). The 40 s
+  chain level is the old 80 s run's first half: ul56's L1 proofs came at a median of 29 abstract s, 50 of 81 within
+  40 s, so 1.73 per CPU hour against 1.45. The variants stay at 80 s after the 160 s level. Old rows are relabelled
+  by budget (L1=L2, L2=L3, L3=L4). The A/B test exp26 goes on.
+* `abs/ul57.sh` 19 Nov 05:52:34 - 06:02 (UL57.log, first results row 102781): ul56 restarted for loop.py 516f416,
   with the A/B test exp26 (`--ab-args="--cp-renormalise-threshold 1000"`: half the goals' deep runs never renormalise
   the queue; rows ab=1; notes/2026-11-19-queue-renorm-ab.md). The restart flagged 1 goal as pool-grown (the fixed
   check). ul56 ended at new=289 in 5 h 52 min.
@@ -682,9 +688,9 @@ earlier member failed in the same context. In production the order is online (`-
 variant levels are optional attempts (loop.py 119c3d1).
 
 Running:
-* **production ul57** since 19 Nov 05:52:34 (abs/ul57.sh, loops/UL57.log, 19 workers). Crash watcher on PID
-  2579765. With the A/B test exp26 (notes/2026-11-19-queue-renorm-ab.md): watch `levyield.py
-  loops/UL/r5/results.tsv 102781`, L1 against L1/B.
+* **production ul58** since 19 Nov 06:02:46 (abs/ul58.sh, loops/UL58.log, 19 workers). Crash watcher on PID
+  2582073. Cascade 5,40,80,160,320 (section 4.3). With the A/B test exp26 (notes/2026-11-19-queue-renorm-ab.md):
+  watch `levyield.py loops/UL/r5/results.tsv 103428`, L1 against L1/B and L2 against L2/B.
 * exp24 ended 05:29: far goals 0 of 40 at 80 s (2.9 CPU h). `--far-deep` (5f8fd4a) stays off.
 * exp25 ended 05:49 (notes/2026-11-19-hint-cost.md): without queue renormalisation 80 s runs cost 25% less, with a
   different search; hence exp26.
@@ -703,7 +709,7 @@ Next:
    --sched-retrain keeps it current. No action.
 3. A twee mode for strict hint following (a size cap that hint matchers bypass, as Prover9's max_weight with
    hints) only if exp23's V40 or V100 show unique proofs. V5 showed that sibling hints do not suit it.
-4. CPU: 19 in use at 05:53 (ul57). exp23's stage3.sh can take 1 now.
+4. CPU: 20 in use at 06:05 (ul58 19, exp23 stage3 1).
 
 ---------------------------------------------------------------------------------------------------------
 

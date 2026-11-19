@@ -45,4 +45,6 @@ notes/2026-11-19-hint-cost.md (exp25).
 
 ## Results
 
-(running)
+* 06:02: production went on as ul58, with the cascade 5,40,80,160,320 (40 s chain level; abs/ul58.sh). The A/B goes
+  on unchanged, and is measured from ul58's first row (103428): L1 (40 s), L2 (the 40 -> 80 s resume), L3 (160 s)
+  and the 80 s variants, each by arm. ul57's 10 minutes (rows 102781-103427) are too few to count.
