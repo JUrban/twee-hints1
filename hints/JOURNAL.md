@@ -719,6 +719,10 @@ Running:
     still on the deep runs. L1 runs rarely now, so it is stalled. Read L1 against L1/B from row 103428.
 
 Ended today:
+* hintdata (16:12; user, 15:20): the durable data is now its own git repo, /project/hintwork/hintdata (branch main,
+  275 small commits, 445 MB, no file above 10 MB): proofs per original, the solved list, run logs, chain records,
+  models, sets, the from-zero runs, and the rule logs as one .tar.xz per original. exp/hintdata_build.py adds new
+  data in further small commits. The README gives the formats.
 * exp30 14:46: the half2 replication, P2D 19,383 against P2A 19,501 (−118, within noise). Half1's +392 does not
   hold. Both arms' deep work tied, and the union is 19,798. The defaults stay, with no claim.
 * exp31 14:09: ENIGMAWatch offline (the user's paper). 512 completion ratios lift held-out AUC by +0.001: not built.
