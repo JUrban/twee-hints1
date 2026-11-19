@@ -743,8 +743,9 @@ Paused:
 * exp19: set-join on the walls, 37 of 107 done, 0.31 per CPU hour (run.py skips done ids).
 
 Next:
-0. ul68 (16:24, 17 workers beside exp32's climber): the deep tail had not run since 06:00 (portfolio notes). Fresh
-   pool runs at 40 and 80 s, and every label explored. Read the new labels after about 1 CPU h each.
+0. ul69 (16:33, 17 workers beside exp32's climber): the deep tail had not run since 06:00 (portfolio notes). Fresh
+   pool runs at 40 and 80 s, every label explored, and `--reexplore 150:0.25` (periodic re-measuring). Read the
+   new labels after about 1 CPU h each.
 1. ul65 (19 workers from 14:46): the new members after 1 CPU hour each, namely pw@0 (ProofWatch), k1000@0, k2000@0,
    s40@0, s200@0 and Vk400 at 80 s.
 2. From zero: a combined portfolio, the 20 s pool resume beside the 5 s lemma members, aiming at exp30's union.

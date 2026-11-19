@@ -1094,8 +1094,30 @@ class Loop:
         EXL = set(a.explore_labels.split(',')) - {''} if a.explore_labels else None
         xbest = [0.0, -1]   # (the best measured label's estimate, the ystat version it was computed at)
         xver = [0]
+        # (19 Nov 16:40, --reexplore W:R; user: "go ahead with the periodic re-exploration") a label that had its
+        # --explore hours but got less than R CPU hours among the last W CPU hours of all counted runs is explored
+        # again (estimated at no less than the best measured label) until it has R in the window. A label that fell
+        # below the live members is otherwise never re-measured as the goals change: from 06:00 to 16:24 on 19 Nov,
+        # L2-L4 and the 80 s variants never ran. The window is in CPU, in row order, so a restart's replay rebuilds
+        # it exactly.
+        RXW, RXR = ((float(x_) * 3600 for x_ in a.reexplore.split(':')) if a.reexplore else (0.0, 0.0))
+        gcpu = [0.0]                                   # CPU s of all counted rows so far
+        ywin = collections.defaultdict(collections.deque)   # label -> (gcpu after the row, CPU s) in the window
+        ywsum = collections.defaultdict(float)         # label -> CPU s in the window
+        def ynote(l, k, c):
+            ystat[l][0] += k; ystat[l][1] += c; xver[0] += 1
+            gcpu[0] += c
+            if RXW:
+                ywin[l].append((gcpu[0], c)); ywsum[l] += c
+        def recent(l):
+            q = ywin[l]; cut = gcpu[0] - RXW
+            while q and q[0][0] <= cut:
+                ywsum[l] -= q.popleft()[1]
+            return ywsum[l]
         def lyield(l):
-            if not a.explore or (EXL is not None and l not in EXL) or ystat[l][1] >= a.explore * 3600:
+            if not a.explore or (EXL is not None and l not in EXL):
+                return lyield0(l)
+            if ystat[l][1] >= a.explore * 3600 and not (RXW and l != 'L0' and recent(l) < RXR):
                 return lyield0(l)
             if xbest[1] != xver[0]:
                 xbest[:] = [max([lyield0(m) for m in list(ystat) if m != 'L0' and ystat[m][1] >= a.explore * 3600]
@@ -1294,7 +1316,7 @@ class Loop:
                 if (len(f) >= 5 and f[4] in IDX and ri >= a.chain_since_row
                         and not (rl_ and f[4] in a.relabel_nostat.split(','))):
                     l_ = f[4] + 'f' if 'f=1' in f[7:] else f[4]
-                    ystat[l_][0] += f[1] == 'THM'; ystat[l_][1] += float(f[2]); xver[0] += 1
+                    ynote(l_, f[1] == 'THM', float(f[2]))
                 if len(f) >= 5 and f[0] in att and f[4] in IDX:
                     lev = ORIG[IDX[f[4]]]   # (the cascade's own level number)
                     if a.chain_since_row and ri < a.chain_since_row and lev >= max(1, a.chain_level):
@@ -1720,7 +1742,7 @@ class Loop:
                              f'\tc={chs(att[n][0]) if n in att else "-"}' + ('\tf=1' if fl_ else '')
                              + ('\tab=1' if T[lev] > T[0] and VAR[lev] != 'p9' and self.ab_arm(n) else '') + '\n'); rf.flush()
                     l_ = LAB[lev] + 'f' if fl_ else LAB[lev]
-                    ystat[l_][0] += 1 if ok else 0; ystat[l_][1] += dt; xver[0] += 1
+                    ynote(l_, 1 if ok else 0, dt)
                     if ok and n in self.solved:
                         pass   # (synced from another process meanwhile: keep its row and hints)
                     elif ok:
@@ -2028,6 +2050,9 @@ def make_parser():
     ap.add_argument('--explore', type=float, default=0.0, metavar='H',
                     help='--ratio-order: a label with less than H CPU hours of runs in this round is estimated at no '
                          'less than the best label with H or more (each member gets measured; 0 = off)')
+    ap.add_argument('--reexplore', default='', metavar='W:R',
+                    help='--explore: a label that had its explore hours but less than R CPU hours among the last W CPU '
+                         'hours of all runs is explored again until it has R in that window (e.g. 150:0.25)')
     ap.add_argument('--explore-labels', default='',
                     help='--explore: only these labels (comma-separated; default all)')
     ap.add_argument('--priors', default='',

@@ -776,5 +776,15 @@ hints more than the pool (none on R1dist_to_aa1, as the offline count predicted)
   * Every label explored (no `--explore-labels`): each label with under 1 CPU h in round 5 is estimated at no less
     than the best measured one until it has 1 CPU h. That covers L2, L3, L4, the 80 s variants and the new pool
     members, about 10 CPU h in all.
-* Still open: labels that were measured once and then decayed below others are not re-measured when the goals
-  change. A periodic re-exploration (a label idle for X hours gets another slice) would close that.
+* Labels measured once and then decayed below the others were still never re-measured as the goals changed.
+  **Periodic re-exploration (user: "go ahead", 16:30; ul69 16:33):**
+  * `--reexplore W:R`: a label (other than L0) that had its explore hour, but got under R CPU h among the last
+    W CPU h of all counted runs, is explored again until it has R in the window.
+  * The window is in CPU, in row order, so a restart's replay rebuilds it exactly.
+  * Production uses `--reexplore 150:0.25`: the window is about 9 hours on 17 workers. With about 38 labels, at most
+    about 6% of the CPU goes to re-measuring.
+  * Replayed on round 5 at 16:32, it would re-explore L2 and Vk60 (80 s) at once. L3, L4 and the other 80 s variants
+    have no rows yet; they get explored as goals pass L2.
+  * Slices overshoot: several goals take the same label before its first result returns (14 of 17 workers on 80 s
+    runs in ul69's first minute), so a slice is nearer 1 CPU h than 0.25. That is acceptable for now. Counting
+    in-flight runs would tighten it.
