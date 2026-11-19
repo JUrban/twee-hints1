@@ -20,6 +20,7 @@ in `/project/hintwork` (not in git).
 | + round 5 continued: wall experiments merged, a ratio-ordered portfolio of variant levels, 160 s resume (2ay–2az); at 18 Nov 20:16 | **45,608** (+46.8% over plain) | **5003** (+56.2%) | – |
 | + variant tiers ordered by live yield (2az); at 18 Nov 23:41 | **45,901** (+47.8% over plain) | **5043** (+57.4%) | – |
 | + optional attempts, context-exact restarts (2az); at 19 Nov 04:08 | **46,203** (+48.8% over plain) | **5084** (+58.7%) | – |
+| + a 40 s chain level, lemma-set variants at 5 s (2az); at 19 Nov 08:21 | **46,822** (+50.7% over plain) | **5161** (+61.1%) | – |
 
 **On unseen originals** (2aq): the 11 whole holdout originals from
 scratch, in 1 hour per batch on 4 workers plus the transfer. Plain twee
@@ -83,6 +84,10 @@ written in loops/UL. Merged proofs count from their merge.
 | 18 Nov 10:00 | 45,385 | 4979 | chain hints at the 80 s level from 08:28 (ul43; ul44 on 8 workers from 09:47) (2ax) |
 | 18 Nov 12:00 | 45,486 | 4991 | merged deep proofs: exp8–exp10, and 15 walls from exp11 (2ax, 2ay) |
 | 18 Nov 14:37 | 45,510 | 4991 | ul45 (fresh 80 s chain level, 12:02); one gap head (exp12) merged at 12:12 and 6 proofs above it; none since about 13:20 (2ay) |
+| 18 Nov 20:16 | 45,608 | 5003 | the variant levels (ul47-ul52) and the wall experiments merged (2az) |
+| 18 Nov 23:41 | 45,901 | 5043 | variant tiers by live yield (ul55) |
+| 19 Nov 04:08 | 46,203 | 5084 | optional attempts, context-exact restarts (ul56, 289 new in 5 h 50 min) |
+| 19 Nov 08:21 | 46,822 | 5161 | the 40 s chain level (ul58, 06:02) and a cascade from about 06:59 across the aK2_eq_aK3 and nil3 families (ul58-ul60, about 400 in 80 minutes) |
 
 From 15 Nov 05:30 the rate fell from hundreds an hour to 50–100. The
 cheap new contexts are used up; 58% of the unsolved goals sit behind the
