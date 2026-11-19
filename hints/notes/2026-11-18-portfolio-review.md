@@ -574,3 +574,20 @@ first:
   proves goals k60 does not.
 * Next: k200@0, once kp@0 and kd@0 (prior 9 in ul61) are measured. Each lemma count is a different problem, cheap
   at 5 s.
+
+**ul61 (09:19-10:05, priors 9), after the cascade:**
+
+| member | runs | proved | CPU h | per CPU h |
+|---|---:|---:|---:|---:|
+| Vkd@0 (proof dependencies) | 1,050 | 9 | 1.83 | 4.9 |
+| Vk100@0 | 4,297 | 28 | 7.73 | 3.6 |
+| L0 (fresh) | 1,382 | 12 | 3.49 | 3.4 |
+| Vkp@0 (use counts) | 307 | 0 | 0.54 | 0 |
+
+* Vk60@0 did not run, since the priors at 9 put the three ahead of it. So these yields are not conditional on
+  k60@0 having failed.
+* The proof-dependency selection, also dropped on 16 Nov (+1 −2), pays. So far the use-count selection does not.
+* Fresh runs proved 12 against 89 predicted: the scheduler overpredicts after a cascade.
+
+**ul62 (10:05):** k200@0 and s12@0 added; `--explore 1` on the five lemma-set labels. In its first minute the deep
+class ran Vk200@0 (99) and Vs12@0 (75), the unmeasured ones, first.

@@ -293,7 +293,10 @@ Each goal is one twee run on the goal's problem.
 ### 4.3 Production
 * No side workers. Prover9 with chain hints (the P9C side worker, abs/p9c.sh and p9c4.sh, 16:46–19:38) is now the
   cascade's `p9` level.
-* `abs/ul61.sh` since 19 Nov 09:19:05 (UL61.log): ul60 on 19 workers with the priors Vkp@0 = Vkd@0 = Vk100@0 = 9.
+* `abs/ul62.sh` since 19 Nov 10:05:50 (UL62.log): ul61 plus k200@0 and s12@0 (loop.py e2986e3), with `--explore 1`
+  (3f95f59) for the lemma-set variants in place of hand-set priors. ul61 ended at new=49 in 46 minutes, after the
+  cascade. Its yields: Vkd@0 9 in 1.83 CPU h (4.9 per CPU hour), Vk100@0 28 in 7.73 (3.6), Vkp@0 0 in 0.54, L0 3.4.
+* `abs/ul61.sh` 19 Nov 09:19:05 - 10:05 (UL61.log): ul60 on 19 workers with the priors Vkp@0 = Vkd@0 = Vk100@0 = 9.
   ul60 ended at new=209 in 74 minutes on 12 workers.
 * `abs/ul60.sh` 19 Nov 08:04:50 - 09:19 (UL60.log; `J=12` while exp27 runs, then a restart with the default 19): ul59
   plus three lemma-set variants at 5 s, kp@0 (use counts), kd@0 (proof dependencies) and k100@0 (loop.py 92d60c4,
@@ -687,7 +690,7 @@ summaries keep results but lose the reasons and the user's exact words. Keep sec
 
 ---------------------------------------------------------------------------------------------------------
 
-## 8. Open threads (19 Nov 09:20; `date` checked)
+## 8. Open threads (19 Nov 10:08; `date` checked)
 
 **The portfolio task** (the user, 18 Nov 17:00: keep complementary methods; notes/2026-11-18-portfolio-review.md,
 REPORT 2az). The principle is the ratio rule: rank each member by its new proofs per CPU hour on the goals every
@@ -695,8 +698,9 @@ earlier member failed in the same context. In production the order is online (`-
 variant levels are optional attempts (loop.py 119c3d1).
 
 Running:
-* **production ul61** since 19 Nov 09:19:05 (abs/ul61.sh, loops/UL61.log, 19 workers). Crash watcher on PID
-  2682257. ul60 plus the lemma-set variants' priors at 9 (at 3 they ran 7-9 times in 45 minutes). New: the lemma-set variants Vkp@0, Vkd@0, Vk100@0 (watch them in
+* **production ul62** since 19 Nov 10:05:50 (abs/ul62.sh, loops/UL62.log, 19 workers; first results row 128800).
+  Crash watcher on PID 2698573. Lemma-set variants at 5 s: unf@0, k60@0, k100@0, k200@0, kp@0, kd@0 and s12@0, with
+  `--explore 1` for k100, k200, kp, kd and s12. Watch `levyield.py loops/UL/r5/results.tsv 128800`. New: the lemma-set variants Vkp@0, Vkd@0, Vk100@0 (watch them in
   levyield), `--knn-refresh 600`. Cascade 5,40,80,160,320 (section 4.3). With the A/B test exp26 (notes/2026-11-19-queue-renorm-ab.md):
   watch `levyield.py loops/UL/r5/results.tsv 103428`, L1 against L1/B and L2 against L2/B.
 * exp27 ended 09:18 (notes/2026-11-19-from-zero-portfolio.md): half1 from zero with today's system, PGC 18,917

@@ -1,5 +1,5 @@
 #!/bin/bash
-# (19 Nov, after the 10:05 check) ul62: ul61 with two more lemma-set variants at 5 s, k200@0 (200 kNN lemmas) and s12@0
+# (19 Nov 10:06) ul62: ul61 with two more lemma-set variants at 5 s, k200@0 (200 kNN lemmas) and s12@0
 # (12 sibling lemmas; loop.py e2986e3), and --explore 1 for the lemma-set variants (loop.py 3f95f59) instead of priors
 # set by hand: each is estimated at no less than the best measured member until it has 1 CPU hour of runs. In ul60
 # Vk100@0 proved 42 in 2.95 CPU hours (14 per CPU hour), 32 of them after Vk60@0 failed in the same context.
