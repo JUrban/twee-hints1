@@ -699,7 +699,7 @@ Running:
   watch `levyield.py loops/UL/r5/results.tsv 103428`, L1 against L1/B and L2 against L2/B.
 * **exp27** (07:18 - about 09:20, notes/2026-11-19-from-zero-portfolio.md): half1 from zero with today's system
   (PGC, 6 workers + transfer), against PGA's 18,987 at 2 hours (noise about 185).
-* exp23 stage3: V40 ended 0 of 107; V100 from 07:02 (1 worker). Then exp28 (E with chain-hint watchlists on the
+* exp23 ended 08:50: V40 and V100 0 of 107 each, so Veroff's settings are a genuine negative. Then exp28 (E with chain-hint watchlists on the
   walls, notes/2026-11-19-eprover-watchlist.md) on that CPU, queued at 07:28.
 * exp24 ended 05:29: far goals 0 of 40 at 80 s (2.9 CPU h). `--far-deep` (5f8fd4a) stays off.
 * exp25 ended 05:49 (notes/2026-11-19-hint-cost.md): without queue renormalisation 80 s runs cost 25% less, with a
@@ -717,8 +717,7 @@ Next:
 2. (Checked 04:11.) The fresh-run predictor's overprediction in ul56 (145 against 185 at 03:50) was all in its
    first hour (63 against 103, a model trained on ul55's burst). From 01:05 to 03:50 it was 82 against 82, and
    --sched-retrain keeps it current. No action.
-3. A twee mode for strict hint following (a size cap that hint matchers bypass, as Prover9's max_weight with
-   hints) only if exp23's V40 or V100 show unique proofs. V5 showed that sibling hints do not suit it.
+3. (Dropped 08:50.) A twee mode for strict hint following: exp23's V5, V40 and V100 proved none of the walls.
 4. CPU: 19-21 in use at 07:18 (ul59 12, exp27 6 + its transfer's 2 at times, exp23 1).
 
 ---------------------------------------------------------------------------------------------------------

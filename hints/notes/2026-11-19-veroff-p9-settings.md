@@ -67,3 +67,12 @@ CPU went to exp24, the first measurement of deep runs on far goals (notes/2026-1
 60 s limit (exit code 4). That includes the 4 walls the default settings prove (exp16 Q). At Q's conditional rate
 about 2.9 proofs were due, so seeing none has a chance of about 5%. A negative by the portfolio rule: no unique proof.
 V100 (Veroff's settings at the default weight limit) started at 07:02 on all 107 (about 1.8 h at 1 worker).
+
+**V100 final (08:50): 0 of 107 at 6,437 CPU s,** all at the 60 s limit. Veroff's other settings fail even at the
+default weight limit: KBO, lex_order_vars, no back demodulation, restrict_denials, para_from_small and no
+cac_redundancy. The default settings (LPO, back demodulation) prove 4 of these walls (exp16 Q), and V100 failed all
+four, including aK2_eq_aK3_j 382, which Q proves in 21 s.
+
+**exp23's verdict:** a genuine negative at every weight limit tried (5, 40, 100). The settings, not the weight limit,
+lose the default's proofs. Production's p9 level keeps the defaults. Item 3 of JOURNAL section 8 (a twee mode for
+strict hint following) is dropped, since no arm showed a unique proof.
