@@ -75,3 +75,15 @@ learning?"
   as lemmas. That needs a few days of used.tsv rows first.
 * A production variant with the original's fill lemmas as extra lemmas, and its sketch steps in the pool. It
   would be measured by the ratio order like the other members, once true.tsv has rows.
+
+## The climbs' hints as production members (ul70, 17:58)
+
+* User, 17:55: "why not collect the climb hints anyway? we do collect all hints from all standard runs already,
+  right?" Production collects the proofs of the goals it proves, one hints file per goal. An original's pool is
+  all of them. Failed runs leave nothing, and until now the climbs' other proofs reached no pool.
+* loop.py `--variants sk`: the pool plus the original's climb steps, read from the `--climb-hints` directories
+  (sketches/ and fillhints/ of CLH, CLHL, CLU, CLHL2, FUD2p and FUDs; re-scanned every 10 minutes). They go after
+  the pool, at the default boost: 65,021 steps of 108 originals at 17:58.
+* ul70 = ul69 + `sk@0` (5 s) + `sk@1:0` (40 s fresh after L0), J 15 while exp36 runs. Both are explored like
+  every member, then get CPU by their measured yield. If they pay, the climb steps move into the base pool.
+* The first launch at 17:58:23 died: loop.py's variant-name whitelist lacked 'sk'. Production was down about 30 s.

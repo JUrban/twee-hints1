@@ -945,6 +945,32 @@ class Loop:
                     seen.add((w[0], w[1])); out.append((w[0], w[1], str(f or a.hint_lemma_proofs)))
         return out
 
+    def climb_hints(self, o):
+        """(--variants sk) the steps of climb.py's proofs for original O: DIR/fillhints/<target>/<tag> (real proofs of
+        fill lemmas) first, then DIR/sketches/<target>/<tag> (proofs under assumptions or of weakened goals), oldest
+        first, over the --climb-hints directories; re-scanned at most every 10 minutes (the live climber adds more)"""
+        c_ = getattr(self, 'chcache', None)
+        if c_ is None or time.time() - c_[0] > 600:
+            by = collections.defaultdict(list); seen = collections.defaultdict(set)
+            for d in (x for x in self.a.climb_hints.split(',') if x):
+                for sub in ('fillhints', 'sketches'):
+                    sd = os.path.join(d, sub)
+                    if not os.path.isdir(sd):
+                        continue
+                    fs = []
+                    for t in os.listdir(sd):
+                        for g in os.listdir(os.path.join(sd, t)):
+                            p = os.path.join(sd, t, g)
+                            fs.append((os.path.getmtime(p), orig_of(t), p))
+                    for _, o_, p in sorted(fs):
+                        for l in open(p):
+                            w = l.rstrip('\n').split('\t')
+                            if not l.startswith('#') and len(w) >= 2 and (w[0], w[1]) not in seen[o_]:
+                                seen[o_].add((w[0], w[1])); by[o_].append((w[0], w[1]))
+            self.chcache = c_ = (time.time(), by)
+            print(f'  climb hints: {sum(len(v) for v in by.values())} steps of {len(by)} originals', file=sys.stderr, flush=True)
+        return c_[1].get(o, [])
+
     def pw_groups(self, n, hv):
         """(--variants pw) N's hints with their ProofWatch groups: the 4th column lists the solved siblings (numbered
         per original) whose proof steps contain the hint; the 3rd is the hint's factor, or '-' for the default.
@@ -1016,7 +1042,7 @@ class Loop:
         VA_ = a.variants_after if a.variants_after >= 0 else CL_
         for v in VL:
             nm, _, at = v.partition('@')
-            assert (nm in ('two', 'unf', 'sub', 'sj', 'pool', 'r2', 'nom', 'nopg', 'x', 'p9', 'kp', 'kd', 'hl', 'pw')
+            assert (nm in ('two', 'unf', 'sub', 'sj', 'pool', 'r2', 'nom', 'nopg', 'x', 'p9', 'kp', 'kd', 'hl', 'pw', 'sk')
                     or (nm and re.fullmatch(r'(k\d+)?(s\d+)?', nm))
                     or (nm and re.fullmatch(r'm\w+', nm) and a.model_fixed
                         and os.path.exists(os.path.join(os.path.dirname(a.model_fixed.split(',')[0]), 'r' + nm + '.bin')))), v
@@ -1678,6 +1704,12 @@ class Loop:
                                     # --hl-factor (16 Nov, 2ap: F = 0.1 and 0.01 each +1 -2 against the pool, union 7-8
                                     # of 150 against 6; dropped then as not better on count)
                                     hv = list(hv) + self.lemma_proof_hints(n, set((h[0], h[1]) for h in hv), a.hl_factor)
+                                elif v_ == 'sk':
+                                    # (19 Nov 18:00; user: "why not collect the climb hints anyway?") the pool plus the
+                                    # steps of the original's climb proofs (sketch proofs with assumptions, weakened goals,
+                                    # fill lemmas) from --climb-hints directories, after the pool, at the default boost
+                                    seen_ = set((h[0], h[1]) for h in hv)
+                                    hv = list(hv) + [h for h in self.climb_hints(orig_of(n)) if h not in seen_]
                                 elif v_ == 'pw':
                                     # (19 Nov, ProofWatch, Goertzel et al. ITP 2018, as in ENIGMAWatch section 2.3) each
                                     # pool hint carries the solved siblings whose proofs contain it; twee
@@ -2042,6 +2074,9 @@ def make_parser():
                     help='(19 Nov) --variants: the budget of the variants after the chain level (default: its own)')
     ap.add_argument('--prior-weight', type=float, default=2.0, metavar='H',
                     help='--ratio-order: the weight of a label\'s prior, in CPU hours of its own runs')
+    ap.add_argument('--climb-hints', default='',
+                    help='--variants sk: climb.py directories (comma-separated) whose sketches/ and fillhints/ proof steps '
+                         'join the pool of their original')
     ap.add_argument('--hl-factor', type=float, default=0.1,
                     help='--variants hl: the score factor of the kNN lemmas\' proof steps as hints')
     ap.add_argument('--pw-factor', type=float, default=0.05,
