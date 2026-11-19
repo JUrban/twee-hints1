@@ -141,6 +141,9 @@ class P9:
         txt = f'set(prolog_style_variables).\nclear(print_given).\nassign(max_seconds, {int(a.timeout)}).\n'
         if a.max_given:
             txt += f'assign(max_given, {a.max_given}).\n'
+        if getattr(a, 'settings', None):
+            # (19 Nov, exp23) extra Prover9 directives, e.g. Veroff's AIM settings (AIM_REDONE .in files)
+            txt += a.settings.strip() + '\n'
         txt += 'formulas(assumptions).\n' + ''.join(f'{x}.\n' for x in ax) + ''.join(f'{x}.\n' for x in lem) + 'end_of_list.\n'
         txt += f'formulas(goals).\n{ladr(conj)}.\nend_of_list.\n'
         if hs:
@@ -293,6 +296,9 @@ def main():
     ap.add_argument('--chain', default=None, metavar='RECORDS',
                     help='hints: the goal\'s chain (sibchain.py, this records file) instead of the pool (batch mode)')
     ap.add_argument('--chain-sibs', type=int, default=10)
+    ap.add_argument('--settings', default='',
+                    help='extra Prover9 directives after the defaults, e.g. "assign(order, kbo). assign(max_weight, 5)." '
+                         '(exp23: Veroff\'s AIM_REDONE settings)')
     ap.add_argument('--solved-rows', type=int, default=0,
                     help='batch mode: the proven state is the first N rows of LOOPDIR/solved.tsv')
     a = ap.parse_args()
