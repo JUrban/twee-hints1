@@ -744,7 +744,10 @@ Paused:
 * exp19: set-join on the walls, 37 of 107 done, 0.31 per CPU hour (run.py skips done ids).
 
 Next:
-0. ul70 (17:58, 15 workers while exp36 runs; ul69 + the climbs' hints as members sk@0 and sk@1:0,
+0. exp37 (19:50): retrained rule models (rm9*) on today's data with the papers' sampling tricks; offline on the 400
+   newest proofs, then a paired test (control loops/MR_rm4t_20), then members `m9*@0`
+   ([notes/2026-11-19-retrained-models.md](notes/2026-11-19-retrained-models.md)). exp35 stopped at 19:43 (no unique proof).
+1. ul70 (17:58, 15 workers while exp36 runs; ul69 + the climbs' hints as members sk@0 and sk@1:0,
    [notes/2026-11-19-climber-outputs.md](notes/2026-11-19-climber-outputs.md)). Before it, ul69 (16:33, 17 workers beside exp32's climber): the deep tail had not run since 06:00 (portfolio notes). Fresh
    pool runs at 40 and 80 s, every label explored, and `--reexplore 150:0.25` (periodic re-measuring). Read the
    new labels after about 1 CPU h each.
@@ -839,6 +842,7 @@ reports are written as the experiments run.
 | [notes/2026-11-19-climber-outputs.md](notes/2026-11-19-climber-outputs.md) | exp34 and the climber's records (user, 16:55): what production uses from the climber; conditional-proof replay 0 of 4; climb.py persists fill lemmas, assumptions, used premises; climbs/ in the data repo |
 | [notes/2026-11-19-pg-order.md](notes/2026-11-19-pg-order.md) | exp35: the parents' stored rule-model scores ordering the queue (twee-e62 `--pg-order` 0.5 and 0.1), paired against exp33's rm4t arm on the 400 ultest goals |
 | [notes/2026-11-19-climb-ablation.md](notes/2026-11-19-climb-ablation.md) | exp36: the climbs' sketch hints ablated on 55 climber proofs (pool vs pool + sketch steps, context as of the proof; user, 17:20); production on 15 workers meanwhile |
+| [notes/2026-11-19-retrained-models.md](notes/2026-11-19-retrained-models.md) | exp37: retrained rule models as members (user, 19:35): the ENIGMA/Mizar60/Suda papers' training tricks, given logs of every loop indexed (several proofs per goal), rm9* models held out of the 400 newest production proofs, paired test from snapshot ULsN19 |
 | [notes/2026-11-19-from-zero-portfolio.md](notes/2026-11-19-from-zero-portfolio.md) | half1 from zero in 2 hours with today's deep portfolio (PGC), against PGA's 18,987 (exp27, from 07:18) |
 | [notes/2026-11-17-lemma-circularity.md](notes/2026-11-17-lemma-circularity.md) | Are lemma chains circular? A check of the used lemmas |
 | [notes/2026-11-17-mix-fail-order.md](notes/2026-11-17-mix-fail-order.md) | Repeats cost most of the time: `--mix` and `--fail-order` |

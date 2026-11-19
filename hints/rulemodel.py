@@ -94,19 +94,29 @@ class RuleModel:
         return data, ind, ptr
 
     def matrix(self, parts, ncol=None):
-        data, ind, ptr = [], [], [0]
+        # (19 Nov) numpy parts: Python lists of all rows took 34 GB for rm7t
+        datas, inds, ptrs = [], [], [np.zeros(1, np.int64)]
+        off = 0; nrow = 0
         for d, i, p in parts:
-            off = len(ind)
-            data.extend(d); ind.extend(i); ptr.extend(off + x for x in p[1:])
+            p = np.asarray(p, np.int64)
+            datas.append(np.asarray(d, np.float32)); inds.append(np.asarray(i, np.int32))
+            ptrs.append(off + p[1:]); off += len(inds[-1]); nrow += len(p) - 1
         ncol = ncol or NFIX + len(self.vocab.idx) + 1
-        return sp.csr_matrix((np.array(data, dtype=np.float32), np.array(ind, dtype=np.int64),
-                              np.array(ptr, dtype=np.int64)), shape=(len(ptr) - 1, ncol))
+        return sp.csr_matrix((np.concatenate(datas) if datas else np.zeros(0, np.float32),
+                              np.concatenate(inds) if inds else np.zeros(0, np.int32),
+                              np.concatenate(ptrs)), shape=(nrow, ncol))
 
-    def train(self, givendir, names, negmax=400, rounds=200, leaves=63, seed=1, threads=8):
-        """givendir: a directory, or a dict name -> path."""
+    def train(self, givendir, names, negmax=400, rounds=200, leaves=63, seed=1, threads=8,
+              weighting='none', negratio=0.0, longexp=0.0, depth=-1, min_data=20, lr=0.1):
+        """givendir: a directory, or a dict name -> path. All positives of a log are kept; its negatives are
+        subsampled to negmax, or with negratio R > 0 to max(negmax, R x its positives) (negatives scale with the
+        proof; the papers' negative/positive ratio as a hyperparameter, Isabelle ENIGMA 4.2).
+        weighting 'none': rows weigh 1, positives scaled globally (scale_pos_weight), as before;
+        'log' (Suda, CADE 2021, 4.3): every log weighs the same, half on its positives, half on its negatives.
+        longexp E: a log's rows weigh (positives / median positives) ** E more (long proofs count more)."""
         import lightgbm as lgb
         rnd = random.Random(seed)
-        parts, ys = [], []
+        parts, ys, logs = [], [], []
         for n in names:
             path = givendir[n] if isinstance(givendir, dict) else os.path.join(givendir, n)
             rows = [x for x in load(path, self.parents) if x[0] >= 0]
@@ -114,21 +124,39 @@ class RuleModel:
             neg = [x for x in rows if x[0] == 0]
             if not pos:
                 continue
-            if len(neg) > negmax:
-                neg = rnd.sample(neg, negmax)
+            k = max(negmax, int(round(negratio * len(pos)))) if negratio > 0 else negmax
+            if len(neg) > k:
+                neg = rnd.sample(neg, k)
             sel = pos + neg
-            parts.append(self.rows(n, [x[1:] for x in sel]))
+            parts.append(self.rows(n.split('@')[0], [x[1:] for x in sel]))   # (NAME@K: K-th proof of NAME, --list)
+            parts[-1] = tuple(np.asarray(z, t) for z, t in zip(parts[-1], (np.float32, np.int32, np.int64)))
             ys.extend(x[0] for x in sel)
+            logs.append((len(pos), len(neg)))
         self.vocab.frozen = True
         X = self.matrix(parts)
+        del parts
         self.ncol = X.shape[1]
-        y = np.array(ys)
-        params = dict(objective='binary', learning_rate=0.1, num_leaves=leaves,
-                      min_data_in_leaf=20, feature_fraction=0.5, bagging_fraction=0.8,
-                      bagging_freq=1, verbose=-1, num_threads=threads,
-                      scale_pos_weight=float((y == 0).sum()) / max(1, (y == 1).sum()))
-        self.model = lgb.train(params, lgb.Dataset(X, y), rounds)
-        return X.shape, int(y.sum())
+        y = np.array(ys, dtype=np.int8)
+        med = float(np.median([p for p, _ in logs])) if logs else 1.0
+        w = None
+        if weighting == 'log' or longexp:
+            w = np.empty(len(y), np.float32); o = 0
+            for p_, n_ in logs:
+                f = (p_ / med) ** longexp if longexp else 1.0
+                if weighting == 'log':
+                    w[o:o + p_] = 0.5 * f / p_
+                    w[o + p_:o + p_ + n_] = 0.5 * f / max(1, n_)
+                else:
+                    w[o:o + p_ + n_] = f
+                o += p_ + n_
+            w *= len(w) / w.sum()
+        params = dict(objective='binary', learning_rate=lr, num_leaves=leaves, max_depth=depth,
+                      min_data_in_leaf=min_data, feature_fraction=0.5, bagging_fraction=0.8,
+                      bagging_freq=1, verbose=-1, num_threads=threads)
+        if weighting != 'log':
+            params['scale_pos_weight'] = float((y == 0).sum()) / max(1, (y == 1).sum())
+        self.model = lgb.train(params, lgb.Dataset(X, y, weight=w), rounds)
+        return X.shape, int(y.sum()), len(logs)
 
     def predict(self, name, items):
         X = self.matrix([self.rows(name, items)], self.ncol)
@@ -156,6 +184,15 @@ def main():
     ap.add_argument('--rounds', type=int, default=200)
     ap.add_argument('--leaves', type=int, default=63)
     ap.add_argument('--negmax', type=int, default=400)
+    ap.add_argument('--list', help='training logs: lines NAME<TAB>PATH, several per goal allowed (Mizar60: '
+                    'up to K proofs per problem); with GIVENDIR, which then gives only the test logs')
+    ap.add_argument('--negratio', type=float, default=0.0, help='negatives per log: max(negmax, R x positives)')
+    ap.add_argument('--weighting', default='none', choices=['none', 'log'],
+                    help="'log': every log the same weight, half positives, half negatives (Suda, CADE 2021)")
+    ap.add_argument('--long-exp', type=float, default=0.0, help='weigh a log (positives/median) ** E (long proofs)')
+    ap.add_argument('--max-depth', type=int, default=-1)
+    ap.add_argument('--min-data', type=int, default=20)
+    ap.add_argument('--lr', type=float, default=0.1)
     ap.add_argument('--threads', type=int, default=8)
     ap.add_argument('--theory', action='store_true', help='add the theory block (axiom features)')
     ap.add_argument('--all', action='store_true')
@@ -174,6 +211,14 @@ def main():
         if os.path.isdir(d):
             for n in os.listdir(d):
                 paths[n] = os.path.join(d, n)
+    if a.list:
+        tn = set(l.split()[0] for l in open(a.test_names)) if a.test_names else set()
+        paths = {n: p for n, p in paths.items() if n in tn}   # (GIVENDIR: the test logs only)
+        cnt = collections.Counter()
+        for l in open(a.list):
+            n, p_ = l.rstrip('\n').split('\t')[:2]
+            if n not in tn:
+                paths[f'{n}@{cnt[n]}'] = p_; cnt[n] += 1
     names = sorted(paths)
     origs = sorted(set(n.split('__goal_')[0] for n in names))
     random.seed(a.seed); random.shuffle(origs)
@@ -198,7 +243,8 @@ def main():
         m.model = lgb.Booster(model_file=mp)
         m.ncol = m.model.num_feature()
     else:
-        print('train', m.train(paths, train, a.negmax, a.rounds, a.leaves, a.seed, a.threads))
+        print('train', m.train(paths, train, a.negmax, a.rounds, a.leaves, a.seed, a.threads, a.weighting,
+                               a.negratio, a.long_exp, a.max_depth, a.min_data, a.lr), flush=True)
     if a.test_only:
         test = sorted(test_n & set(names))
     if a.save:
