@@ -825,6 +825,7 @@ reports are written as the experiments run.
 | [notes/2026-11-19-from-zero-explore.md](notes/2026-11-19-from-zero-explore.md) | exp29: half1 from zero with the explored 5 s lemma members: 19,309 at 2 hours against PGC 18,917, PGA 18,987; solve_new.sh's new defaults |
 | [notes/2026-11-19-half2-replication.md](notes/2026-11-19-half2-replication.md) | exp30: the explored portfolio from zero on half2, both arms at once (12:45 - about 14:45) |
 | [notes/2026-11-19-enigmawatch.md](notes/2026-11-19-enigmawatch.md) | exp31: ENIGMAWatch (user, 13:30): the paper's recipe and the oracle ceiling. Offline, 512 completion ratios (Mean, Var, Rand) lift held-out AUC by +0.001 (0.900 to 0.902), not built. The ProofWatch member pw@0 joins ul65 |
+| [notes/2026-11-19-climber-member.md](notes/2026-11-19-climber-member.md) | exp32: the live head climber measured again as a deep member (user's message, 15:20), 2 climbs beside ul66 (17 workers) from 15:39 |
 | [notes/2026-11-19-from-zero-portfolio.md](notes/2026-11-19-from-zero-portfolio.md) | half1 from zero in 2 hours with today's deep portfolio (PGC), against PGA's 18,987 (exp27, from 07:18) |
 | [notes/2026-11-17-lemma-circularity.md](notes/2026-11-17-lemma-circularity.md) | Are lemma chains circular? A check of the used lemmas |
 | [notes/2026-11-17-mix-fail-order.md](notes/2026-11-17-mix-fail-order.md) | Repeats cost most of the time: `--mix` and `--fail-order` |
