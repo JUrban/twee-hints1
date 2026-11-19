@@ -19,6 +19,7 @@ in `/project/hintwork` (not in git).
 | + round 5 continued: --mix, parental guidance, deep runs with chain hints and their merges (2at–2ay); at 18 Nov 14:37 | **45,510** (+46.5% over plain) | **4991** (+55.8%) | – |
 | + round 5 continued: wall experiments merged, a ratio-ordered portfolio of variant levels, 160 s resume (2ay–2az); at 18 Nov 20:16 | **45,608** (+46.8% over plain) | **5003** (+56.2%) | – |
 | + variant tiers ordered by live yield (2az); at 18 Nov 23:41 | **45,901** (+47.8% over plain) | **5043** (+57.4%) | – |
+| + optional attempts, context-exact restarts (2az); at 19 Nov 04:08 | **46,203** (+48.8% over plain) | **5084** (+58.7%) | – |
 
 **On unseen originals** (2aq): the 11 whole holdout originals from
 scratch, in 1 hour per batch on 4 workers plus the transfer. Plain twee
@@ -4798,6 +4799,25 @@ The union is 26 of 92. **ul54 (21:35)** has 19 workers and adds `nom` as the las
 * No 5 s search-setting variants were added. exp21 found 0 of 300 for each on unchanged contexts; only the
   problem-changing ones (unfolding, more lemmas) pay at 5 s.
 * ul55 ended at new=184 in 80 minutes.
+* **ul56 made 233 new in its first 3 h 50 min** (to 03:50 on 19 Nov). After the first hour the 5 s levels
+  paid little and the 80 s chain level ran on most workers at **1.61 per CPU hour** (40 of 380, above its 1.16
+  prior). One deep proof reopens its neighbours, and their 5 s runs prove more (a burst of 31 in a few minutes at
+  about 03:15).
+
+**Two restart bugs and the far goals (19 Nov 03:50-04:08; loop.py 2b5d7d8, 5f8fd4a).**
+* At a restart `--retry-hints` compared a goal's last fresh run with its original's latest run, which could be a deep
+  run whose hints= counts its chain, not the pool. The pool then looked grown, and the goal repeated its fresh run,
+  5 s variants and deep levels in an unchanged context, failing them again identically. ul45-ul48 flagged 265 to
+  3,142 goals this way; a restart now would have flagged 2,553 of 5,583. Fixed: both sizes from fresh rows only.
+* Deep runs dispatched in the first moment after a start got the original's pool, as the chain records were still
+  loading. Fixed: they wait for the records.
+* 4,176 of the 5,588 unsolved goals are far from the frontier, and production never deepens them (3,683 never had
+  a run over 30 CPU s). By the portfolio rule that member has to be measured before it is left out: exp24 runs
+  production's 80 s chain level on 40 of them. `--far-deep K` lets far goals take levels 1..K with their own
+  yield (`L1f`), for the ratio rule to rank.
+* Prover9 with Veroff's own AIM settings (KBO, no back-demodulation, restrict_denials, para_from_small,
+  max_weight 5) and chain hints proved 0 of the 107 walls (exp23), where the defaults prove 4. Strict hint
+  following needs the goal's own earlier hints, as in Veroff's loops, not its siblings'.
 
 ## 2c. Long runs: stall cutoff and checkpoints
 
