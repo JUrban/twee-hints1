@@ -727,7 +727,7 @@ hints more than the pool (none on R1dist_to_aa1, as the offline count predicted)
 * All are kept: the ratio rule now orders them by these yields, so the weak ones run only when nothing better is
   left for a goal. In ul64 they run with `--prior-weight 0.5`.
 * All the proofs came after other members had failed on the goal in the same context.
-* **Per-original member yields do not predict better (11:14; hints/exp/famcmp.py).** A chronological split of
+* **Per-original member yields do not predict better (11:12; hints/exp/famcmp.py).** A chronological split of
   production's rows, train 47,531-114,999 (67,469 runs), test 115,000 on (21,632 runs, 310 proofs). P(proof |
   member, original) is shrunk toward P(proof | member) with weight m.
   * Test log-loss: global 0.07530; per original m=5 0.07718, m=20 0.07615, m=100 0.07523.
