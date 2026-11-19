@@ -4965,6 +4965,41 @@ rounds of 30 s or more, but about 40% overhead for 8 s rounds.
 
 ## 3. Assessment
 
+*19 Nov, 09:26 (`date` checked). An independent look at where things stand. The 16 Nov assessment follows it.*
+
+* **Where it stands.** All 51,784 public problems: **47,041 solved (+51.5% over plain twee at 4 s)**, holdout
+  **5,188 (+62.0%)**. That is about 5 days of loops on 10–19 workers. 4,743 public goals are left.
+* **From zero on a new half of the benchmark** (half1, 25,937 goals, 6 workers, no outside proofs):
+  * 11,500 in 10 minutes, 18,500 in an hour, 19,000 in 2 hours (PGA 18,987; today's system 18,917).
+  * The curve is front-loaded: the second hour adds 2.5%.
+* **Where the gain comes from now:**
+  1. Proven siblings as lemmas, online: the chain along each original's proof.
+  2. **Cross-original kNN lemmas.** 392 of the 401 production proofs from 06:02 to 08:05 used one, often proved
+     minutes earlier. Cascades run through families of originals with the same axioms (aK2_eq_aK3_*, nil3_*).
+  3. In short runs, the rule model with parental guidance (+577 on half1 at 2 hours).
+  4. On the tail: chain hints for the deep runs (the 40 s chain level, about 1.4–1.9 proofs per CPU hour on near
+     goals), and a portfolio of cheap 5 s variants that change the problem:
+     * unfolded definitions (2–3 per CPU hour);
+     * 60 kNN lemmas (4–8);
+     * 100 kNN lemmas (14, complementary to 60: 32 proofs after 60 had failed).
+* **Genuine negatives, measured** (nothing proved that others did not):
+  * Veroff's Prover9 settings at max_weight 5, 40 and 100 (0 of 107 walls each);
+  * deep runs on far goals (0 of 40 at 80 s);
+  * chain hints at 5 s;
+  * a per-goal success predictor for the deep runs (AUC 0.4–0.7, inconsistent).
+* **What is weak in the evidence:**
+  * Production's tail measures have no controls. Proof cascades swing a window's rate from 40 to 300 an hour, so
+    before/after comparisons of settings are unreliable. Only the per-member yields of the ratio rule, measured
+    side by side, are comparable.
+  * The tail portfolio is unproven from zero. In 2 hours on half1 it is neutral, and longer from-zero runs (6–8
+    hours, where its gains would show) have not been done.
+  * The ratio rule left members unmeasured whose priors were below the best live member (fixed by `--explore`,
+    19 Nov). Several priors come from the walls, a different population from production's goals.
+  * The rule model rm4t was trained on public proofs, so "from zero" is not fully clean (2aq).
+* **The limit now.** Of the 4,743 unsolved goals, most are far from the frontier, where deep runs do not pay. They
+  fall only as their neighbours below are proved, or through new cross-original lemmas. Near goals' deep runs prove
+  5–10% each.
+
 *16 Nov, 15:15. The text after this update is from 13–14 Nov.*
 
 * **Where it stands:**
