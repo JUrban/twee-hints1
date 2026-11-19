@@ -670,38 +670,35 @@ summaries keep results but lose the reasons and the user's exact words. Keep sec
 
 ---------------------------------------------------------------------------------------------------------
 
-## 8. Open threads (18 Nov 18:48; `date` checked)
+## 8. Open threads (19 Nov 04:01; `date` checked)
 
-**The portfolio task** (the user, 17:00: keep complementary methods; notes/2026-11-18-portfolio-review.md, REPORT
-2az). The principle is the ratio rule: rank each member by its new proofs per CPU hour on the goals every earlier
-member failed in the same context. The measured order is in REPORT 2az.
+**The portfolio task** (the user, 18 Nov 17:00: keep complementary methods; notes/2026-11-18-portfolio-review.md,
+REPORT 2az). The principle is the ratio rule: rank each member by its new proofs per CPU hour on the goals every
+earlier member failed in the same context. In production the order is online (`--ratio-order`, levyield), and
+variant levels are optional attempts (loop.py 119c3d1).
 
 Running:
-* **production ul48** since 18:30:32: abs/ul48.sh, loops/UL48.log, 6 workers, `--variants
-  unf@0,k60@0,k60,two,unf,sub --ratio-order`. Watch its V rows with `levyield.py loops/UL/r5/results.tsv ROW`, ROW
-  being ul48's first row (57029). The expected yields are the priors in loop.py (YP).
-* **P9C on 4 workers** since 18:25:55 (abs/p9c4.sh, loops/P9C4.log).
-* **exp20** (notes/2026-11-18-time-matched-control.md): exp11's chain at 160 s on the 92 failed walls, 4 workers,
-  from 17:16. Measure the gain on the increment over 80 s (exp20/ana.py).
-  * If it holds (about 1.4 per CPU hour on the first 22), add an 80 → 160 s resume level, e.g. `--cascade
-    5,80,160,320`, and place it by the ratio rule.
-* **exp22** (notes/2026-11-18-no-pg-no-model-walls.md): no PG (G80), then no rule model (N80), at 80 s on the walls,
-  4 workers, from 18:25.
+* **production ul56** since 18 Nov 23:59:50 (abs/ul56.sh, loops/UL56.log, 19 workers). Crash watcher on PID
+  2524870. 233 new by 03:50. Watch with `levyield.py loops/UL/r5/results.tsv 81268`. loop.py since then: chain-hint
+  levels wait for the chain records (2b5d7d8; takes effect at the next restart).
+* **exp24** (notes/2026-11-19-far-goals-deep.md): production's 80 s chain level on 40 far goals, 2 workers, from
+  03:58. 4,176 of 5,588 unsolved goals are far, and production never deepens them. If they pay, loop.py needs a
+  far-goal deep option with its own yield label (so the ratio rule ranks it apart from the near goals' L1).
 
-Paused (both resumable; their run.py skips done ids):
-* exp12 stage B: 320 s on gap heads, 34 of 95 done, 0.21 per CPU hour.
-* exp19: set-join on the walls, 37 of 107 done, 0.31 per CPU hour.
-
-Done today: exp13, exp14, exp15 (the 92 failed walls), exp16, exp17, exp18, exp21. All their new proofs are merged.
+Paused:
+* exp23 (notes/2026-11-19-veroff-p9-settings.md): Veroff's Prover9 settings. max_weight 5 is a genuine negative
+  (0 of 107); 40 is paused at 0 of 39; 100 is to do. Resume them when CPUs free up (p9twee.py needs a list of the
+  walls not done).
+* exp12 stage B: 320 s on gap heads, 34 of 95 done, 0.21 per CPU hour (run.py skips done ids).
+* exp19: set-join on the walls, 37 of 107 done, 0.31 per CPU hour (run.py skips done ids).
 
 Next:
-1. At the next production restart: `--pass-every 1`. ul48's full pass takes 0.51 s a run against ul47's 0.29,
-   since every failed-fresh goal is now a deep candidate.
-2. When exp20 ends, decide on the 160 s level. When exp22 ends, add G80/N80 as variants if they pay (for them
-   loop.py needs variants `nopg` and `nom` at 80 s; `nom` exists).
-3. After about an hour of ul48, compare the V rows' yields with the priors. Correct the priors in loop.py if they
-   are far off (the online stats already do this within a run).
-4. CPU: 18 in use at 18:47 (ul48 6, P9C 4, exp20 4, exp22 4).
+1. exp24's result decides the far-goal option (above).
+2. The fresh-run predictor overpredicts in ul56 (145 proved against 185 predicted at 03:50; ul55 108 against 113).
+   Check the scheduler model's calibration on recent rows before trusting its pmin.
+3. A twee mode for strict hint following (a size cap that hint matchers bypass, as Prover9's max_weight with
+   hints) only if exp23's V40 or V100 show unique proofs. V5 showed that sibling hints do not suit it.
+4. CPU: 21 in use at 04:01 (ul56 19, exp24 2).
 
 ---------------------------------------------------------------------------------------------------------
 
