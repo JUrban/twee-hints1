@@ -4788,6 +4788,17 @@ The union is 26 of 92. **ul54 (21:35)** has 19 workers and adds `nom` as the las
   on goals reopened by new sibling proofs. The 60-lemma 5 s level fell from 5.5 to 1.3, and the unfolded one rose
   from 0.4 to 6.2 on the goals that reach it now. The tiers followed both changes.
 
+**Optional attempts and context-exact restarts (19 Nov 00:00, loop.py 119c3d1, production ul56).**
+* Tiers still made a goal try every variant after a level before its next level. Now a goal's next attempt is its
+  eligible option of highest live yield: the next cascade level, or any untried variant after a level it ran. Only the
+  resume chain is ordered.
+* Results rows record their run's context (`c=`). A restart replays only rows of the current context, and starts a
+  goal's attempts over at each fresh run. Before this, 892 unsolved goals reopened by new proofs had lost their deeper
+  levels at each restart.
+* No 5 s search-setting variants were added. exp21 found 0 of 300 for each on unchanged contexts; only the
+  problem-changing ones (unfolding, more lemmas) pay at 5 s.
+* ul55 ended at new=184 in 80 minutes.
+
 ## 2c. Long runs: stall cutoff and checkpoints
 
 * `--eqhint-stall N` gives up when no new rule has matched a hint for N

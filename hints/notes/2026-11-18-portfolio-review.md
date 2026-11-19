@@ -338,3 +338,45 @@ All four together prove 17 new walls. With Prover9 + chain first, 18 (k60 then a
 * **Reading:** with the order per goal set by yield, a cheap level is tried again when it pays, and is not
   pushed through when it doesn't. The per-level numbers change within the hour, so fixed priors would have ordered
   them wrongly twice already. Online conditional yields do the work.
+
+## Optional attempts and the replay (18 Nov 23:45 - 19 Nov 00:00)
+
+**What is still unexplored.** At 23:45, 3,514 of the 5,882 unsolved goals had never had a run longer than 30 CPU s.
+Only goals near the frontier may deepen (`may_deepen`). The others get only the 5 s level and its variants. Recent
+80 s chain windows paid 0.8-1.5 per CPU hour, which matches the 1.16 prior, while reopened 5 s runs paid about 17. So
+the ratio rule rightly keeps the deep levels waiting for now.
+
+**Which 5 s variants to add?** None of the search settings. exp21 measured them on 300 goals whose context had not
+changed since a failed 5 s run:
+* subsumption, rule threshold 0.2, no model, no PG, chain hints and Prover9 at 8 s: 0 each;
+* only the variants that change the problem paid: unfolding 4, 60 lemmas 1.
+So these are genuine negatives by the portfolio rule, since they prove nothing new.
+
+**Two defects in loop.py, fixed in 119c3d1:**
+1. **Tiers blocked.** A goal had to try every variant after a level before its next level. A variant that had stopped
+   paying (60 lemmas at 5 s: 5.5 in ul54's hour, 1.3 in ul55's, against 1.16 for the 80 s level) would hold back the
+   goal's 80 s run.
+   * Now variant levels are optional attempts. A goal's next attempt is its eligible option of highest live yield: the
+     next cascade level, or any untried variant after a level it ran. Only the cascade's own levels stay ordered,
+     because a resume needs the state of the level before it.
+   * A goal far from the frontier chooses among the fresh level's variants only. My first version filtered on the
+     chosen level alone, which would have dropped such goals entirely when their 80 s level ranked first. I caught
+     that while designing the smoke test.
+2. **Replay forgot reopened goals.** After a restart a goal counted as tried up to the highest level it reached in the
+   whole round. Context was ignored, and later fresh runs did not reset it. At 23:45, 892 unsolved goals had deeper
+   runs only before their latest fresh run, so after each restart they had lost their deeper levels in the new
+   context.
+   * Now every results row records its context (`c=`, a hash of the goal's proven-sibling context at dispatch).
+   * Replay skips rows of another context and starts a goal's attempts over at each fresh run.
+   * Rows before 23:59 have no `c=`; for them the reset at fresh runs applies.
+
+**Smoke test** (hints/exp/optvar_smoke.sh; 3 nil3_15 goals, cascade 1,2,4,8, scratchpad opt1):
+* Order by yield: L0, unf@0 (3.8), k60@0 (1.9), L1, L2, then k60 (1.19) before L3 (1.0 at these budgets), then unf
+  (0.47) and two (0.23).
+* Restart with all rows current: 0 runs.
+* Rows of an older context: a fresh run, then every level again.
+* A fresh row after deep rows: every level after L0 again.
+* One variant row removed: only that variant ran.
+* Far goals (`--frontier 0`, line gap above F): L0 and the two 5 s variants only.
+
+**00:00: ul56** = ul55 with these fixes. ul55 ended at 10,350 runs, **new=184 in 80 minutes**.
