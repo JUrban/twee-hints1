@@ -91,6 +91,13 @@ By level (`exp/exp30_ana.py`):
 * **Portfolio follow-up:** the 20 s pool resume as a member beside the 5 s lemma members, with a measure of the
   union. A test should give both new and old members the same deep CPU, since the arms' deep work tied here.
   Not started: from-zero pairs cost about 25 CPU hours, and the union (+297) is the target, not either arm.
+* **Why not a third from-zero arm (P2E, 20 s pool plus the 5 s members):** it would be underpowered.
+  * The deep members add about 90 proofs an arm in 2 hours (P2A 87, P2D 89). Taking both arms' deep-only goals
+    would be +40 to +80.
+  * The 5 s chaos between identical runs is about 185. Most of the union's +297 is 5 s luck, which no single arm
+    can collect.
+  * So members are compared the way exp21 and exp11 did: on a fixed set of failed goals in a fixed context, or live
+    under `--explore` in production. From-zero pairs only show whole-system effects of 250 or more.
 
 Interim, 13:45 (`abs/setcurve.py sets/half2 P2A P2D`, goals of half2 proved):
 
