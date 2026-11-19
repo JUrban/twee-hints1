@@ -596,3 +596,7 @@ class ran Vk200@0 (99) and Vs12@0 (75), the unmeasured ones, first.
     Vk60@0 too.
   * ul62's first Vk200@0 and Vs12@0 proofs came after k100, kd and kp (and k60) had failed.
   * Each lemma selection is a different problem, and a 5 s run on it proves goals that the others' runs did not.
+* **Input order is not a source of diversity (10:12).** A 5 s run of nil3_1K_e 502, with its 66 lemma axioms in the
+  original, reversed or shuffled order, gives byte-identical output: twee normalises the input. Random restarts by
+  permuting the problem do not exist for twee, so diversity has to come from changing the problem: other lemma sets,
+  unfolding.
