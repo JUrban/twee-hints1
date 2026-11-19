@@ -38,3 +38,20 @@ Follows exp29 ([notes/2026-11-19-from-zero-explore.md](2026-11-19-from-zero-expl
 ## Results
 
 (running; ends about 14:45)
+
+Interim, 13:45 (`abs/setcurve.py sets/half2 P2A P2D`, goals of half2 proved):
+
+| minutes | 10 | 30 | 45 | 60 |
+|---|---:|---:|---:|---:|
+| P2A (17 Nov system) | 11,489 | 17,345 | 18,422 | 19,041 |
+| P2D (new defaults) | 11,369 | 17,397 | 18,406 | 18,963 |
+| difference | −120 | +52 | −16 | −78 |
+
+* Level so far. On half1 the same comparison was +184 at 60 minutes (PGD 18,713 against PGA 18,529) and +322 at
+  120, so half1's gain has not appeared yet. Half1's gain grew in the second hour, from the deep members' cascades.
+* P2D's levels at 60 minutes (`levyield.py loops/P2D/r1/results.tsv 1`):
+  * L0: 18,893 runs, 16,663 proofs, 4.76 CPU h;
+  * Vunf@0: 37 proofs in 0.37 CPU h (99 per CPU h);
+  * Vk100@0: 10 in 0.08;
+  * L1: 6 in 0.20;
+  * Vk200@0: 3, Vk400@0: 2, Vkd@0: 1.
