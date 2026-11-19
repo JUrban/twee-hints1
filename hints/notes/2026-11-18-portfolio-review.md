@@ -639,7 +639,7 @@ hints more than the pool (none on R1dist_to_aa1, as the offline count predicted)
   * aK2_eq_aK3_d 609 has only 487 candidates in its theory and weaker ones.
   * So k1000@0 is the next cheap member, at about 1.2 times the cost of a run. k2000 costs 2-3 times as much.
 
-**Is the ratio rule's estimate fooled by non-stationarity? No (10:45).**
+**Is the ratio rule's estimate fooled by non-stationarity? No (10:41).**
 * The rates swing widely. In windows of 2,000 results rows since ul58 (hints/exp/winyield.py), the overall yield
   goes from 1.0 to 44 proofs per CPU hour, and L0 from 1.2 to 55.6. Members measured in a cascade or a restart burst
   carry that into their cumulative estimates (Vk100@0: 15.0 in the cascade's tail, 1.6-2.4 since).
