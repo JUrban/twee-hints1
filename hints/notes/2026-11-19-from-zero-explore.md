@@ -43,3 +43,8 @@ Written 19 Nov 2026, 10:21 UTC. Started 10:38:51 (loops/PGD), after exp28 ended.
 * **Caveat:** from 10:46 to 10:55, a LightGBM fit with default threads ran at 9,000% CPU (load 135; portfolio
   review). This run's minutes 7-16 had less CPU than PGC's had. Its 10 and 20 minute points are biased against
   it; the 60 and 120 minute points less so.
+  * Runs completed per 3 minutes (results rows' t=), PGC against PGD: minutes 6-9 3,257 against 2,425; 9-12 1,319
+    against 1,469; 12-15 866 against 609; 15-18 752 against 715. So PGD lost about 1,100 runs in minutes 6-15, and
+    early runs almost all prove. From minute 18 on PGD completed more runs than PGC.
+* 30 minutes (11:10): PGD 16,540, against PGC 16,980 and PGA 16,913 (10 minutes: 10,314 against 11,704; 20: 14,300
+  against 15,080). The gap is closing.
