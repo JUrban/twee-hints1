@@ -48,3 +48,12 @@ The user forwarded a message about the climber at 15:20. Checked against the rec
 ## Results
 
 (running)
+
+* First 11 minutes: 2 real proofs, both in production's solved.tsv with hints:
+  * nslm_to_aa1 845 (15:45): the climb's final run proved it, and so did its plain 160 s control run (`direct`
+    row, 75 s);
+  * aK2_eq_aK3_a 518 (15:48): the final run, in 31 s.
+  * Production's last runs on both were 5 s members (Vkd@0, Vk60@0, Vs12@0), all failed.
+* **So each proof is credited by which run proved it.** Final only is the climb's own gain. Direct (a plain 160 s
+  run) is something production's own 80-320 s levels could also do. Both counts are reported at the end, with the
+  per-CPU-hour rate of each.
