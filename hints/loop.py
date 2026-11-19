@@ -901,7 +901,7 @@ class Loop:
             hs = hs + self.lemma_proof_hints(n, set((h[0], h[1]) for h in hs))
         return hs
 
-    def lemma_proof_hints(self, n, seen):
+    def lemma_proof_hints(self, n, seen, f=None):
         """(16 Nov, --hint-lemma-proofs F) the proof steps of N's kNN lemmas (proven goals of the same or weaker
         axioms, mostly of other originals) as hints with score factor F, after N's own pool"""
         import lemmas
@@ -917,7 +917,7 @@ class Loop:
             for x in lines[:a.hint_lemma_proof_max]:
                 w = x.split('\t')
                 if len(w) >= 2 and (w[0], w[1]) not in seen:
-                    seen.add((w[0], w[1])); out.append((w[0], w[1], str(a.hint_lemma_proofs)))
+                    seen.add((w[0], w[1])); out.append((w[0], w[1], str(f or a.hint_lemma_proofs)))
         return out
 
     def hints_for1(self, n, pools, knn):
@@ -971,7 +971,7 @@ class Loop:
         VA_ = a.variants_after if a.variants_after >= 0 else CL_
         for v in VL:
             nm, _, at = v.partition('@')
-            assert (nm in ('two', 'unf', 'sub', 'sj', 'pool', 'r2', 'nom', 'nopg', 'x', 'p9', 'kp', 'kd')
+            assert (nm in ('two', 'unf', 'sub', 'sj', 'pool', 'r2', 'nom', 'nopg', 'x', 'p9', 'kp', 'kd', 'hl')
                     or (nm and re.fullmatch(r'(k\d+)?(s\d+)?', nm))), v
             VB.append((nm, int(at), int(at)) if at else (nm, CL_, VA_))
             assert 0 <= VB[-1][1] < len(T) and 0 <= VB[-1][2] < len(T), v
@@ -1597,6 +1597,11 @@ class Loop:
                                     hv = self.deep_hints(n, max(ol, a.chain_level), pools, two_sided=(v_ == 'two'))
                                 else:
                                     hv = self.deep_hints(n, ol, pools) if ol > 0 else self.hints_for(n, pools, None)
+                                if v_ == 'hl':
+                                    # (19 Nov 10:15) the proof steps of the goal's kNN lemmas as extra hints at factor
+                                    # --hl-factor (16 Nov, 2ap: F = 0.1 and 0.01 each +1 -2 against the pool, union 7-8
+                                    # of 150 against 6; dropped then as not better on count)
+                                    hv = list(hv) + self.lemma_proof_hints(n, set((h[0], h[1]) for h in hv), a.hl_factor)
                                 fut = ex.submit(self.run_one, n, hv, rnd, T[lev], False, a.cascade_cpu * T[lev], 0, v_)
                             else:
                                 b = T[lev] if fc else (T[lev] - T[PREV[lev]] if (a.p9loop or os.path.exists(sp)) else T[lev])
@@ -1953,6 +1958,8 @@ def make_parser():
                     help='--cascade: deepen goals at most this many places after a proven sibling')
     ap.add_argument('--variant-budget', type=float, default=0,
                     help='(19 Nov) --variants: the budget of the variants after the chain level (default: its own)')
+    ap.add_argument('--hl-factor', type=float, default=0.1,
+                    help='--variants hl: the score factor of the kNN lemmas\' proof steps as hints')
     ap.add_argument('--explore', type=float, default=0.0, metavar='H',
                     help='--ratio-order: a label with less than H CPU hours of runs in this round is estimated at no '
                          'less than the best label with H or more (each member gets measured; 0 = off)')
