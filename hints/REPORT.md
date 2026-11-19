@@ -4352,6 +4352,8 @@ search.
 
 ## 2av. Parental guidance (17 Nov, from 15:50)
 
+*Notes: [notes/2026-11-19-oracle-pg.md](notes/2026-11-19-oracle-pg.md).*
+
 *Notes: [notes/2026-11-17-pg-learned-dense.md](notes/2026-11-17-pg-learned-dense.md), [notes/2026-11-17-pg-sum-filter.md](notes/2026-11-17-pg-sum-filter.md).*
 
 The user suggested this: the "parental guidance" of E (Goertzel,
