@@ -5209,7 +5209,7 @@ rounds of 30 s or more, but about 40% overhead for 8 s rounds.
 
 ## 4. Next steps
 
-*19 Nov, 11:15 (2az; [notes/2026-11-18-portfolio-review.md](notes/2026-11-18-portfolio-review.md)):*
+*19 Nov, 11:11 (2az; [notes/2026-11-18-portfolio-review.md](notes/2026-11-18-portfolio-review.md)):*
 
 * **Production (ul63, then ul64 at about 12:40)** is a portfolio of 5 s problem changes, explored and then ordered
   by the ratio rule. The deep levels (the 40 s chain, then 80 and 160 s) and the 80 s variants come after them.
