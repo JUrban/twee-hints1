@@ -57,3 +57,6 @@ The user forwarded a message about the climber at 15:20. Checked against the rec
 * **So each proof is credited by which run proved it.** Final only is the climb's own gain. Direct (a plain 160 s
   run) is something production's own 80-320 s levels could also do. Both counts are reported at the end, with the
   per-CPU-hour rate of each.
+* (17:05) The climber was restarted at 17:00:52 and 17:03:00 with climb.py's new records (true.tsv, fillhints/,
+  assume.tsv, used.tsv; [notes/2026-11-19-climber-outputs.md](2026-11-19-climber-outputs.md)). Its fill lemmas from 15:40 to 17:00 were lost,
+  and the 2 climbs in flight were cut. The rate is still read per CPU hour from climb.tsv.

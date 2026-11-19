@@ -314,6 +314,36 @@ def main():
     fo = open(os.path.join(c.dir, 'fill.tsv'), 'a')
     seen = collections.defaultdict(set)
     lock = threading.Lock()
+    # (19 Nov 17:00; user: "the climber runs should probably be kept ... and we should keep their stats") what used to
+    # live only in memory goes to disk, and a restart reloads it:
+    #   true.tsv           original, label, TPTP formula, lhs, rhs (canonical), target, tag: each lemma --fill proved
+    #   fillhints/<t>/<tag> the steps of the fill run's real proofs
+    #   assume.tsv         target, climb prefix, label, source goal (or -), formula: what each assumption label meant
+    #                      (kNN labels are positions in a list that changes as goals get proved)
+    #   used.tsv           target, tag, every axiom label a proof used (lemma_goal_J, lemma_knn_I_<goal>, assume_*,
+    #                      true_*): a conditional proof's full premises, so it can be replayed once they are proven
+    ft = open(os.path.join(c.dir, 'true.tsv'), 'a'); fa = open(os.path.join(c.dir, 'assume.tsv'), 'a')
+    fu = open(os.path.join(c.dir, 'used.tsv'), 'a')
+    csrc = {}   # (target, label) -> the goal an assumption states
+    nre = [0, 0]
+    for l_ in (open(os.path.join(c.dir, 'true.tsv')) if os.path.getsize(os.path.join(c.dir, 'true.tsv')) else ()):
+        w_ = l_.rstrip('\n').split('\t')
+        if len(w_) >= 5 and w_[2] not in true[w_[0]]:
+            true[w_[0]][w_[2]] = w_[1]; tkey[(w_[0], w_[1])] = (w_[3], w_[4]); checked[w_[0]].add(w_[2]); nre[0] += 1
+    for sub_ in ('fillhints', 'sketches'):   # (real hints first, as online)
+        d0_ = os.path.join(c.dir, sub_)
+        for t_ in (sorted(os.listdir(d0_)) if os.path.isdir(d0_) else ()):
+            o_ = lemmas.split(t_)[0]
+            for g_ in sorted(os.listdir(os.path.join(d0_, t_))):
+                for l_ in open(os.path.join(d0_, t_, g_)):
+                    w_ = l_.rstrip('\n').split('\t')
+                    if l_.startswith('#') or len(w_) < 2:
+                        continue
+                    k_ = (w_[0], w_[1])
+                    if k_ not in seen[o_]:
+                        seen[o_].add(k_); sketch[o_].append(k_); nre[1] += 1
+    if any(nre):
+        print(f'reloaded {nre[0]} true lemmas and {nre[1]} sketch hints of {len(sketch)} originals', flush=True)
     # (--theory-ts) per theory (its representative original): [nontrivial single-theory sketches, such sketches],
     # from this dir's logs and then online; tmeta: target -> {slot: theory}
     thy_stats = collections.defaultdict(lambda: [0, 0]); tmeta = {}
@@ -350,7 +380,7 @@ def main():
             with lock:
                 near = ix['u'].select(t, c.knn, exclude={f'{o}__goal_{j}' for j in allgoals.get(o, ())})
             for i, m in enumerate(near):
-                res[f'assume_knn_{i}'] = lemmas.conjecture(m)
+                res[f'assume_knn_{i}'] = lemmas.conjecture(m); csrc[(t, f'assume_knn_{i}')] = m
         if c.laws:
             res.update(laws(t))
         if c.gen_assume:
@@ -443,6 +473,9 @@ def main():
                 with lock:
                     out.write(f'{t}\t{tag}:weak\t{len(S)}\tTHM\t-\t{dt:.2f}\t{goal[:120]}\n'); out.flush()
         used = lp.used.pop(t, set()) if ok else set()
+        if ok:
+            with lock:
+                fu.write(f'{t}\t{tag}\t{",".join(sorted(used))}\n'); fu.flush()
         deps = lp.assumed.pop(t, [])
         U = {x for x in used if x.startswith('assume_')}
         ut = sorted(x for x in used if x.startswith('true_'))
@@ -535,14 +568,23 @@ def main():
                 if f'dep_{i}' in got and f not in true[o] and len(true[o]) < c.true_max:
                     true[o][f] = f'true_{len(true[o])}'; new.append(f)
                     tkey[(o, true[o][f])] = loop.canon_key(l, r, sig)
+                    ft.write(f'{o}\t{true[o][f]}\t{f}\t{tkey[(o, true[o][f])][0]}\t{tkey[(o, true[o][f])][1]}\t{t}\t{tag}\n')
+                    ft.flush()
             if got and 'HINTS-END' in o_:
                 L, G = hintlib.extract_hints(o_)
+                fh_ = []
                 for l, r in L + G:
                     if 'skd' in l or 'skd' in r:
                         continue
                     k = loop.canon_key(l, r, sig)
+                    if k[0] != k[1]:
+                        fh_.append(k)
                     if k[0] != k[1] and k not in seen[o]:
                         seen[o].add(k); sketch[o].insert(0, k)   # real hints before the sketch's
+                if fh_:
+                    d_ = os.path.join(c.dir, 'fillhints', t); os.makedirs(d_, exist_ok=True)
+                    with open(os.path.join(d_, tag), 'w') as f_:
+                        f_.writelines(f'{x}\t{y}\n' for x, y in fh_)
             fo.write(f'{t}\t{tag}\t{len(deps)}\t{len(todo)}\t{len(got)}\t{len(new)}\t{len(true[o])}\t{dt:.2f}\n')
             fo.flush()
         for x in (tmp, hp):
@@ -559,6 +601,12 @@ def main():
 
     def climb(t):
         cands[t] = candidates(t)
+        with lock:
+            o0_ = lemmas.split(t)[0]
+            for x_, f_ in cands[t].items():
+                src_ = csrc.get((t, x_)) or (f'{o0_}__goal_{x_[len("assume_goal_"):]}' if x_.startswith('assume_goal_') else '-')
+                fa.write(f'{t}\t{getattr(c, "cprefix", {}).get(t, "")}\t{x_}\t{src_}\t{f_}\n')
+            fa.flush()
         S0 = list(cands[t])
         queue = [frozenset(S0)] if S0 else []
         if tgroups.get(t):
@@ -677,6 +725,12 @@ def main():
         weaker goals (instances), alone and in the first theory. From every proof go down: drop a used
         assumption, or restore the goal. Every proof's steps become hints of the original."""
         cands[t] = candidates(t)
+        with lock:
+            o0_ = lemmas.split(t)[0]
+            for x_, f_ in cands[t].items():
+                src_ = csrc.get((t, x_)) or (f'{o0_}__goal_{x_[len("assume_goal_"):]}' if x_.startswith('assume_goal_') else '-')
+                fa.write(f'{t}\t{getattr(c, "cprefix", {}).get(t, "")}\t{x_}\t{src_}\t{f_}\n')
+            fa.flush()
         S0 = frozenset(cands[t])
         groups = tgroups.get(t) or ([S0] if S0 else [])
         other = frozenset(x for x in S0 if not x.startswith(('assume_thy_', 'assume_gen_')))

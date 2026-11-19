@@ -5025,6 +5025,24 @@ them in 19.6-75 s with the pool hints. Production had run 22-24 fresh 5 s runs o
 * ul67/ul68 add fresh pool runs at 40 and 80 s right after the 5 s level (`pool@1:0`, `pool@2:0`; new syntax
   NAME@B:F) and explore every label, not a hand-picked list. Each label under 1 CPU h is now measured.
 
+**Periodic re-exploration (ul69, 16:33; loop.py 25804f0).** `--reexplore 150:0.25`: a label that had its
+explore hour, but got under 0.25 CPU h among the last 150 CPU h of all runs, is explored again until it has 0.25 in
+that window. At 16:32 this picked L2 and Vk60 at once ([notes/2026-11-18-portfolio-review.md](notes/2026-11-18-portfolio-review.md)).
+
+**The climber's outputs (exp34, user's question 16:55; [notes/2026-11-19-climber-outputs.md](notes/2026-11-19-climber-outputs.md)).**
+* Production takes every real proof a climber made (0 of them missing over 29 climb directories).
+* Production takes none of the rest:
+  * sketch steps: 64,564 over 108 originals, 46% new to the pools, about 4% of a pool;
+  * fill lemmas;
+  * conditional proofs.
+* Three earlier tests of sketch steps as hints for their own target gained nothing (2g, exp4).
+* **Fill lemmas' statements were never written to disk.** Nor were the kNN assumptions' identities or a proof's
+  lemma premises.
+* exp34 replayed the 4 conditional proofs ("T from proven sibling U") that used no fill lemma: 0 of 4, with U as
+  lemmas and the sketch steps as hints, at 20 s. The lemmas those proofs used were not recorded.
+* climb.py now writes true.tsv, fillhints/, assume.tsv and used.tsv, and reloads them on start. The data repo has
+  every climb directory under climbs/.
+
 **The dropped lemma selections as 5 s members (ul60, 08:05; loop.py 92d60c4).** exp21 found that at 5 s only the
 variants that change the problem pay, and the 60-lemma 5 s variant makes 5-20 per CPU hour live. 16 Nov dropped
 three lemma selections that each proved goals plain similarity did not (150 unsolved at 20 s: 6 plain; use counts 7,

@@ -1,0 +1,77 @@
+# What the climber makes, what production uses, and what was lost (exp34)
+
+Written 19 Nov 2026, 17:05 UTC. User, 16:55: "are we using the hints from the climber runs? and the additional axioms
+and weakened conjectures the climber runs use? they might be useful, right? also the climber runs should probably
+be kept somewhere and also in the data repo and we should keep their stats for the lattice up-down climbing
+learning?"
+
+## What production uses
+
+* **Real proofs: yes, all of them.** Over the 29 climb.py directories in loops/, every goal a climber proved is in
+  production's solved list with its hints: 0 missing.
+* **Sketch steps: no.** These are the steps of proofs that used assumptions, or proved a weakened goal.
+  * The saved ones, in sketches/<target>/<tag> (since climb.py 57a0b00), hold 64,564 distinct steps over 108
+    originals.
+  * 29,511 of them (46%) are not in the original's production pool. That is about 270 new steps per original,
+    against a median pool of 6,138 (about 4%).
+  * Those 108 originals hold 4,551 of the 4,554 goals still unsolved.
+  * As hints for the sketched target itself, they were tested three times, all without gain:
+    * 2g: 28 against 28;
+    * chained sketches: 29 against 28;
+    * exp4: 0 of 20 at the pool's factor, and 0 of 20 at a tenfold boost.
+  * They were never tried as part of the pool for the original's other goals.
+* **Weakened conjectures:** the proofs of their instances are real proofs of true statements. Their steps are among
+  the sketch steps above; the files record the instance as `# goal=`.
+* **Assumptions:** an unproven goal cannot be an axiom of a real proof. But a sketch proof that used only sibling
+  assumptions U is a conditional proof: once U is proven, T should follow with U as lemmas. Production never
+  did this. Each run gets only its 6 nearest proven siblings as lemmas.
+* **Fill lemmas:** these are the assumption-dependent steps that `--fill` proved without the assumptions. They are
+  true lemmas of the original, used by the climber's later runs (REPORT: goal 441's final proof used 17).
+  **Their statements were never written to disk**: fill.tsv has counts only. They and the fill runs' proof steps
+  were lost whenever a climber stopped.
+
+## exp34: replaying the conditional proofs
+
+* exp/condtest.py, abs/condtest.sh, 16:53, 2 workers, results in loops/CT1/results.tsv.
+* Every climb.tsv row in loops/: 12,607 sketch proofs used an assumption. 966 of them used only siblings, giving
+  310 targets.
+  * 85 of those targets are still unsolved.
+  * 11 have every assumption proven now. Only 4 of them have such a proof that used no fill lemma; the fill
+    lemmas of the other 7 are lost.
+* Arms at 20 s, in the climber's production context: A plain, B + the siblings as lemmas, C = B + the sketch
+  proof's steps first in the hints.
+* **Result: 0 of 4 in every arm** (aK2_eq_aK3_o 425, aK2_eq_aK3_t 380, ns_to_aa1_b 617 and 658), at 4 times the
+  sketch's budget.
+* Likely reason: a sketch proof also uses the run's lemmas, the proven siblings and kNN goals of that day's
+  context, which change as goals get proven. climb.tsv records only the assumptions used, so "T from U" was
+  really "T from U plus unrecorded lemmas".
+
+## Changes (climb.py, 17:00 and 17:03; the exp32 climber restarted both times)
+
+* `true.tsv`: one row per fill lemma: original, label, formula, canonical pair, target, tag.
+* `fillhints/<target>/<tag>`: the fill runs' real proof steps.
+* `assume.tsv`: per climb, each assumption label with its source goal and formula. kNN labels are positions in a
+  list that changes as goals get proved.
+* `used.tsv`: every proof's full set of used axioms, `lemma_goal_J`, `lemma_knn_I_<goal>`, `assume_*` and
+  `true_*`. That is a conditional proof's full premises.
+* On start, climb.py reloads the fill lemmas and the sketch and fill hints, so a restart loses nothing.
+* Smoke test on loops/SMK3 (a copy of SMK2's records, 3 s sketches): the first run wrote 2 fill lemmas, their
+  steps and 70 assumption names. The second run reloaded them and added 5 more lemmas without duplicates.
+* The exp32 climber was restarted at 17:00:52 and 17:03:00. Its fill lemmas from 15:40 to 17:00 were lost, and
+  the climbs in flight were cut. Its rate is still read per CPU hour from climb.tsv.
+
+## Data repo
+
+* hintdata_build.py `--climbs` writes climbs/<dir>/ for every climb directory (not SMK*, *.old):
+  * the small records, gzipped (climb, theories, fill, true, assume, used);
+  * the climber's own real proofs, as hints.tar.xz (latticedata.py reads DIR/hints/<target>);
+  * sketches.tar.xz and fillhints.tar.xz;
+  * realized/ and given/ rule logs, one .tar.xz per original, committed in chunks of at most 10 MB.
+* The archives are deterministic, so a rerun re-commits only what changed (the live CLHL2).
+
+## Next
+
+* A conditional-proof replayer: when every premise in used.tsv is proven, rerun T with exactly those premises
+  as lemmas. That needs a few days of used.tsv rows first.
+* A production variant with the original's fill lemmas as extra lemmas, and its sketch steps in the pool. It
+  would be measured by the ratio order like the other members, once true.tsv has rows.

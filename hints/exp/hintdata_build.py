@@ -3,8 +3,9 @@
 "put the useful data into a separate new git repo in the hintwork directory; make the commits small so that I can
 push incrementally on github later (no big files or commits)").
 
-hintdata_build.py [--given]   (without --given: everything but the given logs; with it: only the given logs, one
-                               .tar.xz commit per original; both skip what is already committed)
+hintdata_build.py [--given | --climbs]   (without either: everything but the given logs and the climbs; --given: only the
+                               given logs, one .tar.xz commit per original; --climbs: the climb.py directories; all skip
+                               what is already committed)
 """
 import gzip, os, shutil, subprocess, sys, tarfile
 
@@ -86,6 +87,63 @@ def main_data():
             shutil.copy(os.path.join(src, n), os.path.join(d, n))
         commit(['proofs/' + o], 'proofs: %s (%d goals)' % (o, len(by[o])))
 
+CLIMB_SKIP = ('SMK', '.old')
+
+def tarxz(srcdir, names, dst):
+    """a deterministic .tar.xz of srcdir/names (sorted, mtime 0, no owners), so reruns re-commit only changes"""
+    os.makedirs(os.path.dirname(dst), exist_ok=True)
+    tmp = dst + '.tmp'
+    subprocess.run(['bash', '-c', 'tar -C "$1" --sort=name --mtime=@0 --owner=0 --group=0 --numeric-owner -cf - "${@:3}" '
+                    '| xz -T1 -6 > "$2"', '-', srcdir, tmp] + sorted(names), check=True)
+    if os.path.exists(dst) and open(dst, 'rb').read() == open(tmp, 'rb').read():
+        os.unlink(tmp)
+    else:
+        os.replace(tmp, dst)
+
+def main_climbs():
+    """(19 Nov 17:05; user: "the climber runs should probably be kept somewhere and also in the data repo and we should
+    keep their stats for the lattice up-down climbing learning") climbs/<dir>/: every climb.py directory's records"""
+    L = os.path.join(HW, 'loops')
+    for d in sorted(os.listdir(L)):
+        src = os.path.join(L, d)
+        if not os.path.isfile(os.path.join(src, 'climb.tsv')) or any(x in d for x in CLIMB_SKIP):
+            continue
+        out = os.path.join(R, 'climbs', d)
+        os.makedirs(out, exist_ok=True)
+        # 1. the small records
+        for n in ('climb.tsv', 'theories.tsv', 'fill.tsv', 'true.tsv', 'assume.tsv', 'used.tsv'):
+            if os.path.exists(os.path.join(src, n)) and os.path.getsize(os.path.join(src, n)):
+                gz(os.path.join(src, n), os.path.join(out, n + '.gz'))
+        sv = os.path.join(src, 'solved.tsv')
+        real = [l.split('\t')[0] for l in open(sv) if l.split('\t')[1:2] == ['1']] if os.path.exists(sv) else []
+        with open(os.path.join(out, 'solved.tsv'), 'w') as f:
+            f.writelines(l for l in open(sv) if l.split('\t')[1:2] == ['1']) if os.path.exists(sv) else None
+        if real:   # the climber's own real proofs (their hint files, as latticedata.py reads DIR/hints/<target>)
+            tarxz(os.path.join(src, 'hints'), [t for t in real if os.path.exists(os.path.join(src, 'hints', t))],
+                  os.path.join(out, 'hints.tar.xz'))
+        for sub in ('sketches', 'fillhints'):
+            if os.path.isdir(os.path.join(src, sub)) and os.listdir(os.path.join(src, sub)):
+                tarxz(os.path.join(src, sub), os.listdir(os.path.join(src, sub)), os.path.join(out, sub + '.tar.xz'))
+        commit(['climbs/' + d], 'climbs: %s records (climb.tsv: one row per run; sketches, fill, assumptions)' % d)
+        # 2. the per-target rule logs: realized (the final run's given rules) and given (successful runs), per original
+        for sub in ('realized', 'given'):
+            sd = os.path.join(src, sub)
+            if not os.path.isdir(sd):
+                continue
+            by = {}
+            for n in os.listdir(sd):
+                by.setdefault(orig(n), []).append(n)
+            batch, size = [], 0
+            for o in sorted(by):
+                dst = os.path.join(out, sub, o + '.tar.xz')
+                tarxz(sd, by[o], dst)
+                batch.append(dst); size += os.path.getsize(dst)
+                if size > 10_000_000:
+                    commit(batch, 'climbs: %s %s rule logs (xz, per original, up to %s)' % (d, sub, o))
+                    batch, size = [], 0
+            if batch:
+                commit(batch, 'climbs: %s %s rule logs (xz, per original)' % (d, sub))
+
 def main_given():
     src = os.path.join(UL, 'given')
     by = {}
@@ -111,5 +169,7 @@ if __name__ == '__main__':
         shutil.copy(os.path.join(HW, 'abs/hintdata_README.md'), os.path.join(R, 'README.md'))
     if '--given' in sys.argv:
         main_given()
+    elif '--climbs' in sys.argv:
+        main_climbs()
     else:
         main_data()
