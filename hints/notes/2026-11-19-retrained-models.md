@@ -185,6 +185,7 @@ abs/rm9wave2.sh, started 20:09:41 (its header says 20:11, written before checkin
 * Interim paired counts (21:25, replay design): rm9a +5 −3 against the control on 98 goals, rm9b +3 −6 on 78.
 * Interim at 21:54: rm9a +5 −8 on 165, rm9b +5 −7 on 141, rm9e +5 −3 on 102. Every model proves goals rm4t
   misses. Production's m9a@0 ended its explore hour with 0 proofs in 1.05 CPU h (the 5 s tail).
+* CPU: 5 arms + training 4 + climber 4: production restarted at 21:54 with J=8 (rows from 179,422; earlier log loops/UL71a.log).
 * **The first paired design was broken (found 20:58).** The snapshot loops/ULsN19 (production's solved rows before
   the first test goal, all 400 removed) gave the rm4t control 2 proofs in 122 goals.
   * Production had proved these 400 easily: median 3.5 s, 99% within 20 s, mostly at L0 and the 5 s kNN members.
