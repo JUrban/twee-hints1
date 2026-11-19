@@ -165,6 +165,7 @@ abs/rm9wave2.sh, started 20:09:41 (its header says 20:11, written before checkin
 | rm9b (short3, 32 negatives) | 6.90 M, 3.01 M, 129,293 | 0.740 | 98.8% | 3.0% | 26.5 min | 28.7 GB |
 | rm9e (long2, 16 negatives, 255 leaves) | 6.03 M, 4.64 M, 89,155 | 0.854 | 99.3% | 6.5% | 27.0 min | 24.9 GB |
 | rm9c (slm, 16 negatives, long-exp 0.5, 255 leaves) | 6.57 M, 4.55 M, 129,293 | 0.842 | 99.9% | 1.7% | 28.9 min | 27.3 GB |
+| **rm9f (rm9a's data, Suda's per-log weighting)** | 4.76 M, 2.10 M, 21,139 | **0.892** | 99.4% | 13.2% | 19.8 min | 20.3 GB |
 
 * rm9a ranks as well as rm7t, and is calibrated higher: at production's thresholds it defers and freezes much
   less. A threshold matched to rm4t's deferral share would differ. That is the same caveat as exp33's rmO.
@@ -185,6 +186,10 @@ abs/rm9wave2.sh, started 20:09:41 (its header says 20:11, written before checkin
 * Interim paired counts (21:25, replay design): rm9a +5 −3 against the control on 98 goals, rm9b +3 −6 on 78.
 * Interim at 21:54: rm9a +5 −8 on 165, rm9b +5 −7 on 141, rm9e +5 −3 on 102. Every model proves goals rm4t
   misses. Production's m9a@0 ended its explore hour with 0 proofs in 1.05 CPU h (the 5 s tail).
+* **Suda's weighting is the best offline** (rm9f 0.892, against 0.876 for the same rows unweighted). Every log weighs
+  the same, so the many short proofs no longer dominate the positives, and the many negatives of a long search no
+  longer dominate one log.
+* Interim at 22:14: rm9a +9 −11 on 213, rm9b +5 −14 on 182, rm9c +2 −5 on 67, rm9e +5 −3 on 143.
 * CPU: 5 arms + training 4 + climber 4: production restarted at 21:54 with J=8 (rows from 179,422; earlier log loops/UL71a.log).
 * **The first paired design was broken (found 20:58).** The snapshot loops/ULsN19 (production's solved rows before
   the first test goal, all 400 removed) gave the rm4t control 2 proofs in 122 goals.
