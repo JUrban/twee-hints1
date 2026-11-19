@@ -133,6 +133,41 @@ proof or not):
   * So the run tests the paper's three selections: Mean, Var (mean completion 0.39, median 14 steps) and Rand
     (0.53, median 16).
 
-## Results
+## Results (13:45 - 14:09)
 
-(running)
+Log: [exp/exp31_ew_mvr.log](../exp/exp31_ew_mvr.log); per-problem rows /project/hintwork/exp31/ew_mvr.jsonl.
+
+* Training: 1,000 problems of the 86 training originals, 356,944 rows (160,259 proof rules). Test: 300 problems
+  of the 43 held-out originals, every rule of each run.
+* The completion vectors are dense: 511 (Mean), 439 (Var) and 495 (Rand) of the 512 entries are nonzero on an
+  average row.
+
+| arm | watchlist features used | their gain share | AUC (mean) | paired dAUC | better / worse | t = 0.1: proof rules kept / others rejected | t = 0.2 |
+|---|---:|---:|---:|---:|---:|---|---|
+| base (rm4t's features) | | | 0.9004 | | | 0.941 / 0.437 | 0.854 / 0.643 |
+| + 512 by Mean | 111 | 0.108 | 0.9013 | +0.0008 | 139 / 159 | 0.942 / 0.433 | 0.857 / 0.642 |
+| + 512 by Var | 370 | 0.287 | 0.9016 | +0.0012 | 146 / 153 | 0.944 / 0.451 | 0.859 / 0.658 |
+| + 512 by Rand | 406 | 0.343 | 0.9020 | +0.0015 | 152 / 146 | 0.944 / 0.454 | 0.858 / 0.657 |
+
+## Reading
+
+* **The trees use the proof-state vector, as in the paper** (62% of its features there; 79% and a third of the gain
+  here for Rand). **But it adds almost nothing on held-out originals:** +0.001 AUC, with test problems split about
+  50/50 better and worse. At threshold 0.1, Var and Rand reject 1.4-1.7 points more non-proof rules while keeping
+  slightly more proof rules. That is the whole gain.
+* So the vector carries little that rm4t's features (rule, goal, theory, log rule index) lack. The high in-sample
+  use is the trees taking it as a proxy for what they already know: how far the run has gone (completion grows
+  with time) and which theory it is in.
+* Mean degenerates on AIM, as the smoke test showed: its 512 tiny proofs complete early, and the trees use 111 of
+  them. The paper also found Rand competitive (ProofWatch 1352 against Mean's 1357). Here Rand is best by a hair.
+* Not tested: the loop setting, with watchlists from the test problems' own originals (proven siblings). That would
+  measure more information, but it is the information the sibling pool already gives as hints.
+* With the oracle ceiling above (a near-oracle model gains nothing through the deferral filter), even the in-original
+  version could not pay online through today's hooks.
+
+## Decision
+
+* **The ENIGMAWatch model features are not built into twee.** The offline lift is +0.001 AUC, and the oracle
+  ceiling (2ad, 2af) says model quality does not pay through the defer-once filter anyway.
+* **ProofWatch's part goes on as a portfolio member:** `pw@0` in ul65 from exp30's end, explored for 1 CPU h. Read
+  its yield and its conditional proofs (exp/condvar.py) after that.

@@ -1,0 +1,29 @@
+[    0.0s] originals 129 test originals 43 train 1000 test 300
+[   24.7s] watchlists 32127 distinct steps 265817 median size 17
+[   25.0s] M row 0
+[   57.4s] M row 100
+[   91.2s] M row 200
+[  121.6s] M row 300
+[  152.7s] M row 400
+[  184.8s] M row 500
+[  220.2s] M row 600
+[  251.1s] M row 700
+[  282.3s] M built (800, 32127) nonzero share 0.983
+[  282.4s] mean selected: mean completion 0.9425, median size 5, originals 84
+[  282.4s] var selected: mean completion 0.4878, median size 8, originals 79
+[  282.4s] rand selected: mean completion 0.5220, median size 16, originals 82
+[  297.8s] train problems 200
+[  314.9s] train problems 400
+[  333.7s] train problems 600
+[  350.7s] train problems 800
+[  387.0s] train problems 1000
+[  400.6s] train rows (356944, 4350) positives 160259 completion nonzeros per row {'mean': 511.4, 'var': 439.1, 'rand': 494.7}
+[  488.1s] trained base
+[  641.3s] trained mean watchlist features used 111 of 512, gain share 0.108, split share 0.038
+[  815.1s] trained var watchlist features used 370 of 512, gain share 0.287, split share 0.220
+[ 1007.3s] trained rand watchlist features used 406 of 512, gain share 0.343, split share 0.261
+[ 1437.8s] test problems 300
+base  AUC mean 0.9004 median 0.9057 | t=0.1: pos kept 0.9412 neg rejected 0.4370 | t=0.2: pos kept 0.8542 neg rejected 0.6430
+mean  AUC mean 0.9013 median 0.9011 | t=0.1: pos kept 0.9420 neg rejected 0.4327 | t=0.2: pos kept 0.8572 neg rejected 0.6415 | paired dAUC +0.0008 (better 139, worse 159)
+var   AUC mean 0.9016 median 0.9049 | t=0.1: pos kept 0.9437 neg rejected 0.4508 | t=0.2: pos kept 0.8594 neg rejected 0.6584 | paired dAUC +0.0012 (better 146, worse 153)
+rand  AUC mean 0.9020 median 0.9049 | t=0.1: pos kept 0.9437 neg rejected 0.4542 | t=0.2: pos kept 0.8579 neg rejected 0.6572 | paired dAUC +0.0015 (better 152, worse 146)

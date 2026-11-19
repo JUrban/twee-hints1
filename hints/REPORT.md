@@ -4978,6 +4978,26 @@ ext/eprover and given the chain hints as a static watchlist (`-xUseWatchlist`).
 * It proved 0 of the 107 walls at 60 CPU s each (1.79 CPU h). Prover9 with the same hints proved 4 (exp16).
 * E processes about 500 clauses a second on these problems. It stays out of the portfolio.
 
+**ENIGMAWatch (exp31, the user's paper of 13:30; [notes/2026-11-19-enigmawatch.md](notes/2026-11-19-enigmawatch.md)):
+the model part is a negative; ProofWatch becomes a member.** Goertzel, Jakubův and Urban (TABLEAUX 2019) add the
+completion ratios of 512 globally fixed proofs, the proof-state vector, to ENIGMA's features. The selections were
+Mean, Var, Rand and Corr; Mean was best, +8.8% over ENIGMA in loop 0 on Mizar40.
+* **Offline, on twee's rule model** (exp/ew_offline.py):
+  * watchlists: 32,127 proofs of the 86 training originals;
+  * a rule matches a step if their canonical keys are equal;
+  * training on 1,000 problems, testing on 300 of the 43 held-out originals.
+  * The trees use the vector heavily (Rand: 406 of 512 features, a third of the gain).
+  * But held-out AUC moves only from 0.900 to 0.901-0.902 (+0.0008 Mean, +0.0012 Var, +0.0015 Rand), with problems
+    split about 50/50 better and worse.
+  * Mean degenerates on AIM: almost every proof is partly matched in almost every run, so the 512 highest-mean proofs
+    are tiny and complete early.
+* **No online test.** The lift is negligible, and a near-oracle model already gained nothing through the
+  defer-once filter (2ad, 2af).
+* **ProofWatch's own part acts on hints, which pay here.** As `--variants pw` (loop.py 3362943), each pool hint
+  lists the solved siblings whose proofs contain it, and twee's `--eqhint-watch 0.05` moves its boost toward the
+  default 0.01 as its best source proof completes. The 13 Nov test (+2 −4) was complementary, so `pw@0` joins ul65
+  as an explored member.
+
 **The dropped lemma selections as 5 s members (ul60, 08:05; loop.py 92d60c4).** exp21 found that at 5 s only the
 variants that change the problem pay, and the 60-lemma 5 s variant makes 5-20 per CPU hour live. 16 Nov dropped
 three lemma selections that each proved goals plain similarity did not (150 unsolved at 20 s: 6 plain; use counts 7,
