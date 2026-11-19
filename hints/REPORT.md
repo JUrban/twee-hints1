@@ -21,6 +21,7 @@ in `/project/hintwork` (not in git).
 | + variant tiers ordered by live yield (2az); at 18 Nov 23:41 | **45,901** (+47.8% over plain) | **5043** (+57.4%) | – |
 | + optional attempts, context-exact restarts (2az); at 19 Nov 04:08 | **46,203** (+48.8% over plain) | **5084** (+58.7%) | – |
 | + a 40 s chain level, lemma-set variants at 5 s (2az); at 19 Nov 08:21 | **46,822** (+50.7% over plain) | **5161** (+61.1%) | – |
+| + exploration of 5 s members: more lemma sets and counts (2az); at 19 Nov 10:20 | **47,101** (+51.6% over plain) | **5193** (+62.1%) | – |
 
 **On unseen originals** (2aq): the 11 whole holdout originals from
 scratch, in 1 hour per batch on 4 workers plus the transfer. Plain twee
@@ -88,6 +89,7 @@ written in loops/UL. Merged proofs count from their merge.
 | 18 Nov 23:41 | 45,901 | 5043 | variant tiers by live yield (ul55) |
 | 19 Nov 04:08 | 46,203 | 5084 | optional attempts, context-exact restarts (ul56, 289 new in 5 h 50 min) |
 | 19 Nov 08:21 | 46,822 | 5161 | the 40 s chain level (ul58, 06:02) and a cascade from about 06:59 across the aK2_eq_aK3 and nil3 families (ul58-ul60, about 400 in 80 minutes) |
+| 19 Nov 10:20 | 47,101 | 5193 | lemma-set members at 5 s (ul60-ul63): k100@0, kd@0, k200@0; `--explore` (ul62, 10:05) |
 
 From 15 Nov 05:30 the rate fell from hundreds an hour to 50–100. The
 cheap new contexts are used up; 58% of the unsolved goals sit behind the
@@ -4890,6 +4892,35 @@ three lemma selections that each proved goals plain similarity did not (150 unso
 The cascade was spread over many originals of the same axiom families (aK2_eq_aK3_*, nil3_*). 392 of 401 proofs
 since ul58 used a kNN lemma of another original, and for 171 the youngest was under 30 minutes old. So the kNN
 index is now rebuilt every 10 minutes, not 30 (about 1 s a rebuild).
+
+**Exploration, and 5 s members measured one after another (19 Nov 09:20-10:20; loop.py 3f95f59, e2986e3, 5fc6b48,
+4d3baca).**
+* **The gap.** The deep queue is one global sort by each goal's best option. So a member whose prior is below the
+  best live member never runs, and is never measured. At prior 3, ul60's new lemma selections ran 7-9 times in 45
+  minutes. In exp27 the 40 s chain level ran 4 times in an hour from zero, behind unfolded 5 s runs, and proved all 4.
+* **`--explore H`.** A label with less than H CPU hours of runs in the round is estimated at no less than the best
+  label that has H. ul62 (10:05) and ul63 (10:17) use `--explore 1` for the new members, with no hand-set priors.
+* **Measured, each conditional on the members before it in the same context** (`exp/condvar.py`):
+
+| member (5 s) | where | runs | proved | CPU h | per CPU h | proved after |
+|---|---|---:|---:|---:|---:|---|
+| k100@0: 100 kNN lemmas | ul60 | 1,726 | 42 | 2.95 | 14.2 | 32 after k60@0 failed |
+| kd@0: proof-dependency lemmas | ul61 | 1,050 | 9 | 1.83 | 4.9 | all 10 after k100@0 failed |
+| kp@0: use-count lemmas | ul61-62 | 523 | 0 | 0.93 | 0 | |
+| k200@0 | ul62 | 463 | 14 | 1.01 | 13.8 | all 14 after k100@0, 12 after k60@0 |
+| s12@0: 12 sibling lemmas | ul62 | 539 | 5 | 1.02 | 4.9 | all 5 after k100@0 and kd@0 |
+
+* So each lemma selection, and each lemma count, is its own problem. Three of these four were dropped on 16 Nov on
+  count (+1 −2 each against 30 kNN lemmas). As members after one another they pay at about the rate of a fresh 5 s
+  run in a new context (L0, 3-13 per CPU hour on the tail).
+* A 5 s run with 400 kNN lemmas costs no more than with 60 (4 goals, 1.2-6.4 CPU s). One proved an unsolved goal.
+* Twee normalises its input: a permuted problem gives byte-identical output, so there are no cheap random restarts.
+* **ul63** explores 13 members at 5 s:
+  * lemma sets: k100, k200, k400, kp, kd, s12, k200s12;
+  * hl: the pool plus the kNN lemmas' proof steps as hints at factor 0.1 (2ap's dropped `--hint-lemma-proofs`), 114-591
+    hints more a run;
+  * search settings: the rule models rm7t and rm4b (`mX`, each with goal files in its own vocabulary), threshold 0.2,
+    no parental guidance, no rule model.
 
 ## 2c. Long runs: stall cutoff and checkpoints
 
