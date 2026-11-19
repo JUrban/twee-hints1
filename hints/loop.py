@@ -578,6 +578,8 @@ class Loop:
             cmd += ['--rule-model', m, '--rule-vocab', v, '--rule-goal', gp_] + ma
         if hints and a.stall:
             cmd += ['--eqhint-stall', str(a.stall)]
+        if var == 'pw':
+            cmd += ['--eqhint-watch', str(a.pw_factor)]
         if var == 'sub':
             cmd += ['--eqhint-subsume']
         elif var == 'sj':
@@ -943,6 +945,26 @@ class Loop:
                     seen.add((w[0], w[1])); out.append((w[0], w[1], str(f or a.hint_lemma_proofs)))
         return out
 
+    def pw_groups(self, n, hv):
+        """(--variants pw) N's hints with their ProofWatch groups: the 4th column lists the solved siblings (numbered
+        per original) whose proof steps contain the hint; the 3rd is the hint's factor, or '-' for the default.
+        Cached per original until its solved count changes."""
+        o = orig_of(n)
+        sib = sorted(m for m in self.solved if orig_of(m) == o and m != n)
+        c_ = getattr(self, 'pwcache', {}).get(o)
+        if c_ is None or c_[0] != len(sib):
+            g = collections.defaultdict(list)
+            for i, m in enumerate(sib):
+                for h in set((h[0], h[1]) for h in self.hints_of(m)):
+                    g[h].append(i)
+            self.pwcache = getattr(self, 'pwcache', {}); self.pwcache[o] = c_ = (len(sib), g)
+        g = c_[1]
+        out = []
+        for h in hv:
+            gs = g.get((h[0], h[1]))
+            out.append((h[0], h[1], h[2] if len(h) > 2 else '-', ','.join(map(str, gs))) if gs else tuple(h))
+        return out
+
     def hints_for1(self, n, pools, knn):
         a = self.a
         if a.pool.startswith('knn'):
@@ -994,7 +1016,7 @@ class Loop:
         VA_ = a.variants_after if a.variants_after >= 0 else CL_
         for v in VL:
             nm, _, at = v.partition('@')
-            assert (nm in ('two', 'unf', 'sub', 'sj', 'pool', 'r2', 'nom', 'nopg', 'x', 'p9', 'kp', 'kd', 'hl')
+            assert (nm in ('two', 'unf', 'sub', 'sj', 'pool', 'r2', 'nom', 'nopg', 'x', 'p9', 'kp', 'kd', 'hl', 'pw')
                     or (nm and re.fullmatch(r'(k\d+)?(s\d+)?', nm))
                     or (nm and re.fullmatch(r'm\w+', nm) and a.model_fixed
                         and os.path.exists(os.path.join(os.path.dirname(a.model_fixed.split(',')[0]), 'r' + nm + '.bin')))), v
@@ -1630,6 +1652,12 @@ class Loop:
                                     # --hl-factor (16 Nov, 2ap: F = 0.1 and 0.01 each +1 -2 against the pool, union 7-8
                                     # of 150 against 6; dropped then as not better on count)
                                     hv = list(hv) + self.lemma_proof_hints(n, set((h[0], h[1]) for h in hv), a.hl_factor)
+                                elif v_ == 'pw':
+                                    # (19 Nov, ProofWatch, Goertzel et al. ITP 2018, as in ENIGMAWatch section 2.3) each
+                                    # pool hint carries the solved siblings whose proofs contain it; twee
+                                    # --eqhint-watch moves a hint's boost from --pw-factor toward its own as its
+                                    # best source proof completes
+                                    hv = self.pw_groups(n, hv)
                                 fut = ex.submit(self.run_one, n, hv, rnd, T[lev], False, a.cascade_cpu * T[lev], 0, v_)
                             else:
                                 b = T[lev] if fc else (T[lev] - T[PREV[lev]] if (a.p9loop or os.path.exists(sp)) else T[lev])
@@ -1990,6 +2018,9 @@ def make_parser():
                     help='--ratio-order: the weight of a label\'s prior, in CPU hours of its own runs')
     ap.add_argument('--hl-factor', type=float, default=0.1,
                     help='--variants hl: the score factor of the kNN lemmas\' proof steps as hints')
+    ap.add_argument('--pw-factor', type=float, default=0.05,
+                    help='(--variants pw) ProofWatch: score factor of hints whose source proofs are not started (twee '
+                         '--eqhint-watch; it moves to the hint\'s own factor, 0.01, as its best source proof completes)')
     ap.add_argument('--explore', type=float, default=0.0, metavar='H',
                     help='--ratio-order: a label with less than H CPU hours of runs in this round is estimated at no '
                          'less than the best label with H or more (each member gets measured; 0 = off)')
