@@ -504,7 +504,7 @@ All three change the lemma set, so they fit the class that pays at 5 s.
 * At a lower prior they would never run: some goal always has a k60@0 option at 8.4.
 * Cost if they are worthless: about 6 CPU hours of 5 s runs.
 
-## Are restart bursts a scheduler defect? No (19 Nov 07:58-08:20)
+## Are restart bursts a scheduler defect? No (19 Nov 07:56-08:03)
 
 **The worry.** ul58 made 177 new in 74 minutes, and ul59 198 in its first 33 minutes on 12 workers. Fresh runs proved
 8.8% in ul59 against 5.1% in ul58 and 2.3% over ul56. 67 of the goals ul59 proved at the 5 s level had been last run in
