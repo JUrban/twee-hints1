@@ -528,5 +528,12 @@ The cascade was spread over many originals (aK2_eq_aK3_d 21, aK2_eq_aK3_1243b 20
 * It began about two minutes before a kNN index rebuild (t = 3,556 s).
 
 So the bursts are cascades of real proofs, not restart artefacts. "A restart's first hour" is not a fair window for
-comparing settings. Unresolved: whether cross-original kNN lemmas spread such cascades (the index is rebuilt every
-30 minutes or 300 proofs; a rebuild takes about 1 s).
+comparing settings. **Cross-original lemmas spread cascades.**
+* Of the 401 proofs from ul58's start to 08:05, 392 used a kNN lemma of another original. Their kept outputs name
+  the lemmas: `lemma_knn_<i>_<source goal>`.
+* For 171 of them, the youngest such lemma was proved within the last 30 minutes, and for 64 within 10 minutes. The
+  median is 48 minutes. These ages come from the hints files' mtimes, which proofs rewritten later make younger.
+* The index is rebuilt every 30 minutes or 300 proofs, so a new lemma waits about 15 minutes on average before
+  another original's goals can see it. A rebuild takes about 1 s.
+* So ul60 gets `--knn-refresh 600`. It is not measured separately: production's cascades are too noisy for that, and
+  a clean test would be a from-zero pair.
