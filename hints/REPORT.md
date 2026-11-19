@@ -4836,6 +4836,33 @@ The union is 26 of 92. **ul54 (21:35)** has 19 workers and adds `nom` as the las
 those 50 at about half the CPU: 1.73 per CPU hour against 1.45. The resume to 80 s then makes about 1.1 and competes
 with the variants. Production now runs `--cascade 5,40,80,160,320`. Old results rows map to the levels of the same budget
 (`--relabel`), and the variants stay at 80 s.
+* ul58's first hour (to 07:05): the 40 s level made 1.98 proofs per CPU hour (10 in 5.06 CPU h), above the
+  predicted 1.73. ul58 made 177 new in 74 minutes.
+* exp26 at that point: arm A 6 of 114 at 95 CPU s a run, arm B (no renormalisation) 4 of 97 at 76 s. B is 20%
+  cheaper; the proof rates are within noise (Fisher p 0.76).
+* At 5 s, renormalisation never triggers. With and without it, a 5 s hinted run allocates the same bytes and gives
+  the same output. Only the deep levels can gain from B.
+
+**Two negatives on the way (19 Nov 07:00-07:30).**
+* Veroff's Prover9 settings (exp23, notes/2026-11-19-veroff-p9-settings.md). With max_weight 40 they proved 0 of
+  the 107 walls at 6,437 CPU s, so did max_weight 5 (3,484 s). The default settings prove 4.
+* A per-goal predictor for the deep runs. The failed 5 s run's HINTSTATS (matched share, lastmatch, maxgap,
+  deferred) and the goal's distance to the nearest proof below separate L1 successes from failures with AUC
+  0.4-0.7, not consistently across ul56 and ul58. Within the near goals, 0 and 1 places away both prove about 10%.
+  The deep order stays by level yield.
+
+**The system from zero (exp27, from 07:18; notes/2026-11-19-from-zero-portfolio.md).** Everything since 17 Nov was
+measured on production's tail. PGC runs half1 from zero for 2 hours on 6 workers with today's deep portfolio:
+* the chain levels;
+* the variants;
+* the ratio order;
+* twee-pg61.
+It is compared with PGA (17 Nov, the same script: 18,987). At 10 minutes: 11,704 against 11,467.
+
+**E as a member (exp28, queued; notes/2026-11-19-eprover-watchlist.md).** E 3.5.9 built from ext/eprover, with chain
+hints as a static watchlist (`-xUseWatchlist`). On two walls it fails both at 60 s, with and without the watchlist,
+including one twee proves in 21 CPU s. It runs on all 107 walls after exp23, to see whether it proves any no other
+member does.
 
 ## 2c. Long runs: stall cutoff and checkpoints
 
