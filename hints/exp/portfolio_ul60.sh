@@ -1,5 +1,5 @@
 #!/bin/bash
-# (19 Nov, after exp27) ul60: ul59 back on 19 workers, with three lemma-set variants at 5 s (loop.py 92d60c4): kp@0 (kNN
+# (19 Nov 08:05) ul60: ul59 (J workers, default 19; 12 while exp27 runs, to about 09:20), with three lemma-set variants at 5 s (loop.py 92d60c4): kp@0 (kNN
 # lemmas by similarity x use counts), kd@0 (MaSh-style proof dependencies), k100@0 (100 kNN lemmas). The 16 Nov tests
 # dropped them as not better on count, though each proved goals plain similarity did not (+3, +1, +1 of 150); at 5 s
 # only problem-changing variants pay (exp21), and k60@0 makes 8.4 per CPU hour live. Priors 3 each (about Vunf@0's live
@@ -75,6 +75,6 @@ export TWEE_PG_ARGS="--pg-threshold 0.25 --ground-joining-branch-limit 100"
 cd /project/hintwork
 python3 -u /project/twee/hints/loop.py sets/all loops/UL --start 5 --cascade 5,40,80,160,320 --cascade-start 0 --cascade-continue --retry-gap 3 \
   --model --model-fixed /project/hintwork/models/rm4t.bin,/project/hintwork/models/rm4t.vocab --model-theory \
-  --lemmas 6 --lemma-knn 30 --lemma-subsets --lemma-after --twee /project/bin/twee-pg61 --keep-out -j 19 --reserve 0 \
+  --lemmas 6 --lemma-knn 30 --lemma-subsets --lemma-after --twee /project/bin/twee-pg61 --keep-out -j ${J:-19} --reserve 0 \
   --pool original --wall-factor 15 "$@" --line-gaps 80,80 --retry-hints 1.25 --sync 60 --fresh-first --far-retry --mix 0.25 --sched-model /project/hintwork/sched/m4.json --sched-max-lgap 320 --sched-retrain 200 --sched-pmin 0.011 --sched-pmin-auto 400 --retry-knn --knn-refresh 600 --chain-level 1 --chain-records /project/hintwork/chain_records2.tsv --chain-since-row 47530 --variants unf@0,k60@0,kp@0,kd@0,k100@0,k60,p9,unf,two,nom --variants-after 3 --variant-budget 80 --priors L1=1.73,L2=1.1,Vkp@0=3,Vkd@0=3,Vk100@0=3 --relabel L1=L2,L2=L3,L3=L4 --relabel-until 103427 --relabel-nostat L2 --ratio-order --pass-every 1 --ab-args="--cp-renormalise-threshold 1000" --args="--abstract-time 2000 --no-resume-requeue --no-eqhint-consider" > loops/UL60.log 2>&1
 echo "UL60: $(tail -1 loops/UL60.log) $(date +%T)" | tee loops/UL60.done

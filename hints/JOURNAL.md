@@ -293,8 +293,11 @@ Each goal is one twee run on the goal's problem.
 ### 4.3 Production
 * No side workers. Prover9 with chain hints (the P9C side worker, abs/p9c.sh and p9c4.sh, 16:46–19:38) is now the
   cascade's `p9` level.
-* `abs/ul59.sh` since 19 Nov 07:17:30 (UL59.log): ul58 on 12 workers while exp27 runs (about 2 h), with
-  `--relabel-until 103427` hardcoded. ul58 ended at new=177 in 74 minutes.
+* `abs/ul60.sh` since 19 Nov 08:04:50 (UL60.log; `J=12` while exp27 runs, then a restart with the default 19): ul59
+  plus three lemma-set variants at 5 s, kp@0 (use counts), kd@0 (proof dependencies) and k100@0 (loop.py 92d60c4,
+  priors 3 each), and `--knn-refresh 600` (portfolio review, 19 Nov). ul59 ended at new=224 in 47 minutes.
+* `abs/ul59.sh` 19 Nov 07:17:30 - 08:04 (UL59.log): ul58 on 12 workers, with `--relabel-until 103427` hardcoded.
+  ul58 ended at new=177 in 74 minutes.
 * `abs/ul58.sh` 19 Nov 06:02:46 - 07:17 (UL58.log; its first results row is 103428, 1-based, and `--relabel-until`
   103427, 0-based). A **restart must keep `--relabel-until 103427` fixed**: the script computes it from the file's
   length, so a later script must hardcode it. ul57 with the cascade 5,40,80,160,320 (loop.py 1bb0a0f). The 40 s
@@ -682,7 +685,7 @@ summaries keep results but lose the reasons and the user's exact words. Keep sec
 
 ---------------------------------------------------------------------------------------------------------
 
-## 8. Open threads (19 Nov 07:18; `date` checked)
+## 8. Open threads (19 Nov 08:06; `date` checked)
 
 **The portfolio task** (the user, 18 Nov 17:00: keep complementary methods; notes/2026-11-18-portfolio-review.md,
 REPORT 2az). The principle is the ratio rule: rank each member by its new proofs per CPU hour on the goals every
@@ -690,8 +693,9 @@ earlier member failed in the same context. In production the order is online (`-
 variant levels are optional attempts (loop.py 119c3d1).
 
 Running:
-* **production ul59** since 19 Nov 07:17:30 (abs/ul59.sh, loops/UL59.log, 12 workers while exp27 runs; back to
-  19 after it). Crash watcher on PID 2598545. Cascade 5,40,80,160,320 (section 4.3). With the A/B test exp26 (notes/2026-11-19-queue-renorm-ab.md):
+* **production ul60** since 19 Nov 08:04:50 (abs/ul60.sh, loops/UL60.log, J=12 while exp27 runs; restart with
+  J=19 after it). Crash watcher on PID 2653965. New: the lemma-set variants Vkp@0, Vkd@0, Vk100@0 (watch them in
+  levyield), `--knn-refresh 600`. Cascade 5,40,80,160,320 (section 4.3). With the A/B test exp26 (notes/2026-11-19-queue-renorm-ab.md):
   watch `levyield.py loops/UL/r5/results.tsv 103428`, L1 against L1/B and L2 against L2/B.
 * **exp27** (07:18 - about 09:20, notes/2026-11-19-from-zero-portfolio.md): half1 from zero with today's system
   (PGC, 6 workers + transfer), against PGA's 18,987 at 2 hours (noise about 185).
