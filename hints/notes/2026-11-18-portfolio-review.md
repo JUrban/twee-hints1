@@ -668,3 +668,39 @@ hints more than the pool (none on R1dist_to_aa1, as the offline count predicted)
   * loop.py `--prior-weight` (default 2, cfb748e).
   * With `--explore` giving each new member at least 1 CPU hour of its own data, 0.5 is safe. It goes into the
     next production script.
+
+**Which kNN ranks do the lemma-count members' proofs use? Deep ones (10:50; hints/exp/knn_ranks.py).**
+
+| member | proofs | highest used kNN rank, median | proofs using a rank ≥ 30 | ≥ 100 | ≥ 200 |
+|---|---:|---:|---:|---:|---:|
+| L0 (30 lemmas) | 2,998 | 9 | 0 | 0 | 0 |
+| Vk60@0 | 143 | 55 | 134 | 0 | 0 |
+| Vk100@0 | 69 | 90 | 63 | 0 | 0 |
+| Vk200@0 | 14 | 183 | 13 | 13 | 0 |
+| Vk400@0 | 12 | 361 | 11 | 11 | 10 |
+
+* They use few kNN lemmas (median 4-12), spread over the ranks. 93 of the 101 used deep lemmas of the k400 proofs
+  are from other originals (567 of 609 for k100).
+* So beyond the top 10 or so the similarity ranking carries little information about which lemma a proof needs.
+
+**A learned lemma ranker: a feasibility test (10:57; hints/exp/lrank_feas.py).**
+* Set: the 238 goals proved by k60@0-k400@0. Candidates are each goal's top 400 by today's index (2,960 of the 2,982
+  used lemmas are among them). The label is used or not.
+* LightGBM on pair features: rank, similarity, idf-weighted overlaps, containments, sizes, same theory, same
+  original, use count (minus the target's own use, which leaked at first), goal number. 5-fold CV grouped by
+  original.
+
+| features | AUC | targets with all used lemmas in the top 30 | in the top 60 |
+|---|---:|---:|---:|
+| similarity rank alone | 0.897 | 18 | 68 |
+| all | 0.920 | 23 | 89 |
+| without the use count | 0.907 | 24 | 81 |
+| without the use count and goal number | 0.903 | 17 | 74 |
+
+* The lift comes from lemma popularity and the lemma's goal number (its depth in its original), not from better
+  similarity. It is real but modest.
+* The lemma-count members already reach the deep lemmas, at one 5 s run each. So a learned member would mostly
+  save CPU, not add proofs. Not built. (The use-count selection kp@0 proved 0 in 523 runs.)
+* A first run of this test used LightGBM's default thread count, every core: 9,000% CPU for 9 minutes,
+  10:46-10:55, at load 135. It slowed production and exp29's wall clock in that window. Thread counts are now
+  capped (n_jobs=2, OMP_NUM_THREADS=2).
