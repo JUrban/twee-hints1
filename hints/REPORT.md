@@ -4862,7 +4862,13 @@ measured on production's tail. PGC runs half1 from zero for 2 hours on 6 workers
 * the variants;
 * the ratio order;
 * twee-pg61.
-It is compared with PGA (17 Nov, the same script: 18,987). At 10 minutes: 11,704 against 11,467.
+It is compared with PGA (17 Nov, the same script: 18,987).
+* **At 2 hours: 18,917 against 18,987, neutral** (−70; identical runs differ by about 185). PGC led in the first
+  hour (+237 at 10 minutes) and trailed slightly in the second.
+* Its deep worker ran unfolded 5 s runs at 28 per CPU hour. PGA's ran the 20 s pool level at 30. The 40 s chain
+  level ran 4 times, proving all 4, starved by the ratio order's priors.
+* The tail portfolio neither helps nor hurts the first 2 hours from zero. The starvation it shows is the same
+  exploration gap as production's new variants.
 
 **E as a member (exp28, queued; notes/2026-11-19-eprover-watchlist.md).** E 3.5.9 built from ext/eprover, with chain
 hints as a static watchlist (`-xUseWatchlist`). On two walls it fails both at 60 s, with and without the watchlist,

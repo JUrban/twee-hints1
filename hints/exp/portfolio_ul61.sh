@@ -1,5 +1,5 @@
 #!/bin/bash
-# (19 Nov, after exp27) ul61: ul60 on 19 workers, with the lemma-set variants' priors at 9 (was 3). In ul60's first 45
+# (19 Nov 09:19) ul61: ul60 on 19 workers, with the lemma-set variants' priors at 9 (was 3). In ul60's first 45
 # minutes they ran 7-9 times each: the deep queue is sorted by each goal's best option, and Vk60@0 options (8.5 per CPU
 # hour live) keep coming, so a variant below that never comes up. At 9 each gets measured over about 2 CPU hours; if it
 # yields about 1, its estimate falls below Vk60@0's within 2-4 CPU hours.
