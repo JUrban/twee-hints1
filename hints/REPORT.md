@@ -4491,6 +4491,36 @@ model diversity is complementary. rmO cannot be deployed (trained on these goals
 models (m4b@0 and m7t@0 since 10:20, both kept). Still unchecked: a threshold matched to rm4t's freeze rate (rmO's raw
 scores are spread differently).
 
+**Retrained rule models with the papers' sampling tricks (exp37, 19 Nov 19:50-; [notes/2026-11-19-retrained-models.md](notes/2026-11-19-retrained-models.md)).**
+The user asked for retrained members with subsampling, and for the tricks of the ENIGMA, Mizar60 and related papers.
+* **The papers' tricks.** Mizar60 caps the proofs per problem (up to 6 random, or the shortest, a medium and the
+  longest). It also trains several models with different hyperparameters and covers with the best set.
+  ENIGMA Anonymous and Hammering Mizar found much bigger trees paid. Suda (CADE 2021) weighs every run equally,
+  half on positives and half on negatives. Only compatible strategies are mixed.
+* **The data.** Production keeps one proof per goal, but about 100 earlier loops kept theirs too: 643,782 logs
+  over 47,482 goals, most of them easy. The median goal's shortest proof has 4 positives.
+* **The test.** The 400 newest production proofs are held out of every model. They are replayed as of each proof
+  (exp/modelreplay.py) at 20 s with PG 0.25. A single snapshot without all 400 broke their sibling chains: the
+  control proved 2 of 126.
+* **Offline AUC on the 400:**
+
+| model | AUC |
+|---|---:|
+| rm4t | 0.835 |
+| production's logs, as rm7t (rm9a) | 0.876 |
+| 3 shortest proofs per goal over all loops (rm9b) | 0.740 |
+| 2 longest (rm9e) | 0.854 |
+| rm9a's data + Suda's weighting (rm9f) | 0.892 |
+| rm9a's data + 255 leaves (rm9g) | 0.886 |
+| 2 longest + weighting (rm9h) | 0.891 |
+| weighting + 255 leaves (rm9i) | 0.900 |
+
+  Short proofs of easy goals hurt, long ones help, and weighting and bigger trees help most.
+* **Replayed against rm4t (202 of 400), interim:** the weighted models gain (rm9f +9 −5, rm9h +5 −1), the unweighted
+  ones lose (rm9a +11 −27). The new models score higher and prune less at production's thresholds. Shifting them
+  to rm4t's deferral share (rmshift.py) is under test, and has not helped rm9a so far.
+* Members: m9a@0 since 20:30 (ul71); m9f@0, m9h@0 and m9i@0 since 23:30 (ul72).
+
 ## 2aw. Expanded proofs, deep runs and a lattice with small steps (17 Nov, from 19:00)
 
 Three of the user's questions, one experiment each. The records are in [notes/2026-11-17-expanded-proofs.md](notes/2026-11-17-expanded-proofs.md),
