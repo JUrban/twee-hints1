@@ -89,3 +89,18 @@ learning?"
 * The first launch at 17:58:23 died: loop.py's variant-name whitelist lacked 'sk'. Production was down about 30 s.
 * Check (18:01): the first 24 sk@0 runs went to com_Ralt goals with 4,254 hints each: the pool's 3,804 (as in that
   original's L0 runs) plus 450 of its 833 climb steps that the pool lacks.
+
+## Fill lemmas kept constants (found 18:18, fixed in climb.py 18:22)
+
+* By 18:18 the climber had saved 154 fill lemmas, and 69 of its 132 proofs had used at least one.
+* **120 of the 154 (78%) contained the goal's Skolem constants** (x0, x1_2, ...): the gap steps of a sketch proof
+  are about the goal's constants. As axioms they say something about fresh constants named x0 and can match
+  nothing. Only 3 of them were ever used, against 22 of the 34 with variables only. (They are sound: the fill
+  problem leaves out the conjecture, so the constants are arbitrary there.)
+* Fix: before a gap step is tried, every constant that occurs nowhere in the fill problem (axioms, lemmas, earlier
+  fill lemmas) becomes a variable (Yc0, Yc1, ...). Trivial steps (t = t) are skipped. Hints were already
+  generalised the same way (canon_key), so the sk member's fill steps were fine.
+* New record `fillattempts.tsv`: every gap tried, proved or not (which steps are fillable). It is in the data repo.
+* Smoke test on loops/SMK3: the attempts come out with Yc variables. The climber was restarted at 18:22:27 and
+  reloaded all 154 lemmas.
+

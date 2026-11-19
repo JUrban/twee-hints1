@@ -111,7 +111,7 @@ def main_climbs():
         out = os.path.join(R, 'climbs', d)
         os.makedirs(out, exist_ok=True)
         # 1. the small records
-        for n in ('climb.tsv', 'theories.tsv', 'fill.tsv', 'true.tsv', 'assume.tsv', 'used.tsv'):
+        for n in ('climb.tsv', 'theories.tsv', 'fill.tsv', 'true.tsv', 'assume.tsv', 'used.tsv', 'fillattempts.tsv'):
             if os.path.exists(os.path.join(src, n)) and os.path.getsize(os.path.join(src, n)):
                 gz(os.path.join(src, n), os.path.join(out, n + '.gz'))
         sv = os.path.join(src, 'solved.tsv')

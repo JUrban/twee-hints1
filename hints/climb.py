@@ -30,6 +30,7 @@ import hintlib, hintsel, loop, lemmas
 
 
 VAR = re.compile(r'\bX\d+\b')
+CONST = re.compile(r'\b([a-z][A-Za-z0-9_]*)\b(?!\s*\()')   # (constants: lower-case names not applied)
 _tok = re.compile(r"[A-Za-z][A-Za-z0-9_]*|[(),=]")
 
 
@@ -324,6 +325,8 @@ def main():
     #                      true_*): a conditional proof's full premises, so it can be replayed once they are proven
     ft = open(os.path.join(c.dir, 'true.tsv'), 'a'); fa = open(os.path.join(c.dir, 'assume.tsv'), 'a')
     fu = open(os.path.join(c.dir, 'used.tsv'), 'a')
+    #   fillattempts.tsv   original, formula, proved (0/1), target, tag: every gap --fill tried (which are fillable)
+    ffa = open(os.path.join(c.dir, 'fillattempts.tsv'), 'a')
     csrc = {}   # (target, label) -> the goal an assumption states
     nre = [0, 0]
     for l_ in (open(os.path.join(c.dir, 'true.tsv')) if os.path.getsize(os.path.join(c.dir, 'true.tsv')) else ()):
@@ -513,18 +516,7 @@ def main():
         assumptions (with the true lemmas so far and the sketch hints); the proven ones become
         true lemmas of the original."""
         o, _ = lemmas.split(t)
-        with lock:
-            todo = []
-            for asm, (l, r) in deps:
-                vs = sorted(set(VAR.findall(l + ' ' + r)) | set(re.findall(r'\b[A-Z][A-Za-z0-9_]*\b', l + ' ' + r)))
-                f = (f'! [{",".join(vs)}] : ' if vs else '') + f'{l} = {r}'
-                if f in true[o] or f in checked[o]:
-                    continue
-                checked[o].add(f); todo.append((l, r, vs, f))
-            todo = todo[:c.fill_max]
-            tl = list(true[o].items())
-            hs = list(sketch[o])
-        if not todo:
+        if not deps:
             return
         path = os.path.join(lemmas.PROB, t + '.p')
         lines = [x for x in open(path) if x.startswith(('cnf(', 'fof(')) and 'conjecture' not in x]
@@ -535,7 +527,35 @@ def main():
             else:
                 txt, _ = lemmas.lemma_problem(t, lp.lemma_src, a.lemmas, a.lemma_after)
             lines += [x + '\n' for x in txt.splitlines() if x.startswith('fof(lemma_')]
+        with lock:
+            tl = list(true[o].items())
+            hs = list(sketch[o])
         lines += [f'fof({lab}, axiom, {f}).\n' for f, lab in tl]
+        known = set()
+        for x in lines:
+            known.update(CONST.findall(x))
+        with lock:
+            todo = []
+            for asm, (l, r) in deps:
+                # (19 Nov 18:25) the goal's Skolem constants (x0, x1_2, ...) occur nowhere in this problem (its conjecture
+                # is left out), so the step holds for all their values: generalise them to variables. Kept as constants,
+                # 120 of the first 154 fill lemmas could match nothing (3 of them were ever used, against 22 of the 34
+                # with variables only).
+                cs = sorted(set(CONST.findall(l + ' ' + r)) - known)
+                if cs:
+                    ren_ = {cc: f'Yc{k}' for k, cc in enumerate(cs)}
+                    rx_ = re.compile(r'\b(' + '|'.join(map(re.escape, cs)) + r')\b(?!\s*\()')
+                    l = rx_.sub(lambda m: ren_[m.group(1)], l); r = rx_.sub(lambda m: ren_[m.group(1)], r)
+                if l == r:
+                    continue   # (a trivial step, e.g. true_2 of loops/SMK3: t = t)
+                vs = sorted(set(VAR.findall(l + ' ' + r)) | set(re.findall(r'\b[A-Z][A-Za-z0-9_]*\b', l + ' ' + r)))
+                f = (f'! [{",".join(vs)}] : ' if vs else '') + f'{l} = {r}'
+                if f in true[o] or f in checked[o]:
+                    continue
+                checked[o].add(f); todo.append((l, r, vs, f))
+            todo = todo[:c.fill_max]
+        if not todo:
+            return
         for i, (l, r, vs, f) in enumerate(todo):
             sub = {v: f'skd{i}_{v.lower()}' for v in vs}
             g = lambda x: re.sub(r'\b[A-Z][A-Za-z0-9_]*\b', lambda m: sub[m.group(0)], x)
@@ -564,6 +584,9 @@ def main():
         new = []
         sig = lp.signature(t)
         with lock:
+            for i, (l, r, vs, f) in enumerate(todo):
+                ffa.write(f'{o}\t{f}\t{int(f"dep_{i}" in got)}\t{t}\t{tag}\n')
+            ffa.flush()
             for i, (l, r, vs, f) in enumerate(todo):
                 if f'dep_{i}' in got and f not in true[o] and len(true[o]) < c.true_max:
                     true[o][f] = f'true_{len(true[o])}'; new.append(f)
