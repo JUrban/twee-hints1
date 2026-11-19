@@ -389,6 +389,12 @@ class Loop:
                                                    for j, i in enumerate(proved)])
         return cpath
 
+    def ab_arm(self, name):
+        """(19 Nov, exp25) --ab-args: the half of the goals (by a hash of the name) whose deep runs get the extra
+        arguments"""
+        import zlib
+        return bool(self.a.ab_args) and zlib.crc32(name.encode()) & 1 == 1
+
     def run_one(self, name, hints, rnd, budget=None, resume=None, max_cpu=None, variant=0, var=None):
         """One twee run. BUDGET (default: the round's timeout), RESUME (default --resume)
         and MAX_CPU (replaces --max-cpu in --args) are for --cascade. VARIANT: which of the
@@ -545,6 +551,9 @@ class Loop:
             cmd += ['--eqhint-subsume']
         elif var == 'sj':
             cmd += ['--set-join']
+        if (a.cascade and budget is not None and budget > float(a.cascade.split(',')[0]) and var != 'p9'
+                and self.ab_arm(name)):
+            cmd += a.ab_args.split()   # (--ab-args: this goal's deep runs are in the B arm)
         spath = os.path.join(self.dir, 'states', name + '.bin')
         if resume:   # True: continue the saved state; 'fresh': start over but save (replaces the old state);
             # 'nosave': start over and keep no state (an older one is removed: it is of an older context)
@@ -1147,7 +1156,7 @@ class Loop:
             for ri, line in enumerate(open(os.path.join(rdir, 'results.tsv'))):
                 f = line.rstrip('\n').split('\t')
                 if len(f) >= 5 and f[4] in IDX and ri >= a.chain_since_row:
-                    l_ = f[4] + 'f' if len(f) >= 8 and f[7] == 'f=1' else f[4]
+                    l_ = f[4] + 'f' if 'f=1' in f[7:] else f[4]
                     ystat[l_][0] += f[1] == 'THM'; ystat[l_][1] += float(f[2])
                 if len(f) >= 5 and f[0] in att and f[4] in IDX:
                     lev = ORIG[IDX[f[4]]]   # (the cascade's own level number)
@@ -1557,7 +1566,8 @@ class Loop:
                     if H and a.sched_pmin_auto:
                         (auto0 if lev == 0 else auto1).append((ok, dt, p_ if lev == 0 else 0.0))
                     rf.write(f'{n}\t{"THM" if ok else "NO"}\t{dt:.2f}\t{stats}\t{LAB[lev]}\tt={time.time()-t0:.0f}'
-                             f'\tc={chs(att[n][0]) if n in att else "-"}' + ('\tf=1' if fl_ else '') + '\n'); rf.flush()
+                             f'\tc={chs(att[n][0]) if n in att else "-"}' + ('\tf=1' if fl_ else '')
+                             + ('\tab=1' if T[lev] > T[0] and VAR[lev] != 'p9' and self.ab_arm(n) else '') + '\n'); rf.flush()
                     l_ = LAB[lev] + 'f' if fl_ else LAB[lev]
                     ystat[l_][0] += 1 if ok else 0; ystat[l_][1] += dt
                     if ok and n in self.solved:
@@ -1855,6 +1865,10 @@ def make_parser():
                     help='--cascade: retry a goal with a changed context only if at most this many places after a proven sibling')
     ap.add_argument('--frontier', type=int, default=1,
                     help='--cascade: deepen goals at most this many places after a proven sibling')
+    ap.add_argument('--ab-args', default='',
+                    help='(19 Nov, exp25) --cascade: an A/B test in production. The runs above the first level\'s budget '
+                         '(not p9) of half the goals, by a hash of the name, get these twee arguments; their results rows '
+                         'get a column ab=1 (levyield.py splits them)')
     ap.add_argument('--far-deep', type=int, default=0,
                     help='(19 Nov, exp24) --cascade: goals beyond --frontier and --line-gaps may also take the cascade\'s own '
                          'levels 1..K (their yield counted apart, as L<k>f; results rows get a column f=1)')

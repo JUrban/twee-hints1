@@ -9,7 +9,8 @@ for i, l in enumerate(open(f), 1):
     w = l.rstrip('\n').split('\t')
     if i < r0 or len(w) < 5:
         continue
-    k = w[4] + ('f' if len(w) >= 8 and w[7] == 'f=1' else '')   # (19 Nov: loop.py --far-deep rows, L1f)
+    k = w[4] + ('f' if 'f=1' in w[7:] else '')   # (19 Nov: loop.py --far-deep rows, L1f)
+    k += '/B' if 'ab=1' in w[7:] else ''   # (loop.py --ab-args: the B arm's rows)
     n[k] += 1; s[k] += w[1] == 'THM'; c[k] += float(w[2])
 for k in sorted(n, key=lambda k: (k[0], k)):
     print(f'{k:6} runs {n[k]:6}  proofs {s[k]:4}  CPU h {c[k] / 3600:6.2f}  per CPU h {s[k] / max(c[k] / 3600, 1e-9):6.2f}')
