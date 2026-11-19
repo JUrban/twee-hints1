@@ -600,3 +600,13 @@ class ran Vk200@0 (99) and Vs12@0 (75), the unmeasured ones, first.
   original, reversed or shuffled order, gives byte-identical output: twee normalises the input. Random restarts by
   permuting the problem do not exist for twee, so diversity has to come from changing the problem: other lemma sets,
   unfolding.
+
+**hl@0: the kNN lemmas' proof steps as hints, back as a 5 s member (loop.py 5fc6b48, 10:11).**
+* 2ap (16 Nov) dropped `--hint-lemma-proofs` on count: +1 −2 at factor 0.1 and at 0.01, union 7-8 of 150 against 6.
+* Now it is `--variants hl`: the usual hints plus up to 300 proof steps of each of the goal's 30 kNN lemmas, at
+  `--hl-factor` (0.1).
+* On 30 random unsolved UL goals it adds 60-585 new hints (median about 270) to pools of 2,600-21,000. 20-30 of
+  the 30 picks are of other originals. R1dist_to_aa1 674 gets none, since its picks are all siblings
+  (hints/exp/hl_count.py).
+* ul63.sh (prepared): ul62 plus hl@0 under `--explore 1`. It starts once ul62 has measured k200@0 and s12@0, about
+  an hour.
