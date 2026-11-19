@@ -35,9 +35,62 @@ Follows exp29 ([notes/2026-11-19-from-zero-explore.md](2026-11-19-from-zero-expl
 * If P2D ≥ P2A + 185, the gain replicates. If within noise, half1's +392 was partly luck, and the defaults stay
   (they do not lose). If P2D loses by more than the noise, revisit the defaults.
 
-## Results
+## Results (ended 14:46)
 
-(running; ends about 14:45)
+`abs/setcurve.py sets/half2 P2A P2D --at ...` (goals of half2 proved):
+
+| minutes | 10 | 30 | 60 | 90 | 120 |
+|---|---:|---:|---:|---:|---:|
+| P2A (17 Nov system) | 11,489 | 17,345 | 19,041 | 19,442 | **19,501** |
+| P2D (new defaults) | 11,369 | 17,397 | 18,963 | 19,323 | **19,383** |
+| difference | −120 | +52 | −78 | −119 | **−118** |
+
+* **Not replicated: −118 at 2 hours, within the noise of about 185.** Half1 gave +392 with the same comparison
+  (exp29, PGD against PGA's 17 Nov run).
+* Only P2D proved 295 goals, only P2A 414; the union is 19,798 (+297 over P2A alone).
+
+By level (`exp/exp30_ana.py`):
+
+| arm | level | runs | proofs | CPU h | per CPU h |
+|---|---|---:|---:|---:|---:|
+| P2A | L0 (5 s pool) | 20,984 | 16,719 | 8.04 | 2,080 |
+| P2A | L1 (20 s pool, resumed) | 283 | 82 | 2.29 | 35.8 |
+| P2A | L2 (80 s) | 43 | 5 | 1.31 | 3.8 |
+| P2D | L0 (5 s pool) | 22,377 | 16,979 | 8.95 | 1,898 |
+| P2D | Vunf@0 | 632 | 50 | 1.45 | 34.4 |
+| P2D | Vk100@0 | 175 | 18 | 0.20 | 89.1 |
+| P2D | Vk200@0 | 164 | 11 | 0.20 | 54.7 |
+| P2D | Vk400@0 | 144 | 3 | 0.20 | 14.8 |
+| P2D | Vkd@0 | 166 | 1 | 0.20 | 5.0 |
+| P2D | L1 (40 s chain) | 14 | 6 | 0.20 | 29.7 |
+
+* One-arm goals by where they were proved:
+  * P2D: 220 at 5 s, 38 by the transfer, Vunf@0 15, Vk100@0 10, Vk200@0 8, L1 2, Vk400@0 2.
+  * P2A: 296 at 5 s, 67 by the transfer, L1 47, L2 4.
+
+## Reading
+
+* **Deep work is about equal in both arms.**
+  * P2A's 20 s pool level made 35.8 proofs per CPU hour, and 47 goals only P2A proved came from it.
+  * P2D's deep members made 89 proofs in 2.65 CPU h (34 per CPU hour), and 37 goals only P2D proved came from
+    them.
+  * The rest of the one-arm goals are 5 s runs and transfers, which differ by chance (twee's chaos) in both
+    directions: 220 against 296.
+* **So half1's +392 was mostly luck at the 5 s level.** Pooled over both halves, the new defaults are +137 per half
+  (+392 and −118), below the noise of one pair. They do not lose, and they do not win either.
+* **The 20 s pool level is a member P2D lacks.** It runs from the 5 s state (a resume), at about the yield of the best
+  5 s lemma members. P2D's cascade goes 5 → 40 s with chain hints. Its L1 ran 14 times and proved 6 (29.7 per CPU
+  hour), and the explore rule gave it only 0.2 CPU h.
+* The explore budget (0.2 CPU h each) ran out for every member within the first hour. After that the ratio order
+  gave the deep worker to Vunf@0 (1.45 CPU h).
+
+## Decision
+
+* solve_new.sh's defaults stay (no loss), but **REPORT no longer claims a from-zero gain**: +392 on half1, −118 on
+  half2.
+* **Portfolio follow-up:** the 20 s pool resume as a member beside the 5 s lemma members, with a measure of the
+  union. A test should give both new and old members the same deep CPU, since the arms' deep work tied here.
+  Not started: from-zero pairs cost about 25 CPU hours, and the union (+297) is the target, not either arm.
 
 Interim, 13:45 (`abs/setcurve.py sets/half2 P2A P2D`, goals of half2 proved):
 

@@ -4954,7 +4954,7 @@ It is compared with PGA (17 Nov, the same script: 18,987).
 * The tail portfolio neither helps nor hurts the first 2 hours from zero. The starvation it shows is the same
   exploration gap as production's new variants.
 
-**From zero with exploration: +392 at 2 hours (exp29, 19 Nov 10:38-12:39;
+**From zero with exploration: +392 at 2 hours on half1, not replicated on half2 (exp29, 19 Nov 10:38-12:39;
 [notes/2026-11-19-from-zero-explore.md](notes/2026-11-19-from-zero-explore.md)).** PGD is PGC plus the 5 s
 lemma-count members (k100@0, k200@0, k400@0, kd@0) and `--explore 0.2` for them and the 40 s chain level.
 
@@ -4970,8 +4970,23 @@ lemma-count members (k100@0, k200@0, k400@0, kd@0) and `--explore 0.2` for them 
 * The deep members proved 86 goals themselves: L1 10 of 17 runs, Vk100@0 17, Vk200@0 10, Vk400@0 4, Vunf@0 43. 534
   of the 652 PGD-only goals fell to fresh 5 s runs, and 429 of those 534 used a lemma (sibling or kNN) that only
   PGD had proved: cascades from PGD's extra proofs.
-* **solve_new.sh's defaults are now PGD's setting** (`DEEP`, 19 Nov 12:41). A replication on half2, both arms at
-  once (exp30, [notes/2026-11-19-half2-replication.md](notes/2026-11-19-half2-replication.md)), runs until about 14:45.
+* **solve_new.sh's defaults are now PGD's setting** (`DEEP`, 19 Nov 12:41).
+* **The half2 replication does not hold** (exp30, 12:45-14:46, both arms at once;
+  [notes/2026-11-19-half2-replication.md](notes/2026-11-19-half2-replication.md)).
+
+  | minutes | 10 | 30 | 60 | 90 | 120 |
+  |---|---:|---:|---:|---:|---:|
+  | P2A (17 Nov system) | 11,489 | 17,345 | 19,041 | 19,442 | **19,501** |
+  | P2D (new defaults) | 11,369 | 17,397 | 18,963 | 19,323 | **19,383** |
+
+  * −118, within the noise. Only P2D proved 295 goals, only P2A 414; the union is 19,798.
+  * Deep work is about equal in both arms. P2A's 20 s pool resume made 82 proofs at 35.8 per CPU hour, 47 of them
+    goals only P2A proved. P2D's 5 s members made 89 at 34 per CPU hour, 37 of them only P2D's.
+  * The rest of the one-arm goals are 5 s runs that differ by chance, both ways. So half1's +392 was mostly
+    5 s luck: pooled over both halves, +137 a half, below the noise of one pair.
+  * The defaults stay, since they do not lose, but there is no from-zero gain to claim. The 20 s pool resume is a
+    member the new defaults lack. Joining it to the 5 s members is the portfolio follow-up, with the union (+297)
+    as the target.
 
 **E as a member (exp28; [notes/2026-11-19-eprover-watchlist.md](notes/2026-11-19-eprover-watchlist.md)): a genuine negative.** E 3.5.9 was built from
 ext/eprover and given the chain hints as a static watchlist (`-xUseWatchlist`).
@@ -5126,8 +5141,8 @@ rounds of 30 s or more, but about 40% overhead for 8 s rounds.
 * **From zero on a new half of the benchmark** (half1, 25,937 goals, 6 workers, no outside proofs):
   * 11,500 in 10 minutes, 18,500 in an hour, 19,000 in 2 hours (PGA 18,987; today's system 18,917).
   * The curve is front-loaded: the second hour adds 2.5%.
-  * *12:43: with the explored lemma portfolio (exp29), 19,309 in 2 hours (+392). The second hour adds 3.2%.
-    Replication on half2 is running.*
+  * *With the explored lemma portfolio: half1 19,309 in 2 hours (+392, exp29), but half2 −118 (exp30, 14:46).
+    Pooled, the difference is within noise.*
 * **Where the gain comes from now:**
   1. Proven siblings as lemmas, online: the chain along each original's proof.
   2. **Cross-original kNN lemmas.** 392 of the 401 production proofs from 06:02 to 08:05 used one, often proved
@@ -5262,8 +5277,9 @@ rounds of 30 s or more, but about 40% overhead for 8 s rounds.
     at 11.5 per CPU hour). ul64 adds k1000@0, k2000@0, 40 and 200 sibling lemmas, and 400 lemmas at 80 s.
   * Search-setting changes (other rule models, no PG, threshold 0.2, no model) make 0-2 per CPU hour. They are kept,
     ordered below.
-* **From zero:** exp29 (half1) gave +392 at 2 hours, and solve_new.sh's defaults became its setting. exp30
-  replicates it on half2 with both arms at once (until about 14:45). Production is on 4 workers meanwhile.
+* **From zero:** exp29 (half1) gave +392 at 2 hours, and solve_new.sh's defaults became its setting. exp30 did not
+  replicate it on half2 (−118, within noise): no from-zero gain is established. Both arms' deep work tied. The
+  one-arm goals (295 and 414; union +297) are the target of a combined portfolio.
 * **Measured and closed:**
   * E with watchlists (0 of 107 walls);
   * Prover9 with Veroff's settings (0 of 107 at max_weight 5, 40, 100);

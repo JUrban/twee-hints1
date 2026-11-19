@@ -719,6 +719,10 @@ Running:
     still on the deep runs. L1 runs rarely now, so it is stalled. Read L1 against L1/B from row 103428.
 
 Ended today:
+* exp30 14:46: the half2 replication, P2D 19,383 against P2A 19,501 (−118, within noise). Half1's +392 does not
+  hold. Both arms' deep work tied, and the union is 19,798. The defaults stay, with no claim.
+* exp31 14:09: ENIGMAWatch offline (the user's paper). 512 completion ratios lift held-out AUC by +0.001: not built.
+  The ProofWatch member pw@0 joins production (ul65, 14:46).
 * exp29 12:39: half1 from zero with the explored portfolio, 19,309 at 2 hours, against 18,917 and 18,987 (+392).
   solve_new.sh's defaults are now its setting (`DEEP`).
 * exp28 10:38: E with chain-hint watchlists, 0 of 107 walls. A genuine negative.
@@ -735,10 +739,11 @@ Paused:
 * exp19: set-join on the walls, 37 of 107 done, 0.31 per CPU hour (run.py skips done ids).
 
 Next:
-1. exp30's result: confirm or qualify solve_new.sh's new defaults.
-2. ul64's new members after 1 CPU hour each: k1000@0, k2000@0, s40@0, s200@0, Vk400 at 80 s.
-3. A longer from-zero run (4-6 hours) with the new defaults, where the tail starts.
-4. CPU: 20 in use at 12:56 (exp30 16, ul64 4).
+1. ul65 (19 workers from 14:46): the new members after 1 CPU hour each, namely pw@0 (ProofWatch), k1000@0, k2000@0,
+   s40@0, s200@0 and Vk400 at 80 s.
+2. From zero: a combined portfolio, the 20 s pool resume beside the 5 s lemma members, aiming at exp30's union.
+3. A longer from-zero run (4-6 hours) where the tail starts.
+4. CPU: about 20 in use at 14:47 (ul65 19, transfer 2 at times).
 
 ---------------------------------------------------------------------------------------------------------
 
