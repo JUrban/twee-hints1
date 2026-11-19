@@ -48,3 +48,20 @@ Written 19 Nov 2026, 10:21 UTC. Started 10:38:51 (loops/PGD), after exp28 ended.
     early runs almost all prove. From minute 18 on PGD completed more runs than PGC.
 * 30 minutes (11:10): PGD 16,540, against PGC 16,980 and PGA 16,913 (10 minutes: 10,314 against 11,704; 20: 14,300
   against 15,080). The gap is closing.
+* **60 minutes (11:40): PGD 18,713, against PGC 18,545 (+168) and PGA 18,529 (+184).** At 45 minutes: 17,976 against
+  17,934 and 17,872. PGD has overtaken both, despite the runs it lost to the contention. That is within the noise
+  so far (about 185 at 2 hours).
+
+| PGD label, first hour | runs | proofs | CPU h | per CPU h |
+|---|---:|---:|---:|---:|
+| L0 (5 s) | 17,973 | 16,186 | 4.77 | 3,393 |
+| L1 (40 s chain) | 17 | 10 | 0.22 | 46 |
+| Vk100@0 | 62 | 14 | 0.07 | 189 |
+| Vk200@0 | 45 | 5 | 0.06 | 82 |
+| Vk400@0 | 38 | 1 | 0.06 | 17 |
+| Vk60@0 | 6 | 2 | 0.01 | |
+| Vkd@0 | 34 | 0 | 0.05 | 0 |
+| Vunf@0 | 152 | 30 | 0.34 | 88 |
+
+* Against PGC's first 2 hours (L1: 4 runs, Vunf@0 885): exploration gave L1 and the lemma-count members runs early.
+  The deep class is still small (351 runs against 17,954 in the r class).
