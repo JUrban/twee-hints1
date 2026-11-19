@@ -167,6 +167,7 @@ abs/rm9wave2.sh, started 20:09:41 (its header says 20:11, written before checkin
 | rm9c (slm, 16 negatives, long-exp 0.5, 255 leaves) | 6.57 M, 4.55 M, 129,293 | 0.842 | 99.9% | 1.7% | 28.9 min | 27.3 GB |
 | **rm9f (rm9a's data, Suda's per-log weighting)** | 4.76 M, 2.10 M, 21,139 | **0.892** | 99.4% | 13.2% | 19.8 min | 20.3 GB |
 | rm9g (rm9a's data, 255 leaves) | 4.76 M, 2.10 M, 21,140 | 0.886 | 99.0% | 14.4% | 20.8 min | 20.0 GB |
+| rm9h (long2, 16 negatives, 255 leaves, Suda's weighting) | 6.03 M, 4.64 M, 89,155 | 0.891 | 98.7% | 20.7% | 29.6 min | 24.9 GB |
 
 * rm9a ranks as well as rm7t, and is calibrated higher: at production's thresholds it defers and freezes much
   less. A threshold matched to rm4t's deferral share would differ. That is the same caveat as exp33's rmO.
@@ -194,6 +195,24 @@ abs/rm9wave2.sh, started 20:09:41 (its header says 20:11, written before checkin
   combines them: rm9h = long2 + weighting, rm9i = rm9a's data + weighting + 255 leaves.
 * Interim at 22:34: rm9a +9 −14 on 245, rm9b +7 −18 on 216, rm9c +5 −5 on 113, rm9e +6 −10 on 185, rm9f +5 −2
   on 96.
+* The weighting rescues the multi-proof data: long2 goes from 0.854 (rm9e) to 0.891 (rm9h).
+* **Interim at 23:04: online, the deferral share matters, not the ranking.** Against the control:
+
+| model | goals | + | − | deferred at 0.1 (offline) |
+|---|---:|---:|---:|---:|
+| rm9a | 295 | 11 | 23 | 6.6% |
+| rm9b | 246 | 7 | 23 | 3.0% |
+| rm9c | 171 | 5 | 10 | 1.7% |
+| rm9e | 236 | 9 | 14 | 6.5% |
+| rm9f | 177 | 5 | 4 | 13.2% |
+| rm9g | 102 | 4 | 4 | 14.4% |
+
+  * rm4t defers 30.0%. Production's thresholds (deferral 0.1, PG 0.25) were tuned to rm4t's calibration. The new
+    models score rules higher, so they prune less, and those that prune least lose most.
+  * **Calibration shift:** adding a constant to every leaf of a model's first tree shifts every raw score by it.
+    Deferral (sigmoid ≥ 0.1) and PG (q1 + q2 ≥ logit 0.25) then both move consistently, without changing the
+    ranking (AUC) or the thresholds.
+  * The shift is set so that the model defers rm4t's share of all rules in the test logs, using no labels.
 * Interim at 22:14: rm9a +9 −11 on 213, rm9b +5 −14 on 182, rm9c +2 −5 on 67, rm9e +5 −3 on 143.
 * CPU: 5 arms + training 4 + climber 4: production restarted at 21:54 with J=8 (rows from 179,422; earlier log loops/UL71a.log).
 * **The first paired design was broken (found 20:58).** The snapshot loops/ULsN19 (production's solved rows before
