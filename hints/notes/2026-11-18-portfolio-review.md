@@ -735,3 +735,25 @@ hints more than the pool (none on R1dist_to_aa1, as the offline count predicted)
     since the split, k100-k400, have no training rows.)
   * So the ratio rule's single estimate per member stays. Which goal a member proves is not predicted by its
     original, at the resolution these counts give.
+
+## ul64/ul65 members after their explore hour (19 Nov 15:50)
+
+`levyield.py loops/UL/r5/results.tsv 145787` (ul64 from 12:40, ul65 from 14:46; 4 workers until 14:46, then 19):
+
+| member | runs | proofs | CPU h | per CPU h |
+|---|---:|---:|---:|---:|
+| Vs40@0 (40 sibling lemmas) | 937 | 6 | 1.70 | 3.52 |
+| Vk400 (80 s) | 8 | 1 | 0.32 | 3.17 |
+| Vk1000@0 | 1,832 | 17 | 5.47 | 3.11 |
+| L0 | 939 | 7 | 2.38 | 2.94 |
+| Vk400@0 | 3,564 | 12 | 7.67 | 1.56 |
+| Vk2000@0 | 233 | 1 | 1.01 | 0.99 |
+| Vpw@0 (ProofWatch, ul65) | 620 | 0 | 1.14 | 0 |
+| Vs200@0 | 426 | 0 | 1.01 | 0 |
+| Vk100@0, Vk200@0, Vk60@0, Vkd@0, Vs12@0 | 245-912 each | 0 | 0.4-1.7 each | 0 |
+
+* The lemma-count members keep paying, but they are decaying: Vk400@0 went from 11.5 per CPU hour (ul63, 11:10) to
+  1.6, as its easy goals are used up. Vk1000@0 and Vs40@0 are now the best (about 3), and each proved goals after
+  many other members had failed in the same context (exp/condvar.py: Vs40@0's 6 came after up to 12 others).
+* Members with 0 in 1-1.7 CPU h fall below the live ones under the ratio order, with no hand change. Since 15:39,
+  ul66 runs beside the climber (exp32, notes/2026-11-19-climber-member.md).
