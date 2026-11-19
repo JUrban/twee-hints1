@@ -22,7 +22,7 @@ MAP = {  # note -> REPORT section, for notes the section does not name (checked 
     '2026-11-18-chain-transfer-records.md': '2ax', '2026-11-18-knn60-walls.md': '2ay', '2026-11-18-no-pg-no-model-walls.md': '2az',
     '2026-11-18-prover9-chain-walls.md': '2ay', '2026-11-18-set-join-walls.md': '2ay', '2026-11-18-subsumption-deep.md': '2ay',
     '2026-11-18-two-sided-chain.md': '2ay', '2026-11-18-unfolded-walls.md': '2ay', '2026-11-19-far-goals-deep.md': '2az',
-    '2026-11-19-from-zero-explore.md': '2az', '2026-11-19-queue-renorm-ab.md': '2az', '2026-11-16-knn-lemma-count.md': '2am',
+    '2026-11-19-from-zero-explore.md': '2az', '2026-11-19-half2-replication.md': '2az', '2026-11-19-queue-renorm-ab.md': '2az', '2026-11-16-knn-lemma-count.md': '2am',
 }
 def expand(s):
     """', -name.md' after a full notes/DATE-... name -> notes/<the unique notes file DATE-name.md>"""

@@ -702,6 +702,9 @@ earlier member failed in the same context. In production the order is online (`-
 variant levels are optional attempts (loop.py 119c3d1).
 
 Running:
+* **exp30** (12:45 - about 14:45, loops/P2A and P2D,
+  [notes/2026-11-19-half2-replication.md](notes/2026-11-19-half2-replication.md)): half2 from zero, the 17 Nov
+  system against solve_new.sh's new defaults, at once; production on 4 workers meanwhile.
 * exp29 ended 12:39 ([notes/2026-11-19-from-zero-explore.md](notes/2026-11-19-from-zero-explore.md)): half1 from
   zero, PGD 19,309 at 2 hours against PGC 18,917 (+392) and PGA 18,987 (+322); 485 goals neither control proved.
   solve_new.sh's defaults are now PGD's setting (DEEP).
@@ -817,6 +820,7 @@ reports are written as the experiments run.
 | [notes/2026-11-19-queue-renorm-ab.md](notes/2026-11-19-queue-renorm-ab.md) | deep runs without queue renormalisation, an A/B test in production ul57 (exp26, from 05:52) |
 | [notes/2026-11-19-eprover-watchlist.md](notes/2026-11-19-eprover-watchlist.md) | E 3.5.9 with chain hints as a static watchlist on the 107 walls, 60 s (exp28): 0 of 107, a genuine negative |
 | [notes/2026-11-19-from-zero-explore.md](notes/2026-11-19-from-zero-explore.md) | exp29: half1 from zero with the explored 5 s lemma members: 19,309 at 2 hours against PGC 18,917, PGA 18,987; solve_new.sh's new defaults |
+| [notes/2026-11-19-half2-replication.md](notes/2026-11-19-half2-replication.md) | exp30: the explored portfolio from zero on half2, both arms at once (12:45 - about 14:45) |
 | [notes/2026-11-19-from-zero-portfolio.md](notes/2026-11-19-from-zero-portfolio.md) | half1 from zero in 2 hours with today's deep portfolio (PGC), against PGA's 18,987 (exp27, from 07:18) |
 | [notes/2026-11-17-lemma-circularity.md](notes/2026-11-17-lemma-circularity.md) | Are lemma chains circular? A check of the used lemmas |
 | [notes/2026-11-17-mix-fail-order.md](notes/2026-11-17-mix-fail-order.md) | Repeats cost most of the time: `--mix` and `--fail-order` |

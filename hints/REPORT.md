@@ -4700,6 +4700,8 @@ reproduced exactly).
 
 ## 2az. Portfolios: complementary methods kept, not dropped (user's request, 18 Nov 17:00)
 
+*Notes: [notes/2026-11-19-half2-replication.md](notes/2026-11-19-half2-replication.md).*
+
 *Notes: [notes/2026-11-18-no-pg-no-model-walls.md](notes/2026-11-18-no-pg-no-model-walls.md), [notes/2026-11-19-far-goals-deep.md](notes/2026-11-19-far-goals-deep.md), [notes/2026-11-19-from-zero-explore.md](notes/2026-11-19-from-zero-explore.md), [notes/2026-11-19-queue-renorm-ab.md](notes/2026-11-19-queue-renorm-ab.md).*
 
 The user: when a method loses 2 of the best method's proofs but adds 3 of its own, running both for a share of the
@@ -4950,6 +4952,24 @@ It is compared with PGA (17 Nov, the same script: 18,987).
 * The tail portfolio neither helps nor hurts the first 2 hours from zero. The starvation it shows is the same
   exploration gap as production's new variants.
 
+**From zero with exploration: +392 at 2 hours (exp29, 19 Nov 10:38-12:39;
+[notes/2026-11-19-from-zero-explore.md](notes/2026-11-19-from-zero-explore.md)).** PGD is PGC plus the 5 s
+lemma-count members (k100@0, k200@0, k400@0, kd@0) and `--explore 0.2` for them and the 40 s chain level.
+
+| minutes | 10 | 30 | 60 | 90 | 120 |
+|---|---:|---:|---:|---:|---:|
+| PGA (17 Nov system) | 11,467 | 16,913 | 18,529 | 18,875 | 18,987 |
+| PGC (exp27) | 11,704 | 16,980 | 18,545 | 18,834 | 18,917 |
+| **PGD** | 10,314 | 16,540 | 18,713 | 19,216 | **19,309** |
+
+* +392 against PGC and +322 against PGA, about twice the difference between identical runs (185). Early on, a
+  runaway LightGBM fit (all cores, minutes 6-15) cost PGD about 1,100 runs, so the early points are biased against it.
+* Only PGD proved 652 goals, only PGC 251. 485 goals were proved by neither control.
+* The deep members proved 86 goals themselves: L1 10 of 17 runs, Vk100@0 17, Vk200@0 10, Vk400@0 4, Vunf@0 43. 534
+  of the 652 PGD-only goals fell to fresh 5 s runs: each deep proof is a new lemma for its neighbours.
+* **solve_new.sh's defaults are now PGD's setting** (`DEEP`, 19 Nov 12:41). A replication on half2, both arms at
+  once (exp30, [notes/2026-11-19-half2-replication.md](notes/2026-11-19-half2-replication.md)), runs until about 14:45.
+
 **E as a member (exp28; [notes/2026-11-19-eprover-watchlist.md](notes/2026-11-19-eprover-watchlist.md)): a genuine negative.** E 3.5.9 was built from
 ext/eprover and given the chain hints as a static watchlist (`-xUseWatchlist`).
 * It proved 0 of the 107 walls at 60 CPU s each (1.79 CPU h). Prover9 with the same hints proved 4 (exp16).
@@ -5083,6 +5103,8 @@ rounds of 30 s or more, but about 40% overhead for 8 s rounds.
 * **From zero on a new half of the benchmark** (half1, 25,937 goals, 6 workers, no outside proofs):
   * 11,500 in 10 minutes, 18,500 in an hour, 19,000 in 2 hours (PGA 18,987; today's system 18,917).
   * The curve is front-loaded: the second hour adds 2.5%.
+  * *12:43: with the explored lemma portfolio (exp29), 19,309 in 2 hours (+392). The second hour adds 3.2%.
+    Replication on half2 is running.*
 * **Where the gain comes from now:**
   1. Proven siblings as lemmas, online: the chain along each original's proof.
   2. **Cross-original kNN lemmas.** 392 of the 401 production proofs from 06:02 to 08:05 used one, often proved
@@ -5217,8 +5239,8 @@ rounds of 30 s or more, but about 40% overhead for 8 s rounds.
     at 11.5 per CPU hour). ul64 adds k1000@0, k2000@0, 40 and 200 sibling lemmas, and 400 lemmas at 80 s.
   * Search-setting changes (other rule models, no PG, threshold 0.2, no model) make 0-2 per CPU hour. They are kept,
     ordered below.
-* **From zero (exp29, ends about 12:40):** does the explored lemma portfolio lift the second hour on a new half of
-  the benchmark (exp27's 2 hours: neutral)? If it does, solve_new.sh gets it.
+* **From zero:** exp29 (half1) gave +392 at 2 hours, and solve_new.sh's defaults became its setting. exp30
+  replicates it on half2 with both arms at once (until about 14:45). Production is on 4 workers meanwhile.
 * **Measured and closed:**
   * E with watchlists (0 of 107 walls);
   * Prover9 with Veroff's settings (0 of 107 at max_weight 5, 40, 100);
