@@ -5209,6 +5209,27 @@ rounds of 30 s or more, but about 40% overhead for 8 s rounds.
 
 ## 4. Next steps
 
+*19 Nov, 11:15 (2az; [notes/2026-11-18-portfolio-review.md](notes/2026-11-18-portfolio-review.md)):*
+
+* **Production (ul63, then ul64 at about 12:40)** is a portfolio of 5 s problem changes, explored and then ordered
+  by the ratio rule. The deep levels (the 40 s chain, then 80 and 160 s) and the 80 s variants come after them.
+  * Lemma counts pay most: each larger kNN set proves goals the smaller ones failed in the same context (400 lemmas
+    at 11.5 per CPU hour). ul64 adds k1000@0, k2000@0, 40 and 200 sibling lemmas, and 400 lemmas at 80 s.
+  * Search-setting changes (other rule models, no PG, threshold 0.2, no model) make 0-2 per CPU hour. They are kept,
+    ordered below.
+* **From zero (exp29, ends about 12:40):** does the explored lemma portfolio lift the second hour on a new half of
+  the benchmark (exp27's 2 hours: neutral)? If it does, solve_new.sh gets it.
+* **Measured and closed:**
+  * E with watchlists (0 of 107 walls);
+  * Prover9 with Veroff's settings (0 of 107 at max_weight 5, 40, 100);
+  * deep runs on far goals (0 of 40);
+  * a learned lemma ranker (a modest lift, from popularity; the lemma-count members reach the same lemmas);
+  * recency-weighted yield estimates (they rank members worse than the cumulative one).
+* **Open:**
+  * the exp26 A/B on queue renormalisation in deep runs (stalled: L1 runs rarely now);
+  * a 6-8 hour from-zero run, where the tail starts;
+  * lemma sets by other criteria (the proof dependencies, kd@0, make 4.9 per CPU hour).
+
 *18 Nov, 18:49 (the portfolio, 2az):*
 
 * Production is a **portfolio ordered by the ratio rule**: each member is ranked by its new proofs per CPU hour on
