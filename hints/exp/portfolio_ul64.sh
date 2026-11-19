@@ -1,5 +1,5 @@
 #!/bin/bash
-# (19 Nov, after exp29) ul64: ul63 plus three more lemma-set members at 5 s, k1000@0 (about 1.2 times a run's cost),
+# (19 Nov 12:40) ul64: ul63 plus three more lemma-set members at 5 s, k1000@0 (about 1.2 times a run's cost),
 # s40@0 and s200@0 (40 and 200 proven siblings as lemmas, beside the 30 kNN ones), all under --explore 1, and
 # --prior-weight 0.5 (hints/exp/estcmp.py: lighter prior weights rank members a little better).
 # Also k2000@0 (2-3 times a 5 s run's CPU) and k400 at 80 s, both explored: at 11:10 in ul63 Vk400@0 made 11.5 proofs

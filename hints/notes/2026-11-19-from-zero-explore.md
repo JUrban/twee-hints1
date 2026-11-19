@@ -36,9 +36,7 @@ Written 19 Nov 2026, 10:21 UTC. Started 10:38:51 (loops/PGD), after exp28 ended.
   members (hints/exp/condvar.py).
 * Goals only PGD proved, against PGC and PGA.
 
-## Results
-
-(running; ends about 12:40)
+## Results (ended 12:39)
 
 * **Caveat:** from 10:46 to 10:55, a LightGBM fit with default threads ran at 9,000% CPU (load 135; portfolio
   review). This run's minutes 7-16 had less CPU than PGC's had. Its 10 and 20 minute points are biased against
@@ -65,3 +63,55 @@ Written 19 Nov 2026, 10:21 UTC. Started 10:38:51 (loops/PGD), after exp28 ended.
 
 * Against PGC's first 2 hours (L1: 4 runs, Vunf@0 885): exploration gave L1 and the lemma-count members runs early.
   The deep class is still small (351 runs against 17,954 in the r class).
+
+**2 hours (12:39): PGD 19,309, against PGC 18,917 (+392) and PGA 18,987 (+322)** (`abs/setcurve.py`; 19,318 in
+solved.tsv once the last runs had ended).
+
+| minutes | 10 | 30 | 60 | 90 | 100 | 110 | 120 |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| PGA (17 Nov) | 11,467 | 16,913 | 18,529 | 18,875 | 18,912 | 18,941 | 18,987 |
+| PGC (19 Nov 07:18) | 11,704 | 16,980 | 18,545 | 18,834 | 18,866 | 18,902 | 18,917 |
+| PGD | 10,314 | 16,540 | 18,713 | 19,216 | 19,250 | 19,296 | **19,309** |
+
+* +392 against PGC is about twice the difference between identical runs (185), after PGD had lost about 1,100 runs
+  to the contention in minutes 6-15. PGD's second hour added 596, PGC's 372, PGA's 458.
+* One-arm goals: only PGD 652, only PGC 251 (union 19,569); only PGD 635, only PGA 305. 485 goals were proved by PGD
+  and neither control.
+
+By level (PGD r1/results.tsv, 2 hours):
+
+| label | runs | proofs | CPU h | per CPU h |
+|---|---:|---:|---:|---:|
+| L0 (5 s) | 21,708 | 16,690 | 9.38 | 1,780 |
+| L1 (40 s chain) | 17 | 10 | 0.22 | 46 |
+| Vk100@0 | 157 | 17 | 0.20 | 85 |
+| Vk200@0 | 149 | 10 | 0.20 | 49 |
+| Vk400@0 | 128 | 4 | 0.20 | 20 |
+| Vk60@0 | 6 | 2 | 0.01 | |
+| Vkd@0 | 159 | 0 | 0.21 | 0 |
+| Vunf@0 | 428 | 43 | 1.02 | 42 |
+
+* Where the PGD-only goals (against PGC) were proved: L0 534, the transfer 80, Vunf@0 11, Vk200@0 9, Vk100@0 8,
+  L1 6, Vk400@0 4.
+
+## Reading
+
+* **The explored portfolio wins from zero: +392 at 2 hours.** It is the first from-zero gain of the tail machinery
+  (exp27 alone was neutral).
+* The deep members proved 86 goals themselves, but most of the gain is in 5 s fresh runs: 534 of the 652 PGD-only
+  goals. A deep member's proof becomes a sibling lemma and a kNN lemma, and its neighbours then fall to fresh 5 s runs
+  in the new context. That is the chain effect, started earlier and in more places. PGC never measured these
+  members: L1 ran 4 times, and no lemma-count member ran.
+* The 40 s chain level, starved in PGC (4 runs), got 17 runs with exploration and proved 10.
+* Proof-dependency lemmas (kd@0) proved 0 in 159 runs from zero, where in production they make 4.9 per CPU hour.
+  From zero the proof-dependency data are thin.
+* Caveats: one run per arm, and the controls ran on other days or hours under similar load. The early contention
+  biases against PGD, so it does not explain the gain.
+
+## Decision and next
+
+* **solve_new.sh's defaults are now PGD's setting** (19 Nov 12:41): twee-pg61 with PG 0.25 and the branch limit, the
+  cascade 5,40,80,160,320 with chain hints from level 1, and DEEP = the members and exploration. `DEEP=` with
+  `CASCADE=5,20,80,320 TWEE=/project/bin/twee-e48` gives the 17 Nov system.
+* Next: replicate on the other half of the benchmark (half2), PGD's setting against the 17 Nov system, to confirm
+  that the gain is not specific to half1's originals.

@@ -34,13 +34,21 @@
 # (17 Nov 19:00) TWEE default twee-e48 and PG (default --pg-threshold 0.25): parental guidance, no critical pairs of
 # two rules whose source pairs' rule-model scores sum below logit 0.25 (half1 from zero, 2 hours: PGA 18,987 against
 # PGB's 18,410; REPORT 2av, notes/2026-11-17-pg-ab-half1.md). With PG= twee-e48 matches e44. The transfer keeps XTWEE.
+# (19 Nov) The deep portfolio of production, explored (exp27 PGC, exp29 PGD; REPORT 2az,
+# notes/2026-11-19-from-zero-explore.md): TWEE default twee-pg61 (e61 with TWEE_PG_ARGS, default PG 0.25 and the
+# ground-joining branch limit 100, which ends hangs), CASCADE 5,40,80,160,320 with chain hints from level 1, and DEEP
+# (default below): 5 s members that change the problem (unfolded definitions; 60, 100, 200 and 400 kNN lemmas; proof-
+# dependency lemmas), 80 s variants after the 160 s level, all ordered by live yield (--ratio-order) with --explore
+# 0.2 for the new members and the 40 s level. DEEP= gives the 17 Nov system (with CASCADE=5,20,80,320 TWEE=twee-e48).
 set -e
 H=$(cd "$(dirname "$0")" && pwd)
 NAMES=$1; CTX=$2; OUT=$3; J=${4:-4}; HOURS=${5:-1}
 M=${MODEL:-/project/hintwork/models/rm4t}
-TWEE=${TWEE:-/project/bin/twee-e48}
-PG=${PG---pg-threshold 0.25}
-CASCADE=${CASCADE:-5,20,80,320}
+TWEE=${TWEE:-/project/bin/twee-pg61}
+export TWEE_PG_ARGS=${TWEE_PG_ARGS---pg-threshold 0.25 --ground-joining-branch-limit 100}   # (twee-pg61 appends them)
+case "$TWEE" in *twee-pg6*) PG=${PG-} ;; *) PG=${PG---pg-threshold 0.25} ;; esac
+CASCADE=${CASCADE:-5,40,80,160,320}
+DEEP=${DEEP---chain-level 1 --variants unf@0,k60@0,k100@0,k200@0,k400@0,kd@0,k60,p9,unf,two,nom --variants-after 3 --variant-budget 80 --priors L1=1.73,L2=1.1 --ratio-order --explore 0.2 --explore-labels L1,Vk100@0,Vk200@0,Vk400@0,Vkd@0}
 STATES=${STATES---no-fresh-states}
 KNN=${KNN:-30}
 XEVERY=${XEVERY:-120}
@@ -70,7 +78,7 @@ EOF
 MOD="--model --model-fixed $M.bin,$M.vocab --model-theory --lemmas 6 --lemma-knn $KNN --lemma-subsets --lemma-after"
 python3 -u "$H/loop.py" "$NAMES" "$OUT" --init "$OUT.ctx" --start 1 --cascade "$CASCADE" --cascade-start -1 --retry-gap 3 \
   $MOD --twee "$TWEE" --keep-out -j "$J" --reserve 0 --pool original --wall-factor 15 --line-gaps 80,80 \
-  --retry-hints 1.25 --fresh-first --far-retry --retry-knn --sync 60 --cascade-hours "$HOURS" --pass-every "$PASS" $ORDER $SCHED $STATES $LOOPARGS \
+  --retry-hints 1.25 --fresh-first --far-retry --retry-knn --sync 60 --cascade-hours "$HOURS" --pass-every "$PASS" $ORDER $SCHED $STATES $DEEP $LOOPARGS \
   --args="--abstract-time 2000 --no-resume-requeue --no-eqhint-consider $PG" > "$OUT.log" 2>&1 &
 LOOP=$!
 until [ -f "$OUT/config.json" ] || ! kill -0 $LOOP 2>/dev/null; do sleep 2; done
