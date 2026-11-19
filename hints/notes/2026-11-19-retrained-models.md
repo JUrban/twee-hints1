@@ -163,6 +163,7 @@ abs/rm9wave2.sh, started 20:09:41 (its header says 20:11, written before checkin
 | rm7t (14 Nov) | | 0.874 | 98.4% | 14.3% | | |
 | rm9a | 4.76 M, 2.10 M, 21,125 | **0.876** | 99.5% | 6.6% | 39.5 min | 22.7 GB |
 | rm9b (short3, 32 negatives) | 6.90 M, 3.01 M, 129,293 | 0.740 | 98.8% | 3.0% | 26.5 min | 28.7 GB |
+| rm9e (long2, 16 negatives, 255 leaves) | 6.03 M, 4.64 M, 89,155 | 0.854 | 99.3% | 6.5% | 27.0 min | 24.9 GB |
 
 * rm9a ranks as well as rm7t, and is calibrated higher: at production's thresholds it defers and freezes much
   less. A threshold matched to rm4t's deferral share would differ. That is the same caveat as exp33's rmO.
@@ -177,6 +178,10 @@ abs/rm9wave2.sh, started 20:09:41 (its header says 20:11, written before checkin
   * rm9f: rm9a's data with Suda's weighting;
   * rm9g: rm9a's data with 255 leaves.
 * rm9b's paired arm runs anyway: a weak model can still prove other goals (portfolio rule).
+* **rm9e: the longest proofs recover most of it** (0.854: above rm4t, below rm9a). Over the same loops, the 2 longest
+  proofs per goal are far better training data than the 3 shortest. Production's own logs with more negatives per
+  log (rm9a) are better still.
+* Interim paired counts (21:25, replay design): rm9a +5 −3 against the control on 98 goals, rm9b +3 −6 on 78.
 * **The first paired design was broken (found 20:58).** The snapshot loops/ULsN19 (production's solved rows before
   the first test goal, all 400 removed) gave the rm4t control 2 proofs in 122 goals.
   * Production had proved these 400 easily: median 3.5 s, 99% within 20 s, mostly at L0 and the 5 s kNN members.
