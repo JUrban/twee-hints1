@@ -166,6 +166,7 @@ abs/rm9wave2.sh, started 20:09:41 (its header says 20:11, written before checkin
 | rm9e (long2, 16 negatives, 255 leaves) | 6.03 M, 4.64 M, 89,155 | 0.854 | 99.3% | 6.5% | 27.0 min | 24.9 GB |
 | rm9c (slm, 16 negatives, long-exp 0.5, 255 leaves) | 6.57 M, 4.55 M, 129,293 | 0.842 | 99.9% | 1.7% | 28.9 min | 27.3 GB |
 | **rm9f (rm9a's data, Suda's per-log weighting)** | 4.76 M, 2.10 M, 21,139 | **0.892** | 99.4% | 13.2% | 19.8 min | 20.3 GB |
+| rm9g (rm9a's data, 255 leaves) | 4.76 M, 2.10 M, 21,140 | 0.886 | 99.0% | 14.4% | 20.8 min | 20.0 GB |
 
 * rm9a ranks as well as rm7t, and is calibrated higher: at production's thresholds it defers and freezes much
   less. A threshold matched to rm4t's deferral share would differ. That is the same caveat as exp33's rmO.
@@ -189,6 +190,10 @@ abs/rm9wave2.sh, started 20:09:41 (its header says 20:11, written before checkin
 * **Suda's weighting is the best offline** (rm9f 0.892, against 0.876 for the same rows unweighted). Every log weighs
   the same, so the many short proofs no longer dominate the positives, and the many negatives of a long search no
   longer dominate one log.
+* Bigger trees help too (rm9g 0.886 against 0.876), less than the weighting. Wave 4 (abs/rm9wave4.sh, 22:14)
+  combines them: rm9h = long2 + weighting, rm9i = rm9a's data + weighting + 255 leaves.
+* Interim at 22:34: rm9a +9 −14 on 245, rm9b +7 −18 on 216, rm9c +5 −5 on 113, rm9e +6 −10 on 185, rm9f +5 −2
+  on 96.
 * Interim at 22:14: rm9a +9 −11 on 213, rm9b +5 −14 on 182, rm9c +2 −5 on 67, rm9e +5 −3 on 143.
 * CPU: 5 arms + training 4 + climber 4: production restarted at 21:54 with J=8 (rows from 179,422; earlier log loops/UL71a.log).
 * **The first paired design was broken (found 20:58).** The snapshot loops/ULsN19 (production's solved rows before
