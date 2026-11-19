@@ -43,4 +43,12 @@ cd /project/hintwork/exp23; bash stage.sh
 
 ## Results
 
-(pending)
+**V5 (max_weight 5), 02:45: 0 of the first 46 walls at 1,709 CPU s.**
+* That is 37 CPU s a run: 28 used up their search space (exit code 2; median 22 s) and 18 hit the 60 s limit. The
+  hint matchers are kept whatever their weight, and with chain hints there are many.
+* It failed aK2_eq_aK3_j 382 in 0.34 s, a wall the default settings (exp16 Q) proved in 21 s.
+* So strict hint following does not suit sibling hints. Veroff's hint lists came from earlier attempts at the same
+  goals, which is what lets a max_weight 5 search follow them through.
+* **Change of plan (02:46).** V10 and V20 dropped. stage2.sh runs V40, Veroff's settings with a usable weight limit,
+  and then V100, his settings at the default weight, which isolates KBO, lex_order_vars, no back_demod,
+  restrict_denials, para_from_small and no cac_redundancy from the weight limit. V5 finishes its 107 first.
