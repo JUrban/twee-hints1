@@ -942,7 +942,11 @@ class Loop:
             lastown = len(T) - 1
             for nm, bl, af in VB:
                 if af == k:
-                    T.append(T0_[bl]); VAR.append(nm); LAB.append('V' + nm + ('' if bl == CL_ else f'@{bl}'))
+                    # (19 Nov 05:56, --variant-budget B) the variants after the chain level (no @) at budget B, not
+                    # the chain level's: with a 40 s chain level (cascade 5,40,80,...) they stay at the 80 s their
+                    # priors were measured at
+                    vb_ = a.variant_budget if (a.variant_budget and bl == CL_) else T0_[bl]
+                    T.append(vb_); VAR.append(nm); LAB.append('V' + nm + ('' if bl == CL_ else f'@{bl}'))
                     ORIG.append(bl); PREV.append(-1)
         if VL:
             print(f'  cascade: --variants: levels {list(zip(LAB, T))}', flush=True)
@@ -968,6 +972,19 @@ class Loop:
             for k_, l_ in enumerate(LAB):
                 if not VAR[k_] and 0 < k_ and k_ <= IDX.get('L%d' % a.far_deep, 0):
                     YP[l_ + 'f'] = a.far_deep_prior
+        # (19 Nov 05:56, --priors L=Y,...) priors set by hand, e.g. for a new cascade's levels: a 40 s chain level from
+        # the abstract times of ul56's 81 L1 proofs (50 within 40 s, at about half the CPU: 1.73 per CPU hour), and the
+        # 40 -> 80 s resume after it (31 more: about 1.1)
+        for x_ in a.priors.split(','):
+            if x_:
+                l_, _, y_ = x_.partition('=')
+                YP[l_] = float(y_)
+        print(f'  cascade: priors {dict((l_, YP[l_]) for l_ in LAB if l_ in YP)}', flush=True)
+        # (--relabel OLD=NEW,... --relabel-until ROW) results rows before ROW of an earlier cascade take the labels of
+        # the levels of the same budget in this one (cascade 5,80,160,320 -> 5,40,80,160,320: L1=L2,L2=L3,L3=L4), so a
+        # goal's 80 s run counts as this cascade's 80 s level and its saved 80 s state resumes to 160 s
+        RL = dict(x_.split('=') for x_ in a.relabel.split(',') if x_)
+        assert all(v_ in IDX for v_ in RL.values()), RL
         YW = 2.0
         ystat = collections.defaultdict(lambda: [0, 0.0])   # label -> [proofs, CPU s]
         def lyield(l):
@@ -1153,9 +1170,16 @@ class Loop:
         if a.cascade_continue and os.path.exists(os.path.join(rdir, 'results.tsv')):
             # a restarted round: the levels this round already tried (in the current context)
             k0 = 0; fresh = set(); kc = 0; kold = 0
+            nrl = 0
             for ri, line in enumerate(open(os.path.join(rdir, 'results.tsv'))):
                 f = line.rstrip('\n').split('\t')
-                if len(f) >= 5 and f[4] in IDX and ri >= a.chain_since_row:
+                rl_ = False
+                if RL and ri < a.relabel_until and len(f) >= 5 and f[4] in RL:
+                    f[4] = RL[f[4]]; nrl += 1; rl_ = True
+                # (--relabel-nostat L,...: relabelled rows of these new labels are of another member, e.g. a fresh
+                # 80 s run as the 40 -> 80 s resume, and do not count in its yield)
+                if (len(f) >= 5 and f[4] in IDX and ri >= a.chain_since_row
+                        and not (rl_ and f[4] in a.relabel_nostat.split(','))):
                     l_ = f[4] + 'f' if 'f=1' in f[7:] else f[4]
                     ystat[l_][0] += f[1] == 'THM'; ystat[l_][1] += float(f[2])
                 if len(f) >= 5 and f[0] in att and f[4] in IDX:
@@ -1185,6 +1209,8 @@ class Loop:
                             att[n_] = (ctx(n_), FOL[lev])
                     elif lev > att[n_][1]:
                         att[n_] = (ctx(n_), lev); k0 += 1
+            if RL:
+                print(f'  cascade: --relabel: {nrl} rows before row {a.relabel_until} relabelled {RL}', flush=True)
             print(f'  cascade: continuing round {rnd}, {k0} level updates from its results, {kold} rows of older contexts'
                   + (f' ({kc} deep rows before row {a.chain_since_row} capped below --chain-level)' if a.chain_since_row else ''),
                   flush=True)
@@ -1865,6 +1891,16 @@ def make_parser():
                     help='--cascade: retry a goal with a changed context only if at most this many places after a proven sibling')
     ap.add_argument('--frontier', type=int, default=1,
                     help='--cascade: deepen goals at most this many places after a proven sibling')
+    ap.add_argument('--variant-budget', type=float, default=0,
+                    help='(19 Nov) --variants: the budget of the variants after the chain level (default: its own)')
+    ap.add_argument('--priors', default='',
+                    help='--ratio-order: LABEL=YIELD,... priors in proofs per CPU hour, over the built-in ones')
+    ap.add_argument('--relabel', default='',
+                    help='--cascade-continue: OLD=NEW,... results labels of an earlier cascade, for rows before --relabel-until')
+    ap.add_argument('--relabel-nostat', default='',
+                    help='--relabel: new labels whose relabelled rows do not count in the level yields (another member)')
+    ap.add_argument('--relabel-until', type=int, default=0,
+                    help='--relabel: the first results row (0-based) written with this cascade\'s labels')
     ap.add_argument('--ab-args', default='',
                     help='(19 Nov, exp25) --cascade: an A/B test in production. The runs above the first level\'s budget '
                          '(not p9) of half the goals, by a hash of the name, get these twee arguments; their results rows '
