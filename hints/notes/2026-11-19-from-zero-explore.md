@@ -100,7 +100,8 @@ By level (PGD r1/results.tsv, 2 hours):
   (exp27 alone was neutral).
 * The deep members proved 86 goals themselves, but most of the gain is in 5 s fresh runs: 534 of the 652 PGD-only
   goals. A deep member's proof becomes a sibling lemma and a kNN lemma, and its neighbours then fall to fresh 5 s runs
-  in the new context. That is the chain effect, started earlier and in more places. PGC never measured these
+  in the new context. Checked (12:57, USEDAXIOMS of the proofs): 429 of the 534 PGD-only L0 proofs used a lemma
+  that only PGD had proved, 102 used only lemmas PGC had too, 3 used none. That is the chain effect, started earlier and in more places. PGC never measured these
   members: L1 ran 4 times, and no lemma-count member ran.
 * The 40 s chain level, starved in PGC (4 runs), got 17 runs with exploration and proved 10.
 * Proof-dependency lemmas (kd@0) proved 0 in 159 runs from zero, where in production they make 4.9 per CPU hour.

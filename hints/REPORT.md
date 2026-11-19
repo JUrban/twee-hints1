@@ -4966,7 +4966,8 @@ lemma-count members (k100@0, k200@0, k400@0, kd@0) and `--explore 0.2` for them 
   runaway LightGBM fit (all cores, minutes 6-15) cost PGD about 1,100 runs, so the early points are biased against it.
 * Only PGD proved 652 goals, only PGC 251. 485 goals were proved by neither control.
 * The deep members proved 86 goals themselves: L1 10 of 17 runs, Vk100@0 17, Vk200@0 10, Vk400@0 4, Vunf@0 43. 534
-  of the 652 PGD-only goals fell to fresh 5 s runs: each deep proof is a new lemma for its neighbours.
+  of the 652 PGD-only goals fell to fresh 5 s runs, and 429 of those 534 used a lemma (sibling or kNN) that only
+  PGD had proved: cascades from PGD's extra proofs.
 * **solve_new.sh's defaults are now PGD's setting** (`DEEP`, 19 Nov 12:41). A replication on half2, both arms at
   once (exp30, [notes/2026-11-19-half2-replication.md](notes/2026-11-19-half2-replication.md)), runs until about 14:45.
 
