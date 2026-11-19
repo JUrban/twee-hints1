@@ -293,7 +293,9 @@ Each goal is one twee run on the goal's problem.
 ### 4.3 Production
 * No side workers. Prover9 with chain hints (the P9C side worker, abs/p9c.sh and p9c4.sh, 16:46–19:38) is now the
   cascade's `p9` level.
-* `abs/ul58.sh` since 19 Nov 06:02:46 (UL58.log; its first results row is 103428, 1-based, and `--relabel-until`
+* `abs/ul59.sh` since 19 Nov 07:17:30 (UL59.log): ul58 on 12 workers while exp27 runs (about 2 h), with
+  `--relabel-until 103427` hardcoded. ul58 ended at new=177 in 74 minutes.
+* `abs/ul58.sh` 19 Nov 06:02:46 - 07:17 (UL58.log; its first results row is 103428, 1-based, and `--relabel-until`
   103427, 0-based). A **restart must keep `--relabel-until 103427` fixed**: the script computes it from the file's
   length, so a later script must hardcode it. ul57 with the cascade 5,40,80,160,320 (loop.py 1bb0a0f). The 40 s
   chain level is the old 80 s run's first half: ul56's L1 proofs came at a median of 29 abstract s, 50 of 81 within
@@ -680,7 +682,7 @@ summaries keep results but lose the reasons and the user's exact words. Keep sec
 
 ---------------------------------------------------------------------------------------------------------
 
-## 8. Open threads (19 Nov 04:01; `date` checked)
+## 8. Open threads (19 Nov 07:20; `date` checked)
 
 **The portfolio task** (the user, 18 Nov 17:00: keep complementary methods; notes/2026-11-18-portfolio-review.md,
 REPORT 2az). The principle is the ratio rule: rank each member by its new proofs per CPU hour on the goals every
@@ -688,9 +690,12 @@ earlier member failed in the same context. In production the order is online (`-
 variant levels are optional attempts (loop.py 119c3d1).
 
 Running:
-* **production ul58** since 19 Nov 06:02:46 (abs/ul58.sh, loops/UL58.log, 19 workers). Crash watcher on PID
-  2582073. Cascade 5,40,80,160,320 (section 4.3). With the A/B test exp26 (notes/2026-11-19-queue-renorm-ab.md):
+* **production ul59** since 19 Nov 07:17:30 (abs/ul59.sh, loops/UL59.log, 12 workers while exp27 runs; back to
+  19 after it). Crash watcher on PID 2598545. Cascade 5,40,80,160,320 (section 4.3). With the A/B test exp26 (notes/2026-11-19-queue-renorm-ab.md):
   watch `levyield.py loops/UL/r5/results.tsv 103428`, L1 against L1/B and L2 against L2/B.
+* **exp27** (07:18 - about 09:20, notes/2026-11-19-from-zero-portfolio.md): half1 from zero with today's system
+  (PGC, 6 workers + transfer), against PGA's 18,987 at 2 hours (noise about 185).
+* exp23 stage3: V40 ended 0 of 107; V100 from 07:02 (1 worker).
 * exp24 ended 05:29: far goals 0 of 40 at 80 s (2.9 CPU h). `--far-deep` (5f8fd4a) stays off.
 * exp25 ended 05:49 (notes/2026-11-19-hint-cost.md): without queue renormalisation 80 s runs cost 25% less, with a
   different search; hence exp26.
@@ -709,7 +714,7 @@ Next:
    --sched-retrain keeps it current. No action.
 3. A twee mode for strict hint following (a size cap that hint matchers bypass, as Prover9's max_weight with
    hints) only if exp23's V40 or V100 show unique proofs. V5 showed that sibling hints do not suit it.
-4. CPU: 20 in use at 06:05 (ul58 19, exp23 stage3 1).
+4. CPU: 19-21 in use at 07:18 (ul59 12, exp27 6 + its transfer's 2 at times, exp23 1).
 
 ---------------------------------------------------------------------------------------------------------
 
@@ -785,6 +790,7 @@ reports are written as the experiments run.
 | notes/2026-11-19-far-goals-deep.md | production's 80 s chain level on 40 far goals, which production never deepens (exp24, 03:58-05:29): 0 of 40 at 2.9 CPU h; found the chain-records race at loop start |
 | notes/2026-11-19-hint-cost.md | what chain hints cost per abstract second; the profile; queue renormalisation under the abstract clock (exp25) |
 | notes/2026-11-19-queue-renorm-ab.md | deep runs without queue renormalisation, an A/B test in production ul57 (exp26, from 05:52) |
+| notes/2026-11-19-from-zero-portfolio.md | half1 from zero in 2 hours with today's deep portfolio (PGC), against PGA's 18,987 (exp27, from 07:18) |
 | notes/2026-11-17-lemma-circularity.md | Are lemma chains circular? A check of the used lemmas |
 | notes/2026-11-17-mix-fail-order.md | Repeats cost most of the time: `--mix` and `--fail-order` |
 | notes/2026-11-17-pg-ab-half1.md | Parental guidance at scale: half1 from zero, 2 hours, sum filter 0.25 against the defaults |
