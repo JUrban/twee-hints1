@@ -413,9 +413,12 @@ class Loop:
                 # (19 Nov) lemma-set variants: kN takes N kNN lemmas (k60: 60), kp and kd the selections by use
                 # counts and by proof dependencies (start_vix), which the 16 Nov tests found complementary to plain
                 # similarity (notes/2026-11-16-knn-lemma-count.md: 6, 7 and 5 of 150, 10 distinct)
+                # (19 Nov 09:30) kNsM: N kNN lemmas and M sibling lemmas (either part may be left out: k100, s12)
                 ix_ = self.vix.get(var, self.lemma_index) if var in ('kp', 'kd') else self.lemma_index
-                kn_ = int(var[1:]) if var and re.fullmatch(r'k\d+', var) else a.lemma_knn
-                txt, nl = lemmas.lemma_problem_knn(name, self.lemma_src, a.lemmas, ix_, kn_, a.lemma_after)
+                m_ = re.fullmatch(r'(?:k(\d+))?(?:s(\d+))?', var or '') if var not in ('kp', 'kd') else None
+                kn_ = int(m_.group(1)) if m_ and m_.group(1) else a.lemma_knn
+                sm_ = int(m_.group(2)) if m_ and m_.group(2) else a.lemmas
+                txt, nl = lemmas.lemma_problem_knn(name, self.lemma_src, sm_, ix_, kn_, a.lemma_after)
             else:
                 txt, nl = lemmas.lemma_problem(name, self.lemma_src, a.lemmas, a.lemma_after)
             if nl:
@@ -969,7 +972,7 @@ class Loop:
         for v in VL:
             nm, _, at = v.partition('@')
             assert (nm in ('two', 'unf', 'sub', 'sj', 'pool', 'r2', 'nom', 'nopg', 'x', 'p9', 'kp', 'kd')
-                    or re.fullmatch(r'k\d+', nm)), v
+                    or (nm and re.fullmatch(r'(k\d+)?(s\d+)?', nm))), v
             VB.append((nm, int(at), int(at)) if at else (nm, CL_, VA_))
             assert 0 <= VB[-1][1] < len(T) and 0 <= VB[-1][2] < len(T), v
         # internal levels: each cascade level k, then the variants that follow it (in the order given); ORIG: the
