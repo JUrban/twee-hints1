@@ -177,5 +177,20 @@ abs/rm9wave2.sh, started 20:09:41 (its header says 20:11, written before checkin
   * rm9f: rm9a's data with Suda's weighting;
   * rm9g: rm9a's data with 255 leaves.
 * rm9b's paired arm runs anyway: a weak model can still prove other goals (portfolio rule).
+* **The first paired design was broken (found 20:58).** The snapshot loops/ULsN19 (production's solved rows before
+  the first test goal, all 400 removed) gave the rm4t control 2 proofs in 122 goals.
+  * Production had proved these 400 easily: median 3.5 s, 99% within 20 s, mostly at L0 and the 5 s kNN members.
+  * Today's newest proofs are long sibling chains in few originals (aK2rev, aK2_eq_aK3_*, nil3_23_32_to_*), each
+    goal proved with its just-proven predecessors as sibling lemmas. Removing all 400 removes the stepping stones.
+    exp33's ultest set (15 Nov) was spread over many originals and lost little this way.
+  * Stopped at 21:01: MR_rm4t_20 (2 of 126), MR_rm9a_20 (0 of 50), MR_rm9b_20 (0 of 5). The directories stay as the
+    record.
+* **Replay design (21:01, exp/modelreplay.py, abs/mabrm.sh rewritten, arms in loops/MQ_<model>_20).** As exp36:
+  * each test goal runs in production's context as of its own proof (solved rows before its row);
+  * kNN lemmas come from the 47,000 goals before the first test goal;
+  * fresh 20 s, PG 0.25, 6 sibling and 30 kNN lemmas (production's L0);
+  * smoke test: 2 of 3 goals proved in 1–2 s.
+  * Arms rm4t (control), rm9a and rm9b started at 21:01. The queue's later models get their arms from the new
+    abs/mabrm.sh.
 * **Member:** ul71 (20:30, production rows from 174,090) = ul70 + `m9a@0`, J=10 while exp37 trains and runs its
   arms. Its arm on the 400 (loops/MR_rm9a_20) started at 20:30 beside the control.
