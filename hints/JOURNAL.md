@@ -293,9 +293,18 @@ Each goal is one twee run on the goal's problem.
 ### 4.3 Production
 * No side workers. Prover9 with chain hints (the P9C side worker, abs/p9c.sh and p9c4.sh, 16:46–19:38) is now the
   cascade's `p9` level.
-* `abs/ul55.sh` since 18 Nov 22:39:20 (UL55.log): ul54 with variant tiers (loop.py a0a4486). The variants after a
-  cascade level are taken by current yield, each once per context, and replay records the tried ones.
-  First hour (23:40): 8350 runs, **new=146** on 19 workers. L0 17.5 per CPU hour (mostly reopened goals), 60
+* `abs/ul56.sh` since 18 Nov 23:59:50 (UL56.log): ul55 restarted for loop.py 119c3d1.
+  * Variant levels are optional attempts. A goal's next attempt is its eligible option of highest live yield: its
+    next cascade level, or any untried variant after a level it ran. Goals far from the frontier choose among the
+    fresh level's variants only.
+  * Results rows carry the run's context (`c=` hash, column 7). Replay skips rows of other contexts and starts a goal's
+    attempts over at each fresh run. The old replay kept the round's highest level, so 892 unsolved goals reopened by
+    new proofs had lost their deeper levels at each restart.
+  * Smoke test: hints/exp/optvar_smoke.sh on 3 nil3_15 goals at cascade 1,2,4,8.
+* `abs/ul55.sh` from 18 Nov 22:39:20 to 23:59 (UL55.log, 10,350 runs, **new=184 in 80 min** on 19 workers): ul54 with
+  variant tiers (loop.py a0a4486). The variants after a cascade level are taken by current yield, each once per
+  context, and replay records the tried ones.
+  First hour (23:40): 8350 runs, **new=146**. L0 17.5 per CPU hour (mostly reopened goals), 60
   kNN lemmas at 5 s 1.3, unfolded 5 s 6.2; no 80 s runs yet. Solved 45,901 (holdout 5043).
 * `abs/ul54.sh` from 18 Nov 21:35:49 to 22:39 (UL54.log, 7050 runs, new=37 in 63 min on 19 workers): ul53 on **19 workers** with `nom` (no rule model, 80 s) as the last
   variant before 320 s. exp22 is done; the only other job is transfer.py live (xfrlive2, -j 2, about 0.2 CPU on average).
