@@ -42,6 +42,7 @@ class Loop:
             os.makedirs(os.path.join(self.dir, 'p9lem'), exist_ok=True)
         import threading
         self.p9_lock = threading.Lock()
+        self.vix = {}; self.vix_busy = False   # (--variants kp, kd) their lemma indexes, start_vix
         self.gen_lock = threading.Lock(); self.gen_stats = [0, 0, 0.0]   # --gen-model: calls, hints, seconds
         self.p9_uncond = {}
         self.model = None  # (model, vocab, goaldir) of the current round
@@ -409,8 +410,12 @@ class Loop:
         if (a.lemmas or a.lemma_knn) and rnd > 0 and self.lemma_src:
             import lemmas
             if a.lemma_knn:
-                txt, nl = lemmas.lemma_problem_knn(name, self.lemma_src, a.lemmas, self.lemma_index,
-                                                   60 if var == 'k60' else a.lemma_knn, a.lemma_after)
+                # (19 Nov) lemma-set variants: kN takes N kNN lemmas (k60: 60), kp and kd the selections by use
+                # counts and by proof dependencies (start_vix), which the 16 Nov tests found complementary to plain
+                # similarity (notes/2026-11-16-knn-lemma-count.md: 6, 7 and 5 of 150, 10 distinct)
+                ix_ = self.vix.get(var, self.lemma_index) if var in ('kp', 'kd') else self.lemma_index
+                kn_ = int(var[1:]) if var and re.fullmatch(r'k\d+', var) else a.lemma_knn
+                txt, nl = lemmas.lemma_problem_knn(name, self.lemma_src, a.lemmas, ix_, kn_, a.lemma_after)
             else:
                 txt, nl = lemmas.lemma_problem(name, self.lemma_src, a.lemmas, a.lemma_after)
             if nl:
@@ -821,6 +826,40 @@ class Loop:
                 out.append((unfold.show(e[0]), unfold.show(e[1])))
         return out
 
+    def start_vix(self):
+        """(19 Nov, --variants kp / kd) the lemma indexes of those variants, built in a background thread from the
+        current one: kp weights similarity by lemma use counts (--lemma-pop, default 0.3 here; the uses grep takes
+        ~100 s on UL), kd adds MaSh-style proof dependencies (--lemma-deps, default 1; ~20 s on UL). Shallow copies:
+        they share the base index's features and caches, with their own scoring and memo. Until the first build is
+        in, the variants are not eligible (opts); later builds replace them, so a variant's index may lag by one."""
+        a = self.a
+        want = {v.partition('@')[0] for v in a.variants.split(',') if v} & {'kp', 'kd'}
+        if not want or self.vix_busy:
+            return
+        import copy, threading, lemmas
+        base = self.lemma_index; names_ = sorted(self.solved); self.vix_busy = True
+        def work():
+            t_ = time.time(); new = {}
+            try:
+                if 'kp' in want:
+                    ix = copy.copy(base); ix._memo = {}
+                    ix.uses = lemmas.lemma_uses([self.dir]); ix.pop = a.lemma_pop or 0.3
+                    new['kp'] = ix
+                if 'kd' in want:
+                    ix = copy.copy(base); ix._memo = {}
+                    ix.deps, ix.dep_idf = lemmas.proof_deps(os.path.join(self.dir, 'hints'), names_)
+                    ix.dep_w = a.lemma_deps or 1.0; ix.dep_n = a.lemma_dep_n
+                    new['kd'] = ix
+                self.vix = dict(self.vix, **new)
+                print(f'  cascade: variant lemma indexes {sorted(new)} built in {time.time() - t_:.0f}s'
+                      + (f' ({len(new["kp"].uses)} goals with uses)' if 'kp' in new else '')
+                      + (f' ({len(new["kd"].deps)} proofs with deps)' if 'kd' in new else ''), flush=True)
+            except Exception as e:
+                print(f'  cascade: variant lemma indexes failed: {e!r}', flush=True)
+            finally:
+                self.vix_busy = False
+        threading.Thread(target=work, daemon=True).start()
+
     def make_lemma_index(self):
         """The kNN lemma index over the proven goals; --lemma-pop: similarity weighted by lemma use counts, from
         --lemma-uses DIRS (then the loop's own goals are left out of the counts) or else from this loop's outputs."""
@@ -929,7 +968,8 @@ class Loop:
         VA_ = a.variants_after if a.variants_after >= 0 else CL_
         for v in VL:
             nm, _, at = v.partition('@')
-            assert nm in ('two', 'unf', 'sub', 'sj', 'k60', 'pool', 'r2', 'nom', 'nopg', 'x', 'p9'), v
+            assert (nm in ('two', 'unf', 'sub', 'sj', 'pool', 'r2', 'nom', 'nopg', 'x', 'p9', 'kp', 'kd')
+                    or re.fullmatch(r'k\d+', nm)), v
             VB.append((nm, int(at), int(at)) if at else (nm, CL_, VA_))
             assert 0 <= VB[-1][1] < len(T) and 0 <= VB[-1][2] < len(T), v
         # internal levels: each cascade level k, then the variants that follow it (in the order given); ORIG: the
@@ -996,6 +1036,7 @@ class Loop:
         self.lemma_src = {o: set(v) for o, v in lemmas.by_original(self.solved).items()}
         if a.lemma_knn:
             self.lemma_index = self.make_lemma_index()
+            self.start_vix()
         if a.chain_level >= 0:
             # (18 Nov, exp3/exp8) runs at level >= --chain-level take the chain of the goal's nearest proven
             # siblings below as hints (sibchain.py), not the original's pool; records load in the background
@@ -1133,7 +1174,8 @@ class Loop:
             h = att[n][1]
             if h < 0:
                 return [0]
-            o_ = [v for v in VLEVS if FOL[v] <= h and v not in vtried[n]]
+            o_ = [v for v in VLEVS if FOL[v] <= h and v not in vtried[n]
+                  and (VAR[v] not in ('kp', 'kd') or VAR[v] in self.vix)]   # (kp, kd: once their index is in)
             if NOWN[h] < len(T):
                 o_.append(NOWN[h])
             return o_
@@ -1356,6 +1398,7 @@ class Loop:
                         if RK and (time.time() - kgen[1] >= a.knn_refresh or len(self.solved) - kgen[2] >= 300):
                             t_ = time.time()
                             self.lemma_index = self.make_lemma_index()
+                            self.start_vix()
                             kgen[:] = [kgen[0] + 1, time.time(), len(self.solved)]; krb = time.time() - t_
                             print(f'  cascade: --retry-knn: kNN index rebuilt ({len(self.solved)} proofs, '
                                   f'{time.time()-t_:.0f}s)', flush=True)
