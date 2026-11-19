@@ -1,5 +1,5 @@
 #!/bin/bash
-# (19 Nov 10:14) ul63: ul62 plus hl@0 (loop.py 5fc6b48): the pool plus the proof steps of the goal's 30 kNN lemmas at
+# (19 Nov 10:17) ul63: ul62 plus hl@0 (loop.py 5fc6b48): the pool plus the proof steps of the goal's 30 kNN lemmas at
 # factor 0.1, a 5 s run. In UL it adds 60-585 hints (median about 270) to pools of 2,600-21,000 (hints/exp/hl_count.py).
 # Under --explore 1 with the other lemma-set variants.
 # Also five search-setting variants at 5 s, each dropped on count before (loop.py 4d3baca): m7t@0 (rule model rm7t,

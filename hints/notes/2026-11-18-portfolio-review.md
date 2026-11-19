@@ -626,3 +626,11 @@ class ran Vk200@0 (99) and Vs12@0 (75), the unmeasured ones, first.
   another, they keep paying.
 * ul63 (prepared) adds k400@0 and k200s12@0, and the search-setting members (m7t@0, m4b@0, r2@0, nopg@0, nom@0) and
   hl@0, all under `--explore 1`.
+
+**What a 5 s run costs with 60, 200 and 400 kNN lemmas (10:17).** 4 random unsolved UL goals, twee-pg61 with rm4t,
+no hints, 5 abstract s (hints/exp/k400_mk.py):
+* CPU s a run: 4.8-6.3 at 60, 4.5-5.9 at 200, 1.2-6.4 at 400. The lemma count does not raise the cost.
+* The 400-lemma run proved nil3_23_32_to_25 509 (unsolved in UL) in 1.2 s; the 60 and 200 runs did not.
+
+**ul63 (10:16:50):** 13 members explored. In its first 2 minutes every one of them ran. Vhl@0's rows carry 114-591
+hints more than the pool (none on R1dist_to_aa1, as the offline count predicted).
