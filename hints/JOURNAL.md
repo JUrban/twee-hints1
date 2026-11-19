@@ -682,7 +682,7 @@ summaries keep results but lose the reasons and the user's exact words. Keep sec
 
 ---------------------------------------------------------------------------------------------------------
 
-## 8. Open threads (19 Nov 07:20; `date` checked)
+## 8. Open threads (19 Nov 07:18; `date` checked)
 
 **The portfolio task** (the user, 18 Nov 17:00: keep complementary methods; notes/2026-11-18-portfolio-review.md,
 REPORT 2az). The principle is the ratio rule: rank each member by its new proofs per CPU hour on the goals every

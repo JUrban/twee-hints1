@@ -1,5 +1,5 @@
 #!/bin/bash
-# exp27 (19 Nov 07:20): sets/half1 from zero with today's system, 6 workers, 2 hours, against PGA (17 Nov 16:54, the same
+# exp27 (19 Nov 07:18): sets/half1 from zero with today's system, 6 workers, 2 hours, against PGA (17 Nov 16:54, the same
 # script abs/or_test.sh: 18,987 at 2 hours; identical runs differ by about 185). Today's system = production's deep
 # portfolio of 18-19 Nov on top of PGA: twee-pg61 (e61 + PG 0.25 + ground-joining branch limit 100), the cascade
 # 5,40,80,160,320 with chain hints from level 1 (records of this loop's own proofs), the variants

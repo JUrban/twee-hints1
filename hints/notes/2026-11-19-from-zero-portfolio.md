@@ -1,6 +1,6 @@
 # Today's system from zero: half1 in 2 hours with the deep portfolio (exp27)
 
-Started 19 Nov 2026, about 07:20 UTC (`date` checked 07:16). Script abs/exp27.sh (hints/exp/exp27_run.sh). Part of the
+Started 19 Nov 2026, 07:18 UTC. Script abs/exp27.sh (hints/exp/exp27_run.sh). Part of the
 portfolio task (notes/2026-11-18-portfolio-review.md).
 
 ## Why
