@@ -809,6 +809,7 @@ reports are written as the experiments run.
 | notes/2026-11-19-hint-cost.md | what chain hints cost per abstract second; the profile; queue renormalisation under the abstract clock (exp25) |
 | notes/2026-11-19-queue-renorm-ab.md | deep runs without queue renormalisation, an A/B test in production ul57 (exp26, from 05:52) |
 | notes/2026-11-19-eprover-watchlist.md | E 3.5.9 with chain hints as a static watchlist on the 107 walls, 60 s (exp28, queued after exp23) |
+| notes/2026-11-19-from-zero-explore.md | exp29: half1 from zero with the explored 5 s lemma members, against PGC | queued (10:21) |
 | notes/2026-11-19-from-zero-portfolio.md | half1 from zero in 2 hours with today's deep portfolio (PGC), against PGA's 18,987 (exp27, from 07:18) |
 | notes/2026-11-17-lemma-circularity.md | Are lemma chains circular? A check of the used lemmas |
 | notes/2026-11-17-mix-fail-order.md | Repeats cost most of the time: `--mix` and `--fail-order` |
