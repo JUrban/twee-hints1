@@ -577,6 +577,10 @@ parseConfig = do
     expert $
     inGroup "Critical pair weighting heuristics" $
     defaultFlag "cp-model-factor" "Score factor F ** q of each critical pair, q = the --rule-model probability that it is a proof rule (1 = off)" cfg_cp_model_factor argNum
+  cfg_pg_order <-
+    expert $
+    inGroup "Critical pair weighting heuristics" $
+    defaultFlag "pg-order" "Score factor F ** p of each critical pair, p = sigmoid of the sum of its parents' stored --rule-model scores (1 = off)" cfg_pg_order argNum
   cfg_eqhint_watch <-
     expert $
     inGroup "Critical pair weighting heuristics" $

@@ -236,6 +236,7 @@ Repositories and directories:
 | e59 | 18 Nov 06:17 | e58 with the subsumption index in an IntMap of hashed keys and a size check before matching: same results on 3 goals, CPU over flag-off +15% instead of +30% |
 | e60 | 18 Nov 07:06 | e59 + the parental filter judged before unification again unless it is a full forest (e51 had moved it after unification for all filters: +10% CPU, +8% memory for the same pairs with the sum filter). On aa1_45_c 292 at 80 s: e48 83.0 s, e60 86.5 s, e59 96.6 s; output identical to e48 |
 | e61 | 18 Nov 07:25 | e60 with e50's strict rejected set for the early parental check (e60's lazy memo cost 6-8%): e50's speed; output byte-identical to e50 on 8 goals; resumes e50 states. **Production since 18 Nov 07:30** (twee-pg61) |
+| e62 | 19 Nov 17:07 | e61 plus `--pg-order F` (exp35): a new pair's score × F ** sigmoid(q1 + q2), from the parents' stored rule-model scores, two lookups per pair; F = 1 (default) byte-identical to e61 on 3 goals. Wrapper `twee-pg62` (e62 with $TWEE_PG_ARGS) |
 
 Wrappers: `twee-pg` (e48 with $TWEE_PG_ARGS), `twee-pg50` (e50 with $TWEE_PG_ARGS; production until 18 Nov 07:30), `twee-pg61` (e61 with $TWEE_PG_ARGS; production since 18 Nov 07:30).
 

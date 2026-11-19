@@ -134,6 +134,7 @@ data Config f =
     -- (16 Nov) score factor F ** q for each critical pair, q = the rule model's probability that it is a proof
     -- rule (1 = off)
     cfg_cp_model_factor           :: Float,
+    cfg_pg_order                  :: Float,
     -- | (17 Nov) Parental guidance: no critical pairs of a new rule with an active rule
     -- when sigmoid of their --rule-model raw scores' sum is below this (Nothing = off). A rule without a
     -- score (an axiom, a rule from interreduction) is always paired.
@@ -438,6 +439,7 @@ defaultConfig =
     cfg_eqhint_subsume = False,
     cfg_eqhint_instance_factor = 0.1,
     cfg_cp_model_factor = 1,
+    cfg_pg_order = 1,
     cfg_pg_threshold = Nothing,
     cfg_pg_log = False,
     cfg_pg_model = Nothing }
@@ -804,12 +806,20 @@ instance Queue.Batch Batch where
 makePassive :: Function f => Config f -> State f -> Overlap (Active f) f -> Passive
 makePassive config@Config{..} state@State{..} Overlap{..} =
   Passive {
-    passive_score = cpModel (eqHintScore config state overlap_top overlap_eqn (scoreCP config depth st_hints overlap_eqn)),
+    passive_score = pgOrder (cpModel (eqHintScore config state overlap_top overlap_eqn (scoreCP config depth st_hints overlap_eqn))),
     passive_rule1 = active_id overlap_rule1,
     passive_rule2 = active_id overlap_rule2,
     passive_how   = overlap_how }
   where
     depth = Depth (succ (getDepth (the overlap_rule1) `max` getDepth (the overlap_rule2)))
+    -- (19 Nov, --pg-order F) the parents' stored rule-model scores order the queue, at no model cost:
+    -- score * F ** sigmoid(q1 + q2), the probability parental guidance thresholds (two lookups per pair)
+    pgOrder s
+      | cfg_pg_order < 1
+      , Just q1 <- IntMap.lookup (fromIntegral (active_id overlap_rule1)) (pg_raw st_pg)
+      , Just q2 <- IntMap.lookup (fromIntegral (active_id overlap_rule2)) (pg_raw st_pg) =
+        s * cfg_pg_order ** realToFrac (1 / (1 + exp (negate (q1 + q2))) :: Double)
+      | otherwise = s
     -- (16 Nov, --cp-model-factor F) the rule model orders the queue: score * F ** q
     cpModel s
       | cfg_cp_model_factor < 1, Just rm <- cfg_rule_model =
