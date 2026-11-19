@@ -772,7 +772,8 @@ reports are written as the experiments run.
 | notes/2026-11-18-l0-portfolio.md | 8 arms at 5 s (control, 60 kNN lemmas, unfolded, subsumption, rule threshold 0.2, no rule model, no PG, chain hints) on 300 goals that failed their 5 s fresh run (exp21) |
 | notes/2026-11-18-no-pg-no-model-walls.md | No PG / no rule model at 80 s on the 107 walls as portfolio members (exp22, queued after exp21) |
 | notes/2026-11-19-veroff-p9-settings.md | Prover9 with Veroff's AIM settings and chain hints on the 107 walls (exp23, from 02:15, 1 worker): max_weight 5 0 of 107; 40 paused at 0 of 39 (03:54); 100 to do |
-| notes/2026-11-19-far-goals-deep.md | production's 80 s chain level on 40 far goals, which production never deepens (exp24, from 03:58, 2 workers); found the chain-records race at loop start |
+| notes/2026-11-19-far-goals-deep.md | production's 80 s chain level on 40 far goals, which production never deepens (exp24, 03:58-05:29): 0 of 40 at 2.9 CPU h; found the chain-records race at loop start |
+| notes/2026-11-19-hint-cost.md | what chain hints cost per abstract second; the profile; queue renormalisation under the abstract clock (exp25) |
 | notes/2026-11-17-lemma-circularity.md | Are lemma chains circular? A check of the used lemmas |
 | notes/2026-11-17-mix-fail-order.md | Repeats cost most of the time: `--mix` and `--fail-order` |
 | notes/2026-11-17-pg-ab-half1.md | Parental guidance at scale: half1 from zero, 2 hours, sum filter 0.25 against the defaults |

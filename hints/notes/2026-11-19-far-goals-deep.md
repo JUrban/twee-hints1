@@ -51,4 +51,15 @@ cd /project/hintwork/exp24; python3 far.py 24 40; bash run.sh
 
 ## Results
 
-(running)
+**05:29: 0 of 40 proved, at 10,484 CPU s (2.9 CPU h; 262 s a run).** No goal ran twice; no sibling got a fresh
+run, since nothing was proved.
+
+* At the near goals' L1 rate (1.61 per CPU hour in ul56) about 4.7 proofs were due. Seeing none has a chance of about
+  1%, so far goals are well below near ones. The sample cannot rule out a yield up to about 1 per CPU hour (95% upper
+  bound, 3 proofs in 2.9 h).
+* So far goals are not worth 80 s runs now. Their 5 s runs on each new context (the f class) and the frontier's
+  advance are what reach them. A far goal becomes near when its neighbour below is proved.
+* `--far-deep` stays off. With the measured prior it would score about 0.2 per CPU hour, level with the 320 s
+  level (0.21), so the ratio rule would hardly ever pick it. It could serve as a last filler once every near option
+  is used up.
+* exp23's CPU went to exp25 instead (notes/2026-11-19-hint-cost.md), a cheaper and more promising question.
