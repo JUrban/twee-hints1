@@ -5015,6 +5015,14 @@ Mean, Var, Rand and Corr; Mean was best, +8.8% over ENIGMA in loop 0 on Mizar40.
   default 0.01 as its best source proof completes. The 13 Nov test (+2 −4) was complementary, so `pw@0` joins ul65
   as an explored member.
 
+**The deep tail starved from 06:00 to 16:24, and is now explored (portfolio notes, 19 Nov 16:20).** exp32's
+climber ([notes/2026-11-19-climber-member.md](notes/2026-11-19-climber-member.md)) proved 4 stuck heads by 16:19. Its plain 160 s control runs proved 3 of
+them in 19.6-75 s with the pool hints. Production had run 22-24 fresh 5 s runs on each, but nothing beyond 40 s.
+* Since ul58 (06:02), L2-L4 and the 80 s variants k60, p9, unf, two and nom never ran. Their hand-set priors (L2 1.1)
+  sat below the live 5 s members (1-3 per CPU hour), and a label that never runs is never re-measured.
+* ul67/ul68 add fresh pool runs at 40 and 80 s right after the 5 s level (`pool@1:0`, `pool@2:0`; new syntax
+  NAME@B:F) and explore every label, not a hand-picked list. Each label under 1 CPU h is now measured.
+
 **The dropped lemma selections as 5 s members (ul60, 08:05; loop.py 92d60c4).** exp21 found that at 5 s only the
 variants that change the problem pay, and the 60-lemma 5 s variant makes 5-20 per CPU hour live. 16 Nov dropped
 three lemma selections that each proved goals plain similarity did not (150 unsolved at 20 s: 6 plain; use counts 7,

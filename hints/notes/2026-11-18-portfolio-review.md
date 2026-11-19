@@ -757,3 +757,24 @@ hints more than the pool (none on R1dist_to_aa1, as the offline count predicted)
   many other members had failed in the same context (exp/condvar.py: Vs40@0's 6 came after up to 12 others).
 * Members with 0 in 1-1.7 CPU h fall below the live ones under the ratio order, with no hand change. Since 15:39,
   ul66 runs beside the climber (exp32, notes/2026-11-19-climber-member.md).
+
+## The deep tail starved since 06:00 (found 16:20 through exp32)
+
+* exp32's climber proved 4 heads by 16:19. Its plain 160 s control runs, which run only after a climb has
+  proved its goal, proved 3 of the 4, in 19.6, 40.5 and 75 s, with the pool hints.
+* Production had run 22-24 fresh 5 s pool runs on each of these heads, 1-4 40 s chain runs (L1) and dozens of 5 s
+  members, but never a pool run beyond 5 s, nor anything at 80, 160 or 320 s.
+* **Since ul58 (06:02, row 103428):** L0 ran 12,742 times (488 proofs), L1 213 times (10 proofs), Vk400 at 80 s 11
+  times (explored). L2, L3 and L4 never ran (the last such row is 90626), and neither did the 80 s variants k60,
+  p9, unf, two and nom.
+* **Cause, a gap in the ratio order:** a label whose hand-set prior sits below the live members never runs, so its
+  estimate is never updated. Meanwhile the live 5 s members decay (Vk400@0 from 11.5 to 1.6 per CPU hour in 5
+  hours). L2's prior is 1.1 and L3's is the default. The explore rule covered only the labels listed by hand.
+* **Fix (ul67 16:22, ul68 16:24):**
+  * Fresh pool runs at 40 s and 80 s right after the 5 s level: `pool@1:0`, `pool@2:0` (loop.py 902f904, new
+    syntax NAME@B:F = level B's budget, offered after level F).
+  * Every label explored (no `--explore-labels`): each label with under 1 CPU h in round 5 is estimated at no less
+    than the best measured one until it has 1 CPU h. That covers L2, L3, L4, the 80 s variants and the new pool
+    members, about 10 CPU h in all.
+* Still open: labels that were measured once and then decayed below others are not re-measured when the goals
+  change. A periodic re-exploration (a label idle for X hours gets another slice) would close that.
