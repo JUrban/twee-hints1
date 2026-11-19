@@ -704,3 +704,26 @@ hints more than the pool (none on R1dist_to_aa1, as the offline count predicted)
 * A first run of this test used LightGBM's default thread count, every core: 9,000% CPU for 9 minutes,
   10:46-10:55, at load 135. It slowed production and exp29's wall clock in that window. Thread counts are now
   capped (n_jobs=2, OMP_NUM_THREADS=2).
+
+**ul63's explored members after about 1 CPU hour each (rows 130,377-, at 11:10):**
+
+| member | runs | proved | CPU h | per CPU h |
+|---|---:|---:|---:|---:|
+| Vk400@0 | 438 | 12 | 1.05 | **11.5** |
+| Vk200@0 (measured in ul62 too) | 843 | 12 | 1.52 | 7.9 |
+| L0 (fresh, new contexts) | 586 | 7 | 1.56 | 4.5 |
+| Vm4b@0 (rule model rm4b) | 489 | 2 | 1.03 | 1.9 |
+| Vk200s12@0 | 539 | 2 | 1.22 | 1.6 |
+| Vhl@0 (kNN lemmas' proof steps as hints) | 537 | 1 | 1.05 | 1.0 |
+| Vm7t@0 (rule model rm7t) | 534 | 1 | 1.03 | 1.0 |
+| Vnopg@0 (no parental guidance) | 464 | 1 | 1.02 | 1.0 |
+| Vr2@0 (rule threshold 0.2) | 596 | 0 | 1.05 | 0 |
+| Vnom@0 (no rule model) | 466 | 0 | 1.03 | 0 |
+| Vk100@0 | 521 | 0 | 0.92 | 0 (on goals where it had run in ul60-62) |
+
+* Problem changes pay, search-setting changes much less. The larger lemma sets lead: 400 lemmas at 11.5 per CPU
+  hour, after 60, 100 and 200 had failed. The other rule models and no PG make about 1-2 per CPU hour, a quarter of a
+  fresh run's rate. A threshold of 0.2 and no model made none in 1 CPU hour each.
+* All are kept: the ratio rule now orders them by these yields, so the weak ones run only when nothing better is
+  left for a goal. In ul64 they run with `--prior-weight 0.5`.
+* All the proofs came after other members had failed on the goal in the same context.
