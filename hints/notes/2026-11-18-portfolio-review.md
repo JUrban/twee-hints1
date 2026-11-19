@@ -638,3 +638,27 @@ hints more than the pool (none on R1dist_to_aa1, as the offline count predicted)
   * CPU s a 5 s run: 5.6-7.9 at 1,000 lemmas, 5.4-18.4 at 2,000. Peak RSS rises to 90-220 MB.
   * aK2_eq_aK3_d 609 has only 487 candidates in its theory and weaker ones.
   * So k1000@0 is the next cheap member, at about 1.2 times the cost of a run. k2000 costs 2-3 times as much.
+
+**Is the ratio rule's estimate fooled by non-stationarity? No (10:45).**
+* The rates swing widely. In windows of 2,000 results rows since ul58 (hints/exp/winyield.py), the overall yield
+  goes from 1.0 to 44 proofs per CPU hour, and L0 from 1.2 to 55.6. Members measured in a cascade or a restart burst
+  carry that into their cumulative estimates (Vk100@0: 15.0 in the cascade's tail, 1.6-2.4 since).
+* But the ratio to L0 in the same window is steadier: Vk60@0 is at 0.30-0.51 in 7 of 8 windows. So the swings are
+  mostly a common factor.
+* Offline test (hints/exp/estcmp.py, rows 47,531 on, priors as production's). For each window, how well does each
+  estimator, from the rows before it, predict how the window's proofs split among the members that ran in it
+  (multinomial log-likelihood, scale-free)?
+
+| estimator | windows of 1,000 rows (84) | of 2,000 (42) |
+|---|---:|---:|
+| cumulative (the ratio rule now) | **−1,093** | **−1,170** |
+| discounted over 3,000 rows | −1,108 | −1,206 |
+| time-normalised (each CPU second scaled by the overall rate then against now) | −1,132 | −1,217 |
+| flat (all members equal) | −1,276 | −1,357 |
+| the hand-set priors alone | −1,650 | −1,742 |
+
+* At discount and normalisation scales of 1,000 and 10,000 rows the order is the same.
+* So the cumulative estimate ranks members best: its information is real (+185 over flat), and recency weighting
+  only adds noise. No change to the ratio rule.
+* The hand-set priors rank worse than no information at all. That supports `--explore` with data over hand-set
+  priors for new members.
