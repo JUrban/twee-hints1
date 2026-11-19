@@ -503,3 +503,30 @@ All three change the lemma set, so they fit the class that pays at 5 s.
   yield, so each gets about 2 CPU hours of runs before its own yield decides.
 * At a lower prior they would never run: some goal always has a k60@0 option at 8.4.
 * Cost if they are worthless: about 6 CPU hours of 5 s runs.
+
+## Are restart bursts a scheduler defect? No (19 Nov 07:58-08:20)
+
+**The worry.** ul58 made 177 new in 74 minutes, and ul59 198 in its first 33 minutes on 12 workers. Fresh runs proved
+8.8% in ul59 against 5.1% in ul58 and 2.3% over ul56. 67 of the goals ul59 proved at the 5 s level had been last run in
+ul56, and had their current sibling context already at ul58's start. So ul58 had them as candidates and did not run
+them in 74 minutes. A restart that does better than the running loop would point to a defect.
+
+**Checked and ruled out:**
+* *Stale scores.* The scheduler's features (`orate`, `nfail`) change with every run in an original. The score cache
+  is keyed by `over[o]`, but loop.py increments that after every observed run, not only after proofs.
+* *Proofs synced from other processes.* They go through `add_proof`, which clears the context cache.
+* *The threshold.* `--sched-pmin-auto` counts every non-fresh run as a "resume", the cheap 5 s variants too, which
+  inflates it (0.12-0.17 at the starts of ul58 and ul59). But in ul58 it had fallen to 0.003-0.02 from t = 1,500 s,
+  and new proofs stayed flat (20-30) until t = 3,000 s.
+
+**What happened.** ul58's proofs came late, not early:
+* 40 new by t = 3,413 s;
+* then 129 in its last 16 minutes (from about 06:59), and ul59 went on with it.
+
+The cascade was spread over many originals (aK2_eq_aK3_d 21, aK2_eq_aK3_1243b 20, aK2_eq_aK3_c 18, nil4_19K 16, ...):
+* 299 of its 361 proofs were 5 s fresh runs and 47 were Vk60@0.
+* It began about two minutes before a kNN index rebuild (t = 3,556 s).
+
+So the bursts are cascades of real proofs, not restart artefacts. "A restart's first hour" is not a fair window for
+comparing settings. Unresolved: whether cross-original kNN lemmas spread such cascades (the index is rebuilt every
+30 minutes or 300 proofs; a rebuild takes about 1 s).
