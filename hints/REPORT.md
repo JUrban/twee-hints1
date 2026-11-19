@@ -3445,6 +3445,12 @@ same context):
 
 Not pursued. The option stays in, off by default.
 
+**Update (19 Nov 17:10): only the most expensive point of this hook was tried** (the user: the forest can be as small
+as the weight function). rm4t's 200 trees ran on every pair, with both parents featurised again each time, on 6 goals.
+The cheap end is twee-e62 `--pg-order F`: score × F ** sigmoid(q1 + q2), from the parents' stored scores, two lookups
+per pair. exp35 tests it paired on the 400 ultest goals, from about 18:45
+([notes/2026-11-19-pg-order.md](notes/2026-11-19-pg-order.md)).
+
 ## 2ap. Hints from the kNN lemmas' proofs (16 Nov, 11:35): no gain
 
 The cross-original hint pools of earlier tests were never measured

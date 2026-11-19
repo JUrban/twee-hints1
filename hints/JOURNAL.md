@@ -836,6 +836,7 @@ reports are written as the experiments run.
 | [notes/2026-11-19-climber-member.md](notes/2026-11-19-climber-member.md) | exp32: the live head climber measured again as a deep member (user's message, 15:20), 2 climbs beside ul66 (17 workers) from 15:39 |
 | [notes/2026-11-19-oracle-pg.md](notes/2026-11-19-oracle-pg.md) | exp33: the near-oracle rmO through parental guidance (user, 16:40), paired against rm4t on the 400 ultest goals at 20 s |
 | [notes/2026-11-19-climber-outputs.md](notes/2026-11-19-climber-outputs.md) | exp34 and the climber's records (user, 16:55): what production uses from the climber; conditional-proof replay 0 of 4; climb.py persists fill lemmas, assumptions, used premises; climbs/ in the data repo |
+| [notes/2026-11-19-pg-order.md](notes/2026-11-19-pg-order.md) | exp35: the parents' stored rule-model scores ordering the queue (twee-e62 `--pg-order` 0.5 and 0.1), paired against exp33's rm4t arm on the 400 ultest goals |
 | [notes/2026-11-19-from-zero-portfolio.md](notes/2026-11-19-from-zero-portfolio.md) | half1 from zero in 2 hours with today's deep portfolio (PGC), against PGA's 18,987 (exp27, from 07:18) |
 | [notes/2026-11-17-lemma-circularity.md](notes/2026-11-17-lemma-circularity.md) | Are lemma chains circular? A check of the used lemmas |
 | [notes/2026-11-17-mix-fail-order.md](notes/2026-11-17-mix-fail-order.md) | Repeats cost most of the time: `--mix` and `--fail-order` |
