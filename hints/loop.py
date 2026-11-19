@@ -46,6 +46,7 @@ class Loop:
         self.gen_lock = threading.Lock(); self.gen_stats = [0, 0, 0.0]   # --gen-model: calls, hints, seconds
         self.p9_uncond = {}
         self.model = None  # (model, vocab, goaldir) of the current round
+        self.mvocab = {}   # (--variants mX) vocab path -> vocab
         self.names = [l.strip() for l in open(a.set) if l.strip()]
         self.sig = {}
         self.solved = {}   # name -> (round, time)
@@ -549,10 +550,32 @@ class Loop:
                 cmd += ['--precedence', ','.join(self.p9_precedence(orig_path, k))]
         if self.model and var != 'nom':
             m, v, gdir = self.model
+            mm_ = re.fullmatch(r'm(\w+)', var or '')
+            if mm_:
+                # (19 Nov 10:20, --variants mX) another rule model, rmX.bin/.vocab beside the loop's model: rm4b (4 times
+                # rm4's trees: +9 -7 against rm4 at 8 s, 2f) and rm7t (retrained with the loop's proofs, 2u) were dropped
+                # on count
+                m = os.path.join(os.path.dirname(m), 'rm' + mm_.group(1) + '.bin'); v = m[:-4] + '.vocab'
+                # its own goal file: goal features are coded by the model's vocab (a non-theory model's vocab has no
+                # 'g:T' columns, so the theory block is left out by the lookup)
+                gp_ = os.path.join(gdir + '_' + mm_.group(1), name)
+                if not os.path.exists(gp_):
+                    import rulemodel
+                    voc_ = self.mvocab.get(v)
+                    if voc_ is None:
+                        voc_ = {}
+                        for line in open(v):
+                            c_, k_ = line.rstrip('\n').split('\t'); voc_[k_] = int(c_)
+                        self.mvocab[v] = voc_
+                    os.makedirs(os.path.dirname(gp_), exist_ok=True)
+                    rulemodel.write_goalfile(name, voc_, gp_ + '.' + tag)
+                    os.replace(gp_ + '.' + tag, gp_)
+            else:
+                gp_ = os.path.join(gdir, name)
             ma = a.model_args.split()
             if var == 'r2':   # (--variants r2) rule-model threshold 0.2
                 i_ = ma.index('--rule-threshold'); ma[i_ + 1] = '0.2'
-            cmd += ['--rule-model', m, '--rule-vocab', v, '--rule-goal', os.path.join(gdir, name)] + ma
+            cmd += ['--rule-model', m, '--rule-vocab', v, '--rule-goal', gp_] + ma
         if hints and a.stall:
             cmd += ['--eqhint-stall', str(a.stall)]
         if var == 'sub':
@@ -972,7 +995,9 @@ class Loop:
         for v in VL:
             nm, _, at = v.partition('@')
             assert (nm in ('two', 'unf', 'sub', 'sj', 'pool', 'r2', 'nom', 'nopg', 'x', 'p9', 'kp', 'kd', 'hl')
-                    or (nm and re.fullmatch(r'(k\d+)?(s\d+)?', nm))), v
+                    or (nm and re.fullmatch(r'(k\d+)?(s\d+)?', nm))
+                    or (nm and re.fullmatch(r'm\w+', nm) and a.model_fixed
+                        and os.path.exists(os.path.join(os.path.dirname(a.model_fixed.split(',')[0]), 'r' + nm + '.bin')))), v
             VB.append((nm, int(at), int(at)) if at else (nm, CL_, VA_))
             assert 0 <= VB[-1][1] < len(T) and 0 <= VB[-1][2] < len(T), v
         # internal levels: each cascade level k, then the variants that follow it (in the order given); ORIG: the
