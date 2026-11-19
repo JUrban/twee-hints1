@@ -87,3 +87,5 @@ learning?"
 * ul70 = ul69 + `sk@0` (5 s) + `sk@1:0` (40 s fresh after L0), J 15 while exp36 runs. Both are explored like
   every member, then get CPU by their measured yield. If they pay, the climb steps move into the base pool.
 * The first launch at 17:58:23 died: loop.py's variant-name whitelist lacked 'sk'. Production was down about 30 s.
+* Check (18:01): the first 24 sk@0 runs went to com_Ralt goals with 4,254 hints each: the pool's 3,804 (as in that
+  original's L0 runs) plus 450 of its 833 climb steps that the pool lacks.
