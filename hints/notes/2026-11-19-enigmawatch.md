@@ -99,6 +99,12 @@ proof or not):
     and defers 57.3% of the others).
   * rmO: 273 against rm4t's 271 of 400 (defer once), and 270 against 269 with deferral up to 3 times at penalty 5.
   * Ordering the queue by the model (2ao, `--cp-model-factor`) costs about 10x the wall time.
+* (Correction, 16:40, after the user's question.) There is a second, cheap hook: parental guidance (2av, production
+  since 17 Nov). Each rule keeps rm4t's score of the pair it came from. A new rule's pairs with the active rules
+  are not made at all when sigmoid(q1 + q2) < 0.25. That paid: +577 on half1 at 2 hours. Through PG, every better
+  learned model (dense, ENIGMA pcat as in the paper, additive) lost online to the untrained sum of rm4t's scores
+  (36-39 against 52 of 200), though each was better offline. The near-oracle rmO was tested only through deferral
+  (15 Nov, before PG). So an oracle through PG is untested.
 * So even a large AUC lift is unlikely to pay through today's hooks. The offline test measures whether the
   proof-state vector carries information twee's model lacks. An online test follows only if the lift is large, and
   through a hook the oracle has not closed.
