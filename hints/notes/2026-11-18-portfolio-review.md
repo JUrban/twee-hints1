@@ -537,3 +537,12 @@ comparing settings. **Cross-original lemmas spread cascades.**
   another original's goals can see it. A rebuild takes about 1 s.
 * So ul60 gets `--knn-refresh 600`. It is not measured separately: production's cascades are too noisy for that, and
   a clean test would be a from-zero pair.
+
+**ul60's first 45 minutes (08:05-08:50): the new variants hardly ran.** Vkp@0 7 runs, Vkd@0 8, Vk100@0 9, no proofs;
+Vk60@0 2,201 runs (8.5 per CPU hour).
+* The deep queue is one sort by each goal's best option. New Vk60@0 options appear with every failed fresh run, so a
+  variant whose estimate is below Vk60@0's live yield never comes up.
+* A prior is then a decision to measure, not only a belief. ul61 (the restart on 19 workers after exp27) sets their
+  priors to 9.
+* If one of them yields about 1, its estimate falls below Vk60@0's within 2-4 CPU hours, about 3 CPU hours of 5 s
+  runs for all three.
