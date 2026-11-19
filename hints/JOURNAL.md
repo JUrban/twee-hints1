@@ -695,7 +695,8 @@ Running:
   watch `levyield.py loops/UL/r5/results.tsv 103428`, L1 against L1/B and L2 against L2/B.
 * **exp27** (07:18 - about 09:20, notes/2026-11-19-from-zero-portfolio.md): half1 from zero with today's system
   (PGC, 6 workers + transfer), against PGA's 18,987 at 2 hours (noise about 185).
-* exp23 stage3: V40 ended 0 of 107; V100 from 07:02 (1 worker).
+* exp23 stage3: V40 ended 0 of 107; V100 from 07:02 (1 worker). Then exp28 (E with chain-hint watchlists on the
+  walls, notes/2026-11-19-eprover-watchlist.md) on that CPU, queued at 07:28.
 * exp24 ended 05:29: far goals 0 of 40 at 80 s (2.9 CPU h). `--far-deep` (5f8fd4a) stays off.
 * exp25 ended 05:49 (notes/2026-11-19-hint-cost.md): without queue renormalisation 80 s runs cost 25% less, with a
   different search; hence exp26.
@@ -790,6 +791,7 @@ reports are written as the experiments run.
 | notes/2026-11-19-far-goals-deep.md | production's 80 s chain level on 40 far goals, which production never deepens (exp24, 03:58-05:29): 0 of 40 at 2.9 CPU h; found the chain-records race at loop start |
 | notes/2026-11-19-hint-cost.md | what chain hints cost per abstract second; the profile; queue renormalisation under the abstract clock (exp25) |
 | notes/2026-11-19-queue-renorm-ab.md | deep runs without queue renormalisation, an A/B test in production ul57 (exp26, from 05:52) |
+| notes/2026-11-19-eprover-watchlist.md | E 3.5.9 with chain hints as a static watchlist on the 107 walls, 60 s (exp28, queued after exp23) |
 | notes/2026-11-19-from-zero-portfolio.md | half1 from zero in 2 hours with today's deep portfolio (PGC), against PGA's 18,987 (exp27, from 07:18) |
 | notes/2026-11-17-lemma-circularity.md | Are lemma chains circular? A check of the used lemmas |
 | notes/2026-11-17-mix-fail-order.md | Repeats cost most of the time: `--mix` and `--fail-order` |
