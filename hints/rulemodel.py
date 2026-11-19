@@ -191,8 +191,12 @@ class RuleModel:
                       bagging_freq=1, verbose=-1, num_threads=threads)
         if weighting != 'log':
             params['scale_pos_weight'] = float((y == 0).sum()) / max(1, (y == 1).sum())
-        self.model = lgb.train(params, lgb.Dataset(X, y, weight=w), rounds)
-        return X.shape, int(y.sum()), len(logs)
+        ds = lgb.Dataset(X, y, weight=w, params=params)
+        ds.construct()
+        shape = X.shape
+        del X   # (19 Nov: the CSR copy is not needed once LightGBM has binned it)
+        self.model = lgb.train(params, ds, rounds)
+        return shape, int(y.sum()), len(logs)
 
     def predict(self, name, items):
         X = self.matrix([self.rows(name, items)], self.ncol)

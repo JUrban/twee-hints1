@@ -136,6 +136,23 @@ abs/rm9wave2.sh, started 20:09:41 (its header says 20:11, written before checkin
 * CPU: production 13 + climber 4 + training 4 + arms 1–5. When the arms pile up, production goes down
   accordingly.
 
+### Revised at 20:23: memory
+
+* rm9a's process reached 21.5 GB for about 5 M rows. Per row (5 test logs, rm7t's vocab):
+  * the theory block takes 121–132 nonzeros;
+  * the goal block 34–42;
+  * the rule's own features 36–45.
+* So about 85% of the matrix repeats per-problem constants. Only 47 of the 247 theory features are constant over all
+  129 originals, and there are 60 distinct theory blocks, so pruning would save only about a quarter.
+* The first driver (abs/rm9wave2.sh, which would have given rm9b 9.6 M rows) was stopped at 20:23 before it trained
+  anything. abs/rm9wave2b.sh keeps every model at 7 M rows or fewer:
+  * rm9b: short3, 32 negatives per log (6.9 M rows);
+  * rm9d: short3, 32 negatives, Suda's weighting (6.9 M);
+  * rm9c: slm, 16 negatives, long-exp 0.5, 255 leaves (about 6.6 M);
+  * rm9e: the 2 longest proofs per goal (list_long2: 89,155 logs, 4.6 M positives), 16 negatives, 255 leaves
+    (about 6.0 M).
+* rulemodel.py now builds LightGBM's dataset first and then frees the CSR copy.
+
 ## Results
 
 (running)
