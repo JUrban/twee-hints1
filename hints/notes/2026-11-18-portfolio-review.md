@@ -473,3 +473,33 @@ its abstract time (36 s at 20 s against 135 s at 80 s on one wall).
 * The old fresh 80 s rows do not count in the new L2's yield, since that is now a resume.
 * Smoke test (hints/exp/relabel_smoke.sh, cascade 1,1.5,2,4,8 after 1,2,4,8): goals with old deep rows went on from the
   right level with the right increments, and a goal without one ran the new first level fresh.
+
+## Lemma-set variants at 5 s: the dropped selections back as members (19 Nov 07:35-07:56)
+
+**Which dropped methods qualify.** exp21 (18 Nov) found that at 5 s only the variants that change the problem pay:
+unfolding (4 of 300) and 60 kNN lemmas (1). Live in ul58/ul59 the 60-lemma 5 s variant makes 8.4 proofs per CPU hour.
+The review table above lists three other lemma selections that 16 Nov dropped as "not better on count"
+(notes/2026-11-16-knn-lemma-count.md, 150 unsolved goals at 20 s):
+
+| selection | proved | against plain similarity (6) |
+|---|---:|---|
+| use counts (`--lemma-pop 0.3`) | 7 | +3 −2 |
+| proof dependencies, MaSh-style (`--lemma-deps 1`) | 5 | +1 −2 |
+| 100 kNN lemmas | 5 | +1 −2 |
+| (60, already a variant) | 9 | +4 −1 |
+
+All three change the lemma set, so they fit the class that pays at 5 s.
+
+**loop.py 92d60c4.**
+* `--variants kN` takes N kNN lemmas (k60 as before).
+* `kp` weights similarity by lemma use counts. `kd` adds proof dependencies.
+* kp's and kd's indexes are shallow copies of the base index, with their own scoring. A background thread builds
+  them at each index rebuild: on UL the use-count grep takes about 100 s and the dependencies about 20 s, too long
+  for the main loop. They are eligible only once built.
+* On three UL goals, kd changes 2-10 of the 30 lemmas and kp 3-12. Smoke test: hints/exp/lemmavar_smoke.sh.
+
+**To deploy** with production's restart back to 19 workers after exp27 (about 09:18):
+* `--variants unf@0,k60@0,kp@0,kd@0,k100@0,...` with priors Vkp@0 = Vkd@0 = Vk100@0 = 3. That is about Vunf@0's live
+  yield, so each gets about 2 CPU hours of runs before its own yield decides.
+* At a lower prior they would never run: some goal always has a k60@0 option at 8.4.
+* Cost if they are worthless: about 6 CPU hours of 5 s runs.
