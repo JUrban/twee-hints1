@@ -634,3 +634,7 @@ no hints, 5 abstract s (hints/exp/k400_mk.py):
 
 **ul63 (10:16:50):** 13 members explored. In its first 2 minutes every one of them ran. Vhl@0's rows carry 114-591
 hints more than the pool (none on R1dist_to_aa1, as the offline count predicted).
+* **1,000 and 2,000 kNN lemmas (10:23), 4 other random unsolved goals** (hints/exp/k1000_mk.py):
+  * CPU s a 5 s run: 5.6-7.9 at 1,000 lemmas, 5.4-18.4 at 2,000. Peak RSS rises to 90-220 MB.
+  * aK2_eq_aK3_d 609 has only 487 candidates in its theory and weaker ones.
+  * So k1000@0 is the next cheap member, at about 1.2 times the cost of a run. k2000 costs 2-3 times as much.
