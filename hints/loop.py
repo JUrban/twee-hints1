@@ -1020,7 +1020,10 @@ class Loop:
                     or (nm and re.fullmatch(r'(k\d+)?(s\d+)?', nm))
                     or (nm and re.fullmatch(r'm\w+', nm) and a.model_fixed
                         and os.path.exists(os.path.join(os.path.dirname(a.model_fixed.split(',')[0]), 'r' + nm + '.bin')))), v
-            VB.append((nm, int(at), int(at)) if at else (nm, CL_, VA_))
+            # NAME@B: level B's budget and hints, after level B; NAME@B:F (19 Nov 16:30): level B's budget after level F
+            # (pool@1:0: a fresh pool run at the chain level's budget, offered right after the 5 s level)
+            b_, _, f_ = at.partition(':')
+            VB.append((nm, int(b_), int(f_) if f_ else int(b_), at) if at else (nm, CL_, VA_, ''))
             assert 0 <= VB[-1][1] < len(T) and 0 <= VB[-1][2] < len(T), v
         # internal levels: each cascade level k, then the variants that follow it (in the order given); ORIG: the
         # cascade level of an internal level (for a variant: the level it follows, whose budget and hints it takes)
@@ -1030,13 +1033,14 @@ class Loop:
         for k in range(len(T0_)):
             T.append(T0_[k]); VAR.append(None); LAB.append('L%d' % k); ORIG.append(k); PREV.append(lastown)
             lastown = len(T) - 1
-            for nm, bl, af in VB:
+            for nm, bl, af, at_ in VB:
                 if af == k:
                     # (19 Nov 05:56, --variant-budget B) the variants after the chain level (no @) at budget B, not
                     # the chain level's: with a 40 s chain level (cascade 5,40,80,...) they stay at the 80 s their
                     # priors were measured at
-                    vb_ = a.variant_budget if (a.variant_budget and bl == CL_) else T0_[bl]
-                    T.append(vb_); VAR.append(nm); LAB.append('V' + nm + ('' if bl == CL_ else f'@{bl}'))
+                    vb_ = a.variant_budget if (a.variant_budget and bl == CL_ and ':' not in at_) else T0_[bl]
+                    T.append(vb_); VAR.append(nm)
+                    LAB.append('V' + nm + (f'@{at_}' if ':' in at_ else ('' if bl == CL_ else f'@{bl}')))
                     ORIG.append(bl); PREV.append(-1)
         if VL:
             print(f'  cascade: --variants: levels {list(zip(LAB, T))}', flush=True)
