@@ -213,6 +213,20 @@ abs/rm9wave2.sh, started 20:09:41 (its header says 20:11, written before checkin
     Deferral (sigmoid ≥ 0.1) and PG (q1 + q2 ≥ logit 0.25) then both move consistently, without changing the
     ranking (AUC) or the thresholds.
   * The shift is set so that the model defers rm4t's share of all rules in the test logs, using no labels.
+  * rmshift.py (23:08), on 60 test logs: rm4t defers 29.6% of all rules at 0.1. Shifts to match:
+
+| model | unshifted | shift |
+|---|---:|---:|
+| rm9a | 5.8% | −1.121 |
+| rm9f | 13.1% | −0.630 |
+| rm9g | 14.5% | −0.685 |
+| rm9h | 19.7% | −0.369 |
+
+  * The LightGBM text's `tree_sizes` header has to go, as the leaf values change size. The check gives the exact
+    shift on 5 logs.
+  * Arms (23:10): rm9aC and rm9fC. rm9gC and rm9hC follow when the control and rm9a arms end
+    (abs/rm9calarms.sh). To make room, the rm9b arm (+7 −23 on 246) and the rm9c arm (+5 −10 on 171) were stopped
+    at 23:10; their rows stay.
 * Interim at 22:14: rm9a +9 −11 on 213, rm9b +5 −14 on 182, rm9c +2 −5 on 67, rm9e +5 −3 on 143.
 * CPU: 5 arms + training 4 + climber 4: production restarted at 21:54 with J=8 (rows from 179,422; earlier log loops/UL71a.log).
 * **The first paired design was broken (found 20:58).** The snapshot loops/ULsN19 (production's solved rows before
