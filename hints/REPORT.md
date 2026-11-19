@@ -4480,8 +4480,10 @@ or additive, has lost to the untrained sum filter. The sum stays. The additive m
 **The near-oracle through PG (exp33, 19 Nov 16:44-18:22; [notes/2026-11-19-oracle-pg.md](notes/2026-11-19-oracle-pg.md)).** On the 400
 ultest goals at 20 s, with PG 0.25 in both arms, rmO (trained on these goals' own logs) proves 307 against rm4t's
 317 (+8 −18), with 9% more CPU on shared proofs. PG and today's binary lift rm4t from 15 Nov's 271 to 317 on the same
-goals. A better rule model adds nothing at either hook. Still unchecked: a threshold matched to rm4t's freeze rate
-(rmO's raw scores are spread differently).
+goals. A better rule model does not raise the count at either hook. But it proves 8 goals rm4t does not (union 325):
+model diversity is complementary. rmO cannot be deployed (trained on these goals' logs), so the members are other
+models (m4b@0 and m7t@0 since 10:20, both kept). Still unchecked: a threshold matched to rm4t's freeze rate (rmO's raw
+scores are spread differently).
 
 ## 2aw. Expanded proofs, deep runs and a lattice with small steps (17 Nov, from 19:00)
 
