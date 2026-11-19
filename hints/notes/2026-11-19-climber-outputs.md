@@ -104,3 +104,15 @@ learning?"
 * Smoke test on loops/SMK3: the attempts come out with Yc variables. The climber was restarted at 18:22:27 and
   reloaded all 154 lemmas.
 
+## Fill lemmas into production, and CPU to the climber (18:25)
+
+* loop.py: `sk` runs also get the original's fill lemmas from the climb directories' true.tsv as lemma axioms
+  (`lemma_fill_K`). Lemmas that kept goal constants are left out. They are sound for every goal of the original:
+  they were proved from its axioms and proven lemmas, with the conjecture left out.
+* CPU: production 15 → 13 workers, the climber 2 → 4 (restarted at 18:25:19; production's rows from 165,394, its
+  earlier log in loops/UL70a.log).
+  * Reason: from 15:40 to 18:10 the climber made 1.34 proofs per CPU h, production 0.61 on average, and production's
+    members at 80 s and above 0 in 13.9 CPU h.
+  * Total: 13 + 4 + exp35's 2 + exp36's 2 = 21, plus the transfer's 1-2 at times. Once exp35 and exp36 end, their
+    CPUs go back.
+

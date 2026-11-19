@@ -491,6 +491,10 @@ class Loop:
             with open(path, 'w') as f:
                 f.write(txt)
         extra = getattr(self, 'extra_axioms', {}).get(name)
+        if var == 'sk':
+            # (19 Nov 18:30, --variants sk) also the original's fill lemmas (climb.py's true.tsv: gaps of sketch proofs
+            # proved from the real axioms) as lemma axioms; sound, as the climber's own later runs use them
+            extra = (extra or []) + self.fill_lemmas(orig_of(name))
         if extra:
             # (climb.py) assumed statements: extra axioms (label, TPTP formula) of this run
             txt = open(path).read().rstrip('\n') + '\n' + ''.join(
@@ -945,6 +949,13 @@ class Loop:
                     seen.add((w[0], w[1])); out.append((w[0], w[1], str(f or a.hint_lemma_proofs)))
         return out
 
+    def fill_lemmas(self, o):
+        """(--variants sk) the fill lemmas of original O from the --climb-hints directories' true.tsv, as
+        (label, TPTP formula); those that kept a goal's constants (x0, x1_2, constant: before 19 Nov 18:22) are left
+        out, as they can match nothing; re-read with the climb hints"""
+        self.climb_hints(o)
+        return self.chcache[2].get(o, [])
+
     def climb_hints(self, o):
         """(--variants sk) the steps of climb.py's proofs for original O: DIR/fillhints/<target>/<tag> (real proofs of
         fill lemmas) first, then DIR/sketches/<target>/<tag> (proofs under assumptions or of weakened goals), oldest
@@ -967,8 +978,17 @@ class Loop:
                             w = l.rstrip('\n').split('\t')
                             if not l.startswith('#') and len(w) >= 2 and (w[0], w[1]) not in seen[o_]:
                                 seen[o_].add((w[0], w[1])); by[o_].append((w[0], w[1]))
-            self.chcache = c_ = (time.time(), by)
-            print(f'  climb hints: {sum(len(v) for v in by.values())} steps of {len(by)} originals', file=sys.stderr, flush=True)
+            fl = collections.defaultdict(list); fseen = set()
+            for d in (x for x in self.a.climb_hints.split(',') if x):
+                p = os.path.join(d, 'true.tsv')
+                if os.path.exists(p):
+                    for l in open(p):
+                        w = l.rstrip('\n').split('\t')
+                        if len(w) >= 3 and (w[0], w[2]) not in fseen and not re.search(r'\b(x\d+(_\d+)?|constant)\b', w[2]):
+                            fseen.add((w[0], w[2])); fl[w[0]].append((f'lemma_fill_{len(fl[w[0]])}', w[2]))
+            self.chcache = c_ = (time.time(), by, fl)
+            print(f'  climb hints: {sum(len(v) for v in by.values())} steps of {len(by)} originals; fill lemmas: '
+                  f'{sum(len(v) for v in fl.values())} of {len(fl)} originals', file=sys.stderr, flush=True)
         return c_[1].get(o, [])
 
     def pw_groups(self, n, hv):
