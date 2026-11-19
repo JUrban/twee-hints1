@@ -955,6 +955,10 @@ class Loop:
         for k_, l_ in enumerate(LAB):
             if not VAR[k_] and k_ > 0:
                 YP[l_] = {80.0: 1.16, 160.0: 1.77, 320.0: 0.21}.get(T[k_], 1.0)
+        if a.far_deep:
+            for k_, l_ in enumerate(LAB):
+                if not VAR[k_] and 0 < k_ and k_ <= IDX.get('L%d' % a.far_deep, 0):
+                    YP[l_ + 'f'] = a.far_deep_prior
         YW = 2.0
         ystat = collections.defaultdict(lambda: [0, 0.0])   # label -> [proofs, CPU s]
         def lyield(l):
@@ -1107,13 +1111,20 @@ class Loop:
             if NOWN[h] < len(T):
                 o_.append(NOWN[h])
             return o_
-        def nxt(n, ok=None):
+        # (19 Nov, exp24) --far-deep K: goals far from the frontier may also take the cascade's own levels 1..K. Such a
+        # run is counted apart, under its level's label with an f (L1f), as its yield differs from the near goals'; its
+        # results row keeps the level's label (for replay) and adds a column f=1.
+        FD = IDX.get('L%d' % a.far_deep, 0) if a.far_deep else 0
+        def flab(x, far):
+            return LAB[x] + 'f' if far and 0 < x <= FD and not VAR[x] else LAB[x]
+        def nxt(n, ok=None, far=False):
             """N's next internal level of those OK allows (len(T): none left)."""
             o_ = [x for x in opts(n) if ok is None or ok(x)]
             if not o_:
                 return len(T)
-            return max(o_, key=lambda x: (lyield(LAB[x]), -x)) if a.ratio_order else min(o_)
+            return max(o_, key=lambda x: (lyield(flab(x, far)), -x)) if a.ratio_order else min(o_)
         running = {}   # future -> (name, level)
+        frun = set()   # (--far-deep) the futures of far goals' deep runs
         nf = collections.Counter()   # goal -> its failed fresh (T0) runs in this round (--fail-order)
         nfb = {}   # --fail-reset: goal -> its places after the nearest proven goal below at its last failure
         # --orig-rate: (original, fresh run?) -> its runs' proofs and runs, each older run weighing 0.9 per
@@ -1136,7 +1147,8 @@ class Loop:
             for ri, line in enumerate(open(os.path.join(rdir, 'results.tsv'))):
                 f = line.rstrip('\n').split('\t')
                 if len(f) >= 5 and f[4] in IDX and ri >= a.chain_since_row:
-                    ystat[f[4]][0] += f[1] == 'THM'; ystat[f[4]][1] += float(f[2])
+                    l_ = f[4] + 'f' if len(f) >= 8 and f[7] == 'f=1' else f[4]
+                    ystat[l_][0] += f[1] == 'THM'; ystat[l_][1] += float(f[2])
                 if len(f) >= 5 and f[0] in att and f[4] in IDX:
                     lev = ORIG[IDX[f[4]]]   # (the cascade's own level number)
                     if a.chain_since_row and ri < a.chain_since_row and lev >= max(1, a.chain_level):
@@ -1196,9 +1208,12 @@ class Loop:
                     m = re.search(r'hints=(\d+)', f[3]) if len(f) >= 4 else None
                     if not m:
                         continue
-                    h = int(m.group(1)); latest[self.pool_key(f[0])] = h
+                    h = int(m.group(1))
+                    # (19 Nov 04:06) both from fresh (L0) rows only: a deep or variant row's hints= counts its chain,
+                    # 60 lemmas' or unfolded hints, not the pool, and as the latest row of its original it made the
+                    # pool look grown (every goal of the smoke test's restart ran again, from its fresh run)
                     if (f[4] if len(f) >= 5 and f[4][:1] in ('L', 'V') else 'L0') == 'L0':   # (V<name>: --variants)
-                        lastL0[f[0]] = h
+                        lastL0[f[0]] = h; latest[self.pool_key(f[0])] = h
             for n in att:
                 k = self.pool_key(n)
                 hp[n] = psz(n) * lastL0[n] / latest[k] if n in lastL0 and latest.get(k) else psz(n)
@@ -1377,16 +1392,17 @@ class Loop:
                         # (--ratio-order: by the estimated yield of the goal's next level, highest first; the level
                         # itself is the second-to-last entry)
                         deep = sorted((int(not (n in hds and j_ < hof)),
-                                       -lyield(LAB[j_]) if a.ratio_order else j_,
+                                       -lyield(flab(j_, not md_)) if a.ratio_order else j_,
                                        obd.get(gnum[n][0], 0), deep_running[gnum[n][0]], g[n][1], gnum[n][1],
-                                       j_, n)
+                                       not md_, j_, n)
                                       for n in att
                                       if n not in busy and ctx(n) == att[n][0] and not grown(n)
                                       # (the levels open to N: a goal far from the frontier only gets the variants of
                                       # the fresh level; chosen among those, as a variant no longer comes first)
                                       for md_ in (may_deepen(n, g) or n in hds,)
-                                      for j_ in (nxt(n, lambda x, n=n, md_=md_: (md_ or ORIG[x] == 0)
-                                                     and (n in hds or not a.head_only_from or x < hof)),)
+                                      for j_ in (nxt(n, lambda x, n=n, md_=md_: (md_ or ORIG[x] == 0
+                                                                                  or (not VAR[x] and x <= FD))
+                                                     and (n in hds or not a.head_only_from or x < hof), not md_),)
                                       if j_ < len(T))
                         far = []
                         if SM and a.far_retry and (a.mix or len(running) + len(retry) + len(deep) < a.j):
@@ -1443,7 +1459,7 @@ class Loop:
                         else:
                             if sum(1 for _, l in running.values() if l > 0) >= a.j - a.reserve:
                                 break
-                            x_ = deep.pop(0); lev, n = x_[-2], x_[-1]
+                            x_ = deep.pop(0); lev, n = x_[-2], x_[-1]; fd_ = x_[-3]
                             if any(m == n for m, _ in running.values()):
                                 continue
                             if light and (n not in att or lev not in opts(n) or ctx(n) != att[n][0] or grown(n)):
@@ -1491,6 +1507,8 @@ class Loop:
                                 b = T[lev] if fc else (T[lev] - T[PREV[lev]] if (a.p9loop or os.path.exists(sp)) else T[lev])
                                 fut = ex.submit(self.run_one, n, self.deep_hints(n, ol, pools), rnd,
                                                 b, 'fresh' if fc else not a.p9loop, a.cascade_cpu * b)
+                                if fd_ and lev <= FD:
+                                    frun.add(fut)   # (--far-deep: a far goal's run, counted under the f label)
                         running[fut] = (n, lev); rcls[fut] = cl; ncls[cl] += 1; rt0[fut] = time.time()
                         if H and lev == 0:   # (its features, context and predicted success, for observe())
                             x_, c_ = H.feats(n)
@@ -1510,6 +1528,7 @@ class Loop:
                 tm[2] += time.time() - tq_; t_r = time.time()
                 for f in fin:
                     n0, lev = running.pop(f)
+                    fl_ = f in frun; frun.discard(f)
                     n, ok, dt, stats, hs = f.result()
                     ycls[rcls.pop(f, 'r')].append((1 if ok else 0, dt)); rt0.pop(f, None)
                     if a.orig_rate:
@@ -1538,8 +1557,9 @@ class Loop:
                     if H and a.sched_pmin_auto:
                         (auto0 if lev == 0 else auto1).append((ok, dt, p_ if lev == 0 else 0.0))
                     rf.write(f'{n}\t{"THM" if ok else "NO"}\t{dt:.2f}\t{stats}\t{LAB[lev]}\tt={time.time()-t0:.0f}'
-                             f'\tc={chs(att[n][0]) if n in att else "-"}\n'); rf.flush()
-                    ystat[LAB[lev]][0] += 1 if ok else 0; ystat[LAB[lev]][1] += dt
+                             f'\tc={chs(att[n][0]) if n in att else "-"}' + ('\tf=1' if fl_ else '') + '\n'); rf.flush()
+                    l_ = LAB[lev] + 'f' if fl_ else LAB[lev]
+                    ystat[l_][0] += 1 if ok else 0; ystat[l_][1] += dt
                     if ok and n in self.solved:
                         pass   # (synced from another process meanwhile: keep its row and hints)
                     elif ok:
@@ -1835,6 +1855,11 @@ def make_parser():
                     help='--cascade: retry a goal with a changed context only if at most this many places after a proven sibling')
     ap.add_argument('--frontier', type=int, default=1,
                     help='--cascade: deepen goals at most this many places after a proven sibling')
+    ap.add_argument('--far-deep', type=int, default=0,
+                    help='(19 Nov, exp24) --cascade: goals beyond --frontier and --line-gaps may also take the cascade\'s own '
+                         'levels 1..K (their yield counted apart, as L<k>f; results rows get a column f=1)')
+    ap.add_argument('--far-deep-prior', type=float, default=0.5,
+                    help='--far-deep: the prior yield of those levels on far goals, in proofs per CPU hour')
     ap.add_argument('--reserve', type=int, default=3, help='--cascade: workers kept free of deepening runs')
     ap.add_argument('--give-up', type=int, default=0,
                     help='skip the rest of an original in this round after N consecutive failures (with --online: goal order)')
