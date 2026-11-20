@@ -20,7 +20,7 @@ ancestry's axioms of the source run to the same name + .ax, and GOALS.tsv for tr
 files, 0).
 
   givenmatch.py live DIR [--dirs UL,XFL] [--every 1200] [-j 2] [--dst UL] [--gfail GFAIL,GSAT] [--set ALL] [--no-same]
-                   [--cap 60] [--no-inst] [--loops /project/hintwork/loops] -- LOOP-OPTIONS
+                   [--cap 60] [--same-cap N] [--no-inst] [--loops /project/hintwork/loops] -- LOOP-OPTIONS
 beside production: each cycle scans the logs written since the last one and runs the new hits (see live()).
 """
 import os, re, sys
@@ -159,7 +159,8 @@ def sketch(hits, skdir, goals, per=3, prefix=False):
     print(f'{len(by)} goals -> {goals}')
 
 
-def live(dirs, d, every, j, rest, dst='UL', gfail=('GFAIL', 'GSAT'), allp=ALL, same=True, cap=60, inst_scan=True):
+def live(dirs, d, every, j, rest, dst='UL', gfail=('GFAIL', 'GSAT'), allp=ALL, same=True, cap=60, inst_scan=True,
+         same_cap=None):
     """(20 Nov 03:45) beside production: every EVERY s, scan the given logs of DIRS written since the last cycle against
     production's unsolved unit goals (variants; instances within the own original), and run each new hit as exp38
     did: the rule's ancestry first at 20 s, then for the failures the log's prefix with its axioms at 40 s
@@ -313,7 +314,9 @@ def live(dirs, d, every, j, rest, dst='UL', gfail=('GFAIL', 'GSAT'), allp=ALL, s
         so, nso = sofree.candidates(os.path.join(d, 'so_all.tsv'), tried_pairs=sop, dst=os.path.join(LOOPS, dst),
                                     allp=allp)
         n0 = len(so)
-        so = [l for l in so if l.split('\t')[0] in failed][:cap]   # (07:25: as the hits, exp40's 1st cycle had 808)
+        # (07:25: as the hits, exp40's 1st cycle had 808; 20 Nov 10:40 --same-cap: exp40's same-statement runs made
+        # 80 proofs per CPU h against the ancestry runs' 790, and took most of each cycle)
+        so = [l for l in so if l.split('\t')[0] in failed][:cap if same_cap is None else same_cap]
         print(f'  same statement: {nso} candidates, {n0} new free ones, {len(so)} failed in the loop to run', flush=True)
         if so:
             gp = os.path.join(d, f'so_{run_}_{cyc}.tsv')
@@ -338,7 +341,7 @@ def main():
         return live(val('--dirs', 'UL,XFL').split(','), opts[0], val('--every', 1200.0), val('-j', 2), rest,
                     dst=val('--dst', 'UL'), gfail=[x for x in val('--gfail', 'GFAIL,GSAT').split(',') if x],
                     allp=val('--set', ALL), same='--no-same' not in opts, cap=val('--cap', 60),
-                    inst_scan='--no-inst' not in opts)
+                    inst_scan='--no-inst' not in opts, same_cap=val('--same-cap', -1) if '--same-cap' in opts else None)
     if sys.argv[1] == 'sketch':
         per = int(sys.argv[sys.argv.index('--per') + 1]) if '--per' in sys.argv else 3
         return sketch(sys.argv[2], sys.argv[3], sys.argv[4], per, '--prefix' in sys.argv)

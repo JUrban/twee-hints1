@@ -195,6 +195,8 @@ def main():
     ap.add_argument('-n', type=int, default=400)
     ap.add_argument('--seed', type=int, default=1)
     ap.add_argument('--steps', type=int, default=3000)
+    ap.add_argument('--trusted', help='only these goals\' proofs as the bank (exp/trust.py OUT.trusted)')
+    ap.add_argument('--shard', default='0/1', help='I/N: every Nth sampled goal from the Ith')
     ap.add_argument('--control', action='store_true',
                     help='sample proven goals instead, without their own proof steps (the method\'s power)')
     a = ap.parse_args()
@@ -208,6 +210,9 @@ def main():
     random.Random(a.seed).shuffle(U)
     U = U[:a.n]
     U.sort(key=lambda g: (sorted(oax[lemmas.split(g)[0]]), g))   # (one bank per theory)
+    si, sn = (int(x) for x in a.shard.split('/'))
+    U = U[si::sn]
+    TR = {l.strip() for l in open(a.trusted) if l.strip()} if a.trusted else None
     print(f'{len(U)} {"proven" if a.control else "unsolved"} unit goals sampled', flush=True)
     # steps per source original: key -> (lhs, rhs, (source goal, index)) from production's hints files
     steps = {}
@@ -216,7 +221,7 @@ def main():
         if o not in steps:
             d = {}
             for g in by_o[o]:
-                if g not in S or not unit(g):
+                if g not in S or not unit(g) or (TR is not None and g not in TR):
                     continue   # (a conditional goal's proof uses its hypotheses: steps not valid in general)
                 p = os.path.join(L, 'UL', 'hints', g)
                 try:

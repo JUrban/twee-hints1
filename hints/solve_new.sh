@@ -47,7 +47,8 @@
 # then the log's prefix at 40 s; at most 60 goals per 300 s cycle; also the same statement proven in a theory with
 # more axioms), proofs into OUT. half1 from zero, 2 hours: PGE 19,591 against PGD's 19,309 (identical runs differ by
 # about 185); in the last 30 minutes the live loop proved 74 goals in about 0.85 CPU h, the loop 92 in 3. GIVEN=0
-# gives the 19 Nov system. The live loop adds up to 2 workers at times.
+# gives the 19 Nov system. The live loop adds up to 2 workers at times. GIVENARGS (default "--every 300 -j 2 --cap 60
+# --no-inst") holds its options, e.g. --same-cap N for the same-statement runs.
 set -e
 H=$(cd "$(dirname "$0")" && pwd)
 NAMES=$1; CTX=$2; OUT=$3; J=${4:-4}; HOURS=${5:-1}
@@ -85,6 +86,7 @@ print(f'context: {n} proofs (EXCLUDE={excl}: {len(G)} new goals of {len(O)} orig
 EOF
 MOD="--model --model-fixed $M.bin,$M.vocab --model-theory --lemmas 6 --lemma-knn $KNN --lemma-subsets --lemma-after"
 GIVEN=${GIVEN:-1}
+GIVENARGS=${GIVENARGS:---every 300 -j 2 --cap 60 --no-inst}   # (the live loop's own options)
 ROUT=$(realpath -m "$OUT"); GSCAN=
 [ "$GIVEN" = 1 ] && GSCAN="--given-scan ${ROUT}_GF"
 python3 -u "$H/loop.py" "$NAMES" "$OUT" --init "$OUT.ctx" --start 1 --cascade "$CASCADE" --cascade-start -1 --retry-gap 3 \
@@ -101,7 +103,7 @@ GM=
 if [ "$GIVEN" = 1 ]; then
   B=$(basename "$ROUT")
   python3 -u "$H/givenmatch.py" live "${ROUT}_GML" --loops "$(dirname "$ROUT")" --dst "$B" --dirs "$B,$B.xfer" \
-    --gfail "${B}_GF" --set "$(realpath "$NAMES")" --every 300 -j 2 --cap 60 --no-inst -- \
+    --gfail "${B}_GF" --set "$(realpath "$NAMES")" $GIVENARGS -- \
     $MOD --pool original --twee "$TWEE" --wall-factor 15 --args="--abstract-time 2000 --no-eqhint-consider" \
     > "$OUT.gml.log" 2>&1 &
   GM=$!
