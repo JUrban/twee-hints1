@@ -4516,10 +4516,18 @@ The user asked for retrained members with subsampling, and for the tricks of the
 | weighting + 255 leaves (rm9i) | 0.900 |
 
   Short proofs of easy goals hurt, long ones help, and weighting and bigger trees help most.
-* **Replayed against rm4t (202 of 400), interim:** the weighted models gain (rm9f +9 −5, rm9h +5 −1), the unweighted
-  ones lose (rm9a +11 −27). The new models score higher and prune less at production's thresholds. Shifting them
-  to rm4t's deferral share (rmshift.py) is under test, and has not helped rm9a so far.
-* Members: m9a@0 since 20:30 (ul71); m9f@0, m9h@0 and m9i@0 since 23:30 (ul72).
+* **Replayed, fresh 20 s each (final, 20 Nov 02:12):** rm4t 202 of 400; the weighted models 203-204 (rm9f +16 −14,
+  rm9h +14 −13, rm9i +17 −15); the unweighted ones 181-187. **The union of all arms proves 226 (+12%).**
+  * Greedy cover: rm9f 204, rm4t +14, rm9e +5, rm9h +2, rm9a +1.
+  * The weighting is what makes retraining pay, and the models are complementary.
+  * Shifting a model's scores so it prunes as much as rm4t hurt or did nothing (e.g. rm9a 4 gained, 29 lost on 274),
+    so the gain is in the ranking.
+  * A time-matched control (rm4t at 40 s) is running.
+* Members: m9a@0 since 20:30 (ul71); m9f@0 and m9h@0 since 23:30 (ul72); m9e@0 since 02:17 (ul73), in place of m9i@0,
+  which added nothing beyond rm9f.
+* **Production's burst** (783 proofs 22:20-02:13) was the transfer loop. One L1 proof (aK2_eq_aK3_1243b 506, chain
+  hints) and its siblings had steps that were unsolved goals of 22 other originals. Those then started sibling chains
+  of their own.
 
 ## 2aw. Expanded proofs, deep runs and a lattice with small steps (17 Nov, from 19:00)
 
