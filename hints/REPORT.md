@@ -5561,6 +5561,23 @@ rounds of 30 s or more, but about 40% overhead for 8 s rounds.
 
 ## 4. Next steps
 
+*20 Nov, 11:56 (2az, 2ba):*
+
+* **Soundness first.** The re-verification (2ba) ends with the untrusted proofs out of the solved list, and the
+  totals corrected (exp/quarantine2.py).
+  * Every lemma path now records its lemmas by name.
+  * The model audit (exp/modelcheck.py, about 15 minutes on 3 CPUs) is cheap enough to run every day, and after
+    any new lemma or axiom path.
+* **The derived-rule transfer is the from-zero gain** (exp40 +282 on half1, exp41 +769 on half2). Its ancestry runs
+  make about 540-790 proofs per CPU h. exp42 (running) lifts their per-cycle cap.
+* **Step joins** (23 of 23) are a live member.
+  * Next, cross-run joining: the goal's own failed run's given rules together with the other theories' proof steps
+    (loop.py `--given-keep`, joincheck `--own-given`; pilot running).
+  * Then the non-joined goals' normalising steps as lemmas.
+* **Open:**
+  * the climber (CLHL2), restarted after the re-verification;
+  * a 6-8 hour from-zero run with GIVEN=1, where the tail starts.
+
 *19 Nov, 11:11 (2az; [notes/2026-11-18-portfolio-review.md](notes/2026-11-18-portfolio-review.md)):*
 
 * **Production (ul63, then ul64 at about 12:40)** is a portfolio of 5 s problem changes, explored and then ordered
