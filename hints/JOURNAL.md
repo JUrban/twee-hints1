@@ -755,11 +755,16 @@ Paused:
 has the history (user, 20 Nov: "update the total numbers in the report etc every now and then").
 
 Next:
+0000000000000000. **exp45 (written 19:38, starts with exp44 when Z6 ends, [notes/2026-11-20-yield-discount.md](notes/2026-11-20-yield-discount.md)):**
+   Z6 after 4 hours ran only Vunf@0 (2 of its last 291) and L0 retries: its cumulative estimate (23 per CPU h) kept
+   L1 (9 of 16, only in the first hour) from ever running again. estcmp on Z6's rows: cumulative -791, flat -616,
+   discounted over 1,000 rows -557; production's rows keep cumulative best. loop.py `--yield-discount N`; P2J =
+   defaults + `--yield-discount 2000 --reexplore 12:0.25` against P2K, half2, 5 h. exp44 changed to 5 h against P2K
+   too (abs/exp4445.sh); production and stepjlive3 start when the three arms end (abs/afterz6.sh, 19:38).
 000000000000000. **exp44 (written 18:44, starts when Z6 ends, [notes/2026-11-20-retry-class.md](notes/2026-11-20-retry-class.md)):** Z6's first runs ended at
    about 150 min, then retries of goals with a new context proved 47% (1,096 of 2,331 in half an hour), the last
    first runs 3%. loop.py `--retry-class`: failed-before goals as their own --mix class. P2H on half2 against P2E/P2F.
-   Queued by abs/afterz6.sh (hints/exp/afterz6.sh, waiting since 18:44): when loops/Z6.done appears, exp44, production
-   (ul74, J=10, its 04:15 log kept as UL74.0420.log) and the step-join member (stepjlive3.sh: cycles after JOIN/c5).
+   (Design changed 19:37: 5 hours against P2K, see exp45.)
 00000000000000. **20 s sweep (15:32, [notes/2026-11-20-sweep20.md](notes/2026-11-20-sweep20.md)):** 2,895 unsolved goals never had a production run
    above 5 s; the non-joined test proved 4 of 100 such at 20 s. exp/sweep20.py loops/SW20, chunks of 300 with a
    fresh trusted lemma context, 2 workers, proofs into UL (and kept). Production's own loop is stopped (2 proofs in
@@ -937,7 +942,8 @@ reports are written as the experiments run.
 | [notes/2026-11-20-half-gap.md](notes/2026-11-20-half-gap.md) | Why a from-zero half run stops short of production: the other half's kNN lemmas |
 | [notes/2026-11-20-z6.md](notes/2026-11-20-z6.md) | Z6: today's from-zero system on the whole benchmark, 8 hours |
 | [notes/2026-11-20-sweep20.md](notes/2026-11-20-sweep20.md) | One 20 s run for each unsolved goal that never had more than 5 s |
-| [notes/2026-11-20-retry-class.md](notes/2026-11-20-retry-class.md) | exp44: failed-before goals as their own cascade class (P2H against P2E/P2F) |
+| [notes/2026-11-20-retry-class.md](notes/2026-11-20-retry-class.md) | exp44: failed-before goals as their own cascade class (P2H against P2K, 5 h) |
+| [notes/2026-11-20-yield-discount.md](notes/2026-11-20-yield-discount.md) | exp45: a discounted yield estimate for the deeper levels from zero (P2J against P2K, 5 h) |
 | [notes/2026-11-20-base-saturation.md](notes/2026-11-20-base-saturation.md) | exp39: base-theory runs as rule generators for the unsolved goals of the stronger theories |
 | [notes/2026-11-20-given-transfer.md](notes/2026-11-20-given-transfer.md) | exp38: unsolved goals that are variants of rules other runs derived and did not use (379 M in the given logs; transfer.py only matches proof steps); their ancestry as hints |
 | [notes/2026-11-19-from-zero-portfolio.md](notes/2026-11-19-from-zero-portfolio.md) | half1 from zero in 2 hours with today's deep portfolio (PGC), against PGA's 18,987 (exp27, from 07:18) |

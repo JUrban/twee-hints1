@@ -1,0 +1,57 @@
+# A discounted yield estimate for the deeper levels from zero (exp45, 20 Nov)
+
+Written 20 Nov 2026, 19:38 UTC, before launch. Launched with exp44 by abs/exp4445.sh
+([hints/exp/exp4445.sh](../exp/exp4445.sh)), automatically when Z6 ends (about 23:33).
+
+## Why
+
+* **Z6 after 4 hours (notes/2026-11-20-z6.md):** 42,920 at 4 hours, then 151 in the next half hour. Its deeper
+  class ran only the unfolded 5 s variant and L0 retries:
+
+  | Z6, whole run to 4 h | proofs/runs | CPU h |
+  |---|---|---:|
+  | L1 (40 s chain level, goals right after a proven one) | 9/16, all in the first hour | 0.2 |
+  | Vunf@0 (unfolded, 5 s) | 256/3,550; 2 of its last 291 | 9.2 |
+  | Vk100@0, Vk200@0, Vk400@0, Vkd@0 | 67/602 | 0.8 |
+
+* **The cause:** `--ratio-order` ranks a goal's next attempts by each label's cumulative estimate,
+  (proofs + 2 × prior) / (CPU h + 2). Vunf@0 stood at 23 per CPU hour, from runs made while nearly everything
+  proved; L1 at 5.7 (9 proofs in its 0.2 explore hour, prior 1.73). So after its explore hour L1 never ran again.
+  The half tests show the same: L1 ran 33 times in P2E and P2F, all in the first hour, 18 proofs.
+* **Offline (hints/exp/estcmp.py, its split test).** It scores each window's split of proofs among the labels that
+  ran in it, predicted from the rows before (multinomial log-likelihood; windows of 1,000 rows, flat priors):
+
+  | rows | cumulative | discounted over 1,000 | over 3,000 | over 10,000 | time-normalised | flat |
+  |---|---:|---:|---:|---:|---:|---:|
+  | Z6 | −791 | **−557** | −580 | −636 | −670 | −616 |
+  | Z4 | −622 | **−395** | −438 | −532 | −559 | −1,955 |
+  | production, rows 47,531 on (production's priors) | **−2,040** | – | −2,338 | −2,235 | −2,293 | −2,560 |
+
+  From zero the cumulative estimate ranks worse than no information (Z6). On production's rows it stays best,
+  as on 19 Nov (notes/2026-11-18-portfolio-review.md): there the rates swing with a common factor.
+
+## Change
+
+* loop.py `--yield-discount N`: each label's proofs and CPU are discounted by exp(−1/N) per counted results row (all
+  labels' rows), estcmp's 'disc'. The prior term is not discounted, so a label that stops running drifts back to
+  its prior. The explore thresholds still use the raw CPU.
+* With `--reexplore W:R` (production has 150:0.25) a label of `--explore-labels` (L1, Vk100@0, Vk200@0, Vk400@0,
+  Vkd@0 in solve_new.sh) that got under R CPU h in the last W CPU h is ranked with the best label until it has R.
+  Here 12:0.25: on 6 workers the window is 2 hours, so at most 5 × 0.25 / 12 ≈ 10% of the CPU.
+* Every 500 runs the cascade's stderr line lists the six best estimates (`est ...`).
+* Smoke test: loops/YDT (below).
+
+## Set and setting
+
+* **P2J:** sets/half2 from zero, abs/or_test2.sh, 6 workers, 5 hours,
+  `LOOPARGS=--yield-discount 2000 --reexplore 12:0.25`.
+* **Control P2K** (shared with exp44): the same without LOOPARGS.
+* Two changes in one arm: the discount alone would let L1 drift back to its prior 1.73, which is still above the
+  late Vunf@0 (about 3), but the re-exploration measures it now. If P2J wins, a second arm splits them.
+
+## Measures
+
+* `abs/setcurve.py sets/half2 P2K P2H P2J --at 30,60,120,180,240,300`; exp/windows.py P2J against P2K (which labels
+  ran when, proofs per CPU hour).
+* **Decision:** P2J ≥ P2K + 185 at 5 hours makes the pair solve_new.sh's default. Equal is a negative for from-zero
+  runs (production keeps the cumulative estimate either way).

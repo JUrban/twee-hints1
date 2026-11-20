@@ -1,7 +1,8 @@
 # Failed-before goals as their own class in the cascade (exp44, 20 Nov)
 
-Written 20 Nov 2026, 18:44 UTC, before launch. Script abs/exp44.sh ([hints/exp/exp44.sh](../exp/exp44.sh));
-launched automatically when Z6 ends (about 23:31), so the CPU budget holds.
+Written 20 Nov 2026, 18:44 UTC, before launch; design changed at 19:37 (below). Launched with exp45 by
+abs/exp4445.sh ([hints/exp/exp4445.sh](../exp/exp4445.sh)), automatically when Z6 ends (about 23:33;
+abs/afterz6.sh), so the CPU budget holds.
 
 ## Why
 
@@ -37,14 +38,20 @@ errors.
 
 ## Set and setting
 
-* **P2H:** sets/half2 from zero, abs/or_test2.sh (solve_new.sh's defaults, 6 workers, 2 hours, SCHED=, transfer
-  every 5 minutes) with `LOOPARGS=--retry-class`.
-* **Controls:** P2E (exp41, 20,152 at 2 h) and P2F (exp42, 20,174), the same system without it; P2G (exp43,
-  19,994) differs in the live loop. Identical runs differ by about 185 at 2 hours.
+* **Changed at 19:37: 5 hours, with a 5-hour control.** On half2 with 6 workers the first runs last beyond the
+  2 hours of P2E/P2F (22,300 of 25,847 goals had one at 2 hours), so the late retries come after 2 hours. Three
+  arms start together on sets/half2 from zero, abs/or_test2.sh (solve_new.sh's defaults, 6 workers, SCHED=,
+  transfer every 5 minutes), HOURS=5:
+  * **P2K:** the control (LOOPARGS empty);
+  * **P2H:** `LOOPARGS=--retry-class`;
+  * **P2J:** exp45's arm ([notes/2026-11-20-yield-discount.md](2026-11-20-yield-discount.md)).
+* P2E (exp41, 20,152 at 2 h) and P2F (exp42, 20,174) are the same system as P2K for the first 2 hours. Identical
+  runs differ by about 185 at 2 hours.
 
 ## Measures
 
-* `abs/setcurve.py sets/half2 P2E P2F P2H --at 10,30,60,90,120`; one-arm goals against P2F.
-* exp/retrysplit.py on P2H against P2F: first runs and retries per half hour.
-* **Decision:** P2H ≥ P2F + 185 at 2 hours makes `--retry-class` solve_new.sh's default. Ahead at 60-90 minutes but
-  within noise at 2 hours is a speed gain, reported as such and tested on the whole benchmark next.
+* `abs/setcurve.py sets/half2 P2K P2H P2J --at 30,60,120,180,240,300` (and P2E, P2F to 2 hours); one-arm goals.
+* exp/retrysplit.py on P2H against P2K: first runs and retries per half hour.
+* **Decision:** P2H ≥ P2K + 185 at 5 hours (or at 2-3 hours with P2E/P2F in the same range as P2K) makes
+  `--retry-class` solve_new.sh's default; ahead early but within noise at 5 hours is a speed gain, reported as
+  such. Then on the whole benchmark (Z7, against Z6).

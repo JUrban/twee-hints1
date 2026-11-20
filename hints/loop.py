@@ -1270,7 +1270,20 @@ class Loop:
         # better: 0.25 -1078, 0.5 -1081, 1 -1086, 2 -1093, 8 -1108
         YW = a.prior_weight
         ystat = collections.defaultdict(lambda: [0, 0.0])   # label -> [proofs, CPU s]
+        # (20 Nov 19:36, --yield-discount N) the estimate from each label's proofs and CPU discounted by exp(-1/N) per
+        # counted results row (all labels' rows, the clock of hints/exp/estcmp.py's 'disc'). From zero the rates fall by
+        # two orders of magnitude, and a member measured early keeps its early rate: in Z6 after 4 hours Vunf@0 stood at
+        # 23 proofs per CPU hour (2 in its last 291 runs) and L1 at 5.7 (9 of 16, all in the first hour), so L1 never ran
+        # again. In estcmp's split test on Z6's rows the cumulative estimate scored -791, below flat (-616); discounted
+        # over 1,000-3,000 rows -557/-580 (Z4: -622 against -395/-438). On production's rows the cumulative one stays
+        # best (-2,040 against -2,338), as on 19 Nov (notes/2026-11-20-yield-discount.md)
+        YD = math.exp(-1.0 / a.yield_discount) if a.yield_discount else 0.0
+        ydis = collections.defaultdict(lambda: [0.0, 0.0, 0])   # label -> [proofs, CPU s, at row], discounted
+        yrow = [0]
         def lyield0(l):
+            if YD:
+                k, c, r_ = ydis[l]; f_ = YD ** (yrow[0] - r_)
+                return (k * f_ + YW * YP.get(l, 1.0)) / (c * f_ / 3600 + YW)
             k, c = ystat[l]
             return (k + YW * YP.get(l, 1.0)) / (c / 3600 + YW)
         # (19 Nov 09:35, --explore H) exploration in the ratio order: a label with less than H CPU hours of runs in this
@@ -1292,6 +1305,9 @@ class Loop:
         ywsum = collections.defaultdict(float)         # label -> CPU s in the window
         def ynote(l, k, c):
             ystat[l][0] += k; ystat[l][1] += c; xver[0] += 1
+            if YD:
+                yrow[0] += 1; v_ = ydis[l]; f_ = YD ** (yrow[0] - v_[2])
+                v_[0] = v_[0] * f_ + k; v_[1] = v_[1] * f_ + c; v_[2] = yrow[0]
             gcpu[0] += c
             if RXW:
                 ywin[l].append((gcpu[0], c)); ywsum[l] += c
@@ -1970,7 +1986,9 @@ class Loop:
                               f'{time.time()-t0:.0f}s' + (f', synced={nsync}' if a.sync else '')
                               + f', main s: pass {tm[0]:.0f} submit {tm[1]:.0f} wait {tm[2]:.0f} results {tm[3]:.0f}'
                               + (', mix ' + ' '.join(f'{c} {ncls[c]} {3600*yld(c):.0f}/h' for c in ('rfdq' if a.retry_class else 'rfd')) if a.mix else '')
-                              + (f', fresh {calib[2]}/{calib[1]} (predicted {calib[0]:.0f})' if H else ''),
+                              + (f', fresh {calib[2]}/{calib[1]} (predicted {calib[0]:.0f})' if H else '')
+                              + ((', est ' + ' '.join(f'{l_} {lyield(l_):.1f}' for l_ in sorted(ystat, key=lambda m: -lyield(m))[:6]))
+                                 if a.ratio_order and done_n % 500 == 0 else ''),
                               file=sys.stderr, flush=True)
         msg = f'cascade: {done_n} runs new {new} total {len(self.solved)}/{len(self.names)} {time.time()-t0:.0f}s'
         print(msg, file=sys.stderr, flush=True)
@@ -2242,6 +2260,11 @@ def make_parser():
                     help='--cascade: deepen goals at most this many places after a proven sibling')
     ap.add_argument('--variant-budget', type=float, default=0,
                     help='(19 Nov) --variants: the budget of the variants after the chain level (default: its own)')
+    ap.add_argument('--yield-discount', type=float, default=0, metavar='N',
+                    help='(20 Nov) --ratio-order: each label\'s yield estimate from its proofs and CPU discounted by '
+                         'exp(-1/N) per results row (0 = cumulative). From zero the cumulative estimate keeps a member\'s '
+                         'early rate (estcmp.py on Z6: cumulative -791, flat -616, discounted over 1,000 rows -557); '
+                         'on production\'s rows the cumulative one is best (notes/2026-11-20-yield-discount.md)')
     ap.add_argument('--prior-weight', type=float, default=2.0, metavar='H',
                     help='--ratio-order: the weight of a label\'s prior, in CPU hours of its own runs')
     ap.add_argument('--given-scan', default='',
