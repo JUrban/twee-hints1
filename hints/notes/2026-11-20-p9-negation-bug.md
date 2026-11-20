@@ -119,6 +119,9 @@ Written 20 Nov 2026, 10:32 UTC, while the re-verification runs.
   hints to lemmas, given logs to `.ax`. A second prover's input converter is part of the trusted base.
 * **Every proof should record its lemmas by name at write time.** The kept outputs did this for production's own
   runs, by accident of --keep-out. The side workers did not, and that made most of this re-verification necessary.
+* **A quarantine must cover the dependents at once.** Production kept the untrusted dependents as lemma sources,
+  and re-proved quarantined goals from them. That made 8 circular pairs and triples, which a trust fixpoint cannot
+  resolve. Quarantine everything untrusted together, then re-prove with trusted lemmas only.
 * **An independent check** (here, rewriting with the union of proof steps) finds invalid "facts" that no single run
   shows. Worth running now and then over all hints: a join of an unsolved goal is either a cheap proof or a wrong
   step.
