@@ -5181,8 +5181,22 @@ from zero, against exp30's P2D.
 * By kind: the rule's ancestry runs made 339 proofs in 0.63 CPU h (541 per CPU h), the same-statement runs 143 in
   1.79 (80), and the prefix runs 19 in 0.63 (30).
 * The 60-goal cap per cycle, shared with the same-statement runs, starved the ancestry runs: 145-192 hits were still
-  pending at the end. givenmatch.py now has `--same-cap` (solve_new.sh `GIVENARGS`). exp42 will test `--cap 200
-  --same-cap 20`.
+  pending at the end. givenmatch.py now has `--same-cap` (solve_new.sh `GIVENARGS`).
+
+**Lifting the cap does not help: +22 (exp42, 20 Nov 11:27-13:28;
+[notes/2026-11-20-given-cap.md](notes/2026-11-20-given-cap.md)).** P2F is P2E with `--cap 200 --same-cap 20`.
+
+| minutes | 10 | 30 | 60 | 90 | 120 |
+|---|---:|---:|---:|---:|---:|
+| P2E (control) | 11,190 | 17,182 | 19,198 | 19,977 | 20,152 |
+| P2F (cap 200, same 20) | 11,266 | 17,357 | 19,307 | 19,991 | 20,174 |
+
+* Ahead by 175 at 30 minutes, within noise at 2 hours. Only P2F proved 301, only P2E 272 (union 20,454).
+* The live loop proved 559 in 2.83 CPU h: ancestry 421 of 470 (612 per CPU h), same-statement 110 of 255 (76),
+  prefix 28 of 49 (40).
+* The cap of 200 was never reached (0-86 goals a cycle). The limit is the wait: a hit runs only after the loop has
+  failed on its goal, and the extra ancestry proofs were mostly goals the loop proves anyway. exp43 runs hits at
+  once (`--no-wait`, [notes/2026-11-20-given-nowait.md](notes/2026-11-20-given-nowait.md)).
 
 **Step joins: unsolved goals closed by rewriting with other theories' proof steps (20 Nov 10:40;
 [notes/2026-11-20-step-join.md](notes/2026-11-20-step-join.md)).**
@@ -5589,7 +5603,8 @@ rounds of 30 s or more, but about 40% overhead for 8 s rounds.
   * The model audit (exp/modelcheck.py, about 15 minutes on 3 CPUs) is cheap enough to run every day, and after
     any new lemma or axiom path.
 * **The derived-rule transfer is the from-zero gain** (exp40 +282 on half1, exp41 +769 on half2). Its ancestry runs
-  make about 540-790 proofs per CPU h. exp42 (running) lifts their per-cycle cap.
+  make about 540-790 proofs per CPU h. A higher per-cycle cap does not help (exp42, +22); exp43 (running) runs hits
+  without waiting for the loop's failure.
 * **Step joins** (23 of 23) are a live member.
   * Next, cross-run joining: the goal's own failed run's given rules together with the other theories' proof steps
     (loop.py `--given-keep`, joincheck `--own-given`; pilot running).
