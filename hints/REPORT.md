@@ -5462,6 +5462,44 @@ rounds of 30 s or more, but about 40% overhead for 8 s rounds.
 
 ## 3. Assessment
 
+*20 Nov, 13:40 (`date` checked). After the soundness re-verification. The 19 Nov assessment follows it.*
+
+* **Where it stands.** All 51,784 public problems: **48,172 solved (+55.1% over plain twee at 4 s)**, holdout
+  **5,336 (+66.6%)**. Every proof is trusted by the fixpoint of 2ba. 3,612 goals are left.
+* **The day's main event was a soundness bug, not a gain** (2ba).
+  * p9twee.py turned conditional sibling lemmas into false axioms. 16 Prover9 proofs were void, and 143 more rested
+    on them.
+  * Claims that fell: the Prover9 member's yields (2az), exp16's walls, and 2ad's first Prover9 hit. The solved list
+    was re-verified and the totals corrected. 5 of the 16 statements are still unproved (true, but not proved by us).
+  * What guards it now:
+    * every lemma path records its lemmas by name;
+    * exp/trust.py checks the records as a fixpoint;
+    * a model audit runs every 6 hours. On the 16 known-bad proofs it caught 13.
+  * What still rests on argument, not a check:
+    * Proofs outside the 43 exposed originals are trusted because every lemma mechanism stays within the target's
+      theory.
+    * Conditional goals' proofs are not model-checked.
+    * The audit misses false steps that hold in all models up to size 8.
+* **From zero, the one clear gain this week is the derived-rule transfer** (solve_new.sh `GIVEN=1`): +282 on half1
+  (exp40) and +769 on half2 (exp41), against a noise of about 185 between identical runs.
+  * Lifting its per-cycle cap did nothing (exp42, +22). The limit is that a hit waits for the loop's own failure.
+    exp43 (`--no-wait`) is running.
+* **Measured negatives today** (each closed, each recorded):
+  * semantic guidance from Mace4 relevance models (lift 1.09);
+  * cross-run joining with the goal's own failed run's rules (0 of 30);
+  * the from-zero arms' proof steps as a bigger join bank (0 of 1,557).
+* **Step joins are cheap but nearly exhausted.** 24 proofs in about 0.3 CPU h, then about 1 a cycle. New joins come
+  only as new proofs enter the bank.
+* **What is weak in the evidence:**
+  * Each from-zero comparison is one run per arm on one half. The two halves gave +282 and +769 for the same change.
+  * Two-hour curves converge. exp42 led by 175 at 30 minutes and by 22 at 2 hours. So the 2-hour totals hide speed
+    differences, and the 6-8 hour from-zero run that would show long-run effects is still not done.
+  * The rule model rm4t was trained on public proofs, so "from zero" is not fully clean (2aq).
+  * Production's rate has no control. The quarantine, the re-proofs and the experiments' CPU share make its hourly
+    counts today uninterpretable as a measure of any setting.
+* **The limit now.** It is as on 19 Nov. Most of the 3,612 are far from any proof. They fall in cascades when a
+  neighbour below falls, or through cross-original lemmas. Joins and model-based guidance do not reach them.
+
 *19 Nov, 09:26 (`date` checked). An independent look at where things stand. The 16 Nov assessment follows it.*
 
 * **Where it stands.** All 51,784 public problems: **47,041 solved (+51.5% over plain twee at 4 s)**, holdout
