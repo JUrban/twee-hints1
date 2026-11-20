@@ -291,6 +291,12 @@ All arms on all 400 goals, fresh 20 s each, as of each goal's proof:
 * **Not yet known:** whether two models at 20 s beat one at 40 s. Time-matched control: rm4t at 40 s on the same
   400 (loops/MQ_rm4t_40). If it proves fewer than 218, an L0 run with a second model is worth more than a longer
   rm4t run.
+* **The time-matched control, final (20 Nov 07:20, loops/MQ_rm4t_40):** rm4t at 40 s proves **225 of 400** in 5.09
+  CPU h. rm4t and rm9f at 20 s prove 218 together in 5.08 h. 14 goals are proved only at 40 s, 7 only by the pair;
+  all three runs prove 232. So at equal CPU, twice the time for one model beats two models by 7 (3%), and both
+  have goals of their own. For production: keep the members (portfolio rule), and the longer single-model runs (the
+  40 s chain level) deserve their share too. At 225 goals the order had been the other way (147 against 149), so
+  this difference is about the size of the noise.
 * **ul73 at 02:17** (production rows from 196,111, J=12), and the rm4t 40 s arm at 02:17. CPU: production 12, the
   climber 4, the transfer loop 2, the arm 1.
 

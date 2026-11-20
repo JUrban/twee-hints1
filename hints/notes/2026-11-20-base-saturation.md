@@ -80,3 +80,20 @@ hypotheses. Dropping the hypotheses gains nothing here; stopped.
 
 **exp39c (06:35-): production-like base runs.** abs/gsat2.sh: 8 s, 6 siblings + the 100 kNN lemmas of G0
 (lemmas.LemmaIndex.select, as production's k100 member), 300 runs, 3 workers, run tag c in loops/GSAT/runs.tsv.
+* **exp39c result (06:35-06:59): 3 new hits in 1.17 CPU h** (lra2aa 343, nil3_18 360, nil3_23_32_to_28 560). The
+  live loop proved none of them. Worse than the pilot's 30 s runs with random lemmas.
+* **Production's own failed-run hits dried up at the same time:** new goals per hour 19 (04:15-05:00), 17 (05:00-06:00),
+  1 (06:00-07:00). The first hour's harvest was hits that had accumulated, and the base runs here compete for the same
+  dwindling supply.
+
+**exp39d (06:59-07:24, abs/gsat3.sh, `--target`): runs steered to unsolved goals of the stronger theories.** Twee's
+search does not depend on the conjecture, only on the lemmas and hints, so each run took an unsolved goal G0 of a
+stronger theory with the base axioms only, the 100 base theorems nearest to G0's statement (LemmaIndex.select with
+eq) as lemmas, and G0's pool as hints, 8 s.
+* **8 new hits in 1.17 CPU h, 1 proved** (nslm_to_aa1 1057). The other 7 failed in the live loop's passes; 0 direct
+  proofs of G0.
+
+**exp39 summary.** Over 4.96 CPU h of base-theory runs: 20 new goals hit, 8 proved (+1 direct), about 1.8 proofs
+per CPU h. That is 3 times production's own runs now (0.56), but far from the first estimate of 16, which came from
+an accumulated harvest. Not a standing member. The pilot's setting (30 s, random lemmas) was the best of the three
+and could run as a low-priority filler when CPUs are idle.

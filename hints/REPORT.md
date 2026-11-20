@@ -3298,6 +3298,24 @@ Matching against proof steps covers only about 22 M of the given logs' 400 M rul
   the hits. In the first 15 minutes there were 5 goals, some across originals, and all 5 were proved in 34 s.
 * **The same statement in a theory with more axioms** (2ar), redone on today's proofs (exp/sofree.py): 9 of 46 in
   0.34 CPU h, against 4-5 per CPU h on 16 Nov. It now runs in every live cycle.
+* **The hit stream thins fast.** New goals from production's failed runs per hour: 19 (04:15-05:00), 17, then 1
+  (06:00-07:00). The first hour harvested hits that had accumulated.
+
+**Base-theory runs as generators (exp39, 20 Nov 05:39-07:24;
+[notes/2026-11-20-base-saturation.md](notes/2026-11-20-base-saturation.md)).**
+* 13 originals share the 17 base axioms, which are within almost every theory. So their rules hold for 3,001 of
+  3,133 unsolved unit goals, and 19 of the first 27 failed-run hits came from their runs.
+* Dedicated base runs (exp/gensat.py; scan as `--given-scan`, hits into the live loop):
+
+| setting | runs | CPU h | new goals hit | proved |
+|---|---:|---:|---:|---:|
+| 30 s, 6 siblings + 30 random base lemmas, the pool | 120 | 2.62 | 9 | 6 + 1 direct |
+| 8 s, 6 siblings + 100 kNN lemmas | 300 | 1.17 | 3 | 0 |
+| 8 s, steered: a stronger theory's goal on the base axioms, 100 base lemmas nearest to it | 300 | 1.17 | 8 | 1 |
+
+* About 1.8 proofs per CPU h in all: 3 times production's own runs now (0.56), but not a standing member.
+* **The hypotheses dropped** (exp39b): 60 unsolved goals of the stronger theories without their extra axioms,
+  with the same lemmas and hints, against the full problem: 0 and 0 of 60 at 20 s.
 
 ## 2am. How many kNN lemmas (16 Nov, 06:50)
 
@@ -4558,9 +4576,12 @@ The user asked for retrained members with subsampling, and for the tricks of the
   * The weighting is what makes retraining pay, and the models are complementary.
   * Shifting a model's scores so it prunes as much as rm4t hurt or did nothing (e.g. rm9a 4 gained, 29 lost on 274),
     so the gain is in the ranking.
-  * A time-matched control (rm4t at 40 s) is running.
+  * **Time-matched control (final, 20 Nov 07:20):** rm4t at 40 s proves 225 of 400 in 5.09 CPU h, against 218 for
+    rm4t and rm9f at 20 s each in 5.08 h; 14 goals only at 40 s, 7 only by the pair, 232 by all three. Twice the
+    time for one model beats two models by 7, about the noise, and each side has goals of its own.
 * Members: m9a@0 since 20:30 (ul71); m9f@0 and m9h@0 since 23:30 (ul72); m9e@0 since 02:17 (ul73), in place of m9i@0,
   which added nothing beyond rm9f.
+  m10f@0 (rm9f's recipe on all data, 4.97 M rows from 22,158 logs) since 20 Nov 04:15 (ul74), in place of m9f@0.
 * **Production's burst** (783 proofs 22:20-02:13) was the transfer loop. One L1 proof (aK2_eq_aK3_1243b 506, chain
   hints) and its siblings had steps that were unsolved goals of 22 other originals. Those then started sibling chains
   of their own.
