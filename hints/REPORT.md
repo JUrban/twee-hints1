@@ -5222,6 +5222,18 @@ from zero, against exp30's P2D.
   does on the whole benchmark, and changes that act through cross-original lemmas show less on a half.
 * The long from-zero run goes on all 51,784 (Z6, after exp43), against Z4's curve (37,713 at 2 h).
 
+**Z6: today's system from zero on the whole benchmark (20 Nov from 15:31; [notes/2026-11-20-z6.md](notes/2026-11-20-z6.md)).**
+12 workers, 8 hours, solve_new.sh's defaults with `--knn-refresh 600`, proofs kept.
+
+| minutes | 10 | 30 | 60 | 90 | 120 |
+|---|---:|---:|---:|---:|---:|
+| Z4 (17 Nov system) | 15,398 | 29,765 | 35,511 | 37,328 | 37,713 |
+| **Z6** | 15,802 | 31,133 | 37,378 | 39,661 | **40,238** |
+
+* +6.7% at 2 hours. Z6 reaches Z4's 2-hour count in about 62 minutes.
+* It is also above the two half arms of the same system together (39,743 on 2 × 6 workers).
+* The run continues to 8 hours.
+
 **Step joins: unsolved goals closed by rewriting with other theories' proof steps (20 Nov 10:40;
 [notes/2026-11-20-step-join.md](notes/2026-11-20-step-join.md)).**
 * exp/joincheck.py asks whether an unsolved goal's ground equation rewrites to one normal form with the union of
