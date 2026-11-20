@@ -752,6 +752,9 @@ Next:
 000. exp39 (05:39, [notes/2026-11-20-base-saturation.md](notes/2026-11-20-base-saturation.md)): base-theory runs (13 originals share the 17 base
    axioms, within nearly every theory) as rule generators for 3,001 unsolved goals; pilot exp/gensat.py, 120 runs of 30 s,
    3 workers, hits to loops/GSAT for the live loop. Production's base runs gave about 16 goals per CPU h.
+   Done 07:24: three settings, 4.96 CPU h, 20 new hits, 8 + 1 direct proved (about 1.8 per CPU h); exp39b (hypotheses
+   dropped) 0 = 0 of 60. Production's failed-run hits fell from 19 to 17 to 1 an hour (an accumulated harvest).
+   Time-matched control final: rm4t 40 s 225 of 400 vs rm4t|rm9f at 20 s 218, union 232.
 00. exp38 ([notes/2026-11-20-given-transfer.md](notes/2026-11-20-given-transfer.md)): unsolved goals that other runs derived and did not use. Full scan 19 hits, 13
    proved; live loop loops/GML (abs/gmlive.sh, every 20 min) 3 of 5 in cycle 1. Next: `--given-scan` in loop.py
    (failed runs' given rules), ancestries fixed at 04:08 (parents are numbers). ul74 (04:15, J=12) = ul73 +
