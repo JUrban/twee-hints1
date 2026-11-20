@@ -109,3 +109,11 @@ Written 20 Nov 2026, 02:21 UTC.
   failed at 20 s. Not worth a live finder.
 * **The instance scan (loops/GM2) ended at 03:49:** 2 goals hit in 451,614 logs (aa2_to_aa3 266, nil3_31 552).
   Both were already variant hits that failed all three passes. Instances add nothing here.
+* **Fourth pass (abs/gm1d.sh, 03:51-04:05): 0 of 8.** The 8 hits still open (6 of exp38's 19 and 2 of cycle 1)
+  were replayed as close to the source run as transfer.py run allows:
+  * the source run's axioms up to the matched rule as the only lemma axioms;
+  * the log's prefix as the only hints (`--max-hints 0`);
+  * no target lemmas, no rule model, no PG, 80 s.
+  Without the source's own rule-model scores and PG, the search does not retrace the source run. These 8 are known
+  theorems without a printed proof; no more passes for them.
+* Cycle 2 (04:02): 5 new logs, no hits.
