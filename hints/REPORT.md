@@ -25,6 +25,7 @@ in `/project/hintwork` (not in git).
 | + a 40 s chain level, lemma-set variants at 5 s (2az); at 19 Nov 08:21 | **46,822** (+50.7% over plain) | **5161** (+61.1%) | – |
 | + exploration of 5 s members: more lemma sets and counts (2az); at 19 Nov 10:20 | **47,101** (+51.6% over plain) | **5193** (+62.1%) | – |
 | + retrained rule models as members, the transfer loop's cascade, rules other runs derived (2av, 2al); at 20 Nov 04:09 | **48,098** (+54.9% over plain) | **5325** (+66.3%) | – |
+| + failed runs' derived rules and the same statement in stronger theories, live (2al); at 20 Nov 05:31 | **48,142** (+55.0% over plain) | **5332** (+66.5%) | – |
 
 **On unseen originals** (2aq): the 11 whole holdout originals from
 scratch, in 1 hour per batch on 4 workers plus the transfer. Plain twee
@@ -99,6 +100,7 @@ written in loops/UL. Merged proofs count from their merge.
 | 20 Nov 00:00 | 47,906 | 5295 | a cascade from 22:20: one L1 chain proof (aK2_eq_aK3_1243b 506) and its siblings, whose steps were 22 unsolved goals of other originals (the transfer loop), then their sibling chains (2av) |
 | 20 Nov 02:13 | 48,049 | 5319 | the cascade's tail; members m9f@0, m9h@0, m9i@0 (ul72) (2av) |
 | 20 Nov 04:09 | 48,098 | 5325 | ul73 (m9e@0); exp38: unsolved goals that are variants of rules other runs derived, 16 proved (2al) |
+| 20 Nov 05:31 | 48,142 | 5332 | ul74 (04:15): `--given-scan` (failed runs' derived rules) and the live loop every 5 minutes, which proved 27 of 49 in 0.38 CPU h; production's own runs 9 in 13.9 CPU h (2al) |
 
 From 15 Nov 05:30 the rate fell from hundreds an hour to 50–100. The
 cheap new contexts are used up; 58% of the unsolved goals sit behind the

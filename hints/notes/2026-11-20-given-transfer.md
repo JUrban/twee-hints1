@@ -153,3 +153,7 @@ Written 20 Nov 2026, 02:21 UTC.
   candidate and proved it. In all, the live loop has proved 9 of 14.
 * From 04:32 the live loop runs every 5 minutes (abs/gmlive2.sh), as the transfer loop does, so its proofs reach
   production sooner.
+* **05:30, 75 minutes of ul74:** the failed-run scan wrote 167 hit rows for 27 goals. The live loop proved 27 of 49
+  runs in 0.38 CPU h, about 70 per CPU h; its sources are failed-run hits, new logs and the same-statement finder.
+  Production's own runs made 9 proofs in 13.9 CPU h and took in 33 synced proofs.
+* So the 6% that `--print-given-unsolved` costs production pays many times over.
