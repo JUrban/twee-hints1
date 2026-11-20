@@ -247,6 +247,22 @@ abs/rm9wave2.sh, started 20:09:41 (its header says 20:11, written before checkin
   * The calibration shift has not helped rm9a so far (76 goals), so the deferral share is not the whole story. The
     weighted models rank differently.
 * **ul72 (23:30, production rows from 183,986) = ul71 + m9f@0, m9h@0, m9i@0**, J=8.
+* **20 Nov 00:54: the full arms.** rm4t 202 of 400 (2.45 CPU h), rm9f 204 (+16 −14, 2.63 CPU h), rm9a 184 (+15 −33,
+  3.20 CPU h). On the 131 goals every arm had then run, the union of all arms proves 94 against the control's 88.
+* **The calibration shift does not help; it hurts or is neutral:**
+
+| shifted model | goals | + | − | unshifted at that time |
+|---|---:|---:|---:|---|
+| rm9aC | 274 | 4 | 29 | rm9a +15 −33 on 400 |
+| rm9fC | 315 | 8 | 14 | rm9f +16 −14 on 400 |
+| rm9gC | 226 | 7 | 8 | rm9g +10 −19 on 308 |
+| rm9hC | 131 | 3 | 3 | rm9h +11 −9 on 292 |
+
+  * Pruning as much as rm4t does not make the new models better; the weighted models gain by their ranking. The
+    shifted arms were stopped at 00:54; their rows stay.
+  * Production back to J=12 at 00:55 (rows from 188,375; earlier log loops/UL72a.log).
+  * At the restart, ul72 had 41 proofs in 4.0 CPU h since 23:30 (34 of them L0, over many originals), against about
+    0.5 per CPU h before. m9f@0 had 1 proof in 0.58 CPU h; m9h@0 and m9i@0 none in 0.6 each.
 * Interim at 22:14: rm9a +9 −11 on 213, rm9b +5 −14 on 182, rm9c +2 −5 on 67, rm9e +5 −3 on 143.
 * CPU: 5 arms + training 4 + climber 4: production restarted at 21:54 with J=8 (rows from 179,422; earlier log loops/UL71a.log).
 * **The first paired design was broken (found 20:58).** The snapshot loops/ULsN19 (production's solved rows before
