@@ -44,3 +44,18 @@ Do dedicated base-theory runs find such goals at the same rate, and for how long
 * The decline over the runs: whether hits come from a few runs or from all of them.
 * If it pays, the next step is a standing base-theory generator beside production, with more seeds, longer runs and
   rule models.
+
+## exp39b: the stronger theories' goals without their extra axioms (05:46)
+
+* Production's base hits came from short runs (6-8 s, L0 and the k60-k400 kNN members) of a_instances 440-459, not
+  from base goals in general. So the question turns around: are many unsolved goals of the stronger theories base
+  theorems, or theorems with the hypotheses' work already in proven sibling lemmas?
+* Of the theories, 67 add 1 axiom to the base set, 28 add 2, 6 add 3, and 14 add 4-11.
+* exp/naxrun.py (abs/nax1.sh, loops/NAX1): 60 of the 2,756 unsolved unit goals of such theories (seed 1), two arms at
+  20 s with the same lemmas and hints:
+  * full: the problem as it is;
+  * nax: the extra axioms dropped.
+* Lemma axioms: the 6 proven goals just below the goal in its original and 30 random proven base goals. All of them
+  are theorems of the goal's theory, so either arm's proof is a proof in that theory.
+* Measures: proofs per arm, the one-arm goals, and the hits of each arm's given rules.
+* Interim (05:45, 13 runs of the base pilot): 2 new goals hit (aK2_eq_aK3_a 639 and aK2_eq_aK3_i 384), in 0.27 CPU h.
