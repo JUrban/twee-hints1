@@ -743,7 +743,13 @@ Paused:
 * exp12 stage B: 320 s on gap heads, 34 of 95 done, 0.21 per CPU hour (run.py skips done ids).
 * exp19: set-join on the walls, 37 of 107 done, 0.31 per CPU hour (run.py skips done ids).
 
+**Totals (20 Nov 04:09): 48,098 of 51,784 solved (holdout 5,325 of 5,880), 3,686 unsolved.** REPORT's totals table
+has the history (user, 20 Nov: "update the total numbers in the report etc every now and then").
+
 Next:
+00. exp38 ([notes/2026-11-20-given-transfer.md](notes/2026-11-20-given-transfer.md)): unsolved goals that other runs derived and did not use. Full scan 19 hits, 13
+   proved; live loop loops/GML (abs/gmlive.sh, every 20 min) 3 of 5 in cycle 1. Next: `--given-scan` in loop.py
+   (failed runs' given rules; loop.py.tmp written, not installed), ancestries fixed at 04:08 (parents are numbers).
 0. exp37 (19:50): retrained rule models (rm9*) on today's data with the papers' sampling tricks; offline on the 400
    newest proofs, then a paired test (control loops/MR_rm4t_20), then members `m9*@0`
    ([notes/2026-11-19-retrained-models.md](notes/2026-11-19-retrained-models.md)). exp35 stopped at 19:43 (no unique proof).

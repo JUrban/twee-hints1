@@ -24,6 +24,7 @@ in `/project/hintwork` (not in git).
 | + optional attempts, context-exact restarts (2az); at 19 Nov 04:08 | **46,203** (+48.8% over plain) | **5084** (+58.7%) | – |
 | + a 40 s chain level, lemma-set variants at 5 s (2az); at 19 Nov 08:21 | **46,822** (+50.7% over plain) | **5161** (+61.1%) | – |
 | + exploration of 5 s members: more lemma sets and counts (2az); at 19 Nov 10:20 | **47,101** (+51.6% over plain) | **5193** (+62.1%) | – |
+| + retrained rule models as members, the transfer loop's cascade, rules other runs derived (2av, 2al); at 20 Nov 04:09 | **48,098** (+54.9% over plain) | **5325** (+66.3%) | – |
 
 **On unseen originals** (2aq): the 11 whole holdout originals from
 scratch, in 1 hour per batch on 4 workers plus the transfer. Plain twee
@@ -92,6 +93,12 @@ written in loops/UL. Merged proofs count from their merge.
 | 19 Nov 04:08 | 46,203 | 5084 | optional attempts, context-exact restarts (ul56, 289 new in 5 h 50 min) |
 | 19 Nov 08:21 | 46,822 | 5161 | the 40 s chain level (ul58, 06:02) and a cascade from about 06:59 across the aK2_eq_aK3 and nil3 families (ul58-ul60, about 400 in 80 minutes) |
 | 19 Nov 10:20 | 47,101 | 5193 | lemma-set members at 5 s (ul60-ul63): k100@0, kd@0, k200@0; `--explore` (ul62, 10:05) |
+| 19 Nov 14:00 | 47,190 | 5204 | explored members; ENIGMAWatch and the climber as a member (exp31, exp32; 2az) |
+| 19 Nov 18:00 | 47,239 | 5211 | the climbs' hints and fill lemmas as member sk@0 (ul70); exp33-exp36 on 4-6 CPUs (2av, 2az) |
+| 19 Nov 22:20 | 47,278 | 5214 | retrained rule model m9a@0 (ul71); exp37's replay arms on 9-13 CPUs, production on 8-10 workers (2av) |
+| 20 Nov 00:00 | 47,906 | 5295 | a cascade from 22:20: one L1 chain proof (aK2_eq_aK3_1243b 506) and its siblings, whose steps were 22 unsolved goals of other originals (the transfer loop), then their sibling chains (2av) |
+| 20 Nov 02:13 | 48,049 | 5319 | the cascade's tail; members m9f@0, m9h@0, m9i@0 (ul72) (2av) |
+| 20 Nov 04:09 | 48,098 | 5325 | ul73 (m9e@0); exp38: unsolved goals that are variants of rules other runs derived, 16 proved (2al) |
 
 From 15 Nov 05:30 the rate fell from hundreds an hour to 50–100. The
 cheap new contexts are used up; 58% of the unsolved goals sit behind the
@@ -3140,6 +3147,8 @@ Now every other free slot goes to an original's first unsolved goal
   climb is now logged as ERROR and the climber goes on.
 
 ## 2al. Goals that are steps of existing proofs (16 Nov, 04:20)
+
+*Notes: [notes/2026-11-20-given-transfer.md](notes/2026-11-20-given-transfer.md).*
 
 *Notes: [notes/2026-11-16-step-transfer.md](notes/2026-11-16-step-transfer.md).*
 

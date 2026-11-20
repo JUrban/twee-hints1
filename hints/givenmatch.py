@@ -85,7 +85,10 @@ def ancestry(lines, idx):
     """indexes of the rule IDX and all its ancestors in a parsed log"""
     par = {}
     for w in lines:
-        par[w[1]] = [p for p in w[4:6] if p != '0']
+        # (20 Nov 04:08) parents are rule numbers, the rule at position k having number k+1 (given.py); read as
+        # positions until now, so the ancestries followed the wrong rules (proof steps' parents are proof steps or
+        # axioms in 94% as numbers, 66% as positions)
+        par[w[1]] = [str(int(p) - 1) for p in w[4:6] if p not in ('0', '')]
     out = set(); todo = [idx]
     while todo:
         x = todo.pop()
