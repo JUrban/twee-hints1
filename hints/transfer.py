@@ -342,13 +342,15 @@ def run(goals, d, j, T, rest, src_lemmas=0, live_dst=None, src_pool=False):
     def one(g):
         hs, seen = [], set()
         for f in src[g]:
-            for x in open(os.path.join(hd, f)):
+            # (20 Nov) an absolute source is a sketch file (givenmatch.py: a derived rule's ancestry), named
+            # DIR/<goal>/<loop>/<source name>; elsewhere its basename stands for the source goal
+            for x in open(f if os.path.isabs(f) else os.path.join(hd, f)):
                 w = tuple(x.rstrip('\n').split('\t')[:2])
                 if len(w) == 2 and w not in seen:
                     seen.add(w); hs.append(w)
         if src_pool:   # (--src-pool) all proofs of the sources' originals, as hints (their lemma chains)
             for f in src[g]:
-                for h in pools.get(lp.pool_key(f), []):
+                for h in pools.get(lp.pool_key(os.path.basename(f)), []):
                     if (h[0], h[1]) not in seen:
                         seen.add((h[0], h[1])); hs.append((h[0], h[1]))
         n0 = len(hs)
@@ -358,8 +360,8 @@ def run(goals, d, j, T, rest, src_lemmas=0, live_dst=None, src_pool=False):
             # weaker axioms: the kind --lemma-knn --lemma-subsets adds), which the source proofs had as axioms
             L, A = [], lemmas.axiom_set(g)
             for f in src[g]:
-                o2, k2 = lemmas.split(f)
-                if not lemmas.axiom_set(f) <= A:
+                o2, k2 = lemmas.split(os.path.basename(f))
+                if not lemmas.axiom_set(os.path.basename(f)) <= A:
                     continue
                 below = sorted((j for j in lp.lemma_src.get(o2, ()) if j <= k2), reverse=True)[:src_lemmas]
                 for j in below:
