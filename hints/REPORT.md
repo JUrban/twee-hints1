@@ -41,7 +41,9 @@ from 15 Nov on include proofs that are not proofs.
   were removed, 20 of them in circular pairs: production had re-proved a quarantined goal from a lemma whose own
   proof used that goal.
 * 12:10: **48,108** solved, all trusted. The re-proofs of what is still out continue in loops/REVER4.
-* The rows above stay as they were measured, so the 48,178 at 09:14 included at most about 300 void proofs.
+* The rows above stay as they were measured. The 48,178 at 09:14 included 16 void proofs and 156 more that rested
+  on them (the closure over the lemma records). The rest of the quarantine was proofs without records, not known
+  to be void.
 * The from-zero arms never ran Prover9 and are not affected.
 
 **On unseen originals** (2aq): the 11 whole holdout originals from
