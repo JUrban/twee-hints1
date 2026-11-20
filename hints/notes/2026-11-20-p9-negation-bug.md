@@ -95,7 +95,21 @@ Written 20 Nov 2026, 10:32 UTC, while the re-verification runs.
     from its newest matching output.
   * With both fixes at 11:21: 48,168 solved, 230 untrusted (6 without a record, 6 with an unresolved lemma name, 218
     using an untrusted or unsolved lemma).
-  * rever2 continues in loops/REVER3 from 11:24.
+  * rever2 continues in loops/REVER3 from 11:24. Pass 1: 11 of 53 (the roots were then mostly hard quarantined
+    goals).
+* **Circular proofs (12:08).** At 12:07, 96 proofs were untrusted: 4 without a record, 5 with an unresolved name, and
+  87 with complete records whose lemmas were not trusted.
+  * Of those 87, 20 formed 8 cycles of 2-4 goals, and 67 waited on a cycle or on unsolved lemmas. In a cycle,
+    production had re-proved a quarantined goal B from a lemma A whose own (older) proof used B. Production takes
+    lemmas from its whole solved list, untrusted proofs included.
+  * The fixpoint never breaks such a cycle, and rever2 only re-proves proofs without a complete record, so
+    neither would.
+  * Fix: the 96 were quarantined (exp/quarantine2.py, 12:09: 119 rows; hints to loops/UNSOUND/qhints2) and added
+    to Q. No writer can use them as lemmas now, and rever2 (loops/REVER4, 2 workers until exp42 ends) re-proves Q's
+    unsolved goals with trusted lemmas only.
+* **12:10: 48,108 solved, all trusted.** Holdout 5,320 of 5,880. REVER4: 125 quarantined goals to re-prove.
+* Still open: the 5 bad goals not yet re-proved (aK2_eq_aK3_s 450, 470, 474, 476; mbol_lem1 387). The other 11
+  have new sound twee proofs.
 * From 10:35, the transfer loop and the live loop run with `--keep-out` (abs/xfrlive2k.sh, abs/gmlive2k.sh), and
   transfer.py names source lemmas `srclem_<i>_<goal>`, so their proofs carry records too.
 
