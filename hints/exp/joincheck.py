@@ -298,6 +298,8 @@ def main():
             steps[o] = d
         return steps[o]
     rw_cache = {}
+    import modelcheck as mcheck, p9twee
+    mmodels, mcache = {}, {}
     with open(a.out, 'w') as fo:
         for k, g in enumerate(U):
             t0 = time.time()
@@ -317,17 +319,49 @@ def main():
                                 eqs.setdefault((ax[:i], ax[i + 1:]), ('axiom', 0))
                                 break
                 parsed = []
+                # (20 Nov 12:52) hints files also hold printed goal terms that are not theorems (X0 = t(X0,X1) in Z4's
+                # lra2aa 214; notes/2026-11-20-model-audit.md). Every false line the audit found had different
+                # variables on its two sides, so those lines must hold in the theory's Mace4 models (verdicts cached
+                # in loops/JOIN/modelcache/<theory>)
+                key = mcheck.theory_key(p9twee.tptp_parts(g)[0])
+                if key not in mmodels:
+                    mmodels[key] = mcheck.read_models(os.path.join(L, 'MODELCHECK', 'models', key + '.out'))
+                    mcache[key] = {}
+                    cp = os.path.join(L, 'JOIN', 'modelcache', key)
+                    if os.path.exists(cp):
+                        for x in open(cp):
+                            w = x.rstrip('\n').split('\t')
+                            if len(w) == 3:
+                                mcache[key][(w[0], w[1])] = w[2] == '1'
+                newv = []
+                nfalse = 0
                 for (l, r), tag in eqs.items():
                     try:
-                        parsed.append((parse(l), parse(r), tag))
+                        pl, pr = parse(l), parse(r)
                     except (AssertionError, IndexError):
-                        pass
+                        continue
+                    if vars_(pl, set()) != vars_(pr, set()):
+                        ok = mcache[key].get((l, r))
+                        if ok is None:
+                            try:
+                                ok = mcheck.holds(pl, pr, mmodels[key]) is None
+                            except KeyError:
+                                ok = False
+                            mcache[key][(l, r)] = ok; newv.append((l, r, ok))
+                        if not ok:
+                            nfalse += 1
+                            continue
+                    parsed.append((pl, pr, tag))
+                if newv:
+                    os.makedirs(os.path.join(L, 'JOIN', 'modelcache'), exist_ok=True)
+                    with open(os.path.join(L, 'JOIN', 'modelcache', key), 'a') as f:
+                        f.writelines(f'{l}\t{r}\t{int(ok)}\n' for l, r, ok in newv)
                 if len(rw_cache) > 3:
                     rw_cache.clear()
                 tb = time.time()
                 rw_cache[srcs] = Rewriter(parsed, a.steps)
-                print(f'  bank for {o}: {len(srcs)} source originals, {len(parsed)} equations, '
-                      f'index {time.time() - tb:.0f}s', flush=True)
+                print(f'  bank for {o}: {len(srcs)} source originals, {len(parsed)} equations ({nfalse} false in a '
+                      f'model left out), index {time.time() - tb:.0f}s', flush=True)
             rw = rw_cache[srcs]
             rw.n = 0
             if a.control:

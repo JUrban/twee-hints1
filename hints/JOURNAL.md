@@ -748,6 +748,8 @@ Paused:
 has the history (user, 20 Nov: "update the total numbers in the report etc every now and then").
 
 Next:
+00000000000. **exp43 (13:28, [notes/2026-11-20-given-nowait.md](notes/2026-11-20-given-nowait.md)):** P2G = P2F + givenmatch `--no-wait`
+   (hits run as soon as found), half2 from zero, 2 hours, against P2F. abs/exp43.sh.
 0000000000. **Semantic guidance offline (12:14, [notes/2026-11-20-semantic-guidance.md](notes/2026-11-20-semantic-guidance.md)):** are proof steps false in
    Mace4 models of the base axioms where an extra axiom fails (SCOTT-style relevance) more often than other given
    rules? exp/semguide.py over 10 logs per original. Done 12:36: 62 originals with models; 32.4% vs 30.4%, lift
@@ -758,8 +760,6 @@ Next:
    Done 13:28: **P2F 20,174 vs P2E 20,152 (+22, noise)**; +301/−272. Ahead early (+175 at 30 min), caught up by
    2 h. The cap was never reached (0-86 goals a cycle); the wait for the loop's failure limited the ancestry runs,
    and their extra proofs were goals the loop proves anyway. Default stays.
-0000000000. **exp43 (13:28, [notes/2026-11-20-given-nowait.md](notes/2026-11-20-given-nowait.md)):** P2G = P2F + givenmatch `--no-wait`
-   (hits run as soon as found), half2 from zero, 2 hours, against P2F. abs/exp43.sh.
 00000000. **Model audit (10:54, [notes/2026-11-20-model-audit.md](notes/2026-11-20-model-audit.md)):** exp/modelcheck.py evaluates every proof step
    of every solved unit goal in up to 40 Mace4 models (sizes 2-8) of its theory; a step false in a model is not a
    theorem. Self-test: all goal statements must hold. Done 11:17: 2.4M step checks in 2,504 models of 68 theories;
