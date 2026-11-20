@@ -35,3 +35,7 @@ Such a proof holds for the goal if neither it nor its lemmas use the missing axi
   SOP, SOR).
 * 46 of the rest have a first source proof with none of the missing axioms as a step (canonical keys, both
   orientations). They run as SOF/SOR did: source proof steps first as hints, 20 s, 2 workers, proofs into production.
+* **Result (04:29): 9 of 46 in 0.34 CPU h, about 26 per CPU h** (16 Nov: 13 of 323 at 4-5 per CPU h). Proved:
+  aK2_eq_aK3_g 388 and 400, aK2_eq_aK3_o 451, aK3instance 402, nil3_1K_b 410, nil3_1K 471, ns_to_aK1 564, 584 and 585.
+* The source side has grown: production's newest proofs give new same-statement sources. The finder takes 6 s, so it
+  joins the live loop.

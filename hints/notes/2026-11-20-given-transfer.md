@@ -145,3 +145,6 @@ Written 20 Nov 2026, 02:21 UTC.
 * ul74 = ul73 + `--given-scan /project/hintwork/loops/GFAIL` and member m10f@0 in place of m9f@0. Production rows from
   205,649.
 * Measure: hits per hour and proofs from them, against the time cost (about 6% of production's twee time).
+* **First 14 minutes of ul74: 10 hits** in loops/GFAIL/hits.tsv, some across originals (a Ka_eq_aK3 run derived
+  nil3_23_32_to_31 565; a nil3_2K run derived nil3_23_32_to_26 507 and nil3_30 570). The live loop runs them from its
+  next cycle (04:34).
