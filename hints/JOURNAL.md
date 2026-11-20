@@ -771,6 +771,8 @@ Next:
    lemma axioms. All 3,684 (3,170 unit, 514 conditional with the hypothesis as a ground rule): 23 joins, 23 proved.
    Live from 10:50 (abs/stepjlive.sh, every 30 min); cycle 1 of stepjlive2 (11:57): +1, 24 of 24.
    Cross-run pilot (the goal's own failed run's given rules in the bank, exp/owng_pilot.py): 0 of 30; closed.
+   Bigger bank (12:38-13:31): the from-zero arms' proofs of the same goals (joincheck `--banks`), 43% more
+   equations, 0 of 1,557 joined (shard 0/2); 2,264 false printed goal lines dropped by the new model filter. Closed.
 000000. **Soundness (10:00, [notes/2026-11-20-p9-negation-bug.md](notes/2026-11-20-p9-negation-bug.md)):** p9twee.ladr wrote TPTP `~ a = b` as
    LADR `- a = b` (the equation (-a) = b): conditional sibling lemmas became false axioms, and 16 Prover9 proofs in
    production used one (P9C, P9L, P9T, exp16). Fixed 09:45. Quarantine of 1,130 goals at 10:07 (closure + proofs
