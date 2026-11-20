@@ -28,12 +28,12 @@ def akey(body):
     return None
 
 
-def candidates(tmp, tried=(), tried_pairs=()):
+def candidates(tmp, tried=(), tried_pairs=(), dst='UL', allp='/project/hintwork/sets/all'):
     """find --same-other into TMP, then the free candidates (no missing axiom as a step of the first source proof),
     minus goals in TRIED and (goal, first source) pairs in TRIED_PAIRS: (lines, number of candidates)"""
     import contextlib, io
     with contextlib.redirect_stdout(io.StringIO()):
-        transfer.find_same_other(os.path.join(L, 'UL'), tmp)
+        transfer.find_same_other(os.path.join(L, dst), tmp, allp)
     keep = []; n = 0
     for l in open(tmp):
         w = l.rstrip('\n').split('\t')
@@ -47,7 +47,7 @@ def candidates(tmp, tried=(), tried_pairs=()):
         if len(mk) < len(miss):
             continue   # (a missing axiom that is not a plain equation: skip)
         steps = set()
-        for x in open(os.path.join(L, 'UL', 'hints', f)):
+        for x in open(os.path.join(L, dst, 'hints', f)):
             v = x.rstrip('\n').split('\t')
             if len(v) >= 2:
                 steps.add(transfer.key(v[0], v[1]))

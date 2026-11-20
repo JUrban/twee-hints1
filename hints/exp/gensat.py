@@ -32,7 +32,8 @@ SKEL = re.compile(r'\b[A-Z]\w*|\s')
 TWEE = '/project/bin/twee-pg61'
 lock = threading.Lock()
 st = {'t': 0.0}
-_sig, _ax, _unit = {}, {}, {}
+_sig, _ax, _unit, _tpool = {}, {}, {}, {}
+BASE = 'a_instances__goal_100'   # (any goal of a base original: its axioms are the base set)
 
 
 def sig(n):
@@ -85,14 +86,32 @@ def refresh(names):
                     pool.setdefault(o, {}).update((x, None) for x in open(p) if '\t' in x)
         bg = sorted(g for g in names if lemmas.split(g)[0] in B and g not in S and unit(g))
         random.Random(7).shuffle(bg)   # (spread over the 13 originals)
+        bax = axs(BASE)
+        tg = sorted(g for g in names if lemmas.split(g)[0] not in B and g not in S and unit(g) and bax < axs(g))
+        random.Random(7).shuffle(tg)
+        st['tgoals'] = tg
         st.update(t=time.time(), S=S, want=want, known=known, skel=skel, pool=pool, proven=proven, basegoals=bg)
         print(f'{time.strftime("%H:%M:%S")} refresh: {len(want)} target keys, {len(st["basegoals"])} unsolved base '
               f'goals, {sum(len(v) for v in proven.values())} proven base goals', flush=True)
 
 
+def tpool(o, S, names):
+    if o not in _tpool:
+        h = {}
+        for g in names:
+            if lemmas.split(g)[0] == o and g in S:
+                p = os.path.join(L, 'UL', 'hints', g)
+                if os.path.exists(p):
+                    h.update((x, None) for x in open(p) if '\t' in x)
+        _tpool[o] = list(h)
+    return _tpool[o]
+
+
 def job(args):
     k, a, names = args
     refresh(names)
+    if a.target:
+        return job_target(k, a, names)
     with lock:
         S, want, skel, known = st['S'], st['want'], st['skel'], st['known']
         bg = st['basegoals']
@@ -115,6 +134,36 @@ def job(args):
     with open(pp, 'w') as f:
         f.write(open(os.path.join(hintlib.PROB, g0 + '.p')).read().rstrip('\n') + '\n')
         f.writelines(f'fof(lemma_{j}, axiom, {lemmas.lemma_form(g)}).\n' for j, g in enumerate(lem))
+    return finish(k, a, g0, g0, lem, hints, tag, pp, hp)
+
+
+def job_target(k, a, names):
+    """(06:45, exp39d) a run steered to an unsolved goal G0 of a stronger theory: the base axioms with G0 as
+    conjecture, the K proven goals of the base (or weaker) theories nearest to G0's statement as lemma axioms, the
+    pool of G0's original as hints. A proof is a proof of G0 (from base theorems); every rule is a base theorem."""
+    with lock:
+        S = st['S']
+        tg = st['tgoals']
+        if not tg:
+            return None
+        g0 = tg[k % len(tg)]
+        u = unit(g0)
+        lem = [g for g in st['index'].select(BASE, a.K, eq=(u[1], u[2])) if g in S]
+        hints = tpool(lemmas.split(g0)[0], S, names)
+    tag = f'{a.tag}{k}_{g0}'
+    tmp = os.path.join(D, 'tmp'); os.makedirs(tmp, exist_ok=True)
+    pp = os.path.join(tmp, tag + '.p'); hp = os.path.join(tmp, tag + '.hints')
+    with open(pp, 'w') as f:
+        f.writelines(x for x in open(os.path.join(hintlib.PROB, BASE + '.p')) if 'conjecture' not in x)
+        f.writelines(x for x in open(os.path.join(hintlib.PROB, g0 + '.p')) if x.startswith('fof(') and 'conjecture' in x)
+        f.writelines(f'fof(lemma_{j}, axiom, {lemmas.lemma_form(g)}).\n' for j, g in enumerate(lem))
+    return finish(k, a, g0, BASE, lem, hints, tag, pp, hp)
+
+
+def finish(k, a, g0, src, lem, hints, tag, pp, hp):
+    """run twee on PP (hints HP), scan its rules; SRC: a goal of the run's theory (for the signature and axioms)"""
+    with lock:
+        S, want, skel, known = st['S'], st['want'], st['skel'], st['known']
     with open(hp, 'w') as f:
         f.writelines(hints)   # (production's format: lhs TAB rhs [TAB ...] lines)
     cmd = [TWEE, pp, '--max-time', str(a.T), '--no-colour', '--quiet', '--no-proof', '--print-hints',
@@ -130,7 +179,7 @@ def job(args):
     dt = time.time() - t0
     ok = 'HINTS-END' in out
     rules = givenlib.parse_given_parents(out)
-    sg = sig(g0)
+    sg = sig(src)
     hits = []; nk = 0
     for idx, x in enumerate(rules):
         if x is None or x[0] == x[1]:
@@ -139,7 +188,7 @@ def job(args):
         if SKEL.sub('', x[0]) + '=' + SKEL.sub('', x[1]) not in skel:
             continue
         for g in want.get(givenlib.key(x[0], x[1], sg), ()):
-            if g != g0 and g not in S and axs(g0) <= axs(g):
+            if g != g0 and g not in S and axs(src) <= axs(g):
                 hits.append((g, idx))
     stamp = f'{int(time.time() * 1000)}_{tag}'
     if hits:
@@ -191,12 +240,13 @@ def main():
     ap.add_argument('--start', type=int, default=0)
     ap.add_argument('--seed', type=int, default=1)
     ap.add_argument('--knn', action='store_true', help='kNN lemmas (lemmas.LemmaIndex.select) instead of random ones')
+    ap.add_argument('--target', action='store_true', help='runs steered to unsolved goals of stronger theories (exp39d)')
     ap.add_argument('--tag', default='', help='a prefix of the run numbers in runs.tsv and the hit stamps')
     a = ap.parse_args()
     os.makedirs(D, exist_ok=True)
     names = [l.strip() for l in open('/project/hintwork/sets/all') if l.strip()]
     refresh(names)
-    if a.knn:
+    if a.knn or a.target:
         t0 = time.time()
         st['index'] = lemmas.LemmaIndex(sorted(st['S']), subsets=True)
         print(f'lemma index {time.time() - t0:.0f}s', flush=True)
