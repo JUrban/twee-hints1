@@ -18,6 +18,9 @@ OUT: goal, source loop, source name, rule index, label (0 not in that proof, 1 a
 writes each hit's ancestry (index order, the matched rule last) to SKDIR/<goal>/<loop>/<source name> as hints, the
 ancestry's axioms of the source run to the same name + .ax, and GOALS.tsv for transfer.py run (goal, the sketch
 files, 0).
+
+  givenmatch.py live DIR [--dirs UL,XFL] [--every 1200] [-j 2] -- LOOP-OPTIONS
+beside production: each cycle scans the logs written since the last one and runs the new hits (see live()).
 """
 import os, re, sys
 from multiprocessing import get_context
@@ -152,7 +155,105 @@ def sketch(hits, skdir, goals, per=3, prefix=False):
     print(f'{len(by)} goals -> {goals}')
 
 
+def live(dirs, d, every, j, rest):
+    """(20 Nov 03:45) beside production: every EVERY s, scan the given logs of DIRS written since the last cycle against
+    production's unsolved unit goals (variants; instances within the own original), and run each new hit as exp38
+    did: the rule's ancestry first at 20 s, then for the failures the log's prefix with its axioms at 40 s
+    (transfer.py run, proofs into loops/UL). Old logs need no rescan: the targets only shrink."""
+    import subprocess, time, transfer
+    os.makedirs(d, exist_ok=True)
+    if not os.path.lexists(os.path.join(d, 'hints')):
+        os.symlink(os.path.join(LOOPS, 'UL', 'hints'), os.path.join(d, 'hints'))
+    wmp = os.path.join(d, 'watermark')
+    wm = float(open(wmp).read()) if os.path.exists(wmp) else time.time()
+    triedp = os.path.join(d, 'tried.tsv')
+    tried = {l.split('\t')[0] for l in open(triedp)} if os.path.exists(triedp) else set()
+    me = os.path.abspath(__file__); tp = os.path.join(os.path.dirname(me), 'transfer.py')
+    ax = {}
+    def axs(n):
+        o = lemmas.split(n)[0]
+        if o not in ax:
+            ax[o] = lemmas.axiom_set(n)
+        return ax[o]
+    cyc = 0
+    while True:
+        t0 = time.time(); cyc += 1
+        S = {l.split('\t')[0] for l in open(os.path.join(LOOPS, 'UL', 'solved.tsv'))}
+        want = {}
+        for n in (l.strip() for l in open(ALL)):
+            if n and n not in S and n not in tried:
+                try:
+                    ks = gkeys(n)
+                except Exception:
+                    continue
+                for k in ks or ():
+                    want.setdefault(k, []).append(n)
+        byroot = {}
+        for (l, r), gs in want.items():
+            for g in gs:
+                byroot.setdefault((lemmas.split(g)[0], root_s(l)), []).append(
+                    (g, l, r, transfer.parse(l), transfer.parse(r), l.count('(') + r.count('(')))
+        jobs = []; top = wm
+        for dd in dirs:
+            gd = os.path.join(LOOPS, dd, 'given')
+            for name in os.listdir(gd) if os.path.isdir(gd) else ():
+                try:
+                    t = os.path.getmtime(os.path.join(gd, name))
+                except OSError:
+                    continue
+                if t > wm:
+                    top = max(top, t)
+                    try:
+                        if lemmas.unit_eq(lemmas.conjecture(name) or '~'):
+                            jobs.append((dd, name))
+                    except OSError:
+                        pass
+        hits = {}
+        for inst, w in ((False, want), (True, byroot)):
+            init(w, inst)
+            for job in jobs:
+                for h in scan(job):
+                    if h[0] not in S and axs(h[2]) <= axs(h[0]):
+                        hits.setdefault(h[0], []).append(h)
+        print(f'cycle {cyc} {time.strftime("%H:%M:%S")}: {len(want)} target keys, {len(jobs)} new logs, '
+              f'{len(hits)} goals hit', flush=True)
+        if hits:
+            hp = os.path.join(d, f'hits_{cyc}.tsv')
+            with open(hp, 'w') as fo:
+                for g in sorted(hits):
+                    for h in sorted(set(hits[g]), key=lambda h: (h[5], h[1], h[2]))[:5]:
+                        fo.write('\t'.join(map(str, h)) + '\n')
+            with open(os.path.join(d, 'solved.tsv'), 'w') as f:   # (production's proofs as context, round 0)
+                for l in open(os.path.join(LOOPS, 'UL', 'solved.tsv')):
+                    w_ = l.split('\t')
+                    if len(w_) >= 3 and l.endswith('\n'):
+                        f.write(f'{w_[0]}\t0\t{w_[2].strip()}\n')
+            for tag, pre, T in (('a', False, 20), ('p', True, 40)):
+                gp = os.path.join(d, f'goals_{cyc}{tag}.tsv')
+                sketch(hp, os.path.join(d, 'sketch' + tag), gp, 3, pre)
+                if tag == 'p':   # (only the goals the first pass left)
+                    S2 = {l.split('\t')[0] for l in open(os.path.join(LOOPS, 'UL', 'solved.tsv'))}
+                    keep = [l for l in open(gp) if l.split('\t')[0] not in S2]
+                    open(gp, 'w').writelines(keep)
+                    if not keep:
+                        break
+                subprocess.run([sys.executable, tp, 'run', gp, d, '-j', str(j), '--time', str(T), '--src-lemmas', '6',
+                                '--live-dst', os.path.join(LOOPS, 'UL'), '--'] + rest)
+            with open(triedp, 'a') as f:
+                f.writelines(f'{g}\t{cyc}\n' for g in sorted(hits))
+            tried |= set(hits)
+        wm = top
+        open(wmp, 'w').write(repr(wm))
+        time.sleep(max(0, every - (time.time() - t0)))
+
+
 def main():
+    if sys.argv[1] == 'live':
+        argv = sys.argv[2:]
+        i = argv.index('--')
+        opts, rest = argv[:i], argv[i + 1:]
+        val = lambda k, dflt: type(dflt)(opts[opts.index(k) + 1]) if k in opts else dflt
+        return live(val('--dirs', 'UL,XFL').split(','), opts[0], val('--every', 1200.0), val('-j', 2), rest)
     if sys.argv[1] == 'sketch':
         per = int(sys.argv[sys.argv.index('--per') + 1]) if '--per' in sys.argv else 3
         return sketch(sys.argv[2], sys.argv[3], sys.argv[4], per, '--prefix' in sys.argv)

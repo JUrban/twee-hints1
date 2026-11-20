@@ -89,3 +89,16 @@ Written 20 Nov 2026, 02:21 UTC.
   it lead twee to a proof within 20 s. A genuine negative. The rule-level matches above (13 of 19) work because they
   pick the one run that derived the goal itself.
 * Instance scan at 03:40: 1 goal hit in 300,000 logs, so instances add little beyond the variants.
+
+## Live (from 03:42)
+
+* `givenmatch.py live` (abs/gmlive.sh, loops/GML, every 20 min, 2 workers when there are hits). Each cycle:
+  * scans the given logs of loops/UL and loops/XFL written since the last cycle against production's unsolved unit
+    goals: variants, and instances within the own original;
+  * runs the new hits as above, the ancestry at 20 s, then the log prefix with its axioms at 40 s. Proofs go into
+    production.
+  * Old logs need no rescan, as the targets only shrink.
+* The full scan had used models/given_index.tsv, built on 19 Nov at 19:51, so it missed every log since: the burst's
+  783. The first live cycle starts from that time.
+* **Cycle 1 (03:42): 5 goals hit in 696 recent logs**, against 19 in 494,373 in the full scan. The frontier's logs are
+  where the hits are.
