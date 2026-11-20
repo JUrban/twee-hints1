@@ -61,12 +61,15 @@ def main():
                 sg, _, i = t.rpartition(':')
                 if sg in ('axiom', 'hyp') or not sg:   # (the theory's axioms; a goal's own hypothesis)
                     continue
-                if TR is not None and sg not in TR:
+                # (20 Nov 12:38) joincheck --banks: 'LOOP:goal', a step of that loop's proof of the goal
+                bk, _, g2 = sg.rpartition(':')
+                bk = bk or 'UL'
+                if TR is not None and g2 not in TR:
                     steps = None; break
                 if sg not in lines:
-                    lines[sg] = open(os.path.join(L, 'UL', 'hints', sg)).read().split('\n')
+                    lines[sg] = open(os.path.join(L, bk, 'hints', g2)).read().split('\n')
                 x = lines[sg][int(i)].split('\t')
-                steps.append((x[0], x[1], sg))
+                steps.append((x[0], x[1], g2))
             if steps is None:
                 continue
             ax = p9twee.tptp_parts(w[0])[0]

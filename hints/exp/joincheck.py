@@ -249,6 +249,9 @@ def main():
     ap.add_argument('--cond', action='store_true',
                     help='the conditional goals (one hypothesis s = t): its ground sides, normalised, as one oriented '
                          'rule for that goal only')
+    ap.add_argument('--banks', default='',
+                    help='(20 Nov 12:38) more loops (under loops/, comma-separated) whose hints files add proof steps '
+                         'of the same goals (tag LOOP:goal); only goals production solved (and trusted)')
     ap.add_argument('--own-given', default='',
                     help='DIR (loop.py --given-keep): each goal\'s own failed run\'s given rules join the bank for that '
                          'goal (tag own:<line>); only goals with a file there are checked')
@@ -270,6 +273,7 @@ def main():
     if a.own_given:
         U = [g for g in U if os.path.exists(os.path.join(a.own_given, g))]
     TR = {l.strip() for l in open(a.trusted) if l.strip()} if a.trusted else None
+    BANKS = [x for x in a.banks.split(',') if x]
     print(f'{len(U)} {"proven" if a.control else "unsolved"} {"conditional" if a.cond else "unit"} goals sampled', flush=True)
     # steps per source original: key -> (lhs, rhs, (source goal, index)) from production's hints files
     steps = {}
@@ -280,15 +284,17 @@ def main():
             for g in by_o[o]:
                 if g not in S or not unit(g) or (TR is not None and g not in TR):
                     continue   # (a conditional goal's proof uses its hypotheses: steps not valid in general)
-                p = os.path.join(L, 'UL', 'hints', g)
-                try:
-                    lines = open(p).read().split('\n')
-                except OSError:
-                    continue
-                for i, x in enumerate(lines):
-                    w = x.split('\t')
-                    if len(w) >= 2 and (w[0], w[1]) not in d and (w[1], w[0]) not in d:
-                        d[(w[0], w[1])] = (g, i)
+                for bk in ['UL'] + BANKS:
+                    p = os.path.join(L, bk, 'hints', g)
+                    try:
+                        lines = open(p).read().split('\n')
+                    except OSError:
+                        continue
+                    src = g if bk == 'UL' else f'{bk}:{g}'
+                    for i, x in enumerate(lines):
+                        w = x.split('\t')
+                        if len(w) >= 2 and (w[0], w[1]) not in d and (w[1], w[0]) not in d:
+                            d[(w[0], w[1])] = (src, i)
             steps[o] = d
         return steps[o]
     rw_cache = {}
