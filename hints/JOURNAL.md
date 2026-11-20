@@ -750,8 +750,8 @@ Paused:
 * exp12 stage B: 320 s on gap heads, 34 of 95 done, 0.21 per CPU hour (run.py skips done ids).
 * exp19: set-join on the walls, 37 of 107 done, 0.31 per CPU hour (run.py skips done ids).
 
-**Totals (20 Nov 18:45, all trusted, trust.py): 48,201 of 51,784 solved
-(holdout 5,340 of 5,880), 3,583 unsolved.** REPORT's totals table
+**Totals (20 Nov 23:36, all trusted, trust.py): 48,208 of 51,784 solved
+(holdout 5,341 of 5,880), 3,576 unsolved.** REPORT's totals table
 has the history (user, 20 Nov: "update the total numbers in the report etc every now and then").
 
 Next:
@@ -769,7 +769,7 @@ Next:
    above 5 s; the non-joined test proved 4 of 100 such at 20 s. exp/sweep20.py loops/SW20, chunks of 300 with a
    fresh trusted lemma context, 2 workers, proofs into UL (and kept). Production's own loop is stopped (2 proofs in
    its last 2,000 runs). Chunk 0 (16:47): 2 of 300, 0.8 per CPU h (the pilot's sample was nearer); kept running.
-0000000000000. **Z6 (15:30, [notes/2026-11-20-z6.md](notes/2026-11-20-z6.md)):** today's from-zero system on all 51,784, 12 workers, 8 hours
+0000000000000. **Z6 (DONE 23:33: 44,095 at 8 hours, Z4 38,044; 4,113 production-only, 2 Z6-only merged; notes/2026-11-20-z6.md) (15:30, [notes/2026-11-20-z6.md](notes/2026-11-20-z6.md)):** today's from-zero system on all 51,784, 12 workers, 8 hours
    (to about 23:30), `--knn-refresh 600`, against Z4 (37,713 at 2 h). abs/z6_test.sh; read with
    `abs/setcurve.py sets/all Z4 Z6 --at 10,30,60,120,180,240,360,480`. Production's own loop stopped meanwhile.
 000000000000. **The half gap (13:43, [notes/2026-11-20-half-gap.md](notes/2026-11-20-half-gap.md)):** of the goals production has and the from-zero
