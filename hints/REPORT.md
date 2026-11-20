@@ -5155,6 +5155,38 @@ at most 60 goals per cycle; and the same statement proven in a stronger theory).
 * **solve_new.sh now runs it by default** (`GIVEN=1`; `GIVEN=0` gives the 19 Nov system). exp41 replicates on half2
   against P2D.
 
+**It replicates on half2, more strongly: +769 (exp41, 20 Nov 09:16-11:17;
+[notes/2026-11-20-half2-given.md](notes/2026-11-20-half2-given.md)).** P2E is solve_new.sh's new default on half2
+from zero, against exp30's P2D.
+
+| minutes | 10 | 30 | 60 | 90 | 120 |
+|---|---:|---:|---:|---:|---:|
+| P2A (exp30) | 11,489 | 17,345 | 19,041 | 19,442 | 19,501 |
+| P2D (control, exp30) | 11,369 | 17,397 | 18,963 | 19,323 | 19,383 |
+| **P2E (GIVEN=1)** | 11,190 | 17,182 | 19,198 | 19,977 | **20,152** |
+
+* **Only P2E proved 941 goals, only P2D 172** (union 20,325). The live loop proved 501 in 3.05 CPU h, 352 of them
+  goals P2D never proved. At P2D's last-half-hour rate (about 15 per CPU h), 3 more CPU h would give P2D about 45.
+* By kind: the rule's ancestry runs made 339 proofs in 0.63 CPU h (541 per CPU h), the same-statement runs 143 in
+  1.79 (80), and the prefix runs 19 in 0.63 (30).
+* The 60-goal cap per cycle, shared with the same-statement runs, starved the ancestry runs: 145-192 hits were still
+  pending at the end. givenmatch.py now has `--same-cap` (solve_new.sh `GIVENARGS`). exp42 will test `--cap 200
+  --same-cap 20`.
+
+**Step joins: unsolved goals closed by rewriting with other theories' proof steps (20 Nov 10:40;
+[notes/2026-11-20-step-join.md](notes/2026-11-20-step-join.md)).**
+* exp/joincheck.py asks whether an unsolved goal's ground equation rewrites to one normal form with the union of
+  the proof steps of proven unit goals in theories within the goal's. It uses ordered ground rewriting with a
+  discrimination tree. For a conditional goal, the hypothesis is a ground rule for that goal only.
+* exp/stepjoin.py gives twee those steps as lemma axioms named after their source proof (`skax_<i>_<goal>`), with
+  production's options, and keeps the output as the proof's record.
+* **All 3,684 unsolved goals: 23 joins, and 23 proofs** (21 unit, 2 conditional), for about 0.25 CPU h.
+  * Example: nil3_23_32_to_26__goal_507 from three steps of Ka1_eq_Ka2 proofs.
+  * Production never put these together: its lemmas are other goals, not steps of other proofs.
+* Live from 10:50 (abs/stepjlive.sh), every 30 minutes over everything unsolved.
+* Each step axiom is first checked in Mace4 models of the theory (2ba): hints files also hold printed goal terms
+  that are not theorems.
+
 **E as a member (exp28; [notes/2026-11-19-eprover-watchlist.md](notes/2026-11-19-eprover-watchlist.md)): a genuine negative.** E 3.5.9 was built from
 ext/eprover and given the chain hints as a static watchlist (`-xUseWatchlist`).
 * It proved 0 of the 107 walls at 60 CPU s each (1.79 CPU h). Prover9 with the same hints proved 4 (exp16).
@@ -5257,6 +5289,64 @@ index is now rebuilt every 10 minutes, not 30 (about 1 s a rebuild).
     hints more a run;
   * search settings: the rule models rm7t and rm4b (`mX`, each with goal files in its own vocabulary), threshold 0.2,
     no parental guidance, no rule model.
+
+## 2ba. Soundness: the Prover9 negation bug, re-verification, and a model audit (20 Nov)
+
+*Notes: [notes/2026-11-20-p9-negation-bug.md](notes/2026-11-20-p9-negation-bug.md),
+[notes/2026-11-20-model-audit.md](notes/2026-11-20-model-audit.md).*
+
+**The bug.** p9twee.py, which turns twee's problems into Prover9's input, wrote TPTP `~ a = b` as LADR `- a = b`.
+* In TPTP, `=` binds tighter than `~`. In LADR, prefix `-` binds tighter than `=`, so `- a = b` is the equation
+  (-a) = b with `-` a new function symbol.
+* Every conditional sibling lemma given to Prover9 was a false axiom. From one, Prover9 derived that the loop has at
+  most 2 elements, and proved goals from that.
+* Fixed 09:45 (`-(a = b)`). All 9,052 conditional conjectures convert to a negated atom, and Prover9 prints them as
+  `!=` literals.
+
+**Found by an independent check.** joincheck (step joins, 2az) "joined" aK2_eq_aK3_s__goal_497 using commutativity
+and `ld(X0,e) = X0`, both false in that theory. They came from the hints of a P9C proof.
+
+**Scope.**
+* Prover9 ran only through p9twee.py: P9T (15 Nov), P9L (from 15 Nov 08:56), exp16 and P9C (18 Nov), and
+  production's `p9` variant (28 runs, 0 proofs). The from-zero arms never ran it.
+* 16 goals in production rested on a Prover9 proof that used a false clause: P9C 9 of 10, P9L 3 of 9, P9T 1 of 1,
+  exp16 all 6 proofs (3 more goals).
+* **Void claims:** 2ad's "first hit" (aK2_eq_aK3_r__goal_241), 2az's "Prover9 with the chain is the cheapest member
+  (2.3 per CPU hour)", exp16's walls, and the p9 member's yields.
+* The goals' statements are true. They are steps of real Prover9 proofs in AIM60k. Our proofs of them are void,
+  and so are, until re-proved, the proofs that used them as lemma axioms.
+
+**Re-verification.**
+* **Trust** (exp/trust.py), a fixpoint over the lemma records. Since twee-e31 (14 Nov) each kept output's
+  `USEDAXIOMS` line names its lemma axioms after their goals. A proof is trusted if it is older than the first
+  unsound one (15 Nov 08:56), or if its record names every lemma it used and each is a trusted proven goal.
+* **Exposed theories.** Every lemma mechanism takes lemmas from theories within the target's. So only 43 of the 129
+  originals, those whose axioms contain a bad goal's, can hold a dependent proof. The other 86 are trusted
+  outright.
+* **The quarantine** (10:07): 1,130 goals: the closure, plus every proof after 15 Nov 08:56 without a record. 84 of
+  them, outside the exposed theories, went back at 10:36.
+* **Re-proofs** (exp/rever2.py): each pass re-proves the untrusted proofs without a complete record, and the
+  quarantined goals, with trusted lemmas only. Outputs are kept, so the new proofs carry records. Passes repeat
+  until one proves nothing new.
+  * Pass 1 (10:37-11:13): 161 of 221.
+  * trust.py then missed rever2's own nested outputs, and kept old records through the side loops' symlinked hints
+    dirs. After the fix (11:21): 230 untrusted of 48,168.
+  * Continuing in loops/REVER3. Whatever stays untrusted at the end leaves the solved list.
+* All side loops now keep their outputs, and every lemma axiom they add carries its goal's name.
+
+**A model audit finds no other unsoundness** (exp/modelcheck.py).
+* Mace4 finds up to 40 models (sizes 2-8) of each of the 68 theories, 2,504 models in all.
+* Each step of every solved unit goal's proof is evaluated in its theory's models: 2.4M checks.
+* Self-test: no AIM60k goal statement fails.
+* **217 false steps in 71 goals, all with different variables on the two sides**, such as `X0 = X1` and
+  `X0 = m(k(X1,X2),...)`. These are printed goal terms, not derived equations. Harmless as hints, since twee
+  matches by variant; stepjoin now rejects them as axioms.
+* No step with the same variables on both sides is false. That is the shape of a wrong derived equation.
+* **Positive control:** 13 of the 16 unsound Prover9 proofs show such a step, e.g. `ld(X0,e) = X0`.
+
+**Lesson.** Hints may be wrong; axioms may not. Every path that turns text into an axiom (a second prover's input,
+hints as lemmas, given rules as `.ax`) is part of the trusted base. Each needs a check, and each proof should record
+its lemmas when it is written.
 
 ## 2c. Long runs: stall cutoff and checkpoints
 
