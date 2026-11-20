@@ -755,6 +755,9 @@ Paused:
 has the history (user, 20 Nov: "update the total numbers in the report etc every now and then").
 
 Next:
+000000000000000. **exp44 (written 18:44, starts when Z6 ends, [notes/2026-11-20-retry-class.md](notes/2026-11-20-retry-class.md)):** Z6's first runs ended at
+   about 150 min, then retries of goals with a new context proved 47% (1,096 of 2,331 in half an hour), the last
+   first runs 3%. loop.py `--retry-class`: failed-before goals as their own --mix class. P2H on half2 against P2E/P2F.
 00000000000000. **20 s sweep (15:32, [notes/2026-11-20-sweep20.md](notes/2026-11-20-sweep20.md)):** 2,895 unsolved goals never had a production run
    above 5 s; the non-joined test proved 4 of 100 such at 20 s. exp/sweep20.py loops/SW20, chunks of 300 with a
    fresh trusted lemma context, 2 workers, proofs into UL (and kept). Production's own loop is stopped (2 proofs in
@@ -932,6 +935,7 @@ reports are written as the experiments run.
 | [notes/2026-11-20-half-gap.md](notes/2026-11-20-half-gap.md) | Why a from-zero half run stops short of production: the other half's kNN lemmas |
 | [notes/2026-11-20-z6.md](notes/2026-11-20-z6.md) | Z6: today's from-zero system on the whole benchmark, 8 hours |
 | [notes/2026-11-20-sweep20.md](notes/2026-11-20-sweep20.md) | One 20 s run for each unsolved goal that never had more than 5 s |
+| [notes/2026-11-20-retry-class.md](notes/2026-11-20-retry-class.md) | exp44: failed-before goals as their own cascade class (P2H against P2E/P2F) |
 | [notes/2026-11-20-base-saturation.md](notes/2026-11-20-base-saturation.md) | exp39: base-theory runs as rule generators for the unsolved goals of the stronger theories |
 | [notes/2026-11-20-given-transfer.md](notes/2026-11-20-given-transfer.md) | exp38: unsolved goals that are variants of rules other runs derived and did not use (379 M in the given logs; transfer.py only matches proof steps); their ancestry as hints |
 | [notes/2026-11-19-from-zero-portfolio.md](notes/2026-11-19-from-zero-portfolio.md) | half1 from zero in 2 hours with today's deep portfolio (PGC), against PGA's 18,987 (exp27, from 07:18) |

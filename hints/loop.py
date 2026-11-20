@@ -1638,13 +1638,14 @@ class Loop:
             tm = [0.0, 0.0, 0.0, 0.0]   # the main thread's seconds: scheduling passes, submitting, waiting, results
             t_r = None
             retry, deep, far, light, last_full = [], [], [], False, -1e18
+            rq = []   # (--retry-class: the failed-before goals of the retry list, a mix class of their own)
             pdur = 0.0   # the last full pass's seconds (without a kNN index rebuild)
             # --mix M: runs of three kinds, near retries (r), goals beyond the retry gaps (f: far, and goals
             # never run) and deeper levels (d); each kind with waiting goals keeps M of the workers, the
             # other slots go to the kind with the most proofs per run second over its last 300 runs; the
             # seconds its running jobs have taken so far count as spent without a proof (a 320 s resume takes
             # ~25 wall minutes: until one ended, the prior kept the deeper levels first, ul39 17 Nov)
-            ycls = {c: collections.deque(maxlen=300) for c in 'rfd'}; rcls = {}; ncls = collections.Counter()
+            ycls = {c: collections.deque(maxlen=300) for c in 'rfdq'}; rcls = {}; ncls = collections.Counter()
             rt0 = {}   # future -> its start
             def yld(c):
                 now = time.time()
@@ -1663,7 +1664,7 @@ class Loop:
                     # lists it made are used up, each goal checked again when it is taken
                     # (and at most every 8 times the last full pass's length: --fail-order's list of every
                     # waiting goal took 0.2-0.35 s a pass, Z3 kept 5-7 of its 12 workers busy, REPORT 2at)
-                    light = bool(a.pass_every and (retry or deep or far)
+                    light = bool(a.pass_every and (retry or deep or far or rq)
                                  and tq_ - last_full < max(a.pass_every, 8 * pdur))
                     if not light:
                         last_full = tq_; krb = 0.0
@@ -1720,6 +1721,15 @@ class Loop:
                         else:
                             retry = sorted((g[n][1], gnum[n][1], n) for n in att
                                            if n not in busy and (ctx(n) != att[n][0] or grown(n)) and may_retry(n, g))
+                        # (20 Nov 18:36) --retry-class: with --fail-order the list has every goal never failed in the
+                        # round before any goal that failed once and has a new context since. In Z6 the first runs of
+                        # all 51,784 goals ended at about 150 minutes; then 1,096 of 2,331 such retries proved in
+                        # half an hour (47%), while the last first runs proved 3% (notes/2026-11-20-z6.md). Here the
+                        # failed-before goals are their own --mix class 'q', with a share and a yield of their own
+                        if a.retry_class and a.mix and a.fail_order and not SM:
+                            rq = [x for x in retry if x[0] > 0]; retry = [x for x in retry if x[0] == 0]
+                        else:
+                            rq = []
                         uset = set()
                         if SM and a.sweep_first:
                             # --sweep-first: goals never run in this round go first, in goal order across the
@@ -1774,10 +1784,10 @@ class Loop:
                     if not light:
                         pdur = max(0.0, time.time() - tq_ - krb)
                     tm[0] += time.time() - tq_; tq_ = time.time()
-                    while len(running) < a.j and (retry or deep or far):
+                    while len(running) < a.j and (retry or deep or far or rq):
                         if a.mix:
                             cn_ = collections.Counter(rcls.values())
-                            av = [c for c, L in (('r', retry), ('f', far), ('d', deep)) if L
+                            av = [c for c, L in (('r', retry), ('f', far), ('d', deep), ('q', rq)) if L
                                   and (c != 'd' or cn_['d'] < a.j - a.reserve)]
                             if not av:
                                 break
@@ -1786,7 +1796,7 @@ class Loop:
                         else:
                             cl = ('r' if retry else 'f') if retry or (far and not deep) else 'd'
                         if cl != 'd':
-                            n = (retry if cl == 'r' else far).pop(0)[-1]; lev = 0
+                            n = (retry if cl == 'r' else rq if cl == 'q' else far).pop(0)[-1]; lev = 0
                             # (never a goal already running: a full pass's lists predate this pass's own
                             # submissions, so a goal taken as deep first came round again as a retry; both runs
                             # share tmp/<goal>.hints, and ul44 died on the second unlink, 18 Nov 09:29)
@@ -1959,7 +1969,7 @@ class Loop:
                         print(f'  cascade: {done_n} runs, new={new}, {len(running)} running, '
                               f'{time.time()-t0:.0f}s' + (f', synced={nsync}' if a.sync else '')
                               + f', main s: pass {tm[0]:.0f} submit {tm[1]:.0f} wait {tm[2]:.0f} results {tm[3]:.0f}'
-                              + (', mix ' + ' '.join(f'{c} {ncls[c]} {3600*yld(c):.0f}/h' for c in 'rfd') if a.mix else '')
+                              + (', mix ' + ' '.join(f'{c} {ncls[c]} {3600*yld(c):.0f}/h' for c in ('rfdq' if a.retry_class else 'rfd')) if a.mix else '')
                               + (f', fresh {calib[2]}/{calib[1]} (predicted {calib[0]:.0f})' if H else ''),
                               file=sys.stderr, flush=True)
         msg = f'cascade: {done_n} runs new {new} total {len(self.solved)}/{len(self.names)} {time.time()-t0:.0f}s'
@@ -2299,6 +2309,11 @@ def make_parser():
                          'each keep this share of the workers while they have waiting goals; the other slots go to '
                          'the kind with the most proofs per run second lately (with --far-retry; from zero on '
                          '51,784 goals the near retries took every slot and 12,998 goals never ran, REPORT 2as)')
+    ap.add_argument('--retry-class', action='store_true',
+                    help='(20 Nov) --mix with --fail-order: goals that failed before in the round and have a new '
+                         'context are their own class (q) beside the goals never failed (r), with the --mix share '
+                         'and the yield of their own, instead of all coming after every first run (Z6: the first '
+                         'runs ended at about 150 minutes, then such retries proved 47%, the last first runs 3%)')
     ap.add_argument('--fail-order', action='store_true',
                     help='--cascade without --sched-model: the fresh (T0) runs in one list, goals with the fewest '
                          'failed fresh runs in the round first, then those within the retry gaps, then the nearest '
