@@ -37,18 +37,19 @@ def orig(g):
     return g.rsplit('__goal_', 1)[0]
 
 
-def read_out(p):
-    """(goal, dir, [used names]) for a kept twee output that proved its goal, else None"""
+def read_out(pd):
+    """(goal, dir, [used names], mtime) for a kept twee output that proved its goal, else None"""
+    p, d = pd
     try:
         with open(p, errors='replace') as f:
             txt = f.read()
+        mt = os.path.getmtime(p)
     except OSError:
         return None
     if 'RESULT: Theorem' not in txt:
         return None
     m = re.search(r'^USEDAXIOMS (.*)$', txt, re.M)
-    parts = p.split('/')
-    return os.path.basename(p), parts[parts.index('loops') + 1], m.group(1).split() if m else None
+    return os.path.basename(p), d, m.group(1).split() if m else None, mt
 
 
 def main():
@@ -71,9 +72,17 @@ def main():
             return False
     dirs = [d for d in os.listdir(L) if os.path.isdir(os.path.join(L, d)) and not FROMZERO.match(d)]
     paths = []
+    # (20 Nov 11:21) also one level down (loops/REVER2/p1/r1/out: rever2's passes), with the dir the output belongs
+    # to (its hints dir decides whether the output made production's proof)
+    ods = set()
     for d in dirs:
-        for od in glob.glob(os.path.join(L, d, 'r*', 'out')) + glob.glob(os.path.join(L, d, 'out')):
-            paths.extend(os.path.join(od, x) for x in os.listdir(od))
+        for pat in (('r*', 'out'), ('out',), ('*', 'r*', 'out'), ('*', 'out')):
+            ods.update(glob.glob(os.path.join(L, d, *pat)))
+    for od in sorted(ods):
+        dd = os.path.relpath(os.path.dirname(od), L)
+        if re.fullmatch(r'r\d+', os.path.basename(dd)):
+            dd = os.path.dirname(dd)   # (DIR/rN/out belongs to DIR)
+        paths.extend((os.path.join(od, x), dd) for x in os.listdir(od))
     print(f'{len(paths)} kept outputs in {len(dirs)} dirs', flush=True)
     rec = {}    # goal -> set of lemma goals, or None if a used lemma name is not resolved
     knn_at = {}
@@ -115,13 +124,19 @@ def main():
             rec[g] = rec[g] | deps
         elif g not in rec:
             rec[g] = deps
+    # (20 Nov 11:21) each goal's record from its newest output that matches production's hints: the side loops'
+    # hints dirs are symlinks to production's, so an old proof of a goal since re-proved also "matches"
+    newest = {}
     with Pool(j) as pool:
         for r in pool.imap_unordered(read_out, paths, chunksize=500):
             if r is None:
                 continue
-            g, d, names = r
-            if g in S and names is not None and same(d, g):
-                add(g, d, names)
+            g, d, names, mt = r
+            if g in S and same(d, g) and (g not in newest or mt > newest[g][0]):
+                newest[g] = (mt, d, names)
+    for g, (mt, d, names) in newest.items():
+        if names is not None:
+            add(g, d, names)
     for p in glob.glob(os.path.join(L, '*', 'used.tsv')):
         d = p.split('/')[-2]
         for l in open(p):

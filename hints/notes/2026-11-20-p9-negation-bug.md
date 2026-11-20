@@ -85,7 +85,17 @@ Written 20 Nov 2026, 10:32 UTC, while the re-verification runs.
     old proofs (loops/UNSOUND/restored_1036.txt).
   * Trust at 10:37: 47,570 trusted and 529 untrusted (101 without a record, 29 with an unresolved lemma name, 399
     using an untrusted or unsolved lemma).
-  * rever2 pass 1: 130 roots plus 91 quarantined unsolved goals, 221 in all, at 60 s.
+  * rever2 pass 1: 130 roots plus 91 quarantined unsolved goals, 221 in all, at 60 s. **161 proved** (2.36 CPU h,
+    10:37-11:13).
+* **trust.py fixes (11:21):**
+  * It missed rever2's own outputs (loops/REVER2/p1/r1/out, one level down), so pass 2 had 137 of pass 1's 161
+    proofs as roots again. Stopped after 31 of 50 runs.
+  * It took a goal's record from any matching output. The side loops' hints dirs are symlinks to production's, so
+    an old unresolved proof of a re-proved goal also "matched" and kept it untrusted. Now each goal's record comes
+    from its newest matching output.
+  * With both fixes at 11:21: 48,168 solved, 230 untrusted (6 without a record, 6 with an unresolved lemma name, 218
+    using an untrusted or unsolved lemma).
+  * rever2 continues in loops/REVER3 from 11:24.
 * From 10:35, the transfer loop and the live loop run with `--keep-out` (abs/xfrlive2k.sh, abs/gmlive2k.sh), and
   transfer.py names source lemmas `srclem_<i>_<goal>`, so their proofs carry records too.
 
