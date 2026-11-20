@@ -14,6 +14,7 @@ The proof block is cut from 'The conjecture is true! Here is a proof.' to the RE
   collect_proofs.py plan LIST WORK        -> WORK/plan.tsv, WORK/rerun/{names,h/}
   collect_proofs.py plan2 LIST WORK       -> WORK/rerun2/{names,h/} (stage-1 failures, enriched hints)
   collect_proofs.py pack LIST WORK TARBALL
+  collect_proofs.py existing LIST TARBALL     (printed proofs that exist only, no reruns)
 """
 import collections, glob, os, re, sys, tarfile, io
 
@@ -179,7 +180,57 @@ def pack(lst, work, tb):
         print('missing:', ' '.join(miss[:20]), '...' if len(miss) > 20 else '')
 
 
+def existing(lst, tb):
+    """(20 Nov 14:35, user) only printed proofs that exist: for each distinct THM problem of LIST, the first listed
+    run.py run's own output with a proof, else any run.py output of the same problem with one"""
+    by = collections.OrderedDict()
+    for l in open(lst):
+        l = l.rstrip('\n')
+        if ':' not in l:
+            continue
+        p, rest = l.split(':', 1)
+        w = rest.split('\t')
+        if len(w) < 2 or w[1] != 'THM':
+            continue
+        by.setdefault(w[0], []).append(os.path.normpath(os.path.join(HW, os.path.dirname(p))))
+    rdirs = sorted(glob.glob(os.path.join(HW, 'runs', '*', 'out')))
+    n, idx, nproof = collections.Counter(), [], collections.Counter()
+    with tarfile.open(tb, 'w:gz') as tf:
+        for g, ds in by.items():
+            b = src = None
+            kind = 'own'
+            for d in dict.fromkeys(ds):
+                if d.split('/')[3] == 'runs':
+                    b = block(os.path.join(d, 'out', g + '.out'))
+                    if b:
+                        src = os.path.join(d, 'out', g + '.out'); break
+            if b is None:
+                kind = 'other'
+                for od in rdirs:
+                    b = block(os.path.join(od, g + '.out'))
+                    if b:
+                        src = os.path.join(od, g + '.out'); break
+            if b is None:
+                n['no printed proof'] += 1
+                continue
+            n[kind] += 1
+            data = b.encode()
+            ti = tarfile.TarInfo(f'THM_proofs/{g}.proof'); ti.size = len(data)
+            tf.addfile(ti, io.BytesIO(data))
+            idx.append(f'{g}\t{kind}\t{src}\t{ds[0]}\n')
+        readme = (f'Twee proofs of the THM problems in {lst}: {len(by)} distinct problems, {len(idx)} with a printed '
+                  'proof (one per problem). No reruns.\nindex.tsv: problem, source, source file, the first listed '
+                  'run.\nSources: own = a listed run.py run\'s output; other = a printed proof of the same problem '
+                  'from another run.py run.\nThe loops run twee with --no-proof, so problems proved only by loops '
+                  'have no printed proof and are not here.\n')
+        for name, text in (('README', readme), ('index.tsv', ''.join(idx))):
+            data = text.encode(); ti = tarfile.TarInfo(f'THM_proofs/{name}'); ti.size = len(data)
+            tf.addfile(ti, io.BytesIO(data))
+    print(f'{tb}: {len(by)} distinct THM problems; {dict(n)}')
+
+
 if __name__ == '__main__':
     cmd = sys.argv[1]
     {'plan': lambda: plan(sys.argv[2], sys.argv[3]), 'plan2': lambda: plan2(sys.argv[2], sys.argv[3]),
-     'pack': lambda: pack(sys.argv[2], sys.argv[3], sys.argv[4])}[cmd]()
+     'pack': lambda: pack(sys.argv[2], sys.argv[3], sys.argv[4]),
+     'existing': lambda: existing(sys.argv[2], sys.argv[3])}[cmd]()
