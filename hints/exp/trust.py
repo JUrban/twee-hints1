@@ -83,7 +83,8 @@ def main():
         m = re.match(r'(?:lemma|assume)_goal_(\d+)$', x)
         if m:
             return f'{orig(g)}__goal_{m.group(1)}'
-        m = re.match(r'(?:lemma|assume)_knn_\d+_(.+__goal_\d+)$', x) or re.match(r'srclem_\d+_(.+__goal_\d+)$', x)
+        m = re.match(r'(?:lemma|assume)_knn_\d+_(.+__goal_\d+)$', x) or re.match(r'srclem_\d+_(.+__goal_\d+)$', x) \
+            or re.match(r'skax_\d+_(.+__goal_\d+)$', x)
         if m:
             return m.group(1)
         m = re.match(r'lemma_knn_(\d+)$', x)
