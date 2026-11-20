@@ -5200,6 +5200,15 @@ from zero, against exp30's P2D.
   failed on its goal, and the extra ancestry proofs were mostly goals the loop proves anyway. exp43 runs hits at
   once (`--no-wait`, [notes/2026-11-20-given-nowait.md](notes/2026-11-20-given-nowait.md)).
 
+**The half tests understate the system (20 Nov 13:47; [notes/2026-11-20-half-gap.md](notes/2026-11-20-half-gap.md)).**
+* Of the half2 goals production has and the from-zero arms lack (3,768), 2,155 fell to production's 5 s level. Their
+  median goal number is 403, against 170 for the arms' goals.
+* 1,363 of the 1,714 such proofs with a record used a kNN lemma from the other half. A half run cannot have it.
+  Half1: 1,281 of 1,688. Only 11 (half1: 14) used lemmas all of which the arm had proved.
+* So the A/B tests on halves stay fair (both arms have the same handicap), but they understate what the system
+  does on the whole benchmark, and changes that act through cross-original lemmas show less on a half.
+* The long from-zero run goes on all 51,784 (Z6, after exp43), against Z4's curve (37,713 at 2 h).
+
 **Step joins: unsolved goals closed by rewriting with other theories' proof steps (20 Nov 10:40;
 [notes/2026-11-20-step-join.md](notes/2026-11-20-step-join.md)).**
 * exp/joincheck.py asks whether an unsolved goal's ground equation rewrites to one normal form with the union of

@@ -748,6 +748,10 @@ Paused:
 has the history (user, 20 Nov: "update the total numbers in the report etc every now and then").
 
 Next:
+000000000000. **The half gap (13:47, [notes/2026-11-20-half-gap.md](notes/2026-11-20-half-gap.md)):** of the goals production has and the from-zero
+   half arms lack, most fell to production's 5 s level, and 80% (half2) / 76% (half1) of those proofs used a kNN
+   lemma from the other half, which a half run cannot have. Half tests stay for A/B; the long from-zero run goes on
+   the whole benchmark (Z6 after exp43: today's defaults, 12 workers, 8 hours, against Z4).
 00000000000. **exp43 (13:28, [notes/2026-11-20-given-nowait.md](notes/2026-11-20-given-nowait.md)):** P2G = P2F + givenmatch `--no-wait`
    (hits run as soon as found), half2 from zero, 2 hours, against P2F. abs/exp43.sh.
 0000000000. **Semantic guidance offline (12:14, [notes/2026-11-20-semantic-guidance.md](notes/2026-11-20-semantic-guidance.md)):** are proof steps false in
@@ -909,6 +913,7 @@ reports are written as the experiments run.
 | [notes/2026-11-20-given-cap.md](notes/2026-11-20-given-cap.md) | exp42: the derived-rule transfer with the ancestry runs uncapped (P2F against P2E) |
 | [notes/2026-11-20-semantic-guidance.md](notes/2026-11-20-semantic-guidance.md) | Semantic guidance offline: proof steps vs other given rules in relevance models |
 | [notes/2026-11-20-given-nowait.md](notes/2026-11-20-given-nowait.md) | exp43: derived-rule hits run without waiting for the loop's failure (P2G against P2F) |
+| [notes/2026-11-20-half-gap.md](notes/2026-11-20-half-gap.md) | Why a from-zero half run stops short of production: the other half's kNN lemmas |
 | [notes/2026-11-20-base-saturation.md](notes/2026-11-20-base-saturation.md) | exp39: base-theory runs as rule generators for the unsolved goals of the stronger theories |
 | [notes/2026-11-20-given-transfer.md](notes/2026-11-20-given-transfer.md) | exp38: unsolved goals that are variants of rules other runs derived and did not use (379 M in the given logs; transfer.py only matches proof steps); their ancestry as hints |
 | [notes/2026-11-19-from-zero-portfolio.md](notes/2026-11-19-from-zero-portfolio.md) | half1 from zero in 2 hours with today's deep portfolio (PGC), against PGA's 18,987 (exp27, from 07:18) |
