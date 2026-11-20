@@ -747,6 +747,9 @@ Paused:
 has the history (user, 20 Nov: "update the total numbers in the report etc every now and then").
 
 Next:
+000000000. **exp42 (11:30, [notes/2026-11-20-given-cap.md](notes/2026-11-20-given-cap.md)):** half2 from zero, P2F = P2E (solve_new.sh defaults)
+   with the live loop at `--cap 200 --same-cap 20` (ancestry runs no longer starved by the same-statement runs),
+   against exp41's P2E (20,152 at 2 h). abs/exp42.sh; production at J=6, rever at 2 meanwhile.
 00000000. **Model audit (10:54, [notes/2026-11-20-model-audit.md](notes/2026-11-20-model-audit.md)):** exp/modelcheck.py evaluates every proof step
    of every solved unit goal in up to 40 Mace4 models (sizes 2-8) of its theory; a step false in a model is not a
    theorem. Self-test: all goal statements must hold. Done 11:17: 2.4M step checks in 2,504 models of 68 theories;
@@ -888,6 +891,7 @@ reports are written as the experiments run.
 | [notes/2026-11-20-p9-negation-bug.md](notes/2026-11-20-p9-negation-bug.md) | Unsound Prover9 proofs (p9twee negation bug), the quarantine and the trust re-verification |
 | [notes/2026-11-20-step-join.md](notes/2026-11-20-step-join.md) | Step joins: unsolved goals closed by rewriting with proof steps of weaker theories |
 | [notes/2026-11-20-model-audit.md](notes/2026-11-20-model-audit.md) | Soundness audit: every proof step evaluated in finite models of its theory |
+| [notes/2026-11-20-given-cap.md](notes/2026-11-20-given-cap.md) | exp42: the derived-rule transfer with the ancestry runs uncapped (P2F against P2E) |
 | [notes/2026-11-20-base-saturation.md](notes/2026-11-20-base-saturation.md) | exp39: base-theory runs as rule generators for the unsolved goals of the stronger theories |
 | [notes/2026-11-20-given-transfer.md](notes/2026-11-20-given-transfer.md) | exp38: unsolved goals that are variants of rules other runs derived and did not use (379 M in the given logs; transfer.py only matches proof steps); their ancestry as hints |
 | [notes/2026-11-19-from-zero-portfolio.md](notes/2026-11-19-from-zero-portfolio.md) | half1 from zero in 2 hours with today's deep portfolio (PGC), against PGA's 18,987 (exp27, from 07:18) |
