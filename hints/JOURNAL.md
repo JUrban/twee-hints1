@@ -747,6 +747,12 @@ Paused:
 has the history (user, 20 Nov: "update the total numbers in the report etc every now and then").
 
 Next:
+000000. **Soundness (10:00, [notes/2026-11-20-p9-negation-bug.md](notes/2026-11-20-p9-negation-bug.md)):** p9twee.ladr wrote TPTP `~ a = b` as
+   LADR `- a = b` (the equation (-a) = b): conditional sibling lemmas became false axioms, and 16 Prover9 proofs in
+   production used one (P9C, P9L, P9T, exp16). Fixed 09:45. Quarantine of 1,130 goals at 10:07 (closure + proofs
+   without lemma records); exp/trust.py (trusted = before 15 Nov 08:56, or every recorded lemma trusted) and
+   exp/rever2.py (re-proves the roots with a trusted context, --keep-out) running from 10:32. The side loops now keep
+   outputs (abs/xfrlive2k.sh, gmlive2k.sh); transfer.py names source lemmas by goal.
 00000. exp41 (09:16, [notes/2026-11-20-half2-given.md](notes/2026-11-20-half2-given.md)): exp40 replicated on half2, P2E = solve_new.sh's
    defaults (GIVEN=1) against exp30's P2D (19,383 at 2 h); abs/exp41.sh; production at J=4 until about 11:17.
 0000. exp40 ([notes/2026-11-20-from-zero-given.md](notes/2026-11-20-from-zero-given.md)): half1 from zero as exp29's PGD (19,309 at 2 h)
@@ -867,6 +873,7 @@ reports are written as the experiments run.
 | [notes/2026-11-19-retrained-models.md](notes/2026-11-19-retrained-models.md) | exp37: retrained rule models as members (user, 19:35): the ENIGMA/Mizar60/Suda papers' training tricks, given logs of every loop indexed (several proofs per goal), rm9* models held out of the 400 newest production proofs, paired test from snapshot ULsN19 |
 | [notes/2026-11-20-from-zero-given.md](notes/2026-11-20-from-zero-given.md) | exp40: half1 from zero with the derived-rule transfer (--given-scan + givenmatch live) |
 | [notes/2026-11-20-half2-given.md](notes/2026-11-20-half2-given.md) | exp41: exp40 replicated on half2 (solve_new.sh GIVEN=1 against P2D) |
+| [notes/2026-11-20-p9-negation-bug.md](notes/2026-11-20-p9-negation-bug.md) | Unsound Prover9 proofs (p9twee negation bug), the quarantine and the trust re-verification |
 | [notes/2026-11-20-base-saturation.md](notes/2026-11-20-base-saturation.md) | exp39: base-theory runs as rule generators for the unsolved goals of the stronger theories |
 | [notes/2026-11-20-given-transfer.md](notes/2026-11-20-given-transfer.md) | exp38: unsolved goals that are variants of rules other runs derived and did not use (379 M in the given logs; transfer.py only matches proof steps); their ancestry as hints |
 | [notes/2026-11-19-from-zero-portfolio.md](notes/2026-11-19-from-zero-portfolio.md) | half1 from zero in 2 hours with today's deep portfolio (PGC), against PGA's 18,987 (exp27, from 07:18) |

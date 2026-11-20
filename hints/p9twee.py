@@ -45,10 +45,42 @@ def tptp_parts(name):
     return ax, m.group(1).strip() if m else None
 
 
+def _neg(f):
+    """TPTP '~ A' -> LADR '-(A)'. In TPTP '=' binds tighter than '~' (~ a = b is ~(a = b)); in LADR the prefix '-'
+    binds tighter than '=', so '- a = b' is the equation (-a) = b with '-' a function symbol. (20 Nov 09:50: that
+    turned every conditional sibling lemma into a false axiom, and Prover9 proved goals from it.)"""
+    out = []; i = 0; n = len(f)
+    while i < n:
+        c = f[i]
+        if c != '~':
+            out.append(c); i += 1
+            continue
+        i += 1
+        while i < n and f[i] == ' ':
+            i += 1
+        j = i; depth = 0
+        while j < n:
+            d = f[j]
+            if d == '(':
+                depth += 1
+            elif d == ')':
+                if depth == 0:
+                    break
+                depth -= 1
+            elif depth == 0 and (d in '|&' or f.startswith(('=>', '<=', '->', '<-'), j)):
+                break
+            j += 1
+        out.append('-(' + _neg(f[i:j]).strip() + ')')
+        if j < n and f[j - 1] == ' ':
+            out.append(' ')
+        i = j
+    return ''.join(out)
+
+
 def ladr(f):
     """A TPTP formula as LADR text (prolog-style variables; free variables are universal)."""
     f = re.sub(r'!\s*\[[^\]]*\]\s*:\s*', '', f).strip()
-    f = f.replace('<=>', '<->').replace('=>', '->').replace('~', '-')
+    f = _neg(f.replace('<=>', '<->').replace('=>', '->'))
     return f
 
 

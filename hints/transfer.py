@@ -369,7 +369,8 @@ def run(goals, d, j, T, rest, src_lemmas=0, live_dst=None, src_pool=False):
                     fm = lemmas.lemma_form(m)
                     if fm and (m, fm) not in L:
                         L.append((m, fm))
-            lp.extra_axioms[g] = [(f'srclem_{i}', fm) for i, (m, fm) in enumerate(L)]
+            # (20 Nov 10:35) named after their goal, so a kept output's USEDAXIOMS tells which (exp/trust.py)
+            lp.extra_axioms[g] = [(f'srclem_{i}_{m}', fm) for i, (m, fm) in enumerate(L)]
         # (20 Nov) a sketch file's .ax: the source run's axioms behind the sketch (givenmatch.py), as lemma axioms.
         # They are that run's axioms and lemmas (proven goals of the same or weaker axioms, pool hints as axioms).
         axr = []
