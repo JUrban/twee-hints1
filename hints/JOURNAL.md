@@ -761,6 +761,8 @@ Next:
    the whole benchmark (Z6 after exp43: today's defaults, 12 workers, 8 hours, against Z4).
 00000000000. **exp43 (13:28, [notes/2026-11-20-given-nowait.md](notes/2026-11-20-given-nowait.md)):** P2G = P2F + givenmatch `--no-wait`
    (hits run as soon as found), half2 from zero, 2 hours, against P2F. abs/exp43.sh.
+   Done 15:29: **P2G 19,994 vs P2F 20,174 (−180, edge of noise)**; +254/−438. The live loop made 1,494 proofs
+   (P2F 559), mostly goals the loop proves anyway. The wait stays.
 0000000000. **Semantic guidance offline (12:14, [notes/2026-11-20-semantic-guidance.md](notes/2026-11-20-semantic-guidance.md)):** are proof steps false in
    Mace4 models of the base axioms where an extra axiom fails (SCOTT-style relevance) more often than other given
    rules? exp/semguide.py over 10 logs per original. Done 12:36: 62 originals with models; 32.4% vs 30.4%, lift

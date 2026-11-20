@@ -5201,8 +5201,15 @@ from zero, against exp30's P2D.
 * The live loop proved 559 in 2.83 CPU h: ancestry 421 of 470 (612 per CPU h), same-statement 110 of 255 (76),
   prefix 28 of 49 (40).
 * The cap of 200 was never reached (0-86 goals a cycle). The limit is the wait: a hit runs only after the loop has
-  failed on its goal, and the extra ancestry proofs were mostly goals the loop proves anyway. exp43 runs hits at
-  once (`--no-wait`, [notes/2026-11-20-given-nowait.md](notes/2026-11-20-given-nowait.md)).
+  failed on its goal, and the extra ancestry proofs were mostly goals the loop proves anyway.
+
+**Not waiting is worse: −180 (exp43, 20 Nov 13:28-15:29;
+[notes/2026-11-20-given-nowait.md](notes/2026-11-20-given-nowait.md)).** P2G runs each hit as soon as it is found
+(`--no-wait`).
+* P2G had 19,994 at 2 hours, against P2F's 20,174 and P2E's 20,152. Level until 60 minutes, behind after.
+* Only P2G proved 254 goals, only P2F 438.
+* Its live loop proved 1,494 goals (P2F's 559), mostly ones the loop would have proved on its own soon after.
+* The wait for the loop's own failure is what makes the live loop add proofs. It stays.
 
 **The half tests understate the system (20 Nov 13:43; [notes/2026-11-20-half-gap.md](notes/2026-11-20-half-gap.md)).**
 * Of the half2 goals production has and the from-zero arms lack (3,768), 2,155 fell to production's 5 s level. Their
@@ -5496,7 +5503,7 @@ rounds of 30 s or more, but about 40% overhead for 8 s rounds.
 * **From zero, the one clear gain this week is the derived-rule transfer** (solve_new.sh `GIVEN=1`): +282 on half1
   (exp40) and +769 on half2 (exp41), against a noise of about 185 between identical runs.
   * Lifting its per-cycle cap did nothing (exp42, +22). The limit is that a hit waits for the loop's own failure.
-    exp43 (`--no-wait`) is running.
+    Running hits at once does not help either (exp43, −180).
 * **Measured negatives today** (each closed, each recorded):
   * semantic guidance from Mace4 relevance models (lift 1.09);
   * cross-run joining with the goal's own failed run's rules (0 of 30);
@@ -5656,8 +5663,8 @@ rounds of 30 s or more, but about 40% overhead for 8 s rounds.
   * The model audit (exp/modelcheck.py, about 15 minutes on 3 CPUs) is cheap enough to run every day, and after
     any new lemma or axiom path.
 * **The derived-rule transfer is the from-zero gain** (exp40 +282 on half1, exp41 +769 on half2). Its ancestry runs
-  make about 540-790 proofs per CPU h. A higher per-cycle cap does not help (exp42, +22); exp43 (running) runs hits
-  without waiting for the loop's failure.
+  make about 540-790 proofs per CPU h. A higher per-cycle cap does not help (exp42, +22), nor does running hits
+  without waiting for the loop's failure (exp43, −180).
 * **Step joins** (23 of 23) are a live member.
   * Next, cross-run joining: the goal's own failed run's given rules together with the other theories' proof steps
     (loop.py `--given-keep`, joincheck `--own-given`; pilot running).

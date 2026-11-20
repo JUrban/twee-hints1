@@ -27,3 +27,27 @@ Follows exp42 ([notes/2026-11-20-given-cap.md](2026-11-20-given-cap.md)).
   the live loop proved that P2F's loop proved on its own.
 * **Decision:** if P2G ≥ P2F + 185 at 2 hours, `--no-wait` joins the default. If it is ahead early but within noise at
   2 hours, it is a speed gain only, and is reported as such.
+
+## Results (15:30)
+
+| arm | 10 min | 30 min | 60 min | 90 min | 120 min |
+|---|---|---|---|---|---|
+| P2E (exp41) | 11,190 | 17,182 | 19,198 | 19,977 | 20,152 |
+| P2F (exp42, control) | 11,266 | 17,357 | 19,307 | 19,991 | 20,174 |
+| **P2G (--no-wait)** | 11,122 | 17,469 | 19,334 | 19,798 | **19,994** |
+
+* **−180 against P2F at 2 hours, at the edge of the noise** (about 185), and −158 against P2E. Level until
+  60 minutes, behind from 90 on.
+* Only P2G proved 254 goals, only P2F 438 (union 20,436). The three arms together: 20,594.
+* **The live loop without the wait:**
+
+  | kind | runs | proofs | CPU h |
+  |---|---|---|---|
+  | ancestry, 20 s | 1,421 | 1,345 | 1.20 |
+  | prefix, 40 s | 66 | 26 | 1.13 |
+  | same statement, 20 s | 208 | 123 | 0.81 |
+
+  It made 2.4 times as many proofs as P2F's live loop (1,494 against 559) on 3.1 CPU h against 2.8. Most were goals
+  the loop would have proved on its own soon after: the total did not move.
+* **Decision:** the wait stays (solve_new.sh's default GIVENARGS unchanged). Waiting for the loop's failure is what
+  makes the ancestry runs add proofs rather than duplicate them.
