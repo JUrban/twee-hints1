@@ -28,3 +28,14 @@ for m, a in R.items():
 if common:
     print('union over every arm on the common goals:', len({x for x in common for r in R.values() if r[x][0]}),
           ' control alone:', sum(c[x][0] for x in common) if c else '-')
+
+# (20 Nov) Greedy cover (Mizar60's model portfolio) over the arms that ran every goal of the common set: the arm with
+# most proofs first, then each next arm by the proofs it adds, with each arm's CPU on the common goals.
+if common and len(R) > 1:
+    left = dict(R); got = set(); order = []
+    while left:
+        m = max(left, key=lambda k: (len({x for x in common if left[k][x][0]} - got), -sum(left[k][x][1] for x in common)))
+        add = {x for x in common if left[m][x][0]} - got
+        order.append((m, len(add), sum(left[m][x][1] for x in common) / 3600)); got |= add; del left[m]
+    print('greedy cover on the common goals:', ', '.join(f'{m} +{k} ({c:.2f} CPU h)' for m, k, c in order),
+          f'-> {len(got)}')
