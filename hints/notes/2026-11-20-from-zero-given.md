@@ -64,3 +64,17 @@ Written 20 Nov 2026, 07:10 UTC.
   it at 07:21. Those proofs are part of PGE, at about minute 12-15.
 * The same filter (failed in the loop) and cap now apply to the same-statement candidates. Restarted at 07:22; the
   pending queue is rebuilt from the rescan.
+
+## Interim (60 minutes, 08:07)
+
+| minutes | 10 | 20 | 30 | 45 | 60 |
+|---|---:|---:|---:|---:|---:|
+| PGC (19 Nov) | 11,704 | 15,080 | 16,980 | 17,934 | 18,545 |
+| PGD (control) | 10,314 | 14,300 | 16,540 | 17,976 | 18,713 |
+| PGE | 11,695 | 15,293 | 17,003 | 18,070 | **18,849** |
+
+* +136 against PGD and +304 against PGC, at about the noise between identical runs (185 at 2 hours).
+* The live loop has proved 413 of its 517 runs in 1.1 CPU h, including the 131 early same-statement proofs. With the
+  failed-in-loop filter it runs 60 goals a cycle (the cap binds), and 58 of 60 proved in cycle 7. 141 hits are
+  pending. Some of these proofs the loop would have found later by itself; the 2-hour count and the one-arm goals
+  will show how many.
