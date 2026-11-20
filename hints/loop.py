@@ -400,6 +400,38 @@ class Loop:
         import zlib
         return bool(self.a.ab_args) and zlib.crc32(name.encode()) & 1 == 1
 
+    def proof_job(self, name, tag, cmd, env_):
+        """(20 Nov 15:03; the user: search with --no-proof, then rerun a proved run with the proof printed, and keep
+        the proofs) queue a proved run for exp/proofq.py: DIR/proofq/<job>/job.json holds the run's command without
+        --no-proof and --dump-state, with every file it reads (the problem with its lemma axioms, the hints, a loaded
+        state, the rule model and goal file) hard-linked into the job dir, since the loop deletes or replaces them
+        before the rerun. The proof goes to DIR/proofs/<name> (and to the live destination's proofs/, if any)."""
+        import shutil, threading
+        jd = os.path.join(self.dir, 'proofq', f'{tag}.{os.getpid()}.{threading.get_ident()}.{time.time_ns()}')
+        tmp = jd + '.tmp'
+        os.makedirs(tmp)
+        c, files, i = [cmd[0]], [], 1
+        while i < len(cmd):
+            x = cmd[i]
+            if x == '--no-proof':
+                i += 1; continue
+            if x == '--dump-state':
+                i += 2; continue
+            if not x.startswith('-') and os.path.isfile(x) and not os.path.abspath(x).startswith(PROB + '/'):
+                f = f'{len(files)}_{os.path.basename(x)}'
+                try:
+                    os.link(x, os.path.join(tmp, f))
+                except OSError:
+                    shutil.copy2(x, os.path.join(tmp, f))
+                files.append(f); x = os.path.join(jd, f)
+            c.append(x); i += 1
+        env = (env_ or os.environ)
+        job = {'name': name, 'cmd': c, 'files': files, 'TWEE_PG_ARGS': env.get('TWEE_PG_ARGS'),
+               'dir': os.path.abspath(self.dir), 'dst': getattr(self, 'proof_dst', None), 'time': time.time()}
+        with open(os.path.join(tmp, 'job.json'), 'w') as fh:
+            json.dump(job, fh)
+        os.rename(tmp, jd)
+
     def run_one(self, name, hints, rnd, budget=None, resume=None, max_cpu=None, variant=0, var=None):
         """One twee run. BUDGET (default: the round's timeout), RESUME (default --resume)
         and MAX_CPU (replaces --max-cpu in --args) are for --cascade. VARIANT: which of the
@@ -631,6 +663,11 @@ class Loop:
             i, j = out.find('GIVEN-BEGIN'), out.find('GIVEN-END')
             with open(os.path.join(od, tag), 'w') as f:
                 f.write(out[:i] + out[j:] if 0 <= i < j else out)  # without the given rules
+        if a.keep_proofs and 'HINTS-END' in out and 'Here is a proof' not in out:
+            try:   # (20 Nov 15:03, user) the proof, by a rerun with it printed (exp/proofq.py)
+                self.proof_job(name, tag, cmd, env_)
+            except Exception as e_:   # (must not cost the run)
+                print(f'  keep-proofs: {name} error {e_!r}', flush=True)
         if hints and not os.environ.get('LOOP_KEEP_TMP'):
             try:
                 os.unlink(hpath)
@@ -2239,6 +2276,9 @@ def make_parser():
     ap.add_argument('--reserve', type=int, default=3, help='--cascade: workers kept free of deepening runs')
     ap.add_argument('--give-up', type=int, default=0,
                     help='skip the rest of an original in this round after N consecutive failures (with --online: goal order)')
+    ap.add_argument('--no-keep-proofs', dest='keep_proofs', action='store_false',
+                    help='(20 Nov 15:03) do not queue proved runs for a rerun with the proof printed (exp/proofq.py; '
+                         'by default every proved twee run is queued in DIR/proofq and its proof kept in DIR/proofs)')
     ap.add_argument('--keep-out', action='store_true', help='save each run\'s output in DIR/rN/out/<name> (for stallsim.py)')
     ap.add_argument('--p9loop', action='store_true',
                     help="Veroff's P9loop: the hint matchers of a goal's failed runs become lemmas (axioms) of its later runs")

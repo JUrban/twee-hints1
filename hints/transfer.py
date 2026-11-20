@@ -320,6 +320,7 @@ def run(goals, d, j, T, rest, src_lemmas=0, live_dst=None, src_pool=False):
     loop.init_dir(a)
     lp = loop.Loop(a)
     lp.used = {}; lp.extra_axioms = {}; lp.assumed = {}
+    lp.proof_dst = os.path.abspath(live_dst) if live_dst else None   # (20 Nov 15:03) the kept proofs go there too
     pools = lp.build_pools()
     if a.model:
         lp.train_model(1)

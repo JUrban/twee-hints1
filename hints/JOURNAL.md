@@ -119,6 +119,13 @@ possible in the least time.
 
 ## 2. Standing rules (the user's, and my own lessons)
 
+**Keep the proofs (user, 20 Nov 15:03).** Every new experiment keeps the printed Twee proof of each proved run.
+Search runs stay `--quiet --no-proof`. A proved run is rerun with the proof printed: loop.py run_one queues it in
+DIR/proofq/ (`proof_job`, on by default), and exp/proofq.py `--follow -j 2` (loops/PROOFQ.pid) writes
+DIR/proofs/<goal> and the live destination's proofs/ (loops/UL/proofs). Keep the worker running; past experiments
+are not rerun. The proofs collected so far: /project/THM_proofs.tar.gz and /project/THMR5k_proofs.tar.gz
+(exp/collect_proofs.py).
+
 Resources and processes:
 * About 20 CPUs and at most 60 GB RAM. Twee binaries run with `-M6g` by default (twee.cabal rtsopts).
   Use `abs/memwatch.py 7 45` for loops, and pywatch guards for big trainings: rm6t reached 55 GB, so use

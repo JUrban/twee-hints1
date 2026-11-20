@@ -197,6 +197,10 @@ runs. Section 5 has the commands.
 
 ### Scripts (`hints/`)
 
+*Proofs (20 Nov 15:03, the user's request).* The loops search with `--no-proof`, so until now their proofs were never
+printed. Now every proved twee run in loop.py is queued for a rerun with the proof printed (DIR/proofq/,
+exp/proofq.py), and the proof is kept in DIR/proofs/<goal>.
+
 * `run.py`: parallel runner.
 * `loop.py`: Veroff-style hint loop. Round 0 runs without hints, and later
   rounds run every unsolved problem with hints. Pools can be `original`,
