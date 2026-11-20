@@ -370,6 +370,18 @@ def run(goals, d, j, T, rest, src_lemmas=0, live_dst=None, src_pool=False):
                     if fm and (m, fm) not in L:
                         L.append((m, fm))
             lp.extra_axioms[g] = [(f'srclem_{i}', fm) for i, (m, fm) in enumerate(L)]
+        # (20 Nov) a sketch file's .ax: the source run's axioms behind the sketch (givenmatch.py), as lemma axioms.
+        # They are that run's axioms and lemmas (proven goals of the same or weaker axioms, pool hints as axioms).
+        axr = []
+        for f in src[g]:
+            if os.path.isabs(f) and os.path.exists(f + '.ax'):
+                for x in open(f + '.ax'):
+                    w = x.rstrip('\n').split('\t')
+                    if len(w) == 2 and w not in axr:
+                        axr.append(w)
+        if axr:
+            fm = lambda l, r: ''.join(f'! [{v}] : ' for v in sorted(set(re.findall(r'\bX\d+\b', l + ' ' + r)))) + f'{l} = {r}'
+            lp.extra_axioms[g] = lp.extra_axioms.get(g, []) + [(f'skax_{i}', fm(l, r)) for i, (l, r) in enumerate(axr)]
         n, ok, dt, stats, res = lp.run_one(g, hs, 1, T, False, 10 * T)
         lp.extra_axioms.pop(g, None)
         with lock:

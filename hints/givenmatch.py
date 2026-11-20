@@ -14,9 +14,10 @@ variant is a dict lookup of the raw (lhs, rhs) pair, against both orientations o
 (--instances: the goal is an instance of the rule, not only a variant; own original's logs only)
 OUT: goal, source loop, source name, rule index, label (0 not in that proof, 1 a proof step), ancestry size.
 
-  givenmatch.py sketch OUT.tsv SKDIR GOALS.tsv [--per 3]
-writes each hit's ancestry (index order, the matched rule last) to SKDIR/<goal>/<loop>/<source name> as hints, and
-GOALS.tsv for transfer.py run (goal, the sketch files, 0).
+  givenmatch.py sketch OUT.tsv SKDIR GOALS.tsv [--per 3] [--prefix]
+writes each hit's ancestry (index order, the matched rule last) to SKDIR/<goal>/<loop>/<source name> as hints, the
+ancestry's axioms of the source run to the same name + .ax, and GOALS.tsv for transfer.py run (goal, the sketch
+files, 0).
 """
 import os, re, sys
 from multiprocessing import get_context
@@ -119,7 +120,7 @@ def init(w, inst=False):
     W = w; INST = inst
 
 
-def sketch(hits, skdir, goals, per=3):
+def sketch(hits, skdir, goals, per=3, prefix=False):
     by = {}
     for l in open(hits):
         w = l.rstrip('\n').split('\t')
@@ -130,13 +131,22 @@ def sketch(hits, skdir, goals, per=3):
             for w in hs[:per]:
                 _, loop, name, ridx = w[:4]
                 lines = [x.rstrip('\n').split('\t') for x in open(os.path.join(LOOPS, loop, 'given', name))]
-                keep = ancestry(lines, ridx)
+                # (--prefix, 20 Nov 03:12) every rule up to the matched one, in order: the log's parents are the
+                # critical pair's only, without the rewriting steps, so an ancestry can lack most of the derivation
+                # (mbol_asqr 512: rule 7723 with 1 recorded parent)
+                keep = {x[1] for x in lines if len(x) >= 4 and int(x[1]) <= int(ridx)} if prefix else ancestry(lines, ridx)
                 rows = [x for x in lines if len(x) >= 4 and x[1] in keep and x[0] != '-1']   # (axioms are axioms)
                 rows.sort(key=lambda x: int(x[1]))
                 p = os.path.abspath(os.path.join(skdir, g, loop, name))
                 os.makedirs(os.path.dirname(p), exist_ok=True)
                 with open(p, 'w') as f:
                     f.writelines(f'{x[2]}\t{x[3]}\n' for x in rows)
+                # (20 Nov 03:08) the source run's axioms in the ancestry, for transfer.py run as lemma axioms: its
+                # lemmas (proven goals of the same or weaker axioms, pool hints as axioms) differ from the target
+                # run's, and without them 11 of 19 sketches failed
+                axr = [x for x in lines if len(x) >= 4 and x[1] in keep and x[0] == '-1']
+                with open(p + '.ax', 'w') as f:
+                    f.writelines(f'{x[2]}\t{x[3]}\n' for x in axr)
                 fs.append(p)
             fo.write(f'{g}\t{",".join(fs)}\t0\n')
     print(f'{len(by)} goals -> {goals}')
@@ -145,7 +155,7 @@ def sketch(hits, skdir, goals, per=3):
 def main():
     if sys.argv[1] == 'sketch':
         per = int(sys.argv[sys.argv.index('--per') + 1]) if '--per' in sys.argv else 3
-        return sketch(sys.argv[2], sys.argv[3], sys.argv[4], per)
+        return sketch(sys.argv[2], sys.argv[3], sys.argv[4], per, '--prefix' in sys.argv)
     idx, out = sys.argv[1], sys.argv[2]
     j = int(sys.argv[sys.argv.index('-j') + 1]) if '-j' in sys.argv else 4
     excl = sys.argv[sys.argv.index('--loops-exclude') + 1] if '--loops-exclude' in sys.argv else EXCL

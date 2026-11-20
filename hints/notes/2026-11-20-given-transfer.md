@@ -52,3 +52,22 @@ Written 20 Nov 2026, 02:21 UTC.
   give root buckets of thousands of goals, 50 times the variant scan's time. So instance matching is restricted to
   the goal's own original's logs, at about 3 times the variant scan's time.
 * Runs: abs/gm1run.sh from 03:00, 2 workers, 20 s each, into production (loops/GM1run/transfer.tsv).
+
+## Runs (03:00-03:16): 13 of the 19 proved
+
+| pass | sketch | time | proved | CPU |
+|---|---|---:|---:|---:|
+| gm1run.sh | the rule's ancestry | 20 s | 8 of 19 | 232 s × 2 |
+| gm1b.sh | ancestry + the source run's axioms in it (.ax) | 40 s | 3 of 11 | 312 s × 2 |
+| gm1c.sh | the log's whole prefix up to the rule (`sketch --prefix`) + its axioms | 40 s | 2 of 8 | 277 s × 2 |
+
+* **13 proofs in 0.46 CPU h, about 28 per CPU h.** Production makes about 1 per CPU h at the moment.
+* Proved: R1dist_to_aa1 643 and 645; mbol_to_aaxx 453; nil3_18 334; nil3_25 490; ns_to_aa1_b 661, 694, 702 and
+  718; nslm_to_aa1 1028 and 1077; mbol_asqr 503 and 512.
+* Still open: aa1_45_c 366, aa2_to_aa3 266, mbol_to_nil3 646, nil3_24 468, nil3_26 511, nil3_31 552.
+* Why the ancestry is not enough: the given log's parents are a critical pair's, without the rewriting steps.
+  E.g. mbol_asqr 512's rule 7723 records 1 parent, while its prefix holds 7,704 rules. The prefix sketch reproduces the
+  source run's search; it proved that goal in 60 s.
+* The proofs went into production's solved list. By 03:12 production had taken 14 synced proofs and proved
+  nslm_to_aa1 1031 after 1028, so chains may follow.
+* **Instance scan** (loops/GM2, `--instances`, own original's logs, 2 workers) from 03:17: 3,190 goals, 451,614 logs.
