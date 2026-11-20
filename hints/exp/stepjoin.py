@@ -11,8 +11,15 @@ the hints. Production's transfer options, --keep-out, proofs into loops/UL.
 
 --nonjoined N (20 Nov 10:55): N goals that did not join instead, with the steps that rewrote their sides (the
 normal forms differ; are the steps useful lemmas anyway?). --no-steps: the same goals without the steps (control).
+
+(20 Nov 11:14) Every step axiom must hold in the theory's Mace4 models (exp/modelcheck.py; models cached in
+loops/MODELCHECK/models), or the goal is skipped: hints files also hold printed goal terms such as
+'m(r(X0,X1,X2),X3) = m(r(X0,X1,X2),...)', not theorems, which joincheck's rewriter could take as rules
+(notes/2026-11-20-model-audit.md).
 """
 import os, subprocess, sys
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, '/project/twee/hints')
 
 L = '/project/hintwork/loops'
 H = '/project/twee/hints'
@@ -40,6 +47,10 @@ def main():
         done = {l.split('\t')[0] for l in open(os.path.join(d, 'transfer.tsv'))}
     os.makedirs(d, exist_ok=True)
     rows, lines = [], {}
+    import modelcheck, p9twee
+    from joincheck import parse
+    MD = os.path.join(L, 'MODELCHECK', 'models')
+    models, nfalse = {}, 0
     for p in files:
         for l in open(p):
             w = l.rstrip('\n').split('\t')
@@ -58,6 +69,16 @@ def main():
                 steps.append((x[0], x[1], sg))
             if steps is None:
                 continue
+            ax = p9twee.tptp_parts(w[0])[0]
+            key = modelcheck.theory_key(ax)
+            if key not in models:
+                os.makedirs(MD, exist_ok=True)
+                modelcheck.mace((key, ax, os.path.dirname(MD)))
+                models[key] = modelcheck.read_models(os.path.join(MD, key + '.out'))
+            if any(modelcheck.holds(parse(l), parse(r), models[key]) is not None for l, r, _ in steps):
+                nfalse += 1
+                print(f'  {w[0]}: a step is false in a model of its theory, skipped', flush=True)
+                continue
             gd = os.path.join(d, w[0])
             os.makedirs(gd, exist_ok=True)
             sk = os.path.join(gd, 'steps')
@@ -70,7 +91,7 @@ def main():
         import random
         random.Random(seed).shuffle(rows)
         rows = rows[:NJ]
-    print(f'{len(rows)} {"non-joined" if NJ else "joined"} goals to prove', flush=True)
+    print(f'{len(rows)} {"non-joined" if NJ else "joined"} goals to prove ({nfalse} skipped for a false step)', flush=True)
     if not rows:
         return
     gp = os.path.join(d, f'goals_{len(done)}.tsv')
