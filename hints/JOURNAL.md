@@ -747,7 +747,7 @@ Paused:
 has the history (user, 20 Nov: "update the total numbers in the report etc every now and then").
 
 Next:
-000000000. **exp42 (11:30, [notes/2026-11-20-given-cap.md](notes/2026-11-20-given-cap.md)):** half2 from zero, P2F = P2E (solve_new.sh defaults)
+000000000. **exp42 (11:27, [notes/2026-11-20-given-cap.md](notes/2026-11-20-given-cap.md)):** half2 from zero, P2F = P2E (solve_new.sh defaults)
    with the live loop at `--cap 200 --same-cap 20` (ancestry runs no longer starved by the same-statement runs),
    against exp41's P2E (20,152 at 2 h). abs/exp42.sh; production at J=6, rever at 2 meanwhile.
 00000000. **Model audit (10:54, [notes/2026-11-20-model-audit.md](notes/2026-11-20-model-audit.md)):** exp/modelcheck.py evaluates every proof step
