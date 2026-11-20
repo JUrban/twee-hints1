@@ -115,6 +115,10 @@ Written 20 Nov 2026, 10:32 UTC, while the re-verification runs.
   rows describe the climber's old proof (step s18 of mbol_12lemmas 526 used `lemma_knn_4_mbol_lem1__goal_387`).
   Now a used.tsv's rows count only if production's hints file is not newer than the used.tsv. **13:38: 48,172
   solved, all trusted.**
+* **REVER4 stopped (17:33).** Passes 1-4 at 60 s re-proved most of the quarantined goals. Pass 5 at 300 s
+  (from 15:19, 37 goals) proved 0 of 15 in 2.2 hours (about 16 minutes of wall time each), and was stopped with 22
+  left. The 37 quarantined goals still unsolved stay out of the solved list, as any unsolved goal. Trust at 15:19:
+  48,188 solved, all trusted.
 * Still open: the 5 bad goals not yet re-proved (aK2_eq_aK3_s 450, 470, 474, 476; mbol_lem1 387). The other 11
   have new sound twee proofs.
 * From 10:35, the transfer loop and the live loop run with `--keep-out` (abs/xfrlive2k.sh, abs/gmlive2k.sh), and
