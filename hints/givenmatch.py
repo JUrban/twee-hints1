@@ -218,8 +218,24 @@ def live(dirs, d, every, j, rest):
                 for h in scan(job):
                     if h[0] not in S and axs(h[2]) <= axs(h[0]):
                         hits.setdefault(h[0], []).append(h)
+        # (20 Nov 04:13) the hits production's failed runs found (loop.py --given-scan loops/GFAIL), from the offset
+        # read so far; their logs are loops/GFAIL/<stamp>/given/<name>
+        nf = 0
+        gfp = os.path.join(LOOPS, 'GFAIL', 'hits.tsv'); offp = os.path.join(d, 'gfail_offset')
+        if os.path.exists(gfp):
+            off = int(open(offp).read()) if os.path.exists(offp) else 0
+            with open(gfp) as f:
+                f.seek(off)
+                for l in f:
+                    if not l.endswith('\n'):
+                        break
+                    off += len(l.encode())
+                    w = l.rstrip('\n').split('\t')
+                    if len(w) >= 6 and w[0] not in S and w[0] not in tried:
+                        hits.setdefault(w[0], []).append(tuple(w[:3]) + (w[3], w[4], int(w[5]))); nf += 1
+            open(offp, 'w').write(str(off))
         print(f'cycle {cyc} {time.strftime("%H:%M:%S")}: {len(want)} target keys, {len(jobs)} new logs, '
-              f'{len(hits)} goals hit', flush=True)
+              f'{nf} failed-run hits, {len(hits)} goals hit', flush=True)
         if hits:
             hp = os.path.join(d, f'hits_{cyc}.tsv')
             with open(hp, 'w') as fo:

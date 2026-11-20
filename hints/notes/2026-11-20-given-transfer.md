@@ -117,3 +117,30 @@ Written 20 Nov 2026, 02:21 UTC.
   Without the source's own rule-model scores and PG, the search does not retrace the source run. These 8 are known
   theorems without a printed proof; no more passes for them.
 * Cycle 2 (04:02): 5 new logs, no hits.
+
+## Ancestries fixed (04:08)
+
+* The given log's parents are rule numbers; the rule at position k has number k+1 (given.py). givenmatch.py had
+  read them as positions, so every ancestry so far followed the wrong rules.
+* Check over 61,718 parents of proof steps in 200 production logs: read as numbers, 94% are proof steps or axioms;
+  read as positions, 66%. Fixed in `ancestry()`. mbol_asqr 512's rule 7723 now has 14 ancestors, against 2.
+* Pass 1 still proved 8 of 19, because the matched rule itself is always in the sketch.
+* Fifth pass (abs/gm1e.sh, 04:10): the 8 open hits with the correct ancestries and their axioms, 40 s.
+
+## Failed runs' given rules (loop.py --given-scan, ul74 from 04:15)
+
+* Given logs exist only for successful runs. Most of production's CPU goes into failed runs on unsolved goals, the
+  frontier, whose logs gave the hits in cycle 1 (5 in 696).
+* loop.py `--given-scan DIR`:
+  * Every failed run of an unconditional unit goal prints its given rules (twee `--print-given-unsolved`: about 6%
+    more time on a 3 s run).
+  * Those rules are checked against the unsolved unit goals' keys (both orientations, given.py's key, targets rebuilt
+    every 10 minutes), with a prefilter on the rule without variables (0.04 s per run, against 0.17 s without).
+  * A hit, for a goal of an original with the same or more axioms, writes the run's rule log to
+    DIR/<stamp>/given/<name> and a row to DIR/hits.tsv in givenmatch.py's format.
+  * givenmatch.py live reads the new rows each cycle and runs them like its own hits.
+* Test (a planted target on a failed 3 s run of nil3_24 468): the hit rows and the log came out right; the run's
+  success test is unchanged (an unsolved run prints no HINTS-END).
+* ul74 = ul73 + `--given-scan /project/hintwork/loops/GFAIL` and member m10f@0 in place of m9f@0. Production rows from
+  205,649.
+* Measure: hits per hour and proofs from them, against the time cost (about 6% of production's twee time).

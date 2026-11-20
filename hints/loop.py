@@ -30,6 +30,9 @@ def canon_key(l, r, sig):
 
 _UNF_CACHE = {}   # (run_one, unfolded runs) repr of a definition set -> {hint side: its unfolding}
 
+_GS_SKEL = re.compile(r'\b[A-Z]\w*|\s')   # (--given-scan's prefilter: variables and spaces out)
+
+
 class Loop:
     def __init__(self, a):
         self.a = a
@@ -542,8 +545,8 @@ class Loop:
         if a.gen_model:   # (twee-e39) the given rules of a failed run, for gen_save
             cmd += ['--print-given-unsolved']
         cap = name in getattr(self, 'capture_given', ())
-        if cap and not a.gen_model:   # (climb.py) the final run's given rules, also when it fails
-            cmd += ['--print-given-unsolved']
+        if (cap or a.given_scan) and not a.gen_model:   # (climb.py) the final run's given rules, also when it fails;
+            cmd += ['--print-given-unsolved']             # (--given-scan) every failed run's
         k = 0
         if a.p9_orders > 1:
             # P9loop's term orderings: attempt k of a goal (rounds from --start, or the number of
@@ -638,6 +641,11 @@ class Loop:
             self.captured[name] = [canon_key(x[0], x[1], sig_) for x in givenlib.parse_given_parents(out)
                                    if x and x[0] != x[1]]
         ok = 'HINTS-END' in out
+        if not ok and a.given_scan and var not in ('p9',):
+            try:
+                self.given_scan(name, out, tag)
+            except Exception as e_:   # (a scan error must not cost the run)
+                print(f'  given-scan: {name} error {e_!r}', flush=True)
         if ok and getattr(self, 'chains', None) is not None:
             self.chains.add_record(name, out)   # (--chain-level: the new proof's lemma record)
         if ok and hasattr(self, 'used'):
@@ -720,6 +728,73 @@ class Loop:
         if path.startswith(os.path.join(self.dir, 'tmp')) and not os.environ.get('LOOP_KEEP_TMP'):
             os.unlink(path)
         return name, ok, dt, stats, res
+
+    def given_scan(self, name, out, tag):
+        """(--given-scan DIR, 20 Nov; exp38, notes/2026-11-20-given-transfer.md) a failed run's given rules against the
+        unsolved unit goals: a rule that is a variant of a goal (of an original with the same or more axioms) proves
+        it, as a consequence of this run's axioms and proven lemmas. On a hit the run's rule log goes to
+        DIR/<stamp>/given/NAME (the given-log format) and a row to DIR/hits.tsv in givenmatch.py's format, which
+        givenmatch.py live runs. Runs on conditional goals are skipped (their hypotheses are axioms)."""
+        import threading, lemmas, hintsel
+        a = self.a
+        if not hasattr(self, '_gs_lock'):
+            self._gs_lock = threading.Lock(); self._gs_t = 0.0; self._gs_want = {}; self._gs_unit = {}; self._gs_ax = {}
+        def axs(n):
+            o = orig_of(n)
+            if o not in self._gs_ax:
+                self._gs_ax[o] = lemmas.axiom_set(n)
+            return self._gs_ax[o]
+        if name not in self._gs_unit:
+            try:
+                self._gs_unit[name] = bool(lemmas.unit_eq(lemmas.conjecture(name) or '~'))
+            except OSError:
+                self._gs_unit[name] = False
+        if not self._gs_unit[name]:
+            return
+        with self._gs_lock:
+            if time.time() - self._gs_t > 600:   # (the targets: rebuilt every 10 minutes)
+                want = {}
+                for g in self.names:
+                    if g in self.solved:
+                        continue
+                    try:
+                        lits = hintsel.goal_lits(g)
+                    except Exception:
+                        continue
+                    if len(lits) == 1 and lits[0][0]:
+                        sg = self.signature(g)
+                        for k in (givenlib.key(lits[0][1], lits[0][2], sg), givenlib.key(lits[0][2], lits[0][1], sg)):
+                            want.setdefault(k, set()).add(g)
+                # (a prefilter: the rule without variables and spaces, one regex pass, before the full key)
+                self._gs_skel = {_GS_SKEL.sub('', k[0]) + '=' + _GS_SKEL.sub('', k[1]) for k in want}
+                self._gs_want = want; self._gs_t = time.time()
+            want = self._gs_want; skel = self._gs_skel
+        rules = givenlib.parse_given_parents(out)
+        sig = self.signature(name)
+        hits = []
+        for idx, x in enumerate(rules):
+            if x is None or x[0] == x[1]:
+                continue
+            if _GS_SKEL.sub('', x[0]) + '=' + _GS_SKEL.sub('', x[1]) not in skel:
+                continue
+            for g in want.get(givenlib.key(x[0], x[1], sig), ()):
+                if g != name and g not in self.solved and axs(name) <= axs(g):
+                    hits.append((g, idx))
+        if not hits:
+            return
+        stamp = f'{int(time.time() * 1000)}_{tag}'
+        d = os.path.join(a.given_scan, stamp, 'given'); os.makedirs(d, exist_ok=True)
+        ax = set(givenlib.key(l, r, sig) for l, r in givenlib.axioms(name))
+        with open(os.path.join(d, name), 'w') as f:
+            for idx, x in enumerate(rules):
+                if x is None or x[0] == x[1]:
+                    continue
+                k = givenlib.key(x[0], x[1], sig)
+                f.write(f'{-1 if k in ax else 0}\t{idx}\t{k[0]}\t{k[1]}\t{x[2]}\t{x[3]}\n')
+        with self._gs_lock, open(os.path.join(a.given_scan, 'hits.tsv'), 'a') as f:
+            for g, idx in hits:
+                f.write(f'{g}\t{os.path.basename(a.given_scan)}/{stamp}\t{name}\t{idx}\t0\t0\n')
+        print(f'  given-scan: {name} derived {len(hits)} unsolved goal(s): {sorted(set(g for g, _ in hits))}', flush=True)
 
     def run_p9(self, name, hints):
         """(--variants p9, 18 Nov 20:40) Prover9 with the level's hints (the chain), 6 proven siblings either side as
@@ -2094,6 +2169,9 @@ def make_parser():
                     help='(19 Nov) --variants: the budget of the variants after the chain level (default: its own)')
     ap.add_argument('--prior-weight', type=float, default=2.0, metavar='H',
                     help='--ratio-order: the weight of a label\'s prior, in CPU hours of its own runs')
+    ap.add_argument('--given-scan', default='',
+                    help='DIR (under loops/): check failed runs\' given rules against the unsolved unit goals; hits go to '
+                         'DIR/hits.tsv with the run\'s rule log (givenmatch.py live runs them)')
     ap.add_argument('--climb-hints', default='',
                     help='--variants sk: climb.py directories (comma-separated) whose sketches/ and fillhints/ proof steps '
                          'join the pool of their original')

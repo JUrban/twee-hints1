@@ -749,7 +749,8 @@ has the history (user, 20 Nov: "update the total numbers in the report etc every
 Next:
 00. exp38 ([notes/2026-11-20-given-transfer.md](notes/2026-11-20-given-transfer.md)): unsolved goals that other runs derived and did not use. Full scan 19 hits, 13
    proved; live loop loops/GML (abs/gmlive.sh, every 20 min) 3 of 5 in cycle 1. Next: `--given-scan` in loop.py
-   (failed runs' given rules; loop.py.tmp written, not installed), ancestries fixed at 04:08 (parents are numbers).
+   (failed runs' given rules), ancestries fixed at 04:08 (parents are numbers). ul74 (04:15, J=12) = ul73 +
+   `--given-scan loops/GFAIL` + m10f@0 (rm9f's recipe on all data) in place of m9f@0.
 0. exp37 (19:50): retrained rule models (rm9*) on today's data with the papers' sampling tricks; offline on the 400
    newest proofs, then a paired test (control loops/MR_rm4t_20), then members `m9*@0`
    ([notes/2026-11-19-retrained-models.md](notes/2026-11-19-retrained-models.md)). exp35 stopped at 19:43 (no unique proof).
