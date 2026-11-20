@@ -85,3 +85,7 @@ Written 20 Nov 2026, 02:21 UTC.
     and its proof steps as hints;
   * 20 s, 1 worker. Checked: the first run's input has 2,280 such axioms.
 * Measure: proved of 40 per CPU h, against production's current ~1 per CPU h.
+* **Result (03:40): 0 of 40** (0.38 CPU h). A sibling run's whole rule set does not join the unsolved goals, nor does
+  it lead twee to a proof within 20 s. A genuine negative. The rule-level matches above (13 of 19) work because they
+  pick the one run that derived the goal itself.
+* Instance scan at 03:40: 1 goal hit in 300,000 logs, so instances add little beyond the variants.
