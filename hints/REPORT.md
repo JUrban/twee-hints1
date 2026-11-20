@@ -5200,7 +5200,7 @@ from zero, against exp30's P2D.
   failed on its goal, and the extra ancestry proofs were mostly goals the loop proves anyway. exp43 runs hits at
   once (`--no-wait`, [notes/2026-11-20-given-nowait.md](notes/2026-11-20-given-nowait.md)).
 
-**The half tests understate the system (20 Nov 13:47; [notes/2026-11-20-half-gap.md](notes/2026-11-20-half-gap.md)).**
+**The half tests understate the system (20 Nov 13:43; [notes/2026-11-20-half-gap.md](notes/2026-11-20-half-gap.md)).**
 * Of the half2 goals production has and the from-zero arms lack (3,768), 2,155 fell to production's 5 s level. Their
   median goal number is 403, against 170 for the arms' goals.
 * 1,363 of the 1,714 such proofs with a record used a kNN lemma from the other half. A half run cannot have it.

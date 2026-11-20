@@ -748,7 +748,7 @@ Paused:
 has the history (user, 20 Nov: "update the total numbers in the report etc every now and then").
 
 Next:
-000000000000. **The half gap (13:47, [notes/2026-11-20-half-gap.md](notes/2026-11-20-half-gap.md)):** of the goals production has and the from-zero
+000000000000. **The half gap (13:43, [notes/2026-11-20-half-gap.md](notes/2026-11-20-half-gap.md)):** of the goals production has and the from-zero
    half arms lack, most fell to production's 5 s level, and 80% (half2) / 76% (half1) of those proofs used a kNN
    lemma from the other half, which a half run cannot have. Half tests stay for A/B; the long from-zero run goes on
    the whole benchmark (Z6 after exp43: today's defaults, 12 workers, 8 hours, against Z4).
