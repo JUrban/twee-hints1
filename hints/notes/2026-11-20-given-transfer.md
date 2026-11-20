@@ -125,7 +125,8 @@ Written 20 Nov 2026, 02:21 UTC.
 * Check over 61,718 parents of proof steps in 200 production logs: read as numbers, 94% are proof steps or axioms;
   read as positions, 66%. Fixed in `ancestry()`. mbol_asqr 512's rule 7723 now has 14 ancestors, against 2.
 * Pass 1 still proved 8 of 19, because the matched rule itself is always in the sketch.
-* Fifth pass (abs/gm1e.sh, 04:10): the 8 open hits with the correct ancestries and their axioms, 40 s.
+* Fifth pass (abs/gm1e.sh, 04:10-04:16): the 8 open hits with the correct ancestries and their axioms, 40 s: **0 of 8**.
+  With the prefix, the faithful replay and now the true ancestry all failing, these 8 stay open.
 
 ## Failed runs' given rules (loop.py --given-scan, ul74 from 04:15)
 
