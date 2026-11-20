@@ -28,3 +28,10 @@ Such a proof holds for the goal if neither it nor its lemmas use the missing axi
   target's theory.
 
 **Decision and next.** All 323 tried; the proofs merged. REPORT 2ar.
+
+## Redone on production, 20 Nov 04:18 (exp/sofree.py, abs/so2run.sh)
+
+* `find --same-other` on production now: 627 candidates (1,887 on 16 Nov). 343 of them were tried on 16 Nov (SOF,
+  SOP, SOR).
+* 46 of the rest have a first source proof with none of the missing axioms as a step (canonical keys, both
+  orientations). They run as SOF/SOR did: source proof steps first as hints, 20 s, 2 workers, proofs into production.
