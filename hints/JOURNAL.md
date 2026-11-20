@@ -755,6 +755,13 @@ Paused:
 has the history (user, 20 Nov: "update the total numbers in the report etc every now and then").
 
 Next:
+00000000000000. **20 s sweep (15:32, [notes/2026-11-20-sweep20.md](notes/2026-11-20-sweep20.md)):** 2,895 unsolved goals never had a production run
+   above 5 s; the non-joined test proved 4 of 100 such at 20 s. exp/sweep20.py loops/SW20, chunks of 300 with a
+   fresh trusted lemma context, 2 workers, proofs into UL (and kept). Production's own loop is stopped (2 proofs in
+   its last 2,000 runs).
+0000000000000. **Z6 (15:30, [notes/2026-11-20-z6.md](notes/2026-11-20-z6.md)):** today's from-zero system on all 51,784, 12 workers, 8 hours
+   (to about 23:30), `--knn-refresh 600`, against Z4 (37,713 at 2 h). abs/z6_test.sh; read with
+   `abs/setcurve.py sets/all Z4 Z6 --at 10,30,60,120,180,240,360,480`. Production's own loop stopped meanwhile.
 000000000000. **The half gap (13:43, [notes/2026-11-20-half-gap.md](notes/2026-11-20-half-gap.md)):** of the goals production has and the from-zero
    half arms lack, most fell to production's 5 s level, and 80% (half2) / 76% (half1) of those proofs used a kNN
    lemma from the other half, which a half run cannot have. Half tests stay for A/B; the long from-zero run goes on
@@ -787,7 +794,7 @@ Next:
    Bigger bank (12:38-13:31): the from-zero arms' proofs of the same goals (joincheck `--banks`), 43% more
    equations, 0 of 1,557 joined (shard 0/2); 2,264 false printed goal lines dropped by the new model filter. Closed.
    Non-joined steps (13:33): 100 non-joined goals with their normalising steps as lemmas (loops/STEPN) vs without
-   (STEPN0), 20 s, 1 worker each.
+   (STEPN0), 20 s, 1 worker each. Done 14:22: 4 = 4 (the same goals): closed. Production had run those 4 only at 5 s.
 000000. **Soundness (10:00, [notes/2026-11-20-p9-negation-bug.md](notes/2026-11-20-p9-negation-bug.md)):** p9twee.ladr wrote TPTP `~ a = b` as
    LADR `- a = b` (the equation (-a) = b): conditional sibling lemmas became false axioms, and 16 Prover9 proofs in
    production used one (P9C, P9L, P9T, exp16). Fixed 09:45. Quarantine of 1,130 goals at 10:07 (closure + proofs
@@ -923,6 +930,8 @@ reports are written as the experiments run.
 | [notes/2026-11-20-semantic-guidance.md](notes/2026-11-20-semantic-guidance.md) | Semantic guidance offline: proof steps vs other given rules in relevance models |
 | [notes/2026-11-20-given-nowait.md](notes/2026-11-20-given-nowait.md) | exp43: derived-rule hits run without waiting for the loop's failure (P2G against P2F) |
 | [notes/2026-11-20-half-gap.md](notes/2026-11-20-half-gap.md) | Why a from-zero half run stops short of production: the other half's kNN lemmas |
+| [notes/2026-11-20-z6.md](notes/2026-11-20-z6.md) | Z6: today's from-zero system on the whole benchmark, 8 hours |
+| [notes/2026-11-20-sweep20.md](notes/2026-11-20-sweep20.md) | One 20 s run for each unsolved goal that never had more than 5 s |
 | [notes/2026-11-20-base-saturation.md](notes/2026-11-20-base-saturation.md) | exp39: base-theory runs as rule generators for the unsolved goals of the stronger theories |
 | [notes/2026-11-20-given-transfer.md](notes/2026-11-20-given-transfer.md) | exp38: unsolved goals that are variants of rules other runs derived and did not use (379 M in the given logs; transfer.py only matches proof steps); their ancestry as hints |
 | [notes/2026-11-19-from-zero-portfolio.md](notes/2026-11-19-from-zero-portfolio.md) | half1 from zero in 2 hours with today's deep portfolio (PGC), against PGA's 18,987 (exp27, from 07:18) |
