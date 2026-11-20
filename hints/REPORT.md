@@ -4834,6 +4834,8 @@ reproduced exactly).
 
 ## 2az. Portfolios: complementary methods kept, not dropped (user's request, 18 Nov 17:00)
 
+*Notes: [notes/2026-11-20-step-join.md](notes/2026-11-20-step-join.md).*
+
 *Notes: [notes/2026-11-20-p9-negation-bug.md](notes/2026-11-20-p9-negation-bug.md).*
 
 *Notes: [notes/2026-11-20-half2-given.md](notes/2026-11-20-half2-given.md).*
