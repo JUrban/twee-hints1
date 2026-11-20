@@ -311,7 +311,9 @@ def live(dirs, d, every, j, rest, dst='UL', gfail=('GFAIL', 'GSAT'), allp=ALL, s
                     if len(w_) >= 5:
                         sop.add((w_[0], w_[4].split(',')[0]))
         so, nso = sofree.candidates(os.path.join(d, 'so_all.tsv'), tried_pairs=sop, dst=dst, allp=allp)
-        print(f'  same statement: {nso} candidates, {len(so)} new free ones', flush=True)
+        n0 = len(so)
+        so = [l for l in so if l.split('\t')[0] in failed][:cap]   # (07:25: as the hits, exp40's 1st cycle had 808)
+        print(f'  same statement: {nso} candidates, {n0} new free ones, {len(so)} failed in the loop to run', flush=True)
         if so:
             gp = os.path.join(d, f'so_{run_}_{cyc}.tsv')
             open(gp, 'w').writelines(so)

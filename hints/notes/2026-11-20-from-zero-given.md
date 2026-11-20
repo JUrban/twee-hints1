@@ -58,3 +58,9 @@ Written 20 Nov 2026, 07:10 UTC.
   so are the logs since 07:06.
 * So far PGE differs from PGD only by `--given-scan` and the live loop's scans. No live-loop run went into the loop
   before 07:20.
+* **07:17-07:21, the restarted loop's 1st cycle:** 10,643 logs rescanned since 07:06, and 888 goals hit, of which 0
+  had failed in PGE (it had 83 failed runs then), so 888 pending. But the same-statement finder had no such filter:
+  808 free candidates, and it ran 150 of them (about 130 proved, mostly in under a second) into PGE before I stopped
+  it at 07:21. Those proofs are part of PGE, at about minute 12-15.
+* The same filter (failed in the loop) and cap now apply to the same-statement candidates. Restarted at 07:22; the
+  pending queue is rebuilt from the rescan.
