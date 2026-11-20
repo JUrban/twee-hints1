@@ -5355,6 +5355,15 @@ and `ld(X0,e) = X0`, both false in that theory. They came from the hints of a P9
 * No step with the same variables on both sides is false. That is the shape of a wrong derived equation.
 * **Positive control:** 13 of the 16 unsound Prover9 proofs show such a step, e.g. `ld(X0,e) = X0`.
 
+**The models as guidance: a weak negative** ([notes/2026-11-20-semantic-guidance.md](notes/2026-11-20-semantic-guidance.md)).
+* Semantic guidance in the style of Slaney's SCOTT: a rule false in a model of the base axioms where an extra axiom
+  fails depends on the extras.
+* Mace4 has such models for 62 of the 116 originals with extras.
+* In 10 production logs per original, proof steps are false there 32.4% of the time and the other given rules 30.4%
+  (lift 1.09; clearly enriched in 18 originals, depleted in 11). Most of what a run derives depends on the extras
+  too.
+* Not worth evaluating models per rule inside twee.
+
 **Lesson.** Hints may be wrong; axioms may not. Every path that turns text into an axiom (a second prover's input,
 hints as lemmas, given rules as `.ax`) is part of the trusted base. Each needs a check, and each proof should record
 its lemmas when it is written.
