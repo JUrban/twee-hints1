@@ -749,7 +749,8 @@ has the history (user, 20 Nov: "update the total numbers in the report etc every
 Next:
 0000000. **Step joins (10:43, [notes/2026-11-20-step-join.md](notes/2026-11-20-step-join.md)):** exp/joincheck.py over all 3,170 unsolved
    unit goals with trusted proof steps of weaker theories; exp/stepjoin.py proves each join with the steps as named
-   lemma axioms. First 1,881: 9 joins, all 9 proved. A new member, cheap (a pass is ~5 CPU min); make it periodic.
+   lemma axioms. All 3,684 (3,170 unit, 514 conditional with the hypothesis as a ground rule): 23 joins, 23 proved.
+   Live from 10:50 (abs/stepjlive.sh, every 30 min).
 000000. **Soundness (10:00, [notes/2026-11-20-p9-negation-bug.md](notes/2026-11-20-p9-negation-bug.md)):** p9twee.ladr wrote TPTP `~ a = b` as
    LADR `- a = b` (the equation (-a) = b): conditional sibling lemmas became false axioms, and 16 Prover9 proofs in
    production used one (P9C, P9L, P9T, exp16). Fixed 09:45. Quarantine of 1,130 goals at 10:07 (closure + proofs

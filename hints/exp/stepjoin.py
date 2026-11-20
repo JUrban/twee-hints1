@@ -7,7 +7,10 @@ gives twee those steps as lemma axioms, named skax_<i>_<source goal> (transfer.p
 column), so the kept output's USEDAXIOMS records which proofs the new one rests on (exp/trust.py). The steps are also
 the hints. Production's transfer options, --keep-out, proofs into loops/UL.
 
-  stepjoin.py DIR JOIN.tsv... [-j 2] [--time 20] [--trusted OUT.trusted]
+  stepjoin.py DIR JOIN.tsv... [-j 2] [--time 20] [--trusted OUT.trusted] [--nonjoined N [--seed 1]]
+
+--nonjoined N (20 Nov 10:55): N goals that did not join instead, with the steps that rewrote their sides (the
+normal forms differ; are the steps useful lemmas anyway?). --no-steps: the same goals without the steps (control).
 """
 import os, subprocess, sys
 
@@ -26,6 +29,9 @@ def main():
             i = a.index(k); v = a[i + 1]; del a[i:i + 2]; return v
         return dflt
     j, T, tr = val('-j', '2'), val('--time', '20'), val('--trusted', None)
+    NJ, seed = int(val('--nonjoined', '0')), int(val('--seed', '1'))
+    nosteps = '--no-steps' in a
+    a = [x for x in a if x != '--no-steps']
     d, files = os.path.abspath(a[0]), a[1:]
     TR = {l.strip() for l in open(tr) if l.strip()} if tr else None
     S = {l.split('\t')[0] for l in open(os.path.join(L, 'UL', 'solved.tsv'))}
@@ -37,7 +43,7 @@ def main():
     for p in files:
         for l in open(p):
             w = l.rstrip('\n').split('\t')
-            if len(w) < 5 or w[1] != '1' or w[0] in S or w[0] in done:
+            if len(w) < 5 or w[1] != ('0' if NJ else '1') or not w[4] or w[0] in S or w[0] in done:
                 continue
             steps = []
             for t in w[4].split(','):
@@ -56,11 +62,15 @@ def main():
             os.makedirs(gd, exist_ok=True)
             sk = os.path.join(gd, 'steps')
             with open(sk, 'w') as f:
-                f.writelines(f'{l}\t{r}\n' for l, r, _ in steps)
+                f.writelines(f'{l}\t{r}\n' for l, r, _ in steps if not nosteps)
             with open(sk + '.ax', 'w') as f:
-                f.writelines(f'{l}\t{r}\t{sg}\n' for l, r, sg in steps)
+                f.writelines(f'{l}\t{r}\t{sg}\n' for l, r, sg in steps if not nosteps)
             rows.append(f'{w[0]}\t{sk}\t0\n')
-    print(f'{len(rows)} joined goals to prove', flush=True)
+    if NJ:
+        import random
+        random.Random(seed).shuffle(rows)
+        rows = rows[:NJ]
+    print(f'{len(rows)} {"non-joined" if NJ else "joined"} goals to prove', flush=True)
     if not rows:
         return
     gp = os.path.join(d, f'goals_{len(done)}.tsv')
