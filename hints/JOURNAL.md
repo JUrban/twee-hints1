@@ -743,7 +743,8 @@ Paused:
 * exp12 stage B: 320 s on gap heads, 34 of 95 done, 0.21 per CPU hour (run.py skips done ids).
 * exp19: set-join on the walls, 37 of 107 done, 0.31 per CPU hour (run.py skips done ids).
 
-**Totals (20 Nov 09:14): 48,178 of 51,784 solved (holdout 5,337 of 5,880), 3,606 unsolved.** REPORT's totals table
+**Totals (20 Nov 12:10, corrected after the soundness re-verification, REPORT 2ba): 48,108 of 51,784 solved (holdout
+5,320 of 5,880), 3,676 unsolved.** REPORT's totals table
 has the history (user, 20 Nov: "update the total numbers in the report etc every now and then").
 
 Next:

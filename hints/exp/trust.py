@@ -165,6 +165,11 @@ def main():
     norec = sum(1 for g in un if g not in rec)
     unres = sum(1 for g in un if g in rec and rec[g] is None)
     open(out + '.untrusted', 'w').writelines(g + '\n' for g in un)
+    # (20 Nov 12:07) what each untrusted proof with a complete record waits for: its lemmas not trusted
+    with open(out + '.missing', 'w') as f:
+        for g in un:
+            if rec.get(g):
+                f.write(f'{g}\t{",".join(sorted(rec[g] - trusted))}\n')
     open(out + '.trusted', 'w').writelines(g + '\n' for g in sorted(trusted))
     # roots: untrusted for want of a record (none, or a lemma name not resolved), not for an untrusted lemma
     open(out + '.roots', 'w').writelines(g + '\n' for g in un if g not in rec or rec[g] is None)

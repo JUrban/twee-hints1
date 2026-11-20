@@ -51,8 +51,11 @@ def main():
         with open(gp, 'w') as f:
             for g in goals:
                 h = os.path.join(L, 'UL', 'hints', g)
+                for q in ('qhints2', 'qhints'):   # (20 Nov 12:08: exp/quarantine2.py moves hints to qhints2)
+                    if not os.path.exists(h):
+                        h = os.path.join(L, 'UNSOUND', q, g)
                 if not os.path.exists(h):
-                    h = os.path.join(L, 'UNSOUND', 'qhints', g)
+                    h = os.path.join(L, 'UNSOUND', 'empty')
                 f.write(f'{g}\t{h}\t0\n')
         J = open(os.path.join(d, 'J')).read().strip() if os.path.exists(os.path.join(d, 'J')) else '4'
         t = T * 5 if last else T
