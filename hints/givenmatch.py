@@ -20,7 +20,7 @@ ancestry's axioms of the source run to the same name + .ax, and GOALS.tsv for tr
 files, 0).
 
   givenmatch.py live DIR [--dirs UL,XFL] [--every 1200] [-j 2] [--dst UL] [--gfail GFAIL,GSAT] [--set ALL] [--no-same]
-                   [--cap 60] [--no-inst] -- LOOP-OPTIONS
+                   [--cap 60] [--no-inst] [--loops /project/hintwork/loops] -- LOOP-OPTIONS
 beside production: each cycle scans the logs written since the last one and runs the new hits (see live()).
 """
 import os, re, sys
@@ -310,7 +310,8 @@ def live(dirs, d, every, j, rest, dst='UL', gfail=('GFAIL', 'GSAT'), allp=ALL, s
                     w_ = l.rstrip('\n').split('\t')
                     if len(w_) >= 5:
                         sop.add((w_[0], w_[4].split(',')[0]))
-        so, nso = sofree.candidates(os.path.join(d, 'so_all.tsv'), tried_pairs=sop, dst=dst, allp=allp)
+        so, nso = sofree.candidates(os.path.join(d, 'so_all.tsv'), tried_pairs=sop, dst=os.path.join(LOOPS, dst),
+                                    allp=allp)
         n0 = len(so)
         so = [l for l in so if l.split('\t')[0] in failed][:cap]   # (07:25: as the hits, exp40's 1st cycle had 808)
         print(f'  same statement: {nso} candidates, {n0} new free ones, {len(so)} failed in the loop to run', flush=True)
@@ -325,11 +326,15 @@ def live(dirs, d, every, j, rest, dst='UL', gfail=('GFAIL', 'GSAT'), allp=ALL, s
 
 
 def main():
+    global LOOPS
     if sys.argv[1] == 'live':
         argv = sys.argv[2:]
         i = argv.index('--')
         opts, rest = argv[:i], argv[i + 1:]
         val = lambda k, dflt: type(dflt)(opts[opts.index(k) + 1]) if k in opts else dflt
+        # (20 Nov 09:20) --loops: the directory that holds DST, DIRS and GFAIL (default /project/hintwork/loops), for
+        # loops elsewhere (solve_new.sh); the hits' loop column (basename(GFAIL)/stamp) is relative to it
+        LOOPS = os.path.abspath(val('--loops', LOOPS))
         return live(val('--dirs', 'UL,XFL').split(','), opts[0], val('--every', 1200.0), val('-j', 2), rest,
                     dst=val('--dst', 'UL'), gfail=[x for x in val('--gfail', 'GFAIL,GSAT').split(',') if x],
                     allp=val('--set', ALL), same='--no-same' not in opts, cap=val('--cap', 60),

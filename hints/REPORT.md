@@ -26,6 +26,7 @@ in `/project/hintwork` (not in git).
 | + exploration of 5 s members: more lemma sets and counts (2az); at 19 Nov 10:20 | **47,101** (+51.6% over plain) | **5193** (+62.1%) | – |
 | + retrained rule models as members, the transfer loop's cascade, rules other runs derived (2av, 2al); at 20 Nov 04:09 | **48,098** (+54.9% over plain) | **5325** (+66.3%) | – |
 | + failed runs' derived rules and the same statement in stronger theories, live (2al); at 20 Nov 05:31 | **48,142** (+55.0% over plain) | **5332** (+66.5%) | – |
+| + the same, from zero by default (solve_new.sh GIVEN=1, exp40: half1 +282 at 2 hours; 2az); at 20 Nov 09:14 | **48,178** (+55.1% over plain) | **5337** (+66.6%) | – |
 
 **On unseen originals** (2aq): the 11 whole holdout originals from
 scratch, in 1 hour per batch on 4 workers plus the transfer. Plain twee
@@ -101,6 +102,7 @@ written in loops/UL. Merged proofs count from their merge.
 | 20 Nov 02:13 | 48,049 | 5319 | the cascade's tail; members m9f@0, m9h@0, m9i@0 (ul72) (2av) |
 | 20 Nov 04:09 | 48,098 | 5325 | ul73 (m9e@0); exp38: unsolved goals that are variants of rules other runs derived, 16 proved (2al) |
 | 20 Nov 05:31 | 48,142 | 5332 | ul74 (04:15): `--given-scan` (failed runs' derived rules) and the live loop every 5 minutes, which proved 27 of 49 in 0.38 CPU h; production's own runs 9 in 13.9 CPU h (2al) |
+| 20 Nov 09:14 | 48,178 | 5337 | production at 4 workers 07:06-09:07 while exp40 ran (its own runs: 0 new in 2,200); the live loop and the transfer loop; ul74 back at 12 workers from 09:08 (2al, 2az) |
 
 From 15 Nov 05:30 the rate fell from hundreds an hour to 50–100. The
 cheap new contexts are used up; 58% of the unsolved goals sit behind the
@@ -4817,6 +4819,8 @@ reproduced exactly).
 
 ## 2az. Portfolios: complementary methods kept, not dropped (user's request, 18 Nov 17:00)
 
+*Notes: [notes/2026-11-20-half2-given.md](notes/2026-11-20-half2-given.md).*
+
 *Notes: [notes/2026-11-20-from-zero-given.md](notes/2026-11-20-from-zero-given.md).*
 
 *Notes: [notes/2026-11-19-climber-member.md](notes/2026-11-19-climber-member.md).*
@@ -5108,6 +5112,27 @@ lemma-count members (k100@0, k200@0, k400@0, kd@0) and `--explore 0.2` for them 
   * The defaults stay, since they do not lose, but there is no from-zero gain to claim. The 20 s pool resume is a
     member the new defaults lack. Joining it to the 5 s members is the portfolio follow-up, with the union (+297)
     as the target.
+
+**From zero with the derived-rule transfer: +282 at 2 hours on half1 (exp40, 20 Nov 07:06-09:06;
+[notes/2026-11-20-from-zero-given.md](notes/2026-11-20-from-zero-given.md)).** PGE is PGD plus 2al's transfer:
+loop.py `--given-scan` (each failed run's given rules against the unsolved goals) and givenmatch.py live (each hit,
+once the loop has failed on its goal, run with the rule's ancestry as hints at 20 s, then the log's prefix at 40 s;
+at most 60 goals per cycle; and the same statement proven in a stronger theory).
+
+| minutes | 10 | 30 | 60 | 90 | 120 |
+|---|---:|---:|---:|---:|---:|
+| PGC (exp27) | 11,704 | 16,980 | 18,545 | 18,834 | 18,917 |
+| PGD (control, exp29) | 10,314 | 16,540 | 18,713 | 19,216 | 19,309 |
+| **PGE** | 11,695 | 17,003 | 18,849 | 19,425 | **19,591** |
+
+* +282 against PGD, 1.5 times the noise between identical runs; exp29's +392 on half1 did not replicate on half2.
+* The live loop added 2.97 CPU h of twee time to the loop's 12 and proved 614 of 901 runs. Its ancestry runs proved
+  434 of 478 at 790 per CPU hour, the same-statement runs 154 of 379 at 80, the prefix runs 26 of 44 at 53.
+* Its proofs add to the loop's. In the last half hour PGE's loop proved 92 (PGD 93) and the live loop 74 more on
+  about 0.85 CPU h. At equal CPU (PGE near 96 minutes) the gain is about +150.
+* Only PGE proved 643 goals, only PGD 368 (union 19,961). 308 of the 643 are live proofs; the rest are cascades.
+* **solve_new.sh now runs it by default** (`GIVEN=1`; `GIVEN=0` gives the 19 Nov system). exp41 replicates on half2
+  against P2D.
 
 **E as a member (exp28; [notes/2026-11-19-eprover-watchlist.md](notes/2026-11-19-eprover-watchlist.md)): a genuine negative.** E 3.5.9 was built from
 ext/eprover and given the chain hints as a static watchlist (`-xUseWatchlist`).

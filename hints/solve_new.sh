@@ -40,6 +40,14 @@
 # (default below): 5 s members that change the problem (unfolded definitions; 60, 100, 200 and 400 kNN lemmas; proof-
 # dependency lemmas), 80 s variants after the 160 s level, all ordered by live yield (--ratio-order) with --explore
 # 0.2 for the new members and the 40 s level. DEEP= gives the 17 Nov system (with CASCADE=5,20,80,320 TWEE=twee-e48).
+# (20 Nov) GIVEN (default 1): derived-rule transfer (exp38/exp40; notes/2026-11-20-given-transfer.md and
+# notes/2026-11-20-from-zero-given.md). The loop scans every failed run's given rules against the unsolved goals
+# (loop.py --given-scan OUT_GF: a rule that is an unsolved goal up to variables, the source's axioms within the
+# goal's), and givenmatch.py live runs each hit once the loop has failed on its goal (the rule's ancestry at 20 s,
+# then the log's prefix at 40 s; at most 60 goals per 300 s cycle; also the same statement proven in a theory with
+# more axioms), proofs into OUT. half1 from zero, 2 hours: PGE 19,591 against PGD's 19,309 (identical runs differ by
+# about 185); in the last 30 minutes the live loop proved 74 goals in about 0.85 CPU h, the loop 92 in 3. GIVEN=0
+# gives the 19 Nov system. The live loop adds up to 2 workers at times.
 set -e
 H=$(cd "$(dirname "$0")" && pwd)
 NAMES=$1; CTX=$2; OUT=$3; J=${4:-4}; HOURS=${5:-1}
@@ -76,9 +84,12 @@ with open(os.path.join(snap, 'solved.tsv'), 'w') as f:
 print(f'context: {n} proofs (EXCLUDE={excl}: {len(G)} new goals of {len(O)} originals)')
 EOF
 MOD="--model --model-fixed $M.bin,$M.vocab --model-theory --lemmas 6 --lemma-knn $KNN --lemma-subsets --lemma-after"
+GIVEN=${GIVEN:-1}
+ROUT=$(realpath -m "$OUT"); GSCAN=
+[ "$GIVEN" = 1 ] && GSCAN="--given-scan ${ROUT}_GF"
 python3 -u "$H/loop.py" "$NAMES" "$OUT" --init "$OUT.ctx" --start 1 --cascade "$CASCADE" --cascade-start -1 --retry-gap 3 \
   $MOD --twee "$TWEE" --keep-out -j "$J" --reserve 0 --pool original --wall-factor 15 --line-gaps 80,80 \
-  --retry-hints 1.25 --fresh-first --far-retry --retry-knn --sync 60 --cascade-hours "$HOURS" --pass-every "$PASS" $ORDER $SCHED $STATES $DEEP $LOOPARGS \
+  --retry-hints 1.25 --fresh-first --far-retry --retry-knn --sync 60 --cascade-hours "$HOURS" --pass-every "$PASS" $ORDER $SCHED $STATES $DEEP $GSCAN $LOOPARGS \
   --args="--abstract-time 2000 --no-resume-requeue --no-eqhint-consider $PG" > "$OUT.log" 2>&1 &
 LOOP=$!
 until [ -f "$OUT/config.json" ] || ! kill -0 $LOOP 2>/dev/null; do sleep 2; done
@@ -86,6 +97,17 @@ python3 "$H/transfer.py" live "$OUT" "$OUT.xfer" -j 2 --time 20 --src-lemmas 6 -
   $MOD --pool original --twee "$XTWEE" --wall-factor 15 --args="--abstract-time 2000 --no-eqhint-consider" \
   > "$OUT.xfer.log" 2>&1 &
 XFER=$!
+GM=
+if [ "$GIVEN" = 1 ]; then
+  B=$(basename "$ROUT")
+  python3 -u "$H/givenmatch.py" live "${ROUT}_GML" --loops "$(dirname "$ROUT")" --dst "$B" --dirs "$B,$B.xfer" \
+    --gfail "${B}_GF" --set "$(realpath "$NAMES")" --every 300 -j 2 --cap 60 --no-inst -- \
+    $MOD --pool original --twee "$TWEE" --wall-factor 15 --args="--abstract-time 2000 --no-eqhint-consider" \
+    > "$OUT.gml.log" 2>&1 &
+  GM=$!
+fi
 wait $LOOP || true
-kill $(ps -o pid= --ppid $XFER) $XFER 2>/dev/null || true
+desc() { for c in $(ps -o pid= --ppid $1); do desc $c; done; echo $1; }
+kill $(desc $XFER) 2>/dev/null || true
+[ -n "$GM" ] && { kill $(desc $GM) 2>/dev/null || true; }
 echo "$(awk -F'\t' 'NR==FNR {g[$1]=1; next} ($1 in g) {print $1}' "$NAMES" "$OUT/solved.tsv" | sort -u | wc -l) of $(grep -c . "$NAMES") solved ($OUT/solved.tsv)"

@@ -743,12 +743,16 @@ Paused:
 * exp12 stage B: 320 s on gap heads, 34 of 95 done, 0.21 per CPU hour (run.py skips done ids).
 * exp19: set-join on the walls, 37 of 107 done, 0.31 per CPU hour (run.py skips done ids).
 
-**Totals (20 Nov 05:31): 48,142 of 51,784 solved (holdout 5,332 of 5,880), 3,642 unsolved.** REPORT's totals table
+**Totals (20 Nov 09:14): 48,178 of 51,784 solved (holdout 5,337 of 5,880), 3,606 unsolved.** REPORT's totals table
 has the history (user, 20 Nov: "update the total numbers in the report etc every now and then").
 
 Next:
+00000. exp41 (09:16, [notes/2026-11-20-half2-given.md](notes/2026-11-20-half2-given.md)): exp40 replicated on half2, P2E = solve_new.sh's
+   defaults (GIVEN=1) against exp30's P2D (19,383 at 2 h); abs/exp41.sh; production at J=4 until about 11:17.
 0000. exp40 ([notes/2026-11-20-from-zero-given.md](notes/2026-11-20-from-zero-given.md)): half1 from zero as exp29's PGD (19,309 at 2 h)
    plus `--given-scan` and givenmatch.py live on the loop (abs/exp40.sh); production at J=4 meanwhile.
+   Done 09:06: **PGE 19,591, +282** (+150 at equal CPU); the live loop 614 of 901 in 2.97 CPU h (ancestry runs 434
+   of 478 at 790 per CPU h); one-arm 643 vs 368. solve_new.sh GIVEN=1 by default (09:13); givenmatch live --loops.
 000. exp39 (05:39, [notes/2026-11-20-base-saturation.md](notes/2026-11-20-base-saturation.md)): base-theory runs (13 originals share the 17 base
    axioms, within nearly every theory) as rule generators for 3,001 unsolved goals; pilot exp/gensat.py, 120 runs of 30 s,
    3 workers, hits to loops/GSAT for the live loop. Production's base runs gave about 16 goals per CPU h.
@@ -862,6 +866,7 @@ reports are written as the experiments run.
 | [notes/2026-11-19-climb-ablation.md](notes/2026-11-19-climb-ablation.md) | exp36: the climbs' sketch hints ablated on 55 climber proofs (pool vs pool + sketch steps, context as of the proof; user, 17:20); production on 15 workers meanwhile |
 | [notes/2026-11-19-retrained-models.md](notes/2026-11-19-retrained-models.md) | exp37: retrained rule models as members (user, 19:35): the ENIGMA/Mizar60/Suda papers' training tricks, given logs of every loop indexed (several proofs per goal), rm9* models held out of the 400 newest production proofs, paired test from snapshot ULsN19 |
 | [notes/2026-11-20-from-zero-given.md](notes/2026-11-20-from-zero-given.md) | exp40: half1 from zero with the derived-rule transfer (--given-scan + givenmatch live) |
+| [notes/2026-11-20-half2-given.md](notes/2026-11-20-half2-given.md) | exp41: exp40 replicated on half2 (solve_new.sh GIVEN=1 against P2D) |
 | [notes/2026-11-20-base-saturation.md](notes/2026-11-20-base-saturation.md) | exp39: base-theory runs as rule generators for the unsolved goals of the stronger theories |
 | [notes/2026-11-20-given-transfer.md](notes/2026-11-20-given-transfer.md) | exp38: unsolved goals that are variants of rules other runs derived and did not use (379 M in the given logs; transfer.py only matches proof steps); their ancestry as hints |
 | [notes/2026-11-19-from-zero-portfolio.md](notes/2026-11-19-from-zero-portfolio.md) | half1 from zero in 2 hours with today's deep portfolio (PGC), against PGA's 18,987 (exp27, from 07:18) |

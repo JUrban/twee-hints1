@@ -78,3 +78,52 @@ Written 20 Nov 2026, 07:10 UTC.
   failed-in-loop filter it runs 60 goals a cycle (the cap binds), and 58 of 60 proved in cycle 7. 141 hits are
   pending. Some of these proofs the loop would have found later by itself; the 2-hour count and the one-arm goals
   will show how many.
+
+## Results (2 hours, ended 09:06)
+
+`abs/setcurve.py sets/half1 PGC PGD PGE --at 10,20,30,45,60,90,120`:
+
+| minutes | 10 | 20 | 30 | 45 | 60 | 90 | 120 |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| PGC (19 Nov) | 11,704 | 15,080 | 16,980 | 17,934 | 18,545 | 18,834 | 18,917 |
+| PGD (control) | 10,314 | 14,300 | 16,540 | 17,976 | 18,713 | 19,216 | 19,309 |
+| PGE | 11,695 | 15,293 | 17,003 | 18,070 | 18,849 | 19,425 | **19,591** |
+
+* **+282 against PGD at 2 hours** (+136 at 60 minutes, +209 at 90), and +674 against PGC. Identical runs differ by
+  about 185, and exp29's +392 on half1 did not replicate on half2 (exp30: −118). So this one half1 run alone is
+  suggestive, not conclusive.
+* **More CPU.** PGE had 12 CPU h of loop workers (the scan included), like PGD, plus 2.97 CPU h of live-loop twee time
+  (901 runs). At equal CPU, PGE's curve near 96 minutes (about 19,460) is about +150 over PGD at 120.
+* **The live loop:** 614 of 901 runs proved, 2.97 CPU h:
+
+  | kind | runs | proved | CPU h | per CPU h |
+  |---|---:|---:|---:|---:|
+  | the rule's ancestry, 20 s | 478 | 434 | 0.55 | 790 |
+  | the log's prefix, 40 s | 44 | 26 | 0.49 | 53 |
+  | same statement, stronger theory, 20 s | 379 | 154 | 1.93 | 80 |
+
+* **The live proofs add to the loop's, they do not replace them.** PGE's proofs by half hour, by who proved them:
+
+  | minutes | 0-30 | 30-60 | 60-90 | 90-120 |
+  |---|---:|---:|---:|---:|
+  | PGE's loop | 16,819 | 1,654 | 412 | 92 |
+  | PGE's live loop | 183 | 192 | 165 | 74 |
+  | PGD (all) | 16,540 | 2,173 | 503 | 93 |
+
+  In the last half hour the loop made 92 on 3 CPU h, as PGD did (93), and the live loop 74 more on about 0.85 CPU h.
+* **One-arm goals:** only PGE 643, only PGD 368, union 19,961 (+370 over PGE alone). 308 of the 643 are live-loop
+  proofs; the other 335 are cascades from them (siblings and lemmas). Against PGC and PGD together: 447 PGE-only goals,
+  union of the three 20,016.
+* **The scan:** 2,023 failed runs derived an unsolved goal; 15,767 hit rows for 3,925 goals, most of them proved by the
+  loop itself later (the pending queue held them until a failed run of the goal).
+* **The cycles grew long:** 300 s was the plan, but cycles 9-11 took 16-23 minutes, mostly in the same-statement runs
+  (20 s each on 2 workers). The ancestry runs are the cheap, productive ones. 51 hits were pending at the end.
+
+## Decision (09:13)
+
+* **solve_new.sh: GIVEN=1 is the default** (the scan plus the live loop, as in PGE). The gain is +282 at 2 hours, and
+  the live proofs come at 3 times the loop's late rate per CPU hour.
+* `givenmatch.py live --loops DIR` lets the loop dirs be outside /project/hintwork/loops (the hits' loop column is
+  relative to it). A 9-minute test on 21 goals (/project/hintwork/sn_test/SNG1) checks the plumbing.
+* **Next:** replicate on half2 against exp30's P2D (19,383), as exp41.
+* Then: the ancestry runs first, with a higher cap, and the same-statement runs in their own budget.
