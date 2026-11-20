@@ -749,7 +749,7 @@ has the history (user, 20 Nov: "update the total numbers in the report etc every
 Next:
 00000000. **Model audit (10:54, [notes/2026-11-20-model-audit.md](notes/2026-11-20-model-audit.md)):** exp/modelcheck.py evaluates every proof step
    of every solved unit goal in up to 40 Mace4 models (sizes 2-8) of its theory; a step false in a model is not a
-   theorem. Self-test: all goal statements must hold. Done 11:05: 2.4M step checks in 2,504 models of 68 theories;
+   theorem. Self-test: all goal statements must hold. Done 11:17: 2.4M step checks in 2,504 models of 68 theories;
    0 false goals; 217 false steps in 71 goals, all printed goal terms (different variables on the two sides, e.g.
    X0 = X1), none a wrong derived equation. Positive control: 13 of the 16 unsound Prover9 proofs have one
    (ld(X0,e) = X0). stepjoin now model-checks its step axioms.

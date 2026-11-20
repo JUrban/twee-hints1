@@ -36,7 +36,7 @@ Outputs:
 * false_goals.tsv
 * false_step_goals.txt
 
-## Results (11:05–11:20)
+## Results (done 11:17)
 
 * **68 theories, 2,504 models** (13 to 40 each; every theory has some), **2,400,297 step checks** (unique steps per
   theory, each solved unit goal's hints file).
