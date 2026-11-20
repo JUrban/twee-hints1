@@ -35,3 +35,20 @@ Written 20 Nov 2026, 02:21 UTC.
 
 * Hit goals, and how many the runs prove. Then production's proofs in the following hours from the chains these
   start.
+
+## Scan result (02:59)
+
+* **19 of the 3,218 unsolved unit goals are variants of a derived rule** (48 hits, 45 of them label 0, i.e. not a
+  step of that run's proof). Sources: production 23 hits, exp30's P2D 5, the AB* loops 15, CA1 2, OR* 3.
+* Ancestries are small: 1 to 27 rules for the first source of each goal.
+* Of the scanned logs, 2 goals were proven outright by another loop and never merged into production:
+  R1dist_to_aa1 643 and 645, by exp30's P2D (from zero on half2) at round 1. Their own P2D logs are among the
+  sources.
+* 243 goals have a given log outside production but are unsolved there. All but those 2 come from climber
+  directories, whose logs include sketch runs with assumptions. F80 and F80b are climber directories (climb.tsv)
+  that the name filter missed; none of the hits came from them, and givenmatch.py now skips every directory with a
+  climb.tsv.
+* **Instances** (`--instances`, the rule more general than the goal): across originals, AIM's few function symbols
+  give root buckets of thousands of goals, 50 times the variant scan's time. So instance matching is restricted to
+  the goal's own original's logs, at about 3 times the variant scan's time.
+* Runs: abs/gm1run.sh from 03:00, 2 workers, 20 s each, into production (loops/GM1run/transfer.tsv).

@@ -10,7 +10,8 @@ variant of such a rule is a theorem, and the rule's ancestry in that log (its pa
 Twee prints each logged rule with its variables numbered in order of occurrence (checked: 66,797 of 66,797), so a
 variant is a dict lookup of the raw (lhs, rhs) pair, against both orientations of each goal.
 
-  givenmatch.py INDEX OUT.tsv [-j 4] [--loops-exclude REGEX]
+  givenmatch.py INDEX OUT.tsv [-j 4] [--loops-exclude REGEX] [--instances]
+(--instances: the goal is an instance of the rule, not only a variant; own original's logs only)
 OUT: goal, source loop, source name, rule index, label (0 not in that proof, 1 a proof step), ancestry size.
 
   givenmatch.py sketch OUT.tsv SKDIR GOALS.tsv [--per 3]
@@ -28,7 +29,43 @@ ALL = '/project/hintwork/sets/all'
 # (climbers' runs may use unproven assumptions; 'bad' loops are known broken)
 EXCL = r'^(CL|FUD|SMK)|bad'
 
-W = None   # (in the workers: key -> goals)
+W = None   # (in the workers: key -> goals; with --instances, lhs root -> [(goal, lhs, rhs, parsed lhs, parsed rhs)])
+INST = False
+
+
+def root_s(t):
+    i = t.find('(')
+    return t[:i] if i >= 0 else t
+
+
+def scan_inst(lines_iter, o):
+    """(--instances) the goals of the log's own original O that are instances of a rule: one-way matching of the
+    rule onto both orientations, after cheap filters (the lhs root, the rhs root unless the rhs is a variable, no
+    more applications than the goal). Only the own original's goals: across originals the root buckets hold
+    thousands of goals (AIM has few function symbols), 50 times the variant scan's time."""
+    import transfer
+    out = []
+    for l in lines_iter:
+        w = l.split('\t', 4)
+        if len(w) < 4 or w[0] == '-1':
+            continue
+        cs = W.get((o, root_s(w[2])))
+        if not cs:
+            continue
+        r = w[3].rstrip('\n')
+        rv = r[0].isupper() and '(' not in r
+        rr = None if rv else root_s(r)
+        na = w[2].count('(') + r.count('(')
+        pl = pr = None
+        for g, gl, gr, pgl, pgr, gna in cs:
+            if gna < na or (rr is not None and root_s(gr) != rr):
+                continue
+            if pl is None:
+                pl, pr = transfer.parse(w[2]), transfer.parse(r)
+            sub = transfer.match(pl, pgl, {})
+            if sub is not False and transfer.match(pr, pgr, sub) is not False:
+                out.append((g, w[1], w[0]))
+    return out
 
 
 def gkeys(n):
@@ -63,7 +100,9 @@ def scan(job):
     except OSError:
         return hits
     with f:
-        for l in f:
+        if INST:
+            hits = scan_inst(f, lemmas.split(name)[0])
+        for l in ([] if INST else f):
             w = l.split('\t', 4)   # (label, index, lhs, rhs, the rest: the whole log is parsed only on a hit)
             if len(w) >= 4 and w[0] != '-1':
                 gs = W.get((w[2], w[3].rstrip('\n')))
@@ -75,9 +114,9 @@ def scan(job):
     return hits
 
 
-def init(w):
-    global W
-    W = w
+def init(w, inst=False):
+    global W, INST
+    W = w; INST = inst
 
 
 def sketch(hits, skdir, goals, per=3):
@@ -110,6 +149,7 @@ def main():
     idx, out = sys.argv[1], sys.argv[2]
     j = int(sys.argv[sys.argv.index('-j') + 1]) if '-j' in sys.argv else 4
     excl = sys.argv[sys.argv.index('--loops-exclude') + 1] if '--loops-exclude' in sys.argv else EXCL
+    inst = '--instances' in sys.argv
     S = {l.split('\t')[0] for l in open(os.path.join(LOOPS, 'UL', 'solved.tsv'))}
     want = {}
     ng = 0
@@ -131,14 +171,19 @@ def main():
             ax[o] = lemmas.axiom_set(n)
         return ax[o]
     tax = [axs(g) for gs in want.values() for g in gs]
-    unit = {}; ucache = {}
+    torig = {lemmas.split(g)[0] for gs in want.values() for g in gs}
+    unit = {}; ucache = {}; climbdir = {}
     jobs = []
     for l in open(idx):
         w = l.rstrip('\n').split('\t')
         name, loop = w[0], w[1]
-        if re.search(excl, loop):
+        if loop not in climbdir:
+            climbdir[loop] = bool(re.search(excl, loop)) or os.path.exists(os.path.join(LOOPS, loop, 'climb.tsv'))
+        if climbdir[loop]:   # (F80, F80b: climber directories by their records, not their names)
             continue
         o = lemmas.split(name)[0]
+        if inst and o not in torig:   # (--instances: the own original's goals only)
+            continue
         if o not in unit:
             try:
                 unit[o] = None
@@ -158,7 +203,16 @@ def main():
             jobs.append((loop, name))
     print(f'{ng} unsolved unit goals, {len(jobs)} logs to scan ({j} workers)', flush=True)
     hits = {}
-    with get_context('fork').Pool(j, initializer=init, initargs=(want,)) as pool:
+    if inst:
+        # (both orientations of each goal, by the root of the side the rule's lhs must match)
+        import transfer
+        byroot = {}
+        for (l, r), gs in want.items():
+            for g in gs:
+                byroot.setdefault((lemmas.split(g)[0], root_s(l)), []).append((g, l, r, transfer.parse(l), transfer.parse(r),
+                                                        l.count('(') + r.count('(')))
+        want = byroot
+    with get_context('fork').Pool(j, initializer=init, initargs=(want, inst)) as pool:
         for k, hs in enumerate(pool.imap_unordered(scan, jobs, chunksize=64)):
             for h in hs:
                 g, loop, name = h[0], h[1], h[2]
