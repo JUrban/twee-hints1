@@ -130,7 +130,7 @@ def main():
     old = {g for g in S if os.path.getmtime(os.path.join(L, 'UL', 'hints', g)) < T0}
     trusted = set(old)
     if '--exposed' in sys.argv:
-        # (10:45) every lemma mechanism takes lemmas from theories within the target's (siblings, kNN with subsets,
+        # (20 Nov 10:36) every lemma mechanism takes lemmas from theories within the target's (siblings, kNN with subsets,
         # proof-dependency sets, transfer's srclem guard and .ax from runs of weaker theories, the climber's true
         # lemmas, the base lemmas), so a proof can rest on a bad goal only if its theory contains the bad goal's:
         # outside the EXPOSED originals every proof is trusted, record or not
