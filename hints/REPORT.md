@@ -28,6 +28,18 @@ in `/project/hintwork` (not in git).
 | + failed runs' derived rules and the same statement in stronger theories, live (2al); at 20 Nov 05:31 | **48,142** (+55.0% over plain) | **5332** (+66.5%) | – |
 | + the same, from zero by default (solve_new.sh GIVEN=1, exp40: half1 +282 at 2 hours; 2az); at 20 Nov 09:14 | **48,178** (+55.1% over plain) | **5337** (+66.6%) | – |
 
+**Correction (20 Nov 10:40; [notes/2026-11-20-p9-negation-bug.md](notes/2026-11-20-p9-negation-bug.md)).** The counts
+from 15 Nov on include proofs that are not proofs.
+* p9twee.py's TPTP-to-LADR conversion wrote `~ a = b` as `- a = b`, which Prover9 reads as the equation (-a) = b.
+  So every conditional sibling lemma became a false axiom.
+* 16 goals in production rested on such Prover9 proofs (P9C, P9L, P9T, exp16), and further proofs used them as
+  lemmas.
+* Production's solved list is being re-verified:
+  * a proof counts if it is older than 15 Nov 08:56, or if every lemma it used is recorded and trusted;
+  * the rest are re-proved with trusted lemmas only.
+* The rows above stay as they were measured. The corrected total follows when the re-verification ends.
+* The from-zero arms never ran Prover9 and are not affected.
+
 **On unseen originals** (2aq): the 11 whole holdout originals from
 scratch, in 1 hour per batch on 4 workers plus the transfer. Plain twee
 at 4 s solves 2,887 of 4,720 (61.2%). With the 13 Nov proofs of the
@@ -2329,7 +2341,8 @@ translation. It holds:
 * the conjecture;
 * the original's whole twee pool as `formulas(hints)`.
 
-The first hit is aK2_eq_aK3_r__goal_241, a goal every twee variant failed
+*(20 Nov: this proof, like 15 more Prover9 proofs, used a lemma that p9twee.py had turned into a false axiom, and is
+not a proof; [notes/2026-11-20-p9-negation-bug.md](notes/2026-11-20-p9-negation-bug.md).)* The first hit is aK2_eq_aK3_r__goal_241, a goal every twee variant failed
 (settings, pools, models, the climber and 80 s runs). Prover9 proved it
 in 44 s with 320 given clauses. The proof has 448 steps at level 64, with
 clauses up to weight 1027, and 277 of its steps are hint matchers. The
@@ -4804,7 +4817,9 @@ reproduced exactly).
 * No variant so far beats the control in count.
 * But each proves 2-4 walls that every other run failed. Twee's search is chaotic, so a change of setting
   re-randomises which hard goals fall. As a **portfolio on stalled holes** that is worth about 0.5-1 new proof
-  per CPU hour, and **Prover9 with the chain is the cheapest member (2.3 per CPU hour)**.
+  per CPU hour, and **Prover9 with the chain is the cheapest member (2.3 per CPU hour)**. *(20 Nov: void. 9 of P9C's
+  10 proofs and all 6 of exp16's used a false axiom from p9twee.py's negation bug;
+  [notes/2026-11-20-p9-negation-bug.md](notes/2026-11-20-p9-negation-bug.md).)*
 * So from 16:46 a Prover9 side worker with chain hints (abs/p9c.sh, 2 workers) runs on twee's stalled goals,
   writing its proofs into UL.
 * The Waldmeister paper (the user, 16:24; [notes/2026-11-18-waldmeister-paper.md](notes/2026-11-18-waldmeister-paper.md)): twee already has most of its
