@@ -754,6 +754,9 @@ Next:
 000000000. **exp42 (11:27, [notes/2026-11-20-given-cap.md](notes/2026-11-20-given-cap.md)):** half2 from zero, P2F = P2E (solve_new.sh defaults)
    with the live loop at `--cap 200 --same-cap 20` (ancestry runs no longer starved by the same-statement runs),
    against exp41's P2E (20,152 at 2 h). abs/exp42.sh; production at J=6, rever at 2 meanwhile.
+   At 45 min: 18,532 vs 18,449; the cap was not binding yet (31-64 goals a cycle, about 290 hits pending until the
+   loop fails on their goal). Next candidate (exp43): run hits without waiting for the loop's failure (ancestry runs
+   prove 93% at about 4 s each).
 00000000. **Model audit (10:54, [notes/2026-11-20-model-audit.md](notes/2026-11-20-model-audit.md)):** exp/modelcheck.py evaluates every proof step
    of every solved unit goal in up to 40 Mace4 models (sizes 2-8) of its theory; a step false in a model is not a
    theorem. Self-test: all goal statements must hold. Done 11:17: 2.4M step checks in 2,504 models of 68 theories;

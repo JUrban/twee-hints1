@@ -5301,6 +5301,8 @@ index is now rebuilt every 10 minutes, not 30 (about 1 s a rebuild).
 
 ## 2ba. Soundness: the Prover9 negation bug, re-verification, and a model audit (20 Nov)
 
+*Notes: [notes/2026-11-20-semantic-guidance.md](notes/2026-11-20-semantic-guidance.md).*
+
 *Notes: [notes/2026-11-20-p9-negation-bug.md](notes/2026-11-20-p9-negation-bug.md),
 [notes/2026-11-20-model-audit.md](notes/2026-11-20-model-audit.md).*
 
