@@ -30,7 +30,7 @@ in `/project/hintwork` (not in git).
 | **corrected:** proofs resting on unsound Prover9 proofs removed or re-proved (2ba); step joins; at 20 Nov 12:10 | **48,108** (+54.9% over plain) | **5320** (+66.1%) | – |
 | + re-proofs of quarantined goals with trusted lemmas, step joins, the live and transfer loops; at 20 Nov 13:38, all trusted | **48,172** (+55.1% over plain) | **5336** (+66.6%) | – |
 | + the 20 s sweep of never-deep unsolved goals, the live and transfer loops (production paused for Z6); at 20 Nov 18:45, all trusted | **48,201** (+55.2% over plain) | **5340** (+66.7%) | – |
-| + Z6's two derived-rule proofs, the sweep (production paused); at 20 Nov 23:36, all trusted | **48,208** (+55.2% over plain) | **5341** (+66.7%) | – |
+| + Z6's two derived-rule proofs, the sweep (production paused); at 20 Nov 23:35, all trusted | **48,208** (+55.2% over plain) | **5341** (+66.7%) | – |
 
 **Correction (20 Nov 10:40; [notes/2026-11-20-p9-negation-bug.md](notes/2026-11-20-p9-negation-bug.md)).** The counts
 from 15 Nov on include proofs that are not proofs.
@@ -127,7 +127,7 @@ written in loops/UL. Merged proofs count from their merge.
 | 20 Nov 12:10 | 48,108 | 5320 | corrected (2ba): 1,130 goals quarantined at 10:07, re-proved with trusted lemmas or removed (the last 96 at 12:09); step joins (24); production at 4-12 workers while exp41 and exp42 ran |
 | 20 Nov 13:38 | 48,172 | 5336 | 83 of the 125 quarantined goals proved again with trusted lemmas (REVER4 and production), 42 still out; production at 6 workers while exp42 and exp43 ran; all 48,172 trusted (trust.py, 2ba) |
 | 20 Nov 18:45 | 48,201 | 5340 | production paused 15:30 for Z6 (from zero on all goals, 41,789 at 3 h); the 20 s sweep (9 of 600), Z6's and production's live and transfer loops; REVER4 stopped 17:33 (0 of 15 at 300 s); all 48,201 trusted (trust.py) |
-| 20 Nov 23:36 | 48,208 | 5341 | Z6 from zero ended: 44,095 in 8 hours on 12 workers (Z4 38,044); its 2 unique proofs merged, trusted; the sweep 14 of 1,200 |
+| 20 Nov 23:35 | 48,208 | 5341 | Z6 from zero ended: 44,095 in 8 hours on 12 workers (Z4 38,044); its 2 unique proofs merged, trusted; the sweep 14 of 1,200 |
 
 From 15 Nov 05:30 the rate fell from hundreds an hour to 50–100. The
 cheap new contexts are used up; 58% of the unsolved goals sit behind the
