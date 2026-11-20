@@ -178,7 +178,7 @@ def live(dirs, d, every, j, rest):
         if o not in ax:
             ax[o] = lemmas.axiom_set(n)
         return ax[o]
-    cyc = 0
+    cyc = 0; run_ = time.strftime('%d%H%M')   # (cycle files carry the process's start, so a restart keeps the old)
     while True:
         t0 = time.time(); cyc += 1
         S = {l.split('\t')[0] for l in open(os.path.join(LOOPS, 'UL', 'solved.tsv'))}
@@ -237,7 +237,7 @@ def live(dirs, d, every, j, rest):
         print(f'cycle {cyc} {time.strftime("%H:%M:%S")}: {len(want)} target keys, {len(jobs)} new logs, '
               f'{nf} failed-run hits, {len(hits)} goals hit', flush=True)
         if hits:
-            hp = os.path.join(d, f'hits_{cyc}.tsv')
+            hp = os.path.join(d, f'hits_{run_}_{cyc}.tsv')
             with open(hp, 'w') as fo:
                 for g in sorted(hits):
                     for h in sorted(set(hits[g]), key=lambda h: (h[5], h[1], h[2]))[:5]:
@@ -248,7 +248,7 @@ def live(dirs, d, every, j, rest):
                     if len(w_) >= 3 and l.endswith('\n'):
                         f.write(f'{w_[0]}\t0\t{w_[2].strip()}\n')
             for tag, pre, T in (('a', False, 20), ('p', True, 40)):
-                gp = os.path.join(d, f'goals_{cyc}{tag}.tsv')
+                gp = os.path.join(d, f'goals_{run_}_{cyc}{tag}.tsv')
                 sketch(hp, os.path.join(d, 'sketch' + tag), gp, 3, pre)
                 if tag == 'p':   # (only the goals the first pass left)
                     S2 = {l.split('\t')[0] for l in open(os.path.join(LOOPS, 'UL', 'solved.tsv'))}
@@ -261,6 +261,26 @@ def live(dirs, d, every, j, rest):
             with open(triedp, 'a') as f:
                 f.writelines(f'{g}\t{cyc}\n' for g in sorted(hits))
             tried |= set(hits)
+        # (20 Nov 04:30) the same statement proven in a theory with more axioms (REPORT 2ar; exp/sofree.py): the
+        # candidates whose first source proof has no missing axiom as a step, new (goal, first source) pairs only,
+        # source proof steps first, 20 s (46 at 04:18 gave 9, 26 per CPU h)
+        sys.path.insert(0, os.path.join(os.path.dirname(me), 'exp'))
+        import sofree
+        sop = set()
+        for dd in ('SOF', 'SOP', 'SOR', 'SO2run', os.path.basename(d)):
+            p_ = os.path.join(LOOPS, dd, 'transfer.tsv')
+            if os.path.exists(p_):
+                for l in open(p_):
+                    w_ = l.rstrip('\n').split('\t')
+                    if len(w_) >= 5:
+                        sop.add((w_[0], w_[4].split(',')[0]))
+        so, nso = sofree.candidates(os.path.join(d, 'so_all.tsv'), tried_pairs=sop)
+        print(f'  same statement: {nso} candidates, {len(so)} new free ones', flush=True)
+        if so:
+            gp = os.path.join(d, f'so_{run_}_{cyc}.tsv')
+            open(gp, 'w').writelines(so)
+            subprocess.run([sys.executable, tp, 'run', gp, d, '-j', str(j), '--time', '20', '--src-lemmas', '6',
+                            '--live-dst', os.path.join(LOOPS, 'UL'), '--'] + rest)
         wm = top
         open(wmp, 'w').write(repr(wm))
         time.sleep(max(0, every - (time.time() - t0)))

@@ -28,21 +28,18 @@ def akey(body):
     return None
 
 
-def main():
-    out = sys.argv[1]
-    tmp = out + '.all'
-    transfer.find_same_other(os.path.join(L, 'UL'), tmp)
-    tried = set()
-    for d in ('SOF', 'SOP', 'SOR'):
-        p = os.path.join(L, d, 'transfer.tsv')
-        if os.path.exists(p):
-            tried |= {l.split('\t')[0] for l in open(p)}
+def candidates(tmp, tried=(), tried_pairs=()):
+    """find --same-other into TMP, then the free candidates (no missing axiom as a step of the first source proof),
+    minus goals in TRIED and (goal, first source) pairs in TRIED_PAIRS: (lines, number of candidates)"""
+    import contextlib, io
+    with contextlib.redirect_stdout(io.StringIO()):
+        transfer.find_same_other(os.path.join(L, 'UL'), tmp)
     keep = []; n = 0
     for l in open(tmp):
         w = l.rstrip('\n').split('\t')
         g, srcs = w[0], w[1].split(',')
         n += 1
-        if g in tried:
+        if g in tried or (g, srcs[0]) in tried_pairs:
             continue
         f = srcs[0]
         miss = lemmas.axiom_set(f) - lemmas.axiom_set(g)
@@ -56,6 +53,17 @@ def main():
                 steps.add(transfer.key(v[0], v[1]))
         if not (mk & steps):
             keep.append(l if l.endswith('\n') else l + '\n')
+    return keep, n
+
+
+def main():
+    out = sys.argv[1]
+    tried = set()
+    for d in ('SOF', 'SOP', 'SOR'):
+        p = os.path.join(L, d, 'transfer.tsv')
+        if os.path.exists(p):
+            tried |= {l.split('\t')[0] for l in open(p)}
+    keep, n = candidates(out + '.all', tried)
     open(out, 'w').writelines(keep)
     print(f'{n} same-statement candidates, {len(tried)} tried on 16 Nov, {len(keep)} with no missing axiom as a '
           f'step of the first source proof -> {out}')
