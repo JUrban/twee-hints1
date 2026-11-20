@@ -29,6 +29,7 @@ in `/project/hintwork` (not in git).
 | + the same, from zero by default (solve_new.sh GIVEN=1, exp40: half1 +282 at 2 hours; 2az); at 20 Nov 09:14 | **48,178** (+55.1% over plain) | **5337** (+66.6%) | – |
 | **corrected:** proofs resting on unsound Prover9 proofs removed or re-proved (2ba); step joins; at 20 Nov 12:10 | **48,108** (+54.9% over plain) | **5320** (+66.1%) | – |
 | + re-proofs of quarantined goals with trusted lemmas, step joins, the live and transfer loops; at 20 Nov 13:38, all trusted | **48,172** (+55.1% over plain) | **5336** (+66.6%) | – |
+| + the 20 s sweep of never-deep unsolved goals, the live and transfer loops (production paused for Z6); at 20 Nov 18:45, all trusted | **48,201** (+55.2% over plain) | **5340** (+66.7%) | – |
 
 **Correction (20 Nov 10:40; [notes/2026-11-20-p9-negation-bug.md](notes/2026-11-20-p9-negation-bug.md)).** The counts
 from 15 Nov on include proofs that are not proofs.
@@ -124,6 +125,7 @@ written in loops/UL. Merged proofs count from their merge.
 | 20 Nov 09:14 | 48,178 | 5337 | production at 4 workers 07:06-09:07 while exp40 ran (its own runs: 0 new in 2,200); the live loop and the transfer loop; ul74 back at 12 workers from 09:08 (2al, 2az) |
 | 20 Nov 12:10 | 48,108 | 5320 | corrected (2ba): 1,130 goals quarantined at 10:07, re-proved with trusted lemmas or removed (the last 96 at 12:09); step joins (24); production at 4-12 workers while exp41 and exp42 ran |
 | 20 Nov 13:38 | 48,172 | 5336 | 83 of the 125 quarantined goals proved again with trusted lemmas (REVER4 and production), 42 still out; production at 6 workers while exp42 and exp43 ran; all 48,172 trusted (trust.py, 2ba) |
+| 20 Nov 18:45 | 48,201 | 5340 | production paused 15:30 for Z6 (from zero on all goals, 41,789 at 3 h); the 20 s sweep (9 of 600), Z6's and production's live and transfer loops; REVER4 stopped 17:33 (0 of 15 at 300 s); all 48,201 trusted (trust.py) |
 
 From 15 Nov 05:30 the rate fell from hundreds an hour to 50–100. The
 cheap new contexts are used up; 58% of the unsolved goals sit behind the
@@ -4846,6 +4848,8 @@ reproduced exactly).
 * exp12 stage B.
 
 ## 2az. Portfolios: complementary methods kept, not dropped (user's request, 18 Nov 17:00)
+
+*Notes: [notes/2026-11-20-retry-class.md](notes/2026-11-20-retry-class.md).*
 
 *Notes: [notes/2026-11-20-sweep20.md](notes/2026-11-20-sweep20.md), [notes/2026-11-20-z6.md](notes/2026-11-20-z6.md).*
 
