@@ -749,7 +749,10 @@ has the history (user, 20 Nov: "update the total numbers in the report etc every
 Next:
 00000000. **Model audit (10:54, [notes/2026-11-20-model-audit.md](notes/2026-11-20-model-audit.md)):** exp/modelcheck.py evaluates every proof step
    of every solved unit goal in up to 40 Mace4 models (sizes 2-8) of its theory; a step false in a model is not a
-   theorem. Self-test: all goal statements must hold. Running (-j 3).
+   theorem. Self-test: all goal statements must hold. Done 11:05: 2.4M step checks in 2,504 models of 68 theories;
+   0 false goals; 217 false steps in 71 goals, all printed goal terms (different variables on the two sides, e.g.
+   X0 = X1), none a wrong derived equation. Positive control: 13 of the 16 unsound Prover9 proofs have one
+   (ld(X0,e) = X0). stepjoin now model-checks its step axioms.
 0000000. **Step joins (10:43, [notes/2026-11-20-step-join.md](notes/2026-11-20-step-join.md)):** exp/joincheck.py over all 3,170 unsolved
    unit goals with trusted proof steps of weaker theories; exp/stepjoin.py proves each join with the steps as named
    lemma axioms. All 3,684 (3,170 unit, 514 conditional with the hypothesis as a ground rule): 23 joins, 23 proved.
@@ -760,8 +763,10 @@ Next:
    without lemma records); exp/trust.py (trusted = before 15 Nov 08:56, or every recorded lemma trusted) and
    exp/rever2.py (re-proves the roots with a trusted context, --keep-out) running from 10:32. The side loops now keep
    outputs (abs/xfrlive2k.sh, gmlive2k.sh); transfer.py names source lemmas by goal.
-00000. exp41 (09:16, [notes/2026-11-20-half2-given.md](notes/2026-11-20-half2-given.md)): exp40 replicated on half2, P2E = solve_new.sh's
-   defaults (GIVEN=1) against exp30's P2D (19,383 at 2 h); abs/exp41.sh; production at J=4 until about 11:17.
+00000. **exp41 done (11:20, [notes/2026-11-20-half2-given.md](notes/2026-11-20-half2-given.md)):** half2 from zero, P2E (GIVEN=1) 20,152 at
+   2 hours against P2D's 19,383: +941/−172, net +769 (half1 exp40: +282). Replicates; GIVEN=1 stays. The live loop's
+   ancestry runs made 541 proofs per CPU h, same-statement runs 80, and the 60-goal cap starved the former (145-192
+   pending). Next: exp42 with --cap 200 --same-cap 20 on half1 against PGE, after the re-verification.
 0000. exp40 ([notes/2026-11-20-from-zero-given.md](notes/2026-11-20-from-zero-given.md)): half1 from zero as exp29's PGD (19,309 at 2 h)
    plus `--given-scan` and givenmatch.py live on the loop (abs/exp40.sh); production at J=4 meanwhile.
    Done 09:06: **PGE 19,591, +282** (+150 at equal CPU); the live loop 614 of 901 in 2.97 CPU h (ancestry runs 434

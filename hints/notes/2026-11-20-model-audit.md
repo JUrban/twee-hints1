@@ -36,6 +36,24 @@ Outputs:
 * false_goals.tsv
 * false_step_goals.txt
 
-## Results
+## Results (11:05–11:20)
 
-(pending)
+* **68 theories, 2,504 models** (13 to 40 each; every theory has some), **2,400,297 step checks** (unique steps per
+  theory, each solved unit goal's hints file).
+* **Self-test:** 0 of the AIM60k goal statements fail in a model.
+* **217 false steps, in 71 goals.** All 217 have different variables on the two sides, e.g. `X0 = X1` (15 times),
+  `X0 = m(k(X1,X2),rd(X3,m(X2,X3)))`, `m(r(X0,X1,X2),X3) = m(r(X0,X1,X2),...)`.
+  * 191 have a side that is a bare variable not on the other side.
+  * They are printed goal terms, not derived equations. In aa1_45_b__goal_301 the first hints line is
+    `X0 = m(k(X1,X2),rd(X3,m(X2,X3)))`, the goal's left side with a fresh variable.
+  * As hints they are harmless: twee matches hints by variant.
+  * As axioms or rewrite rules they are false. The live path from hints to axioms was exp/stepjoin.py, now
+    filtered: each step axiom must hold in the models. All 64 step axioms of its 23 proofs hold. loop.py
+    `--hint-axioms` has been used only in hax.sh (14 Nov, REPORT 2s), not in production.
+* **No false step with the same variables on both sides**, which is the shape of a wrong derived equation.
+* **Positive control:** the hints of the 16 quarantined unsound Prover9 proofs. 13 of 16 have a same-variable false
+  step, e.g. `ld(X0,e) = X0` (every inverse equal to itself) and `rd(e,X0) = X0`. The other 3
+  (aK2eq_1234__goal_392, aK2_eq_aK3_j__goal_425, nil3_23_32_to_28__goal_401) show none in their hints.
+* **Verdict:** with this check's recall on known-bad proofs (13 of 16), production's 48k unit-goal proofs show no
+  sign of another unsoundness. Conditional goals' proofs and false steps that hold in all small models stay
+  unchecked.
