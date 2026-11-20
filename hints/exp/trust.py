@@ -139,9 +139,14 @@ def main():
             add(g, d, names)
     for p in glob.glob(os.path.join(L, '*', 'used.tsv')):
         d = p.split('/')[-2]
+        mu = os.path.getmtime(p)
         for l in open(p):
             w = l.rstrip('\n').split('\t')
-            if len(w) >= 3 and w[0] in S and same(d, w[0]):
+            # (20 Nov 13:38) a climber's rows describe its own proof. When production's hints file is newer than the
+            # whole used.tsv, that proof has since been replaced (CLHL2 stopped at 10:04; its old rows kept REVER4's
+            # sound re-proofs of mbol_12lemmas 526 and three more untrusted through a quarantined lemma)
+            if len(w) >= 3 and w[0] in S and same(d, w[0]) and \
+                    os.path.getmtime(os.path.join(L, 'UL', 'hints', w[0])) <= mu:
                 add(w[0], d, [x for x in w[2].split(',') if x])
     old = {g for g in S if os.path.getmtime(os.path.join(L, 'UL', 'hints', g)) < T0}
     trusted = set(old)

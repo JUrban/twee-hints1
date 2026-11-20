@@ -108,6 +108,13 @@ Written 20 Nov 2026, 10:32 UTC, while the re-verification runs.
     to Q. No writer can use them as lemmas now, and rever2 (loops/REVER4, 2 workers until exp42 ends) re-proves Q's
     unsolved goals with trusted lemmas only.
 * **12:10: 48,108 solved, all trusted.** Holdout 5,320 of 5,880. REVER4: 125 quarantined goals to re-prove.
+* **Stale climber rows (13:38).** At 13:35, 4 proofs were untrusted (aa1_12 533, mbol_12lemmas 526,
+  mbol_aa1sqrd_to_aa1 549, mbol_to_aaxx 456), through mbol_lem1__goal_387. Their current proofs are REVER4's
+  re-proofs (12:43 and later), with complete trusted records. The taint came from the climber CLHL2's used.tsv
+  (last written 10:04, before the quarantine): trust.py unions a climber's rows into the goal's record, and those
+  rows describe the climber's old proof (step s18 of mbol_12lemmas 526 used `lemma_knn_4_mbol_lem1__goal_387`).
+  Now a used.tsv's rows count only if production's hints file is not newer than the used.tsv. **13:38: 48,172
+  solved, all trusted.**
 * Still open: the 5 bad goals not yet re-proved (aK2_eq_aK3_s 450, 470, 474, 476; mbol_lem1 387). The other 11
   have new sound twee proofs.
 * From 10:35, the transfer loop and the live loop run with `--keep-out` (abs/xfrlive2k.sh, abs/gmlive2k.sh), and
