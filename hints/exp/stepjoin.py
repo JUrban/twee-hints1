@@ -42,7 +42,7 @@ def main():
             steps = []
             for t in w[4].split(','):
                 sg, _, i = t.rpartition(':')
-                if sg == 'axiom' or not sg:
+                if sg in ('axiom', 'hyp') or not sg:   # (the theory's axioms; a goal's own hypothesis)
                     continue
                 if TR is not None and sg not in TR:
                     steps = None; break

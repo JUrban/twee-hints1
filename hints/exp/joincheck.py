@@ -145,6 +145,7 @@ class Rewriter:
     def __init__(self, eqs, limit):
         """EQS: (lhs, rhs, tag) parsed; each direction whose right side's variables occur on its left"""
         self.ix = Index(); self.nf = {}; self.limit = limit; self.n = 0; self.skip = None
+        self.hyp = {}   # (--cond) ground rules of one goal's hypotheses: lhs -> rhs
         for l, r, tag in eqs:
             vl, vr = vars_(l, set()), vars_(r, set())
             if not isinstance(l, str) and vr <= vl:
@@ -165,6 +166,10 @@ class Rewriter:
             if self.n > self.limit:
                 raise TimeoutError
             t2 = (t[0],) + tuple(self.norm(a, u0) for a in t[1:])
+            if t2 in self.hyp:
+                u0.add(('hyp', 0))
+                t = self.hyp[t2]
+                continue
             for l, r, tag in self.ix.candidates(t2):
                 if tag[0] == self.skip:
                     continue
@@ -183,6 +188,46 @@ class Rewriter:
         return t
 
 
+def split_top(s, sep):
+    out, dep, i0 = [], 0, 0
+    for i, c in enumerate(s):
+        dep += (c == '(') - (c == ')')
+        if dep == 0 and s.startswith(sep, i):
+            out.append(s[i0:i].strip()); i0 = i + len(sep)
+    out.append(s[i0:].strip())
+    return out
+
+
+def cond(g):
+    """a goal '~ s = t | u = v' -> ((s, t), (u, v)), else None"""
+    import re
+    import p9twee
+    try:
+        f = p9twee.tptp_parts(g)[1]
+    except Exception:
+        return None
+    if not f or f.count('~') != 1:
+        return None
+    f = re.sub(r'!\s*\[[^\]]*\]\s*:\s*', '', f).strip()
+    while f.startswith('(') and f.endswith(')'):   # (outer parentheses, when they enclose the whole formula)
+        inner = f[1:-1]; dep = 0; ok = True
+        for i, c in enumerate(inner):
+            dep += (c == '(') - (c == ')')
+            if dep < 0:
+                ok = False; break
+        if not ok:
+            break
+        f = inner.strip()
+    parts = split_top(f, '|')
+    if len(parts) != 2 or not parts[0].startswith('~'):
+        return None
+    h = split_top(parts[0][1:].strip().strip('()'), '=') if parts[0][1:].strip().startswith('(') else split_top(parts[0][1:].strip(), '=')
+    c = split_top(parts[1], '=')
+    if len(h) != 2 or len(c) != 2:
+        return None
+    return (h[0], h[1]), (c[0], c[1])
+
+
 def ground(t, m):
     if isinstance(t, str):
         return m.setdefault(t, ('sk_' + t.lower(),))
@@ -197,6 +242,9 @@ def main():
     ap.add_argument('--steps', type=int, default=3000)
     ap.add_argument('--trusted', help='only these goals\' proofs as the bank (exp/trust.py OUT.trusted)')
     ap.add_argument('--shard', default='0/1', help='I/N: every Nth sampled goal from the Ith')
+    ap.add_argument('--cond', action='store_true',
+                    help='the conditional goals (one hypothesis s = t): its ground sides, normalised, as one oriented '
+                         'rule for that goal only')
     ap.add_argument('--control', action='store_true',
                     help='sample proven goals instead, without their own proof steps (the method\'s power)')
     a = ap.parse_args()
@@ -206,14 +254,14 @@ def main():
     for g in names:
         by_o[lemmas.split(g)[0]].append(g)
     oax = {o: frozenset(axs(gs[0])) for o, gs in by_o.items()}
-    U = sorted(g for g in names if (g in S) == a.control and unit(g))
+    U = sorted(g for g in names if (g in S) == a.control and (cond(g) if a.cond else unit(g)))
     random.Random(a.seed).shuffle(U)
     U = U[:a.n]
     U.sort(key=lambda g: (sorted(oax[lemmas.split(g)[0]]), g))   # (one bank per theory)
     si, sn = (int(x) for x in a.shard.split('/'))
     U = U[si::sn]
     TR = {l.strip() for l in open(a.trusted) if l.strip()} if a.trusted else None
-    print(f'{len(U)} {"proven" if a.control else "unsolved"} unit goals sampled', flush=True)
+    print(f'{len(U)} {"proven" if a.control else "unsolved"} {"conditional" if a.cond else "unit"} goals sampled', flush=True)
     # steps per source original: key -> (lhs, rhs, (source goal, index)) from production's hints files
     steps = {}
 
@@ -269,16 +317,27 @@ def main():
             rw.n = 0
             if a.control:
                 rw.skip = g; rw.nf = {}
-            _, ls, rs = unit(g)
-            m = {}
-            s_, t_ = ground(parse(ls), m), ground(parse(rs), m)
             used = set()
+            m = {}
+            if a.cond:
+                (hl, hr), (ls, rs) = cond(g)
+                rw.nf = {}; rw.hyp = {}
+            else:
+                _, ls, rs = unit(g)
+            s_, t_ = ground(parse(ls), m), ground(parse(rs), m)
             try:
+                if a.cond:
+                    h1, h2 = rw.norm(ground(parse(hl), m), used), rw.norm(ground(parse(hr), m), used)
+                    if h1 != h2:
+                        rw.hyp = {h1: h2} if gt(h1, h2) else {h2: h1}
+                        rw.nf = {}
                 ns_, nt_ = rw.norm(s_, used), rw.norm(t_, used)
                 j = int(ns_ == nt_)
                 info = f'{size(ns_)}\t{size(nt_)}'
             except (TimeoutError, RecursionError):
                 j, info = -1, '-\t-'
+            if a.cond:
+                rw.nf = {}; rw.hyp = {}
             dt = time.time() - t0
             fo.write(f'{g}\t{j}\t{info}\t{",".join(f"{x}:{i}" for x, i in sorted(used))}\t{dt:.1f}\n')
             fo.flush()
