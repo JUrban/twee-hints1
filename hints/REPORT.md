@@ -4849,6 +4849,8 @@ reproduced exactly).
 
 ## 2az. Portfolios: complementary methods kept, not dropped (user's request, 18 Nov 17:00)
 
+*Notes: [notes/2026-11-20-yield-discount.md](notes/2026-11-20-yield-discount.md).*
+
 *Notes: [notes/2026-11-20-retry-class.md](notes/2026-11-20-retry-class.md).*
 
 *Notes: [notes/2026-11-20-sweep20.md](notes/2026-11-20-sweep20.md), [notes/2026-11-20-z6.md](notes/2026-11-20-z6.md).*

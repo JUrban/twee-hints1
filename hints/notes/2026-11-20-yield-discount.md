@@ -39,7 +39,10 @@ Written 20 Nov 2026, 19:38 UTC, before launch. Launched with exp44 by abs/exp444
   Vkd@0 in solve_new.sh) that got under R CPU h in the last W CPU h is ranked with the best label until it has R.
   Here 12:0.25: on 6 workers the window is 2 hours, so at most 5 × 0.25 / 12 ≈ 10% of the CPU.
 * Every 500 runs the cascade's stderr line lists the six best estimates (`est ...`).
-* Smoke test: loops/YDT (below).
+* Smoke tests (19:37-19:55, 487 goals of aa3_45 and nsmr_to_aa1, 2 workers): loops/YDT (`--yield-discount 2000`,
+  6 min) and loops/YDT2 (with `--reexplore 1:0.02`, 12 min, past 500 runs): no errors; the estimate line read
+  `est L0 156.8 Vunf@0 4.1 L1 1.7 Vk100@0 1.0 ...`. L1 did not run there: no label had its 0.2 explore hours yet, so
+  nothing was re-explored.
 
 ## Set and setting
 
