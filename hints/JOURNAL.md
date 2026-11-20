@@ -750,7 +750,8 @@ has the history (user, 20 Nov: "update the total numbers in the report etc every
 Next:
 0000000000. **Semantic guidance offline (12:14, [notes/2026-11-20-semantic-guidance.md](notes/2026-11-20-semantic-guidance.md)):** are proof steps false in
    Mace4 models of the base axioms where an extra axiom fails (SCOTT-style relevance) more often than other given
-   rules? exp/semguide.py over 10 logs per original; first original (aK2_eq_aK3_s): 17% vs 24%, the wrong way.
+   rules? exp/semguide.py over 10 logs per original. Done 12:36: 62 originals with models; 32.4% vs 30.4%, lift
+   1.09 (18 originals clearly enriched, 11 depleted). Closed as a weak negative.
 000000000. **exp42 (11:27, [notes/2026-11-20-given-cap.md](notes/2026-11-20-given-cap.md)):** half2 from zero, P2F = P2E (solve_new.sh defaults)
    with the live loop at `--cap 200 --same-cap 20` (ancestry runs no longer starved by the same-statement runs),
    against exp41's P2E (20,152 at 2 h). abs/exp42.sh; production at J=6, rever at 2 meanwhile.

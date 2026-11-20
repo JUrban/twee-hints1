@@ -28,6 +28,28 @@ Written 20 Nov 2026, 12:14 UTC, at launch.
 
     python3 exp/semguide.py loops/SEMG --logs 10 --models 10 -j 2
 
-## Results
+## Results (12:36)
 
-(pending)
+* **Relevance models:** 62 of the 116 originals with extras have some, 10 each (620). For the other 54, the extras
+  hold in every model of the base up to size 8, or Mace4 found none in 30 s.
+* **Over the 62:** proof steps are false in a relevance model 36,301 of 111,964 times (32.4%); the other given rules
+  495,783 of 1,629,586 times (30.4%). **P(step | false) / P(step | true) = 1.09.**
+* **By original:** proof steps are false clearly more often (by a factor of more than 1.2) in 18 originals, and
+  clearly less often in 11. The strongest enrichments:
+
+  | original | proof steps false | other rules false |
+  |---|---|---|
+  | ns_to_aa1_b | 32.2% | 19.1% |
+  | gbol_to_aK1 | 44.2% | 31.4% |
+  | gbol_to_osb | 43.8% | 32.4% |
+  | ns_to_aa1_c | 41.2% | 27.4% |
+  | mbol_com | 78.0% | 62.9% |
+
+  On the other side: aK2_eq_aK3_s 17% against 24%, raa2a 11% against 15%.
+* **Reading:** proofs need the extras, but so does most of what the search derives from them. A run's given rules
+  are mostly consequences of the extras too, so falsity there hardly separates steps from the rest. A proof must
+  contain at least one step false in each model of the base where the goal fails. That is one step in a hundred, too
+  few to move the rates.
+* **Decision:** not worth evaluating models per rule inside twee for a lift of 1.09. Closed as a weak negative. A
+  per-original feature for the rule model (the falsity bit, with the original's own lift learned) stays possible.
+  The 18 enriched originals are where it could pay.
