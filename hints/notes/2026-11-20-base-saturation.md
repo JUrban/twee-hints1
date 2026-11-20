@@ -59,3 +59,24 @@ Do dedicated base-theory runs find such goals at the same rate, and for how long
   are theorems of the goal's theory, so either arm's proof is a proof in that theory.
 * Measures: proofs per arm, the one-arm goals, and the hits of each arm's given rules.
 * Interim (05:45, 13 runs of the base pilot): 2 new goals hit (aK2_eq_aK3_a 639 and aK2_eq_aK3_i 384), in 0.27 CPU h.
+
+## Results
+
+**exp39 pilot (05:39-06:33): 120 runs, 2.62 CPU h, 9 new goals hit and 1 direct proof.**
+* The live loop proved 6 of the 9: aK2_eq_aK3_c 489, aK2_eq_aK3_i 384, aK2_eq_aK3_j 444, aK2_eq_aK3_o 450,
+  nil3_23_32_to_26 476 and nslm_to_aa1 1196.
+* It failed on aK2_eq_aK3_a 639 and nslm_to_aa1 1053 and 1099, in both passes.
+* Direct proof: aK2rev 438, not in production before. It goes in through transfer.py run (abs/gsatd.sh).
+* About 2.7 proofs per CPU h, against 0.6 for production's own runs. But that is a fifth of the hit rate of
+  production's base runs (3.4 hits per CPU h here, against about 16).
+* The hits come late in the runs: at rules 5,588 to 12,219 of runs with 6,828 to 14,339 rules. So at this setting,
+  short runs would not reach them.
+* Production's base runs that hit were short (6-8 s) with 36 to 406 lemmas nearest the goal. So the lemma choice
+  (kNN, not random) is the first thing to vary.
+
+**exp39b (05:46-06:33): nax 0, full 0 of 60**, in 2 × 60 runs of 20 s, and no goal hit by either arm. The 60 random
+unsolved goals of the stronger theories are beyond a 20 s run with these lemmas and hints, with or without their
+hypotheses. Dropping the hypotheses gains nothing here; stopped.
+
+**exp39c (06:35-): production-like base runs.** abs/gsat2.sh: 8 s, 6 siblings + the 100 kNN lemmas of G0
+(lemmas.LemmaIndex.select, as production's k100 member), 300 runs, 3 workers, run tag c in loops/GSAT/runs.tsv.

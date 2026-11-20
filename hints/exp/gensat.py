@@ -104,14 +104,17 @@ def job(args):
         sib = [g for _, g in sorted(x for x in prov if x[0] < i0)[-6:]]
         allp = [g for v in st['proven'].values() for _, g in v]
         rnd = random.Random(a.seed * 100003 + k)
-        lem = sib + [g for g in rnd.sample(allp, min(a.K, len(allp))) if g not in sib]
+        if a.knn:   # (06:40, exp39c) production's kNN lemmas: the K proven goals nearest to G0 (same or weaker axioms)
+            lem = sib + [g for g in st['index'].select(g0, a.K, exclude=set(sib)) if g not in sib]
+        else:
+            lem = sib + [g for g in rnd.sample(allp, min(a.K, len(allp))) if g not in sib]
         hints = list(st['pool'].get(o, {}))
-    tag = f'{k}_{g0}'
+    tag = f'{a.tag}{k}_{g0}'
     tmp = os.path.join(D, 'tmp'); os.makedirs(tmp, exist_ok=True)
     pp = os.path.join(tmp, tag + '.p'); hp = os.path.join(tmp, tag + '.hints')
     with open(pp, 'w') as f:
         f.write(open(os.path.join(hintlib.PROB, g0 + '.p')).read().rstrip('\n') + '\n')
-        f.writelines(f'fof(lemma_{j}, axiom, {lemmas.conjecture(g)}).\n' for j, g in enumerate(lem))
+        f.writelines(f'fof(lemma_{j}, axiom, {lemmas.lemma_form(g)}).\n' for j, g in enumerate(lem))
     with open(hp, 'w') as f:
         f.writelines(hints)   # (production's format: lhs TAB rhs [TAB ...] lines)
     cmd = [TWEE, pp, '--max-time', str(a.T), '--no-colour', '--quiet', '--no-proof', '--print-hints',
@@ -167,7 +170,7 @@ def job(args):
         new = sorted(set(g for g, _ in hits) - st.setdefault('seen', set()))
         st['seen'] |= set(new)
         with open(os.path.join(D, 'runs.tsv'), 'a') as f:
-            f.write(f'{k}\t{g0}\t{"THM" if ok else "NO"}\t{dt:.1f}\t{len(rules)}\t{len(hits)}\t{len(new)}\t'
+            f.write(f'{a.tag}{k}\t{g0}\t{"THM" if ok else "NO"}\t{dt:.1f}\t{len(rules)}\t{len(hits)}\t{len(new)}\t'
                     f'{len(lem)}\t{len(hints)}\t{nk}\n')
         print(f'{time.strftime("%H:%M:%S")} {k} {g0} {"THM" if ok else "NO"} {dt:.0f}s {len(rules)} rules ({nk} goal statements), '
               f'{len(set(g for g, _ in hits))} goals hit, {len(new)} new {new[:4]}', flush=True)
@@ -187,10 +190,16 @@ def main():
     ap.add_argument('--jobs', type=int, default=120)
     ap.add_argument('--start', type=int, default=0)
     ap.add_argument('--seed', type=int, default=1)
+    ap.add_argument('--knn', action='store_true', help='kNN lemmas (lemmas.LemmaIndex.select) instead of random ones')
+    ap.add_argument('--tag', default='', help='a prefix of the run numbers in runs.tsv and the hit stamps')
     a = ap.parse_args()
     os.makedirs(D, exist_ok=True)
     names = [l.strip() for l in open('/project/hintwork/sets/all') if l.strip()]
     refresh(names)
+    if a.knn:
+        t0 = time.time()
+        st['index'] = lemmas.LemmaIndex(sorted(st['S']), subsets=True)
+        print(f'lemma index {time.time() - t0:.0f}s', flush=True)
     with ThreadPoolExecutor(a.j) as ex:
         n = sum(x or 0 for x in ex.map(job, [(k, a, names) for k in range(a.start, a.start + a.jobs)]))
     print(f'gensat: {a.jobs} runs, {n} new goals hit {time.strftime("%H:%M:%S")}', flush=True)
