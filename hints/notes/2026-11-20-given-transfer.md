@@ -107,3 +107,5 @@ Written 20 Nov 2026, 02:21 UTC.
 * **Side check, transfer.py `find --instances`** (instances of unit-goal proof steps, last run 16 Nov; 3.5 min): only
   11 candidates now, 9 of them already tried by the transfer loop or exp38. The other 2 (own-original sources, abs/xi1run.sh)
   failed at 20 s. Not worth a live finder.
+* **The instance scan (loops/GM2) ended at 03:49:** 2 goals hit in 451,614 logs (aa2_to_aa3 266, nil3_31 552).
+  Both were already variant hits that failed all three passes. Instances add nothing here.

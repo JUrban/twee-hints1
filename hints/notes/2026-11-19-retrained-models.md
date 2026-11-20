@@ -328,3 +328,11 @@ All arms on all 400 goals, fresh 20 s each, as of each goal's proof:
     abs/mabrm.sh.
 * **Member:** ul71 (20:30, production rows from 174,090) = ul70 + `m9a@0`, J=10 while exp37 trains and runs its
   arms. Its arm on the 400 (loops/MR_rm9a_20) started at 20:30 beside the control.
+
+## rm10f: rm9f's recipe on all data (20 Nov 03:49)
+
+* abs/rm10.sh: rulemodel.py `--all`, with no held-out goals. It trains on the 400 test logs and every production proof
+  since 19 Nov 19:50: 22,163 logs against rm9f's 21,143.
+* The same data sources, 150 negatives per log, Suda's weighting, rm9a's frozen vocab. 3 threads, 3 feature workers.
+* As in Mizar60's deployment, the retrained model would replace m9f@0 as m10f@0. It has no held-out test; the replay
+  measured the recipe.
