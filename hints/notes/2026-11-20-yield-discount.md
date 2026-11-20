@@ -18,6 +18,11 @@ Written 20 Nov 2026, 19:38 UTC, before launch. Launched with exp44 by abs/exp444
   (proofs + 2 × prior) / (CPU h + 2). Vunf@0 stood at 23 per CPU hour, from runs made while nearly everything
   proved; L1 at 5.7 (9 proofs in its 0.2 explore hour, prior 1.73). So after its explore hour L1 never ran again.
   The half tests show the same: L1 ran 33 times in P2E and P2F, all in the first hour, 18 proofs.
+* **Z6's heads at 19:56** (unsolved goals right after a proven sibling, the only goals `--frontier 1` lets deepen):
+  1,423, and production proved 1,245 of them. Production's first proof was at L0 for 504 (with production's
+  larger lemma context), **at L1 for 358**, at L2 for 58, by variants for 65 and by side loops for 260. Z6 ran L1
+  on 3 of its heads: its head runs were 2,841 at L0, 934 of Vunf@0 and 189 of the lemma-count variants. A head's
+  proof also gives the goal after it a new context.
 * **Offline (hints/exp/estcmp.py, its split test).** It scores each window's split of proofs among the labels that
   ran in it, predicted from the rows before (multinomial log-likelihood; windows of 1,000 rows, flat priors):
 
