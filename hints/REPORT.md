@@ -3150,6 +3150,8 @@ Now every other free slot goes to an original's first unsolved goal
 
 ## 2al. Goals that are steps of existing proofs (16 Nov, 04:20)
 
+*Notes: [notes/2026-11-20-base-saturation.md](notes/2026-11-20-base-saturation.md).*
+
 *Notes: [notes/2026-11-20-given-transfer.md](notes/2026-11-20-given-transfer.md).*
 
 *Notes: [notes/2026-11-16-step-transfer.md](notes/2026-11-16-step-transfer.md).*

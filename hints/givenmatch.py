@@ -220,9 +220,11 @@ def live(dirs, d, every, j, rest):
                         hits.setdefault(h[0], []).append(h)
         # (20 Nov 04:13) the hits production's failed runs found (loop.py --given-scan loops/GFAIL), from the offset
         # read so far; their logs are loops/GFAIL/<stamp>/given/<name>
+        # (05:40) and those of the base-theory runs (exp/gensat.py, loops/GSAT; exp39)
         nf = 0
-        gfp = os.path.join(LOOPS, 'GFAIL', 'hits.tsv'); offp = os.path.join(d, 'gfail_offset')
-        if os.path.exists(gfp):
+        for gdir_, offn_ in (('GFAIL', 'gfail_offset'), ('GSAT', 'gsat_offset')):
+          gfp = os.path.join(LOOPS, gdir_, 'hits.tsv'); offp = os.path.join(d, offn_)
+          if os.path.exists(gfp):
             off = int(open(offp).read()) if os.path.exists(offp) else 0
             with open(gfp) as f:
                 f.seek(off)
