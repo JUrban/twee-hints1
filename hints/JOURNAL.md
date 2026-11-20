@@ -749,6 +749,7 @@ Next:
    ([notes/2026-11-19-retrained-models.md](notes/2026-11-19-retrained-models.md)). exp35 stopped at 19:43 (no unique proof).
    ul71 (20:30, J=10) = ul70 + member m9a@0 (rm9a: AUC 0.876 on the 400, rm4t 0.835). exp36 ended: sketch hints +3 −0 of 54.
    ul72 (23:30, J=8) = ul71 + m9f@0, m9h@0, m9i@0: Suda's per-log weighting (AUC 0.892-0.900); replayed at 20 s rm9f +9 −5, rm9h +5 −1 against rm4t (202 of 400).
+   exp37 final (20 Nov 02:12): rm4t 202, rm9f 204, rm9h 203, rm9i 204, rm9a 184, rm9e 181, rm9g 187; union 226; cover rm9f, rm4t +14, rm9e +5, rm9h +2, rm9a +1. ul73 (02:17, J=12) = ul72 − m9i@0 + m9e@0. Time-matched control rm4t at 40 s running. Production's 19-20 Nov burst (783 proofs 22:20-02:13) came from the transfer loop: one L1 proof's steps solved 22 goals of other originals, which started sibling chains.
 1. ul70 (17:58, 15 workers while exp36 runs; ul69 + the climbs' hints as members sk@0 and sk@1:0,
    [notes/2026-11-19-climber-outputs.md](notes/2026-11-19-climber-outputs.md)). Before it, ul69 (16:33, 17 workers beside exp32's climber): the deep tail had not run since 06:00 (portfolio notes). Fresh
    pool runs at 40 and 80 s, every label explored, and `--reexplore 150:0.25` (periodic re-measuring). Read the

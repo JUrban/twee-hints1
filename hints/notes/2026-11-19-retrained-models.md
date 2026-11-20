@@ -263,6 +263,52 @@ abs/rm9wave2.sh, started 20:09:41 (its header says 20:11, written before checkin
   * Production back to J=12 at 00:55 (rows from 188,375; earlier log loops/UL72a.log).
   * At the restart, ul72 had 41 proofs in 4.0 CPU h since 23:30 (34 of them L0, over many originals), against about
     0.5 per CPU h before. m9f@0 had 1 proof in 0.58 CPU h; m9h@0 and m9i@0 none in 0.6 each.
+
+## Final paired result (20 Nov 02:12)
+
+All arms on all 400 goals, fresh 20 s each, as of each goal's proof:
+
+| model | proved | + | − | CPU h | unique among all arms |
+|---|---:|---:|---:|---:|---:|
+| rm4t (control) | 202 | | | 2.45 | 7 |
+| rm9a (production's logs) | 184 | 15 | 33 | 3.20 | 0 |
+| rm9e (2 longest proofs per goal) | 181 | 15 | 36 | 3.59 | 2 |
+| **rm9f (rm9a's data, Suda's weighting)** | **204** | 16 | 14 | 2.63 | 0 |
+| rm9g (rm9a's data, 255 leaves) | 187 | 13 | 28 | 3.24 | 0 |
+| **rm9h (2 longest, weighting)** | **203** | 14 | 13 | 2.77 | 1 |
+| **rm9i (weighting, 255 leaves)** | **204** | 17 | 15 | 2.72 | 0 |
+
+* **Union of all arms: 226 of 400, against rm4t's 202 (+12%).**
+* **Greedy cover (exp/mqcmp.py):** rm9f 204, then rm4t +14, rm9e +5, rm9h +2, rm9a +1, then rm9i and rm9g +0 (226).
+  rm9f and rm4t together prove 218.
+* **Reading:**
+  * Suda's per-run weighting is what makes a retrained model pay: all three weighted models match or beat rm4t.
+    The unweighted ones lose 18-21 goals, even rm9g with bigger trees.
+  * The models are complementary. Each weighted model has 13-15 goals rm4t lacks and loses about as many.
+  * rm9e is a weak model alone (181) but the third in the cover. Its training on long proofs makes it different.
+* **Members (portfolio rule):** m9f, m9h, m9e and m9a add proofs in the cover. m9i adds none (it proves the same
+  goals as rm9f) and had 0 in its 1.0 CPU h exploration, so it is dropped. ul73: ul72 − m9i@0 + m9e@0.
+* **Not yet known:** whether two models at 20 s beat one at 40 s. Time-matched control: rm4t at 40 s on the same
+  400 (loops/MQ_rm4t_40). If it proves fewer than 218, an L0 run with a second model is worth more than a longer
+  rm4t run.
+* **ul73 at 02:17** (production rows from 196,111, J=12), and the rm4t 40 s arm at 02:17. CPU: production 12, the
+  climber 4, the transfer loop 2, the arm 1.
+
+## Production's burst of 19-20 Nov was the transfer loop, not a model
+
+* My count at 23:30 ("ul71: 10 proofs in 13 CPU h") was wrong. ul71 made 454 proofs in 11.8 CPU h (375 at L0),
+  and production made 783 new proofs from 22:20 to 02:13. On 19 Nov it made 1,986 in all.
+* **The trigger (22:20):** L1 (40 s, the chain hints of the 10 nearest proven siblings: 269 hints) proved
+  aK2_eq_aK3_1243b goal 506. Four 5 s members with about 6,800 pool hints had failed on it. Its siblings 507-518
+  followed within 2 minutes.
+* **At 22:23 the transfer loop** (loops/XFL, transfer.py live, every 300 s) found 22 unsolved goals of other
+  originals that are steps of those proofs (same or weaker axioms). It proved all 22 in 24 s and wrote them to
+  production's solved.tsv with time 0. production's log shows synced 2 → 24 at that point.
+* Each transferred goal then started sibling chains in its own original. The transfer loop kept feeding:
+  28, 17, 19, 19 new candidates in the next 20 minutes.
+* So the big gains come from chain reactions across originals: one hard proof, its siblings, the transferred steps,
+  their siblings. The rule models act inside single runs.
+* Unsolved: 3,733 of 51,784 at 02:13.
 * Interim at 22:14: rm9a +9 −11 on 213, rm9b +5 −14 on 182, rm9c +2 −5 on 67, rm9e +5 −3 on 143.
 * CPU: 5 arms + training 4 + climber 4: production restarted at 21:54 with J=8 (rows from 179,422; earlier log loops/UL71a.log).
 * **The first paired design was broken (found 20:58).** The snapshot loops/ULsN19 (production's solved rows before
