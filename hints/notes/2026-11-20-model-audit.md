@@ -57,3 +57,11 @@ Outputs:
 * **Verdict:** with this check's recall on known-bad proofs (13 of 16), production's 48k unit-goal proofs show no
   sign of another unsoundness. Conditional goals' proofs and false steps that hold in all small models stay
   unchecked.
+
+## Routine (12:37)
+
+* exp/modelcheck.py writes OUTDIR/alarm.tsv: the false steps with the same variables on both sides, the shape of
+  a wrong derived equation. It prints an ALARM line if there are any.
+* abs/auditlive.sh (exp/auditlive.sh) runs the audit every 6 hours into loops/AUDIT/<stamp>, reusing the models,
+  from 15:37 (pid in loops/AUDIT.pid). It costs about 15 minutes on 3 CPUs.
+

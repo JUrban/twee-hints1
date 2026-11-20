@@ -196,6 +196,17 @@ def main():
             fg.flush(); fs_.flush()
             print(f'  {key}: {nm} models, {ns} steps, {len(bg)} false goals, {len(bs)} false steps', flush=True)
     bad = sorted({l.split('\t')[0] for l in open(os.path.join(OUT, 'false_steps.tsv'))})
+    # (20 Nov 12:37) the alarm: a false step with the same variables on both sides is the shape of a wrong derived
+    # equation (the printed goal terms have different variables on the two sides; notes/2026-11-20-model-audit.md)
+    alarm = []
+    for l in open(os.path.join(OUT, 'false_steps.tsv')):
+        w = l.rstrip('\n').split('\t')
+        if set(re.findall(r'X\d+', w[2])) == set(re.findall(r'X\d+', w[3])):
+            alarm.append(l)
+    open(os.path.join(OUT, 'alarm.tsv'), 'w').writelines(alarm)
+    if alarm:
+        print(f'ALARM: {len(alarm)} false steps with the same variables on both sides, in '
+              f'{len({l.split(chr(9))[0] for l in alarm})} goals (OUTDIR/alarm.tsv)', flush=True)
     open(os.path.join(OUT, 'false_step_goals.txt'), 'w').writelines(g + '\n' for g in bad)
     print('modelcheck: ' + ', '.join(f'{v} {k}' for k, v in tot.items()) + f'; {len(bad)} goals with a false step',
           flush=True)
