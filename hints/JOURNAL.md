@@ -758,6 +758,8 @@ Next:
 000000000000000. **exp44 (written 18:44, starts when Z6 ends, [notes/2026-11-20-retry-class.md](notes/2026-11-20-retry-class.md)):** Z6's first runs ended at
    about 150 min, then retries of goals with a new context proved 47% (1,096 of 2,331 in half an hour), the last
    first runs 3%. loop.py `--retry-class`: failed-before goals as their own --mix class. P2H on half2 against P2E/P2F.
+   Queued by abs/afterz6.sh (hints/exp/afterz6.sh, waiting since 18:44): when loops/Z6.done appears, exp44, production
+   (ul74, J=10, its 04:15 log kept as UL74.0420.log) and the step-join member (stepjlive3.sh: cycles after JOIN/c5).
 00000000000000. **20 s sweep (15:32, [notes/2026-11-20-sweep20.md](notes/2026-11-20-sweep20.md)):** 2,895 unsolved goals never had a production run
    above 5 s; the non-joined test proved 4 of 100 such at 20 s. exp/sweep20.py loops/SW20, chunks of 300 with a
    fresh trusted lemma context, 2 workers, proofs into UL (and kept). Production's own loop is stopped (2 proofs in
