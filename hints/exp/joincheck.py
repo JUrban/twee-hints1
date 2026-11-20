@@ -146,6 +146,7 @@ class Rewriter:
         """EQS: (lhs, rhs, tag) parsed; each direction whose right side's variables occur on its left"""
         self.ix = Index(); self.nf = {}; self.limit = limit; self.n = 0; self.skip = None
         self.hyp = {}   # (--cond) ground rules of one goal's hypotheses: lhs -> rhs
+        self.ix2 = None   # (--own-given) one goal's own rules: its failed run's given rules
         for l, r, tag in eqs:
             vl, vr = vars_(l, set()), vars_(r, set())
             if not isinstance(l, str) and vr <= vl:
@@ -170,7 +171,10 @@ class Rewriter:
                 u0.add(('hyp', 0))
                 t = self.hyp[t2]
                 continue
-            for l, r, tag in self.ix.candidates(t2):
+            cands = self.ix.candidates(t2)
+            if self.ix2 is not None:
+                cands = cands + self.ix2.candidates(t2)
+            for l, r, tag in cands:
                 if tag[0] == self.skip:
                     continue
                 sub = {}
@@ -245,6 +249,9 @@ def main():
     ap.add_argument('--cond', action='store_true',
                     help='the conditional goals (one hypothesis s = t): its ground sides, normalised, as one oriented '
                          'rule for that goal only')
+    ap.add_argument('--own-given', default='',
+                    help='DIR (loop.py --given-keep): each goal\'s own failed run\'s given rules join the bank for that '
+                         'goal (tag own:<line>); only goals with a file there are checked')
     ap.add_argument('--control', action='store_true',
                     help='sample proven goals instead, without their own proof steps (the method\'s power)')
     a = ap.parse_args()
@@ -260,6 +267,8 @@ def main():
     U.sort(key=lambda g: (sorted(oax[lemmas.split(g)[0]]), g))   # (one bank per theory)
     si, sn = (int(x) for x in a.shard.split('/'))
     U = U[si::sn]
+    if a.own_given:
+        U = [g for g in U if os.path.exists(os.path.join(a.own_given, g))]
     TR = {l.strip() for l in open(a.trusted) if l.strip()} if a.trusted else None
     print(f'{len(U)} {"proven" if a.control else "unsolved"} {"conditional" if a.cond else "unit"} goals sampled', flush=True)
     # steps per source original: key -> (lhs, rhs, (source goal, index)) from production's hints files
@@ -325,6 +334,20 @@ def main():
             else:
                 _, ls, rs = unit(g)
             s_, t_ = ground(parse(ls), m), ground(parse(rs), m)
+            if a.own_given:
+                ix2 = Index(); n2 = 0
+                for i, x in enumerate(open(os.path.join(a.own_given, g))):
+                    w = x.rstrip('\n').split('\t')
+                    try:
+                        l2, r2 = parse(w[0]), parse(w[1])
+                    except (AssertionError, IndexError):
+                        continue
+                    vl, vr = vars_(l2, set()), vars_(r2, set())
+                    if not isinstance(l2, str) and vr <= vl:
+                        ix2.add(l2, (l2, r2, ('own', i))); n2 += 1
+                    if not isinstance(r2, str) and vl <= vr and l2 != r2:
+                        ix2.add(r2, (r2, l2, ('own', i))); n2 += 1
+                rw.ix2 = ix2; rw.nf = {}
             try:
                 if a.cond:
                     h1, h2 = rw.norm(ground(parse(hl), m), used), rw.norm(ground(parse(hr), m), used)
@@ -338,6 +361,8 @@ def main():
                 j, info = -1, '-\t-'
             if a.cond:
                 rw.nf = {}; rw.hyp = {}
+            if a.own_given:
+                rw.nf = {}; rw.ix2 = None
             dt = time.time() - t0
             fo.write(f'{g}\t{j}\t{info}\t{",".join(f"{x}:{i}" for x, i in sorted(used))}\t{dt:.1f}\n')
             fo.flush()

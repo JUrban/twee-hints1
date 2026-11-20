@@ -545,8 +545,8 @@ class Loop:
         if a.gen_model:   # (twee-e39) the given rules of a failed run, for gen_save
             cmd += ['--print-given-unsolved']
         cap = name in getattr(self, 'capture_given', ())
-        if (cap or a.given_scan) and not a.gen_model:   # (climb.py) the final run's given rules, also when it fails;
-            cmd += ['--print-given-unsolved']             # (--given-scan) every failed run's
+        if (cap or a.given_scan or a.given_keep) and not a.gen_model:   # (climb.py) the final run's given rules, also
+            cmd += ['--print-given-unsolved']             # when it fails; (--given-scan, --given-keep) every failed run's
         k = 0
         if a.p9_orders > 1:
             # P9loop's term orderings: attempt k of a goal (rounds from --start, or the number of
@@ -646,6 +646,11 @@ class Loop:
                 self.given_scan(name, out, tag)
             except Exception as e_:   # (a scan error must not cost the run)
                 print(f'  given-scan: {name} error {e_!r}', flush=True)
+        if not ok and a.given_keep and var not in ('p9',):
+            try:
+                self.given_keep(name, out)
+            except Exception as e_:
+                print(f'  given-keep: {name} error {e_!r}', flush=True)
         if ok and getattr(self, 'chains', None) is not None:
             self.chains.add_record(name, out)   # (--chain-level: the new proof's lemma record)
         if ok and hasattr(self, 'used'):
@@ -728,6 +733,29 @@ class Loop:
         if path.startswith(os.path.join(self.dir, 'tmp')) and not os.environ.get('LOOP_KEEP_TMP'):
             os.unlink(path)
         return name, ok, dt, stats, res
+
+    def given_keep(self, name, out):
+        """(--given-keep DIR, 20 Nov 11:40; notes/2026-11-20-step-join.md) a failed unit-goal run's given rules, in the
+        hints' canonical form, to DIR/NAME ('lhs<TAB>rhs' lines, the latest failed run's): consequences of that run's
+        axioms and lemmas, for exp/joincheck.py --own-given (cross-run joining with other proofs' steps)"""
+        import lemmas
+        try:
+            if not lemmas.unit_eq(lemmas.conjecture(name) or '~'):
+                return
+        except OSError:
+            return
+        sig = self.signature(name)
+        ks = []
+        for x in givenlib.parse_given_parents(out):
+            if x and x[0] != x[1]:
+                ks.append(givenlib.key(x[0], x[1], sig))
+        if not ks:
+            return
+        os.makedirs(self.a.given_keep, exist_ok=True)
+        p = os.path.join(self.a.given_keep, name)
+        with open(p + '.tmp', 'w') as f:
+            f.writelines(f'{l}\t{r}\n' for l, r in ks)
+        os.replace(p + '.tmp', p)
 
     def given_scan(self, name, out, tag):
         """(--given-scan DIR, 20 Nov; exp38, notes/2026-11-20-given-transfer.md) a failed run's given rules against the
@@ -2172,6 +2200,9 @@ def make_parser():
     ap.add_argument('--given-scan', default='',
                     help='DIR (under loops/): check failed runs\' given rules against the unsolved unit goals; hits go to '
                          'DIR/hits.tsv with the run\'s rule log (givenmatch.py live runs them)')
+    ap.add_argument('--given-keep', default='',
+                    help='DIR: each failed unit-goal run\'s given rules to DIR/<goal> (the latest run), for '
+                         'exp/joincheck.py --own-given')
     ap.add_argument('--climb-hints', default='',
                     help='--variants sk: climb.py directories (comma-separated) whose sketches/ and fillhints/ proof steps '
                          'join the pool of their original')
