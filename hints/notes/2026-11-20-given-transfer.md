@@ -102,3 +102,8 @@ Written 20 Nov 2026, 02:21 UTC.
   783. The first live cycle starts from that time.
 * **Cycle 1 (03:42): 5 goals hit in 696 recent logs**, against 19 in 494,373 in the full scan. The frontier's logs are
   where the hits are.
+* Cycle 1's runs: 2 of 5 by the ancestry pass (71 s × 2), 1 of the remaining 3 by the prefix pass (121 s × 2). So
+  **3 of 5**, in about 0.11 CPU h.
+* **Side check, transfer.py `find --instances`** (instances of unit-goal proof steps, last run 16 Nov; 3.5 min): only
+  11 candidates now, 9 of them already tried by the transfer loop or exp38. The other 2 (own-original sources, abs/xi1run.sh)
+  failed at 20 s. Not worth a live finder.
