@@ -3272,6 +3272,29 @@ unsolved goals, the live climber's config with a 160 s final run, 4
 workers): 2 of the first 8 heads proved (KK_Kcom_to_aK1 255, Ka1_eq_Ka2
 361) in 4,128 CPU s, about 1.7 per CPU hour.
 
+**Rules other runs derived and did not use (exp38, 20 Nov 02:20-; [notes/2026-11-20-given-transfer.md](notes/2026-11-20-given-transfer.md)).**
+Matching against proof steps covers only about 22 M of the given logs' 400 M rules.
+* **The rest.** Every successful run's given log also holds the 379 M rules it derived and did not use. In a run on an
+  unconditional unit goal they follow from that original's axioms and proven lemmas. So an unsolved goal (of the
+  same or more axioms) that is a variant of one of them is a theorem, with that run's log as its sketch.
+* **The full scan** (givenmatch.py, 494,373 logs) found 19 such goals. 13 were proved, at about 28 per CPU h:
+  * the rule's ancestry as hints at 20 s proved 8;
+  * with the source run's axioms at 40 s, 3 more;
+  * the log's whole prefix as hints, 2 more.
+  The log's parents are rule numbers (position + 1). They were read as positions at first, which mangled the
+  ancestries, and were fixed at 04:08.
+* **Negatives:**
+  * a sibling run's whole rule set as lemma axioms: 0 of 40;
+  * instances, the rule more general than the goal: 2 hits, nothing new;
+  * a replay close to the source run: 0 of the 8 that resist.
+* **The frontier's logs are where the hits are:** 5 in the 696 logs written after the index, against 19 in 494,373.
+  So `givenmatch.py live` (loops/GML, every 5 minutes) scans each new log.
+* **Failed runs.** Given logs exist only for proofs. loop.py `--given-scan` (ul74, 04:15) checks every failed run's
+  given rules against the unsolved goals. That costs twee about 6% more time, for printing them. The live loop runs
+  the hits. In the first 15 minutes there were 5 goals, some across originals, and all 5 were proved in 34 s.
+* **The same statement in a theory with more axioms** (2ar), redone on today's proofs (exp/sofree.py): 9 of 46 in
+  0.34 CPU h, against 4-5 per CPU h on 16 Nov. It now runs in every live cycle.
+
 ## 2am. How many kNN lemmas (16 Nov, 06:50)
 
 *Notes: [notes/2026-11-16-knn-lemma-count.md](notes/2026-11-16-knn-lemma-count.md).*
