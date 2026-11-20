@@ -755,9 +755,11 @@ Next:
 000000000. **exp42 (11:27, [notes/2026-11-20-given-cap.md](notes/2026-11-20-given-cap.md)):** half2 from zero, P2F = P2E (solve_new.sh defaults)
    with the live loop at `--cap 200 --same-cap 20` (ancestry runs no longer starved by the same-statement runs),
    against exp41's P2E (20,152 at 2 h). abs/exp42.sh; production at J=6, rever at 2 meanwhile.
-   At 45 min: 18,532 vs 18,449; the cap was not binding yet (31-64 goals a cycle, about 290 hits pending until the
-   loop fails on their goal). Next candidate (exp43): run hits without waiting for the loop's failure (ancestry runs
-   prove 93% at about 4 s each).
+   Done 13:28: **P2F 20,174 vs P2E 20,152 (+22, noise)**; +301/−272. Ahead early (+175 at 30 min), caught up by
+   2 h. The cap was never reached (0-86 goals a cycle); the wait for the loop's failure limited the ancestry runs,
+   and their extra proofs were goals the loop proves anyway. Default stays.
+0000000000. **exp43 (13:28, [notes/2026-11-20-given-nowait.md](notes/2026-11-20-given-nowait.md)):** P2G = P2F + givenmatch `--no-wait`
+   (hits run as soon as found), half2 from zero, 2 hours, against P2F. abs/exp43.sh.
 00000000. **Model audit (10:54, [notes/2026-11-20-model-audit.md](notes/2026-11-20-model-audit.md)):** exp/modelcheck.py evaluates every proof step
    of every solved unit goal in up to 40 Mace4 models (sizes 2-8) of its theory; a step false in a model is not a
    theorem. Self-test: all goal statements must hold. Done 11:17: 2.4M step checks in 2,504 models of 68 theories;
@@ -902,6 +904,7 @@ reports are written as the experiments run.
 | [notes/2026-11-20-model-audit.md](notes/2026-11-20-model-audit.md) | Soundness audit: every proof step evaluated in finite models of its theory |
 | [notes/2026-11-20-given-cap.md](notes/2026-11-20-given-cap.md) | exp42: the derived-rule transfer with the ancestry runs uncapped (P2F against P2E) |
 | [notes/2026-11-20-semantic-guidance.md](notes/2026-11-20-semantic-guidance.md) | Semantic guidance offline: proof steps vs other given rules in relevance models |
+| [notes/2026-11-20-given-nowait.md](notes/2026-11-20-given-nowait.md) | exp43: derived-rule hits run without waiting for the loop's failure (P2G against P2F) |
 | [notes/2026-11-20-base-saturation.md](notes/2026-11-20-base-saturation.md) | exp39: base-theory runs as rule generators for the unsolved goals of the stronger theories |
 | [notes/2026-11-20-given-transfer.md](notes/2026-11-20-given-transfer.md) | exp38: unsolved goals that are variants of rules other runs derived and did not use (379 M in the given logs; transfer.py only matches proof steps); their ancestry as hints |
 | [notes/2026-11-19-from-zero-portfolio.md](notes/2026-11-19-from-zero-portfolio.md) | half1 from zero in 2 hours with today's deep portfolio (PGC), against PGA's 18,987 (exp27, from 07:18) |
