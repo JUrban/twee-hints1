@@ -129,6 +129,15 @@ def main():
                 add(w[0], d, [x for x in w[2].split(',') if x])
     old = {g for g in S if os.path.getmtime(os.path.join(L, 'UL', 'hints', g)) < T0}
     trusted = set(old)
+    if '--exposed' in sys.argv:
+        # (10:45) every lemma mechanism takes lemmas from theories within the target's (siblings, kNN with subsets,
+        # proof-dependency sets, transfer's srclem guard and .ax from runs of weaker theories, the climber's true
+        # lemmas, the base lemmas), so a proof can rest on a bad goal only if its theory contains the bad goal's:
+        # outside the EXPOSED originals every proof is trusted, record or not
+        ex = {l.strip() for l in open(sys.argv[sys.argv.index('--exposed') + 1]) if l.strip()}
+        safe = {g for g in S if orig(g) not in ex}
+        print(f'{len(safe - trusted)} later proofs outside the {len(ex)} exposed originals', flush=True)
+        trusted |= safe
     changed = True
     while changed:
         changed = False

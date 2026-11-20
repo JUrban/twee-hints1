@@ -7,7 +7,7 @@ pass dir's solved.tsv); each goal's last proof (or its quarantined one) is its h
 options at --time T, --keep-out (the outputs are the new proofs' records); proofs into loops/UL. Passes until one
 proves nothing new; then one at 5 T. Workers: the number in DIR/J (read each pass).
 
-  rever2.py DIR [--time 60] [--passes 8]
+  rever2.py DIR [--time 60] [--passes 8] [--exposed ORIGINALS.txt]   (trust.py --exposed: see there)
 """
 import os, subprocess, sys, time
 L = '/project/hintwork/loops'
@@ -18,8 +18,14 @@ OPTS = ['--model', '--model-fixed', '/project/hintwork/models/rm4t.bin,/project/
         '--args=--abstract-time 2000 --no-eqhint-consider']
 
 
+EXPOSED = []
+
+
 def main():
+    global EXPOSED
     d = os.path.abspath(sys.argv[1])
+    if '--exposed' in sys.argv:
+        EXPOSED = ['--exposed', os.path.abspath(sys.argv[sys.argv.index('--exposed') + 1])]
     T = float(sys.argv[sys.argv.index('--time') + 1]) if '--time' in sys.argv else 60.0
     P = int(sys.argv[sys.argv.index('--passes') + 1]) if '--passes' in sys.argv else 8
     os.makedirs(d, exist_ok=True)
@@ -28,7 +34,7 @@ def main():
     last = False
     for p in range(1, P + 2):
         tp = os.path.join(d, f'trust{p}')
-        subprocess.run([sys.executable, os.path.join(H, 'exp', 'trust.py'), tp, '-j', '4'], env=env, check=True)
+        subprocess.run([sys.executable, os.path.join(H, 'exp', 'trust.py'), tp, '-j', '4'] + EXPOSED, env=env, check=True)
         roots = [l.strip() for l in open(tp + '.roots') if l.strip()]
         trusted = {l.strip() for l in open(tp + '.trusted') if l.strip()}
         S = {l.split('\t')[0] for l in open(os.path.join(L, 'UL', 'solved.tsv'))}
@@ -63,7 +69,7 @@ def main():
         if n == 0:
             last = True
     tp = os.path.join(d, 'trust_final')
-    subprocess.run([sys.executable, os.path.join(H, 'exp', 'trust.py'), tp, '-j', '4'], env=env, check=True)
+    subprocess.run([sys.executable, os.path.join(H, 'exp', 'trust.py'), tp, '-j', '4'] + EXPOSED, env=env, check=True)
     print(f'rever2 done {time.strftime("%H:%M:%S")}', flush=True)
 
 

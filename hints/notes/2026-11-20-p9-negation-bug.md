@@ -76,6 +76,16 @@ Written 20 Nov 2026, 10:32 UTC, while the re-verification runs.
     are complete.
   * Passes run until one proves nothing new, then one more at 300 s. Whatever stays untrusted at the end leaves
     production's solved list.
+* **The exposed theories (10:45).** Every lemma mechanism takes lemmas from theories within the target's:
+  siblings, kNN with subsets, the proof-dependency sets, transfer's srclem guard and `.ax` (from runs of weaker
+  theories), the climber's true lemmas, and the base lemmas. So a proof can rest on one of the 16 only if its theory
+  contains that goal's theory. That holds for 43 of the 129 originals (loops/UNSOUND/exposed.txt), and every proof
+  outside them is trusted, record or not (`trust.py --exposed`).
+  * The 84 quarantined goals outside the exposed originals that were still unsolved went back at 10:45, with their
+    old proofs (loops/UNSOUND/restored_1045.txt).
+  * Trust at 10:37: 47,570 trusted and 529 untrusted (101 without a record, 29 with an unresolved lemma name, 399
+    using an untrusted or unsolved lemma).
+  * rever2 pass 1: 130 roots plus 91 quarantined unsolved goals, 221 in all, at 60 s.
 * From 10:35, the transfer loop and the live loop run with `--keep-out` (abs/xfrlive2k.sh, abs/gmlive2k.sh), and
   transfer.py names source lemmas `srclem_<i>_<goal>`, so their proofs carry records too.
 
