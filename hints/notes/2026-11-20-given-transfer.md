@@ -71,3 +71,17 @@ Written 20 Nov 2026, 02:21 UTC.
 * The proofs went into production's solved list. By 03:12 production had taken 14 synced proofs and proved
   nslm_to_aa1 1031 after 1028, so chains may follow.
 * **Instance scan** (loops/GM2, `--instances`, own original's logs, 2 workers) from 03:17: 3,190 goals, 451,614 logs.
+
+## exp38b: a sibling run's whole rule set as lemma axioms (from 03:18)
+
+* Matching a single rule is the narrowest use of a log. More generally, a goal follows at once if a sibling run's
+  rules join its two sides.
+* Those rules are sound as axioms: they follow from that run's axioms and proven lemmas. This differs from
+  production's pool@ members (the most frequent sibling proof steps as axioms) and from the transfer loop (proof
+  steps only).
+* exp/gm3prep.py, abs/gm3run.sh, loops/GM3run:
+  * 40 unsolved goals, seed 1, out of 2,909 candidates;
+  * each gets the newest production log of its original: all its rules (366 to 2,819, median 1,349) as lemma axioms
+    and its proof steps as hints;
+  * 20 s, 1 worker. Checked: the first run's input has 2,280 such axioms.
+* Measure: proved of 40 per CPU h, against production's current ~1 per CPU h.
