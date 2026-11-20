@@ -148,3 +148,8 @@ Written 20 Nov 2026, 02:21 UTC.
 * **First 14 minutes of ul74: 10 hits** in loops/GFAIL/hits.tsv, some across originals (a Ka_eq_aK3 run derived
   nil3_23_32_to_31 565; a nil3_2K run derived nil3_23_32_to_26 507 and nil3_30 570). The live loop runs them from its
   next cycle (04:34).
+* **04:30, the live loop's first cycle with them:** 7 failed-run hit rows (5 goals) and 3 new logs. **5 of 5 proved** in
+  34 s by the ancestry pass. The same-statement finder, added at 04:30 (exp/sofree.py; REPORT 2ar), found 1 new free
+  candidate and proved it. In all, the live loop has proved 9 of 14.
+* From 04:32 the live loop runs every 5 minutes (abs/gmlive2.sh), as the transfer loop does, so its proofs reach
+  production sooner.
