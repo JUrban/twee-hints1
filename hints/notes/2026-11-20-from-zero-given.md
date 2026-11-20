@@ -45,3 +45,16 @@ Written 20 Nov 2026, 07:10 UTC.
 * Started 07:06:01 (loops/PGE, loop PID 3156431 with `--given-scan`, its live loop 3156433). Production went to J=4
   at 07:06 (ul74, rows from 216,723; the J=12 log is loops/UL74a.log).
 * The live loop's first cycle: 19,249 target keys (half1's unsolved unit goals at the start).
+* **07:15, the live loop's 2nd cycle: 4,086 new logs, 4,827 failed-run hit rows, 3,975 goals hit.** From zero,
+  most unsolved goals are steps or derived rules of other runs, and the loop would prove nearly all of them at its
+  first level anyway. At 20 s on 2 workers, the cycle would have taken 11 hours. Stopped at 07:16 before any run.
+* **The fix** (givenmatch.py live, installed 07:20):
+  * a hit waits in a pending queue until the loop has a failed run of its goal (a NO row in its results, read
+    incrementally);
+  * at most 60 goals run per cycle (`--cap`), oldest first;
+  * `--no-inst` skips the instance scan, which found nothing new on production and doubled the scan's time.
+  Production's unsolved goals have all failed and its hits are few, so it is unchanged there.
+* Restarted at 07:20 (abs/exp40live.sh, which ends with the arm). The scan hit file is read again from the start, and
+  so are the logs since 07:06.
+* So far PGE differs from PGD only by `--given-scan` and the live loop's scans. No live-loop run went into the loop
+  before 07:20.

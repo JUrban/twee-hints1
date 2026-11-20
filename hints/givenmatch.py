@@ -20,7 +20,7 @@ ancestry's axioms of the source run to the same name + .ax, and GOALS.tsv for tr
 files, 0).
 
   givenmatch.py live DIR [--dirs UL,XFL] [--every 1200] [-j 2] [--dst UL] [--gfail GFAIL,GSAT] [--set ALL] [--no-same]
-                   -- LOOP-OPTIONS
+                   [--cap 60] [--no-inst] -- LOOP-OPTIONS
 beside production: each cycle scans the logs written since the last one and runs the new hits (see live()).
 """
 import os, re, sys
@@ -159,7 +159,7 @@ def sketch(hits, skdir, goals, per=3, prefix=False):
     print(f'{len(by)} goals -> {goals}')
 
 
-def live(dirs, d, every, j, rest, dst='UL', gfail=('GFAIL', 'GSAT'), allp=ALL, same=True):
+def live(dirs, d, every, j, rest, dst='UL', gfail=('GFAIL', 'GSAT'), allp=ALL, same=True, cap=60, inst_scan=True):
     """(20 Nov 03:45) beside production: every EVERY s, scan the given logs of DIRS written since the last cycle against
     production's unsolved unit goals (variants; instances within the own original), and run each new hit as exp38
     did: the rule's ancestry first at 20 s, then for the failures the log's prefix with its axioms at 40 s
@@ -182,6 +182,24 @@ def live(dirs, d, every, j, rest, dst='UL', gfail=('GFAIL', 'GSAT'), allp=ALL, s
             ax[o] = lemmas.axiom_set(n)
         return ax[o]
     cyc = 0; run_ = time.strftime('%d%H%M')   # (cycle files carry the process's start, so a restart keeps the old)
+    # (07:20, exp40) from zero most hits are goals the loop has not tried yet and proves at its first level (the 2nd
+    # cycle had 3,975 goals hit). So a hit waits in PENDING until the loop has a failed run of its goal (a NO row in
+    # LOOPS/DST/r*/results.tsv, read incrementally), and at most CAP goals run per cycle, oldest first. Production's
+    # unsolved goals have all failed and its hits are few, so it runs as before.
+    pending = {}; failed = set(); roff = {}
+    def read_failed():
+        import glob
+        for rp in glob.glob(os.path.join(LOOPS, dst, 'r*', 'results.tsv')):
+            with open(rp) as f:
+                f.seek(roff.get(rp, 0))
+                while True:
+                    l = f.readline()
+                    if not l.endswith('\n'):
+                        break
+                    w = l.split('\t', 2)
+                    if len(w) >= 2 and w[1] == 'NO':
+                        failed.add(w[0])
+                roff[rp] = f.tell() - (len(l.encode()) if l else 0)
     while True:
         t0 = time.time(); cyc += 1
         S = {l.split('\t')[0] for l in open(os.path.join(LOOPS, dst, 'solved.tsv'))}
@@ -215,7 +233,7 @@ def live(dirs, d, every, j, rest, dst='UL', gfail=('GFAIL', 'GSAT'), allp=ALL, s
                     except OSError:
                         pass
         hits = {}
-        for inst, w in ((False, want), (True, byroot)):
+        for inst, w in ((False, want), (True, byroot)) if inst_scan else ((False, want),):
             init(w, inst)
             for job in jobs:
                 for h in scan(job):
@@ -242,6 +260,13 @@ def live(dirs, d, every, j, rest, dst='UL', gfail=('GFAIL', 'GSAT'), allp=ALL, s
             open(offp, 'w').write(str(off))
         print(f'cycle {cyc} {time.strftime("%H:%M:%S")}: {len(want)} target keys, {len(jobs)} new logs, '
               f'{nf} failed-run hits, {len(hits)} goals hit', flush=True)
+        for g, v in hits.items():
+            pending.setdefault(g, []).extend(v)
+        read_failed()
+        for g in [g for g in pending if g in S or g in tried]:
+            del pending[g]
+        hits = {g: pending.pop(g) for g in [g for g in pending if g in failed][:cap]}
+        print(f'  {len(hits)} goals to run (failed in the loop), {len(pending)} pending', flush=True)
         if hits:
             hp = os.path.join(d, f'hits_{run_}_{cyc}.tsv')
             with open(hp, 'w') as fo:
@@ -305,7 +330,8 @@ def main():
         val = lambda k, dflt: type(dflt)(opts[opts.index(k) + 1]) if k in opts else dflt
         return live(val('--dirs', 'UL,XFL').split(','), opts[0], val('--every', 1200.0), val('-j', 2), rest,
                     dst=val('--dst', 'UL'), gfail=[x for x in val('--gfail', 'GFAIL,GSAT').split(',') if x],
-                    allp=val('--set', ALL), same='--no-same' not in opts)
+                    allp=val('--set', ALL), same='--no-same' not in opts, cap=val('--cap', 60),
+                    inst_scan='--no-inst' not in opts)
     if sys.argv[1] == 'sketch':
         per = int(sys.argv[sys.argv.index('--per') + 1]) if '--per' in sys.argv else 3
         return sketch(sys.argv[2], sys.argv[3], sys.argv[4], per, '--prefix' in sys.argv)
