@@ -20,6 +20,9 @@ P2J's results (loops/P2J/r1/results.tsv, half2 from zero, 6 workers, 5 hours):
   37 / 926. From 60 minutes on the first runs mostly fail (27%, 10%, 5%, 4% proved) and still hold most workers: the
   4,820 failures of 60-180 minutes took about 8 of the 12 CPU hours. Of all 6,211 first-run failures, 2,070 were
   proved later (L0 859, Vunf@0 127, other variants and L1 107, the side writers 977).
+* exp/quickstat.py on P2J: its first pass ended at 172 minutes. In 120-180 minutes the last first runs proved 106 of
+  2,256 (3.8 CPU hours) while L0 retries in a new context proved 379 of 671 (0.7 CPU hours) once they ran
+  (`--retry-class` gives those a share; `--quick` makes the first pass itself cheaper).
 * Earlier: a 5 s first level beat 10 s in production's context (2ag: 33 against 20). A shorter first run from
   zero has not been tried.
 
