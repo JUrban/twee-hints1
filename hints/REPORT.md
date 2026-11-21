@@ -217,7 +217,10 @@ runs. Section 5 has the commands.
 
 *Proofs (20 Nov 15:03, the user's request).* The loops search with `--no-proof`, so until now their proofs were never
 printed. Now every proved twee run in loop.py is queued for a rerun with the proof printed (DIR/proofq/,
-exp/proofq.py), and the proof is kept in DIR/proofs/<goal>.
+exp/proofq.py), and the proof is kept in DIR/proofs/<goal>. (21 Nov 23:58) `--no-proof` saves no CPU in twee's
+search: it only gates the presentation after a proof, and 42 proved runs took 61.1 CPU s with the proof against
+61.2 s without, with the same output otherwise ([notes/2026-11-21-proof-cost.md](notes/2026-11-21-proof-cost.md)). So the reruns cost a second run per
+proved job (about 3 CPUs at -j 3); printing the proof in the search run would cost nothing. Left to the user.
 
 * `run.py`: parallel runner.
 * `loop.py`: Veroff-style hint loop. Round 0 runs without hints, and later
