@@ -171,3 +171,11 @@ per abstract second than during exp44/45.
 12:0.25 --knn-ctx 10 --head-class`): best side by side, and tied with the best single option at equal work. Half2
 lacks the other half's lemmas, which caps its late phase, so Z7 on all goals is the real test. The defaults change
 after exp49/50, together with their winners, before Z7.
+
+## Installed as the default (21 Nov 12:20)
+
+solve_new.sh has a new variable LATE, default `--retry-class --yield-discount 2000 --reexplore 12:0.25 --knn-ctx 10
+--head-class` (P2O's set), passed to loop.py before LOOPARGS; `LATE=` gives the 20 Nov system. Running arms use their
+own copies of the script (or_test2.sh copies it at launch), so exp49/50 is unaffected. Smoke test loops/LTD (12:19,
+smoke487, 2 workers, 3 minutes, LOOPARGS `--head-class --retry-time 3`, so one option given twice): no errors, 351
+solved, the mix line with classes q and h. exp49/50's winners join LATE at about 14:50.

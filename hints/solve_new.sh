@@ -65,6 +65,13 @@ XTWEE=${XTWEE:-/project/bin/twee-e39}   # the transfer worker's twee (as abs/rpx
 PASS=${PASS_EVERY:-1}   # loop.py --pass-every: the full scheduling pass at most once a second (REPORT 2as)
 SCHED=${SCHED:-}
 ORDER=${ORDER---mix 0.1 --fail-order}
+# (21 Nov 12:25) LATE: the late-phase options of exp44/45 and exp48 (notes/2026-11-21-late-combo.md): retries of failed
+# goals as their own mix class with live yield (--retry-class), past proofs discounted by 2000 abstract s and a 25%
+# re-exploration every 12 minutes (--yield-discount 2000 --reexplore 12:0.25), a goal's context tracked through its
+# 10 nearest kNN lemmas (--knn-ctx 10), and 40 s chain-level runs for the first unsolved goal after a proved one
+# (--head-class). half2 from zero, 5 hours, side by side: P2O (all) 21,940 against P2N (without the last two) 21,702;
+# at equal abstract work P2O ties exp44/45's best single option. LATE= gives the 20 Nov system.
+LATE=${LATE---retry-class --yield-discount 2000 --reexplore 12:0.25 --knn-ctx 10 --head-class}
 [ -n "$OUT" ] && [ -f "$NAMES" ] && [ -f "$CTX/solved.tsv" ] || { sed -n 2,20p "$0"; exit 1; }
 [ -e "$OUT" ] && { echo "$OUT exists"; exit 1; }
 mkdir -p "$OUT.ctx/hints"
@@ -91,7 +98,7 @@ ROUT=$(realpath -m "$OUT"); GSCAN=
 [ "$GIVEN" = 1 ] && GSCAN="--given-scan ${ROUT}_GF"
 python3 -u "$H/loop.py" "$NAMES" "$OUT" --init "$OUT.ctx" --start 1 --cascade "$CASCADE" --cascade-start -1 --retry-gap 3 \
   $MOD --twee "$TWEE" --keep-out -j "$J" --reserve 0 --pool original --wall-factor 15 --line-gaps 80,80 \
-  --retry-hints 1.25 --fresh-first --far-retry --retry-knn --sync 60 --cascade-hours "$HOURS" --pass-every "$PASS" $ORDER $SCHED $STATES $DEEP $GSCAN $LOOPARGS \
+  --retry-hints 1.25 --fresh-first --far-retry --retry-knn --sync 60 --cascade-hours "$HOURS" --pass-every "$PASS" $ORDER $LATE $SCHED $STATES $DEEP $GSCAN $LOOPARGS \
   --args="--abstract-time 2000 --no-resume-requeue --no-eqhint-consider $PG" > "$OUT.log" 2>&1 &
 LOOP=$!
 until [ -f "$OUT/config.json" ] || ! kill -0 $LOOP 2>/dev/null; do sleep 2; done
