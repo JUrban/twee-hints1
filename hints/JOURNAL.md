@@ -755,6 +755,10 @@ Paused:
 has the history (user, 20 Nov: "update the total numbers in the report etc every now and then").
 
 Next:
+00000000000000000000000. **Dispatch profile (07:20, [notes/2026-11-21-dispatch-profile.md](notes/2026-11-21-dispatch-profile.md)):** exp/stacksample.py
+   samples loop.py's threads. At 6 workers workers are twee-bound (80%); the main thread spent 90 s (all goals) writing
+   every rule-model goal file before the first run: now written at first use (loop.py goalfile, smoke GFT identical).
+   Z6 at 12 workers had the main thread 76% busy early (about 20 ms a run): profile at 12 workers between exp48 and exp49.
 0000000000000000000000. **exp50 (06:50, [notes/2026-11-21-retry-time.md](notes/2026-11-21-retry-time.md)):** L0 retries of failed-before goals
    took 30.8 of Z6's 96 CPU hours for 2,149 proofs (late: 5% proved); 78-84% of retry proofs come within 3 s. loop.py
    `--retry-time T` runs them at T s (rows r=1); a replay gives 1.2-1.4x proofs per CPU hour at T=3. Smoke loops/RTT;
@@ -979,6 +983,7 @@ reports are written as the experiments run.
 | [notes/2026-11-21-late-combo.md](notes/2026-11-21-late-combo.md) | exp48: the late-phase winners together, and with exp46/47 |
 | [notes/2026-11-21-quick-first.md](notes/2026-11-21-quick-first.md) | exp49: a quick first run for every goal (`--quick Q`) |
 | [notes/2026-11-21-retry-time.md](notes/2026-11-21-retry-time.md) | exp50: shorter L0 retries (`--retry-time T`) |
+| [notes/2026-11-21-dispatch-profile.md](notes/2026-11-21-dispatch-profile.md) | Where a from-zero start spends its time: loop.py's threads; goal files at first use |
 | [notes/2026-11-20-base-saturation.md](notes/2026-11-20-base-saturation.md) | exp39: base-theory runs as rule generators for the unsolved goals of the stronger theories |
 | [notes/2026-11-20-given-transfer.md](notes/2026-11-20-given-transfer.md) | exp38: unsolved goals that are variants of rules other runs derived and did not use (379 M in the given logs; transfer.py only matches proof steps); their ancestry as hints |
 | [notes/2026-11-19-from-zero-portfolio.md](notes/2026-11-19-from-zero-portfolio.md) | half1 from zero in 2 hours with today's deep portfolio (PGC), against PGA's 18,987 (exp27, from 07:18) |

@@ -191,11 +191,23 @@ class Loop:
         for line in open(v):
             c, k = line.rstrip('\n').split('\t'); vocab[k] = int(c)
         gdir = os.path.join(self.dir, 'goals', 'r%d' % rnd); os.makedirs(gdir, exist_ok=True)
-        for n in self.names:
-            if n not in self.solved or a.rerun_solved:
-                rulemodel.write_goalfile(n, vocab, os.path.join(gdir, n))
+        # (21 Nov) each goal's file is written at its first use (goalfile): writing all of them here took 90 s of
+        # the main thread before a from-zero run on 51,784 goals could start its first run (45 s on half2)
+        self._goal_vocab = vocab
         self.model = (m, v, gdir)
         print(f'  round {rnd}: trained rule model {time.time()-t0:.0f}s', file=sys.stderr, flush=True)
+
+    def goalfile(self, name):
+        """The rule model's goal file of NAME in the current round (self.model's directory), written at its first
+        use (the same content train_model used to write for every goal at the round's start)."""
+        gdir = self.model[2]
+        p = os.path.join(gdir, name)
+        if not os.path.exists(p):
+            import rulemodel, threading
+            tmp = f'{p}.{os.getpid()}.{threading.get_ident()}.tmp'
+            rulemodel.write_goalfile(name, self._goal_vocab, tmp)
+            os.replace(tmp, p)
+        return p
 
     def gen_save(self, name, out, path):
         """--gen-model: the axiom rows and the last --gen-ctx rules of a failed run, in the given
@@ -297,7 +309,7 @@ class Loop:
             mcmd += ['--hints-file', hpath]
         if self.model:
             m, v, gdir = self.model
-            mcmd += ['--rule-model', m, '--rule-vocab', v, '--rule-goal', os.path.join(gdir, name)] + a.model_args.split()
+            mcmd += ['--rule-model', m, '--rule-vocab', v, '--rule-goal', self.goalfile(name)] + a.model_args.split()
         try:
             q = subprocess.run(mcmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                                timeout=a.gen_cut_time * (a.wall_factor if '--abstract-time' in a.args else 1) + 30)
@@ -610,7 +622,7 @@ class Loop:
                     rulemodel.write_goalfile(name, voc_, gp_ + '.' + tag)
                     os.replace(gp_ + '.' + tag, gp_)
             else:
-                gp_ = os.path.join(gdir, name)
+                gp_ = self.goalfile(name)
             ma = a.model_args.split()
             if var == 'r2':   # (--variants r2) rule-model threshold 0.2
                 i_ = ma.index('--rule-threshold'); ma[i_ + 1] = '0.2'
@@ -922,7 +934,7 @@ class Loop:
                '--print-hints', '--multi-goal'] + args
         if self.model:
             m, v, gdir = self.model
-            cmd += ['--rule-model', m, '--rule-vocab', v, '--rule-goal', os.path.join(gdir, names[0])] + \
+            cmd += ['--rule-model', m, '--rule-vocab', v, '--rule-goal', self.goalfile(names[0])] + \
                    a.model_args.split()
         if hints:
             hpath = os.path.join(self.dir, 'tmp', names[0] + '.multi.hints')

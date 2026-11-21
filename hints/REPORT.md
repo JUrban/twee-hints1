@@ -3899,6 +3899,8 @@ holds for the goal if neither it nor its lemmas use the missing axioms.
 
 ## 2as. The whole benchmark from zero, and a faster dispatcher (16–17 Nov night)
 
+*Notes: [notes/2026-11-21-dispatch-profile.md](notes/2026-11-21-dispatch-profile.md).*
+
 *Notes: [notes/2026-11-16-from-zero-dispatcher.md](notes/2026-11-16-from-zero-dispatcher.md).*
 
 **Z0** (`abs/z0_test.sh`, from 23:49): the final system from zero on
