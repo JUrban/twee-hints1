@@ -772,7 +772,8 @@ Next:
    rows), the 20 s sweep at -j 1, the live transfer loops. User, 14:34: no E or Vampire; the work is on Twee.
    **Started early, with Z7C's CPU: production restarted 16:50 (abs/ul74.sh, J=6 while Z7 runs; loop.py 995541),
    the sweep 16:50 (995832, -j 1 from SW20/J). exp52 starts when Z7 ends.** exp52 started 20:49 (P2T loop.py
-   1115326, P2U 1115327).
+   1115326, P2U 1115327). The 20 s sweep ended at 20:58; its CPU went to the proof worker (-j 3, PID 1177545,
+   21:02; 121,512 jobs queued, most from Z7 and Z7C).
 00000000000000000000000000. **exp52 candidate (13:30, [notes/2026-11-21-floor-ratio.md](notes/2026-11-21-floor-ratio.md)):** Z7 at 30 minutes was 2,196
    behind Z7C: the q and h floors held half a worker of six at 77 and 12 proofs per run-hour against the first runs'
    6,885. loop.py `--floor-ratio K` (classes `--floor-classes`, default qh) keeps a floor only while K × its yield
