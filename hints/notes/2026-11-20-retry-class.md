@@ -55,3 +55,24 @@ errors.
 * **Decision:** P2H ≥ P2K + 185 at 5 hours (or at 2-3 hours with P2E/P2F in the same range as P2K) makes
   `--retry-class` solve_new.sh's default; ahead early but within noise at 5 hours is a speed gain, reported as
   such. Then on the whole benchmark (Z7, against Z6).
+
+## Interim at 1 hour (21 Nov 00:36)
+
+| arm | 10 min | 30 min | 60 min |
+|---|---:|---:|---:|
+| P2E (exp41) | 11,190 | 17,182 | 19,198 |
+| P2F (exp42) | 11,266 | 17,357 | 19,307 |
+| P2K control | 11,279 | 17,103 | 19,009 |
+| P2H retry class | 11,246 | 16,748 | 18,745 |
+| P2J (exp45) | 10,894 | 16,961 | 19,161 |
+
+exp/retrysplit.py, proofs/runs in the first hour:
+
+| arm | first runs | retries |
+|---|---:|---:|
+| P2K | 16,556 / 18,060 | 62 / 349 |
+| P2H | 15,964 / 17,095 | 189 / 893 |
+
+The q floor (10% of the workers while q has goals) runs 2.6 times as many retries in the first hour as the control
+does, at 21% yield against 93% for its first runs, so P2H is 264 behind at 1 hour. That was expected to cost early;
+the question is still whether the retries pay off at 2.5-3.5 hours, where Z6's burst was.

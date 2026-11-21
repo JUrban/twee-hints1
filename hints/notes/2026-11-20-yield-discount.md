@@ -63,3 +63,10 @@ Written 20 Nov 2026, 19:38 UTC, before launch. Launched with exp44 by abs/exp444
   ran when, proofs per CPU hour).
 * **Decision:** P2J ≥ P2K + 185 at 5 hours makes the pair solve_new.sh's default. Equal is a negative for from-zero
   runs (production keeps the cumulative estimate either way).
+
+## Interim at 1 hour (21 Nov 00:36)
+
+P2J 19,161 against the control P2K 19,009 (+152; P2E and P2F, the same system as P2K, 19,198 and 19,307). Table in
+[notes/2026-11-20-retry-class.md](2026-11-20-retry-class.md). At 1 hour nearly every run is a first run at L0
+in all three arms, so the label estimates have not yet decided much: P2J's line reads `est L0 381.9 Vk100@0 6.8
+... Vunf@0 6.8` (the discount keeps L0's estimate near its recent rate), P2K's `est L0 2601.2 Vunf@0 17.7 ...`.
