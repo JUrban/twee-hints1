@@ -65,7 +65,7 @@ XTWEE=${XTWEE:-/project/bin/twee-e39}   # the transfer worker's twee (as abs/rpx
 PASS=${PASS_EVERY:-1}   # loop.py --pass-every: the full scheduling pass at most once a second (REPORT 2as)
 SCHED=${SCHED:-}
 ORDER=${ORDER---mix 0.1 --fail-order}
-# (21 Nov 12:25) LATE: the late-phase options of exp44/45 and exp48 (notes/2026-11-21-late-combo.md): retries of failed
+# (21 Nov 12:19) LATE: the late-phase options of exp44/45 and exp48 (notes/2026-11-21-late-combo.md): retries of failed
 # goals as their own mix class with live yield (--retry-class), past proofs discounted by 2000 abstract s and a 25%
 # re-exploration every 12 minutes (--yield-discount 2000 --reexplore 12:0.25), a goal's context tracked through its
 # 10 nearest kNN lemmas (--knn-ctx 10), and 40 s chain-level runs for the first unsolved goal after a proved one

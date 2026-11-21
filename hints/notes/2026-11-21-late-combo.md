@@ -180,7 +180,7 @@ own copies of the script (or_test2.sh copies it at launch), so exp49/50 is unaff
 smoke487, 2 workers, 3 minutes, LOOPARGS `--head-class --retry-time 3`, so one option given twice): no errors, 351
 solved, the mix line with classes q and h. exp49/50's winners join LATE at about 14:50.
 
-## A check of the abstract-work correction (21 Nov 12:25)
+## A check of the abstract-work correction (21 Nov 12:23)
 
 exp49's control P2R runs P2O's options on the same set, under a heavier load (three arms, and a machine load average
 up to 47 from outside this sandbox). abscurve.py with P2R as the reference:
