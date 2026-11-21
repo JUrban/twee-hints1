@@ -69,3 +69,28 @@ workers for 7 minutes (notes/2026-11-21-dispatch-profile.md) and wrote loops/GO4
 P2S beside them at 09:45:47 (403343, loop.py 403368). All three run loop.py with the goal files written at first use
 (a145d98); their lemmas.py is the one before the conjecture cache. Crash watcher on the three loop.py PIDs and the
 side loops. They end at about 14:50.
+
+## Interim at 1 hour (21 Nov 10:46)
+
+| arm | 15 min | 30 min | 45 min | 60 min |
+|---|---:|---:|---:|---:|
+| P2R (control, P2O's set) | 12,893 | 15,960 | 17,102 | 18,119 |
+| **P2Q** (`--quick 1`) | **13,868** | **16,541** | 16,878 | 17,385 |
+| P2S (exp50, `--retry-time 3`) | 12,894 | 16,016 | 17,134 | 18,114 |
+| P2O (exp48, 2 arms on the machine) | 13,450 | 16,453 | 17,886 | 18,792 |
+
+* P2Q leads by 975 at 15 minutes and 581 at 30, then trails: −224 at 45, −734 at 60.
+* exp/quickstat.py: P2Q made 24,824 quick runs, nearly every goal, and proved 15,306 (62%). In 30-60 minutes they
+  proved 133 of 3,754 and 29 of 2,583 (2.2 CPU hours). 8,966 quick-failed goals still wait for their T0 run; those
+  that had it proved 457 of 552 (83%).
+* P2R made only 16,308 first runs by 60 minutes (96% proved), the near goals first, and beside them deeper runs
+  (73 proved) and retries (70). Its mix line: r 16,293, d 353, q 464, h 45 runs; P2Q's r 25,363, d 44, q 41, h 7.
+* **Why:** the sort key puts a quick-failed goal after every goal never run, the far ones included (`(nf,
+  quick-failed, orig-rate bin, near/far, ...)`). So P2Q's class r quick-ran the whole far tail before any T0 run of
+  a near quick-failed goal. And a quick-failed goal is neither failed (no retry class q) nor tried in its context
+  (no deeper level, no head), so classes d, q and h had almost nothing to run.
+* The fix for a second try: near/far before quick-failed in the key, so a near goal's T0 run comes before a far
+  goal's quick run. The A/B goes on unchanged; P2Q may still catch up as its T0 runs prove at 83%.
+* P2R is 673 behind P2O at 60 minutes, with the same options: three arms and their side loops load the machine more
+  than exp48's two (load average about 30). At 10:47 the proof worker and the sweep were stopped to bring that down;
+  they restart after exp49/50.
