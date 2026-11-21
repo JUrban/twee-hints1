@@ -778,6 +778,8 @@ Next:
    loops/GO48. Production stays paused. **At 5 hours (04:35) P2K 21,147, P2H 21,597 (+450), P2J 21,706 (+559):
    both options become defaults; union P2H ∪ P2J 21,924. P2N and P2O started 04:36** (loops/AFTERZ6.pids), to
    about 09:40. Decision: P2N ≥ P2J + 185 makes the pair the default; P2O ≥ P2N + 185 adds the two options.
+   **DONE 09:38: P2O 21,939, P2N 21,698 (P2O +241 side by side). At equal abstract work (exp/abscurve.py; the machine
+   was ~15% faster than in exp44/45) P2O ties P2J (21,706) and P2N trails it by 325. Default: P2O's set; exp49/50 on it.**
 0000000000000000000. **exp47 (01:40, [notes/2026-11-21-head-class.md](notes/2026-11-21-head-class.md)):** Z6 ended with 1,120 unsolved heads,
    875 of them proved by production, and ran L1 16 times in 8 hours (3 on those heads): with --ratio-order L1's
    estimate stays near its prior and its entries come last. loop.py `--head-class`: heads whose next own level is

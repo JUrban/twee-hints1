@@ -5299,7 +5299,24 @@ from zero, against exp30's P2D.
     Vk400@0, Vkd@0 and L1 (31 runs, 14 proved; the control and P2H ran L1 0 times after the first hour and spent
     their deep work on Vunf@0). Those proofs give new contexts, which its L0 retries use (414 and 402 proved in the
     half hours 150-210 minutes). It proves 425 and 328 goals from lemmas of hours 2 and 3 (P2H 307 and 40).
-  * exp48 (from 04:36): P2N runs both options together, P2O adds `--knn-ctx 10 --head-class`; half2, 5 hours.
+* **exp48:** two more half2 arms, 04:36-09:38: P2N with both options, P2O with both plus `--knn-ctx 10 --head-class`.
+
+  | arm | 60 min | 120 min | 180 min | 240 min | 300 min |
+  |---|---:|---:|---:|---:|---:|
+  | P2N, both | 19,214 | 20,872 | 21,271 | 21,370 | 21,698 |
+  | **P2O, both + --knn-ctx 10 --head-class** | 18,792 | 20,934 | 21,524 | 21,686 | **21,939** |
+
+  * **Side by side, P2O +241 over P2N** (+384 / −146): the two options add to the pair.
+  * **Wall minutes are not comparable across nights.** Failed plain 5 s L0 runs took 5.6-6.0 CPU s in exp44/45 and
+    4.7-5.0 s in exp48. exp/abscurve.py converts each run's CPU into abstract seconds with its window's rate (the
+    median failed 5 s run) and compares arms at equal abstract work. At P2J's 5 hours of work (25.1 abstract worker
+    hours, reached by exp48's arms at 255 minutes): P2J 21,706, P2H 21,597, P2N 21,381, **P2O 21,706**. So the pair
+    alone is 325 behind P2J, and P2O ties it.
+  * P2O's lead comes from its head class: 301 L1 runs over 5 hours (P2N 34 L1 runs by 3 hours). By 3 hours, its 34
+    heads proved after the first 30 minutes were followed within 30 minutes by 123 proofs of the goals after them.
+    The kNN-only retries proved 48 of 274, nearly all in the first hour.
+  * Default: P2O's set, the best side by side and tied at equal work. Z7 on all goals decides the late phase, since
+    half2 lacks the other half's lemmas.
 * **What Z6 lacked (exp/roots.py, trust.py --dump-rec).** Of the 4,117 goals production has and Z6 lacks, 190 have
   recorded lemmas that Z6 all proved (104 first proved at L1); their reach is 363. The rest rest on lemmas Z6
   never proved. The gap is mostly depth.
