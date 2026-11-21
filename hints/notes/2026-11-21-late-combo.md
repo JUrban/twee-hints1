@@ -31,3 +31,18 @@ else the options above; and abs/stepjlive3.sh. Production stays paused: its own 
 exp44/45 ended 04:35: P2K 21,147, P2H 21,597, P2J 21,706 (both over the +185 rule). loops/GO48 written 04:36 with no
 .args files, so the arms run the options above: P2N loop.py PID 66396, P2O 66394 (loops/AFTERZ6.pids); stepjlive3
 66377. They end at about 09:40. The bar for P2N is P2J's 21,706 + 185 = 21,891 (the union P2H ∪ P2J was 21,924).
+
+## Interim at 1 hour (21 Nov 05:37)
+
+| arm | 15 min | 30 min | 45 min | 60 min |
+|---|---:|---:|---:|---:|
+| P2K (exp44/45 control) | 13,737 | 17,103 | 18,242 | 19,009 |
+| P2H | 13,653 | 16,748 | 17,944 | 18,745 |
+| P2J | 13,360 | 16,961 | 18,212 | 19,161 |
+| **P2N** | 13,753 | 17,048 | 18,325 | **19,214** |
+| P2O | 13,450 | 16,453 | 17,886 | 18,792 |
+
+P2O is 422 behind P2N. It ran about 1,000 fewer L0 runs in the first hour (17,446 against 18,478): class h took a
+worker for 49 L1 runs (20 proved, 0.8 CPU hours; P2N's L1 17 runs, 8 proved), the deeper levels 473 runs against 381,
+and --knn-ctx flagged 87 goals at the last rebuild (221 waiting). P2H's early cost (−264 at 1 hour) turned into
++1,128 at 3 hours; the 3-hour and 5-hour marks decide.
