@@ -110,3 +110,24 @@ proved about the same (P2T 2,218, P2U 2,122 by the curve), so the lead is the fi
 The mix lines at 60 min: P2T r 1,324/h, q 100/h (281 runs), h 26/h (45 runs); P2U r 1,085/h, q 92/h (378 runs), h
 44/h (2 runs). In P2U the q floor is on again (20 × 92 ≥ 1,085), the h floor still off (20 × 44 < 1,085); it comes
 back when the first runs' yield falls below 20 times the head class's.
+
+## Interim at 2 hours (21 Nov 22:50): P2U +1,040
+
+| min | 30 | 60 | 90 | 120 |
+|---|---|---|---|---|
+| P2T (control) | 14,568 | 16,786 | 17,944 | 18,618 |
+| P2U (+ `--floor-ratio 20`) | 15,574 | 17,696 | 18,795 | 19,658 |
+| P2U − P2T | +1,006 | +910 | +851 | **+1,040** |
+| P2O (6 workers, 21 Nov) | 16,453 | 18,792 | 20,084 | 20,934 |
+
+exp/quickstat.py, 60-120 min (proofs / runs / CPU hours):
+
+| arm | first | retry | deep |
+|---|---|---|---|
+| P2T | 1,302 / 1,737 / 1.0 | 81 / 684 / 0.9 | 58 / 594 / 2.0 |
+| P2U | 1,320 / 2,318 / 1.8 | 122 / 806 / 1.0 | 60 / 561 / 1.0 |
+
+From 1 to 2 hours P2U gained 1,962 and P2T 1,832. P2U spends half the control's CPU on deep runs (1.0 against 2.0
+CPU hours, mostly the head class's L1 runs) for the same proofs, and puts it into first runs and retries. The mix lines
+at 120 min: P2T h 90 runs at 17/h, q 973 at 59/h, r 802/h; P2U h 3 runs at 25/h, q 1,188 at 108/h, r 530/h. P2U's h
+floor is still off (20 × 25 < 530), close to coming back on.
