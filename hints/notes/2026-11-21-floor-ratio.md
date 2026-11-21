@@ -15,6 +15,19 @@ factor K of the best class keep the first pass's speed and still give their late
 * In P2R (P2O's set) between 90 and 180 minutes, first runs proved about 390 per CPU hour, retries 137 and head runs
   about 28. With K = 20, both floors would be back by then; at 30 minutes in Z7 they would be off (20 × 77 < 6,885).
 
+* exp48's first hour (exp/quickstat.py, CPU hours per 15-minute window; "deep" holds class h's 40 s runs):
+
+  | window | P2O first | P2O retry | P2O deep | P2N first | P2N retry | P2N deep |
+  |---|---|---|---|---|---|---|
+  | 15-30 min | 2,018 / 0.7 h | 30 / 0.2 h | 25 / 0.5 h | 2,243 / 0.9 h | 33 / 0.2 h | 24 / 0.2 h |
+  | 30-45 min | 1,074 / 0.7 h | 27 / 0.2 h | 18 / 0.5 h | 907 / 0.9 h | 46 / 0.2 h | 7 / 0.3 h |
+  | 45-60 min | 577 / 0.7 h | 32 / 0.2 h | 23 / 0.5 h | 612 / 0.9 h | 54 / 0.2 h | 12 / 0.2 h |
+
+  (proofs / CPU hours.) P2O's deeper runs took 0.2-0.3 CPU h more per window and proved 23 more in 15-60 minutes than
+  P2N's; the 0.2 CPU h less of first runs was worth about 165 proofs per window at 45-60 minutes (824 per CPU hour).
+  P2O was 422 behind P2N at 60 minutes and 62 ahead at 120. What the A/B has to show is whether the head runs' early
+  proofs matter later (their following goals), or only their late ones.
+
 ## Change
 
 loop.py `--floor-ratio K` (default off) and `--floor-classes CLS` (default qh). With --mix, a class in CLS is among the
