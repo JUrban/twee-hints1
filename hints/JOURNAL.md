@@ -759,6 +759,12 @@ Paused:
 has the history (user, 20 Nov: "update the total numbers in the report etc every now and then").
 
 Next:
+0000000000000000000000000000. **exp53 candidate (17:05): deep runs without queue renormalisation, from zero.** Under
+   --abstract-time renormalising the queue is 27% of a hinted run's CPU but free in abstract time; off, 80 s runs cost
+   25% less with a different search (exp25: 2 of 3 proofs kept); exp26 in production was too thin to tell (7/209 vs
+   5/186, [notes/2026-11-19-queue-renorm-ab.md](notes/2026-11-19-queue-renorm-ab.md)). In Z7 the retry and deep
+   classes take about half the CPU after 2 hours, so a from-zero A/B has the volume: `PG="--cp-renormalise-threshold
+   1000"` (solve_new.sh passes $PG into twee's arguments; empty for twee-pg61) against the control. After exp52.
 000000000000000000000000000. **After the Z7 pair (plan agreed with the user, 14:34):** split the CPU instead of
    speed tests only. About 10 CPUs: exp52's A/B on half2 (LATE against LATE + `--floor-ratio 20`, 4 workers each, 3 h),
    judged also by the h and q classes' proofs and the union per worker-hour. About 10 CPUs: the unsolved 3,550:
