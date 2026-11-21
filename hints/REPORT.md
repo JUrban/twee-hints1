@@ -32,6 +32,7 @@ in `/project/hintwork` (not in git).
 | + the 20 s sweep of never-deep unsolved goals, the live and transfer loops (production paused for Z6); at 20 Nov 18:45, all trusted | **48,201** (+55.2% over plain) | **5340** (+66.7%) | – |
 | + Z6's two derived-rule proofs, the sweep (production paused); at 20 Nov 23:35, all trusted | **48,208** (+55.2% over plain) | **5341** (+66.7%) | – |
 | + the sweep and the side loops, exp44/45's two unique proofs (production paused); at 21 Nov 04:41, all trusted | **48,221** (+55.3% over plain) | **5342** (+66.8%) | – |
+| + the sweep, the side loops and step joins, exp48's unique proof (production paused); at 21 Nov 09:56, all trusted | **48,234** (+55.3% over plain) | **5343** (+66.8%) | – |
 
 **Correction (20 Nov 10:40; [notes/2026-11-20-p9-negation-bug.md](notes/2026-11-20-p9-negation-bug.md)).** The counts
 from 15 Nov on include proofs that are not proofs.
@@ -130,6 +131,7 @@ written in loops/UL. Merged proofs count from their merge.
 | 20 Nov 18:45 | 48,201 | 5340 | production paused 15:30 for Z6 (from zero on all goals, 41,789 at 3 h); the 20 s sweep (9 of 600), Z6's and production's live and transfer loops; REVER4 stopped 17:33 (0 of 15 at 300 s); all 48,201 trusted (trust.py) |
 | 20 Nov 23:35 | 48,208 | 5341 | Z6 from zero ended: 44,095 in 8 hours on 12 workers (Z4 38,044); its 2 unique proofs merged, trusted; the sweep 14 of 1,200 |
 | 21 Nov 04:41 | 48,221 | 5342 | production paused for exp44/45 (half2 from zero, 5 h: P2J 21,706, P2H 21,597, P2K 21,147); their 2 unique proofs merged; the sweep 18 of 1,500 and the step-join and live loops 11; all 48,221 trusted (trust.py --exposed) |
+| 21 Nov 09:56 | 48,234 | 5343 | production still paused (exp48: P2O 21,940, P2N 21,702 of half2; exp49/50 from 09:45); P2O's 1 unique proof merged (R1dist_to_aa1 614); the sweep 27 of 2,100, the step joins and live loops; all 48,234 trusted (trust.py --exposed) |
 
 From 15 Nov 05:30 the rate fell from hundreds an hour to 50–100. The
 cheap new contexts are used up; 58% of the unsolved goals sit behind the
