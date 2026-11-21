@@ -122,3 +122,23 @@ minutes), P2J 21,462 (216), P2K 20,580 (217); P2O had 21,524 with a little less 
 * Where P2O's lead comes from: not mainly the kNN-only retries (274, 48 proved, 43 of them in the first hour; 5 of
   71 since). Its L1 runs: 152, 48 proved (class h), against P2N's 34 and 16. A proved head gives the goals after it
   a new nearest sibling, so their L0 retries follow; P2O's L0 runs proved 352 in 120–180 minutes against 190.
+
+## Interim at 4 hours (21 Nov 08:37)
+
+| arm | 180 min | 210 min | 240 min |
+|---|---:|---:|---:|
+| P2K | 20,224 | 20,546 | 20,828 |
+| P2H | 21,355 | 21,444 | 21,525 |
+| P2J | 20,770 | 21,374 | 21,624 |
+| P2N | 21,271 | 21,317 | 21,370 |
+| **P2O** | 21,524 | 21,615 | **21,686** |
+
+At equal abstract work (P2N's 210 and 240 minutes = 20.5 and 23.6 abstract worker hours): P2H 21,531 and 21,590
+(at 248 and 282 minutes), P2J 21,636 and 21,683 (250, 283), P2N 21,317 and 21,370, P2O 21,618 at 20.5 hours and
+21,686 now with a little less than 23.6.
+
+* P2O leads P2N by 316 side by side. At equal work it ties P2J and leads P2H by about 100; P2N trails both by
+  220-310. The two options together are worse than either alone, and --knn-ctx with --head-class win that back.
+* Both arms are flattening: P2O +71 in 210-240 minutes (L1 0 of 22, V@0 1 of 300), P2N +53. On half2 the late phase
+  is short of the other half's lemmas (notes/2026-11-21-roots.md), so the sets/all run (Z7) decides what the late
+  options are worth.
