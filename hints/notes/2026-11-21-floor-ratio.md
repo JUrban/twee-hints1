@@ -56,3 +56,11 @@ An A/B after the Z7 pair (about 20:50), when the CPU is free: the LATE default a
 `--floor-ratio 20`. Most of the effect should be in the first two hours, so on all goals from zero, 6 workers each,
 3 hours, against the same control. Decision: +260 at 3 hours, or a curve clearly ahead throughout with no loss at 3
 hours (the measure is goals solved at each point in time).
+
+## Launch (21 Nov 16:52)
+
+With the user's CPU split (about 10 CPUs for this test, about 10 for the unsolved goals), the A/B is on half2 at 4
+workers each, not on all goals at 6. abs/after_z7.sh (exp/after_z7.sh, PID 997587) waits for loops/Z7.done (about
+20:50) and starts P2T (control: solve_new.sh's defaults, LATE) and P2U (the same plus `--floor-ratio 20`), half2 from
+zero, 3 hours, PIDs in loops/AFTERZ7.pids. Identical half2 runs differ by about 185, so the decision line is +185 at 3
+hours, or a curve clearly ahead throughout with no loss at 3 hours, judged also by the h and q classes' proofs.
