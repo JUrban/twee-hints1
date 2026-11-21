@@ -5265,6 +5265,39 @@ from zero, against exp30's P2D.
   get their own class (exp44, `--retry-class`). A discounted yield estimate with re-exploration lets L1 come back
   (exp45, `--yield-discount`).
 
+**The late phase from zero: retries, latency and heads (21 Nov, interim at 02:36; [notes/2026-11-20-retry-class.md](notes/2026-11-20-retry-class.md),
+[notes/2026-11-20-yield-discount.md](notes/2026-11-20-yield-discount.md), [notes/2026-11-21-roots.md](notes/2026-11-21-roots.md),
+[notes/2026-11-21-knn-ctx.md](notes/2026-11-21-knn-ctx.md), [notes/2026-11-21-head-class.md](notes/2026-11-21-head-class.md)).**
+* **exp44/45:** three half2 arms from zero, 6 workers, 5 hours, from 23:34 (identical runs differ by about 185 at
+  2 hours).
+
+  | arm | 60 min | 120 min | 180 min |
+  |---|---:|---:|---:|
+  | P2K, the control | 19,009 | 20,004 | 20,227 |
+  | **P2H, `--retry-class`** | 18,745 | 20,611 | **21,355** |
+  | P2J, `--yield-discount 2000 --reexplore 12:0.25` | 19,161 | 20,124 | 20,774 |
+
+  * P2H's failed-before goals with a new context have their own --mix class. It costs 264 at 1 hour (retries at 21%
+    take workers from first runs at 93%) and leads by 1,128 at 3 hours: the control's context-change retries wait
+    until all first runs end, at about 150 minutes.
+  * The 5-hour result decides.
+* **What Z6 lacked (exp/roots.py, trust.py --dump-rec).** Of the 4,117 goals production has and Z6 lacks, 190 have
+  recorded lemmas that Z6 all proved (104 first proved at L1); their reach is 363. The rest rest on lemmas Z6
+  never proved. The gap is mostly depth.
+  * The 190 at 40 s in Z6's final context, fresh, without hints: 84 of the first 131 proved (64%).
+* **Latency (exp/latency.py).** Once its last lemma was proved, a goal Z6 proved waited a median of 4-51 minutes
+  in hours 1-5 (p75 26-81), and almost always fell at its first run after that.
+  * Goals whose last lemma was a near sibling came at once. Those whose last lemma was a kNN lemma did not: 56%
+    came over 10 minutes late.
+  * With `--fail-order`, a kNN change never triggered a retry; only the learned scheduler's path checked it.
+  * exp46: `--knn-ctx K`, a goal that a new proof would enter the top K of its kNN lemmas has a new context.
+* **Heads.** At Z6's end 1,120 of its 7,689 unsolved goals were heads (right after a proven sibling); production has
+  proved 875 of them. Z6 ran L1 16 times in 8 hours. With --ratio-order, L1's estimate stays near its prior, so a
+  head runs every 5 s variant first and L1 entries come last.
+  * exp47: `--head-class`, heads whose next own level is L1 are a mix class.
+* exp46 (P2L) and exp47 (P2M) start on half2 when exp44/45 end (about 04:40), each on top of `--retry-class`, with
+  P2H as the control.
+
 **Step joins: unsolved goals closed by rewriting with other theories' proof steps (20 Nov 10:40;
 [notes/2026-11-20-step-join.md](notes/2026-11-20-step-join.md)).**
 * exp/joincheck.py asks whether an unsolved goal's ground equation rewrites to one normal form with the union of
