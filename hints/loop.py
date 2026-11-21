@@ -1371,6 +1371,7 @@ class Loop:
         def knnch(n):
             return RK and (n not in knn_at or knn_sig(n) != knn_at[n])
         kf = open(kfile, 'a') if RK else None
+        kft = [0.0]   # (21 Nov) knn_at.tsv is flushed at most every 5 s: a flush per dispatch took ~0.8 ms of the main thread
         # (21 Nov 00:52) --knn-ctx: with --fail-order a goal was retried fresh only when its sibling context changed or
         # its hint pool grew; a new kNN lemma did not count (only --sched-model looked at knnch). In Z6, of the proofs
         # after the first hour whose last lemma to be proved was a kNN lemma, 56% came over 10 minutes after it, and
@@ -1905,7 +1906,9 @@ class Loop:
                             att[n] = (ctx(n), 0); vtried.pop(n, None)
                             if RK:
                                 knn_at[n] = knn_sig(n)
-                                kf.write(f'{n}\t{",".join(sorted(knn_at[n]))}\n'); kf.flush()
+                                kf.write(f'{n}\t{",".join(sorted(knn_at[n]))}\n')
+                                if tq_ - kft[0] > 5:
+                                    kf.flush(); kft[0] = tq_
                             if KC:
                                 knew.discard(n)
                                 sc_ = sorted((self.lemma_index.sim(n, m) for m in knn_at[n]), reverse=True)

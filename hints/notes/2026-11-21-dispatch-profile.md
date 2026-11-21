@@ -76,3 +76,14 @@ loops/PRB: sets/all from zero, 12 workers, 6 minutes, exp48's base options, with
   old module and are unaffected.
 * Next: a profile with line numbers of the cascade function's own 28.7% (loops/PRC, 2 workers, all goals; the
   busy part of the main thread does not depend on the worker count).
+
+## The line profile (PRC, 09:47-09:53)
+
+loops/PRC: sets/all from zero, 2 workers, 6 minutes, P2O's options, with the conjecture cache. The main thread waited
+89.6% of the samples. Of the rest: the knn_at.tsv write and flush at each dispatch (line 1908) 1.8%, about 0.8 ms a
+dispatch; the full pass's retry-list sort 1.3%; ctx and gaps about 3%; knn_sig with its conjecture reads now 0.7%
+(15% at 12 workers before the cache, at a higher dispatch rate). **Change (09:55):** knn_at.tsv is flushed at most
+every 5 s (it is read only at a restart; a lost line makes that goal count as kNN-changed once).
+
+With the goal files at first use, the conjecture cache and this, the main thread should have room at 12 workers. Z7
+will show it in its progress lines (main s: pass, submit, wait, results) against Z6's.
