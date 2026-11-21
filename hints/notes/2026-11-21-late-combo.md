@@ -25,3 +25,9 @@ else the options above; and abs/stepjlive3.sh. Production stays paused: its own 
   exp/latency.py.
 * Decision: P2N ≥ max(P2H, P2J) + 185 at 5 hours makes the pair solve_new.sh's default; P2O ≥ P2N + 185 adds the
   exp46/47 options. Then Z7 on sets/all against Z6.
+
+## Launch (21 Nov 04:36)
+
+exp44/45 ended 04:35: P2K 21,147, P2H 21,597, P2J 21,706 (both over the +185 rule). loops/GO48 written 04:36 with no
+.args files, so the arms run the options above: P2N loop.py PID 66396, P2O 66394 (loops/AFTERZ6.pids); stepjlive3
+66377. They end at about 09:40. The bar for P2N is P2J's 21,706 + 185 = 21,891 (the union P2H ∪ P2J was 21,924).
