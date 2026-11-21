@@ -755,6 +755,10 @@ Paused:
 has the history (user, 20 Nov: "update the total numbers in the report etc every now and then").
 
 Next:
+00000000000000000. **Roots (00:44, [notes/2026-11-21-roots.md](notes/2026-11-21-roots.md)):** of the 4,117 goals production has and Z6
+   lacks, 190 have recorded lemmas that Z6 all proved (L1 104, L0 46, L2 26); their reach is 363. The rest rest on
+   lemmas Z6 lacks (2,981 through goals without a record). The gap is mostly depth. Test: the 190 at 40 s in Z6's
+   context, loops/ROOTS/t40, 1 worker (abs/roots_t40.sh).
 0000000000000000. **exp45 (written 19:38, starts with exp44 when Z6 ends, [notes/2026-11-20-yield-discount.md](notes/2026-11-20-yield-discount.md)):**
    Z6 after 4 hours ran only Vunf@0 (2 of its last 291) and L0 retries: its cumulative estimate (23 per CPU h) kept
    L1 (9 of 16, only in the first hour) from ever running again. estcmp on Z6's rows: cumulative -791, flat -616,
@@ -944,6 +948,7 @@ reports are written as the experiments run.
 | [notes/2026-11-20-sweep20.md](notes/2026-11-20-sweep20.md) | One 20 s run for each unsolved goal that never had more than 5 s |
 | [notes/2026-11-20-retry-class.md](notes/2026-11-20-retry-class.md) | exp44: failed-before goals as their own cascade class (P2H against P2K, 5 h) |
 | [notes/2026-11-20-yield-discount.md](notes/2026-11-20-yield-discount.md) | exp45: a discounted yield estimate for the deeper levels from zero (P2J against P2K, 5 h) |
+| [notes/2026-11-21-roots.md](notes/2026-11-21-roots.md) | Roots: which of production's proofs Z6 was one proof away from, and a 40 s test of them |
 | [notes/2026-11-20-base-saturation.md](notes/2026-11-20-base-saturation.md) | exp39: base-theory runs as rule generators for the unsolved goals of the stronger theories |
 | [notes/2026-11-20-given-transfer.md](notes/2026-11-20-given-transfer.md) | exp38: unsolved goals that are variants of rules other runs derived and did not use (379 M in the given logs; transfer.py only matches proof steps); their ancestry as hints |
 | [notes/2026-11-19-from-zero-portfolio.md](notes/2026-11-19-from-zero-portfolio.md) | half1 from zero in 2 hours with today's deep portfolio (PGC), against PGA's 18,987 (exp27, from 07:18) |

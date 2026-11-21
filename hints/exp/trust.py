@@ -6,7 +6,7 @@ record names every lemma it used (a kept twee output's USEDAXIOMS, a climber's u
 trusted proven goal. Anything else (no record, a lemma name that is not resolved: srclem_, skax_, an unnamed
 lemma_knn_I, ...) is untrusted. Production's proofs are written to OUT.untrusted for quarantine.
 
-  trust.py OUT [-j 4]
+  trust.py OUT [-j 4] [--exposed EXPOSED.txt] [--dump-rec REC.tsv]
 
 The rest of this docstring is unsound.py's:
 
@@ -170,6 +170,13 @@ def main():
     norec = sum(1 for g in un if g not in rec)
     unres = sum(1 for g in un if g in rec and rec[g] is None)
     open(out + '.untrusted', 'w').writelines(g + '\n' for g in un)
+    if '--dump-rec' in sys.argv:
+        # (21 Nov 00:50) every solved goal's record: its lemma goals, UNRES for an unresolved name, none without one
+        # (exp/roots.py)
+        with open(sys.argv[sys.argv.index('--dump-rec') + 1], 'w') as f:
+            for g in sorted(S):
+                r_ = rec.get(g, 0)
+                f.write(f'{g}\t{"NOREC" if r_ == 0 else "UNRES" if r_ is None else ",".join(sorted(r_))}\n')
     # (20 Nov 12:07) what each untrusted proof with a complete record waits for: its lemmas not trusted
     with open(out + '.missing', 'w') as f:
         for g in un:
