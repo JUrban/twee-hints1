@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """(21 Nov 05:10) exp49 (notes/2026-11-21-quick-first.md): the first pass of loop.py --quick arms against controls.
+(07:45) exp50: --retry-time rows (r=1) are their own kind, "retry at T"; a last row gives proofs and proofs per CPU hour.
 
   quickstat.py DIR... [--bins 15,30,60,90,120,180,240,300]
 
@@ -38,7 +39,7 @@ def main():
             elif lab == 'L0' and n in qf:
                 k = 'T0 after quick'; qf.discard(n); qt0[0] += ok; qt0[1] += 1
             elif lab == 'L0':
-                k = 'retry'
+                k = 'retry at T' if 'r=1' in w[7:] else 'retry'
             else:
                 k = 'deep'
             if lab == 'L0' and n not in seen:
@@ -47,8 +48,12 @@ def main():
             v = kinds[(b, k)]; v[0] += ok; v[1] += 1; v[2] += dt
         print(f'== {d}: {len(rows)} runs; first pass ended at {endfirst / 60:.0f} min; quick runs {q[0]}/{q[1]}; '
               f'T0 runs after a failed quick run {qt0[0]}/{qt0[1]}, {len(qf)} still waiting')
-        ks = ['quick', 'first', 'T0 after quick', 'retry', 'deep']
+        ks = [k for k in ['quick', 'first', 'T0 after quick', 'retry', 'retry at T', 'deep']
+              if any(kk == k for _, kk in kinds)]
         print('  min  | ' + ' | '.join(f'{k:>22}' for k in ks))
+        tot = {k: [sum(v[0] for (b, kk), v in kinds.items() if kk == k), sum(v[2] for (b, kk), v in kinds.items() if kk == k)]
+               for k in ks}
+        print('  all  | ' + ' | '.join(f'{f"{p}, {p / max(1e-9, c / 3600):.0f}/CPU h":>22}' for p, c in tot.values()))
         for b in bins + ['later']:
             cells = []
             for k in ks:
