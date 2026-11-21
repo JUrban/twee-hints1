@@ -98,3 +98,27 @@ wall minutes across nights.
 (`abscurve.py sets/half2 P2J P2H P2N P2O --at 300`). If P2N reaches that work before its own end, the comparison is
 at that wall time, else at its end (which then favours P2J and P2H). P2O against P2N stays by wall time. Z7 against
 Z6 needs the same correction.
+
+## Interim at 3 hours (21 Nov 07:37)
+
+By wall minutes (side by side, fair for P2O against P2N):
+
+| arm | 120 min | 150 min | 180 min |
+|---|---:|---:|---:|
+| P2K | 20,004 | 20,075 | 20,224 |
+| P2H | 20,611 | 21,086 | 21,355 |
+| P2J | 20,124 | 20,282 | 20,770 |
+| P2N | 20,872 | 21,148 | 21,271 |
+| **P2O** | 20,934 | 21,286 | **21,524** |
+
+At equal abstract work (abscurve, P2N's 180 minutes = 17.4 abstract worker hours): P2N 21,266, P2H 21,457 (at 213
+minutes), P2J 21,462 (216), P2K 20,580 (217); P2O had 21,524 with a little less work.
+
+* **P2O leads P2N by 253**, above the +185 rule. P2N has nearly stalled: +123 in 150–180 minutes, its mix line's
+  yields r 19, d 12 and q 1 an hour (P2O: r 62, d 43, q 62, h 17). In 150–180 minutes P2N's L0 runs proved 43 of
+  1,638, P2O's 142 of 1,461.
+* **At equal work the pair alone (P2N) is about 190 behind each of its options alone.** The two do not stack; with
+  --knn-ctx and --head-class added (P2O) the set leads.
+* Where P2O's lead comes from: not mainly the kNN-only retries (274, 48 proved, 43 of them in the first hour; 5 of
+  71 since). Its L1 runs: 152, 48 proved (class h), against P2N's 34 and 16. A proved head gives the goals after it
+  a new nearest sibling, so their L0 retries follow; P2O's L0 runs proved 352 in 120–180 minutes against 190.
