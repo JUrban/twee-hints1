@@ -179,3 +179,20 @@ solve_new.sh has a new variable LATE, default `--retry-class --yield-discount 20
 own copies of the script (or_test2.sh copies it at launch), so exp49/50 is unaffected. Smoke test loops/LTD (12:19,
 smoke487, 2 workers, 3 minutes, LOOPARGS `--head-class --retry-time 3`, so one option given twice): no errors, 351
 solved, the mix line with classes q and h. exp49/50's winners join LATE at about 14:50.
+
+## A check of the abstract-work correction (21 Nov 12:25)
+
+exp49's control P2R runs P2O's options on the same set, under a heavier load (three arms, and a machine load average
+up to 47 from outside this sandbox). abscurve.py with P2R as the reference:
+
+| reference minute | P2R | P2O at equal abstract work (its minute) | P2O − P2R | wall-minute gap |
+|---|---:|---:|---:|---:|
+| 60 | 18,117 | 18,361 (53) | +244 | +673 |
+| 90 | 19,356 | 19,570 (78) | +214 | +728 |
+| 120 | 20,234 | 20,660 (106) | +426 | +700 |
+| 150 | 20,929 | 21,096 (131) | +167 | |
+
+So the correction removes a half to three quarters of the gap between two runs of one system, not all of it. The
+calibration (failed plain 5 s L0 runs) may miss part of the slowdown, e.g. of the main thread and the side loops,
+which do not run on abstract time. A cross-time difference under about 400 is therefore not evidence; for Z7 against
+Z6 the decision needs a clearly larger margin, or a Z6-set control arm run beside it.
