@@ -758,7 +758,9 @@ Next:
 00000000000000000000. **exp48 (03:37, [notes/2026-11-21-late-combo.md](notes/2026-11-21-late-combo.md)):** at 4 hours P2H (--retry-class) +697 and P2J
    (--yield-discount 2000 --reexplore 12:0.25) +796 over P2K. P2N = both; P2O = P2N + --knn-ctx 10 --head-class
    (exp46/47 in one arm, to stay near 24 CPUs). half2, 5 h, when exp44/45 end; abs/after4445e.sh waits for
-   loops/GO48. Production stays paused.
+   loops/GO48. Production stays paused. **At 5 hours (04:35) P2K 21,147, P2H 21,597 (+450), P2J 21,706 (+559):
+   both options become defaults; union P2H ∪ P2J 21,924. P2N and P2O started 04:36** (loops/AFTERZ6.pids), to
+   about 09:40. Decision: P2N ≥ P2J + 185 makes the pair the default; P2O ≥ P2N + 185 adds the two options.
 0000000000000000000. **exp47 (01:40, [notes/2026-11-21-head-class.md](notes/2026-11-21-head-class.md)):** Z6 ended with 1,120 unsolved heads,
    875 of them proved by production, and ran L1 16 times in 8 hours (3 on those heads): with --ratio-order L1's
    estimate stays near its prior and its entries come last. loop.py `--head-class`: heads whose next own level is
@@ -778,11 +780,11 @@ Next:
    L1 (9 of 16, only in the first hour) from ever running again. estcmp on Z6's rows: cumulative -791, flat -616,
    discounted over 1,000 rows -557; production's rows keep cumulative best. loop.py `--yield-discount N`; P2J =
    defaults + `--yield-discount 2000 --reexplore 12:0.25` against P2K, half2, 5 h. exp44 changed to 5 h against P2K
-   too (abs/exp4445.sh); production and stepjlive3 start when the three arms end (abs/afterz6.sh, 19:38; from 21 Nov 00:56 abs/after4445.sh, production at J=6 beside exp46).
+   too (abs/exp4445.sh); production and stepjlive3 start when the three arms end (abs/afterz6.sh, 19:38; from 21 Nov 00:56 abs/after4445.sh, production at J=6 beside exp46). **DONE 04:35: P2J 21,706, P2K 21,147 (+559).**
 000000000000000. **exp44 (written 18:44, starts when Z6 ends, [notes/2026-11-20-retry-class.md](notes/2026-11-20-retry-class.md)):** Z6's first runs ended at
    about 150 min, then retries of goals with a new context proved 47% (1,096 of 2,331 in half an hour), the last
    first runs 3%. loop.py `--retry-class`: failed-before goals as their own --mix class. P2H on half2 against P2E/P2F.
-   (Design changed 19:37: 5 hours against P2K, see exp45.)
+   (Design changed 19:37: 5 hours against P2K, see exp45.) **DONE 04:35: P2H 21,597, P2K 21,147 (+450).**
 00000000000000. **20 s sweep (15:32, [notes/2026-11-20-sweep20.md](notes/2026-11-20-sweep20.md)):** 2,895 unsolved goals never had a production run
    above 5 s; the non-joined test proved 4 of 100 such at 20 s. exp/sweep20.py loops/SW20, chunks of 300 with a
    fresh trusted lemma context, 2 workers, proofs into UL (and kept). Production's own loop is stopped (2 proofs in

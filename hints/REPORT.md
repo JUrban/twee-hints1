@@ -5267,26 +5267,33 @@ from zero, against exp30's P2D.
   get their own class (exp44, `--retry-class`). A discounted yield estimate with re-exploration lets L1 come back
   (exp45, `--yield-discount`).
 
-**The late phase from zero: retries, latency and heads (21 Nov, interim at 02:36; [notes/2026-11-20-retry-class.md](notes/2026-11-20-retry-class.md),
+**The late phase from zero: retries, latency and heads (21 Nov, result at 5 hours 04:35; [notes/2026-11-20-retry-class.md](notes/2026-11-20-retry-class.md),
 [notes/2026-11-20-yield-discount.md](notes/2026-11-20-yield-discount.md), [notes/2026-11-21-roots.md](notes/2026-11-21-roots.md),
-[notes/2026-11-21-knn-ctx.md](notes/2026-11-21-knn-ctx.md), [notes/2026-11-21-head-class.md](notes/2026-11-21-head-class.md)).**
-* **exp44/45:** three half2 arms from zero, 6 workers, 5 hours, from 23:34 (identical runs differ by about 185 at
+[notes/2026-11-21-knn-ctx.md](notes/2026-11-21-knn-ctx.md), [notes/2026-11-21-head-class.md](notes/2026-11-21-head-class.md),
+[notes/2026-11-21-late-combo.md](notes/2026-11-21-late-combo.md)).**
+* **exp44/45:** three half2 arms from zero, 6 workers, 5 hours, 23:34-04:35 (identical runs differ by about 185 at
   2 hours).
 
-  | arm | 60 min | 120 min | 180 min |
-  |---|---:|---:|---:|
-  | P2K, the control | 19,009 | 20,004 | 20,227 |
-  | **P2H, `--retry-class`** | 18,745 | 20,611 | **21,355** |
-  | P2J, `--yield-discount 2000 --reexplore 12:0.25` | 19,161 | 20,124 | 20,774 |
+  | arm | 60 min | 120 min | 180 min | 240 min | 300 min |
+  |---|---:|---:|---:|---:|---:|
+  | P2K, the control | 19,009 | 20,004 | 20,224 | 20,828 | 21,147 |
+  | **P2H, `--retry-class`** | 18,745 | 20,611 | 21,355 | 21,525 | **21,597** |
+  | **P2J, `--yield-discount 2000 --reexplore 12:0.25`** | 19,161 | 20,124 | 20,770 | 21,624 | **21,706** |
 
+  * **Both options pass the +185 rule at 5 hours:** P2H +450 (+642 / −192), P2J +559 (+726 / −167). P2H against
+    P2J +218 / −327; union P2H ∪ P2J 21,924, all three 21,988.
   * P2H's failed-before goals with a new context have their own --mix class. It costs 264 at 1 hour (retries at 21%
     take workers from first runs at 93%) and leads by 1,128 at 3 hours: the control's context-change retries wait
-    until all first runs end, at about 150 minutes.
-  * The 5-hour result decides.
+    until all first runs end, at about 150 minutes. The control catches up later (+697 at 4 hours, +450 at 5).
+  * P2J's discounted estimates keep the deeper variants close, so its deep work spreads over Vk100@0, Vk200@0,
+    Vk400@0, Vkd@0 and L1 (31 runs, 14 proved; the control and P2H ran L1 0 times after the first hour and spent
+    their deep work on Vunf@0). Those proofs give new contexts, which its L0 retries use (414 and 402 proved in the
+    half hours 150-210 minutes). It proves 425 and 328 goals from lemmas of hours 2 and 3 (P2H 307 and 40).
+  * exp48 (from 04:36): P2N runs both options together, P2O adds `--knn-ctx 10 --head-class`; half2, 5 hours.
 * **What Z6 lacked (exp/roots.py, trust.py --dump-rec).** Of the 4,117 goals production has and Z6 lacks, 190 have
   recorded lemmas that Z6 all proved (104 first proved at L1); their reach is 363. The rest rest on lemmas Z6
   never proved. The gap is mostly depth.
-  * The 190 at 40 s in Z6's final context, fresh, without hints: 84 of the first 131 proved (64%).
+  * The 190 at 40 s in Z6's final context, fresh, without hints: 121 proved (64%; heads 85 of 138).
 * **Latency (exp/latency.py).** Once its last lemma was proved, a goal Z6 proved waited a median of 4-51 minutes
   in hours 1-5 (p75 26-81), and almost always fell at its first run after that.
   * Goals whose last lemma was a near sibling came at once. Those whose last lemma was a kNN lemma did not: 56%
@@ -5297,8 +5304,6 @@ from zero, against exp30's P2D.
   proved 875 of them. Z6 ran L1 16 times in 8 hours. With --ratio-order, L1's estimate stays near its prior, so a
   head runs every 5 s variant first and L1 entries come last.
   * exp47: `--head-class`, heads whose next own level is L1 are a mix class.
-* exp46 (P2L) and exp47 (P2M) start on half2 when exp44/45 end (about 04:40), each on top of `--retry-class`, with
-  P2H as the control.
 
 **Step joins: unsolved goals closed by rewriting with other theories' proof steps (20 Nov 10:40;
 [notes/2026-11-20-step-join.md](notes/2026-11-20-step-join.md)).**
