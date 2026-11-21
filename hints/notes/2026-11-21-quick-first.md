@@ -141,7 +141,7 @@ an hour or more. The early lead (+975 at 15 minutes) is the value of a 1 s first
 it. `--quick-near` (smoke QKN) fixes the order; it is a candidate for a later, short A/B (2 hours is enough, since the
 difference shows in the first pass), not for Z7.
 
-## The portfolio check (21 Nov 14:22)
+## The portfolio check (21 Nov 14:30)
 
 The portfolio rule is: report +/−, the union, and the union per CPU hour against a time-matched control.
 * Union per CPU: P2R ∪ P2Q at 3 hours each (36 worker-hours) has 21,508 goals; P2R ∪ P2S has 21,489. P2O alone at 5
