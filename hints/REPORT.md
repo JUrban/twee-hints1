@@ -4855,6 +4855,8 @@ reproduced exactly).
 
 ## 2az. Portfolios: complementary methods kept, not dropped (user's request, 18 Nov 17:00)
 
+*Notes: [notes/2026-11-21-head-time.md](notes/2026-11-21-head-time.md).*
+
 *Notes: [notes/2026-11-21-retry-time.md](notes/2026-11-21-retry-time.md).*
 
 *Notes: [notes/2026-11-21-quick-first.md](notes/2026-11-21-quick-first.md).*

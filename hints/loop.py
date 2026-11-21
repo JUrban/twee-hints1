@@ -1470,6 +1470,8 @@ class Loop:
         # The frontier's first pass would then take about a third of the time.
         QK = bool(a.quick and a.fail_order and not a.sched_model)
         rtf = set()   # (--retry-time) the futures of failed-before goals' fresh runs at its shorter limit
+        htf = set()   # (--head-time) the futures of class h's chain-level runs at its shorter limit
+        sbud = {}     # goal -> the budget its saved deep state has reached (a resume runs the rest of its level's)
         qd, qf, qfut = set(), set(), set()   # goals that had their quick run; of those, failed and waiting; its futures
         # (18 Nov 22:38) tiers; (23:48) optional attempts. A variant level is an attempt a goal may take at any time after
         # the cascade level it follows, once per context. Only the cascade's own levels are ordered: a resume needs the
@@ -1995,9 +1997,26 @@ class Loop:
                                     hv = self.pw_groups(n, hv)
                                 fut = ex.submit(self.run_one, n, hv, rnd, T[lev], False, a.cascade_cpu * T[lev], 0, v_)
                             else:
-                                b = T[lev] if fc else (T[lev] - T[PREV[lev]] if (a.p9loop or os.path.exists(sp)) else T[lev])
+                                # (--head-time S, 21 Nov) a head's chain-level run in class h at S; the state it saves
+                                # has reached S, so the next level's resume runs to that level's full budget
+                                ht_ = bool(fc and cl == 'h' and a.head_time and a.head_time < T[lev])
+                                if ht_:
+                                    b = a.head_time
+                                elif fc:
+                                    b = T[lev]
+                                elif a.p9loop:
+                                    b = T[lev] - T[PREV[lev]]
+                                elif os.path.exists(sp):
+                                    # (without --head-time exactly as before: the increment over the previous level)
+                                    b = T[lev] - (min(sbud.get(n, T[PREV[lev]]), T[lev] - 1) if a.head_time
+                                                  else T[PREV[lev]])
+                                else:
+                                    b = T[lev]
                                 fut = ex.submit(self.run_one, n, self.deep_hints(n, ol, pools), rnd,
                                                 b, 'fresh' if fc else not a.p9loop, a.cascade_cpu * b)
+                                sbud[n] = b if ht_ else T[lev]
+                                if ht_:
+                                    htf.add(fut)
                                 if fd_ and lev <= FD:
                                     frun.add(fut)   # (--far-deep: a far goal's run, counted under the f label)
                         running[fut] = (n, lev); rcls[fut] = cl; ncls[cl] += 1; rt0[fut] = time.time()
@@ -2024,6 +2043,7 @@ class Loop:
                     ycls[rcls.pop(f, 'r')].append((1 if ok else 0, dt)); rt0.pop(f, None)
                     qk_ = f in qfut; qfut.discard(f)
                     rt_ = f in rtf; rtf.discard(f)
+                    ht1 = f in htf; htf.discard(f)
                     if a.orig_rate:
                         k_ = (orig_of(n), lev == 0)
                         ors[k_] = ors[k_] * 0.9 + (1 if ok else 0); orc[k_] = orc[k_] * 0.9 + 1
@@ -2055,7 +2075,7 @@ class Loop:
                     rf.write(f'{n}\t{"THM" if ok else "NO"}\t{dt:.2f}\t{stats}\t{LAB[lev]}\tt={time.time()-t0:.0f}'
                              f'\tc={chs(att[n][0]) if n in att else "-"}' + ('\tf=1' if fl_ else '')
                              + ('\tab=1' if T[lev] > T[0] and VAR[lev] != 'p9' and self.ab_arm(n) else '')
-                             + ('\tq=1' if qk_ else '') + ('\tr=1' if rt_ else '') + '\n'); rf.flush()
+                             + ('\tq=1' if qk_ else '') + ('\tr=1' if rt_ else '') + ('\tht=1' if ht1 else '') + '\n'); rf.flush()
                     l_ = LAB[lev] + 'f' if fl_ else LAB[lev]
                     ynote(l_, 1 if ok else 0, dt)
                     if ok and n in self.solved:
@@ -2341,6 +2361,11 @@ def make_parser():
                     help='(21 Nov) --cascade: the fresh L0 runs of goals that failed one before (a new context) '
                          'at T seconds instead of the first level\'s (results rows r=1; Z6: 59%% of its L0 retry '
                          'proofs within 2 s, 78%% within 3 s, while failed retries took 28.6 of its 96 CPU hours)')
+    ap.add_argument('--head-time', type=float, default=0, metavar='S',
+                    help='(21 Nov) --head-class: a head\'s chain-level run in class h at S abstract seconds instead of '
+                         'the level\'s budget; the next level resumes it to its full budget (rows ht=1; P2O\'s failed '
+                         'L1 head runs took 86.6 CPU s each, and production\'s L1 proofs replayed at 20 s kept 73%% '
+                         'for 45%% of the CPU)')
     ap.add_argument('--cascade-start', type=int, default=0,
                     help='--cascade: unsolved goals count as tried up to this level in their current context')
     ap.add_argument('--retry-hints', type=float, default=0,

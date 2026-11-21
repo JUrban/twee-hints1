@@ -755,6 +755,10 @@ Paused:
 has the history (user, 20 Nov: "update the total numbers in the report etc every now and then").
 
 Next:
+000000000000000000000000. **exp51 candidate (08:40, [notes/2026-11-21-head-time.md](notes/2026-11-21-head-time.md)):** P2O's failed L1
+   head runs took 86.6 CPU s each (2.55 of class h's 2.86 CPU h); production's L1 proofs replayed at 20 s kept 73% for
+   45% of the CPU. loop.py `--head-time S`: class h's chain-level runs at S (rows ht=1); a resume runs the rest of its
+   level. Smoke HTT2 (6 workers) fine. A/B after exp49/50 and Z7.
 00000000000000000000000. **Dispatch profile (07:20, [notes/2026-11-21-dispatch-profile.md](notes/2026-11-21-dispatch-profile.md)):** exp/stacksample.py
    samples loop.py's threads. At 6 workers workers are twee-bound (80%); the main thread spent 90 s (all goals) writing
    every rule-model goal file before the first run: now written at first use (loop.py goalfile, smoke GFT identical).
@@ -984,6 +988,7 @@ reports are written as the experiments run.
 | [notes/2026-11-21-quick-first.md](notes/2026-11-21-quick-first.md) | exp49: a quick first run for every goal (`--quick Q`) |
 | [notes/2026-11-21-retry-time.md](notes/2026-11-21-retry-time.md) | exp50: shorter L0 retries (`--retry-time T`) |
 | [notes/2026-11-21-dispatch-profile.md](notes/2026-11-21-dispatch-profile.md) | Where a from-zero start spends its time: loop.py's threads; goal files at first use |
+| [notes/2026-11-21-head-time.md](notes/2026-11-21-head-time.md) | exp51 (candidate): shorter first runs for heads at the chain level (`--head-time S`) |
 | [notes/2026-11-20-base-saturation.md](notes/2026-11-20-base-saturation.md) | exp39: base-theory runs as rule generators for the unsolved goals of the stronger theories |
 | [notes/2026-11-20-given-transfer.md](notes/2026-11-20-given-transfer.md) | exp38: unsolved goals that are variants of rules other runs derived and did not use (379 M in the given logs; transfer.py only matches proof steps); their ancestry as hints |
 | [notes/2026-11-19-from-zero-portfolio.md](notes/2026-11-19-from-zero-portfolio.md) | half1 from zero in 2 hours with today's deep portfolio (PGC), against PGA's 18,987 (exp27, from 07:18) |
