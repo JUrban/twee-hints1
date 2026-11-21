@@ -142,3 +142,32 @@ At equal abstract work (P2N's 210 and 240 minutes = 20.5 and 23.6 abstract worke
 * Both arms are flattening: P2O +71 in 210-240 minutes (L1 0 of 22, V@0 1 of 300), P2N +53. On half2 the late phase
   is short of the other half's lemmas (notes/2026-11-21-roots.md), so the sets/all run (Z7) decides what the late
   options are worth.
+
+## Result at 5 hours (21 Nov 09:38)
+
+| arm | 240 min | 270 min | 300 min |
+|---|---:|---:|---:|
+| P2K, the control | 20,828 | 21,066 | 21,142 |
+| P2H, --retry-class | 21,525 | 21,571 | 21,597 |
+| P2J, --yield-discount 2000 --reexplore 12:0.25 | 21,624 | 21,673 | 21,706 |
+| P2N, both | 21,370 | 21,446 | 21,698 |
+| **P2O, both + --knn-ctx 10 --head-class** | 21,686 | 21,736 | **21,939** |
+
+At P2J's abstract work at 240 and 300 minutes (19.6 and 25.1 abstract worker hours; abscurve.py, reference P2J):
+P2J 21,624 and 21,706; P2H 21,522 (238 min) and 21,597 (299); P2N 21,309 (201) and 21,381 (255); **P2O 21,593
+(202) and 21,706 (255)**. P2N and P2O reached P2J's 5 hours of work at 255 minutes: the machine was about 15% faster
+per abstract second than during exp44/45.
+
+* **P2O against P2N (side by side): +241** (+384 / −146, union 22,086). Over the +185 rule: `--knn-ctx 10
+  --head-class` add to the pair. abs/after48.sh starts exp49/50 on P2O's options.
+* **P2N against the better of P2H and P2J at equal work: −325.** The pair alone fails its rule; the two late-phase
+  options do not stack by themselves.
+* **P2O against P2J at equal work: a tie** (21,706 each); +362 / −128 by the end, union 22,068. All five arms'
+  union 22,211.
+* Both arms had a late burst in 270–300 minutes (P2N +252, P2O +203; L0 154 and 174, L1 20 and 8).
+* Mix lines at the end: P2O r 45, d 14, q 131, h 13 an hour (301 head runs); P2N r 43, d 22, q 9.
+
+**Decision.** solve_new.sh's late-phase default is P2O's set (`--retry-class --yield-discount 2000 --reexplore
+12:0.25 --knn-ctx 10 --head-class`): best side by side, and tied with the best single option at equal work. Half2
+lacks the other half's lemmas, which caps its late phase, so Z7 on all goals is the real test. The defaults change
+after exp49/50, together with their winners, before Z7.
