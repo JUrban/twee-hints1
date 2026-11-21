@@ -7,7 +7,7 @@ used is a goal ARM proved (or it used none): ARM had the context for that proof.
 whose lemmas are all in ARM or reached. A root's descendants are the reached goals that have it among their
 ancestors (transitively, through the lemma records within the gap).
 
-  roots.py REC.tsv ARM [--set SET] [--out ROOTS.tsv]
+  roots.py REC.tsv|EARLIEST ARM [--set SET] [--out ROOTS.tsv]
 Columns of ROOTS.tsv: root, first production label (results.tsv column 5 of its first THM row, else the side
 writer's dir), that row's seconds, number of lemmas, descendants.
 """
@@ -18,6 +18,52 @@ L = '/project/hintwork/loops'
 
 def solved(d):
     return {l.split('\t')[0] for l in open(f'{L}/{d}/solved.tsv') if l.strip()}
+
+
+def earliest(G):
+    """(00:46) each goal's record from its earliest kept output with a proof, in any dir that is not a from-zero
+    run (whether or not it made production's proof): the lemmas it used were proved before it, so the records are
+    well founded in time (no cycles). lemma_knn_I without a goal name: resolved by the dir's current knn_at.tsv,
+    which may be later than the output, so it counts as UNRES."""
+    import re, sys
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    from trust import FROMZERO
+    orig = lambda g: g.rsplit('__goal_', 1)[0]
+    best = {}
+    for d in os.listdir(L):
+        if not os.path.isdir(os.path.join(L, d)) or FROMZERO.match(d) or d.startswith(('Z', 'P2', 'ROOTS')):
+            continue
+        for pat in (('r*', 'out'), ('out',), ('*', 'r*', 'out'), ('*', 'out')):
+            for od in glob.glob(os.path.join(L, d, *pat)):
+                for g in os.listdir(od):
+                    if g not in G:
+                        continue
+                    p = os.path.join(od, g)
+                    try:
+                        mt = os.path.getmtime(p)
+                    except OSError:
+                        continue
+                    if g in best and best[g][0] <= mt:
+                        continue
+                    t = open(p, errors='replace').read()
+                    if 'RESULT: Theorem' not in t:
+                        continue
+                    m = re.search(r'^USEDAXIOMS (.*)$', t, re.M)
+                    if not m:
+                        continue
+                    deps, ok = set(), True
+                    for x in m.group(1).split():
+                        mm = re.match(r'(?:lemma|assume)_goal_(\d+)$', x)
+                        if mm:
+                            deps.add(f'{orig(g)}__goal_{mm.group(1)}'); continue
+                        mm = re.match(r'(?:(?:lemma|assume)_knn|srclem|skax)_\d+_(.+__goal_\d+)$', x)
+                        if mm:
+                            deps.add(mm.group(1)); continue
+                        if x.startswith(('lemma', 'assume', 'srclem', 'skax', 'hint_axiom', 'p9lemma', 'true', 'fill',
+                                         'gen', 'cut')):
+                            ok = False; break
+                    best[g] = (mt, ','.join(sorted(deps)) if ok else 'UNRES')
+    return {g: v[1] for g, v in best.items()}
 
 
 def main():
@@ -34,10 +80,13 @@ def main():
         U, Z = U & H, Z & H
     G = U - Z
     rec = {}
-    for l in open(rp):
-        w = l.rstrip('\n').split('\t')
-        if len(w) == 2:
-            rec[w[0]] = w[1]
+    if rp == 'EARLIEST':
+        rec = earliest(G)
+    else:
+        for l in open(rp):
+            w = l.rstrip('\n').split('\t')
+            if len(w) == 2:
+                rec[w[0]] = w[1]
     lab = {}
     for p in sorted(glob.glob(f'{L}/UL/r*/results.tsv')):
         for l in open(p):
@@ -69,7 +118,7 @@ def main():
         for g in sorted(deps):
             if g not in R and deps[g] <= Z | R:
                 R.add(g); order.append(g); changed = True
-    # (00:58) why the rest are not reached: through the unreached lemmas (transitively) a gap goal without a record,
+    # (00:42) why the rest are not reached: through the unreached lemmas (transitively) a gap goal without a record,
     # a lemma production did not prove, or neither (a cycle: the newest outputs of re-proved goals use later lemmas)
     out_set = collections.Counter()
     for g, d in deps.items():

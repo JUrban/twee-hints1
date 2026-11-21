@@ -255,6 +255,7 @@ class LemmaIndex:
         # (17 Nov) select() memo: the loop picks a goal's kNN lemmas at dispatch (--retry-knn) and again when it
         # writes the problem, ~20-40 ms each over 20k+ candidates (Z0); the index is rebuilt, not changed
         self._memo = {}
+        self._cset = {}
 
     def candidates(self, key, name):
         if key not in self._cands:
@@ -325,6 +326,27 @@ class LemmaIndex:
         out = self._select(name, key, F, k, exclude, lemma_form(name) or conjecture(name))
         self._memo[mk] = tuple(out)
         return out
+
+    def sim(self, name, m):
+        """(21 Nov 00:52) _select's score of proven goal M for NAME's goal (0 if M is not in NAME's pool); NAME must
+        have been selected for (its features are in self.info). loop.py --knn-ctx: does a new proof enter a goal's
+        kNN lemmas?"""
+        key, F = self.info[name]
+        cs = self._cset.get(key)
+        if cs is None:
+            cs = self._cset[key] = frozenset(self.candidates(key, name))
+        if m not in cs or m == name or not F:
+            return 0.0
+        idf = self.idf(key, name)
+        G = self.info[m][1]
+        inter = sum(idf[x] for x in F & G)
+        if inter <= 0:
+            return 0.0
+        union = sum(idf.get(x, 0) for x in F) + sum(idf[x] for x in G) - inter
+        sc = inter / union
+        if self.pop:
+            sc *= 1 + self.pop * math.log1p(self.uses.get(m, 0))
+        return sc
 
     def _select(self, name, key, F, k, exclude, form):
         idf = self.idf(key, name)
