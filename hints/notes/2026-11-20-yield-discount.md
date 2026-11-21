@@ -70,3 +70,9 @@ P2J 19,161 against the control P2K 19,009 (+152; P2E and P2F, the same system as
 [notes/2026-11-20-retry-class.md](2026-11-20-retry-class.md). At 1 hour nearly every run is a first run at L0
 in all three arms, so the label estimates have not yet decided much: P2J's line reads `est L0 381.9 Vk100@0 6.8
 ... Vunf@0 6.8` (the discount keeps L0's estimate near its recent rate), P2K's `est L0 2601.2 Vunf@0 17.7 ...`.
+
+## Interim at 2 hours (21 Nov 01:36)
+
+P2J 20,124 against P2K 20,004 (+120, noise; P2H +607, table in the retry-class note). The estimate lines: P2J
+`est L0 91.4 Vk100@0 4.2 ... Vunf@0 4.2`, P2K `est L0 1525.9 Vunf@0 16.2 Vk100@0 7.7 L1 7.4 ...`. The late phase,
+where the discount should matter, starts after the first runs end (about 2.5 hours on half2).

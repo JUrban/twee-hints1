@@ -76,3 +76,18 @@ exp/retrysplit.py, proofs/runs in the first hour:
 The q floor (10% of the workers while q has goals) runs 2.6 times as many retries in the first hour as the control
 does, at 21% yield against 93% for its first runs, so P2H is 264 behind at 1 hour. That was expected to cost early;
 the question is still whether the retries pay off at 2.5-3.5 hours, where Z6's burst was.
+
+## Interim at 2 hours (21 Nov 01:36)
+
+| arm | 30 min | 60 min | 90 min | 120 min |
+|---|---:|---:|---:|---:|
+| P2E (exp41) | 17,182 | 19,198 | 19,977 | 20,152 |
+| P2F (exp42) | 17,357 | 19,307 | 19,991 | 20,174 |
+| P2K control | 17,103 | 19,009 | 19,728 | 20,004 |
+| **P2H retry class** | 16,748 | 18,745 | 20,027 | **20,611** |
+| P2J (exp45) | 16,961 | 19,161 | 19,879 | 20,124 |
+
+**P2H +607 over P2K at 2 hours** (+437 and +459 over P2E and P2F, the same system as P2K; identical runs differ by
+about 185). Behind at 1 hour (−264), ahead from 90 minutes. retrysplit, 90-120 minutes: P2H's retries 122 / 733
+(17%) beside first runs 296 / 1,201; P2K's retries 1 / 224, first runs 177 / 1,551. The control's first runs still
+run at 2 hours (11% yield) while its failed-before goals with new contexts wait; P2H takes them at 17% meanwhile.
