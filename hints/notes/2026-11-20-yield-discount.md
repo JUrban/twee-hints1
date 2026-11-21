@@ -99,7 +99,7 @@ P2H +327 / −218; union 21,924.
 
 Where the gain comes from (windows.py by label, 120-300 minutes): P2K and P2H spent their deep work on one 5 s
 variant (Vunf@0) after the first hour; P2J spread it over Vk100@0, Vk200@0, Vk400@0, Vkd@0 and Vunf@0 and ran L1 (5 +
-7 runs in 120-180 minutes, 7 + 3 in 240-300, 14 of 32 proved; P2K none). Those proofs gave new contexts, and P2J's
+7 runs in 120-180 minutes, 11 + 8 in 240-300; 14 of 31 proved; P2K none). Those proofs gave new contexts, and P2J's
 L0 retries proved 414 / 1,631 in 150-180 and 402 / 1,665 in 180-210 minutes. Latency (retry-class note): P2J proves
 425 and 328 goals from lemmas found in hours 2 and 3 (P2H 307 and 40, P2K 101 and 157). Estimates at 5 hours: P2J
 `est L0 18.7 Vunf@0 6.2 L1 4.4 Vk100@0 2.6 ...`, P2K `est L0 783.2 Vunf@0 15.3 Vk100@0 7.7 L1 7.4 ...`: the
