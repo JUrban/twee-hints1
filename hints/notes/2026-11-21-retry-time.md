@@ -41,6 +41,9 @@ loop.py `--retry-time T` (default off):
 
 loops/RTT (06:44, sets/smoke487, 2 workers, 12 minutes, `LOOPARGS="--retry-time 3"`), against QKC (04:46, the same
 setting without the option; run at another time, so a check for errors and r=1 rows, not a comparison).
+Ended 06:57, no errors: 394 solved against QKC's 395 (curves at 1, 2, 3, 4, 6, 8, 10, 12 minutes: RTT 292, 343, 368,
+378, 382, 390, 392, 394; QKC 286, 344, 354, 377, 382, 385, 394, 395). All 100 of RTT's L0 retries ran at 3 s (r=1;
+the longest took 3.72 CPU s) and proved 5 in 259 CPU s; QKC's 56 retries proved 8 in 215 s.
 
 ## Plan
 
