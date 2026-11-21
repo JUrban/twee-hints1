@@ -64,3 +64,10 @@ workers each, not on all goals at 6. abs/after_z7.sh (exp/after_z7.sh, PID 99758
 20:50) and starts P2T (control: solve_new.sh's defaults, LATE) and P2U (the same plus `--floor-ratio 20`), half2 from
 zero, 3 hours, PIDs in loops/AFTERZ7.pids. Identical half2 runs differ by about 185, so the decision line is +185 at 3
 hours, or a curve clearly ahead throughout with no loss at 3 hours, judged also by the h and q classes' proofs.
+
+## Started (21 Nov 20:49)
+
+Z7 ended at 20:49:29; after_z7.sh started both arms at 20:49:57: P2T loop.py 1115326, P2U loop.py 1115327, each with its
+transfer loop (-j 2) and derived-rule loop. loops/P2T/config.json has floor_ratio 0, loops/P2U/config.json 20.0;
+otherwise the same (retry_class, head_class, knn_ctx 10, yield_discount 2000, reexplore 12:0.25, j 4). They end at
+about 23:50.
