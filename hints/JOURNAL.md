@@ -759,6 +759,10 @@ Paused:
 has the history (user, 20 Nov: "update the total numbers in the report etc every now and then").
 
 Next:
+00000000000000000000000000000. **exp53 launcher (22:25):** abs/after_exp52.sh (exp/ copy, PID 1287489) waits for
+   P2T.done and P2U.done, then up to 20 minutes for loops/EXP53.go or loops/EXP53.skip, then runs abs/exp53.sh:
+   P2V (control) and P2W (`PG="--cp-renormalise-threshold 1000"`), half2 from zero, 4 workers each, 3 hours
+   (to about 03:10). Decision +185 at 3 h. Smoke: twee-e61 takes the option (a 5 s proof, byte-identical output).
 0000000000000000000000000000. **exp53 candidate (16:58): deep runs without queue renormalisation, from zero.** Under
    --abstract-time renormalising the queue is 27% of a hinted run's CPU but free in abstract time; off, 80 s runs cost
    25% less with a different search (exp25: 2 of 3 proofs kept); exp26 in production was too thin to tell (7/209 vs
