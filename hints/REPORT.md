@@ -5323,6 +5323,28 @@ from zero, against exp30's P2D.
     The kNN-only retries proved 48 of 274, nearly all in the first hour.
   * Default: P2O's set, the best side by side and tied at equal work. Z7 on all goals decides the late phase, since
     half2 lacks the other half's lemmas.
+* **exp49/50 (09:45-12:47, on P2O's set; [notes/2026-11-21-quick-first.md](notes/2026-11-21-quick-first.md),
+  [notes/2026-11-21-retry-time.md](notes/2026-11-21-retry-time.md)): both rejected, stopped at 3 hours.**
+  * `--quick 1` (each goal's first run at 1 s): +975 at 15 minutes, −719 at 3 hours. A goal that failed its quick run
+    waited behind every far goal's quick run.
+  * `--retry-time 3` (L0 retries at 3 s): −166 at 3 hours. The retries proved 114 per CPU hour against 137.
+  * With abstract time both runs are prefixes of the 5 s run, so neither can add proofs, only move them in time. No
+    one-arm goal of either is new to the collection.
+* **The Z7 pair (12:48-, all 51,784 goals from zero, 6 workers each; [notes/2026-11-21-z7-pair.md](notes/2026-11-21-z7-pair.md)):
+  the late-phase set (solve_new.sh's LATE, default since 12:19) against the 20 Nov system, side by side.**
+
+  | arm | 30 min | 60 min | 120 min | 180 min | 240 min |
+  |---|---:|---:|---:|---:|---:|
+  | Z7C, the 20 Nov system | 26,757 | 34,522 | 38,957 | 40,479 | 41,237 |
+  | **Z7, LATE** | 24,561 | 32,154 | 37,195 | 40,786 | **42,478** |
+
+  * **+1,241 at 4 hours; LATE confirmed on the whole benchmark.** Z7C was stopped at 16:49, when it proved 114 a
+    half hour against Z7's 506.
+  * The early cost: up to −2,368 at 1 hour. The floors of the retry and head classes held about half a worker of six
+    at about 1% of a first run's yield. exp52 (`--floor-ratio`, [notes/2026-11-21-floor-ratio.md](notes/2026-11-21-floor-ratio.md))
+    tests floors that wait until those classes can compete.
+  * Z7's late first runs prove 65% against Z7C's 20%: they come later, in a fuller context.
+  * A pair, not Z7 against Z6: on a replica pair (P2R against P2O), exp/abscurve.py left 167-426 of the gap.
 * **What Z6 lacked (exp/roots.py, trust.py --dump-rec).** Of the 4,117 goals production has and Z6 lacks, 190 have
   recorded lemmas that Z6 all proved (104 first proved at L1); their reach is 363. The rest rest on lemmas Z6
   never proved. The gap is mostly depth.
