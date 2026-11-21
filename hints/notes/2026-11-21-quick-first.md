@@ -140,3 +140,16 @@ the goals at 1 s), but failing them sorts a goal after the far tail, and the goa
 an hour or more. The early lead (+975 at 15 minutes) is the value of a 1 s first pass; the loss is the ordering after
 it. `--quick-near` (smoke QKN) fixes the order; it is a candidate for a later, short A/B (2 hours is enough, since the
 difference shows in the first pass), not for Z7.
+
+## The portfolio check (21 Nov 14:22)
+
+The portfolio rule is: report +/−, the union, and the union per CPU hour against a time-matched control.
+* Union per CPU: P2R ∪ P2Q at 3 hours each (36 worker-hours) has 21,508 goals; P2R ∪ P2S has 21,489. P2O alone at 5
+  hours (30 worker-hours) has 21,940. So a single longer run beats either pair, by about 430-450 with fewer worker-hours.
+  Caveat: P2O ran under a lighter load, which can be worth 167-426 (notes/2026-11-21-late-combo.md).
+* Unique proofs: among the three arms, P2Q 132, P2S 112 and the control P2R 253. None is new to the whole collection
+  (all other runs and production's 48,234).
+* Why this was expected: with --abstract-time, a 1 s or 3 s run is a prefix of the same 5 s run, so these options
+  change only when a proof is found, not which proofs exist. Their one-arm goals come from scheduling (contexts at
+  different times), as between two identical runs. A complementary member has to search differently (other hints,
+  lemma sets, options, provers).

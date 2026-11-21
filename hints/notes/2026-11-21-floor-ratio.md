@@ -48,6 +48,10 @@ smoke test shows that the option runs, not what it gains.
 
 ## Plan
 
+The floors are the mix's exploration: they keep every class measured. --floor-ratio withholds them where a class
+looks poor, so the A/B is judged also by what the h and q classes give: their proofs and the goals after a proved
+head, + and − goals and the union per worker-hour, not only the totals.
+
 An A/B after the Z7 pair (about 20:50), when the CPU is free: the LATE default against the LATE default plus
 `--floor-ratio 20`. Most of the effect should be in the first two hours, so on all goals from zero, 6 workers each,
 3 hours, against the same control. Decision: +260 at 3 hours, or a curve clearly ahead throughout with no loss at 3
