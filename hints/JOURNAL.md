@@ -755,6 +755,11 @@ Paused:
 has the history (user, 20 Nov: "update the total numbers in the report etc every now and then").
 
 Next:
+0000000000000000000000. **exp50 (06:50, [notes/2026-11-21-retry-time.md](notes/2026-11-21-retry-time.md)):** L0 retries of failed-before goals
+   took 30.8 of Z6's 96 CPU hours for 2,149 proofs (late: 5% proved); 78-84% of retry proofs come within 3 s. loop.py
+   `--retry-time T` runs them at T s (rows r=1); a replay gives 1.2-1.4x proofs per CPU hour at T=3. Smoke loops/RTT;
+   arm P2S = exp49's base + `--retry-time 3`, started with P2Q/P2R by abs/after48b.sh, against P2R. stepjlive3 stopped
+   06:45 (no joins in 3 cycles).
 000000000000000000000. **exp49 (04:47, [notes/2026-11-21-quick-first.md](notes/2026-11-21-quick-first.md)):** in P2J the failed first runs took 10.3 of
    the first pass's 13.1 CPU hours, and 86% of first-run proofs came within 1 s. loop.py `--quick Q`: a goal's first
    fresh run at Q seconds; a goal that fails it gets its T0 run after the goals never run. Smoke tests loops/QKT
@@ -973,6 +978,7 @@ reports are written as the experiments run.
 | [notes/2026-11-21-head-class.md](notes/2026-11-21-head-class.md) | exp47: heads at L1 as a class of their own (`--head-class`) |
 | [notes/2026-11-21-late-combo.md](notes/2026-11-21-late-combo.md) | exp48: the late-phase winners together, and with exp46/47 |
 | [notes/2026-11-21-quick-first.md](notes/2026-11-21-quick-first.md) | exp49: a quick first run for every goal (`--quick Q`) |
+| [notes/2026-11-21-retry-time.md](notes/2026-11-21-retry-time.md) | exp50: shorter L0 retries (`--retry-time T`) |
 | [notes/2026-11-20-base-saturation.md](notes/2026-11-20-base-saturation.md) | exp39: base-theory runs as rule generators for the unsolved goals of the stronger theories |
 | [notes/2026-11-20-given-transfer.md](notes/2026-11-20-given-transfer.md) | exp38: unsolved goals that are variants of rules other runs derived and did not use (379 M in the given logs; transfer.py only matches proof steps); their ancestry as hints |
 | [notes/2026-11-19-from-zero-portfolio.md](notes/2026-11-19-from-zero-portfolio.md) | half1 from zero in 2 hours with today's deep portfolio (PGC), against PGA's 18,987 (exp27, from 07:18) |

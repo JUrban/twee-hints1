@@ -1457,6 +1457,7 @@ class Loop:
         # them on the 6,211 that failed; of the 17,309 first-run proofs 14,904 came within 1 s (86%), 16,341 within 2 s.
         # The frontier's first pass would then take about a third of the time.
         QK = bool(a.quick and a.fail_order and not a.sched_model)
+        rtf = set()   # (--retry-time) the futures of failed-before goals' fresh runs at its shorter limit
         qd, qf, qfut = set(), set(), set()   # goals that had their quick run; of those, failed and waiting; its futures
         # (18 Nov 22:38) tiers; (23:48) optional attempts. A variant level is an attempt a goal may take at any time after
         # the cascade level it follows, once per context. Only the cascade's own levels are ordered: a resume needs the
@@ -1885,6 +1886,7 @@ class Loop:
                             qk_ = QK and n not in qd and not nf.get(n)
                             if qk_:
                                 qd.add(n)
+                            t0_ = a.retry_time if a.retry_time and not qk_ and nf.get(n) else T[0]
                             qf.discard(n)
                             att[n] = (ctx(n), 0); vtried.pop(n, None)
                             if RK:
@@ -1912,8 +1914,10 @@ class Loop:
                                 qfut.add(fut)
                             else:
                                 fut = ex.submit(self.run_one, n, self.hints_for(n, pools, None), rnd,
-                                                T[0], False if a.p9loop else ('fresh' if keep else 'nosave'),
-                                                a.cascade_cpu * T[0])
+                                                t0_, False if a.p9loop else ('fresh' if keep else 'nosave'),
+                                                a.cascade_cpu * t0_)
+                                if t0_ != T[0]:
+                                    rtf.add(fut)
                         else:
                             if sum(1 for _, l in running.values() if l > 0) >= a.j - a.reserve:
                                 break
@@ -2007,6 +2011,7 @@ class Loop:
                     n, ok, dt, stats, hs = f.result()
                     ycls[rcls.pop(f, 'r')].append((1 if ok else 0, dt)); rt0.pop(f, None)
                     qk_ = f in qfut; qfut.discard(f)
+                    rt_ = f in rtf; rtf.discard(f)
                     if a.orig_rate:
                         k_ = (orig_of(n), lev == 0)
                         ors[k_] = ors[k_] * 0.9 + (1 if ok else 0); orc[k_] = orc[k_] * 0.9 + 1
@@ -2038,7 +2043,7 @@ class Loop:
                     rf.write(f'{n}\t{"THM" if ok else "NO"}\t{dt:.2f}\t{stats}\t{LAB[lev]}\tt={time.time()-t0:.0f}'
                              f'\tc={chs(att[n][0]) if n in att else "-"}' + ('\tf=1' if fl_ else '')
                              + ('\tab=1' if T[lev] > T[0] and VAR[lev] != 'p9' and self.ab_arm(n) else '')
-                             + ('\tq=1' if qk_ else '') + '\n'); rf.flush()
+                             + ('\tq=1' if qk_ else '') + ('\tr=1' if rt_ else '') + '\n'); rf.flush()
                     l_ = LAB[lev] + 'f' if fl_ else LAB[lev]
                     ynote(l_, 1 if ok else 0, dt)
                     if ok and n in self.solved:
@@ -2320,6 +2325,10 @@ def make_parser():
     ap.add_argument('--quick', type=float, default=0, metavar='Q',
                     help='(21 Nov) --cascade with --fail-order: each goal\'s first fresh run in the round at Q seconds; a goal '
                          'that fails it gets its first T0 run after the goals never run (results rows q=1)')
+    ap.add_argument('--retry-time', type=float, default=0, metavar='T',
+                    help='(21 Nov) --cascade: the fresh L0 runs of goals that failed one before (a new context) '
+                         'at T seconds instead of the first level\'s (results rows r=1; Z6: 59%% of its L0 retry '
+                         'proofs within 2 s, 78%% within 3 s, while failed retries took 28.6 of its 96 CPU hours)')
     ap.add_argument('--cascade-start', type=int, default=0,
                     help='--cascade: unsolved goals count as tried up to this level in their current context')
     ap.add_argument('--retry-hints', type=float, default=0,
