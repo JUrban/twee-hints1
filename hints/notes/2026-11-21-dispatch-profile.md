@@ -42,7 +42,7 @@ model 0s", no errors, the 380 goal files it made identical to QKC's, no tmp file
 from-zero start on all goals (45 s on half2). It does not change which runs are made, so it does not bias the A/B
 arms, which both get it.
 
-## A hypothesis rejected (07:50): output pipes starved by the interpreter lock
+## A hypothesis rejected (07:40): output pipes starved by the interpreter lock
 
 Twee's --print-given output (152 KB for a 1.7 s proof) goes to a pipe that a worker thread reads, which needs the
 interpreter lock. If a busy main thread held the lock, twee could block on a full pipe and its wall time (results
