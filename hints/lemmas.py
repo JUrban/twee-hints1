@@ -28,10 +28,18 @@ def split(name):
     o, n = name.rsplit('__goal_', 1)
     return o, int(n)
 
+_conj = {}
+
 def conjecture(name):
+    # (21 Nov) cached: loop.py's kNN picks asked for it at every dispatch of a goal lemma_form cannot unitize, a read
+    # and a regex over the problem file each time, 15% of the main thread at 12 workers (notes/2026-11-21-dispatch-profile.md)
+    v = _conj.get(name, False)
+    if v is not False:
+        return v
     txt = open(os.path.join(PROB, name + '.p')).read()
     m = re.search(r'fof\(\w+,\s*conjecture,\s*(.*)\)\.\s*$', txt, re.S)
-    return m.group(1).strip() if m else None
+    v = _conj[name] = m.group(1).strip() if m else None
+    return v
 
 # A conditional conjecture ~ s = X | C = D (or ~ X = s | C = D) whose hypothesis binds a variable X
 # that does not occur in s is equivalent to the unit equation C = D with X replaced by s: 6,235 of
