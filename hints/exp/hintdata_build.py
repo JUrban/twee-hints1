@@ -3,7 +3,7 @@
 "put the useful data into a separate new git repo in the hintwork directory; make the commits small so that I can
 push incrementally on github later (no big files or commits)").
 
-hintdata_build.py [--given | --climbs]   (without either: everything but the given logs and the climbs; --given: only the
+hintdata_build.py [--given | --climbs | --realproofs]   (--realproofs: realproofs/<family>/, see main_realproofs; without any: everything but the given logs and the climbs; --given: only the
                                given logs, one .tar.xz commit per original; --climbs: the climb.py directories; all skip
                                what is already committed)
 """
@@ -144,6 +144,97 @@ def main_climbs():
             if batch:
                 commit(batch, 'climbs: %s %s rule logs (xz, per original)' % (d, sub))
 
+# (21 Nov 11:40; user: "can you pack these new proofs also into hintwork/hintdata/realproofs ? preferably into tarballs
+# at most 10M big?") the printed twee proofs that loops keep since 20 Nov 15:04 (loops/<dir>/proofs/<goal>, written by
+# loop.py's proof_job and exp/proofq.py), grouped by run family: a run with its transfer (.xfer) and derived-rule (_GML)
+# loops, whose proofs use each other's goals as lemmas
+RP_FAMILIES = [('production', ['UL', 'XFL', 'GML', 'STEPJ', 'SW20', 'ROOTS']),
+               ('smoke', ['HCT', 'HCT2', 'KCT', 'KCT2', 'KCT3', 'QKC', 'QKT', 'QKN', 'RCT', 'RTT', 'YDT', 'YDT2', 'HTT',
+                          'HTT2', 'GFT'])]
+RP_MAX = 9_900_000          # bytes of one .tar.xz
+RP_RAW = 120_000_000        # tar bytes per first try (xz -6 makes proofs about 16 times smaller)
+
+def rp_tarxz(names, dst):
+    """deterministic .tar.xz of loops/<dir>/proofs/<goal> as <dir>/<goal>.proof (names sorted, mtime 0, no owners)"""
+    tmp, lst = dst + '.tmp', dst + '.lst'
+    os.makedirs(os.path.dirname(dst), exist_ok=True)
+    with open(lst, 'w') as f:
+        f.writelines(n + '\n' for n in sorted(names))
+    subprocess.run(['bash', '-c', 'tar -C "$1" --sort=name --mtime=@0 --owner=0 --group=0 --numeric-owner --no-recursion '
+                    '--transform "s,/proofs/\\([^/]*\\)\\$,/\\1.proof," -T "$3" -cf - | nice -n 10 xz -T1 -6 > "$2"', '-',
+                    os.path.join(HW, 'loops'), tmp, lst], check=True)
+    os.unlink(lst)
+    return tmp
+
+def main_realproofs():
+    import glob
+    L = os.path.join(HW, 'loops')
+    dirs = sorted(os.path.relpath(os.path.dirname(p), L) for p in glob.glob(os.path.join(L, '*/proofs')) +
+                  glob.glob(os.path.join(L, '*/*/proofs')))
+    only = [a.split('=', 1)[1] for a in sys.argv if a.startswith('--family=')]
+    fam = {}
+    for d in dirs:
+        names = [os.path.join(d, 'proofs', n) for n in os.listdir(os.path.join(L, d, 'proofs')) if '__goal_' in n]
+        if not names:
+            continue
+        b = d.split('/')[0].split('.')[0]   # a run and its side loops: Z6, Z6.xfer, Z6_GML -> Z6
+        b = b[:-4] if b.endswith('_GML') else b
+        f = next((k for k, pats in RP_FAMILIES if b in pats), b)
+        if not only or f in only:
+            fam.setdefault(f, []).extend(names)
+    os.makedirs(os.path.join(R, 'realproofs'), exist_ok=True)
+    index = []
+    def key(n):
+        d, _, g = n.rpartition('/proofs/')
+        o, _, k = g.rpartition('__goal_')
+        return (d, o, int(k))
+    for f in sorted(fam):
+        names, bad = [], 0
+        for n in sorted(fam[f], key=key):
+            with open(os.path.join(L, n), 'rb') as h:
+                if b'RESULT: Theorem' in h.read()[-200:]:
+                    names.append(n)
+                else:
+                    bad += 1
+        # chunks of about RP_RAW tar bytes, halved until each .tar.xz is at most RP_MAX
+        chunks, cur, size = [], [], 0
+        for n in names:
+            b = 512 + (os.path.getsize(os.path.join(L, n)) + 511) // 512 * 512
+            if cur and size + b > RP_RAW:
+                chunks.append(cur); cur, size = [], 0
+            cur.append(n); size += b
+        if cur:
+            chunks.append(cur)
+        done, k = [], 0
+        while chunks:
+            c = chunks.pop(0)
+            tmp = rp_tarxz(c, os.path.join(R, 'realproofs', f, 'chunk.tar.xz'))
+            if os.path.getsize(tmp) > RP_MAX and len(c) > 1:
+                os.unlink(tmp); chunks[:0] = [c[:len(c) // 2], c[len(c) // 2:]]
+                continue
+            k += 1
+            dst = os.path.join(R, 'realproofs', f, '%s_%02d.tar.xz' % (f, k))
+            if os.path.exists(dst) and open(dst, 'rb').read() == open(tmp, 'rb').read():
+                os.unlink(tmp)
+            else:
+                os.replace(tmp, dst)
+            done.append(dst)
+            rel = os.path.relpath(dst, R)
+            index.extend('%s\t%s\t%s\n' % (n.rpartition('/proofs/')[2], n.rpartition('/proofs/')[0], rel) for n in c)
+            commit([dst], 'realproofs: %s part %d (%d printed twee proofs, %.1f MB xz)' % (f, k, len(c), os.path.getsize(dst) / 1e6))
+        for old in glob.glob(os.path.join(R, 'realproofs', f, '%s_*.tar.xz' % f)):
+            if old not in done:
+                git('rm', '-q', '--', os.path.relpath(old, R))
+        print(f, len(names), 'proofs in', k, 'parts', ('(%d files without a Theorem line left out)' % bad) if bad else '',
+              flush=True)
+    if only:
+        return
+    tmp = os.path.join(R, 'realproofs', 'index.tsv')
+    with open(tmp, 'w') as h:
+        h.write('goal\tdir\ttarball\n'); h.writelines(sorted(index))
+    gz(tmp, tmp + '.gz'); os.unlink(tmp)
+    commit(['realproofs/index.tsv.gz', 'realproofs/README.md'], 'realproofs: index (goal, loop dir, tarball) and README')
+
 def main_given():
     src = os.path.join(UL, 'given')
     by = {}
@@ -171,5 +262,7 @@ if __name__ == '__main__':
         main_given()
     elif '--climbs' in sys.argv:
         main_climbs()
+    elif '--realproofs' in sys.argv:
+        main_realproofs()
     else:
         main_data()
