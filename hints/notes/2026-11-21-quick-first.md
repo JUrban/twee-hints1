@@ -94,3 +94,14 @@ side loops. They end at about 14:50.
 * P2R is 673 behind P2O at 60 minutes, with the same options: three arms and their side loops load the machine more
   than exp48's two (load average about 30). At 10:47 the proof worker and the sweep were stopped to bring that down;
   they restart after exp49/50.
+
+## The fix as an option: `--quick-near` (10:48)
+
+loop.py `--quick-near` (default off): with --quick, the --fail-order key is (failures, far, quick-failed, orig-rate
+bin, gap lines, goal number) instead of (failures, quick-failed, orig-rate bin, far, ...). A near goal's T0 run after
+its failed quick run then comes before a far goal's quick run.
+
+Smoke test loops/QKN (10:48, smoke487, 2 workers, 12 minutes, `--quick 1 --quick-near`): no errors, 402 solved (QKT
+and QKC 395; one run each, so no comparison). In its first 2 minutes it made 348 quick runs (308 proved) and 33 T0
+runs after a failed quick run (28 proved); QKT made only quick runs then (471, 323 proved) and its T0 runs came after
+2 minutes. If P2Q loses at 5 hours, the second try is `--quick 1 --quick-near` against the same base.

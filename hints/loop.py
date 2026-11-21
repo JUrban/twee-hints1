@@ -1791,10 +1791,19 @@ class Loop:
                             # per run hour), one that had failed before 4-6% (17-29 an hour), on 61% of the
                             # workers' time; Z2 after 30 min 88% (1,749 an hour) against 7-17% (52-106)
                             nfg = nf.get; fr = a.fail_reset; nbg = nfb.get; obg = ob0.get
-                            retry = sorted((nfg(n, 0) if not fr or nbg(n) == g[n][0] else 0, 1 if n in qf else 0,
-                                            obg(gnum[n][0], 0), 0 if may_retry(n, g) else 1, g[n][1], gnum[n][1], n) for n in att
-                                           if n not in busy and (ctx(n) != att[n][0] or grown(n) or n in knew)
-                                           and (a.far_retry or may_retry(n, g)))
+                            if a.quick_near:
+                                # (--quick-near, 21 Nov 10:50) near before quick-failed: a near goal's T0 run after a
+                                # failed quick run comes before a far goal's quick run (exp49's P2Q quick-ran the whole far
+                                # tail first, 30-60 min: 162 of 6,337 proved, while 8,966 near quick-failed goals waited)
+                                retry = sorted((nfg(n, 0) if not fr or nbg(n) == g[n][0] else 0, 0 if may_retry(n, g) else 1,
+                                                1 if n in qf else 0, obg(gnum[n][0], 0), g[n][1], gnum[n][1], n) for n in att
+                                               if n not in busy and (ctx(n) != att[n][0] or grown(n) or n in knew)
+                                               and (a.far_retry or may_retry(n, g)))
+                            else:
+                                retry = sorted((nfg(n, 0) if not fr or nbg(n) == g[n][0] else 0, 1 if n in qf else 0,
+                                                obg(gnum[n][0], 0), 0 if may_retry(n, g) else 1, g[n][1], gnum[n][1], n) for n in att
+                                               if n not in busy and (ctx(n) != att[n][0] or grown(n) or n in knew)
+                                               and (a.far_retry or may_retry(n, g)))
                         else:
                             retry = sorted((g[n][1], gnum[n][1], n) for n in att
                                            if n not in busy and (ctx(n) != att[n][0] or grown(n)) and may_retry(n, g))
@@ -2360,6 +2369,9 @@ def make_parser():
     ap.add_argument('--quick', type=float, default=0, metavar='Q',
                     help='(21 Nov) --cascade with --fail-order: each goal\'s first fresh run in the round at Q seconds; a goal '
                          'that fails it gets its first T0 run after the goals never run (results rows q=1)')
+    ap.add_argument('--quick-near', action='store_true',
+                    help='(21 Nov) --quick: in the --fail-order key, near/far before quick-failed, so a near goal\'s T0 '
+                         'run after its failed quick run comes before a far goal\'s quick run')
     ap.add_argument('--retry-time', type=float, default=0, metavar='T',
                     help='(21 Nov) --cascade: the fresh L0 runs of goals that failed one before (a new context) '
                          'at T seconds instead of the first level\'s (results rows r=1; Z6: 59%% of its L0 retry '
