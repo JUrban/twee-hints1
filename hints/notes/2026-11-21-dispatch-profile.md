@@ -42,6 +42,14 @@ model 0s", no errors, the 380 goal files it made identical to QKC's, no tmp file
 from-zero start on all goals (45 s on half2). It does not change which runs are made, so it does not bias the A/B
 arms, which both get it.
 
+## A hypothesis rejected (07:50): output pipes starved by the interpreter lock
+
+Twee's --print-given output (152 KB for a 1.7 s proof) goes to a pipe that a worker thread reads, which needs the
+interpreter lock. If a busy main thread held the lock, twee could block on a full pipe and its wall time (results
+dt) would grow. Synthetic test (4 worker threads, 4 runs each of the same proof job; exp/giltest.py): median
+wall 1.73 s with an idle main thread, 1.86 s with a main thread spinning in pure Python, 1.97 s with the output sent
+to a file instead of a pipe. No real effect at this scale, so the output path stays as it is.
+
 ## Next
 
 A profile at 12 workers on all goals, Z7's setting, in the gap between exp48's end (about 09:40) and exp49's start
