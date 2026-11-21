@@ -750,6 +750,10 @@ Paused:
 * exp12 stage B: 320 s on gap heads, 34 of 95 done, 0.21 per CPU hour (run.py skips done ids).
 * exp19: set-join on the walls, 37 of 107 done, 0.31 per CPU hour (run.py skips done ids).
 
+**Printed proofs in hintdata (21 Nov 11:50; user: "pack these new proofs also into hintwork/hintdata/realproofs"):**
+188,561 kept proofs (44,475 goals) in hintdata/realproofs/<family>/<family>_NN.tar.xz, 10 parts of at most 10 MB
+(45 MB), index.tsv.gz and README.md; `exp/hintdata_build.py --realproofs` adds the rest once proofq has caught up.
+
 **Totals (21 Nov 09:56, all trusted, trust.py --exposed loops/UNSOUND/exposed.txt): 48,234 of 51,784 solved
 (holdout 5,343 of 5,880), 3,550 unsolved.** REPORT's totals table
 has the history (user, 20 Nov: "update the total numbers in the report etc every now and then").
