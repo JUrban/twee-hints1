@@ -1451,6 +1451,13 @@ class Loop:
         att = {n: ((ctx(n, False if a.cascade_was_below else None), a.cascade_start) if a.cascade_start >= 0
                    else (None, -1))
                for n in self.names if n not in self.solved}
+        # (21 Nov 04:50, --quick Q) with --fail-order (not the learned scheduler) a goal's first fresh run in the round has
+        # a budget of Q seconds; if it fails the goal is not counted as failed (nf) and waits, untried, behind the goals
+        # never run (qf), for its first run at T0. In P2J (half2 from zero, 5 h) the first runs took 13.1 CPU hours, 10.3 of
+        # them on the 6,211 that failed; of the 17,309 first-run proofs 14,904 came within 1 s (86%), 16,341 within 2 s.
+        # The frontier's first pass would then take about a third of the time.
+        QK = bool(a.quick and a.fail_order and not a.sched_model)
+        qd, qf, qfut = set(), set(), set()   # goals that had their quick run; of those, failed and waiting; its futures
         # (18 Nov 22:38) tiers; (23:48) optional attempts. A variant level is an attempt a goal may take at any time after
         # the cascade level it follows, once per context. Only the cascade's own levels are ordered: a resume needs the
         # state of the level before it. With --ratio-order a goal's next attempt is its option of highest current yield, so
@@ -1530,6 +1537,12 @@ class Loop:
                         and not (rl_ and f[4] in a.relabel_nostat.split(','))):
                     l_ = f[4] + 'f' if 'f=1' in f[7:] else f[4]
                     ynote(l_, f[1] == 'THM', float(f[2]))
+                if 'q=1' in f[7:]:
+                    # (--quick) a quick first run: proved, or failed and waiting for its first T0 run
+                    qd.add(f[0])
+                    if f[1] == 'NO' and f[0] in att:
+                        qf.add(f[0])
+                    continue
                 if len(f) >= 5 and f[0] in att and f[4] in IDX:
                     lev = ORIG[IDX[f[4]]]   # (the cascade's own level number)
                     if a.chain_since_row and ri < a.chain_since_row and lev >= max(1, a.chain_level):
@@ -1762,7 +1775,7 @@ class Loop:
                             # per run hour), one that had failed before 4-6% (17-29 an hour), on 61% of the
                             # workers' time; Z2 after 30 min 88% (1,749 an hour) against 7-17% (52-106)
                             nfg = nf.get; fr = a.fail_reset; nbg = nfb.get; obg = ob0.get
-                            retry = sorted((nfg(n, 0) if not fr or nbg(n) == g[n][0] else 0,
+                            retry = sorted((nfg(n, 0) if not fr or nbg(n) == g[n][0] else 0, 1 if n in qf else 0,
                                             obg(gnum[n][0], 0), 0 if may_retry(n, g) else 1, g[n][1], gnum[n][1], n) for n in att
                                            if n not in busy and (ctx(n) != att[n][0] or grown(n) or n in knew)
                                            and (a.far_retry or may_retry(n, g)))
@@ -1869,6 +1882,10 @@ class Loop:
                                 continue
                             if KC and n in knew and ctx(n) == att[n][0] and not grown(n):
                                 kcf.write(f'{time.time() - t0:.0f}\t{n}\n'); kcf.flush()
+                            qk_ = QK and n not in qd and not nf.get(n)
+                            if qk_:
+                                qd.add(n)
+                            qf.discard(n)
                             att[n] = (ctx(n), 0); vtried.pop(n, None)
                             if RK:
                                 knn_at[n] = knn_sig(n)
@@ -1889,9 +1906,14 @@ class Loop:
                             # failing fresh runs took 68% of the workers' time and only 1% of runs resumed)
                             keep = (not a.no_fresh_states and
                                     (not a.lean_states or len(T) < 2 or may_deepen(n, g) or n in hds))
-                            fut = ex.submit(self.run_one, n, self.hints_for(n, pools, None), rnd,
-                                            T[0], False if a.p9loop else ('fresh' if keep else 'nosave'),
-                                            a.cascade_cpu * T[0])
+                            if qk_:
+                                fut = ex.submit(self.run_one, n, self.hints_for(n, pools, None), rnd,
+                                                a.quick, 'nosave', a.cascade_cpu * a.quick)
+                                qfut.add(fut)
+                            else:
+                                fut = ex.submit(self.run_one, n, self.hints_for(n, pools, None), rnd,
+                                                T[0], False if a.p9loop else ('fresh' if keep else 'nosave'),
+                                                a.cascade_cpu * T[0])
                         else:
                             if sum(1 for _, l in running.values() if l > 0) >= a.j - a.reserve:
                                 break
@@ -1984,11 +2006,15 @@ class Loop:
                     fl_ = f in frun; frun.discard(f)
                     n, ok, dt, stats, hs = f.result()
                     ycls[rcls.pop(f, 'r')].append((1 if ok else 0, dt)); rt0.pop(f, None)
+                    qk_ = f in qfut; qfut.discard(f)
                     if a.orig_rate:
                         k_ = (orig_of(n), lev == 0)
                         ors[k_] = ors[k_] * 0.9 + (1 if ok else 0); orc[k_] = orc[k_] * 0.9 + 1
                         org[lev == 0].append(1 if ok else 0)
-                    if lev == 0 and not ok:
+                    if lev == 0 and not ok and qk_:
+                        if n in att:
+                            att[n] = (None, -1); qf.add(n)   # (--quick: its first T0 run still to come)
+                    elif lev == 0 and not ok:
                         if a.fail_reset:
                             # (counted since the nearest proven goal below last changed)
                             gb = g[n][0] if n in g else None
@@ -2011,7 +2037,8 @@ class Loop:
                         (auto0 if lev == 0 else auto1).append((ok, dt, p_ if lev == 0 else 0.0))
                     rf.write(f'{n}\t{"THM" if ok else "NO"}\t{dt:.2f}\t{stats}\t{LAB[lev]}\tt={time.time()-t0:.0f}'
                              f'\tc={chs(att[n][0]) if n in att else "-"}' + ('\tf=1' if fl_ else '')
-                             + ('\tab=1' if T[lev] > T[0] and VAR[lev] != 'p9' and self.ab_arm(n) else '') + '\n'); rf.flush()
+                             + ('\tab=1' if T[lev] > T[0] and VAR[lev] != 'p9' and self.ab_arm(n) else '')
+                             + ('\tq=1' if qk_ else '') + '\n'); rf.flush()
                     l_ = LAB[lev] + 'f' if fl_ else LAB[lev]
                     ynote(l_, 1 if ok else 0, dt)
                     if ok and n in self.solved:
@@ -2290,6 +2317,9 @@ def make_parser():
                          'twee --multi-goal search, with all their lemmas and N times the budget')
     ap.add_argument('--cascade', default='',
                     help='T0,T1,...: frontier deepening instead of rounds (see Loop.cascade), from round --start')
+    ap.add_argument('--quick', type=float, default=0, metavar='Q',
+                    help='(21 Nov) --cascade with --fail-order: each goal\'s first fresh run in the round at Q seconds; a goal '
+                         'that fails it gets its first T0 run after the goals never run (results rows q=1)')
     ap.add_argument('--cascade-start', type=int, default=0,
                     help='--cascade: unsolved goals count as tried up to this level in their current context')
     ap.add_argument('--retry-hints', type=float, default=0,

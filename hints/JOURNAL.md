@@ -755,6 +755,10 @@ Paused:
 has the history (user, 20 Nov: "update the total numbers in the report etc every now and then").
 
 Next:
+000000000000000000000. **exp49 (04:47, [notes/2026-11-21-quick-first.md](notes/2026-11-21-quick-first.md)):** in P2J the failed first runs took 10.3 of
+   the first pass's 13.1 CPU hours, and 86% of first-run proofs came within 1 s. loop.py `--quick Q`: a goal's first
+   fresh run at Q seconds; a goal that fails it gets its T0 run after the goals never run. Smoke tests loops/QKT
+   (`--quick 1`) and QKC (control), smoke487, 2 workers, 12 minutes. A/B on half2 after exp48, on its winner's base.
 00000000000000000000. **exp48 (03:37, [notes/2026-11-21-late-combo.md](notes/2026-11-21-late-combo.md)):** at 4 hours P2H (--retry-class) +697 and P2J
    (--yield-discount 2000 --reexplore 12:0.25) +796 over P2K. P2N = both; P2O = P2N + --knn-ctx 10 --head-class
    (exp46/47 in one arm, to stay near 24 CPUs). half2, 5 h, when exp44/45 end; abs/after4445e.sh waits for
@@ -968,6 +972,7 @@ reports are written as the experiments run.
 | [notes/2026-11-21-knn-ctx.md](notes/2026-11-21-knn-ctx.md) | exp46: a new kNN lemma counts as a new context (`--knn-ctx`) |
 | [notes/2026-11-21-head-class.md](notes/2026-11-21-head-class.md) | exp47: heads at L1 as a class of their own (`--head-class`) |
 | [notes/2026-11-21-late-combo.md](notes/2026-11-21-late-combo.md) | exp48: the late-phase winners together, and with exp46/47 |
+| [notes/2026-11-21-quick-first.md](notes/2026-11-21-quick-first.md) | exp49: a quick first run for every goal (`--quick Q`) |
 | [notes/2026-11-20-base-saturation.md](notes/2026-11-20-base-saturation.md) | exp39: base-theory runs as rule generators for the unsolved goals of the stronger theories |
 | [notes/2026-11-20-given-transfer.md](notes/2026-11-20-given-transfer.md) | exp38: unsolved goals that are variants of rules other runs derived and did not use (379 M in the given logs; transfer.py only matches proof steps); their ancestry as hints |
 | [notes/2026-11-19-from-zero-portfolio.md](notes/2026-11-19-from-zero-portfolio.md) | half1 from zero in 2 hours with today's deep portfolio (PGC), against PGA's 18,987 (exp27, from 07:18) |
