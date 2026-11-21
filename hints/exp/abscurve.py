@@ -6,7 +6,7 @@
 setcurve.py compares arms by wall minutes, which is fair only for arms run side by side: the machine's speed per
 abstract second changes with its load (failed 5 s L0 runs took 5.6-6.0 CPU s in exp44/45 at night, 4.7-5.0 s in
 exp48). Here each run's CPU time (results.tsv dt) is turned into abstract seconds by its arm's CPU per abstract
-second in the same 15-minute window (the mean dt/5 of that window's failed plain 5 s L0 runs; cumulative to date
+second in the same 15-minute window (the median dt/5 of that window's failed plain 5 s L0 runs; cumulative to date
 when the window has fewer than 30). A(t) = an arm's abstract worker seconds by wall time t. For each M in --at, at
 REF's A(M minutes), every arm's wall time with the same A and its SET goals solved then (proof-file mtimes, as
 setcurve.py).
@@ -27,11 +27,13 @@ def acurve(d):
     win = {}
     for t, dt, p in ev:
         if p:
-            v = win.setdefault(int(t // 900), [0.0, 0]); v[0] += dt; v[1] += 1
-    cum = [0.0, 0]; ks = {}
+            win.setdefault(int(t // 900), []).append(dt)
+    med = lambda v: sorted(v)[len(v) // 2]
+    cum = []; ks = {}
     for b in range(0, int(ev[-1][0] // 900) + 1):
-        v = win.get(b, [0.0, 0]); cum[0] += v[0]; cum[1] += v[1]
-        ks[b] = (v[0] / v[1] / 5) if v[1] >= 30 else (cum[0] / cum[1] / 5 if cum[1] else 1.0)
+        v = win.get(b, []); cum += v
+        # (the median: Z6's first window had 17 such runs, four of them 50-73 s)
+        ks[b] = med(v) / 5 if len(v) >= 30 else (med(cum) / 5 if cum else 1.0)
     ts, As = [], []; a = 0.0
     for t, dt, p in ev:
         a += dt / ks[int(t // 900)]; ts.append(t); As.append(a)
