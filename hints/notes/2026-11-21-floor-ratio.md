@@ -151,7 +151,7 @@ floor is still off (20 × 25 < 530), close to coming back on.
   worker-hour) against P2U's 20,876 on 4 (12 worker-hours, 1,740 per worker-hour). The control adds nothing a
   second worker set would not.
 
-**Decision: accepted.** solve_new.sh's LATE now ends with `--floor-ratio 20` (0e6996b, 21 Nov 23:52). The test ran 3
+**Decision: accepted.** solve_new.sh's LATE now ends with `--floor-ratio 20` (0e6996b, 21 Nov 23:51). The test ran 3
 hours; the narrowing in the third hour is a reason to watch the next long from-zero run (all goals, 8 hours), where
 the late classes matter most.
 
