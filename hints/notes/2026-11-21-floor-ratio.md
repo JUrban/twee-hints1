@@ -94,3 +94,19 @@ The control's head class ran 20 L1 runs (40 s) for 12 proofs in 0.32 CPU hours; 
 runs (+1,199 runs, +0.27 CPU hours), which proved +1,152. As expected, the floors cost more at 4 workers than at 6:
 one worker of four held by each of q, h and d leaves the first runs fewer workers. The decision is at 3 hours,
 where LATE's gains come.
+
+## Interim at 1 hour (21 Nov 21:50): P2U +910
+
+| min | 10 | 30 | 45 | 60 |
+|---|---|---|---|---|
+| P2T (control) | 9,152 | 14,568 | 16,028 | 16,786 |
+| P2U (+ `--floor-ratio 20`) | 9,627 | 15,574 | 16,931 | 17,696 |
+| P2U − P2T | +475 | +1,006 | +903 | **+910** |
+
+exp/quickstat.py, 30-60 min (proofs / runs / CPU hours): first runs P2T 1,599 / 1,776 / 0.6, P2U 1,610 / 1,961 / 0.9;
+retries 27 / 205 / 0.3 and 44 / 325 / 0.4; deep 39 / 320 / 1.0 and 34 / 280 / 0.5. In the second half hour the arms
+proved about the same (P2T 2,218, P2U 2,122 by the curve), so the lead is the first half hour's.
+
+The mix lines at 60 min: P2T r 1,324/h, q 100/h (281 runs), h 26/h (45 runs); P2U r 1,085/h, q 92/h (378 runs), h
+44/h (2 runs). In P2U the q floor is on again (20 × 92 ≥ 1,085), the h floor still off (20 × 44 < 1,085); it comes
+back when the first runs' yield falls below 20 times the head class's.
