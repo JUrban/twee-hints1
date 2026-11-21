@@ -36,7 +36,10 @@ loop.py `--quick Q` (default off; with `--cascade --fail-order`, not with the le
 ## Smoke tests
 
 sets/smoke487, 2 workers, 12 minutes, abs/or_test2.sh with solve_new.sh's defaults:
-* loops/QKT (04:46, `LOOPARGS="--quick 1"`) against loops/QKC (04:46, no LOOPARGS), started together.
+* loops/QKT (04:46, `LOOPARGS="--quick 1"`) against loops/QKC (04:46, no LOOPARGS), started together. No errors;
+  both 395 solved at 12 minutes. Curves (1, 2, 3, 4, 6, 8, 10 minutes): QKT 308, 323, 351, 367, 385, 389, 393; QKC
+  288, 344, 354, 377, 382, 385, 394. QKT's 487 quick runs proved 323 (66%) and ended at 128 s; then the 164 that
+  failed had their 5 s runs. One original's chain at 2 workers is too small for the frontier effect.
 
 ## Plan
 
