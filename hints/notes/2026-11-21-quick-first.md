@@ -121,3 +121,22 @@ runs after a failed quick run (28 proved); QKT made only quick runs then (471, 3
 * P2Q is catching up slowly (−734 at 60 minutes, −749 at 90, −627 at 120).
 * Load: the arms' own processes are about 25 running; the machine's load average rose to 43 at 11:46 from outside
   this sandbox, so all three arms are slower than P2O was at the same minutes.
+
+## Result: stopped at 3 hours (21 Nov 12:47), `--quick 1` rejected
+
+| arm | 120 min | 150 min | 180 min | vs P2R at 180: +, −, union |
+|---|---:|---:|---:|---|
+| P2R (control) | 20,234 | 20,929 | 21,264 | |
+| P2Q (`--quick 1`) | 19,606 | 20,100 | 20,545 (−719) | +225, −959, 21,508 |
+| P2S (exp50) | 20,300 | 20,761 | 21,098 (−166) | +206, −389, 21,489 |
+
+All three arms were stopped at 12:47 instead of at 5 hours: P2Q would have needed about 900 more than P2R in the last two
+hours, while its remaining T0 runs after a failed quick run proved 27% (199 of 737 in 150-180 minutes; 4,905 still
+waiting). Its 225 goals that P2R lacks are at the level two identical runs differ by (about 200), so it is no portfolio
+member either.
+
+What the test showed: the quick runs themselves are cheap and productive (15,306 proofs at 3,330 per CPU hour, 62% of
+the goals at 1 s), but failing them sorts a goal after the far tail, and the goals that need 1-5 s then wait for
+an hour or more. The early lead (+975 at 15 minutes) is the value of a 1 s first pass; the loss is the ordering after
+it. `--quick-near` (smoke QKN) fixes the order; it is a candidate for a later, short A/B (2 hours is enough, since the
+difference shows in the first pass), not for Z7.

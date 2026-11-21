@@ -80,3 +80,12 @@ P2S 20,300 against P2R 20,234 at 120 minutes (+66; 90 min 19,380 / 19,356). Retr
 of 1,856, 132 per CPU hour; P2R's 5 s retries 250 of 1,301, 137 per CPU hour. In 90-120 minutes P2S 74 of 571 (0.5 CPU
 h), P2R 124 of 481 (0.6 CPU h). So far the shorter limit does not raise the retries' yield per CPU hour. Both arms'
 first passes ended at about 120 minutes, so the retries are only now taking most of the workers.
+
+## Result: stopped at 3 hours (21 Nov 12:47), `--retry-time 3` rejected
+
+P2S 21,098 against P2R 21,264 at 180 minutes (−166; +206, −389 one-arm goals, union 21,489). Its 3 s retries proved
+fewer per CPU hour than P2R's 5 s ones after the first pass: 114 against 137 overall; in 150-180 minutes 33 of 480
+(0.5 CPU h) against 39 of 353 (0.6 CPU h). The static replay (1.2-1.4 times the yield) did not hold: a retry that
+fails at 3 s keeps its place in the queue as a failure and is retried later again, so the saved CPU went into more
+retries of the same kind, and a proof that needed 3-5 s was lost or delayed. Stopped together with exp49 (see
+notes/2026-11-21-quick-first.md).
