@@ -771,7 +771,8 @@ Next:
    production restarted as ul74 at J=8 (its last 3.3 h: 62 new on 17 workers; the yield discount scored worse on its
    rows), the 20 s sweep at -j 1, the live transfer loops. User, 14:34: no E or Vampire; the work is on Twee.
    **Started early, with Z7C's CPU: production restarted 16:50 (abs/ul74.sh, J=6 while Z7 runs; loop.py 995541),
-   the sweep 16:50 (995832, -j 1 from SW20/J). exp52 starts when Z7 ends.**
+   the sweep 16:50 (995832, -j 1 from SW20/J). exp52 starts when Z7 ends.** exp52 started 20:49 (P2T loop.py
+   1115326, P2U 1115327).
 00000000000000000000000000. **exp52 candidate (13:30, [notes/2026-11-21-floor-ratio.md](notes/2026-11-21-floor-ratio.md)):** Z7 at 30 minutes was 2,196
    behind Z7C: the q and h floors held half a worker of six at 77 and 12 proofs per run-hour against the first runs'
    6,885. loop.py `--floor-ratio K` (classes `--floor-classes`, default qh) keeps a floor only while K × its yield
@@ -783,6 +784,8 @@ Next:
    Z7C + 260. Proof worker on again beside it.
    **At 4 hours (16:49) Z7 42,478, Z7C 41,237 (+1,241; −2,368 at 1 h, even at about 2 h 50 min): LATE confirmed on
    all goals. Z7C stopped at 16:49 (it proved 114 in the last half hour against Z7's 506); Z7 runs to 8 h (~20:50).**
+   **At 8 h (20:49): Z7 43,767 on 6 workers, Z6 44,092 on 12 (cross-time; Z7 +1,289 from 4 to 8 h, Z6 +1,172).
+   Z7 ∪ Z6 44,505. One goal new to the collection (mbol_asqr__goal_420) merged into production at 20:52.**
 000000000000000000000000. **exp51 candidate (08:40, [notes/2026-11-21-head-time.md](notes/2026-11-21-head-time.md)):** P2O's failed L1
    head runs took 86.6 CPU s each (2.55 of class h's 2.86 CPU h); production's L1 proofs replayed at 20 s kept 73% for
    45% of the CPU. loop.py `--head-time S`: class h's chain-level runs at S (rows ht=1); a resume runs the rest of its

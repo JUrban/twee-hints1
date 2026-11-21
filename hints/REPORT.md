@@ -74,7 +74,9 @@ empty context on all 51,784 problems, 12 workers plus the transfer.
 * **The 21 Nov late-phase default (Z7, 6 workers; [notes/2026-11-21-z7-pair.md](notes/2026-11-21-z7-pair.md)):**
   beside its control (Z7C, the 20 Nov system, also 6 workers), 32,154 against 34,522 at 1 hour, 40,786 against 40,479
   at 3 hours, **42,478 against 41,237 at 4 hours** (+1,241). It loses early, while its retry and head classes take
-  workers from the first pass, and gains from about 3 hours. Z7 runs to 8 hours (about 20:50).
+  workers from the first pass, and gains from about 3 hours. **At 8 hours Z7 had 43,767 on 6 workers, against Z6's
+  44,092 on 12** (cross-time). From 4 to 8 hours Z7 gained 1,289 and Z6 1,172. Z7 also proved one goal production
+  never had (merged into production).
 * Production, with every method since 12 Nov, has **48,238** (21 Nov 18:06).
 
 \* Starts from 33,720 proofs: the third round plus 52 from long runs on
