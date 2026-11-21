@@ -847,6 +847,7 @@ Next:
    above 5 s; the non-joined test proved 4 of 100 such at 20 s. exp/sweep20.py loops/SW20, chunks of 300 with a
    fresh trusted lemma context, 2 workers, proofs into UL (and kept). Production's own loop is stopped (2 proofs in
    its last 2,000 runs). Chunk 0 (16:47): 2 of 300, 0.8 per CPU h (the pilot's sample was nearer); kept running.
+   **Done 21 Nov 20:58: 30 of 2,874, 25.1 h of run time, 1.2 per CPU h (production's own loop meanwhile about 0.45).**
 0000000000000. **Z6 (15:30, DONE 23:33, [notes/2026-11-20-z6.md](notes/2026-11-20-z6.md)): 44,095 at 8 hours, Z4 38,044; 4,113 production-only, 2 Z6-only merged.** today's from-zero system on all 51,784, 12 workers, 8 hours
    (to about 23:30), `--knn-refresh 600`, against Z4 (37,713 at 2 h). abs/z6_test.sh; read with
    `abs/setcurve.py sets/all Z4 Z6 --at 10,30,60,120,180,240,360,480`. Production's own loop stopped meanwhile.
