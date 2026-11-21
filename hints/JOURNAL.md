@@ -764,6 +764,8 @@ Next:
    judged also by the h and q classes' proofs and the union per worker-hour. About 10 CPUs: the unsolved 3,550:
    production restarted as ul74 at J=8 (its last 3.3 h: 62 new on 17 workers; the yield discount scored worse on its
    rows), the 20 s sweep at -j 1, the live transfer loops. User, 14:34: no E or Vampire; the work is on Twee.
+   **Started early, with Z7C's CPU: production restarted 16:50 (abs/ul74.sh, J=6 while Z7 runs; loop.py 995541),
+   the sweep 16:50 (995832, -j 1 from SW20/J). exp52 starts when Z7 ends.**
 00000000000000000000000000. **exp52 candidate (13:30, [notes/2026-11-21-floor-ratio.md](notes/2026-11-21-floor-ratio.md)):** Z7 at 30 minutes was 2,196
    behind Z7C: the q and h floors held half a worker of six at 77 and 12 proofs per run-hour against the first runs'
    6,885. loop.py `--floor-ratio K` (classes `--floor-classes`, default qh) keeps a floor only while K × its yield
@@ -772,6 +774,8 @@ Next:
    (solve_new.sh LATE, P2O's set) against `LATE=` (the 20 Nov system), side by side on all goals from zero, 6 workers
    each, 8 hours (abs/z7pair.sh): Z7 vs Z7C. A pair because abscurve leaves 167-426 of a replica's gap. Decision: Z7 ≥
    Z7C + 260. Proof worker on again beside it.
+   **At 4 hours (16:49) Z7 42,478, Z7C 41,237 (+1,241; −2,368 at 1 h, even at about 2 h 50 min): LATE confirmed on
+   all goals. Z7C stopped at 16:49 (it proved 114 in the last half hour against Z7's 506); Z7 runs to 8 h (~20:50).**
 000000000000000000000000. **exp51 candidate (08:40, [notes/2026-11-21-head-time.md](notes/2026-11-21-head-time.md)):** P2O's failed L1
    head runs took 86.6 CPU s each (2.55 of class h's 2.86 CPU h); production's L1 proofs replayed at 20 s kept 73% for
    45% of the CPU. loop.py `--head-time S`: class h's chain-level runs at S (rows ht=1); a resume runs the rest of its
