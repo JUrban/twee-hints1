@@ -759,6 +759,10 @@ Paused:
 has the history (user, 20 Nov: "update the total numbers in the report etc every now and then").
 
 Next:
+00000000000000000000000000. **exp52 candidate (13:30, [notes/2026-11-21-floor-ratio.md](notes/2026-11-21-floor-ratio.md)):** Z7 at 30 minutes was 2,196
+   behind Z7C: the q and h floors held half a worker of six at 77 and 12 proofs per run-hour against the first runs'
+   6,885. loop.py `--floor-ratio K` (classes `--floor-classes`, default qh) keeps a floor only while K × its yield
+   reaches the best class's. Smoke FRT fine. A/B after the Z7 pair: all goals, 6 workers each, 3 hours.
 0000000000000000000000000. **Z7 pair (12:48, [notes/2026-11-21-z7-pair.md](notes/2026-11-21-z7-pair.md)):** today's late-phase default
    (solve_new.sh LATE, P2O's set) against `LATE=` (the 20 Nov system), side by side on all goals from zero, 6 workers
    each, 8 hours (abs/z7pair.sh): Z7 vs Z7C. A pair because abscurve leaves 167-426 of a replica's gap. Decision: Z7 ≥
@@ -1008,6 +1012,7 @@ reports are written as the experiments run.
 | [notes/2026-11-21-dispatch-profile.md](notes/2026-11-21-dispatch-profile.md) | Where a from-zero start spends its time: loop.py's threads; goal files at first use |
 | [notes/2026-11-21-head-time.md](notes/2026-11-21-head-time.md) | exp51 (candidate): shorter first runs for heads at the chain level (`--head-time S`) |
 | [notes/2026-11-21-z7-pair.md](notes/2026-11-21-z7-pair.md) | Z7 pair: today's late-phase default against the 20 Nov system, on all goals |
+| [notes/2026-11-21-floor-ratio.md](notes/2026-11-21-floor-ratio.md) | exp52 (candidate): floors for the late classes only when they can compete (`--floor-ratio K`) |
 | [notes/2026-11-20-base-saturation.md](notes/2026-11-20-base-saturation.md) | exp39: base-theory runs as rule generators for the unsolved goals of the stronger theories |
 | [notes/2026-11-20-given-transfer.md](notes/2026-11-20-given-transfer.md) | exp38: unsolved goals that are variants of rules other runs derived and did not use (379 M in the given logs; transfer.py only matches proof steps); their ancestry as hints |
 | [notes/2026-11-19-from-zero-portfolio.md](notes/2026-11-19-from-zero-portfolio.md) | half1 from zero in 2 hours with today's deep portfolio (PGC), against PGA's 18,987 (exp27, from 07:18) |

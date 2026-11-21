@@ -1893,6 +1893,14 @@ class Loop:
                             if not av:
                                 break
                             low = [c for c in av if cn_[c] < a.mix * a.j]
+                            if a.floor_ratio and low:
+                                # (--floor-ratio K, 21 Nov 13:25) a class of --floor-classes keeps its floor only
+                                # while K times its yield reaches the best class's: in Z7's first 30 minutes the q
+                                # and h floors held half a worker of six at 77 and 12 proofs per run-hour against the
+                                # first runs' 6,885 (8-9% fewer runs than Z7C); later the first runs' yield falls
+                                # and the floors come back
+                                ym_ = max(yld(c) for c in av)
+                                low = [c for c in low if c not in a.floor_classes or a.floor_ratio * yld(c) >= ym_]
                             cl = min(low, key=lambda c: cn_[c]) if low else max(av, key=yld)
                         else:
                             cl = ('r' if retry else 'f') if retry or (far and not deep) else 'd'
@@ -2369,6 +2377,11 @@ def make_parser():
     ap.add_argument('--quick', type=float, default=0, metavar='Q',
                     help='(21 Nov) --cascade with --fail-order: each goal\'s first fresh run in the round at Q seconds; a goal '
                          'that fails it gets its first T0 run after the goals never run (results rows q=1)')
+    ap.add_argument('--floor-ratio', type=float, default=0, metavar='K',
+                    help='(21 Nov) --mix: a class of --floor-classes gets its floor of workers only while K times its '
+                         'yield (proofs per run-hour, last 300 runs) is at least the best waiting class\'s')
+    ap.add_argument('--floor-classes', default='qh', metavar='CLS',
+                    help='the classes --floor-ratio applies to (default qh: retries and heads)')
     ap.add_argument('--quick-near', action='store_true',
                     help='(21 Nov) --quick: in the --fail-order key, near/far before quick-failed, so a near goal\'s T0 '
                          'run after its failed quick run comes before a far goal\'s quick run')
