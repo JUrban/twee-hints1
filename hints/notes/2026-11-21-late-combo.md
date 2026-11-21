@@ -46,3 +46,26 @@ P2O is 422 behind P2N. It ran about 1,000 fewer L0 runs in the first hour (17,44
 worker for 49 L1 runs (20 proved, 0.8 CPU hours; P2N's L1 17 runs, 8 proved), the deeper levels 473 runs against 381,
 and --knn-ctx flagged 87 goals at the last rebuild (221 waiting). P2H's early cost (−264 at 1 hour) turned into
 +1,128 at 3 hours; the 3-hour and 5-hour marks decide.
+
+## Interim at 2 hours (21 Nov 06:37)
+
+| arm | 60 min | 90 min | 120 min |
+|---|---:|---:|---:|
+| P2K (exp44/45 control) | 19,009 | 19,728 | 20,004 |
+| P2H | 18,745 | 20,027 | 20,611 |
+| P2J | 19,161 | 19,879 | 20,124 |
+| P2N | 19,214 | **20,356** | 20,872 |
+| P2O | 18,792 | 20,084 | **20,934** |
+
+P2O made up the 422 and leads by 62; P2N leads P2H by 261 and P2J by 748 at 2 hours (P2H then gained 986 to its 5-hour
+21,597, P2J 1,582 to 21,706; the bar is 21,891). By half hour (proved/runs at L0, CPU hours):
+
+| window | P2N L0 | P2O L0 | P2O L1 (class h) |
+|---|---|---|---|
+| 60–90 | 833/2,368, 2.4 h | 927/2,037, 1.9 h | 11/28, 0.5 h |
+| 90–120 | 246/1,854, 2.4 h | **528**/1,671, 1.9 h | 3/24, 0.5 h |
+
+In 90–120 P2O proved twice P2N's L0 goals with fewer runs. The mix lines say where: P2O's retry class q yields 165
+an hour against P2N's 50 (the retries --knn-ctx flags have a new lemma in their kNN context). Its kNN-only retries
+so far: 240 dispatched, 48 proved (20%), none waiting. Class h costs about 1 CPU hour an hour for 14 proofs since 60
+minutes. The machine: load about 26 CPUs of mine (2 × 6 workers, the side loops, stepjlive3's join checks), 10 GB.
