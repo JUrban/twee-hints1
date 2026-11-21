@@ -759,6 +759,10 @@ Paused:
 has the history (user, 20 Nov: "update the total numbers in the report etc every now and then").
 
 Next:
+0000000000000000000000000. **Z7 pair (12:48, [notes/2026-11-21-z7-pair.md](notes/2026-11-21-z7-pair.md)):** today's late-phase default
+   (solve_new.sh LATE, P2O's set) against `LATE=` (the 20 Nov system), side by side on all goals from zero, 6 workers
+   each, 8 hours (abs/z7pair.sh): Z7 vs Z7C. A pair because abscurve leaves 167-426 of a replica's gap. Decision: Z7 ≥
+   Z7C + 260. Proof worker on again beside it.
 000000000000000000000000. **exp51 candidate (08:40, [notes/2026-11-21-head-time.md](notes/2026-11-21-head-time.md)):** P2O's failed L1
    head runs took 86.6 CPU s each (2.55 of class h's 2.86 CPU h); production's L1 proofs replayed at 20 s kept 73% for
    45% of the CPU. loop.py `--head-time S`: class h's chain-level runs at S (rows ht=1); a resume runs the rest of its
@@ -773,6 +777,8 @@ Next:
    arm P2S = exp49's base + `--retry-time 3`, started with P2Q/P2R by abs/after48b.sh, against P2R. stepjlive3 stopped
    06:45 (no joins in 3 cycles).
    **P2S started 09:45:47 (loop.py 403368), against P2R.**
+   **Stopped at 3 hours (12:47): P2S 21,098, P2R 21,264 (−166); its 3 s retries 114 proofs per CPU h against 137.
+   Rejected.**
 000000000000000000000. **exp49 (04:47, [notes/2026-11-21-quick-first.md](notes/2026-11-21-quick-first.md)):** in P2J the failed first runs took 10.3 of
    the first pass's 13.1 CPU hours, and 86% of first-run proofs came within 1 s. loop.py `--quick Q`: a goal's first
    fresh run at Q seconds; a goal that fails it gets its T0 run after the goals never run. Smoke tests loops/QKT
@@ -780,6 +786,8 @@ Next:
    **Started 09:45:32 on P2O's set: P2Q (+ --quick 1, loop.py 401107), P2R (control, 401110); to about 14:50.**
    At 1 hour P2Q +975 at 15 min but −734 at 60: quick-failed near goals waited behind the far tail's quick runs (the
    key put quick-failed before near/far). `--quick-near` (smoke QKN) reorders; the second try if P2Q loses.
+   **Stopped at 3 hours (12:47): P2Q 20,545, P2R 21,264 (−719; +225/−959). Rejected; `--quick-near` is a later,
+   short A/B.**
 00000000000000000000. **exp48 (03:37, [notes/2026-11-21-late-combo.md](notes/2026-11-21-late-combo.md)):** at 4 hours P2H (--retry-class) +697 and P2J
    (--yield-discount 2000 --reexplore 12:0.25) +796 over P2K. P2N = both; P2O = P2N + --knn-ctx 10 --head-class
    (exp46/47 in one arm, to stay near 24 CPUs). half2, 5 h, when exp44/45 end; abs/after4445e.sh waits for
@@ -999,6 +1007,7 @@ reports are written as the experiments run.
 | [notes/2026-11-21-retry-time.md](notes/2026-11-21-retry-time.md) | exp50: shorter L0 retries (`--retry-time T`) |
 | [notes/2026-11-21-dispatch-profile.md](notes/2026-11-21-dispatch-profile.md) | Where a from-zero start spends its time: loop.py's threads; goal files at first use |
 | [notes/2026-11-21-head-time.md](notes/2026-11-21-head-time.md) | exp51 (candidate): shorter first runs for heads at the chain level (`--head-time S`) |
+| [notes/2026-11-21-z7-pair.md](notes/2026-11-21-z7-pair.md) | Z7 pair: today's late-phase default against the 20 Nov system, on all goals |
 | [notes/2026-11-20-base-saturation.md](notes/2026-11-20-base-saturation.md) | exp39: base-theory runs as rule generators for the unsolved goals of the stronger theories |
 | [notes/2026-11-20-given-transfer.md](notes/2026-11-20-given-transfer.md) | exp38: unsolved goals that are variants of rules other runs derived and did not use (379 M in the given logs; transfer.py only matches proof steps); their ancestry as hints |
 | [notes/2026-11-19-from-zero-portfolio.md](notes/2026-11-19-from-zero-portfolio.md) | half1 from zero in 2 hours with today's deep portfolio (PGC), against PGA's 18,987 (exp27, from 07:18) |
