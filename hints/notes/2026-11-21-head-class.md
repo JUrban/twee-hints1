@@ -43,3 +43,6 @@ P2M: sets/half2 from zero, abs/or_test2.sh, 6 workers, 5 hours, beside P2L when 
 P2L (loops/P2L.args decides: if `--retry-class` holds at 5 hours both arms get it and P2H is the control, else P2K).
 Measures: setcurve at 30-300 minutes; windows.py (class h's runs and proofs per half hour); L1 runs and proofs;
 the h class's yield in the mix line.
+
+**Base (02:36):** with P2H 1,128 ahead at 3 hours, loops/P2M.args = `--retry-class --head-class`: the arm adds its option to
+`--retry-class`, and **P2H is the control**. If --retry-class fails at 5 hours, compare with P2K as well.
