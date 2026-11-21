@@ -758,8 +758,8 @@ Next:
 000000000000000000. **exp46 (00:55, [notes/2026-11-21-knn-ctx.md](notes/2026-11-21-knn-ctx.md)):** Z6 waited long to use new kNN
    lemmas: after hour 1, 56% of the proofs whose last lemma was a kNN lemma came over 10 minutes after it (siblings:
    at once). With --fail-order a kNN change never made a retry (only the learned scheduler looked). loop.py
-   `--knn-ctx`: after each kNN rebuild, goals that would gain one of the new proofs count as a new context. Smoke
-   test loops/KCT; A/B P2L on half2 after exp44/45.
+   `--knn-ctx K`: after each kNN rebuild, a goal for which a new proof enters its top K kNN lemmas has a new context. Smoke
+   tests loops/KCT, KCT2, KCT3; A/B P2L (K=10) on half2 after exp44/45 (abs/after4445b.sh).
 00000000000000000. **Roots (00:44; latency 00:48, [notes/2026-11-21-roots.md](notes/2026-11-21-roots.md)):** of the 4,117 goals production has and Z6
    lacks, 190 have recorded lemmas that Z6 all proved (L1 104, L0 46, L2 26); their reach is 363. The rest rest on
    lemmas Z6 lacks (2,981 through goals without a record). The gap is mostly depth. Test: the 190 at 40 s in Z6's
@@ -769,7 +769,7 @@ Next:
    L1 (9 of 16, only in the first hour) from ever running again. estcmp on Z6's rows: cumulative -791, flat -616,
    discounted over 1,000 rows -557; production's rows keep cumulative best. loop.py `--yield-discount N`; P2J =
    defaults + `--yield-discount 2000 --reexplore 12:0.25` against P2K, half2, 5 h. exp44 changed to 5 h against P2K
-   too (abs/exp4445.sh); production and stepjlive3 start when the three arms end (abs/afterz6.sh, 19:38).
+   too (abs/exp4445.sh); production and stepjlive3 start when the three arms end (abs/afterz6.sh, 19:38; from 21 Nov 00:56 abs/after4445.sh, production at J=6 beside exp46).
 000000000000000. **exp44 (written 18:44, starts when Z6 ends, [notes/2026-11-20-retry-class.md](notes/2026-11-20-retry-class.md)):** Z6's first runs ended at
    about 150 min, then retries of goals with a new context proved 47% (1,096 of 2,331 in half an hour), the last
    first runs 3%. loop.py `--retry-class`: failed-before goals as their own --mix class. P2H on half2 against P2E/P2F.

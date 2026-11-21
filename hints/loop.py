@@ -1363,8 +1363,10 @@ class Loop:
         # its hint pool grew; a new kNN lemma did not count (only --sched-model looked at knnch). In Z6, of the proofs
         # after the first hour whose last lemma to be proved was a kNN lemma, 56% came over 10 minutes after it, and
         # nearly all at the first run after it (notes/2026-11-21-roots.md). Here, after each kNN rebuild, a goal
-        # whose recorded kNN lemmas would gain one of the new proofs (one scoring above its weakest recorded pick)
-        # counts as having a new context.
+        # one of whose new proofs would enter the top --knn-ctx K of its kNN lemmas (score above its K-th recorded
+        # pick) counts as having a new context: it joins the retry list (it stays open to the deeper levels too).
+        # (01:20) K, not all --lemma-knn: in the smoke test a top-30 entry flagged most failed goals at every
+        # rebuild; in Z6 ranks 0-9 were 57% of the late kNN-last proofs.
         KC = bool(a.knn_ctx and RK and a.fail_order and not a.sched_model)
         kth, knew, kprev = {}, set(), [frozenset(self.solved)]
         kcf = open(os.path.join(self.dir, 'knn_ctx.tsv'), 'a') if KC else None
@@ -1711,7 +1713,7 @@ class Loop:
                             if KC:
                                 t_ = time.time(); ix_ = self.lemma_index
                                 new_ = [m for m in self.solved if m not in kprev[0] and m in ix_.info]
-                                kprev[0] = frozenset(self.solved); nh_ = 0
+                                kprev[0] = frozenset(self.solved); nh_ = 0; hn_ = []
                                 for n in [n for n in kth if n in self.solved or n not in att]:
                                     del kth[n]; knew.discard(n)
                                 for n, th in kth.items():
@@ -1722,10 +1724,11 @@ class Loop:
                                             continue
                                         ix_.info[n] = oinfo_[n]
                                     if any(ix_.sim(n, m) > th for m in new_):
-                                        knew.add(n); nh_ += 1
+                                        knew.add(n); nh_ += 1; hn_.append(n)
                                 krb += time.time() - t_
                                 print(f'  cascade: --knn-ctx: {nh_} goals gain a kNN lemma from the {len(new_)} new '
-                                      f'proofs ({len(knew)} waiting, {time.time()-t_:.1f}s)', flush=True)
+                                      f'proofs ({len(knew)} waiting, {time.time()-t_:.1f}s): {" ".join(hn_[:4])}',
+                                      flush=True)
                         if SM and RK:
                             # best predicted first; the kNN check (~27 ms a goal) only as far as needed
                             free = a.j - len(running)
@@ -1808,7 +1811,6 @@ class Loop:
                                        not md_, j_, n)
                                       for n in att
                                       if n not in busy and ctx(n) == att[n][0] and not grown(n)
-                                      and not (n in knew and (a.far_retry or may_retry(n, g)))
                                       # (the levels open to N: a goal far from the frontier only gets the variants of
                                       # the fresh level; chosen among those, as a variant no longer comes first)
                                       for md_ in (may_deepen(n, g) or n in hds,)
@@ -1857,8 +1859,8 @@ class Loop:
                                 kf.write(f'{n}\t{",".join(sorted(knn_at[n]))}\n'); kf.flush()
                             if KC:
                                 knew.discard(n)
-                                kth[n] = min((self.lemma_index.sim(n, m) for m in knn_at[n]), default=0.0) \
-                                    if len(knn_at[n]) >= a.lemma_knn else 0.0
+                                sc_ = sorted((self.lemma_index.sim(n, m) for m in knn_at[n]), reverse=True)
+                                kth[n] = sc_[a.knn_ctx - 1] if len(sc_) >= a.knn_ctx else 0.0
                             if a.retry_hints:
                                 hp[n] = psz(n)
                             # fresh in the new context; its state replaces any older one, so deepening
@@ -1880,8 +1882,7 @@ class Loop:
                             x_ = deep.pop(0); lev, n = x_[-2], x_[-1]; fd_ = x_[-3]
                             if any(m == n for m, _ in running.values()):
                                 continue
-                            if light and (n not in att or lev not in opts(n) or ctx(n) != att[n][0] or grown(n)
-                                          or n in knew):
+                            if light and (n not in att or lev not in opts(n) or ctx(n) != att[n][0] or grown(n)):
                                 continue
                             # (19 Nov 03:56) a level that takes chain hints waits for the chain records, which load in a
                             # background thread: before they are in, deep_hints falls back to the original's pool. exp24's
@@ -2368,11 +2369,11 @@ def make_parser():
                          'each keep this share of the workers while they have waiting goals; the other slots go to '
                          'the kind with the most proofs per run second lately (with --far-retry; from zero on '
                          '51,784 goals the near retries took every slot and 12,998 goals never ran, REPORT 2as)')
-    ap.add_argument('--knn-ctx', action='store_true',
-                    help='(21 Nov) --retry-knn with --fail-order: a goal whose kNN lemmas would gain one of the proofs '
-                         'new since the last kNN rebuild counts as having a new context (retried fresh); before, only '
-                         'sibling changes and hint pool growth did (Z6: 56%% of the late proofs whose last lemma was a '
-                         'kNN lemma came over 10 minutes after it)')
+    ap.add_argument('--knn-ctx', type=int, default=0, metavar='K',
+                    help='(21 Nov) --retry-knn with --fail-order: a goal one of whose proofs new since the last kNN '
+                         'rebuild would enter the top K of its kNN lemmas counts as having a new context (retried '
+                         'fresh); before, only sibling changes and hint pool growth did (Z6: 56%% of the late proofs '
+                         'whose last lemma was a kNN lemma came over 10 minutes after it)')
     ap.add_argument('--retry-class', action='store_true',
                     help='(20 Nov) --mix with --fail-order: goals that failed before in the round and have a new '
                          'context are their own class (q) beside the goals never failed (r), with the --mix share '
