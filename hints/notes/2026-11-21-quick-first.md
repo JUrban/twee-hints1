@@ -16,6 +16,10 @@ P2J's results (loops/P2J/r1/results.tsv, half2 from zero, 6 workers, 5 hours):
   about three times sooner. The 2,400 goals that need 1-5 s then get their 5 s run later, in a context with more
   lemmas. The other 6,200 failures would have failed at 5 s anyway, and their 5 s runs also come later, when more
   of their siblings are proved.
+* P2J's first runs by half hour (proved / failed): 14,971 / 346, 1,591 / 1,045, 496 / 1,309, 145 / 1,361, 69 / 1,224,
+  37 / 926. From 60 minutes on the first runs mostly fail (27%, 10%, 5%, 3%) and still hold most workers: the
+  4,820 failures of 60-180 minutes took about 8 of the 12 CPU hours. Of all 6,211 first-run failures, 2,070 were
+  proved later (L0 859, Vunf@0 127, other variants and L1 107, the side writers 977).
 * Earlier: a 5 s first level beat 10 s in production's context (2ag: 33 against 20). A shorter first run from
   zero has not been tried.
 
