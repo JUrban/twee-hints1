@@ -759,7 +759,7 @@ Paused:
 has the history (user, 20 Nov: "update the total numbers in the report etc every now and then").
 
 Next:
-000000000000000000000000000. **After the Z7 pair (plan agreed with the user, 14:36):** split the CPU instead of
+000000000000000000000000000. **After the Z7 pair (plan agreed with the user, 14:34):** split the CPU instead of
    speed tests only. About 10 CPUs: exp52's A/B on half2 (LATE against LATE + `--floor-ratio 20`, 4 workers each, 3 h),
    judged also by the h and q classes' proofs and the union per worker-hour. About 10 CPUs: the unsolved 3,550:
    production restarted as ul74 at J=8 (its last 3.3 h: 62 new on 17 workers; the yield discount scored worse on its
