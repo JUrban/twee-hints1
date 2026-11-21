@@ -36,3 +36,11 @@ prove more goals in the same wall-clock time, from zero?
 * Portfolio: one-arm goals both ways and the union per worker-hour.
 * Decision: identical half2 runs differ by about 185, so P2W ≥ P2V + 185 at 3 hours, or a curve clearly ahead
   throughout with no loss at 3 hours.
+
+## Started (21 Nov 23:51)
+
+exp52 was accepted at 23:51 (`--floor-ratio 20` in solve_new.sh's LATE, 0e6996b), and loops/EXP53.go made
+abs/after_exp52.sh start abs/exp53.sh at 23:51:52: P2V loop.py 1400531, P2W loop.py 1400534, each with its transfer
+and derived-rule loops. Both config.json files have floor_ratio 20.0, retry_class and head_class; P2W's args are
+`--abstract-time 2000 --no-resume-requeue --no-eqhint-consider --cp-renormalise-threshold 1000`, P2V's the same
+without the last option. They end at about 02:52.
