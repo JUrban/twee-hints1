@@ -47,3 +47,8 @@ An A/B on half2 from zero, 6 workers, against a control with the same base, when
 base is exp48's winner. Measures: setcurve at 15, 30, 60, 90, 120 and 180 minutes; the time the first pass ends
 (the last never-run goal's first run); the quick runs' proofs and failures; the later 5 s runs of quick-failed
 goals (proved, failed); latency of the first-run proofs (exp/latency.py).
+
+**Launch (05:00):** abs/after48.sh (copy in hints/exp; PID 143725 in loops/AFTER48.pid) waits for loops/P2N.done
+and loops/P2O.done, then up to 20 minutes for loops/GO49, and starts P2Q (base + `--quick 1`) and P2R (the base)
+on half2, 6 workers, 5 hours. The base is P2O's options if P2O ends at least 185 above P2N, else P2N's;
+loops/<ARM>.args overrides. Production stays paused.
