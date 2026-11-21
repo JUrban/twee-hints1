@@ -71,3 +71,26 @@ Z7 ended at 20:49:29; after_z7.sh started both arms at 20:49:57: P2T loop.py 111
 transfer loop (-j 2) and derived-rule loop. loops/P2T/config.json has floor_ratio 0, loops/P2U/config.json 20.0;
 otherwise the same (retry_class, head_class, knn_ctx 10, yield_discount 2000, reexplore 12:0.25, j 4). They end at
 about 23:50.
+
+## Interim at 30 minutes (21 Nov 21:20): P2U +1,006
+
+abs/setcurve.py sets/half2 (goals by minutes after the start); P2O and P2N are earlier half2 arms at 6 workers:
+
+| min | 5 | 10 | 20 | 30 |
+|---|---|---|---|---|
+| P2T (control, 4 workers) | 4,988 | 9,152 | 13,101 | 14,568 |
+| P2U (+ `--floor-ratio 20`) | 5,182 | 9,627 | 13,604 | 15,574 |
+| P2U − P2T | +194 | +475 | +503 | **+1,006** |
+| P2O (6 workers, 21 Nov) | 6,073 | 11,260 | 14,795 | 16,453 |
+
+The runs by level (loops/<arm>/r1/results.tsv, proofs / runs / CPU hours):
+
+| arm | L0 (5 s) | L1 (40 s) | Vunf@0 | other |
+|---|---|---|---|---|
+| P2T | 12,142 / 12,283 / 1.18 | 12 / 20 / 0.32 | 19 / 97 / 0.21 | 5 / 24 / 0.09 |
+| P2U | 13,294 / 13,482 / 1.45 | 1 / 2 / 0.03 | 29 / 109 / 0.21 | 9 / 33 / 0.09 |
+
+The control's head class ran 20 L1 runs (40 s) for 12 proofs in 0.32 CPU hours; P2U ran 2 and gave that CPU to 5 s
+runs (+1,199 runs, +0.27 CPU hours), which proved +1,152. As expected, the floors cost more at 4 workers than at 6:
+one worker of four held by each of q, h and d leaves the first runs fewer workers. The decision is at 3 hours,
+where LATE's gains come.
