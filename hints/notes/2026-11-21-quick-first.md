@@ -105,3 +105,19 @@ Smoke test loops/QKN (10:48, smoke487, 2 workers, 12 minutes, `--quick 1 --quick
 and QKC 395; one run each, so no comparison). In its first 2 minutes it made 348 quick runs (308 proved) and 33 T0
 runs after a failed quick run (28 proved); QKT made only quick runs then (471, 323 proved) and its T0 runs came after
 2 minutes. If P2Q loses at 5 hours, the second try is `--quick 1 --quick-near` against the same base.
+
+## Interim at 2 hours (21 Nov 11:46)
+
+| arm | 60 min | 90 min | 120 min |
+|---|---:|---:|---:|
+| P2R (control) | 18,119 | 19,356 | 20,234 |
+| P2Q (`--quick 1`) | 17,385 | 18,607 | 19,607 (−627) |
+| P2S (`--retry-time 3`) | 18,114 | 19,380 | 20,300 (+66) |
+| P2O (exp48) | 18,792 | 20,084 | 20,934 |
+
+* P2Q's T0 runs after a failed quick run: 1,764 proved of 3,236 so far (554 per CPU hour; in 90-120 minutes 595 of
+  1,317), and 6,282 quick-failed goals are still waiting. P2R's first runs in the same window: 502 of 1,247 (about
+  390 per CPU hour); its first pass ended only at 121 minutes, since classes d, q and h share the workers.
+* P2Q is catching up slowly (−734 at 60 minutes, −749 at 90, −627 at 120).
+* Load: the arms' own processes are about 25 running; the machine's load average rose to 43 at 11:46 from outside
+  this sandbox, so all three arms are slower than P2O was at the same minutes.

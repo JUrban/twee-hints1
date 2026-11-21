@@ -73,3 +73,10 @@ winner, plus the option). Its control is exp49's P2R. Ends at about 14:50.
 P2S 18,114 against P2R 18,119 at 60 minutes (15 min 12,894 / 12,893, 30 min 16,016 / 15,960, 45 min 17,134 / 17,102).
 Its retries at 3 s: 85 proved of 725, 129 per CPU hour; P2R's 5 s retries 75 of 466, 102 per CPU hour (quickstat).
 The retries only start to dominate after the first pass (about 60-150 minutes), so the 2- and 3-hour marks matter.
+
+## Interim at 2 hours (21 Nov 11:46)
+
+P2S 20,300 against P2R 20,234 at 120 minutes (+66; 90 min 19,380 / 19,356). Retries so far: P2S's 3 s retries 211 proved
+of 1,856, 132 per CPU hour; P2R's 5 s retries 250 of 1,301, 137 per CPU hour. In 90-120 minutes P2S 74 of 571 (0.5 CPU
+h), P2R 124 of 481 (0.6 CPU h). So far the shorter limit does not raise the retries' yield per CPU hour. Both arms'
+first passes ended at about 120 minutes, so the retries are only now taking most of the workers.
