@@ -76,3 +76,9 @@ in all three arms, so the label estimates have not yet decided much: P2J's line 
 P2J 20,124 against P2K 20,004 (+120, noise; P2H +607, table in the retry-class note). The estimate lines: P2J
 `est L0 91.4 Vk100@0 4.2 ... Vunf@0 4.2`, P2K `est L0 1525.9 Vunf@0 16.2 Vk100@0 7.7 L1 7.4 ...`. The late phase,
 where the discount should matter, starts after the first runs end (about 2.5 hours on half2).
+
+## Interim at 3 hours (21 Nov 02:36)
+
+P2J 20,774 against P2K 20,227 (+547; P2H +1,128). Most of it in 150-180 minutes: retries 396 / 902 (P2K 111 / 638
+at 150). L1 ran 5 + 7 times in 120-180 minutes (2 + 2 proved); P2K none. Estimates: P2J `est L0 100.1 Vk100@0 7.1
+Vk200@0 7.1 Vkd@0 7.1 Vunf@0 7.1 L1 2.4`, P2K `est L0 1100.3 Vunf@0 12.8 Vk100@0 7.7 L1 7.4 ...`.

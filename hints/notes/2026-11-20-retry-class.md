@@ -91,3 +91,15 @@ the question is still whether the retries pay off at 2.5-3.5 hours, where Z6's b
 about 185). Behind at 1 hour (−264), ahead from 90 minutes. retrysplit, 90-120 minutes: P2H's retries 122 / 733
 (17%) beside first runs 296 / 1,201; P2K's retries 1 / 224, first runs 177 / 1,551. The control's first runs still
 run at 2 hours (11% yield) while its failed-before goals with new contexts wait; P2H takes them at 17% meanwhile.
+
+## Interim at 3 hours (21 Nov 02:36)
+
+| arm | 60 min | 120 min | 150 min | 180 min |
+|---|---:|---:|---:|---:|
+| P2K control | 19,009 | 20,004 | 20,075 | 20,227 |
+| **P2H retry class** | 18,745 | 20,611 | 21,086 | **21,355** |
+| P2J (exp45) | 19,161 | 20,124 | 20,282 | 20,774 |
+
+P2H +1,128 over P2K at 3 hours. retrysplit 120-180 minutes: P2K's first runs 25 / 992 then none, retries 111 / 638
+at 150 minutes; P2H's retries 41 / 646 at 150 (its burst came earlier). P2K's first runs ended at about 150 minutes;
+its context-change retries start only then.
