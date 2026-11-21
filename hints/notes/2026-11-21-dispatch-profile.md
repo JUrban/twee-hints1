@@ -85,5 +85,9 @@ dispatch; the full pass's retry-list sort 1.3%; ctx and gaps about 3%; knn_sig w
 (15% at 12 workers before the cache, at a higher dispatch rate). **Change (09:54):** knn_at.tsv is flushed at most
 every 5 s (it is read only at a restart; a lost line makes that goal count as kNN-changed once).
 
+exp/trust.py also reads a loop's knn_at.tsv, to resolve unnamed lemma_knn_I in kept outputs. A production proof
+made in the 5 s before trust.py reads the file could then count as untrusted until the next check: a handful at
+most, and only while a production loop runs.
+
 With the goal files at first use, the conjecture cache and this, the main thread should have room at 12 workers. Z7
 will show it in its progress lines (main s: pass, submit, wait, results) against Z6's.
