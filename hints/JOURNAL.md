@@ -759,7 +759,7 @@ Paused:
 has the history (user, 20 Nov: "update the total numbers in the report etc every now and then").
 
 Next:
-0000000000000000000000000000. **exp53 candidate (17:05): deep runs without queue renormalisation, from zero.** Under
+0000000000000000000000000000. **exp53 candidate (16:58): deep runs without queue renormalisation, from zero.** Under
    --abstract-time renormalising the queue is 27% of a hinted run's CPU but free in abstract time; off, 80 s runs cost
    25% less with a different search (exp25: 2 of 3 proofs kept); exp26 in production was too thin to tell (7/209 vs
    5/186, [notes/2026-11-19-queue-renorm-ab.md](notes/2026-11-19-queue-renorm-ab.md)). In Z7 the retry and deep
