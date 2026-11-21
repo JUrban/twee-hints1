@@ -1,5 +1,5 @@
 #!/bin/bash
-# (21 Nov 07:25) notes/2026-11-21-dispatch-profile.md: when exp48 ends (loops/P2N.done, loops/P2O.done), a profile of
+# (21 Nov 07:18) notes/2026-11-21-dispatch-profile.md: when exp48 ends (loops/P2N.done, loops/P2O.done), a profile of
 # loop.py's threads at 12 workers on all goals from zero (Z7's setting; exp/stacksample.py, 6 minutes, loops/PRB),
 # then loops/GO49, so abs/after48.sh starts exp49 (and abs/after48b.sh exp50) at once (it waits up to 20 minutes).
 cd /project/hintwork

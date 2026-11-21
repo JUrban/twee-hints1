@@ -48,6 +48,6 @@ A profile at 12 workers on all goals, Z7's setting, in the gap between exp48's e
 (abs/after48.sh waits up to 20 minutes for loops/GO49). That shows whether the main thread (pass, submit, results)
 or contention for the interpreter lock is the limit at 12 workers.
 
-abs/prof12.sh (exp/prof12.sh; started 07:25, PID 251315) waits for loops/P2N.done and loops/P2O.done, runs loops/PRB
+abs/prof12.sh (exp/prof12.sh; started 07:18, PID 251315) waits for loops/P2N.done and loops/P2O.done, runs loops/PRB
 (sets/all from zero, 12 workers, 6 minutes, exp48's base options, under exp/stacksample.py into loops/PRB.prof.txt),
 then writes loops/GO49, so exp49 and exp50 start about 8 minutes after exp48 ends.
