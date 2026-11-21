@@ -69,3 +69,31 @@ In 90–120 P2O proved twice P2N's L0 goals with fewer runs. The mix lines say w
 an hour against P2N's 50 (the retries --knn-ctx flags have a new lemma in their kNN context). Its kNN-only retries
 so far: 240 dispatched, 48 proved (20%), none waiting. Class h costs about 1 CPU hour an hour for 14 proofs since 60
 minutes. The machine: load about 26 CPUs of mine (2 × 6 workers, the side loops, stepjlive3's join checks), 10 GB.
+
+## A correction: compare across time by abstract work, not wall minutes (21 Nov 07:20)
+
+P2N's bar (P2J + 185 at 5 hours) compares arms run at different times. The curves are by wall minutes, and the
+machine's speed per abstract second follows its load: failed plain 5 s L0 runs took on average 5.6-6.0 CPU s in
+P2K, P2H and P2J (three arms at night) and 4.7-5.0 s in P2N and P2O. By 120 minutes P2N had made 23,738 runs, P2J
+22,082. Only P2O against P2N (side by side) is fair by wall time.
+
+exp/abscurve.py turns each run's CPU time into abstract seconds with its arm's CPU per abstract second in the same
+15-minute window (from that window's failed plain 5 s L0 runs), and compares arms at equal abstract worker time.
+At P2N's 60, 120 and 150 minutes (5.5, 11.5 and 14.4 abstract worker hours):
+
+| arm | 5.5 h | 11.5 h | 14.4 h |
+|---|---:|---:|---:|
+| P2K | 19,421 (71 min) | 20,071 (147) | 20,281 (184) |
+| P2H | 19,306 (70) | **21,004** (142) | **21,354** (178) |
+| P2J | 19,559 (72) | 20,278 (148) | 20,941 (184) |
+| P2N | 19,214 (60) | 20,872 (120) | 21,148 (150) |
+| P2O | 18,850 (61) | 20,975 (122) | 21,304 (152) |
+
+At equal work P2N is 594 ahead of P2J at 11.5 hours but 132 behind P2H, which then led because its first hour
+cost less per run. The calibration is coarse: the first windows have few failed runs, and the main thread's share of
+a run is not scaled. It is still fairer than wall minutes across nights.
+
+**The decision, restated:** at P2J's abstract work at 300 minutes, P2N against the better of P2H and P2J
+(`abscurve.py sets/half2 P2J P2H P2N P2O --at 300`). If P2N reaches that work before its own end, the comparison is
+at that wall time, else at its end (which then favours P2J and P2H). P2O against P2N stays by wall time. Z7 against
+Z6 needs the same correction.
