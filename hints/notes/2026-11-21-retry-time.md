@@ -61,3 +61,9 @@ A third arm beside exp49, on the same base B and against the same control P2R:
   hour against P2R).
 * The r=1 rows: runs, proofs, CPU hours by half hour, against P2R's L0 retries; exp/quickstat.py on all three.
 * Decision: P2S ≥ P2R + 185 at 5 hours makes `--retry-time 3` a default for Z7.
+
+## Started (21 Nov 09:45)
+
+P2S started at 09:45:47 (abs/after48b.sh; or_test2.sh PID 403343, loop.py 403368), 15 s after P2Q and P2R, with
+`--retry-class --yield-discount 2000 --reexplore 12:0.25 --knn-ctx 10 --head-class --retry-time 3` (P2O's set, exp48's
+winner, plus the option). Its control is exp49's P2R. Ends at about 14:50.

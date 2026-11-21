@@ -768,10 +768,12 @@ Next:
    `--retry-time T` runs them at T s (rows r=1); a replay gives 1.2-1.4x proofs per CPU hour at T=3. Smoke loops/RTT;
    arm P2S = exp49's base + `--retry-time 3`, started with P2Q/P2R by abs/after48b.sh, against P2R. stepjlive3 stopped
    06:45 (no joins in 3 cycles).
+   **P2S started 09:45:47 (loop.py 403368), against P2R.**
 000000000000000000000. **exp49 (04:47, [notes/2026-11-21-quick-first.md](notes/2026-11-21-quick-first.md)):** in P2J the failed first runs took 10.3 of
    the first pass's 13.1 CPU hours, and 86% of first-run proofs came within 1 s. loop.py `--quick Q`: a goal's first
    fresh run at Q seconds; a goal that fails it gets its T0 run after the goals never run. Smoke tests loops/QKT
    (`--quick 1`) and QKC (control), smoke487, 2 workers, 12 minutes. A/B on half2 after exp48, on its winner's base.
+   **Started 09:45:32 on P2O's set: P2Q (+ --quick 1, loop.py 401107), P2R (control, 401110); to about 14:50.**
 00000000000000000000. **exp48 (03:37, [notes/2026-11-21-late-combo.md](notes/2026-11-21-late-combo.md)):** at 4 hours P2H (--retry-class) +697 and P2J
    (--yield-discount 2000 --reexplore 12:0.25) +796 over P2K. P2N = both; P2O = P2N + --knn-ctx 10 --head-class
    (exp46/47 in one arm, to stay near 24 CPUs). half2, 5 h, when exp44/45 end; abs/after4445e.sh waits for

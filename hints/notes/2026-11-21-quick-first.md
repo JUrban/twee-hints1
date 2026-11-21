@@ -59,3 +59,13 @@ goals (proved, failed); latency of the first-run proofs (exp/latency.py).
 and loops/P2O.done, then up to 20 minutes for loops/GO49, and starts P2Q (base + `--quick 1`) and P2R (the base)
 on half2, 6 workers, 5 hours. The base is P2O's options if P2O ends at least 185 above P2N, else P2N's;
 loops/<ARM>.args overrides. Production stays paused.
+
+## Started (21 Nov 09:45)
+
+exp48 ended 09:38 with P2O 21,940 against P2N 21,702 of half2 solved, so abs/after48.sh took P2O's options as the base
+B (`--retry-class --yield-discount 2000 --reexplore 12:0.25 --knn-ctx 10 --head-class`). abs/prof12.sh profiled 12
+workers for 7 minutes (notes/2026-11-21-dispatch-profile.md) and wrote loops/GO49 at 09:45:18. Started 09:45:32:
+**P2Q** = B + `--quick 1` (or_test2.sh PID 401094, loop.py 401107) and **P2R** = B (401097, loop.py 401110); exp50's
+P2S beside them at 09:45:47 (403343, loop.py 403368). All three run loop.py with the goal files written at first use
+(a145d98); their lemmas.py is the one before the conjecture cache. Crash watcher on the three loop.py PIDs and the
+side loops. They end at about 14:50.
