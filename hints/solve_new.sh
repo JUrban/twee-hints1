@@ -71,7 +71,10 @@ ORDER=${ORDER---mix 0.1 --fail-order}
 # 10 nearest kNN lemmas (--knn-ctx 10), and 40 s chain-level runs for the first unsolved goal after a proved one
 # (--head-class). half2 from zero, 5 hours, side by side: P2O (all) 21,940 against P2N (without the last two) 21,702;
 # at equal abstract work P2O ties exp44/45's best single option. LATE= gives the 20 Nov system.
-LATE=${LATE---retry-class --yield-discount 2000 --reexplore 12:0.25 --knn-ctx 10 --head-class}
+# (21 Nov 23:55) + --floor-ratio 20 (exp52, notes/2026-11-21-floor-ratio.md): the retry and head classes keep their
+# one-worker floor only while 20 times their yield reaches the best class's, so they do not hold workers while first
+# runs prove at 100 times their rate. half2 from zero, 4 workers each, 3 hours: P2U 20,876 against P2T's 20,087.
+LATE=${LATE---retry-class --yield-discount 2000 --reexplore 12:0.25 --knn-ctx 10 --head-class --floor-ratio 20}
 [ -n "$OUT" ] && [ -f "$NAMES" ] && [ -f "$CTX/solved.tsv" ] || { sed -n 2,20p "$0"; exit 1; }
 [ -e "$OUT" ] && { echo "$OUT exists"; exit 1; }
 mkdir -p "$OUT.ctx/hints"
