@@ -15,6 +15,7 @@ sys.argv = sys.argv[2:]
 main_id = threading.get_ident()
 inc = collections.defaultdict(collections.Counter); exc = collections.defaultdict(collections.Counter)
 tot = collections.Counter(); paths = collections.defaultdict(collections.Counter)
+lines = collections.defaultdict(collections.Counter)   # (21 Nov 09:55) the innermost loop.py frame's line
 
 
 def key(fr):
@@ -32,6 +33,9 @@ def dump():
             f.write('  inclusive:\n')
             for fn, c in inc[k].most_common(60):
                 f.write(f'    {100 * c / tot[k]:5.1f}%  {fn}\n')
+            f.write('  lines (the innermost loop.py frame):\n')
+            for fn, c in lines[k].most_common(40):
+                f.write(f'    {100 * c / tot[k]:5.1f}%  {fn}\n')
             f.write('  paths (loop.py frames, outer to inner, then the leaf):\n')
             for fn, c in paths[k].most_common(50):
                 f.write(f'    {100 * c / tot[k]:5.1f}%  {fn}\n')
@@ -48,15 +52,19 @@ def sampler():
             k = 'main' if tid == main_id else 'worker'
             tot[k] += 1
             exc[k][key(fr)] += 1
-            seen = set(); leaf = key(fr); lp = []
+            seen = set(); leaf = key(fr); lp = []; ln = None
             while fr is not None:
                 s = key(fr)
                 if s not in seen:
                     seen.add(s); inc[k][s] += 1
                 if s.startswith('loop.py:') and s not in ('loop.py:<module>', 'loop.py:main'):
                     lp.append(s[8:])
+                    if ln is None:
+                        ln = f'{s[8:]}:{fr.f_lineno}'
                 fr = fr.f_back
             paths[k][' > '.join(reversed(lp)) + ' | ' + leaf] += 1
+            if ln:
+                lines[k][ln + ' | ' + leaf] += 1
         if time.time() - last > 60:
             dump(); last = time.time()
 

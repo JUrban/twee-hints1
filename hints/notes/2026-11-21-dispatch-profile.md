@@ -59,3 +59,20 @@ or contention for the interpreter lock is the limit at 12 workers.
 abs/prof12.sh (exp/prof12.sh; started 07:18, PID 251315) waits for loops/P2N.done and loops/P2O.done, runs loops/PRB
 (sets/all from zero, 12 workers, 6 minutes, exp48's base options, under exp/stacksample.py into loops/PRB.prof.txt),
 then writes loops/GO49, so exp49 and exp50 start about 8 minutes after exp48 ends.
+
+## The 12-worker profile (PRB, 09:38-09:45)
+
+loops/PRB: sets/all from zero, 12 workers, 6 minutes, exp48's base options, with the goal files at first use.
+
+* **The start is faster:** solved at 1, 2, 3, 4, 5 and 6 minutes: PRB 2,347, 4,121, 5,735, 7,290, 8,659, 9,744; Z6
+  0, 1,879, 4,194, 6,293, 8,060, 8,834. "trained rule model 0s" (PRA 90 s). About a minute and a half earlier on
+  the curve, the same 12 workers.
+* Main thread: waiting 40.8% of the samples, so not saturated at this stage. Of the rest, the cascade function's own
+  code 28.7%, `knn_sig` 23% (of which `lemmas.conjecture` 15.2%: for a goal lemma_form cannot unitize, the kNN
+  select re-read and re-parsed its problem file at each call, and after each kNN rebuild every waiting goal's picks
+  are recomputed), gaps and ctx about 4%.
+* Its progress counters at 9,650 runs (358 s): pass 62, submit 138, wait 57, results 100 s.
+* **Change (09:47):** `lemmas.conjecture` is cached (same results on 3,000 goals). The arms running now loaded the
+  old module and are unaffected.
+* Next: a profile with line numbers of the cascade function's own 28.7% (loops/PRC, 2 workers, all goals; the
+  busy part of the main thread does not depend on the worker count).
