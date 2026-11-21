@@ -5355,6 +5355,20 @@ from zero, against exp30's P2D.
   * The early cost: up to −2,368 at 1 hour. The floors of the retry and head classes held about half a worker of six
     at about 1% of a first run's yield. exp52 (`--floor-ratio`, [notes/2026-11-21-floor-ratio.md](notes/2026-11-21-floor-ratio.md))
     tests floors that wait until those classes can compete.
+  * Z7 ran on alone to 8 hours: 43,767, against Z6's 44,092 on 12 workers (cross-time). It proved one goal
+    production never had, merged into production.
+* **exp52, floors that wait (21 Nov 20:49-23:50; [notes/2026-11-21-floor-ratio.md](notes/2026-11-21-floor-ratio.md)):
+  loop.py `--floor-ratio 20` keeps the retry and head classes' one-worker floor only while 20 times their yield
+  reaches the best class's.** half2 from zero, 4 workers each, side by side:
+
+  | arm | 30 min | 60 min | 120 min | 180 min |
+  |---|---:|---:|---:|---:|
+  | P2T, LATE | 14,568 | 16,786 | 18,618 | 20,087 |
+  | **P2U, LATE + `--floor-ratio 20`** | 15,574 | 17,696 | 19,658 | **20,876** |
+
+  * **+789 at 3 hours (+1,040 at 2); accepted into LATE (21 Nov 23:51).** P2U spent half the control's CPU on deep
+    runs for the same proofs. The floors come back by themselves when the first runs' yield falls.
+  * The lead narrowed by 251 in the third hour, as P2U ran out of easy goals first; the next 8-hour run checks it.
   * Z7's late first runs prove 65% against Z7C's 20%: they come later, in a fuller context.
   * A pair, not Z7 against Z6: on a replica pair (P2R against P2O), exp/abscurve.py left 167-426 of the gap.
 * **What Z6 lacked (exp/roots.py, trust.py --dump-rec).** Of the 4,117 goals production has and Z6 lacks, 190 have

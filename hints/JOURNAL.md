@@ -763,6 +763,9 @@ Next:
    P2T.done and P2U.done, then up to 20 minutes for loops/EXP53.go or loops/EXP53.skip, then runs abs/exp53.sh:
    P2V (control) and P2W (`PG="--cp-renormalise-threshold 1000"`), half2 from zero, 4 workers each, 3 hours
    (to about 03:10). Decision +185 at 3 h. Smoke: twee-e61 takes the option (a 5 s proof, byte-identical output).
+   **Started 23:51:52 by the go file (P2V loop.py 1400531, P2W 1400534); both arms have the new LATE with
+   --floor-ratio 20 (config.json floor_ratio 20.0), P2W's args end with --cp-renormalise-threshold 1000. Ends
+   about 02:52.**
 0000000000000000000000000000. **exp53 candidate (16:58): deep runs without queue renormalisation, from zero.** Under
    --abstract-time renormalising the queue is 27% of a hinted run's CPU but free in abstract time; off, 80 s runs cost
    25% less with a different search (exp25: 2 of 3 proofs kept); exp26 in production was too thin to tell (7/209 vs
@@ -780,7 +783,10 @@ Next:
    21:02; 121,512 jobs queued, most from Z7 and Z7C). At -j 3 it reruns about 4,100 jobs an hour (3,468 in 21:03-21:54,
    from the proofq.log rows), and each half2 arm from zero queues about 25,000: 131,363 queued at 21:51. It needs
    more CPU in a gap between A/B tests to catch up.
-00000000000000000000000000. **exp52 candidate (13:30, [notes/2026-11-21-floor-ratio.md](notes/2026-11-21-floor-ratio.md)):** Z7 at 30 minutes was 2,196
+00000000000000000000000000. **exp52 (13:30, DONE 23:50, ACCEPTED, [notes/2026-11-21-floor-ratio.md](notes/2026-11-21-floor-ratio.md)):
+   P2U 20,876 against P2T 20,087 at 3 h (+789; +1,006 at 30 min, +910 at 1 h, +1,040 at 2 h). `--floor-ratio 20` is in
+   solve_new.sh's LATE since 23:51 (0e6996b). Union 21,164 on 8 workers, 882 a worker-hour against P2U's 1,740.
+   Watch the narrowing in hour 3 (−251) in the next 8-hour run.** Z7 at 30 minutes was 2,196
    behind Z7C: the q and h floors held half a worker of six at 77 and 12 proofs per run-hour against the first runs'
    6,885. loop.py `--floor-ratio K` (classes `--floor-classes`, default qh) keeps a floor only while K × its yield
    reaches the best class's. Smoke FRT fine. **abs/after_z7.sh (16:52) starts P2T (control) and P2U (+ --floor-ratio
@@ -1039,7 +1045,7 @@ reports are written as the experiments run.
 | [notes/2026-11-21-dispatch-profile.md](notes/2026-11-21-dispatch-profile.md) | Where a from-zero start spends its time: loop.py's threads; goal files at first use |
 | [notes/2026-11-21-head-time.md](notes/2026-11-21-head-time.md) | exp51 (candidate): shorter first runs for heads at the chain level (`--head-time S`) |
 | [notes/2026-11-21-z7-pair.md](notes/2026-11-21-z7-pair.md) | Z7 pair: today's late-phase default against the 20 Nov system, on all goals |
-| [notes/2026-11-21-floor-ratio.md](notes/2026-11-21-floor-ratio.md) | exp52 (candidate): floors for the late classes only when they can compete (`--floor-ratio K`) |
+| [notes/2026-11-21-floor-ratio.md](notes/2026-11-21-floor-ratio.md) | exp52: floors for the late classes only when they can compete (`--floor-ratio K`); accepted |
 | [notes/2026-11-21-renorm-zero.md](notes/2026-11-21-renorm-zero.md) | exp53: deep runs without queue renormalisation, from zero (`--cp-renormalise-threshold 1000`) |
 | [notes/2026-11-20-base-saturation.md](notes/2026-11-20-base-saturation.md) | exp39: base-theory runs as rule generators for the unsolved goals of the stronger theories |
 | [notes/2026-11-20-given-transfer.md](notes/2026-11-20-given-transfer.md) | exp38: unsolved goals that are variants of rules other runs derived and did not use (379 M in the given logs; transfer.py only matches proof steps); their ancestry as hints |
