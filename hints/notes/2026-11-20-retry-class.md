@@ -115,3 +115,28 @@ its context-change retries start only then.
 P2H +697 over P2K (it was +1,128 at 3 hours): the control's retry burst came at 180-240 minutes (retries 94 / 1,440
 at 210), P2H's earlier. P2H gets the same proofs sooner, and some more. Latency (exp/latency.py at 3 hours): goals
 whose last lemma came in hour 1, P2K 520 proved with p90 delay 70 minutes, P2H 1,176 with p90 29, P2J 482 with 99.
+
+## Result at 5 hours (21 Nov 04:35)
+
+| arm | 60 min | 120 min | 180 min | 240 min | 270 min | 300 min |
+|---|---:|---:|---:|---:|---:|---:|
+| P2K control | 19,009 | 20,004 | 20,224 | 20,828 | 21,066 | 21,147 |
+| **P2H retry class** | 18,745 | 20,611 | 21,355 | 21,525 | 21,571 | **21,597** |
+| P2J (exp45) | 19,161 | 20,124 | 20,770 | 21,624 | 21,673 | 21,706 |
+
+**P2H +450 over P2K at 5 hours** (+642 / −192 goals; 642 unique in 30 CPU hours, 21 per CPU hour): above the +185
+rule, so `--retry-class` becomes a default. Against P2J (exp45) +218 / −327; union P2H ∪ P2J 21,924, all three
+21,988. The gain shrinks after 3 hours (+1,128, +697, +450): the control reaches most of the same goals late.
+
+Latency at 5 hours (exp/latency.py; goals proved by the loop itself, by the hour their last lemma came):
+
+| arm | hour 1: goals, p90 delay | hour 2 | hour 3 |
+|---|---|---|---|
+| P2K | 628, 111 min | 101, 76 min | 157, 44 min |
+| P2H | 1,196, 33 min | 307, 65 min | 40, 80 min |
+| P2J | 542, 106 min | 425, 44 min | 328, 32 min |
+
+P2H's proofs from hour-1 lemmas come early and twice as many; P2J proves more from lemmas of hours 2 and 3 (its
+variants' proofs). In the late hours (240-300 minutes) P2H ran mostly the 5 s variants (V@0 2,287 runs, 39 proved)
+and few L0 runs: its retries were used up. Next: exp48 (notes/2026-11-21-late-combo.md) runs both options together
+(P2N) and with `--knn-ctx 10 --head-class` (P2O), from 04:36.

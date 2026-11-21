@@ -90,3 +90,20 @@ Vk200@0 7.1 Vkd@0 7.1 Vunf@0 7.1 L1 2.4`, P2K `est L0 1100.3 Vunf@0 12.8 Vk100@0
 ...` (L1 out of the top 6), P2K `est L0 886.2 Vunf@0 18.7 Vk100@0 7.7 L1 7.4 ...`. Where P2J's gain comes from is
 not yet clear: the discount changes which variants run first, and their proofs give contexts that the L0 retries
 then use. To read at 5 hours with windows.py by label.
+
+## Result at 5 hours (21 Nov 04:35)
+
+**P2J 21,706 against P2K 21,147 (+559; +726 / −167; 726 unique in 30 CPU hours)**, P2H 21,597 (table in the
+retry-class note). Above the +185 rule: `--yield-discount 2000 --reexplore 12:0.25` becomes a default. P2J against
+P2H +327 / −218; union 21,924.
+
+Where the gain comes from (windows.py by label, 120-300 minutes): P2K and P2H spent their deep work on one 5 s
+variant (Vunf@0) after the first hour; P2J spread it over Vk100@0, Vk200@0, Vk400@0, Vkd@0 and Vunf@0 and ran L1 (5 +
+7 runs in 120-180 minutes, 7 + 3 in 240-300, 14 of 32 proved; P2K none). Those proofs gave new contexts, and P2J's
+L0 retries proved 414 / 1,631 in 150-180 and 402 / 1,665 in 180-210 minutes. Latency (retry-class note): P2J proves
+425 and 328 goals from lemmas found in hours 2 and 3 (P2H 307 and 40, P2K 101 and 157). Estimates at 5 hours: P2J
+`est L0 18.7 Vunf@0 6.2 L1 4.4 Vk100@0 2.6 ...`, P2K `est L0 783.2 Vunf@0 15.3 Vk100@0 7.7 L1 7.4 ...`: the
+discount keeps the late estimates close, so the order keeps changing.
+
+The two options act on different parts (P2H: when the failed-before goals with new contexts run; P2J: which deeper
+variants run), so exp48 P2N runs them together, from 04:36.
