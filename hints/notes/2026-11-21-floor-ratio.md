@@ -131,3 +131,28 @@ From 1 to 2 hours P2U gained 1,962 and P2T 1,832. P2U spends half the control's 
 CPU hours, mostly the head class's L1 runs) for the same proofs, and puts it into first runs and retries. The mix lines
 at 120 min: P2T h 90 runs at 17/h, q 973 at 59/h, r 802/h; P2U h 3 runs at 25/h, q 1,188 at 108/h, r 530/h. P2U's h
 floor is still off (20 × 25 < 530), close to coming back on.
+
+## Result at 3 hours (21 Nov 23:50): P2U +789, accepted
+
+| min | 30 | 60 | 120 | 150 | 180 |
+|---|---|---|---|---|---|
+| P2T (control) | 14,568 | 16,786 | 18,618 | 19,269 | 20,087 |
+| P2U (+ `--floor-ratio 20`) | 15,574 | 17,696 | 19,658 | 20,402 | 20,876 |
+| P2U − P2T | +1,006 | +910 | +1,040 | +1,133 | **+789** |
+| P2O (6 workers, 21 Nov) | 16,453 | 18,792 | 20,934 | 21,286 | 21,524 |
+
+* exp/quickstat.py, 120-180 min (proofs / runs / CPU hours): first runs P2T 849 / 1,310 / 0.9, P2U 616 / 1,586 / 1.6;
+  retries 159 / 838 / 1.0 and 116 / 793 / 1.0; deep 66 / 512 / 2.0 and 62 / 442 / 1.3. In the third hour the
+  control gained 1,469 and P2U 1,218: P2U had used up more of the easy goals, so its first runs proved 39% against the
+  control's 65%. The lead narrowed by 251 but stayed four times the decision line.
+* The floors come back on their own: at the end P2U's mix line had r 204/h, q 72/h (1,974 runs), h 18/h (22 runs),
+  so 20 × 18 ≥ 204 and the head class has its floor again.
+* Portfolio at 3 hours: P2U-only 1,077, P2T-only 288, union 21,164 on 8 workers (24 worker-hours, 882 per
+  worker-hour) against P2U's 20,876 on 4 (12 worker-hours, 1,740 per worker-hour). The control adds nothing a
+  second worker set would not.
+
+**Decision: accepted.** solve_new.sh's LATE now ends with `--floor-ratio 20` (0e6996b, 21 Nov 23:52). The test ran 3
+hours; the narrowing in the third hour is a reason to watch the next long from-zero run (all goals, 8 hours), where
+the late classes matter most.
+
+exp53 (notes/2026-11-21-renorm-zero.md) started at 23:51:52 with the new default in both arms.
