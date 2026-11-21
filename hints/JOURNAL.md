@@ -769,7 +769,8 @@ Next:
 00000000000000000000000000. **exp52 candidate (13:30, [notes/2026-11-21-floor-ratio.md](notes/2026-11-21-floor-ratio.md)):** Z7 at 30 minutes was 2,196
    behind Z7C: the q and h floors held half a worker of six at 77 and 12 proofs per run-hour against the first runs'
    6,885. loop.py `--floor-ratio K` (classes `--floor-classes`, default qh) keeps a floor only while K × its yield
-   reaches the best class's. Smoke FRT fine. A/B after the Z7 pair: all goals, 6 workers each, 3 hours.
+   reaches the best class's. Smoke FRT fine. **abs/after_z7.sh (16:52) starts P2T (control) and P2U (+ --floor-ratio
+   20) when Z7 ends: half2, 4 workers each, 3 hours (the user's CPU split); decision +185 at 3 h.**
 0000000000000000000000000. **Z7 pair (12:48, [notes/2026-11-21-z7-pair.md](notes/2026-11-21-z7-pair.md)):** today's late-phase default
    (solve_new.sh LATE, P2O's set) against `LATE=` (the 20 Nov system), side by side on all goals from zero, 6 workers
    each, 8 hours (abs/z7pair.sh): Z7 vs Z7C. A pair because abscurve leaves 167-426 of a replica's gap. Decision: Z7 ≥
