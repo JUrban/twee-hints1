@@ -33,6 +33,7 @@ in `/project/hintwork` (not in git).
 | + Z6's two derived-rule proofs, the sweep (production paused); at 20 Nov 23:35, all trusted | **48,208** (+55.2% over plain) | **5341** (+66.7%) | – |
 | + the sweep and the side loops, exp44/45's two unique proofs (production paused); at 21 Nov 04:41, all trusted | **48,221** (+55.3% over plain) | **5342** (+66.8%) | – |
 | + the sweep, the side loops and step joins, exp48's unique proof (production paused); at 21 Nov 09:56, all trusted | **48,234** (+55.3% over plain) | **5343** (+66.8%) | – |
+| + the live transfer loops on the unsolved goals (production paused to 16:50, then restarted at 6 workers); at 21 Nov 18:06, all trusted | **48,238** (+55.3% over plain) | **5344** (+66.8%) | – |
 
 **Correction (20 Nov 10:40; [notes/2026-11-20-p9-negation-bug.md](notes/2026-11-20-p9-negation-bug.md)).** The counts
 from 15 Nov on include proofs that are not proofs.
@@ -68,7 +69,13 @@ empty context on all 51,784 problems, 12 workers plus the transfer.
   35,511 in 1 hour and 37,713 in 2 hours.
 * Without the new order and the faster dispatcher (Z0, Z1), it proved
   6,215 and 7,942 in 10 minutes, and Z1 had 36,552 at 2 hours.
-* Production needed 3.5 days and many side methods for its 44,844.
+* **The 20 Nov system (Z6, 12 workers; 2az):** 15,802 in 10 minutes, 31,133 in 30, 37,378 in 1 hour, 40,238 in 2,
+  42,920 in 4 and **44,095 in 8 hours**. Production took 3.5 days and many side methods for its first 44,844.
+* **The 21 Nov late-phase default (Z7, 6 workers; [notes/2026-11-21-z7-pair.md](notes/2026-11-21-z7-pair.md)):**
+  beside its control (Z7C, the 20 Nov system, also 6 workers), 32,154 against 34,522 at 1 hour, 40,786 against 40,479
+  at 3 hours, **42,478 against 41,237 at 4 hours** (+1,241). It loses early, while its retry and head classes take
+  workers from the first pass, and gains from about 3 hours. Z7 runs to 8 hours (about 20:50).
+* Production, with every method since 12 Nov, has **48,238** (21 Nov 18:06).
 
 \* Starts from 33,720 proofs: the third round plus 52 from long runs on
 two families (2m). Its time is the summed wall time of the runs, close
@@ -132,6 +139,7 @@ written in loops/UL. Merged proofs count from their merge.
 | 20 Nov 23:35 | 48,208 | 5341 | Z6 from zero ended: 44,095 in 8 hours on 12 workers (Z4 38,044); its 2 unique proofs merged, trusted; the sweep 14 of 1,200 |
 | 21 Nov 04:41 | 48,221 | 5342 | production paused for exp44/45 (half2 from zero, 5 h: P2J 21,706, P2H 21,597, P2K 21,147); their 2 unique proofs merged; the sweep 18 of 1,500 and the step-join and live loops 11; all 48,221 trusted (trust.py --exposed) |
 | 21 Nov 09:56 | 48,234 | 5343 | production still paused (exp48: P2O 21,940, P2N 21,702 of half2; exp49/50 from 09:45); P2O's 1 unique proof merged (R1dist_to_aa1 614); the sweep 27 of 2,100, the step joins and live loops; all 48,234 trusted (trust.py --exposed) |
+| 21 Nov 18:06 | 48,238 | 5344 | 4 new from production's live transfer and derived-rule loops (XFL, GML); exp49/50 rejected; the Z7 pair on all goals (LATE +1,241 at 4 hours); production restarted 16:50 (ul74, 6 workers) and the sweep; all 48,238 trusted (trust.py --exposed) |
 
 From 15 Nov 05:30 the rate fell from hundreds an hour to 50–100. The
 cheap new contexts are used up; 58% of the unsolved goals sit behind the
