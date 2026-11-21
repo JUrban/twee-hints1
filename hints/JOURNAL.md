@@ -759,7 +759,7 @@ Paused:
 has the history (user, 20 Nov: "update the total numbers in the report etc every now and then").
 
 Next:
-00000000000000000000000000000. **exp53 launcher (22:25):** abs/after_exp52.sh (exp/ copy, PID 1287489) waits for
+00000000000000000000000000000. **exp53 launcher (22:25, [notes/2026-11-21-renorm-zero.md](notes/2026-11-21-renorm-zero.md)):** abs/after_exp52.sh (exp/ copy, PID 1287489) waits for
    P2T.done and P2U.done, then up to 20 minutes for loops/EXP53.go or loops/EXP53.skip, then runs abs/exp53.sh:
    P2V (control) and P2W (`PG="--cp-renormalise-threshold 1000"`), half2 from zero, 4 workers each, 3 hours
    (to about 03:10). Decision +185 at 3 h. Smoke: twee-e61 takes the option (a 5 s proof, byte-identical output).
