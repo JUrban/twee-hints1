@@ -67,3 +67,9 @@ A third arm beside exp49, on the same base B and against the same control P2R:
 P2S started at 09:45:47 (abs/after48b.sh; or_test2.sh PID 403343, loop.py 403368), 15 s after P2Q and P2R, with
 `--retry-class --yield-discount 2000 --reexplore 12:0.25 --knn-ctx 10 --head-class --retry-time 3` (P2O's set, exp48's
 winner, plus the option). Its control is exp49's P2R. Ends at about 14:50.
+
+## Interim at 1 hour (21 Nov 10:46)
+
+P2S 18,114 against P2R 18,119 at 60 minutes (15 min 12,894 / 12,893, 30 min 16,016 / 15,960, 45 min 17,134 / 17,102).
+Its retries at 3 s: 85 proved of 715, 129 per CPU hour; P2R's 5 s retries 75 of 466, 102 per CPU hour (quickstat).
+The retries only start to dominate after the first pass (about 60-150 minutes), so the 2- and 3-hour marks matter.
