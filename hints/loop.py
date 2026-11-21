@@ -1666,13 +1666,14 @@ class Loop:
             t_r = None
             retry, deep, far, light, last_full = [], [], [], False, -1e18
             rq = []   # (--retry-class: the failed-before goals of the retry list, a mix class of their own)
+            hq = []   # (--head-class: heads whose next own level is L1, a mix class of their own)
             pdur = 0.0   # the last full pass's seconds (without a kNN index rebuild)
             # --mix M: runs of three kinds, near retries (r), goals beyond the retry gaps (f: far, and goals
             # never run) and deeper levels (d); each kind with waiting goals keeps M of the workers, the
             # other slots go to the kind with the most proofs per run second over its last 300 runs; the
             # seconds its running jobs have taken so far count as spent without a proof (a 320 s resume takes
             # ~25 wall minutes: until one ended, the prior kept the deeper levels first, ul39 17 Nov)
-            ycls = {c: collections.deque(maxlen=300) for c in 'rfdq'}; rcls = {}; ncls = collections.Counter()
+            ycls = {c: collections.deque(maxlen=300) for c in 'rfdqh'}; rcls = {}; ncls = collections.Counter()
             rt0 = {}   # future -> its start
             def yld(c):
                 now = time.time()
@@ -1691,7 +1692,7 @@ class Loop:
                     # lists it made are used up, each goal checked again when it is taken
                     # (and at most every 8 times the last full pass's length: --fail-order's list of every
                     # waiting goal took 0.2-0.35 s a pass, Z3 kept 5-7 of its 12 workers busy, REPORT 2at)
-                    light = bool(a.pass_every and (retry or deep or far or rq)
+                    light = bool(a.pass_every and (retry or deep or far or rq or hq)
                                  and tq_ - last_full < max(a.pass_every, 8 * pdur))
                     if not light:
                         last_full = tq_; krb = 0.0
@@ -1818,6 +1819,21 @@ class Loop:
                                                                                   or (not VAR[x] and x <= FD))
                                                      and (n in hds or not a.head_only_from or x < hof), not md_),)
                                       if j_ < len(T))
+                        # (21 Nov 01:40) --head-class: Z6 ended with 1,120 heads (the goal right after a proven
+                        # sibling) unsolved, 875 of them proved by production; it ran L1 16 times in 8 hours, 3 on those
+                        # heads. With --ratio-order a head's next level is the open level with the best label estimate
+                        # (a 5 s variant, until all are tried) and the deep list goes by that estimate, so L1 entries
+                        # came last behind thousands of variant runs. Here the heads whose next own cascade level is L1
+                        # (in their current context) are a mix class of their own (h), dispatched at L1, nearest first
+                        # (notes/2026-11-21-head-class.md)
+                        if a.head_class and a.mix and 'L1' in IDX:
+                            l1_ = IDX['L1']
+                            hq = sorted((g[n][1], gnum[n][1], False, l1_, n) for n in att
+                                        if n not in busy and n in g and g[n][0] == 1 and ctx(n) == att[n][0]
+                                        and not grown(n) and l1_ in opts(n))
+                            if hq:
+                                hs_ = {x[-1] for x in hq}
+                                deep = [x for x in deep if not (x[-2] == l1_ and x[-1] in hs_)]
                         far = []
                         if SM and a.far_retry and (a.mix or len(running) + len(retry) + len(deep) < a.j):
                             far = sorted((-v, n) for n, v in cand.items()
@@ -1831,18 +1847,18 @@ class Loop:
                     if not light:
                         pdur = max(0.0, time.time() - tq_ - krb)
                     tm[0] += time.time() - tq_; tq_ = time.time()
-                    while len(running) < a.j and (retry or deep or far or rq):
+                    while len(running) < a.j and (retry or deep or far or rq or hq):
                         if a.mix:
                             cn_ = collections.Counter(rcls.values())
-                            av = [c for c, L in (('r', retry), ('f', far), ('d', deep), ('q', rq)) if L
-                                  and (c != 'd' or cn_['d'] < a.j - a.reserve)]
+                            av = [c for c, L in (('r', retry), ('f', far), ('d', deep), ('q', rq), ('h', hq)) if L
+                                  and (c not in 'dh' or cn_['d'] + cn_['h'] < a.j - a.reserve)]
                             if not av:
                                 break
                             low = [c for c in av if cn_[c] < a.mix * a.j]
                             cl = min(low, key=lambda c: cn_[c]) if low else max(av, key=yld)
                         else:
                             cl = ('r' if retry else 'f') if retry or (far and not deep) else 'd'
-                        if cl != 'd':
+                        if cl not in 'dh':
                             n = (retry if cl == 'r' else rq if cl == 'q' else far).pop(0)[-1]; lev = 0
                             # (never a goal already running: a full pass's lists predate this pass's own
                             # submissions, so a goal taken as deep first came round again as a retry; both runs
@@ -1879,7 +1895,7 @@ class Loop:
                         else:
                             if sum(1 for _, l in running.values() if l > 0) >= a.j - a.reserve:
                                 break
-                            x_ = deep.pop(0); lev, n = x_[-2], x_[-1]; fd_ = x_[-3]
+                            x_ = (hq if cl == 'h' else deep).pop(0); lev, n = x_[-2], x_[-1]; fd_ = x_[-3]
                             if any(m == n for m, _ in running.values()):
                                 continue
                             if light and (n not in att or lev not in opts(n) or ctx(n) != att[n][0] or grown(n)):
@@ -1951,7 +1967,7 @@ class Loop:
                             x_, c_ = H.feats(n)
                             startctx[n] = (c_, 1 / (1 + math.exp(-score(n))), x_)
                     tm[1] += time.time() - tq_
-                    if light and len(running) < a.j and not (retry or deep or far):
+                    if light and len(running) < a.j and not (retry or deep or far or rq or hq):
                         last_full = -1e18; t_r = None   # (the kept lists ran dry: a full pass now)
                         continue
                 if not running:
@@ -2022,7 +2038,7 @@ class Loop:
                         print(f'  cascade: {done_n} runs, new={new}, {len(running)} running, '
                               f'{time.time()-t0:.0f}s' + (f', synced={nsync}' if a.sync else '')
                               + f', main s: pass {tm[0]:.0f} submit {tm[1]:.0f} wait {tm[2]:.0f} results {tm[3]:.0f}'
-                              + (', mix ' + ' '.join(f'{c} {ncls[c]} {3600*yld(c):.0f}/h' for c in ('rfdq' if a.retry_class else 'rfd')) if a.mix else '')
+                              + (', mix ' + ' '.join(f'{c} {ncls[c]} {3600*yld(c):.0f}/h' for c in 'rfd' + 'q' * bool(a.retry_class) + 'h' * bool(a.head_class)) if a.mix else '')
                               + (f', fresh {calib[2]}/{calib[1]} (predicted {calib[0]:.0f})' if H else '')
                               + ((', est ' + ' '.join(f'{l_} {lyield(l_):.1f}' for l_ in sorted(ystat, key=lambda m: -lyield(m))[:6]))
                                  if a.ratio_order and done_n % 500 == 0 else ''),
@@ -2374,6 +2390,11 @@ def make_parser():
                          'rebuild would enter the top K of its kNN lemmas counts as having a new context (retried '
                          'fresh); before, only sibling changes and hint pool growth did (Z6: 56%% of the late proofs '
                          'whose last lemma was a kNN lemma came over 10 minutes after it)')
+    ap.add_argument('--head-class', action='store_true',
+                    help='(21 Nov) --mix: heads (the goal right after a proven sibling) whose next own cascade level is '
+                         'L1 in their current context are a mix class of their own (h), run at L1, nearest first, '
+                         'with the --mix share and their own yield (Z6 ran L1 16 times in 8 hours; 875 of its 1,120 '
+                         'unsolved heads at the end were proved by production)')
     ap.add_argument('--retry-class', action='store_true',
                     help='(20 Nov) --mix with --fail-order: goals that failed before in the round and have a new '
                          'context are their own class (q) beside the goals never failed (r), with the --mix share '

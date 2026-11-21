@@ -755,6 +755,11 @@ Paused:
 has the history (user, 20 Nov: "update the total numbers in the report etc every now and then").
 
 Next:
+0000000000000000000. **exp47 (01:40, [notes/2026-11-21-head-class.md](notes/2026-11-21-head-class.md)):** Z6 ended with 1,120 unsolved heads,
+   875 of them proved by production, and ran L1 16 times in 8 hours (3 on those heads): with --ratio-order L1's
+   estimate stays near its prior and its entries come last. loop.py `--head-class`: heads whose next own level is
+   L1 are a mix class (h). Smoke test loops/HCT; A/B P2M on half2 beside P2L. The roots at 40 s in Z6's context:
+   38 of 61 at 01:38.
 000000000000000000. **exp46 (00:55, [notes/2026-11-21-knn-ctx.md](notes/2026-11-21-knn-ctx.md)):** Z6 waited long to use new kNN
    lemmas: after hour 1, 56% of the proofs whose last lemma was a kNN lemma came over 10 minutes after it (siblings:
    at once). With --fail-order a kNN change never made a retry (only the learned scheduler looked). loop.py
@@ -955,6 +960,7 @@ reports are written as the experiments run.
 | [notes/2026-11-20-yield-discount.md](notes/2026-11-20-yield-discount.md) | exp45: a discounted yield estimate for the deeper levels from zero (P2J against P2K, 5 h) |
 | [notes/2026-11-21-roots.md](notes/2026-11-21-roots.md) | Roots: which of production's proofs Z6 was one proof away from, and a 40 s test of them |
 | [notes/2026-11-21-knn-ctx.md](notes/2026-11-21-knn-ctx.md) | exp46: a new kNN lemma counts as a new context (`--knn-ctx`) |
+| [notes/2026-11-21-head-class.md](notes/2026-11-21-head-class.md) | exp47: heads at L1 as a class of their own (`--head-class`) |
 | [notes/2026-11-20-base-saturation.md](notes/2026-11-20-base-saturation.md) | exp39: base-theory runs as rule generators for the unsolved goals of the stronger theories |
 | [notes/2026-11-20-given-transfer.md](notes/2026-11-20-given-transfer.md) | exp38: unsolved goals that are variants of rules other runs derived and did not use (379 M in the given logs; transfer.py only matches proof steps); their ancestry as hints |
 | [notes/2026-11-19-from-zero-portfolio.md](notes/2026-11-19-from-zero-portfolio.md) | half1 from zero in 2 hours with today's deep portfolio (PGC), against PGA's 18,987 (exp27, from 07:18) |
