@@ -759,6 +759,11 @@ Paused:
 has the history (user, 20 Nov: "update the total numbers in the report etc every now and then").
 
 Next:
+000000000000000000000000000. **After the Z7 pair (plan agreed with the user, 14:36):** split the CPU instead of
+   speed tests only. About 10 CPUs: exp52's A/B on half2 (LATE against LATE + `--floor-ratio 20`, 4 workers each, 3 h),
+   judged also by the h and q classes' proofs and the union per worker-hour. About 10 CPUs: the unsolved 3,550:
+   production restarted as ul74 at J=8 (its last 3.3 h: 62 new on 17 workers; the yield discount scored worse on its
+   rows), the 20 s sweep at -j 1, the live transfer loops. User, 14:34: no E or Vampire; the work is on Twee.
 00000000000000000000000000. **exp52 candidate (13:30, [notes/2026-11-21-floor-ratio.md](notes/2026-11-21-floor-ratio.md)):** Z7 at 30 minutes was 2,196
    behind Z7C: the q and h floors held half a worker of six at 77 and 12 proofs per run-hour against the first runs'
    6,885. loop.py `--floor-ratio K` (classes `--floor-classes`, default qh) keeps a floor only while K × its yield
