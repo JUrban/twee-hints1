@@ -82,3 +82,11 @@ where the discount should matter, starts after the first runs end (about 2.5 hou
 P2J 20,774 against P2K 20,227 (+547; P2H +1,128). Most of it in 150-180 minutes: retries 396 / 902 (P2K 111 / 638
 at 150). L1 ran 5 + 7 times in 120-180 minutes (2 + 2 proved); P2K none. Estimates: P2J `est L0 100.1 Vk100@0 7.1
 Vk200@0 7.1 Vkd@0 7.1 Vunf@0 7.1 L1 2.4`, P2K `est L0 1100.3 Vunf@0 12.8 Vk100@0 7.7 L1 7.4 ...`.
+
+## Interim at 4 hours (21 Nov 03:36)
+
+**P2J 21,624 against P2K 20,828 (+796; P2H +697).** P2J's retries proved 396 / 902 at 150 minutes and 106 / 1,618 at
+210, its L0 runs 402 / 1,665 in 180-210 minutes. Estimates at 4 hours: P2J `est L0 50.8 Vunf@0 13.8 Vk100@0 4.6
+...` (L1 out of the top 6), P2K `est L0 886.2 Vunf@0 18.7 Vk100@0 7.7 L1 7.4 ...`. Where P2J's gain comes from is
+not yet clear: the discount changes which variants run first, and their proofs give contexts that the L0 retries
+then use. To read at 5 hours with windows.py by label.

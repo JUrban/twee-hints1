@@ -103,3 +103,15 @@ run at 2 hours (11% yield) while its failed-before goals with new contexts wait;
 P2H +1,128 over P2K at 3 hours. retrysplit 120-180 minutes: P2K's first runs 25 / 992 then none, retries 111 / 638
 at 150 minutes; P2H's retries 41 / 646 at 150 (its burst came earlier). P2K's first runs ended at about 150 minutes;
 its context-change retries start only then.
+
+## Interim at 4 hours (21 Nov 03:36)
+
+| arm | 120 min | 180 min | 210 min | 240 min |
+|---|---:|---:|---:|---:|
+| P2K control | 20,004 | 20,224 | 20,546 | 20,828 |
+| P2H retry class | 20,611 | 21,355 | 21,444 | 21,525 |
+| P2J (exp45) | 20,124 | 20,770 | 21,374 | **21,624** |
+
+P2H +697 over P2K (it was +1,128 at 3 hours): the control's retry burst came at 180-240 minutes (retries 94 / 1,440
+at 210), P2H's earlier. P2H gets the same proofs sooner, and some more. Latency (exp/latency.py at 3 hours): goals
+whose last lemma came in hour 1, P2K 520 proved with p90 delay 70 minutes, P2H 1,176 with p90 29, P2J 482 with 99.
