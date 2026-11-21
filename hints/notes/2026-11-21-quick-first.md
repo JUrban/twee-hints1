@@ -23,6 +23,10 @@ P2J's results (loops/P2J/r1/results.tsv, half2 from zero, 6 workers, 5 hours):
 * exp/quickstat.py on P2J: its first pass ended at 172 minutes. In 120-180 minutes the last first runs proved 106 of
   2,256 (3.8 CPU hours) while L0 retries in a new context proved 379 of 671 (0.7 CPU hours) once they ran
   (`--retry-class` gives those a share; `--quick` makes the first pass itself cheaper).
+* Why first runs only: an L0 retry's proof is slower. Of the retries' proofs, P2J's 17% came within 1 s (60% within
+  2 s), P2H's 23% (59%), Z6's 37% (70%), so a quick retry would lose most of them.
+* Z6 (all goals, 12 workers): its first pass ended at 169 minutes; in 90-180 minutes its first runs proved 423 of
+  8,076 (5%) in 11.5 of the 18 CPU hours, while retries in a new context proved 1,071 of 1,938 at 150-180.
 * Earlier: a 5 s first level beat 10 s in production's context (2ag: 33 against 20). A shorter first run from
   zero has not been tried.
 
