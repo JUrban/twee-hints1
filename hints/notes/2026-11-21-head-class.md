@@ -26,9 +26,16 @@ of the deep list into class h, nearest (in proof lines) first, and run at L1 (th
 (d and h together) keep the --reserve. Also: a light pass now counts rq and hq as waiting work (before, a run with
 only rq left forced a full pass at every step).
 
-## Smoke test
+## Smoke tests
 
-loops/HCT (01:40, sets/smoke487, 2 workers, 12 minutes, `LOOPARGS=--head-class`).
+* loops/HCT (01:40, sets/smoke487, 2 workers, 12 minutes, `LOOPARGS=--head-class`): no errors, 395 solved, but class
+  h never ran: among the classes with nothing running the first in the list wins, h is last, and with 2 workers r and
+  d always had goals. With 6 workers each class gets a slot.
+* loops/HCT2 (01:53, the same with 6 workers, 9 minutes): no errors, 408 solved; h ran 20 L1 runs, 12 proved
+  (`mix ... h 14 50/h`).
+
+**Launch (02:03):** abs/after4445d.sh starts P2M (LOOPARGS from loops/P2M.args, else `--head-class`) and P2L
+together when loops/exp4445.done appears; production at J=4 meanwhile (two arms of about 10 CPUs each).
 
 ## Plan
 
