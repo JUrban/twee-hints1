@@ -150,7 +150,13 @@ def main_climbs():
 # loops, whose proofs use each other's goals as lemmas
 RP_FAMILIES = [('production', ['UL', 'XFL', 'GML', 'STEPJ', 'SW20', 'ROOTS']),
                ('smoke', ['HCT', 'HCT2', 'KCT', 'KCT2', 'KCT3', 'QKC', 'QKT', 'QKN', 'RCT', 'RTT', 'YDT', 'YDT2', 'HTT',
-                          'HTT2', 'GFT'])]
+                          'HTT2', 'GFT', 'KDS', 'LSM', 'LTD', 'PIS', 'FRS', 'FRT']),
+               # (22 Nov 15:32) the experiments since 21 Nov 11:50, one family each
+               ('profile', ['PRA', 'PRB', 'PRC', 'PRF']),
+               ('exp54', ['LAA', 'LAB']),
+               ('exp56', ['GMR', 'GMR2', 'GMR3']),
+               ('exp57', ['CW0', 'CW1', 'CW2', 'CW3', 'CW4', 'CW5', 'CW6', 'CW7', 'CW9']),
+               ('exp59', ['HUB80'])]
 RP_MAX = 9_900_000          # bytes of one .tar.xz
 RP_RAW = 120_000_000        # tar bytes per first try (xz -6 makes proofs about 16 times smaller)
 
@@ -172,6 +178,8 @@ def main_realproofs():
     dirs = sorted(os.path.relpath(os.path.dirname(p), L) for p in glob.glob(os.path.join(L, '*/proofs')) +
                   glob.glob(os.path.join(L, '*/*/proofs')))
     only = [a.split('=', 1)[1] for a in sys.argv if a.startswith('--family=')]
+    # (22 Nov 15:32) --skip=F,G: leave out families still being written (running arms); the index is still rebuilt
+    skip = {x for a in sys.argv if a.startswith('--skip=') for x in a.split('=', 1)[1].split(',')}
     fam = {}
     for d in dirs:
         names = [os.path.join(d, 'proofs', n) for n in os.listdir(os.path.join(L, d, 'proofs')) if '__goal_' in n]
@@ -180,7 +188,7 @@ def main_realproofs():
         b = d.split('/')[0].split('.')[0]   # a run and its side loops: Z6, Z6.xfer, Z6_GML -> Z6
         b = b[:-4] if b.endswith('_GML') else b
         f = next((k for k, pats in RP_FAMILIES if b in pats), b)
-        if not only or f in only:
+        if (not only or f in only) and f not in skip:
             fam.setdefault(f, []).extend(names)
     os.makedirs(os.path.join(R, 'realproofs'), exist_ok=True)
     index = []

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""(22 Nov 15:27; notes/2026-11-22-hub-roots.md) kNN centrality of unsolved goals: a signal for hubs before they are
+"""(22 Nov 15:24; notes/2026-11-22-hub-roots.md) kNN centrality of unsolved goals: a signal for hubs before they are
 proved.
 
   hubcent.py SOLVED.tsv OUT.tsv [--set sets/all] [-k 30]
