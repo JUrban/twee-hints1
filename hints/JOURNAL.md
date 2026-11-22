@@ -765,6 +765,8 @@ Next:
    abs/late_test.sh. Smoke LSM (200 goals, 2 workers, 10 minutes, --head-time 20) at 03:00:20. Planned exp54 when Z8
    ends (about 10:53): LAA control and LAB --head-time 20 (exp51), 4 workers each, 3 hours; decision +50, a replica
    pair first if within ±50.
+   Smoke clean (12 of 200 in 10 minutes, no errors). **abs/after_z8.sh (PID 1622999, 03:11) starts abs/exp54.sh when
+   loops/Z8.done appears, after up to 20 minutes for loops/EXP54.go or EXP54.skip.**
 0000000000000000000000000000000. **Z8 (planned 00:23, [notes/2026-11-22-z8.md](notes/2026-11-22-z8.md)):** the defaults as they stand
    (LATE + --floor-ratio 20) from zero on all goals, 6 workers, 8 hours, one arm against Z7's curve. abs/after_exp53.sh
    (PID 1485120) starts abs/z8.sh when exp53 ends (about 02:52), after up to 20 minutes for loops/Z8.go or Z8.skip.
