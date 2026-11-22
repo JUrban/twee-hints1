@@ -773,6 +773,7 @@ Next:
    pair first if within ±50.
    Smoke clean (12 of 200 in 10 minutes, no errors). **abs/after_z8.sh (PID 1622999, 03:11) starts abs/exp54.sh when
    loops/Z8.done appears, after up to 20 minutes for loops/EXP54.go or EXP54.skip.**
+   **Started 08:55:22 (Z8 stopped at 6 h): LAA loop.py 1903363, LAB 1903360; head_time 0 / 20.0. Ends about 11:57.**
    Candidate from production (07:10, loops/UL/r5 since the restart at row 233,804, 14.3 h): its own runs proved 32,
    L1 (the 40 s chain level) 17 in 23.8 CPU h (0.71/h), L0 7, the 5 s variants (V*@0) 8 in 52.7 CPU h. 773 of the
    1,026 heads had an L1 run since the restart, 253 none; 16 of the 17 L1 proofs were heads whose previous goal was
@@ -791,7 +792,7 @@ Next:
    32,751 against 32,404), synced −818 (9,256 against 10,074); Z8-only 327, Z7-only 798 (exp/armdiff.py). Over the
    400 rule: a side-by-side pair for `--floor-ratio 20` after exp54, unless Z8 is within 400 at 8 h.
    At 6 h (08:54): Z8 42,917, Z7 43,350 (−433; −408 at 5 h; −406 at equal abstract work at 5 h); union 43,604.
-   **Stopped at 6 h (08:58): the gap is steady and the pair is needed anyway; exp54 starts early (EXP54.go).**
+   **Stopped at 6 h (08:55:04, 42,920 in solved.tsv): the gap is steady and the pair is needed anyway; exp54 starts early (EXP54.go).**
    Plan (03:26): at 4 hours, if Z8 leads Z7 by more than about 400 at equal abstract work, stop Z8 (its hours 4-8
    would only give a cross-time difference inside the noise) and start exp54 then instead of at 10:53.
 000000000000000000000000000000. **Proof cost (23:58, [notes/2026-11-21-proof-cost.md](notes/2026-11-21-proof-cost.md)):** twee's `proof` flag is read only
