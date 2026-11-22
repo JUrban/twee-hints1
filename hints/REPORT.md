@@ -5743,6 +5743,8 @@ rounds of 30 s or more, but about 40% overhead for 8 s rounds.
 
 ## 2d. Prover9-new branches: what was ported
 
+*Notes: [notes/2026-11-22-o2-build.md](notes/2026-11-22-o2-build.md).*
+
 | branch | what it does | decision |
 |---|---|---|
 | packed-fast, better-packed, faster-packed-fallback, adaptive-hint-mask-filter, lazy-hash-gate | fast matching against very large hint banks (millions of hints, Josef runs): packed matchers, 64-bit checklists, bit tables | not ported. With ≤ 10^3 hints per run, matching costs about 7% of twee's throughput after the fingerprint prefilter, which plays the same role. |
