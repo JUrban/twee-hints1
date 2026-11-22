@@ -6309,6 +6309,44 @@ rounds of 30 s or more, but about 40% overhead for 8 s rounds.
 
 ## 5. How to run the best system
 
+### The system as of 22 Nov (`date` checked 21:10)
+
+Everything runs in `/project/hintwork`; the scripts are in this branch's `hints/` (copies of the launch scripts in
+`hints/exp/`). twee is this branch's build, installed as `/project/bin/twee-e61`; `/project/bin/twee-pg61` is a
+wrapper that appends `TWEE_PG_ARGS` (parental guidance at 0.25 and the ground-joining branch limit 100). The rule
+model is `models/rm4t.bin,.vocab` (LightGBM, 2b). Every run uses `--abstract-time 2000`, so a search is the same
+whatever the load.
+
+**From zero, the system to unleash on a new benchmark: `hints/solve_new.sh NAMES CONTEXT OUT J HOURS`.** Its header
+documents every default and the experiment behind it. The whole benchmark from an empty context, as Z8 (abs/z8.sh)
+and Z9 (abs/z9.sh):
+
+    sed "s|^H=.*|H=/project/twee/hints|" /project/twee/hints/solve_new.sh > loops/Z9.solve_new.sh
+    SCHED= XEVERY=300 LOOPARGS="--knn-refresh 600" bash loops/Z9.solve_new.sh sets/all loops/EMPTY loops/Z9 6 8
+
+* loop.py's cascade: fresh 5 s runs with 30 kNN lemmas, 6 sibling lemmas and the proofs' steps as hints, then the
+  40 s chain level and 80/160/320 s, and a portfolio of 5 s members that change the problem (unfolded definitions,
+  60-400 kNN lemmas, proof-dependency lemmas) ordered by live yield (`DEEP`).
+* Run order (`ORDER`, `LATE`): every goal's first run before repeats, near before far (`--mix 0.1 --fail-order`);
+  failed goals as their own class with live yields (`--retry-class --yield-discount 2000 --reexplore 12:0.25`),
+  kNN-context retries (`--knn-ctx 10`), the head class (`--head-class`), floors that wait (`--floor-ratio 20`) and,
+  since 22 Nov 20:35, retries by kNN drift (`--knn-drift 5`).
+* Side loops started by solve_new.sh: the proof-step transfer (`transfer.py live`, OUT.xfer) and the derived-rule
+  transfer (`givenmatch.py live`, OUT_GML, `GIVENARGS` with `--lemma-ax`).
+* Output: OUT/solved.tsv, the printed proofs in OUT/proofs (each proved run is rerun with the proof on), hints in
+  OUT/hints. Read a run with `abs/setcurve.py SET OUT ... --at 30,60,120,240,360`, or `exp/abscurve.py` to compare
+  arms at equal abstract work.
+* Measured: on all 51,784 goals, Z8 (6 workers) 42,917 at 6 hours; on half2 (25,847 goals, 4 workers) P2Z 21,796
+  at 6 hours.
+
+**Production, the long run: `abs/ul75.sh`** (loop.py on sets/all, continuing loops/UL with its whole history:
+`--mix 0.25`, the learned scheduler, `--ratio-order` over the 5 s members, `--head-class`, `--given-scan`). Beside
+it: `exp/proofq.py --follow -j 3` (proof reruns for every loop), `transfer.py live loops/UL loops/XFL`, and
+`abs/gmlive4.sh` (`givenmatch.py live loops/GML --dirs UL,XFL --retry-tried 3 --lemma-ax --retry-times 60,160`).
+Totals: `exp/trust.py` from /project/hintwork with `--exposed loops/UNSOUND/exposed.txt` (REPORT's totals table).
+
+### Earlier recipes (15 Nov)
+
 Build twee from this branch (`cabal build exe:twee`). The commands below
 are run in `/project/hintwork`, with `venv` holding lightgbm.
 
