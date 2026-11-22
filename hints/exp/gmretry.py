@@ -7,14 +7,57 @@ took the oldest logs. Production keeps deriving some of these goals in later fai
 hits from 32 source runs by 22 Nov 10:15). This runs the same two passes, on the newest PER hits of distinct
 sources, for every tried goal still unsolved in production.
 
-usage: gmretry.py OUT [-j J] [--per K] [--min-hits N] [--dry] -- TRANSFER_ARGS (as GML's)
+usage: gmretry.py OUT [-j J] [--per K] [--min-hits N] [--lemma-ax] [--only FILE] [--dry] -- TRANSFER_ARGS (as GML's)
 OUT is a new directory; proofs go into production (loops/UL) as GML's do.
+
+--lemma-ax (22 Nov 11:25): loop.py's given_scan labels only the original's axioms as axioms (-1), so a failed run's lemma
+axioms (its sibling and kNN lemmas, proven goals) are label-0 rules without parents in its log, and the sketch's .ax
+lacks them. With --lemma-ax every parentless rule of the source log that is the statement of a proven goal of
+production (givenmatch.gkeys) whose axioms are within the target's goes into the .ax, with that goal's name in the
+third column: transfer.py then names the axiom skax_<i>_<goal>, which exp/trust.py resolves.
+--only FILE: only the goals listed in FILE.
 """
 import os, subprocess, sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import givenmatch
 
 LOOPS = givenmatch.LOOPS
+
+
+KM = None
+
+
+def lemma_ax(gp, skdir, S):
+    """add the source runs' lemma axioms (see --lemma-ax) to each sketch's .ax, named by their proven goal"""
+    import lemmas
+    global KM
+    if KM is None:
+        KM = {}
+        for m in S:
+            try:
+                ks = givenmatch.gkeys(m)
+            except Exception:
+                continue
+            for k in ks or ():
+                KM.setdefault(k, []).append(m)
+    tot = 0
+    for l in open(gp):
+        g, fs = l.split('\t')[:2]
+        A = lemmas.axiom_set(g)
+        for f in fs.split(','):
+            rel = os.path.relpath(f, skdir).split(os.sep)   # g / DIR / stamp_x / name
+            log = os.path.join(LOOPS, rel[1], rel[2], 'given', rel[3])
+            add = []
+            for x in open(log):
+                w = x.rstrip('\n').split('\t')
+                if len(w) >= 6 and w[0] == '0' and w[4] == '0' and w[5] == '0':
+                    ms = sorted(m for m in KM.get((w[2], w[3]), ()) if lemmas.axiom_set(m) <= A)
+                    if ms:
+                        add.append(f'{w[2]}\t{w[3]}\t{ms[0]}\n')
+            with open(f + '.ax', 'a') as fo:
+                fo.writelines(add)
+            tot += len(add)
+    print(f'--lemma-ax: {tot} lemma axioms added to the sketches of {gp}', flush=True)
 
 
 def main():
@@ -40,6 +83,9 @@ def main():
             if len(w) >= 6 and w[0] in tried and w[0] not in S \
                     and os.path.exists(os.path.join(LOOPS, w[1], 'given', w[2])):
                 hits.setdefault(w[0], []).append(w[:6])
+    if '--only' in opts:
+        keep_ = {l.strip() for l in open(val('--only', ''))}
+        hits = {g: v for g, v in hits.items() if g in keep_}
     sel = {}
     for g, hs in hits.items():
         if len(hs) < minh:
@@ -74,6 +120,8 @@ def main():
     for tag, pre, T in (('a', False, 20), ('p', True, 40)):
         gp = os.path.join(out, f'goals_{tag}.tsv')
         givenmatch.sketch(hp, os.path.join(out, 'sketch' + tag), gp, per, pre)
+        if '--lemma-ax' in opts:
+            lemma_ax(gp, os.path.join(out, 'sketch' + tag), S)
         S2 = {l.split('\t')[0] for l in open(os.path.join(dst, 'solved.tsv'))}
         keep = [l for l in open(gp) if l.split('\t')[0] not in S2]
         open(gp, 'w').writelines(keep)
