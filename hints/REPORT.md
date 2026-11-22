@@ -5709,6 +5709,38 @@ rounds of 30 s or more, but about 40% overhead for 8 s rounds.
 
 ## 3. Assessment
 
+*22 Nov, 12:52 (`date` checked). The 22 Nov 03:58 assessment follows it.*
+
+* **Where it stands.** **48,329 solved (+55.6% over plain twee at 4 s), holdout 5,359 (+67.3%)**, all trusted (12:41).
+  3,455 are left. That is 69 more than at 00:26.
+* **Where the new proofs come from.** Of the 49 since 07:21:
+  * production's own runs 23 (ul75, 6 workers; 24 new in its first 5.7 hours, against about 1.6 an hour for ul74
+    before it, a comparison across times);
+  * the given-rule retry 18 (exp56), the live given-rule loop 7, the proof-step transfer 1.
+* **A defect found and fixed: given rules lacked their lemma axioms (exp56).**
+  * When a failed run derives an unsolved goal's equation, its rules are replayed as a sketch for that goal. The
+    source run's lemma axioms (proven sibling and kNN lemmas) reached the sketch only as hints, because loop.py's
+    scan marks only the original's axioms.
+  * Named after the proven goals they state, so trust.py resolves them, they made 13 of the 25 given-up goals fall
+    at 27 per CPU hour (12 at 20 s, where the old sketches proved 0 of 30).
+  * The live loop also used to try a goal once and never again; it now retries every 3 hours on newer hits. Both
+    changes have been live since 12:06.
+  * Production's runs therefore pay twice: in their own proofs, and in the hits they supply. Since 07:13, L1 supplied
+    the first hit of 18 goals and the 5 s variants of 5. The ratio order counts only the first kind.
+* **From zero.** Z8 (`--floor-ratio 20`, 6 workers) ended at 42,917 at 6 hours, against Z7's 43,350 the day before.
+  That is within the cross-time noise, and the floors were kept on exp52's side-by-side +789. The lemma-axiom fix
+  should matter more from zero: in Z8's live loop 682 goals failed, and Z8 solved 265 of them later by other routes.
+  That is the next from-zero test after exp55 (exp58).
+* **Not adopted today:** the head class's 40 s runs cut to 20 s (exp54, +8 at 3 hours, within its ±50 band).
+* **Portfolio: twee's own critical-pair weights (exp57, the user's question at 11:08).** Seven weight settings at 20 s
+  on 300 heads, against the control at 20 s and 40 s. On the first 78 goals, the union of all nine arms is 19, against
+  17 for the control. So far the weights barely change which heads fall. The final reading is at about 15:10.
+* **What is weak in the evidence:**
+  * The given-rule figures are on goals selected for having hits from many runs. Their rate will not hold for goals
+    with a single hit.
+  * The late A/B's noise is still not measured (its replica pair is deferred), so its ±50 band is a guess.
+  * Production's rates are compared across times and contexts.
+
 *22 Nov, 03:58 (`date` checked). The 20 Nov assessment follows it.*
 
 * **Where it stands.** All 51,784 public problems: **48,260 solved (+55.4% over plain twee at 4 s)**, holdout
