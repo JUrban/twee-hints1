@@ -759,6 +759,14 @@ Paused:
 has the history (user, 20 Nov: "update the total numbers in the report etc every now and then").
 
 Next:
+000000000000000000000000000000000000. **exp57 (11:12, [notes/2026-11-22-cp-weights.md](notes/2026-11-22-cp-weights.md)):** twee's
+   critical-pair weights as members (user, 11:08: "have we played with different weights for the default twee
+   weighting functions?" No: no run in the records changed them). sets/wheads300: 300 heads of late2 (previous goal
+   proven in Z7's context; seed 57), loops/LAA.ctx, one fresh 20 s run per goal and arm. CW0 control; CW1/CW2
+   lhs-weight 2/8; CW3/CW4 depth-weight 0/5; CW5/CW6 var-weight 0.5/1.5; CW7 dup-factor 1; CW9 the control at 40 s
+   (time-matched for control + one variant). Smoke clean (11:10). **abs/after_exp54w.sh (PID 2026476) starts it when
+   exp54 ends (EXP55.skip for after_exp54.sh), then exp55.** exp54's replica pair is deferred. Decision: a union with
+   CW0 that beats CW9 by 5+.
 00000000000000000000000000000000000. **exp56 (11:05, [notes/2026-11-22-gm-retry.md](notes/2026-11-22-gm-retry.md)):** the given-rule
    hits the live loop gave up on. givenmatch.py live runs a hit goal once and lists it in loops/GML/tried.tsv for
    good. 30 of the 273 tried goals are still unsolved and all have hit rows; ns_to_aa1_b 673 has 229 from 32 source
@@ -794,6 +802,8 @@ Next:
    At 1 h (09:57): LAA 234, LAB 244 (+10); L1 16/58 against 23/125 in 0.99 CPU h each; LAB-only 17, LAA-only 7.
    At 2 h (10:57): LAA 315, LAB 327 (+12, flat since 1 h); L1 30/115 against 34/240 in 2 CPU h each; LAB-only 20,
    LAA-only 8.
+   (11:12) The replica pair (abs/exp54r.sh) is deferred for exp57 (the user's weights question): +12 is far below
+   the +50 bar, so LAB stays undecided and is not adopted.
    Candidate from production (07:10, loops/UL/r5 since the restart at row 233,804, 14.3 h): its own runs proved 32,
    L1 (the 40 s chain level) 17 in 23.8 CPU h (0.71/h), L0 7, the 5 s variants (V*@0) 8 in 52.7 CPU h. 773 of the
    1,026 heads had an L1 run since the restart, 253 none; 16 of the 17 L1 proofs were heads whose previous goal was
@@ -1122,6 +1132,7 @@ reports are written as the experiments run.
 | [notes/2026-11-22-ul75.md](notes/2026-11-22-ul75.md) | ul75: production with the head class |
 | [notes/2026-11-22-knn-drift.md](notes/2026-11-22-knn-drift.md) | exp55: retry the goals whose kNN lemmas drifted (`--knn-drift`) |
 | [notes/2026-11-22-gm-retry.md](notes/2026-11-22-gm-retry.md) | exp56: retry the given-rule hits the live loop gave up on (exp/gmretry.py) |
+| [notes/2026-11-22-cp-weights.md](notes/2026-11-22-cp-weights.md) | exp57: twee's critical-pair weights as portfolio members |
 | [notes/2026-11-20-base-saturation.md](notes/2026-11-20-base-saturation.md) | exp39: base-theory runs as rule generators for the unsolved goals of the stronger theories |
 | [notes/2026-11-20-given-transfer.md](notes/2026-11-20-given-transfer.md) | exp38: unsolved goals that are variants of rules other runs derived and did not use (379 M in the given logs; transfer.py only matches proof steps); their ancestry as hints |
 | [notes/2026-11-19-from-zero-portfolio.md](notes/2026-11-19-from-zero-portfolio.md) | half1 from zero in 2 hours with today's deep portfolio (PGC), against PGA's 18,987 (exp27, from 07:18) |

@@ -1,0 +1,82 @@
+# Twee's critical-pair weights as portfolio members (exp57)
+
+Written 22 Nov 2026, 11:13 UTC.
+
+## Question
+
+The user (11:08): "ad portfolios, have we played with different weights for the default twee weighting functions?"
+
+No. The records (REPORT, JOURNAL, notes/) have no run with `--lhs-weight`, `--rhs-weight`, `--var-weight`,
+`--depth-weight`, `--dup-cost`, `--dup-factor` or `--fun-weight`. The search-setting variants tried so far are:
+* the rule-model variants (threshold 0.2, no rule model, other models);
+* no parental guidance; subsumption matching; the two-sided chain;
+* `--flip-ordering`, `--kbo-weight0`, `--no-flatten-goal`, `--flatten-goal-lightly` (15 Nov, abs/var_test.sh).
+
+All of them proved 0 on stalled goals at 5-20 s (exp21: "changing the search does nothing at 5 s where the same
+problem just failed"). Those tests were on goals the same search had just failed in the same context, at short
+budgets. A weight change reorders the whole critical-pair queue, so it may pay on goals that have not been tried yet,
+at longer budgets.
+
+Twee's score of a critical pair l = r (src/Twee/CP.hs), with m and n the weighted sizes of the two sides:
+
+    depth * depth-weight + (m + n) * rhs-weight + max(m, n) * (lhs-weight - rhs-weight)
+
+The defaults are lhs 4, rhs 1, var 6/7, depth 2, dup-cost 1 (a repeated subterm costs 1, not its size) and
+dup-factor 0. The hint score is applied on top of this (`s * eqhint-factor + eqhint-weight`); the factor is a
+multiplier, so it does not depend on the weights' scale.
+
+## Set
+
+* sets/wheads300 (exp/sets/wheads300) is 300 heads of sets/late2, drawn with random.seed(57) from the sorted list.
+  * sets/late2 is the 3,817 half2 goals Z7 left unsolved (notes/2026-11-22-late-ab.md).
+  * A head here is a late2 goal whose previous goal in its original is proven in Z7's context. There are 692 such
+    heads, from 63 originals; the sample covers 58 originals.
+  * The heads are the right population. LAA ∪ LAB proved 239 of the 692 heads (35%) in their first 2.7 hours,
+    against 107 of the other 3,125 late2 goals (3%).
+* Context: loops/LAA.ctx, Z7's 43,769 proofs without the late2 goals (exp54's context).
+
+## Arms
+
+There is one fresh run per goal and arm. The search is loop.py `--start 1 --rounds 1`, abs/var_test.sh's form, with
+solve_new.sh's model and lemma options:
+* rm4t, 6 lemmas, 30 kNN lemmas, pool original;
+* twee-pg61 with TWEE_PG_ARGS `--pg-threshold 0.25 --ground-joining-branch-limit 100`;
+* `--abstract-time 2000 --no-resume-requeue --no-eqhint-consider`.
+
+| arm | twee flag | budget | workers |
+|---|---|---|---|
+| CW0 | (control) | 20 s | 1 |
+| CW1 | `--lhs-weight 2` | 20 s | 1 |
+| CW2 | `--lhs-weight 8` | 20 s | 1 |
+| CW3 | `--depth-weight 0` | 20 s | 1 |
+| CW4 | `--depth-weight 5` | 20 s | 1 |
+| CW5 | `--var-weight 0.5` | 20 s | 1 |
+| CW6 | `--var-weight 1.5` | 20 s | 1 |
+| CW7 | `--dup-factor 1` (a repeated subterm costs its size + 1) | 20 s | 1 |
+| CW9 | (control) | 40 s | 2 |
+
+CW9 is the time-matched control for "the control plus one weight variant". The union of CW0 and CWk costs two 20 s
+runs a goal, and CW9 is one 40 s run.
+
+Smoke test (abs/wsmoke.sh, 11:10): 3 goals at 5 s, control and `--lhs-weight 2`. Both proved 0. The outputs
+differ (3,154 against 3,007 rules on nil3_1K_b 377), so the flag reaches twee.
+
+## Schedule
+
+* abs/after_exp54w.sh (PID 2026476, 11:12) waits for exp54 to end (about 11:57). Then:
+  * it writes loops/EXP55.skip, so abs/after_exp54.sh exits without starting exp55;
+  * it runs abs/exp57.sh, about 2 hours on 10 workers;
+  * it then runs abs/exp55.sh, unless loops/EXP55B.skip exists 10 minutes after exp57 ends.
+* exp54's replica pair (abs/exp54r.sh) is deferred. exp54's +12 is far below its +50 bar either way.
+
+## Measures
+
+* Proved of 300 per arm; for each CWk, the +/− against CW0 and the union with CW0.
+* That union against CW9 (equal CPU), and the CPU of each arm from its rows.
+* The union of all arms, and the goals only one arm proved.
+* Proofs: keep_proofs is on by default, so each proved run's printed proof is kept for proofq (rerun with
+  `exp/proofq.py` on the CW dirs afterwards).
+
+Decision: a weight arm whose union with CW0 beats CW9 by 5 or more goals becomes a member candidate. It would then
+be a 40 s variant on heads in production and get its exploration hour. loop.py's variants are named (unf, k60, r2
+and so on), so this needs a new variant kind that passes a twee flag.
