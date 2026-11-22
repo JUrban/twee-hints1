@@ -36,6 +36,7 @@ in `/project/hintwork` (not in git).
 | + the live transfer loops on the unsolved goals (production paused to 16:50, then restarted at 6 workers); at 21 Nov 18:06, all trusted | **48,238** (+55.3% over plain) | **5344** (+66.8%) | – |
 | + production's own loop at 6 workers, its side loops, the sweep's last chunk and Z7's unique proof; at 22 Nov 00:26, all trusted | **48,260** (+55.4% over plain) | **5347** (+66.9%) | – |
 | + production's own loop (ul74, 6 workers) and its side loops; at 22 Nov 07:21, all trusted | **48,280** (+55.4% over plain) | **5348** (+67.0%) | – |
+| + production with the head class (ul75), the given-rule retry and its lemma-axiom fix (2al, exp56); at 22 Nov 12:41, all trusted | **48,329** (+55.6% over plain) | **5359** (+67.3%) | – |
 
 **Correction (20 Nov 10:40; [notes/2026-11-20-p9-negation-bug.md](notes/2026-11-20-p9-negation-bug.md)).** The counts
 from 15 Nov on include proofs that are not proofs.
@@ -79,7 +80,7 @@ empty context on all 51,784 problems, 12 workers plus the transfer.
   workers from the first pass, and gains from about 3 hours. **At 8 hours Z7 had 43,767 on 6 workers, against Z6's
   44,092 on 12** (cross-time). From 4 to 8 hours Z7 gained 1,289 and Z6 1,172. Z7 also proved one goal production
   never had (merged into production).
-* Production, with every method since 12 Nov, has **48,280** (22 Nov 07:21).
+* Production, with every method since 12 Nov, has **48,329** (22 Nov 12:41).
 
 \* Starts from 33,720 proofs: the third round plus 52 from long runs on
 two families (2m). Its time is the summed wall time of the runs, close
@@ -146,6 +147,7 @@ written in loops/UL. Merged proofs count from their merge.
 | 21 Nov 18:06 | 48,238 | 5344 | 4 new from production's live transfer and derived-rule loops (XFL, GML); exp49/50 rejected; the Z7 pair on all goals (LATE +1,241 at 4 hours); production restarted 16:50 (ul74, 6 workers) and the sweep; all 48,238 trusted (trust.py --exposed) |
 | 22 Nov 00:26 | 48,260 | 5347 | 22 new: production's own loop 15 (ul74, 6 workers), its derived-rule transfer (GML) 5, the sweep's last chunk 1 (the sweep is done: 30 of 2,874), Z7's unique proof 1 (merged; merge.py now copies the record); exp52 accepted (--floor-ratio 20); all 48,260 trusted (trust.py --exposed) |
 | 22 Nov 07:21 | 48,280 | 5348 | 20 new: production's own runs 16 (ul74, 6 workers), its side loops (transfer, derived rules) 4; Z8 from zero at 4 hours 42,007 (Z7 42,478); production restarted 07:13 as ul75 (`--head-class`); all 48,280 trusted (trust.py --exposed, loops/TRUSTNOW/t0712x, run 07:09-07:21) |
+| 22 Nov 12:41 | 48,329 | 5359 | 49 new: production's own runs 23 (ul75, `--head-class`, 6 workers), the given-rule retry of goals the live loop had given up on 18 (exp56: newest hits, then the failed runs' lemma axioms named by proven goal), the live given-rule loop 7 (with both changes from 12:06), the transfer loop 1; exp54 ended (+8, not adopted); all 48,329 trusted (trust.py --exposed, loops/TRUSTNOW/t1240, run 12:41-12:50) |
 
 From 15 Nov 05:30 the rate fell from hundreds an hour to 50–100. The
 cheap new contexts are used up; 58% of the unsolved goals sit behind the
