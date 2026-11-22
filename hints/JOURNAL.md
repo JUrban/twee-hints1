@@ -753,6 +753,8 @@ Paused:
 **Printed proofs in hintdata (21 Nov 11:50; user: "pack these new proofs also into hintwork/hintdata/realproofs"):**
 188,561 kept proofs (44,475 goals) in hintdata/realproofs/<family>/<family>_NN.tar.xz, 10 parts of at most 10 MB
 (45 MB), index.tsv.gz and README.md; `exp/hintdata_build.py --realproofs` adds the rest once proofq has caught up.
+(22 Nov 15:33-16:02) `--realproofs --skip=P2X,P2Z` packed 578,449 printed proofs in 24 families (new: Z7, Z7C, Z8, P2Q-P2W,
+exp54/56/57/59, profile; 23 commits in hintdata, parts at most 9.9 MB, realproofs/ 121 MB). exp55's arms come later.
 
 **Totals (22 Nov 12:41, all trusted, trust.py --exposed loops/UNSOUND/exposed.txt, loops/TRUSTNOW/t1240, run
 12:41-12:50): 48,329 of 51,784 solved (holdout 5,359 of 5,880), 3,455 unsolved.** REPORT's totals table
