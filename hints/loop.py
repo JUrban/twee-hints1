@@ -1874,7 +1874,10 @@ class Loop:
                         # failed-before goals are their own --mix class 'q', with a share and a yield of their own
                         if a.retry_class and a.mix and a.fail_order and not SM:
                             rq = [x for x in retry if x[0] > 0]; retry = [x for x in retry if x[0] == 0]
-                            if KD:
+                            # (--knn-drift-order-after MIN, 22 Nov 20:39) --fail-order's usual order (fewest failures
+                            # first) until MIN minutes. In P2Z the count alone admitted 13 goals by minute 30 and 54 by
+                            # 60 (179 in 6 h), so the sort is the likelier cause of its early cost (-216 at 30 minutes)
+                            if KD and (not a.knn_drift_order_after or time.time() - t0 >= a.knn_drift_order_after * 60):
                                 # (--knn-drift) the most new kNN lemmas first (capped at 10), then the usual order
                                 rq.sort(key=lambda x: (-min(kdc.get(x[-1], 0), 10),) + x)
                         else:
@@ -2575,6 +2578,9 @@ def make_parser():
     ap.add_argument('--knn-drift-after', type=float, default=0, metavar='MIN',
                     help='(22 Nov) with --knn-drift: the count admits goals to the retry class only after MIN minutes '
                          '(it is kept from the start; a kNN hit admits a goal at any time, as with --knn-ctx alone)')
+    ap.add_argument('--knn-drift-order-after', type=float, default=0, metavar='MIN',
+                    help='(22 Nov) with --knn-drift: the retry class goes by the count only after MIN minutes; before, '
+                         'in the usual order (with --knn-drift-after MIN as well, the drift starts at MIN altogether)')
     ap.add_argument('--knn-ctx', type=int, default=0, metavar='K',
                     help='(21 Nov) --retry-knn with --fail-order: a goal one of whose proofs new since the last kNN '
                          'rebuild would enter the top K of its kNN lemmas counts as having a new context (retried '
