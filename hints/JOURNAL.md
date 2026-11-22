@@ -772,6 +772,7 @@ Next:
    (PID 1485120) starts abs/z8.sh when exp53 ends (about 02:52), after up to 20 minutes for loops/Z8.go or Z8.skip.
    **Started 02:53:28 by the go file, made at once when exp53 was rejected (loop.py 1572206, transfer 1572319,
    givenmatch 1572323); config.json floor_ratio 20.0, no renormalisation argument. Ends about 10:53.**
+   At 30 min (03:24): Z8 26,836, Z7 24,561 (+2,275; +1,828 at equal abstract work), Z7C 26,757: the early cost is gone.
 000000000000000000000000000000. **Proof cost (23:58, [notes/2026-11-21-proof-cost.md](notes/2026-11-21-proof-cost.md)):** twee's `proof` flag is read only
    after a successful search (SequentialMain.hs:1618). exp/proofcost.py, 42 queued proof jobs from six dirs, each
    with and without `--no-proof`: 61.1 against 61.2 CPU s, the same output outside the proof block in all 42. So
