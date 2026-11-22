@@ -3377,6 +3377,10 @@ Matching against proof steps covers only about 22 M of the given logs' 400 M rul
     goals Z8's live loop failed in its ancestry pass, each in Z8's context at the time of its run, the fix proved 46
     (27 of the 36 Z8 never solved), and the unchanged sketches 0 of 15. solve_new.sh's live loop has it
     by default since 22 Nov 13:26.
+  * The same gap in same-statement runs (exp58b, [notes/2026-11-22-src-used.md](notes/2026-11-22-src-used.md)): a
+    proof's hint file lacks the lemma axioms it used. transfer.py `--src-used` adds them, named by goal. On 100 of
+    Z8's failed same-statement runs it proved 6 (controls 0 of 20). Most of the source proofs' lemmas are of the
+    stronger theory and do not fit the target (a median of 1 added). Not adopted.
 
 **Base-theory runs as generators (exp39, 20 Nov 05:39-07:24;
 [notes/2026-11-20-base-saturation.md](notes/2026-11-20-base-saturation.md)).**

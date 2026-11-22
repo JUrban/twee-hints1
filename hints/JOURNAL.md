@@ -764,6 +764,8 @@ Next:
    transfer.py `--src-used` adds the source proofs' used lemma axioms (from their proof texts), named by goal.
    exp/soreplay.py on 100 of the 525 goals Z8's live loop failed in same-statement runs (20 controls), each in Z8's
    context at the time (PID 2066925, loops/SORP). If +10 over control: production's GML and XFL get it.
+   **Result (14:31): used 6 of 100 (4 of the 55 that got lemmas; median 1 lemma added), ctl 0 of 20, paired 0 vs 0.
+   Not adopted; the option stays off by default.**
 0000000000000000000000000000000000000. **exp58a (12:57, [notes/2026-11-22-lemma-ax-replay.md](notes/2026-11-22-lemma-ax-replay.md)):** the
    lemma-axiom fix replayed on Z8's live loop. Only 59 goals failed there with an ancestry run (most of the 682
    failures were same-statement runs), so the fix can change at most 59 from zero: the 6-hour pair (exp58) is
