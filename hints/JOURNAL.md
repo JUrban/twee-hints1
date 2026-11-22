@@ -756,8 +756,8 @@ Paused:
 (22 Nov 15:33-16:02) `--realproofs --skip=P2X,P2Z` packed 578,449 printed proofs in 24 families (new: Z7, Z7C, Z8, P2Q-P2W,
 exp54/56/57/59, profile; 23 commits in hintdata, parts at most 9.9 MB, realproofs/ 121 MB). exp55's arms come later.
 
-**Totals (22 Nov 12:41, all trusted, trust.py --exposed loops/UNSOUND/exposed.txt, loops/TRUSTNOW/t1240, run
-12:41-12:50): 48,329 of 51,784 solved (holdout 5,359 of 5,880), 3,455 unsolved.** REPORT's totals table
+**Totals (22 Nov 18:02, all trusted, trust.py --exposed loops/UNSOUND/exposed.txt, loops/TRUSTNOW/t1802, run
+18:02-18:11): 48,357 of 51,784 solved (holdout 5,363 of 5,880), 3,427 unsolved.** REPORT's totals table
 has the history (user, 20 Nov: "update the total numbers in the report etc every now and then").
 
 Next:
