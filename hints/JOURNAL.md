@@ -766,6 +766,8 @@ Next:
    (loops/Z8F.ctx), 1 worker (abs/hub80.sh, loops/HUB80).
    **Result (15:24): 15 of 24 proved in Z8's context (7 under 10 s: context drift; 8 at 11-175 s: Z8 never
    gave any more than 8 s). Next: a kNN-centrality signal for hubs, checked on these roots, then a from-zero pair.**
+   kNN centrality (exp/hubcent.py, 15:26): Spearman 0.20 with reach over 437 roots; the 9 hubs with reach > 1,000 rank
+   247-1,144 of 8,642; the top 500 hold 49.6% later-production goals vs 42.4% base. Weak; not pursued for now.
 00000000000000000000000000000000000000. **exp58b (13:32, [notes/2026-11-22-src-used.md](notes/2026-11-22-src-used.md)):** the same gap in transfer
    runs: a proof's hint file lacks the lemma axioms it used, and same-statement runs get no source lemmas at all.
    transfer.py `--src-used` adds the source proofs' used lemma axioms (from their proof texts), named by goal.
