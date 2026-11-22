@@ -768,6 +768,9 @@ Next:
    gave any more than 8 s). Next: a kNN-centrality signal for hubs, checked on these roots, then a from-zero pair.**
    kNN centrality (exp/hubcent.py, 15:26): Spearman 0.20 with reach over 437 roots; the 9 hubs with reach > 1,000 rank
    247-1,144 of 8,642; the top 500 hold 49.6% later-production goals vs 42.4% base. Weak; not pursued for now.
+   (15:30) Z8's head class ran 171 times in 6 h (floor withheld while r out-yielded it), so hub heads never got L1.
+   But within Z8, L1 proofs were used as lemmas less than L0 proofs (0.93 vs 2.21 per proof; same hours 0.33 vs 1.35):
+   the hubs' reach is a multi-day effect. No from-zero change from this thread.
 00000000000000000000000000000000000000. **exp58b (13:32, [notes/2026-11-22-src-used.md](notes/2026-11-22-src-used.md)):** the same gap in transfer
    runs: a proof's hint file lacks the lemma axioms it used, and same-statement runs get no source lemmas at all.
    transfer.py `--src-used` adds the source proofs' used lemma axioms (from their proof texts), named by goal.

@@ -5593,6 +5593,18 @@ index is now rebuilt every 10 minutes, not 30 (about 1 s a rebuild).
   All nine arms together proved 119 in 19.3 CPU h, the 40 s default alone 116 in 4.1. So the weights are not
   complementary members: on these goals a second setting is worth less than twice the time. loop.py
   `--flag-variants NAME=FLAGS` (any twee flag as a variant) stays for later tests.
+* **What the from-zero runs lack (exp59, 22 Nov; [notes/2026-11-22-hub-roots.md](notes/2026-11-22-hub-roots.md)).**
+  * 4,355 goals production has are in neither Z7 (8 hours) nor Z8 (6 hours). 2,082 of them fell to production's 5 s
+    L0 runs: they need the right lemmas more than search time.
+  * In their first recorded proofs (kept outputs, USEDAXIOMS), 502 used no other such goal as a lemma (roots). A few
+    roots lead to 1,200-2,000 others through chains of kNN and sibling lemmas: aK2rev 349, Kproperties_1 314,
+    aKperms_1 342 and others, first proved by production's 40 s and 80 s runs.
+  * One fresh 80 s run each in Z8's final context proved 15 of the top 24 roots, 6 of them in under 10 s. Z8 had run
+    each at about 5 s only: its head class got 2 of its 36 CPU hours, while the 5 s retries out-yielded it.
+  * Within a 6-hour run that choice holds up: Z8's 40 s proofs were used as lemmas by later Z8 proofs less often
+    than its 5 s proofs (0.93 against 2.21 times per proof). The hubs' reach builds up over days.
+  * kNN centrality (how many unsolved goals would take a goal among their 30 nearest lemmas) picks the biggest hubs
+    only weakly (rank correlation 0.20 with reach).
 
 ## 2ba. Soundness: the Prover9 negation bug, re-verification, and a model audit (20 Nov)
 
