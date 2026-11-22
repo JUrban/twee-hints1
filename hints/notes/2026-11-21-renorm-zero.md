@@ -72,3 +72,21 @@ CPU s a run (results.tsv): L0 0.64 against 0.63 (15,772 and 15,777 runs); Vunf@0
 4.57; Vk200@0 5.23 and 5.28; Vk400@0 5.50 and 5.71. Not renormalising saves nothing at these levels: the runs are
 5-10 s, and exp25's −25% was at 80 s. Deep runs are few (L1 3 and 2, L2 1 each). P2V replicates exp52's P2U: +108 at
 1 hour.
+
+## Interim at 2 hours (22 Nov 01:52): P2W −467
+
+| min | 30 | 60 | 90 | 120 |
+|---|---|---|---|---|
+| P2V (control) | 15,382 | 17,804 | 18,909 | 19,763 |
+| P2W (`--cp-renormalise-threshold 1000`) | 15,305 | 17,728 | 18,800 | 19,296 |
+| P2W − P2V | −77 | −76 | −109 | **−467** |
+| P2U (exp52, same setup as P2V) | 15,574 | 17,696 | 18,795 | 19,658 |
+
+* In the last half hour P2V proved 854, P2W 496.
+* Runs by level (proofs / runs / CPU hours / CPU s a run): L0 P2V 16,321 / 18,543 / 5.48 / 1.06, P2W 16,049 / 18,204
+  / 5.26 / 1.04; L1 (40 s heads) 4 / 10 / 0.18 / 65.2 and 12 / 26 / 0.38 / 53.0; Vunf@0 65 / 331 / 0.76 / 8.27 and
+  58 / 324 / 0.76 / 8.42. Only the 40 s runs are cheaper without renormalisation (−19%, as exp25's −25% at 80 s);
+  the 5-10 s runs cost the same.
+* The mix lines at 120 min: P2V r 778/h, h 10 runs at 25/h; P2W r 536/h, h 27 runs at 32/h. P2W's first runs and
+  retries prove less, so its head floor came back earlier (20 × 32 ≥ 536).
+* My processes used about 17.5 CPUs; the load average (55) came from outside them and is the same for both arms.
