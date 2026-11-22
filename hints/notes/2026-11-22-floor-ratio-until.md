@@ -90,3 +90,10 @@ too.
   Each arm and production get 14 whole cores, 7 per socket, one logical CPU per core (P3A 0-6,28-34; P3B 7-13,35-41;
   P3C 14-20,42-48; production with its side loops and proofq 21-27,49-55); the hyperthread siblings are left to the
   machine's other users. The same for all arms, from 2 hours 2 minutes on; P3B's change of rule starts at 2 hours.
+
+3-hour reading (23:36): wall minutes P3A 20,510, P3B 20,028 (−482), P3C 20,809 (+299). At equal abstract work (P3A's
+170 minutes): P3A 20,280, P3B 20,021 (−259), P3C 20,808 (+528). In the hour after the CPU sets, CPU s per abstract
+second: P3A 1.04, P3B 1.11, P3C 1.09 (before them 1.02 against 1.13-1.16): closer, not equal.
+* P3B, from minute 120 without the floor-ratio rule, lost about 230 at equal work in one hour (−27 at 90 minutes,
+  −259 now).
+* P3C, in effect exp55's drift arm again, leads by 528 at equal work (exp55 at 3 hours: +122 by wall time).

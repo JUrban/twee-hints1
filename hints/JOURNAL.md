@@ -799,6 +799,7 @@ Next:
    and production 14 whole cores, 7 per socket (abs/pin_exp60b.sh). The decision is read at equal abstract work.
    New A/Bs: abs/or_test3.sh with CPUSET per arm (exp/or_test3.sh); Z9 pinned to 0-20,28-48. Production keeps
    21-27,49-55 until its next restart (the set is lost then; pin it again).
+   180 min: P3A 20,510, P3B 20,028, P3C 20,809 by wall; at equal abstract work P3B −259, P3C +528.
 000000000000000000000000000000000000000. **exp59 (14:39, [notes/2026-11-22-hub-roots.md](notes/2026-11-22-hub-roots.md)):** 4,355 goals only
    production has (not Z7, not Z8); 2,082 fell at production's 5 s L0. exp/hubroots.py: 502 roots (first proof uses
    no other such goal), a few with reach 1,200-1,980 (aK2rev 349, Kproperties_1 314, aKperms_1 342, ...); the top
