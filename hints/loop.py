@@ -45,6 +45,10 @@ class Loop:
             os.makedirs(os.path.join(self.dir, 'p9lem'), exist_ok=True)
         import threading
         self.p9_lock = threading.Lock()
+        # (--flag-variants, 22 Nov; exp57) variant name -> extra twee flags; twee takes no --flag=value, so such a token
+        # is split in two (the option can then go through a shell variable without spaces)
+        self.fv = {k.strip(): [y for t in v.split() for y in (t.split('=', 1) if t.startswith('--') else [t])]
+                   for k, _, v in (x.partition('=') for x in a.flag_variants.split(';')) if k.strip()}
         self.vix = {}; self.vix_busy = False   # (--variants kp, kd) their lemma indexes, start_vix
         self.gen_lock = threading.Lock(); self.gen_stats = [0, 0, 0.0]   # --gen-model: calls, hints, seconds
         self.p9_uncond = {}
@@ -650,6 +654,8 @@ class Loop:
             cmd += ['--eqhint-stall', str(a.stall)]
         if var == 'pw':
             cmd += ['--eqhint-watch', str(a.pw_factor)]
+        if var in self.fv:
+            cmd += self.fv[var]   # (--flag-variants)
         if var == 'sub':
             cmd += ['--eqhint-subsume']
         elif var == 'sj':
@@ -1240,6 +1246,7 @@ class Loop:
         for v in VL:
             nm, _, at = v.partition('@')
             assert (nm in ('two', 'unf', 'sub', 'sj', 'pool', 'r2', 'nom', 'nopg', 'x', 'p9', 'kp', 'kd', 'hl', 'pw', 'sk')
+                    or nm in self.fv
                     or (nm and re.fullmatch(r'(k\d+)?(s\d+)?', nm))
                     or (nm and re.fullmatch(r'm\w+', nm) and a.model_fixed
                         and os.path.exists(os.path.join(os.path.dirname(a.model_fixed.split(',')[0]), 'r' + nm + '.bin')))), v
@@ -2346,6 +2353,9 @@ def make_parser():
                          'guidance, also not from TWEE_PG_ARGS), x (the chain\'s '
                          'hints). They keep no state, so the next level resumes the chain run\'s. NAME@L: after level L '
                          'instead, at its budget and with its hints (rows V<name>@L)')
+    ap.add_argument('--flag-variants', default='', metavar='NAME=FLAGS;...',
+                    help='(22 Nov, exp57: twee\'s critical-pair weights) variants that add twee flags, usable in '
+                         '--variants by NAME (e.g. "lw2=--lhs-weight=2;dw0=--depth-weight=0" and --variants lw2@1)')
     ap.add_argument('--chain-since-row', type=int, default=0,
                     help='--chain-level with --cascade-continue: deep rows of the round before this row (pool-era runs) '
                          'are ignored, so those goals get a fresh chain-level run')
