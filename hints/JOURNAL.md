@@ -761,6 +761,10 @@ exp54/56/57/59, profile; 23 commits in hintdata, parts at most 9.9 MB, realproof
 has the history (user, 20 Nov: "update the total numbers in the report etc every now and then").
 
 Next:
+0000000000000000000000000000000000000000000. **exp63 (16:48, [notes/2026-11-22-frontier-orderings.md](notes/2026-11-22-frontier-orderings.md)):** another
+   term ordering on production's frontier. Production yields about 0.5 proofs per CPU h now (698 CPU h spent on the
+   3,432 unsolved, median 47 runs), all under twee's default precedence. 120 unsolved unit goals (sets/ulu120, seed
+   63) in production's context (loops/ULF.ctx), 20 s fresh: OD default vs OO1 ordering 1. abs/ordtest.sh.
 000000000000000000000000000000000000000000. **exp62 (16:33, [notes/2026-11-22-o2-build.md](notes/2026-11-22-o2-build.md)):** twee-e61 built with -O2
    (all binaries so far: cabal's default -O1; Prover9-new's josef01-cpu-next audits build flags). Worktree
    /project/hintwork/tw61o2; abs/o2bench.sh runs exp61's command with both binaries at once (loops/OB1, OB2).
@@ -1217,6 +1221,7 @@ reports are written as the experiments run.
 | [notes/2026-11-22-floor-ratio-until.md](notes/2026-11-22-floor-ratio-until.md) | exp60: `--floor-ratio-until 120` from zero against the control |
 | [notes/2026-11-22-retry-deficit.md](notes/2026-11-22-retry-deficit.md) | exp61: what Z8's final context proves in 5 s (the retry deficit) |
 | [notes/2026-11-22-o2-build.md](notes/2026-11-22-o2-build.md) | exp62: twee built with -O2 against the -O1 production binary |
+| [notes/2026-11-22-frontier-orderings.md](notes/2026-11-22-frontier-orderings.md) | exp63: another term ordering on production's frontier |
 | [notes/2026-11-20-base-saturation.md](notes/2026-11-20-base-saturation.md) | exp39: base-theory runs as rule generators for the unsolved goals of the stronger theories |
 | [notes/2026-11-20-given-transfer.md](notes/2026-11-20-given-transfer.md) | exp38: unsolved goals that are variants of rules other runs derived and did not use (379 M in the given logs; transfer.py only matches proof steps); their ancestry as hints |
 | [notes/2026-11-19-from-zero-portfolio.md](notes/2026-11-19-from-zero-portfolio.md) | half1 from zero in 2 hours with today's deep portfolio (PGC), against PGA's 18,987 (exp27, from 07:18) |
