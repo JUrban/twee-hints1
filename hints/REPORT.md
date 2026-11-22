@@ -5695,7 +5695,8 @@ rounds of 30 s or more, but about 40% overhead for 8 s rounds.
   twee reads the flag only after the search has succeeded: printing costs nothing (61.1 against 61.2 CPU s on 42
   jobs). So the reruns spend about 3 CPUs repeating proved runs, and they fall behind: 123,342 jobs were queued at
   03:58. loop.py `--proof-in-search` would keep the same proofs without reruns. It is ready, and waits for the
-  user's decision.
+  user's decision. (07:08: 69,073 queued, and 20,203 rerun in the hour from 06:00, so the queue is now
+  shrinking: most jobs are runs of under a second.)
 
 *20 Nov, 13:40 (`date` checked). After the soundness re-verification. The 19 Nov assessment follows it.*
 
