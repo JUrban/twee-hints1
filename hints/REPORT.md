@@ -5384,12 +5384,34 @@ from zero, against exp30's P2D.
   * The lead narrowed by 251 in the third hour, as P2U ran out of easy goals first; the next 8-hour run checks it.
   * Z7's late first runs prove 65% against Z7C's 20%: they come later, in a fuller context.
   * A pair, not Z7 against Z6: on a replica pair (P2R against P2O), exp/abscurve.py left 167-426 of the gap.
-* **exp53, deep runs without queue renormalisation (22 Nov 23:51-02:53; [notes/2026-11-21-renorm-zero.md](notes/2026-11-21-renorm-zero.md)):
+* **exp53, deep runs without queue renormalisation (21 Nov 23:51 to 22 Nov 02:53; [notes/2026-11-21-renorm-zero.md](notes/2026-11-21-renorm-zero.md)):
   `--cp-renormalise-threshold 1000` from zero, beside a control with the current defaults (half2, 4 workers each).**
   P2W 20,154 against P2V 20,974 at 3 hours (**−820**; −76 at 1 hour, −467 at 2). Rejected; renormalisation stays.
   * Only the 40 s runs got cheaper (11%); the 5-10 s runs, where most of the CPU goes, cost the same.
   * The loss is in first runs after the first hour, goals whose hints come from proofs found earlier.
   * P2W-only 113 for its 12 worker-hours: not a portfolio member. The control matched exp52's P2U within 105.
+* **Z8, the defaults with `--floor-ratio 20` from zero on all goals (22 Nov 02:53-08:55, 6 workers;
+  [notes/2026-11-22-z8.md](notes/2026-11-22-z8.md)), against Z7's curve (LATE without it, 21 Nov; cross-time).**
+
+  | min | 30 | 60 | 120 | 180 | 240 | 360 |
+  |---|---:|---:|---:|---:|---:|---:|
+  | Z8 | 26,836 | 33,974 | 38,179 | 40,739 | 42,007 | **42,917** |
+  | Z7 | 24,561 | 32,154 | 37,195 | 40,786 | 42,478 | 43,350 |
+  | Z6 (20 Nov system, 12 workers) | 31,133 | 37,378 | 40,238 | 41,789 | 42,920 | 43,782 |
+
+  * The floors that wait remove Z7's early cost (+2,275 at 30 minutes, +1,820 at 1 hour), but the lead is gone by 3
+    hours and Z8 trails by 408-471 from 4 to 6 hours (−406 at equal abstract work at 5 hours). Stopped at 6 hours:
+    by the rule set at its start, the option needs a side-by-side test either way (exp55, planned).
+  * Z8's own runs were ahead at 4 hours (+347); the gap was in proofs synced from the statement transfer (−818).
+    exp/armdiff.py: of the 798 goals only Z7 had at 4 hours, 387 fell at Z7's first run, made about 50 minutes later
+    than Z8's failed one, in a fuller context.
+  * Caveat: exp52's side-by-side on half2 still had +789 at 3 hours, where Z8 against Z7 was already level. Part of
+    the late gap may be the cross-time comparison (noise up to about 400).
+* **ul75: production with the head class (22 Nov 07:13; [notes/2026-11-22-ul75.md](notes/2026-11-22-ul75.md)).** In
+  ul74's 14.3 hours the 40 s chain level proved 17 in 23.8 CPU hours (0.71 per CPU hour), the 5 s variants 8 in
+  52.7, and 253 of the 1,026 heads had no L1 run: with `--ratio-order` a head's L1 entry queued behind the variants.
+  ul75 adds `--head-class` (exp47/48). First hour: 153 L1 runs (ul74: 67 an hour), 4 proved; new=4 (ul74: 2.2 an
+  hour). One hour without a control: a direction only.
 * **What Z6 lacked (exp/roots.py, trust.py --dump-rec).** Of the 4,117 goals production has and Z6 lacks, 190 have
   recorded lemmas that Z6 all proved (104 first proved at L1); their reach is 363. The rest rest on lemmas Z6
   never proved. The gap is mostly depth.
