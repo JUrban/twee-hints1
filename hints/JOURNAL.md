@@ -808,7 +808,7 @@ Next:
    (11:15) Is there a better use of the variants' CPU? Over each label's own last 5 CPU h only L1 (1.39/h), L0 (1.20)
    and Vs40@0 (0.40) prove anything; L2 0 in 3.1 CPU h since the relabel, L3 1 in 2.0, L4 0 in 4.2. So no: it needs
    new members on heads (exp57).
-   (12:45, correction) The runs also feed the given-rule loop: since 07:13 the first hits of 25 goals came from L1 18,
+   (12:41, correction) The runs also feed the given-rule loop: since 07:13 the first hits of 25 goals came from L1 18,
    L0 2, Vk100@0 2, Vk60@0 2, Vk200@0 1 (21 solved now). Since 21 Nov 16:50, 35 of production's 94 new goals came by
    that route (GML 17, exp56 18), 55 from its own runs.
 00000000000000000000000000000000. **Late A/B (03:00, [notes/2026-11-22-late-ab.md](notes/2026-11-22-late-ab.md)):** the 3-hour half2 tests
