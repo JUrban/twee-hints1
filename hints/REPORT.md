@@ -5663,6 +5663,40 @@ rounds of 30 s or more, but about 40% overhead for 8 s rounds.
 
 ## 3. Assessment
 
+*22 Nov, 03:58 (`date` checked). The 20 Nov assessment follows it.*
+
+* **Where it stands.** All 51,784 public problems: **48,260 solved (+55.4% over plain twee at 4 s)**, holdout
+  **5,347 (+66.9%)**, all trusted (22 Nov 00:26). 3,524 are left. Production's own loop now proves about 1.6 an hour
+  on 6 workers (17 in the 10.5 hours after its 21 Nov 16:50 restart, 59 CPU hours), and its side loops a few more.
+* **From zero, the measure that matters most.** The system as of 21 Nov evening (solve_new.sh's LATE set) had
+  43,767 at 8 hours on 6 workers (Z7), against 44,092 for the 20 Nov system on 12 workers (Z6).
+  * Z8 (LATE + `--floor-ratio 20`, 6 workers, from 02:53) is level with the 20 Nov system in the first hour, where
+    Z7 was 2,368 behind it. At 1 hour Z8 had 33,987, against Z7's 32,154. Its 4-hour reading comes at about 06:53.
+* **What moved the from-zero curve in the last 1.5 days** (half2 from zero, side by side, against a noise of about
+  105 between identical arms):
+  * failed-before goals as their own mix class, `--retry-class`: +450 at 5 hours (exp44);
+  * member yields over the last 2,000 runs with re-exploration: +559 at 5 hours (exp45);
+  * both, plus kNN-context retries and a head class (P2O): +241 over the pair (exp48);
+  * floors that wait for the class to compete, `--floor-ratio 20`: +789 at 3 hours (exp52).
+* **Rejected, each side by side:** 1 s quick first runs (−719, exp49), 3 s retries (−166, exp50), and deep runs
+  without queue renormalisation (−820, exp53).
+* **The late curve is limited by hard goals, not by CPU.** Twice the workers gave 325 more at 8 hours (Z6 against
+  Z7). The unsolved goals sit at the ends of the proof chains: 2,379 of the 3,524 are in the last tenth of their
+  original's goals, none in the first four tenths, and 1,029 come right after a solved goal. Runs of 640 s proved
+  none of 15 late goals that failed at 320 s (17 Nov).
+* **What is weak in the evidence:**
+  * The 3-hour half2 tests hardly reach the deep and head classes: the control of exp53 ran the 40 s chain level 31
+    times in 3 hours. Methods for those classes need another design. The late A/B
+    ([notes/2026-11-22-late-ab.md](notes/2026-11-22-late-ab.md)) starts on the 3,817 half2 goals Z7 left unsolved,
+    with Z7's proofs as the context. Its noise is not known yet.
+  * From-zero runs at different times differ by up to about 400 from the machine's load alone. exp/abscurve.py
+    corrects only part of that.
+* **Proofs.** Search runs use `--no-proof`, and exp/proofq.py reruns every proved run with the proof printed. But
+  twee reads the flag only after the search has succeeded: printing costs nothing (61.1 against 61.2 CPU s on 42
+  jobs). So the reruns spend about 3 CPUs repeating proved runs, and they fall behind: 123,342 jobs were queued at
+  03:58. loop.py `--proof-in-search` would keep the same proofs without reruns. It is ready, and waits for the
+  user's decision.
+
 *20 Nov, 13:40 (`date` checked). After the soundness re-verification. The 19 Nov assessment follows it.*
 
 * **Where it stands.** All 51,784 public problems: **48,172 solved (+55.1% over plain twee at 4 s)**, holdout
