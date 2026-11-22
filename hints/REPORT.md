@@ -5627,10 +5627,9 @@ index is now rebuilt every 10 minutes, not 30 (about 1 s a rebuild).
     P2X-only 93, union 21,889.
   * The count orders the retries as intended: retries with 10 or more new kNN lemmas proved 37.5%, 5-9 23.9%,
     1-2 12.9%, 0 8.5%.
-  * The cost is early: −216 at 30 minutes. The count alone admitted only 13 goals by then, so the likelier cause is
-    the sort of the retry class by the count, from the start. exp60's arm P3C (`--knn-drift-after 60`) delays only
-    the admissions (54 in P2Z's first hour): in effect a replica of the gain. loop.py `--knn-drift-order-after MIN`
-    (delaying the sort) is for a later test.
+  * The early −216 (30 minutes) is within noise: in exp60, P3B, identical to its control until minute 120, trailed
+    it by 313-381 in the first 30 minutes, from throughput alone. exp60's arm P3C (`--knn-drift-after 60`) delays
+    only the count's admissions (54 in P2Z's first hour), so it is in effect a replica of the gain.
 
 ## 2ba. Soundness: the Prover9 negation bug, re-verification, and a model audit (20 Nov)
 
@@ -5790,7 +5789,8 @@ rounds of 30 s or more, but about 40% overhead for 8 s rounds.
 * **From zero: one more option adopted.** `--knn-drift 5` (exp55) sends failed goals back to the retry class once 5
   or more new proofs rank among their 30 nearest kNN lemmas, and orders that class by the count. half2 from zero, 4
   workers each, 6 hours, side by side: **+204** (21,796 against 21,592), with 297 goals only the drift arm proved
-  against 93. It costs 216 at 30 minutes and pays from the second hour. It is in solve_new.sh's LATE from 20:35.
+  against 93. It trailed by 216 at 30 minutes, within the early noise (exp60's identical twins differed by up to 381
+  then), and led from the second hour. It is in solve_new.sh's LATE from 20:35.
 * **Running: exp60 (20:35 to about 02:35).** Three half2 arms of 4 workers on the same control: P3A (control),
   P3B (`--floor-ratio-until 120`: the class floors stop after 2 hours) and P3C (`--knn-drift 5 --knn-drift-after 60`:
   the drift count admits goals only after an hour). Since the count admitted only 54 goals in exp55's first hour,
