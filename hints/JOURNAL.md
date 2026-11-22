@@ -791,6 +791,8 @@ Next:
    the three loops. Read: abs/setcurve.py sets/half2 P3A P3B P3C --at 30,60,120,180,240,300,360.**
    30 min: P3A 15,203, P3B 14,838, P3C 14,981. P3B is P3A's twin until minute 120, so −365 is noise (throughput:
    13,154 runs against 12,530 at equal run seconds); exp55's early −216 is within it.
+   60 min: P3A 17,541, P3B 17,196, P3C 17,312 by wall time; at equal abstract work P3B −115, P3C +40 (P3A ran at
+   1.07 CPU s per abstract s in the second half hour, the others 1.18-1.20). Decision read both ways at 6 h.
 000000000000000000000000000000000000000. **exp59 (14:39, [notes/2026-11-22-hub-roots.md](notes/2026-11-22-hub-roots.md)):** 4,355 goals only
    production has (not Z7, not Z8); 2,082 fell at production's 5 s L0. exp/hubroots.py: 502 roots (first proof uses
    no other such goal), a few with reach 1,200-1,980 (aK2rev 349, Kproperties_1 314, aKperms_1 342, ...); the top

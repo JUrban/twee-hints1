@@ -57,3 +57,10 @@ hours**: their difference until then is the noise of a side-by-side half2 pair.
   is within it, and at equal abstract work P2Z against P2X was +118 at 10 minutes, +50 at 20, −175 at 30, −75 at
   60, +169 at 120 and +201 at 360. The test of `--knn-drift-order-after` is not needed unless P3C falls further
   behind than P3B does.
+
+60-minute reading (21:36): wall minutes (setcurve) P3A 17,541, P3B 17,196 (−345), P3C 17,312 (−229). At equal abstract
+work (abscurve, at P3A's 55 minutes): P3A 17,277, P3B 17,162 (−115), P3C 17,317 (+40). In the second half hour
+P3A's runs took 1.07 CPU s per abstract second, P3B's 1.18 and P3C's 1.20: the control's processes ran faster,
+probably from where the kernel placed them (twee runs are children of their arm's loop.py). Wall-time readings
+then favour P3A, so the 6-hour decision is read both ways, and a test arm must clear +200 at equal abstract work
+too.
