@@ -5720,7 +5720,9 @@ rounds of 30 s or more, but about 40% overhead for 8 s rounds.
   * The 3-hour half2 tests hardly reach the deep and head classes: the control of exp53 ran the 40 s chain level 31
     times in 3 hours. Methods for those classes need another design. The late A/B
     ([notes/2026-11-22-late-ab.md](notes/2026-11-22-late-ab.md)) starts on the 3,817 half2 goals Z7 left unsolved,
-    with Z7's proofs as the context. Its noise is not known yet.
+    with Z7's proofs as the context. Its noise is not known yet. Its first test, exp54 (`--head-time 20`: the head
+    class's 40 s runs cut to 20 s), ended at +8 in 3 hours (360 against 352 new goals; union 376). That is within its
+    ±50 band, so the setting is not adopted.
   * From-zero runs at different times differ by up to about 400 from the machine's load alone. exp/abscurve.py
     corrects only part of that.
 * **Proofs.** Search runs use `--no-proof`, and exp/proofq.py reruns every proved run with the proof printed. But

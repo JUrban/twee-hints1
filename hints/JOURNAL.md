@@ -813,6 +813,8 @@ Next:
    LAA-only 8.
    (11:12) The replica pair (abs/exp54r.sh) is deferred for exp57 (the user's weights question): +12 is far below
    the +50 bar, so LAB stays undecided and is not adopted.
+   **Final (11:57): LAA 352, LAB 360 (+8, within ±50: not adopted, undecided); L1 43/194 in 3.44 CPU h against
+   49/398 in 3.40; LAB-only 24, LAA-only 16, union 376 new (15.7 per worker-hour; LAB alone 30.0).**
    Candidate from production (07:10, loops/UL/r5 since the restart at row 233,804, 14.3 h): its own runs proved 32,
    L1 (the 40 s chain level) 17 in 23.8 CPU h (0.71/h), L0 7, the 5 s variants (V*@0) 8 in 52.7 CPU h. 773 of the
    1,026 heads had an L1 run since the restart, 253 none; 16 of the 17 L1 proofs were heads whose previous goal was
