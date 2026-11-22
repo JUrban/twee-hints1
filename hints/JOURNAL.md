@@ -775,6 +775,10 @@ Next:
    runs (newest 10:15 today), tried once on 20 Nov 04:57. The live loop's sort by ancestry size sees 0 on every
    failed-run hit, so it took the oldest logs. exp/gmretry.py runs the same two passes (20 s ancestry, 40 s prefix)
    on the newest 3 hits of distinct sources, 1 worker, into production. Started 11:05:27 (PID 2023224, loops/GMR).
+   Ancestry pass 0 of 30 (937 s). Likely cause (11:21): loop.py given_scan labels only the original's axioms as −1,
+   so a failed run's lemma axioms (proven goals) reach the sketch as hints, not in `.ax`. exp56b (`--lemma-ax`): the
+   parentless source rules that are statements of proven goals within the target's axioms go into `.ax` named by goal
+   (skax_<i>_<goal>, resolved by trust.py); goal_673's 3 sketches get 300. abs/gmr2.sh (PID 2032897) runs it after GMR.
 0000000000000000000000000000000000. **exp55 (09:33, [notes/2026-11-22-knn-drift.md](notes/2026-11-22-knn-drift.md)):**
    loop.py `--knn-drift M`: retry goals whose kNN lemma sets drifted (M or more new since the last fresh run), and
    the retry class goes by that count. Why: LAA's first runs on Z7's unsolved goals prove 40% with 5+ new kNN
