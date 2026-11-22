@@ -3205,6 +3205,8 @@ Now every other free slot goes to an original's first unsolved goal
 
 ## 2al. Goals that are steps of existing proofs (16 Nov, 04:20)
 
+*Notes: [notes/2026-11-22-lemma-ax-replay.md](notes/2026-11-22-lemma-ax-replay.md).*
+
 *Notes: [notes/2026-11-22-gm-retry.md](notes/2026-11-22-gm-retry.md).*
 
 *Notes: [notes/2026-11-20-base-saturation.md](notes/2026-11-20-base-saturation.md).*

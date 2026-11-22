@@ -759,6 +759,12 @@ Paused:
 has the history (user, 20 Nov: "update the total numbers in the report etc every now and then").
 
 Next:
+0000000000000000000000000000000000000. **exp58a (12:57, [notes/2026-11-22-lemma-ax-replay.md](notes/2026-11-22-lemma-ax-replay.md)):** the
+   lemma-axiom fix replayed on Z8's live loop. Only 59 goals failed there with an ancestry run (most of the 682
+   failures were same-statement runs), so the fix can change at most 59 from zero: the 6-hour pair (exp58) is
+   dropped. exp/gmreplay.py: lax on all 59 and ctl on 15, each in Z8's context at the time of its run, 20 s, 1
+   worker (PID 2059788, loops/GMRP). If lax beats the control rate by 10+, `--lemma-ax` goes into solve_new.sh's
+   GIVENARGS before exp55 (~15:20).
 000000000000000000000000000000000000. **exp57 (11:12, [notes/2026-11-22-cp-weights.md](notes/2026-11-22-cp-weights.md)):** twee's
    critical-pair weights as members (user, 11:08: "have we played with different weights for the default twee
    weighting functions?" No: no run in the records changed them). sets/wheads300: 300 heads of late2 (previous goal
@@ -1157,6 +1163,7 @@ reports are written as the experiments run.
 | [notes/2026-11-22-knn-drift.md](notes/2026-11-22-knn-drift.md) | exp55: retry the goals whose kNN lemmas drifted (`--knn-drift`) |
 | [notes/2026-11-22-gm-retry.md](notes/2026-11-22-gm-retry.md) | exp56: retry the given-rule hits the live loop gave up on (exp/gmretry.py) |
 | [notes/2026-11-22-cp-weights.md](notes/2026-11-22-cp-weights.md) | exp57: twee's critical-pair weights as portfolio members |
+| [notes/2026-11-22-lemma-ax-replay.md](notes/2026-11-22-lemma-ax-replay.md) | exp58a: the lemma-axiom fix replayed on a from-zero live loop (exp/gmreplay.py) |
 | [notes/2026-11-20-base-saturation.md](notes/2026-11-20-base-saturation.md) | exp39: base-theory runs as rule generators for the unsolved goals of the stronger theories |
 | [notes/2026-11-20-given-transfer.md](notes/2026-11-20-given-transfer.md) | exp38: unsolved goals that are variants of rules other runs derived and did not use (379 M in the given logs; transfer.py only matches proof steps); their ancestry as hints |
 | [notes/2026-11-19-from-zero-portfolio.md](notes/2026-11-19-from-zero-portfolio.md) | half1 from zero in 2 hours with today's deep portfolio (PGC), against PGA's 18,987 (exp27, from 07:18) |

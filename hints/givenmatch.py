@@ -149,7 +149,7 @@ def lemma_ax(gp, skdir, S):
             _KM.setdefault(k, []).append(m)
     tot = 0
     for l in open(gp):
-        g, fs = l.split('\t')[:2]
+        g, fs = l.rstrip('\n').split('\t')[:2]   # (a two-column goals file: the newline is not in the last path)
         A = lemmas.axiom_set(g)
         def name(k):
             ms = sorted(m for m in _KM.get(k, ()) if m != g and lemmas.axiom_set(m) <= A)
