@@ -772,6 +772,8 @@ Next:
    253 of the 1,026 heads had no L1 run. **ul74 stopped 07:13:18; ul75 started 07:13:25 (loop.py 1846757, J=6, first
    row 257,905); class h ran 5 L1 runs in its first 197 s.** Read: L1 runs and proofs per hour from row 257,905,
    against ul74's 2.2 new per hour.
+   At 3.7 h (11:00): new=18 (4.8 an hour); L1 17/503 in 10.64 CPU h (1.60/h, ul74 0.71), 53% of the CPU; the 5 s
+   variants and L0 1 of 3,805 runs.
    First hour (08:14): L1 153 runs (ul74 67/h), 4 proved in 3.15 CPU h; new=4, synced=2 (ul74 2.2 new/h).
 00000000000000000000000000000000. **Late A/B (03:00, [notes/2026-11-22-late-ab.md](notes/2026-11-22-late-ab.md)):** the 3-hour half2 tests
    from zero hardly reach the head and deep classes (P2V: 31 runs at the 40 s level in 3 hours). sets/late2: the 3,817
