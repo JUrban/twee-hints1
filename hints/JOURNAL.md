@@ -793,6 +793,10 @@ Next:
    400 rule: a side-by-side pair for `--floor-ratio 20` after exp54, unless Z8 is within 400 at 8 h.
    At 6 h (08:54): Z8 42,917, Z7 43,350 (−433; −408 at 5 h; −406 at equal abstract work at 5 h); union 43,604.
    **Stopped at 6 h (08:55:04, 42,920 in solved.tsv): the gap is steady and the pair is needed anyway; exp54 starts early (EXP54.go).**
+   Plan (09:00): exp55 after exp54 (or after exp54's replica pair, if exp54 lands within ±50): `--floor-ratio 20`
+   side by side on all goals from zero, LATE as it is against LATE without it (Z7's setting), 6 workers each, 6 h,
+   production paused or at J=2 meanwhile. Note: exp52 on half2 (4 workers) still had +789 at 3 h, where Z8 against
+   Z7 was already −46: the cross-time comparison may be part of the gap.
    Plan (03:26): at 4 hours, if Z8 leads Z7 by more than about 400 at equal abstract work, stop Z8 (its hours 4-8
    would only give a cross-time difference inside the noise) and start exp54 then instead of at 10:53.
 000000000000000000000000000000. **Proof cost (23:58, [notes/2026-11-21-proof-cost.md](notes/2026-11-21-proof-cost.md)):** twee's `proof` flag is read only
