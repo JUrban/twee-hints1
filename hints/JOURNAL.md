@@ -767,6 +767,8 @@ Next:
    with and without `--no-proof`: 61.1 against 61.2 CPU s, the same output outside the proof block in all 42. So
    proofq's rerun is a full second run per proved job; printing the proof in the search run is free. **For the
    user to decide** (their method); until then search `--no-proof` and proofq stay.
+   Prepared: loop.py `--proof-in-search` (0ae814a, off by default; transfer.py loops take it too). Smoke PIS
+   (smoke487, 00:54-01:00): 387 proved, 387 proofs kept, 0 proofq jobs.
 00000000000000000000000000000. **exp53 launcher (22:25, [notes/2026-11-21-renorm-zero.md](notes/2026-11-21-renorm-zero.md)):** abs/after_exp52.sh (exp/ copy, PID 1287489) waits for
    P2T.done and P2U.done, then up to 20 minutes for loops/EXP53.go or loops/EXP53.skip, then runs abs/exp53.sh:
    P2V (control) and P2W (`PG="--cp-renormalise-threshold 1000"`), half2 from zero, 4 workers each, 3 hours
