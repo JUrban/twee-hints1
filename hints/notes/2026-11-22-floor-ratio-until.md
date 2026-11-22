@@ -78,7 +78,8 @@ too.
 | P3C − P3A, equal abstract work | +15 | **+148** | – |
 
 * By wall time the twins ended their identical first two hours 459 apart; at equal abstract work (exp/abscurve.py)
-  27 apart. P3A's runs took 1.02 CPU s per abstract second in hours 2 and 3, P3B's 1.16 and 1.13, P3C's 1.13 and 1.14.
+  27 apart. After the first hour P3A's runs took 1.02 CPU s per abstract second, P3B's 1.13-1.16, P3C's 1.13-1.14
+  (abscurve's hourly values).
 * The cause: sockets. In a 12-second sample at 22:36 the running twee runs were on socket 0 for P3A 28 of 40, for
   P3B 10 of 32, P3C 14 of 38, production 2 of 36 (/proc/cpuinfo: CPUs 0-27 and 56-83 are socket 0, 28-55 and
   84-111 socket 1, CPU i and i+56 share a core). The kernel keeps runs near their loop.py, and three loops shared
