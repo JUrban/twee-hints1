@@ -792,6 +792,8 @@ Next:
    loops/GML3.log).**
    **exp56b final (12:39): 13 of 25 (12 at 20 s), 0.48 CPU h; 18 of the 30 given-up goals proved in all. GML3 4 of 4
    in its first 30 minutes. Production 48,329.**
+   exp56c (12:59): the 11 left, `--times 60,160` (their hits come at given rule 2,000-18,000 of the source runs);
+   abs/gmr3.sh starts GMR3 after the exp58a replay.
    Candidate for from zero (exp58, after exp55): solve_new.sh's GIVENARGS + `--lemma-ax --retry-tried 1`. In Z8's live
    loop (loops/Z8_GML) the ancestry pass proved 665 of 765, the prefix pass 40 of 95, and 682 goals failed there
    (same-statement runs included), of which Z8 later solved 265. A half2 pair, 6 h, as exp55.

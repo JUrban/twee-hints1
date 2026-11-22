@@ -7,7 +7,7 @@ took the oldest logs. Production keeps deriving some of these goals in later fai
 hits from 32 source runs by 22 Nov 10:15). This runs the same two passes, on the newest PER hits of distinct
 sources, for every tried goal still unsolved in production.
 
-usage: gmretry.py OUT [-j J] [--per K] [--min-hits N] [--lemma-ax] [--only FILE] [--dry] -- TRANSFER_ARGS (as GML's)
+usage: gmretry.py OUT [-j J] [--per K] [--min-hits N] [--lemma-ax] [--only FILE] [--times A,P] [--dry] -- TRANSFER_ARGS
 OUT is a new directory; proofs go into production (loops/UL) as GML's do.
 
 --lemma-ax (22 Nov 11:25): loop.py's given_scan labels only the original's axioms as axioms (-1), so a failed run's lemma
@@ -16,6 +16,7 @@ lacks them. With --lemma-ax every parentless rule of the source log that is the 
 production (givenmatch.gkeys) whose axioms are within the target's goes into the .ax, with that goal's name in the
 third column: transfer.py then names the axiom skax_<i>_<goal>, which exp/trust.py resolves.
 --only FILE: only the goals listed in FILE.
+--times A,P (22 Nov 12:59): the two passes' budgets in seconds (default 20,40, the live loop's).
 """
 import os, subprocess, sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -86,7 +87,8 @@ def main():
             for w in sel[g]:
                 fo.write('\t'.join(w) + '\n')
     tp = os.path.join(os.path.dirname(givenmatch.__file__), 'transfer.py')
-    for tag, pre, T in (('a', False, 20), ('p', True, 40)):
+    ta, tp_ = (float(x) for x in val('--times', '20,40').split(','))
+    for tag, pre, T in (('a', False, ta), ('p', True, tp_)):
         gp = os.path.join(out, f'goals_{tag}.tsv')
         givenmatch.sketch(hp, os.path.join(out, 'sketch' + tag), gp, per, pre)
         if '--lemma-ax' in opts:
