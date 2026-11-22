@@ -790,6 +790,8 @@ Next:
    At 4 h (06:54): Z8 42,007, Z7 42,478 (−471; −503 at equal abstract work), Z7C 41,237. Z8's own runs +347 (new
    32,751 against 32,404), synced −818 (9,256 against 10,074); Z8-only 327, Z7-only 798 (exp/armdiff.py). Over the
    400 rule: a side-by-side pair for `--floor-ratio 20` after exp54, unless Z8 is within 400 at 8 h.
+   At 6 h (08:54): Z8 42,917, Z7 43,350 (−433; −408 at 5 h; −406 at equal abstract work at 5 h); union 43,604.
+   **Stopped at 6 h (08:58): the gap is steady and the pair is needed anyway; exp54 starts early (EXP54.go).**
    Plan (03:26): at 4 hours, if Z8 leads Z7 by more than about 400 at equal abstract work, stop Z8 (its hours 4-8
    would only give a cross-time difference inside the noise) and start exp54 then instead of at 10:53.
 000000000000000000000000000000. **Proof cost (23:58, [notes/2026-11-21-proof-cost.md](notes/2026-11-21-proof-cost.md)):** twee's `proof` flag is read only
