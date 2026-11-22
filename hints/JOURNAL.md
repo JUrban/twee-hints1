@@ -784,6 +784,8 @@ Next:
    **Started 08:55:22 (Z8 stopped at 6 h): LAA loop.py 1903363, LAB 1903360; head_time 0 / 20.0. Ends about 11:57.**
    At 30 min (09:27): LAA 162, LAB 163; L1 LAA 13/35, LAB 12/64 (ht=1), 0.49 CPU h each.
    At 1 h (09:57): LAA 234, LAB 244 (+10); L1 16/58 against 23/125 in 0.99 CPU h each; LAB-only 17, LAA-only 7.
+   At 2 h (10:57): LAA 315, LAB 327 (+12, flat since 1 h); L1 30/115 against 34/240 in 2 CPU h each; LAB-only 20,
+   LAA-only 8.
    Candidate from production (07:10, loops/UL/r5 since the restart at row 233,804, 14.3 h): its own runs proved 32,
    L1 (the 40 s chain level) 17 in 23.8 CPU h (0.71/h), L0 7, the 5 s variants (V*@0) 8 in 52.7 CPU h. 773 of the
    1,026 heads had an L1 run since the restart, 253 none; 16 of the 17 L1 proofs were heads whose previous goal was
