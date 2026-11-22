@@ -111,8 +111,9 @@ CPU s a run (results.tsv): L0 0.64 against 0.63 (15,772 and 15,777 runs); Vunf@0
   (mix lines at 180 min: P2V r 321/h, h 30 runs; P2W r 303/h, h 67 runs).
 * quickstat.py (first / retry / deep proofs, CPU h): P2V 16,891 / 292 / 180, P2W 16,438 / 262 / 167. The loss is in
   first runs from the second hour on (1,272 against 1,030 in 60-120 min, 765 against 560 in 120-180 min): these are
-  first L0 runs of goals whose hints come from proofs found earlier, and those hints are found less often without
-  renormalisation, the effect exp25's note warned about (queued pairs keep their stale scores against the hints).
+  first L0 runs of goals whose hints come from proofs found earlier. A likely cause, not checked here: without
+  renormalisation queued pairs keep scores from before the hints' rules joined, the effect REPORT's renormalisation
+  section warns about.
 * P2V replicates exp52's P2U to within 105 at every reading (+98 at 3 hours).
 
 **Decision: rejected.** The decision line was P2W ≥ P2V + 185. The default (renormalise at the twee default

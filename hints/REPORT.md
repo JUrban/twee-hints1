@@ -5378,6 +5378,12 @@ from zero, against exp30's P2D.
   * The lead narrowed by 251 in the third hour, as P2U ran out of easy goals first; the next 8-hour run checks it.
   * Z7's late first runs prove 65% against Z7C's 20%: they come later, in a fuller context.
   * A pair, not Z7 against Z6: on a replica pair (P2R against P2O), exp/abscurve.py left 167-426 of the gap.
+* **exp53, deep runs without queue renormalisation (22 Nov 23:51-02:53; [notes/2026-11-21-renorm-zero.md](notes/2026-11-21-renorm-zero.md)):
+  `--cp-renormalise-threshold 1000` from zero, beside a control with the current defaults (half2, 4 workers each).**
+  P2W 20,154 against P2V 20,974 at 3 hours (**−820**; −76 at 1 hour, −467 at 2). Rejected; renormalisation stays.
+  * Only the 40 s runs got cheaper (11%); the 5-10 s runs, where most of the CPU goes, cost the same.
+  * The loss is in first runs after the first hour, goals whose hints come from proofs found earlier.
+  * P2W-only 113 for its 12 worker-hours: not a portfolio member. The control matched exp52's P2U within 105.
 * **What Z6 lacked (exp/roots.py, trust.py --dump-rec).** Of the 4,117 goals production has and Z6 lacks, 190 have
   recorded lemmas that Z6 all proved (104 first proved at L1); their reach is 363. The rest rest on lemmas Z6
   never proved. The gap is mostly depth.

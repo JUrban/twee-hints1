@@ -762,6 +762,8 @@ Next:
 0000000000000000000000000000000. **Z8 (planned 00:23, [notes/2026-11-22-z8.md](notes/2026-11-22-z8.md)):** the defaults as they stand
    (LATE + --floor-ratio 20) from zero on all goals, 6 workers, 8 hours, one arm against Z7's curve. abs/after_exp53.sh
    (PID 1485120) starts abs/z8.sh when exp53 ends (about 02:52), after up to 20 minutes for loops/Z8.go or Z8.skip.
+   **Started 02:53:28 by the go file, made at once when exp53 was rejected (loop.py 1572206, transfer 1572319,
+   givenmatch 1572323); config.json floor_ratio 20.0, no renormalisation argument. Ends about 10:53.**
 000000000000000000000000000000. **Proof cost (23:58, [notes/2026-11-21-proof-cost.md](notes/2026-11-21-proof-cost.md)):** twee's `proof` flag is read only
    after a successful search (SequentialMain.hs:1618). exp/proofcost.py, 42 queued proof jobs from six dirs, each
    with and without `--no-proof`: 61.1 against 61.2 CPU s, the same output outside the proof block in all 42. So
@@ -769,14 +771,16 @@ Next:
    user to decide** (their method); until then search `--no-proof` and proofq stay.
    Prepared: loop.py `--proof-in-search` (0ae814a, off by default; transfer.py loops take it too). Smoke PIS
    (smoke487, 00:54-01:00): 387 proved, 387 proofs kept, 0 proofq jobs.
-00000000000000000000000000000. **exp53 launcher (22:25, [notes/2026-11-21-renorm-zero.md](notes/2026-11-21-renorm-zero.md)):** abs/after_exp52.sh (exp/ copy, PID 1287489) waits for
+00000000000000000000000000000. **exp53 (22:25, DONE 02:53, REJECTED, [notes/2026-11-21-renorm-zero.md](notes/2026-11-21-renorm-zero.md)):** abs/after_exp52.sh (exp/ copy, PID 1287489) waits for
    P2T.done and P2U.done, then up to 20 minutes for loops/EXP53.go or loops/EXP53.skip, then runs abs/exp53.sh:
    P2V (control) and P2W (`PG="--cp-renormalise-threshold 1000"`), half2 from zero, 4 workers each, 3 hours
    (to about 03:10). Decision +185 at 3 h. Smoke: twee-e61 takes the option (a 5 s proof, byte-identical output).
    **Started 23:51:52 by the go file (P2V loop.py 1400531, P2W 1400534); both arms have the new LATE with
    --floor-ratio 20 (config.json floor_ratio 20.0), P2W's args end with --cp-renormalise-threshold 1000. Ends
-   about 02:52.**
-0000000000000000000000000000. **exp53 candidate (16:58): deep runs without queue renormalisation, from zero.** Under
+   about 02:52.** **Result: P2W 20,154 against P2V 20,974 at 3 h (−820; −77 at 30 min, −76 at 1 h, −467 at 2 h).
+   Union 21,087 (P2W-only 113 for 12 worker-hours). The loss is in first runs after the first hour; L1 runs are 11%
+   cheaper. Renormalisation stays on.**
+0000000000000000000000000000. **exp53 candidate (16:58, run as exp53 above, rejected): deep runs without queue renormalisation, from zero.** Under
    --abstract-time renormalising the queue is 27% of a hinted run's CPU but free in abstract time; off, 80 s runs cost
    25% less with a different search (exp25: 2 of 3 proofs kept); exp26 in production was too thin to tell (7/209 vs
    5/186, [notes/2026-11-19-queue-renorm-ab.md](notes/2026-11-19-queue-renorm-ab.md)). In Z7 the retry and deep
