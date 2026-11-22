@@ -44,3 +44,17 @@ abs/after_exp52.sh start abs/exp53.sh at 23:51:52: P2V loop.py 1400531, P2W loop
 and derived-rule loops. Both config.json files have floor_ratio 20.0, retry_class and head_class; P2W's args are
 `--abstract-time 2000 --no-resume-requeue --no-eqhint-consider --cp-renormalise-threshold 1000`, P2V's the same
 without the last option. They end at about 02:52.
+
+## Interim at 30 minutes (22 Nov 00:22): even
+
+| min | 5 | 10 | 20 | 30 |
+|---|---|---|---|---|
+| P2V (control) | 5,604 | 9,766 | 13,466 | 15,382 |
+| P2W (`--cp-renormalise-threshold 1000`) | 5,583 | 9,744 | 13,408 | 15,305 |
+| P2W − P2V | −21 | −22 | −58 | −77 |
+| P2U (exp52, the same setup as P2V, 21 Nov) | 5,182 | 9,627 | 13,604 | 15,574 |
+
+Runs by level (proofs / runs / CPU hours / CPU s a run): L0 P2V 13,202 / 13,404 / 1.41 / 0.38, P2W 13,141 / 13,347 /
+1.40 / 0.38; Vunf@0 29 / 111 / 0.20 / 6.54 and 24 / 108 / 0.21 / 6.94; L2 one run each, 155 and 158 s. No CPU saving
+yet: first runs are short, and the queue is renormalised only as it grows. The deep runs, where exp25 measured −25%,
+come later. P2V is a replica of P2U's setup and sits 192 below it at 30 minutes, within the usual spread.
