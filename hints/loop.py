@@ -444,6 +444,25 @@ class Loop:
             json.dump(job, fh)
         os.rename(tmp, jd)
 
+    def proof_write(self, name, out):
+        """(22 Nov 00:55, --proof-in-search; notes/2026-11-21-proof-cost.md) a proved run that printed its proof: cut
+        it as exp/proofq.py does, from 'The conjecture is true! Here is a proof.' to the RESULT line, into
+        DIR/proofs/<name> (and the live destination's proofs/, if any), through a temp file and a rename."""
+        import threading
+        B, E = 'The conjecture is true! Here is a proof.', 'RESULT: Theorem (the conjecture is true).'
+        i = out.find(B); j = out.find(E, i)
+        if not 0 <= i < j:
+            return False
+        text = out[i:j + len(E)] + '\n'
+        for d in [self.dir] + ([self.proof_dst] if getattr(self, 'proof_dst', None) else []):
+            pd = os.path.join(d, 'proofs')
+            os.makedirs(pd, exist_ok=True)
+            tmp = os.path.join(pd, f'.{name}.{os.getpid()}.{threading.get_ident()}')
+            with open(tmp, 'w') as f:
+                f.write(text)
+            os.rename(tmp, os.path.join(pd, name))
+        return True
+
     def run_one(self, name, hints, rnd, budget=None, resume=None, max_cpu=None, variant=0, var=None):
         """One twee run. BUDGET (default: the round's timeout), RESUME (default --resume)
         and MAX_CPU (replaces --max-cpu in --args) are for --cascade. VARIANT: which of the
@@ -582,8 +601,8 @@ class Loop:
         if max_cpu is not None:
             args = [x for i, x in enumerate(args) if x != '--max-cpu' and (i == 0 or args[i - 1] != '--max-cpu')]
             args += ['--max-cpu', str(max_cpu)]
-        cmd = [a.twee, path, '--max-time', str(T), '--no-colour', '--quiet',
-               '--no-proof', '--print-hints', '--print-given'] + args
+        cmd = [a.twee, path, '--max-time', str(T), '--no-colour', '--quiet'] + \
+              ([] if a.proof_in_search else ['--no-proof']) + ['--print-hints', '--print-given'] + args
         if a.p9loop:
             cmd += ['--print-hint-matchers']
         if a.gen_model:   # (twee-e39) the given rules of a failed run, for gen_save
@@ -679,6 +698,12 @@ class Loop:
             try:   # (20 Nov 15:03, user) the proof, by a rerun with it printed (exp/proofq.py)
                 self.proof_job(name, tag, cmd, env_)
             except Exception as e_:   # (must not cost the run)
+                print(f'  keep-proofs: {name} error {e_!r}', flush=True)
+        elif a.keep_proofs and 'HINTS-END' in out:
+            try:   # (--proof-in-search) the run printed its proof: keep it, no rerun
+                if not self.proof_write(name, out):
+                    self.proof_job(name, tag, cmd, env_)
+            except Exception as e_:
                 print(f'  keep-proofs: {name} error {e_!r}', flush=True)
         if hints and not os.environ.get('LOOP_KEEP_TMP'):
             try:
@@ -2469,6 +2494,10 @@ def make_parser():
     ap.add_argument('--no-keep-proofs', dest='keep_proofs', action='store_false',
                     help='(20 Nov 15:03) do not queue proved runs for a rerun with the proof printed (exp/proofq.py; '
                          'by default every proved twee run is queued in DIR/proofq and its proof kept in DIR/proofs)')
+    ap.add_argument('--proof-in-search', action='store_true',
+                    help='(22 Nov) search runs print their proof (no --no-proof) and a proved run keeps it at once in '
+                         'DIR/proofs, instead of a proofq rerun: twee reads the proof flag only after a successful '
+                         'search, so the search costs the same (notes/2026-11-21-proof-cost.md). Off by default.')
     ap.add_argument('--keep-out', action='store_true', help='save each run\'s output in DIR/rN/out/<name> (for stallsim.py)')
     ap.add_argument('--p9loop', action='store_true',
                     help="Veroff's P9loop: the hint matchers of a goal's failed runs become lemmas (axioms) of its later runs")
