@@ -765,6 +765,8 @@ Next:
    (all binaries so far: cabal's default -O1; Prover9-new's josef01-cpu-next audits build flags). Worktree
    /project/hintwork/tw61o2; abs/o2bench.sh runs exp61's command with both binaries at once (loops/OB1, OB2).
    Adopt if the outputs match and the CPU saving is at least 5%.
+   **Result (16:44): not adopted. exp/rawbench.py, 30 goals x 3 binaries, identical outputs: -O2 median CPU ratio
+   1.035 (124.6 against 118.6 s), -O1 + -fspecialise-aggressively 1.002. The loop benchmark was not run.**
 00000000000000000000000000000000000000000. **exp61 (15:40, [notes/2026-11-22-retry-deficit.md](notes/2026-11-22-retry-deficit.md)):** the retry
    deficit: 300 random unit goals Z8 left (sets/z8u300, seed 60), one 5 s run each in Z8's final context
    (abs/rd5.sh, after the packer; loops/RD5). How much would perfect retries add at 6 h?
