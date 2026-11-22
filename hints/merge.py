@@ -4,12 +4,13 @@
 
 For each SRC row of solved.tsv from round >= 1 (rows of round 0 are what SRC
 imported with --init) whose goal DST has not solved: append NAME, R, TIME to
-DST/solved.tsv and copy SRC/hints/NAME. With --given also SRC/given/NAME (not
+DST/solved.tsv and copy SRC/hints/NAME, and SRC's kept output of NAME (r*/out or out) into DST/out/NAME (the
+record exp/trust.py needs). With --given also SRC/given/NAME (not
 for climb.py dirs: their given logs may be of a sketch run with assumptions).
 A running loop sees the merged proofs at its next restart (it reads
 solved.tsv at start); its own later proof of a merged goal only adds a row.
 """
-import argparse, os, shutil
+import argparse, glob, os, shutil
 
 
 def main():
@@ -44,6 +45,13 @@ def main():
         g = os.path.join(s, 'given', n)
         if a.given and os.path.exists(g):
             shutil.copy(g, os.path.join(a.dst, 'given', n))
+        # (22 Nov 00:30) the proof's kept twee output (its USEDAXIOMS record) into DST/out/, where exp/trust.py reads
+        # it as DST's own; trust.py skips from-zero dirs (Z7, P2*, ...), so a goal merged from one had no record
+        outs = sorted(glob.glob(os.path.join(s, 'r*', 'out', n)), key=lambda p: int(p.split(os.sep)[-3][1:])
+                      if p.split(os.sep)[-3][1:].isdigit() else -1) + glob.glob(os.path.join(s, 'out', n))
+        if outs:
+            os.makedirs(os.path.join(a.dst, 'out'), exist_ok=True)
+            shutil.copy(outs[-1], os.path.join(a.dst, 'out', n))
         with open(os.path.join(a.dst, 'solved.tsv'), 'a') as f:
             f.write(f'{n}\t{R}\t{t}\n')
     print(f'{len(rows)} merged into {a.dst} (round {R})' + (' [dry]' if a.dry else ''))
