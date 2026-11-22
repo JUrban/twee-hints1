@@ -90,3 +90,30 @@ CPU s a run (results.tsv): L0 0.64 against 0.63 (15,772 and 15,777 runs); Vunf@0
 * The mix lines at 120 min: P2V r 778/h, h 10 runs at 25/h; P2W r 536/h, h 27 runs at 32/h. P2W's first runs and
   retries prove less, so its head floor came back earlier (20 × 32 ≥ 536).
 * My processes used about 17.5 CPUs; the load average (55) came from outside them and is the same for both arms.
+
+## Result at 3 hours (22 Nov 02:53): P2W −820, rejected
+
+| min | 30 | 60 | 120 | 150 | 180 |
+|---|---|---|---|---|---|
+| P2V (control) | 15,382 | 17,804 | 19,763 | 20,577 | 20,974 |
+| P2W (`--cp-renormalise-threshold 1000`) | 15,305 | 17,728 | 19,296 | 19,746 | 20,154 |
+| P2W − P2V | −77 | −76 | −467 | −831 | **−820** |
+| P2U (exp52, same setup as P2V) | 15,574 | 17,696 | 19,658 | 20,402 | 20,876 |
+
+(abs/setcurve.py sets/half2 P2V P2W P2U P2T, proof-file mtimes against config.json.)
+
+* Portfolio: P2W-only 113, P2V-only 933, union 21,087. P2W adds 113 goals for its 12 worker-hours (9 an hour),
+  while P2V's own last half hour proved 397 with 4 workers (199 a worker-hour). Not a portfolio member.
+* Runs by level at 3 hours (proofs / runs / CPU hours / CPU s a run): L0 P2V 17,183 / 20,757 / 7.99 / 1.39, P2W
+  16,700 / 20,074 / 7.43 / 1.33; L1 13 / 31 / 0.55 / 64.3 and 27 / 67 / 1.07 / 57.5; Vunf@0 92 / 612 / 1.59 / 9.35
+  and 81 / 634 / 1.64 / 9.31. P2W's 40 s runs are 11% cheaper, but they prove less per run (0.40 against 0.42)
+  and P2W ran twice as many of them, because its first runs prove less and the head floor stays on longer
+  (mix lines at 180 min: P2V r 321/h, h 30 runs; P2W r 303/h, h 67 runs).
+* quickstat.py (first / retry / deep proofs, CPU h): P2V 16,891 / 292 / 180, P2W 16,438 / 262 / 167. The loss is in
+  first runs from the second hour on (1,272 against 1,030 in 60-120 min, 765 against 560 in 120-180 min): these are
+  first L0 runs of goals whose hints come from proofs found earlier, and those hints are found less often without
+  renormalisation, the effect exp25's note warned about (queued pairs keep their stale scores against the hints).
+* P2V replicates exp52's P2U to within 105 at every reading (+98 at 3 hours).
+
+**Decision: rejected.** The decision line was P2W ≥ P2V + 185. The default (renormalise at the twee default
+threshold) stays. Z8 started at 02:53:28 (loops/Z8.go, created at once).
