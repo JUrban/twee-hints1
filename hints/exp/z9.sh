@@ -6,5 +6,6 @@
 cd /project/hintwork
 [ -e loops/Z9 ] && { echo "loops/Z9 exists"; exit 1; }
 sed "s|^H=.*|H=/project/twee/hints|" /project/twee/hints/solve_new.sh > loops/Z9.solve_new.sh
-SCHED= XEVERY=300 LOOPARGS="--knn-refresh 600 ${Z9ARGS:-}" bash loops/Z9.solve_new.sh sets/all loops/EMPTY loops/Z9 ${J:-6} ${HOURS:-8} > loops/Z9.out 2>&1
+# (22 Nov) CPUSET: whole cores on both sockets, apart from production's (abs/pin_exp60b.sh gave it 21-27,49-55)
+SCHED= XEVERY=300 LOOPARGS="--knn-refresh 600 ${Z9ARGS:-}" taskset -c "${CPUSET:-0-20,28-48}" bash loops/Z9.solve_new.sh sets/all loops/EMPTY loops/Z9 ${J:-6} ${HOURS:-8} > loops/Z9.out 2>&1
 echo "Z9 done $(date +%T)" > loops/Z9.done
