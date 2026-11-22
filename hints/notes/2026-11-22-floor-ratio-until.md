@@ -60,7 +60,8 @@ hours**: their difference until then is the noise of a side-by-side half2 pair.
 
 60-minute reading (21:36): wall minutes (setcurve) P3A 17,541, P3B 17,196 (−345), P3C 17,312 (−229). At equal abstract
 work (abscurve, at P3A's 55 minutes): P3A 17,277, P3B 17,162 (−115), P3C 17,317 (+40). In the second half hour
-P3A's runs took 1.07 CPU s per abstract second, P3B's 1.18 and P3C's 1.20: the control's processes ran faster,
-probably from where the kernel placed them (twee runs are children of their arm's loop.py). Wall-time readings
+P3A's runs took 1.07 CPU s per abstract second, P3B's 1.18 and P3C's 1.20: the control's processes ran faster.
+The cause is not known: a sample of the running twee processes' CPUs (2 sockets, 28 cores each, 2 threads per core)
+shows each arm spread over the machine, not clustered; other users' load on shared cores is a guess. Wall-time readings
 then favour P3A, so the 6-hour decision is read both ways, and a test arm must clear +200 at equal abstract work
 too.
