@@ -764,6 +764,9 @@ Next:
 00000000000000000000000000000000000000000. **exp61 (15:40, [notes/2026-11-22-retry-deficit.md](notes/2026-11-22-retry-deficit.md)):** the retry
    deficit: 300 random unit goals Z8 left (sets/z8u300, seed 60), one 5 s run each in Z8's final context
    (abs/rd5.sh, after the packer; loops/RD5). How much would perfect retries add at 6 h?
+   **Result (16:29): 9 of 300 (3.0%, 1.1-4.9%) -> about 260 of 8,642. Perfect late 5 s retries add little; exp55's +200
+   bar is likely out of reach from retries alone. Z8 never ran 4,475 of its unsolved goals (by design; those prove
+   1.3% at 5 s in the final context, the others 4.7%).**
 0000000000000000000000000000000000000000. **exp60 (15:34, [notes/2026-11-22-floor-ratio-until.md](notes/2026-11-22-floor-ratio-until.md)):** the
    floor-ratio pair. P3A control vs P3B `--floor-ratio-until 120`, half2 from zero, 4 workers each, 6 h. Why: Z8 led
    Z7 by 1,820 at 1 h and trailed by 408-471 from 4 h (cross-time); in Z8 the head class got 171 runs in 6 h.
