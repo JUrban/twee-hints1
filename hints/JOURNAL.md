@@ -767,7 +767,7 @@ Next:
    pair first if within ±50.
    Smoke clean (12 of 200 in 10 minutes, no errors). **abs/after_z8.sh (PID 1622999, 03:11) starts abs/exp54.sh when
    loops/Z8.done appears, after up to 20 minutes for loops/EXP54.go or EXP54.skip.**
-   Candidate from production (07:15, loops/UL/r5 since the restart at row 233,804, 14.3 h): its own runs proved 32,
+   Candidate from production (07:10, loops/UL/r5 since the restart at row 233,804, 14.3 h): its own runs proved 32,
    L1 (the 40 s chain level) 17 in 23.8 CPU h (0.71/h), L0 7, the 5 s variants (V*@0) 8 in 52.7 CPU h. 773 of the
    1,026 heads had an L1 run since the restart, 253 none; 16 of the 17 L1 proofs were heads whose previous goal was
    proved 35-188 h earlier, not fresh chain steps. So heads wait for L1 CPU that the 5 s variants take: a late-A/B
