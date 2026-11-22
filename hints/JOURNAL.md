@@ -754,8 +754,8 @@ Paused:
 188,561 kept proofs (44,475 goals) in hintdata/realproofs/<family>/<family>_NN.tar.xz, 10 parts of at most 10 MB
 (45 MB), index.tsv.gz and README.md; `exp/hintdata_build.py --realproofs` adds the rest once proofq has caught up.
 
-**Totals (21 Nov 18:06, all trusted, trust.py --exposed loops/UNSOUND/exposed.txt): 48,238 of 51,784 solved
-(holdout 5,344 of 5,880), 3,546 unsolved.** REPORT's totals table
+**Totals (22 Nov 00:26, all trusted, trust.py --exposed loops/UNSOUND/exposed.txt): 48,260 of 51,784 solved
+(holdout 5,347 of 5,880), 3,524 unsolved.** REPORT's totals table
 has the history (user, 20 Nov: "update the total numbers in the report etc every now and then").
 
 Next:
