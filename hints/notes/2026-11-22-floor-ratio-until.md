@@ -35,3 +35,25 @@ Three arms of 4 workers and production's 6 are about 20 CPUs.
 * abs/setcurve.py sets/half2 P3A P3B --at 30,60,120,180,240,300,360; exp/armdiff.py P3B P3A (only-goals, union).
 * The mix lines: class h and q runs per hour before and after minute 120.
 * Decision (each test arm against P3A): ≥ +200 at 6 hours (half2 replicas differed by up to about 185). Within ±200, a replica first.
+
+## Early readings, and a measured A/A (22 Nov 21:12)
+
+`--floor-ratio-until 120` changes nothing before minute 120, so **P3B is the control's twin for the first two
+hours**: their difference until then is the noise of a side-by-side half2 pair.
+
+| | 10 min | 20 min | 30 min |
+|---|---:|---:|---:|
+| P3A (control) | 9,649 | 13,268 | 15,203 |
+| P3B (= P3A until 120 min) | 9,268 | 12,955 | 14,838 |
+| P3C (`--knn-drift-after 60`) | 9,294 | 12,972 | 14,981 |
+| P3B − P3A | −381 | −313 | −365 |
+| P3C − P3A | −355 | −296 | −222 |
+
+* The twins' 30-minute gap is throughput: in its first 30 minutes P3A completed 13,154 runs against P3B's 12,530,
+  with nearly equal run seconds (5,985 against 6,014). At equal abstract work (exp/abscurve.py) the gap at P3A's
+  20 minutes is −166 (P3B) and −219 (P3C).
+* The machine is busier than during exp55: 1.21 CPU s per abstract second, against 0.92-0.97 for P2X and P2Z.
+* So early gaps of 200-400 between side-by-side half2 arms are noise. exp55's early "cost" (−216 at 30 minutes)
+  is within it, and at equal abstract work P2Z against P2X was +118 at 10 minutes, +50 at 20, −175 at 30, −75 at
+  60, +169 at 120 and +201 at 360. The test of `--knn-drift-order-after` is not needed unless P3C falls further
+  behind than P3B does.
