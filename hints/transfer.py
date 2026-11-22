@@ -310,7 +310,24 @@ def live(D, d, j, T, rest, src_lemmas, every, allp='/project/hintwork/sets/all')
         time.sleep(max(0, every - (time.time() - t0)))
 
 
-def run(goals, d, j, T, rest, src_lemmas=0, live_dst=None, src_pool=False):
+USED_AX = re.compile(r'^Axiom \d+ \(([^)]*)\):', re.M)
+
+
+def used_lemma_goals(proof, o):
+    """(22 Nov 13:28, exp58b, notes/2026-11-22-src-used.md) the proven goals behind the lemma axioms a proof text used
+    (its 'Axiom N (name):' lines; names as exp/trust.py resolves them; O is the proof's own original)"""
+    out = []
+    for x in USED_AX.findall(proof):
+        m = re.match(r'lemma_goal_(\d+)$', x)
+        if m:
+            out.append(f'{o}__goal_{m.group(1)}'); continue
+        m = re.match(r'(?:lemma_knn|srclem|skax)_\d+_(.+__goal_\d+)$', x)
+        if m:
+            out.append(m.group(1))
+    return out
+
+
+def run(goals, d, j, T, rest, src_lemmas=0, live_dst=None, src_pool=False, src_used=False):
     import loop
     os.makedirs(d, exist_ok=True)
     names = os.path.join(d, 'goals.names')   # (loop.py's goal set: names only)
@@ -372,6 +389,27 @@ def run(goals, d, j, T, rest, src_lemmas=0, live_dst=None, src_pool=False):
                         L.append((m, fm))
             # (20 Nov 10:35) named after their goal, so a kept output's USEDAXIOMS tells which (exp/trust.py)
             lp.extra_axioms[g] = [(f'srclem_{i}_{m}', fm) for i, (m, fm) in enumerate(L)]
+        if src_used:
+            # (22 Nov 13:28, --src-used, exp58b) the lemma axioms the source proofs used (their proof texts in
+            # LIVE_DST/proofs, INIT/proofs or D/proofs), if proven here, not the goal and within the goal's axioms. A
+            # proof's hint file has its derived steps only, so without these a transfer (a proof step, the same
+            # statement in a stronger theory) has to re-derive the source's lemmas from hints.
+            A = lemmas.axiom_set(g)
+            have = {nm.split('_', 2)[2] for nm, _ in lp.extra_axioms.get(g, []) if nm.startswith('srclem_')}
+            L2 = []
+            pds = [os.path.join(x, 'proofs') for x in (live_dst, a.init, d) if x]
+            for f in src[g]:
+                b = os.path.basename(f)
+                pf = next((os.path.join(x, b) for x in pds if os.path.exists(os.path.join(x, b))), None)
+                if not pf:
+                    continue
+                for m in used_lemma_goals(open(pf).read(), lemmas.split(b)[0]):
+                    if m != g and m in lp.solved and m not in have and lemmas.axiom_set(m) <= A:
+                        fm = lemmas.lemma_form(m)
+                        if fm:
+                            have.add(m); L2.append((m, fm))
+            k0 = len(lp.extra_axioms.get(g, []))
+            lp.extra_axioms[g] = lp.extra_axioms.get(g, []) + [(f'srclem_{k0 + i}_{m}', fm) for i, (m, fm) in enumerate(L2)]
         # (20 Nov) a sketch file's .ax: the source run's axioms behind the sketch (givenmatch.py), as lemma axioms.
         # They are that run's axioms and lemmas (proven goals of the same or weaker axioms, pool hints as axioms).
         # (20 Nov 10:50) an optional third column names the proven goal the equation comes from (a step of its proof,
@@ -432,7 +470,7 @@ def main():
         T = float(opts[opts.index('--time') + 1]) if '--time' in opts else 20
         K = int(opts[opts.index('--src-lemmas') + 1]) if '--src-lemmas' in opts else 0
         dst = opts[opts.index('--live-dst') + 1] if '--live-dst' in opts else None
-        run(goals, d, j, T, rest, K, dst, '--src-pool' in opts)
+        run(goals, d, j, T, rest, K, dst, '--src-pool' in opts, '--src-used' in opts)
 
 
 if __name__ == '__main__':
