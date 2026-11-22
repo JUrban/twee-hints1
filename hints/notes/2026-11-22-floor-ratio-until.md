@@ -21,8 +21,14 @@ with `LOOPARGS="--floor-ratio-until 120"`), sets/half2 from zero, 4 workers each
 solve_new.sh's new `--lemma-ax` default. abs/after_exp55.sh (exp/ copy, PID 2235753, 15:34) starts it 10 minutes after
 exp55 ends (about 20:24) unless loops/EXP60.skip appears.
 
+**A third arm (18:29):** P3C = the same with `LOOPARGS="--knn-drift 5 --knn-drift-after 60"` (loop.py 1b4d930; smokes
+KDA, KDB). exp55's drift retries cost 216 at 30 minutes and 149 at 60, and gave +109 to +122 from 2 to 4 hours
+(notes/2026-11-22-knn-drift.md); the drift count now admits goals only after the first hour. P3C shares P3A as its
+control; with exp55 it also gives a second reading of the drift retries (not an exact replica: they start later).
+Three arms of 4 workers and production's 6 are about 20 CPUs.
+
 ## Measures
 
 * abs/setcurve.py sets/half2 P3A P3B --at 30,60,120,180,240,300,360; exp/armdiff.py P3B P3A (only-goals, union).
 * The mix lines: class h and q runs per hour before and after minute 120.
-* Decision: P3B ≥ P3A + 200 at 6 hours (half2 replicas differed by up to about 185). Within ±200, a replica first.
+* Decision (each test arm against P3A): ≥ +200 at 6 hours (half2 replicas differed by up to about 185). Within ±200, a replica first.

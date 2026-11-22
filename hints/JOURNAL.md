@@ -782,6 +782,8 @@ Next:
    floor-ratio pair. P3A control vs P3B `--floor-ratio-until 120`, half2 from zero, 4 workers each, 6 h. Why: Z8 led
    Z7 by 1,820 at 1 h and trailed by 408-471 from 4 h (cross-time); in Z8 the head class got 171 runs in 6 h.
    abs/after_exp55.sh (PID 2235753) starts it 10 min after exp55 ends unless loops/EXP60.skip. Decision +200 at 6 h.
+   (18:29) Third arm P3C `--knn-drift 5 --knn-drift-after 60` (new loop.py option, 1b4d930: the drift count admits
+   goals only after MIN minutes; exp55 lost 216 at 30 min, then +109 to +122). Same control, same rule.
 000000000000000000000000000000000000000. **exp59 (14:39, [notes/2026-11-22-hub-roots.md](notes/2026-11-22-hub-roots.md)):** 4,355 goals only
    production has (not Z7, not Z8); 2,082 fell at production's 5 s L0. exp/hubroots.py: 502 roots (first proof uses
    no other such goal), a few with reach 1,200-1,980 (aK2rev 349, Kproperties_1 314, aKperms_1 342, ...); the top
