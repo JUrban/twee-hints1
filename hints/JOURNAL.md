@@ -789,6 +789,9 @@ Next:
    First hour (08:14): L1 153 runs (ul74 67/h), 4 proved in 3.15 CPU h; new=4, synced=2 (ul74 2.2 new/h).
    At 3.7 h (11:00): new=18 (4.8 an hour); L1 17/503 in 10.64 CPU h (1.60/h, ul74 0.71), 53% of the CPU; the 5 s
    variants and L0 1 of 3,805 runs.
+   (11:15) Is there a better use of the variants' CPU? Over each label's own last 5 CPU h only L1 (1.39/h), L0 (1.20)
+   and Vs40@0 (0.40) prove anything; L2 0 in 3.1 CPU h since the relabel, L3 1 in 2.0, L4 0 in 4.2. So no: it needs
+   new members on heads (exp57).
 00000000000000000000000000000000. **Late A/B (03:00, [notes/2026-11-22-late-ab.md](notes/2026-11-22-late-ab.md)):** the 3-hour half2 tests
    from zero hardly reach the head and deep classes (P2V: 31 runs at the 40 s level in 3 hours). sets/late2: the 3,817
    half2 goals Z7 left unsolved (production has 2,234), with loops/Z7's proofs as the context (solve_new.sh CONTEXT),

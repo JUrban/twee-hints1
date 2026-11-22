@@ -13,12 +13,14 @@ import os
 if os.environ.get('FLATP'):   # all priors 1.0
     P = collections.defaultdict(lambda: 1.0)
 YW = float(os.environ.get('YW', YW))
-rows = []
+SF = int(os.environ.get('SCORE_FROM', 0))   # (22 Nov) score only the windows from this line on; estimates still from R
+rows = []; nsf = 0
 for i, l in enumerate(open(f_), 1):
     if i < R: continue
     f = l.rstrip('\n').split('\t')
     if len(f) < 5: continue
     rows.append((f[4], 1 if f[1] != 'NO' else 0, float(f[2])))
+    if i < SF: nsf = len(rows)
 d = math.exp(-1 / TAU)
 k = collections.Counter(); c = collections.Counter(); E = collections.Counter()
 kd = collections.Counter(); cd = collections.Counter()
@@ -26,7 +28,7 @@ Gk, Gc = 0.0, 0.0
 ll = collections.Counter(); n = 0; mll = collections.Counter(); nw = [0]
 for s in range(0, len(rows), W):
     w = rows[s:s + W]
-    if s > 0:
+    if s > 0 and s >= nsf:
         Gnow = (Gk + 1) / (Gc / 3600 + 0.5)
         est = {}; ests = collections.defaultdict(dict)
         wk = collections.Counter(); wc = collections.Counter()
