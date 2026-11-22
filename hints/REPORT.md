@@ -5571,6 +5571,22 @@ index is now rebuilt every 10 minutes, not 30 (about 1 s a rebuild).
     hints more a run;
   * search settings: the rule models rm7t and rm4b (`mX`, each with goal files in its own vocabulary), threshold 0.2,
     no parental guidance, no rule model.
+* **Twee's critical-pair weights (exp57, 22 Nov; the user: "have we played with different weights for the default
+  twee weighting functions?"; [notes/2026-11-22-cp-weights.md](notes/2026-11-22-cp-weights.md)).** No run before
+  had changed them. One fresh 20 s run per goal on 300 late heads (Z7's context), one value either side of each
+  default:
+
+  | arm | proved of 300 | +/− vs default | union with default | vs default at 40 s (116) |
+  |---|---:|---|---:|---:|
+  | default 20 s | 98 | | | |
+  | `--lhs-weight 2` / `8` | 89 / 89 | +2 −11 / +4 −13 | 100 / 102 | −16 / −14 |
+  | `--depth-weight 0` / `5` | 76 / 95 | +3 −25 / +6 −9 | 101 / 104 | −15 / −12 |
+  | `--var-weight 0.5` / `1.5` | 91 / 87 | +5 −12 / +5 −16 | 103 / 103 | −13 / −13 |
+  | `--dup-factor 1` | 91 | +0 −7 | 98 | −18 |
+
+  All nine arms together proved 119 in 19.3 CPU h, the 40 s default alone 116 in 4.1. So the weights are not
+  complementary members: on these goals a second setting is worth less than twice the time. loop.py
+  `--flag-variants NAME=FLAGS` (any twee flag as a variant) stays for later tests.
 
 ## 2ba. Soundness: the Prover9 negation bug, re-verification, and a model audit (20 Nov)
 
@@ -5741,8 +5757,9 @@ rounds of 30 s or more, but about 40% overhead for 8 s rounds.
   That is the next from-zero test after exp55 (exp58).
 * **Not adopted today:** the head class's 40 s runs cut to 20 s (exp54, +8 at 3 hours, within its ±50 band).
 * **Portfolio: twee's own critical-pair weights (exp57, the user's question at 11:08).** Seven weight settings at 20 s
-  on 300 heads, against the control at 20 s and 40 s. On the first 78 goals, the union of all nine arms is 19, against
-  17 for the control. So far the weights barely change which heads fall. The final reading is at about 15:10.
+  on 300 heads, against the control at 20 s (98 proved) and 40 s (116). Every setting proved fewer than the default
+  (76-95), and each one's union with the default stayed 12-18 below the default at twice the time. No member; twee's
+  default weights are the best single setting on these goals.
 * **What is weak in the evidence:**
   * The given-rule figures are on goals selected for having hits from many runs. Their rate will not hold for goals
     with a single hit.

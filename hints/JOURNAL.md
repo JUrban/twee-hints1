@@ -773,6 +773,8 @@ Next:
    **Result (13:26): lax 46 of 59, ctl 0 of 15 (paired 12 vs 0); 27 of the 36 Z8 never solved; all 597
    axiom lines of the proofs resolve. solve_new.sh GIVENARGS default += `--lemma-ax` (13:26).**
 000000000000000000000000000000000000. **exp57 (11:12, [notes/2026-11-22-cp-weights.md](notes/2026-11-22-cp-weights.md)):** twee's
+   **Result (14:14; ended 14:13:40): every weight arm below the default at 20 s (CW0 98; arms 76-95); each union with
+   CW0 12-18 below CW9 (116 at 40 s); all nine arms 119. No member. Twee's default weights stay.**
    critical-pair weights as members (user, 11:08: "have we played with different weights for the default twee
    weighting functions?" No: no run in the records changed them). sets/wheads300: 300 heads of late2 (previous goal
    proven in Z7's context; seed 57), loops/LAA.ctx, one fresh 20 s run per goal and arm. CW0 control; CW1/CW2

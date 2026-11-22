@@ -119,3 +119,28 @@ The union of all nine arms is 19 goals in 5.89 CPU h. Only CW3 proved a goal no 
 hardly change which heads fall at 20 s, and twice the time adds 1. The heads split into those any setting proves
 within 20 s and those none proves within 40 s.
 
+## Result (22 Nov 14:14; exp57 ran 11:57:42-14:13:40)
+
+exp/cwana.py on all 300 goals:
+
+| arm | proved | CPU h | +/− vs CW0 | union with CW0 (CPU h) | vs CW9 |
+|---|---:|---:|---|---:|---:|
+| CW0 control 20 s | 98 | 1.90 | | | |
+| CW9 control 40 s | **116** | 4.08 | +18 −0 | | |
+| CW1 lhs-weight 2 | 89 | 1.95 | +2 −11 | 100 (3.84) | −16 |
+| CW2 lhs-weight 8 | 89 | 1.83 | +4 −13 | 102 (3.73) | −14 |
+| CW3 depth-weight 0 | 76 | 1.55 | +3 −25 | 101 (3.45) | −15 |
+| CW4 depth-weight 5 | 95 | 2.17 | +6 −9 | 104 (4.06) | −12 |
+| CW5 var-weight 0.5 | 91 | 2.25 | +5 −12 | 103 (4.15) | −13 |
+| CW6 var-weight 1.5 | 87 | 1.59 | +5 −16 | 103 (3.49) | −13 |
+| CW7 dup-factor 1 | 91 | 1.95 | +0 −7 | 98 (3.85) | −18 |
+
+* Every weight setting proves fewer heads than twee's defaults at the same 20 s (−3 to −22).
+* As a second member beside the default, each is 12 to 18 below the default at twice the time. The union of all
+  nine arms is 119 in 19.3 CPU h, against 116 for CW9 in 4.1. Goals only one arm proved: CW9 7, CW3 1, CW6 1.
+* **Decision: no weight variant becomes a member.** Twee's default weights are the best single setting here, and the
+  variants are not complementary to it. On these heads, more time beats a second setting.
+* Caveat: one budget (20 s) and one population (late heads in Z7's context), one value either side of each default.
+  A setting could still pay at longer budgets or on other goals, but nothing here points to one.
+* The proved runs' proofs are queued in loops/CW*/proofq, which the proof worker follows.
+
