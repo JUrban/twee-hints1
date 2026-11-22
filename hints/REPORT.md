@@ -5780,6 +5780,36 @@ rounds of 30 s or more, but about 40% overhead for 8 s rounds.
 
 ## 3. Assessment
 
+*22 Nov, 20:36 (`date` checked). The 22 Nov 12:52 assessment follows it.*
+
+* **Where it stands.** **48,357 solved (+55.7% over plain twee at 4 s), holdout 5,363 (+67.4%)**, all trusted (18:02).
+  3,427 are left. Production (ul75, 6 workers) proves about 0.5 per CPU hour now, and its frontier is saturated: exp63
+  ran 120 of its unsolved unit goals under two other term orderings at 20 s (2.4 CPU h) and proved none.
+* **From zero: one more option adopted.** `--knn-drift 5` (exp55) sends failed goals back to the retry class once 5
+  or more new proofs rank among their 30 nearest kNN lemmas, and orders that class by the count. half2 from zero, 4
+  workers each, 6 hours, side by side: **+204** (21,796 against 21,592), with 297 goals only the drift arm proved
+  against 93. It costs 216 at 30 minutes and pays from the second hour. It is in solve_new.sh's LATE from 20:35.
+* **Running: exp60 (20:35 to about 02:35).** Three half2 arms of 4 workers on the same control: P3A (control),
+  P3B (`--floor-ratio-until 120`: the class floors stop after 2 hours) and P3C (`--knn-drift 5 --knn-drift-after 60`:
+  the drift count admits goals only after an hour). P3C is also exp55's replica.
+* **Not adopted today, each measured:**
+  * the head class's 40 s runs cut to 20 s (exp54, +8 in 3 hours);
+  * twee's own critical-pair weights, 7 settings (exp57; each proved fewer than the default, no union pays);
+  * twee built at -O2 (exp62; identical searches, 3.5% more CPU) and with aggressive specialisation (neutral);
+  * other term orderings on production's frontier (exp63, 0 of 120 each at 20 s).
+* **Bounds measured today.** Perfect late 5 s retries would add about 260 at 6 hours on all goals (exp61: 9 of 300
+  random failed goals proved in the final context). The from-zero runs miss mostly hubs: goals whose proofs open
+  chains of 1,200-2,000 others, first proved at 40-80 s, which a 6-hour run reaches only at 5 s (exp59).
+* **What is weak in the evidence:**
+  * exp55's +204 is just over its +200 rule; half2 pairs have differed by up to about 185. P3C checks it, with the
+    drift admitting goals from minute 60 instead of from the start.
+  * The late A/B's noise is still not measured.
+  * Production's rates are compared across times and contexts.
+* **Data.** 578,449 printed proofs are packed in hintdata/realproofs (24 families, parts of at most 9.9 MB, 121 MB);
+  exp55's two arms (about 53,000 more) are being packed now.
+* **Pending the user's decision:** `--proof-in-search` (proofs printed in the search run; it would free the 3 CPUs
+  that proofq spends repeating proved runs).
+
 *22 Nov, 12:52 (`date` checked). The 22 Nov 03:58 assessment follows it.*
 
 * **Where it stands.** **48,329 solved (+55.6% over plain twee at 4 s), holdout 5,359 (+67.3%)**, all trusted (12:41).
@@ -6022,6 +6052,19 @@ rounds of 30 s or more, but about 40% overhead for 8 s rounds.
     time.
 
 ## 4. Next steps
+
+*22 Nov, 20:36 (2az, 3):*
+
+* **exp60 (to about 02:35):** P3B (`--floor-ratio-until 120`) and P3C (`--knn-drift-after 60`, also exp55's replica)
+  against the control P3A, half2 from zero, 4 workers each, 6 hours. Each is adopted at +200 or more at 6 hours.
+* **Then a whole-benchmark run from zero with the system as it stands (Z9: all 51,784 goals, 6 workers, 8 hours).**
+  The last one, Z8, had 42,917 at 6 hours before exp55's `--knn-drift` and whatever exp60 adds. It measures the
+  system; it is not an A/B (runs at different times differ by up to about 400).
+* **Production** stays as it is: about 0.5 new proofs per CPU hour, and neither other orderings (exp63) nor late
+  5 s retries (exp61) add to it.
+* **Open:**
+  * the late A/B's replica pair, to measure its noise;
+  * `--proof-in-search` (the user's decision).
 
 *20 Nov, 11:56 (2az, 2ba):*
 
