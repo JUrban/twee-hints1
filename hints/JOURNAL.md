@@ -767,6 +767,8 @@ Next:
    (time-matched for control + one variant). Smoke clean (11:10). **abs/after_exp54w.sh (PID 2026476) starts it when
    exp54 ends (EXP55.skip for after_exp54.sh), then exp55.** exp54's replica pair is deferred. Decision: a union with
    CW0 that beats CW9 by 5+.
+   loop.py `--flag-variants NAME=FLAGS;...` (d825cae), so a winner can be a production variant: smoke FVS (11:17-11:23,
+   `lw2=--lhs-weight=2`, --variants lw2@0,unf@0) built level Vlw2@0 and ran it with `--lhs-weight 2`; no traceback.
 00000000000000000000000000000000000. **exp56 (11:05, [notes/2026-11-22-gm-retry.md](notes/2026-11-22-gm-retry.md)):** the given-rule
    hits the live loop gave up on. givenmatch.py live runs a hit goal once and lists it in loops/GML/tried.tsv for
    good. 30 of the 273 tried goals are still unsolved and all have hit rows; ns_to_aa1_b 673 has 229 from 32 source

@@ -80,3 +80,12 @@ differ (3,154 against 3,007 rules on nil3_1K_b 377), so the flag reaches twee.
 Decision: a weight arm whose union with CW0 beats CW9 by 5 or more goals becomes a member candidate. It would then
 be a 40 s variant on heads in production and get its exploration hour. loop.py's variants are named (unf, k60, r2
 and so on), so this needs a new variant kind that passes a twee flag.
+
+## loop.py support (22 Nov 11:23)
+
+`--flag-variants NAME=FLAGS;...` (commit d825cae) defines variants that add twee flags; NAME is then usable in
+`--variants` like the named variants. Twee takes no `--flag=value`, so loop.py splits such a token in two, and the
+option can go through LOOPARGS without spaces. Smoke FVS (solve_new.sh, sets/wsm3, 1 worker, 5 minutes,
+`--flag-variants lw2=--lhs-weight=2 --variants lw2@0,unf@0`): the cascade built level Vlw2@0 at 5 s, its twee command
+carried `--lhs-weight 2` (LOOP_PRINT_CMD), it ran on all 3 goals, and there was no traceback.
+
