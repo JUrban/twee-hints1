@@ -58,3 +58,17 @@ Runs by level (proofs / runs / CPU hours / CPU s a run): L0 P2V 13,202 / 13,404 
 1.40 / 0.38; Vunf@0 29 / 111 / 0.20 / 6.54 and 24 / 108 / 0.21 / 6.94; L2 one run each, 155 and 158 s. No CPU saving
 yet: first runs are short, and the queue is renormalised only as it grows. The deep runs, where exp25 measured −25%,
 come later. P2V is a replica of P2U's setup and sits 192 below it at 30 minutes, within the usual spread.
+
+## Interim at 1 hour (22 Nov 00:52): even, and no CPU saving
+
+| min | 10 | 30 | 45 | 60 |
+|---|---|---|---|---|
+| P2V (control) | 9,766 | 15,382 | 16,875 | 17,804 |
+| P2W (`--cp-renormalise-threshold 1000`) | 9,744 | 15,305 | 16,774 | 17,728 |
+| P2W − P2V | −22 | −77 | −101 | −76 |
+| P2U (exp52, same setup as P2V) | 9,627 | 15,574 | 16,931 | 17,696 |
+
+CPU s a run (results.tsv): L0 0.64 against 0.63 (15,772 and 15,777 runs); Vunf@0 7.16 and 7.42; Vk100@0 4.73 and
+4.57; Vk200@0 5.23 and 5.28; Vk400@0 5.50 and 5.71. Not renormalising saves nothing at these levels: the runs are
+5-10 s, and exp25's −25% was at 80 s. Deep runs are few (L1 3 and 2, L2 1 each). P2V replicates exp52's P2U: +108 at
+1 hour.
