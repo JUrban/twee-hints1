@@ -65,3 +65,27 @@ The cause is not known: a sample of the running twee processes' CPUs (2 sockets,
 shows each arm spread over the machine, not clustered; other users' load on shared cores is a guess. Wall-time readings
 then favour P3A, so the 6-hour decision is read both ways, and a test arm must clear +200 at equal abstract work
 too.
+
+## 120 minutes: the end of the twin window, and the sockets (22:39)
+
+| | 60 min | 90 min | 120 min |
+|---|---:|---:|---:|
+| P3A (control) | 17,541 | 18,582 | 19,520 |
+| P3B (= P3A until here) | 17,196 | 18,310 | 19,061 |
+| P3C | 17,312 | 18,435 | 19,299 |
+| P3B − P3A, wall | −345 | −272 | **−459** |
+| P3B − P3A, equal abstract work | −150 (P3A's 60) | **−27** (P3A's 90) | – |
+| P3C − P3A, equal abstract work | +15 | **+148** | – |
+
+* By wall time the twins ended their identical first two hours 459 apart; at equal abstract work (exp/abscurve.py)
+  27 apart. P3A's runs took 1.02 CPU s per abstract second in hours 2 and 3, P3B's 1.16 and 1.13, P3C's 1.13 and 1.14.
+* The cause: sockets. In a 12-second sample at 22:36 the running twee runs were on socket 0 for P3A 28 of 40, for
+  P3B 10 of 32, P3C 14 of 38, production 2 of 36 (/proc/cpuinfo: CPUs 0-27 and 56-83 are socket 0, 28-55 and
+  84-111 socket 1, CPU i and i+56 share a core). The kernel keeps runs near their loop.py, and three loops shared
+  socket 1.
+* So wall-time readings of side-by-side arms carry a throughput bias of their own, up to about 10% here, besides
+  the dispatch noise. The 6-hour decision is read at equal abstract work, and by wall time as a second view.
+* **Fix from 22:37-22:39** (abs/pin_exp60.sh, then abs/pin_exp60b.sh; copies in exp/): CPU affinity per process tree.
+  Each arm and production get 14 whole cores, 7 per socket, one logical CPU per core (P3A 0-6,28-34; P3B 7-13,35-41;
+  P3C 14-20,42-48; production with its side loops and proofq 21-27,49-55); the hyperthread siblings are left to the
+  machine's other users. The same for all arms, from 2 hours 2 minutes on; P3B's change of rule starts at 2 hours.
