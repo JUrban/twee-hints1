@@ -1407,6 +1407,14 @@ class Loop:
         # rebuild; in Z6 ranks 0-9 were 57% of the late kNN-last proofs.
         KC = bool(a.knn_ctx and RK and a.fail_order and not a.sched_model)
         kth, knew, kprev = {}, set(), [frozenset(self.solved)]
+        # (--knn-drift M, 22 Nov) per goal: the similarity of its --lemma-knn-th kNN lemma at its last fresh run (kmin),
+        # and how many proofs found since then score above it (kdc), i.e. roughly how many of its kNN lemmas are new.
+        # In exp54's control (LAA), Z7's unsolved goals in Z7's final context, the goals proved at the first run had a
+        # median of 6 new kNN lemmas since Z7's last run on them, the failed ones 2; with 5 or more new, 73 of 181
+        # proved (40%), with fewer 51 of 613 (8%) (hints/exp/knndrift.py LAA Z7 at 09:32). Z7 had last run the proved
+        # ones at a median of 173 of its 480 minutes.
+        KD = bool(KC and a.knn_drift)
+        kmin, kdc, kdv = {}, collections.Counter(), {}
         kcf = open(os.path.join(self.dir, 'knn_ctx.tsv'), 'a') if KC else None
         if RK:
             print(f'  cascade: --retry-knn: {len(knn_at)} goals with a recorded kNN lemma set', flush=True)
@@ -1770,19 +1778,35 @@ class Loop:
                                 new_ = [m for m in self.solved if m not in kprev[0] and m in ix_.info]
                                 kprev[0] = frozenset(self.solved); nh_ = 0; hn_ = []
                                 for n in [n for n in kth if n in self.solved or n not in att]:
-                                    del kth[n]; knew.discard(n)
+                                    del kth[n]; knew.discard(n); kmin.pop(n, None); kdc.pop(n, None)
+                                nd_ = 0
                                 for n, th in kth.items():
-                                    if n in knew:
+                                    if n in knew and not KD:
                                         continue
                                     if n not in ix_.info:
                                         if n not in oinfo_:
                                             continue
                                         ix_.info[n] = oinfo_[n]
-                                    if any(ix_.sim(n, m) > th for m in new_):
+                                    if KD:
+                                        # (--knn-drift: every new proof is scored, also for goals already waiting, so
+                                        # that the retry class can go by the count)
+                                        km_ = kmin.get(n, 0.0); hit_ = False; c_ = 0
+                                        for m in new_:
+                                            s_ = ix_.sim(n, m)
+                                            if s_ > km_:
+                                                c_ += 1
+                                                if s_ > th:
+                                                    hit_ = True
+                                        if c_:
+                                            kdc[n] += c_
+                                        if n not in knew and (hit_ or kdc[n] >= a.knn_drift):
+                                            knew.add(n); nh_ += 1; hn_.append(n); nd_ += 0 if hit_ else 1
+                                    elif any(ix_.sim(n, m) > th for m in new_):
                                         knew.add(n); nh_ += 1; hn_.append(n)
                                 krb += time.time() - t_
                                 print(f'  cascade: --knn-ctx: {nh_} goals gain a kNN lemma from the {len(new_)} new '
-                                      f'proofs ({len(knew)} waiting, {time.time()-t_:.1f}s): {" ".join(hn_[:4])}',
+                                      f'proofs ({len(knew)} waiting, {time.time()-t_:.1f}s): {" ".join(hn_[:4])}'
+                                      + (f' (--knn-drift: {nd_} by the count only)' if KD else ''),
                                       flush=True)
                         if SM and RK:
                             # best predicted first; the kNN check (~27 ms a goal) only as far as needed
@@ -1839,6 +1863,9 @@ class Loop:
                         # failed-before goals are their own --mix class 'q', with a share and a yield of their own
                         if a.retry_class and a.mix and a.fail_order and not SM:
                             rq = [x for x in retry if x[0] > 0]; retry = [x for x in retry if x[0] == 0]
+                            if KD:
+                                # (--knn-drift) the most new kNN lemmas first (capped at 10), then the usual order
+                                rq.sort(key=lambda x: (-min(kdc.get(x[-1], 0), 10),) + x)
                         else:
                             rq = []
                         uset = set()
@@ -1958,6 +1985,9 @@ class Loop:
                                 knew.discard(n)
                                 sc_ = sorted((self.lemma_index.sim(n, m) for m in knn_at[n]), reverse=True)
                                 kth[n] = sc_[a.knn_ctx - 1] if len(sc_) >= a.knn_ctx else 0.0
+                                if KD:
+                                    kdv[n] = kdc.pop(n, 0)
+                                    kmin[n] = sc_[a.lemma_knn - 1] if len(sc_) >= a.lemma_knn else 0.0
                             if a.retry_hints:
                                 hp[n] = psz(n)
                             # fresh in the new context; its state replaces any older one, so deepening
@@ -2123,7 +2153,8 @@ class Loop:
                     rf.write(f'{n}\t{"THM" if ok else "NO"}\t{dt:.2f}\t{stats}\t{LAB[lev]}\tt={time.time()-t0:.0f}'
                              f'\tc={chs(att[n][0]) if n in att else "-"}' + ('\tf=1' if fl_ else '')
                              + ('\tab=1' if T[lev] > T[0] and VAR[lev] != 'p9' and self.ab_arm(n) else '')
-                             + ('\tq=1' if qk_ else '') + ('\tr=1' if rt_ else '') + ('\tht=1' if ht1 else '') + '\n'); rf.flush()
+                             + ('\tq=1' if qk_ else '') + ('\tr=1' if rt_ else '') + ('\tht=1' if ht1 else '')
+                             + (f'\tkd={kdv.pop(n)}' if KD and lev == 0 and n in kdv else '') + '\n'); rf.flush()
                     l_ = LAB[lev] + 'f' if fl_ else LAB[lev]
                     ynote(l_, 1 if ok else 0, dt)
                     if ok and n in self.solved:
@@ -2523,6 +2554,10 @@ def make_parser():
                          'each keep this share of the workers while they have waiting goals; the other slots go to '
                          'the kind with the most proofs per run second lately (with --far-retry; from zero on '
                          '51,784 goals the near retries took every slot and 12,998 goals never ran, REPORT 2as)')
+    ap.add_argument('--knn-drift', type=int, default=0, metavar='M',
+                    help='(22 Nov) with --knn-ctx: count, per goal, the proofs since its last fresh run that score above its '
+                         '--lemma-knn-th kNN lemma (about how many of its kNN lemmas are new); M or more is a new context, '
+                         'and the retry class (--retry-class) goes by the count, most first (results rows kd=N)')
     ap.add_argument('--knn-ctx', type=int, default=0, metavar='K',
                     help='(21 Nov) --retry-knn with --fail-order: a goal one of whose proofs new since the last kNN '
                          'rebuild would enter the top K of its kNN lemmas counts as having a new context (retried '
