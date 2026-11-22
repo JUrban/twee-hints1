@@ -150,13 +150,14 @@ def main_climbs():
 # loops, whose proofs use each other's goals as lemmas
 RP_FAMILIES = [('production', ['UL', 'XFL', 'GML', 'STEPJ', 'SW20', 'ROOTS']),
                ('smoke', ['HCT', 'HCT2', 'KCT', 'KCT2', 'KCT3', 'QKC', 'QKT', 'QKN', 'RCT', 'RTT', 'YDT', 'YDT2', 'HTT',
-                          'HTT2', 'GFT', 'KDS', 'LSM', 'LTD', 'PIS', 'FRS', 'FRT']),
+                          'HTT2', 'GFT', 'KDS', 'LSM', 'LTD', 'PIS', 'FRS', 'FRT', 'KDA', 'KDB']),
                # (22 Nov 15:32) the experiments since 21 Nov 11:50, one family each
                ('profile', ['PRA', 'PRB', 'PRC', 'PRF']),
                ('exp54', ['LAA', 'LAB']),
                ('exp56', ['GMR', 'GMR2', 'GMR3']),
                ('exp57', ['CW0', 'CW1', 'CW2', 'CW3', 'CW4', 'CW5', 'CW6', 'CW7', 'CW9']),
-               ('exp59', ['HUB80'])]
+               ('exp59', ['HUB80']),
+               ('exp61', ['RD5'])]   # (22 Nov 20:28) exp55's arms P2X, P2Z stay families of their own, as the P2* before
 RP_MAX = 9_900_000          # bytes of one .tar.xz
 RP_RAW = 120_000_000        # tar bytes per first try (xz -6 makes proofs about 16 times smaller)
 
