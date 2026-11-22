@@ -160,7 +160,7 @@ def sketch(hits, skdir, goals, per=3, prefix=False):
 
 
 def live(dirs, d, every, j, rest, dst='UL', gfail=('GFAIL', 'GSAT'), allp=ALL, same=True, cap=60, inst_scan=True,
-         same_cap=None, nowait=False):
+         same_cap=None, nowait=False, retry_h=0.0):
     """(20 Nov 03:45) beside production: every EVERY s, scan the given logs of DIRS written since the last cycle against
     production's unsolved unit goals (variants; instances within the own original), and run each new hit as exp38
     did: the rule's ancestry first at 20 s, then for the failures the log's prefix with its axioms at 40 s
@@ -175,6 +175,21 @@ def live(dirs, d, every, j, rest, dst='UL', gfail=('GFAIL', 'GSAT'), allp=ALL, s
     wm = float(open(wmp).read()) if os.path.exists(wmp) else time.time()
     triedp = os.path.join(d, 'tried.tsv')
     tried = {l.split('\t')[0] for l in open(triedp)} if os.path.exists(triedp) else set()
+    # (22 Nov 12:01, --retry-tried H; exp56, notes/2026-11-22-gm-retry.md) a tried goal runs again on the hits that came
+    # after its last try, at most once every H hours, newest hits first: of the 30 tried goals left unsolved, 5 fell to
+    # the prefix pass on their newest hits (goal_673 had 229 hit rows from 32 source runs). Rows of tried.tsv carry
+    # the try's time (third column; older rows count as time 0)
+    tried_t = {}
+    if os.path.exists(triedp):
+        for l in open(triedp):
+            w_ = l.rstrip('\n').split('\t')
+            tried_t[w_[0]] = float(w_[2]) if len(w_) > 2 and w_[2] else 0.0
+    later = {}   # (--retry-tried) the hits of tried goals since their last try, until they may run again
+    def blocked(g):
+        return g in tried and not (retry_h and time.time() - tried_t.get(g, 0.0) >= retry_h * 3600)
+    def hstamp(h):
+        m_ = re.match(r'[^/]+/(\d{13})_', h[1])
+        return int(m_.group(1)) / 1000 if m_ else 0.0
     me = os.path.abspath(__file__); tp = os.path.join(os.path.dirname(me), 'transfer.py')
     ax = {}
     def axs(n):
@@ -206,7 +221,7 @@ def live(dirs, d, every, j, rest, dst='UL', gfail=('GFAIL', 'GSAT'), allp=ALL, s
         S = {l.split('\t')[0] for l in open(os.path.join(LOOPS, dst, 'solved.tsv'))}
         want = {}
         for n in (l.strip() for l in open(allp)):
-            if n and n not in S and n not in tried:
+            if n and n not in S and (n not in tried or retry_h):
                 try:
                     ks = gkeys(n)
                 except Exception:
@@ -256,7 +271,7 @@ def live(dirs, d, every, j, rest, dst='UL', gfail=('GFAIL', 'GSAT'), allp=ALL, s
                         break
                     off += len(l.encode())
                     w = l.rstrip('\n').split('\t')
-                    if len(w) >= 6 and w[0] not in S and w[0] not in tried:
+                    if len(w) >= 6 and w[0] not in S and (w[0] not in tried or retry_h):
                         hits.setdefault(w[0], []).append(tuple(w[:3]) + (w[3], w[4], int(w[5]))); nf += 1
             open(offp, 'w').write(str(off))
         print(f'cycle {cyc} {time.strftime("%H:%M:%S")}: {len(want)} target keys, {len(jobs)} new logs, '
@@ -265,7 +280,17 @@ def live(dirs, d, every, j, rest, dst='UL', gfail=('GFAIL', 'GSAT'), allp=ALL, s
             pending.setdefault(g, []).extend(v)
         read_failed()
         for g in [g for g in pending if g in S or g in tried]:
-            del pending[g]
+            v_ = pending.pop(g)
+            if retry_h and g not in S:
+                later[g] = (later.get(g, []) + v_)[-50:]
+        for g in [g for g in later if g in S]:
+            del later[g]
+        if retry_h:
+            back = [g for g in later if not blocked(g)]
+            for g in back:
+                pending[g] = later.pop(g)
+            if back or later:
+                print(f'  --retry-tried: {len(back)} tried goals back with newer hits, {len(later)} waiting', flush=True)
         # (20 Nov 12:14 --no-wait: a hit runs without waiting for the loop to fail on its goal; exp42's ancestry runs
         # proved 93% at about 4 s each while about 290 hits waited)
         hits = {g: pending.pop(g) for g in [g for g in pending if nowait or g in failed][:cap]}
@@ -274,7 +299,8 @@ def live(dirs, d, every, j, rest, dst='UL', gfail=('GFAIL', 'GSAT'), allp=ALL, s
             hp = os.path.join(d, f'hits_{run_}_{cyc}.tsv')
             with open(hp, 'w') as fo:
                 for g in sorted(hits):
-                    for h in sorted(set(hits[g]), key=lambda h: (h[5], h[1], h[2]))[:5]:
+                    for h in sorted(set(hits[g]), key=lambda h: (h[5], -hstamp(h), h[1], h[2]) if retry_h
+                                    else (h[5], h[1], h[2]))[:5]:
                         fo.write('\t'.join(map(str, h)) + '\n')
             with open(os.path.join(d, 'solved.tsv'), 'w') as f:   # (production's proofs as context, round 0)
                 for l in open(os.path.join(LOOPS, dst, 'solved.tsv')):
@@ -293,8 +319,8 @@ def live(dirs, d, every, j, rest, dst='UL', gfail=('GFAIL', 'GSAT'), allp=ALL, s
                 subprocess.run([sys.executable, tp, 'run', gp, d, '-j', str(j), '--time', str(T), '--src-lemmas', '6',
                                 '--live-dst', os.path.join(LOOPS, dst), '--'] + rest)
             with open(triedp, 'a') as f:
-                f.writelines(f'{g}\t{cyc}\n' for g in sorted(hits))
-            tried |= set(hits)
+                f.writelines(f'{g}\t{cyc}\t{time.time():.0f}\n' for g in sorted(hits))
+            tried |= set(hits); tried_t.update((g, time.time()) for g in hits)
         # (20 Nov 04:30) the same statement proven in a theory with more axioms (REPORT 2ar; exp/sofree.py): the
         # candidates whose first source proof has no missing axiom as a step, new (goal, first source) pairs only,
         # source proof steps first, 20 s (46 at 04:18 gave 9, 26 per CPU h)
@@ -344,7 +370,7 @@ def main():
                     dst=val('--dst', 'UL'), gfail=[x for x in val('--gfail', 'GFAIL,GSAT').split(',') if x],
                     allp=val('--set', ALL), same='--no-same' not in opts, cap=val('--cap', 60),
                     inst_scan='--no-inst' not in opts, same_cap=val('--same-cap', -1) if '--same-cap' in opts else None,
-                    nowait='--no-wait' in opts)
+                    nowait='--no-wait' in opts, retry_h=val('--retry-tried', 0.0))
     if sys.argv[1] == 'sketch':
         per = int(sys.argv[sys.argv.index('--per') + 1]) if '--per' in sys.argv else 3
         return sketch(sys.argv[2], sys.argv[3], sys.argv[4], per, '--prefix' in sys.argv)
