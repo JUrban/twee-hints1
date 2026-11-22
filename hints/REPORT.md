@@ -5403,8 +5403,8 @@ from zero, against exp30's P2D.
     hours and Z8 trails by 408-471 from 4 to 6 hours (−406 at equal abstract work at 5 hours). Stopped at 6 hours:
     by the rule set at its start, the option needs a side-by-side test either way (exp55, planned).
   * Z8's own runs were ahead at 4 hours (+347); the gap was in proofs synced from the statement transfer (−818).
-    exp/armdiff.py: of the 798 goals only Z7 had at 4 hours, 387 fell at Z7's first run, made about 50 minutes later
-    than Z8's failed one, in a fuller context.
+    exp/armdiff.py: of the 798 goals only Z7 had at 4 hours, 387 fell at Z7's first run. For the 206 of them Z8 had
+    run, Z7's first run came at a median of 187 minutes and Z8's failed one at 162: later, in a fuller context.
   * Caveat: exp52's side-by-side on half2 still had +789 at 3 hours, where Z8 against Z7 was already level. Part of
     the late gap may be the cross-time comparison (noise up to about 400).
 * **ul75: production with the head class (22 Nov 07:13; [notes/2026-11-22-ul75.md](notes/2026-11-22-ul75.md)).** In
