@@ -765,6 +765,8 @@ Next:
    dropped. exp/gmreplay.py: lax on all 59 and ctl on 15, each in Z8's context at the time of its run, 20 s, 1
    worker (PID 2059788, loops/GMRP). If lax beats the control rate by 10+, `--lemma-ax` goes into solve_new.sh's
    GIVENARGS before exp55 (~15:20).
+   **Result (13:26): lax 46 of 59, ctl 0 of 15 (paired 12 vs 0); 27 of the 36 Z8 never solved; all 597
+   axiom lines of the proofs resolve. solve_new.sh GIVENARGS default += `--lemma-ax` (13:26).**
 000000000000000000000000000000000000. **exp57 (11:12, [notes/2026-11-22-cp-weights.md](notes/2026-11-22-cp-weights.md)):** twee's
    critical-pair weights as members (user, 11:08: "have we played with different weights for the default twee
    weighting functions?" No: no run in the records changed them). sets/wheads300: 300 heads of late2 (previous goal

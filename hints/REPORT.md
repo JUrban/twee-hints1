@@ -3371,6 +3371,10 @@ Matching against proof steps covers only about 22 M of the given logs' 400 M rul
   * With it, the 20 s pass proved 7 of the first 12 left goals, several in 3-4 s.
   * Production's live loop has run with `--lemma-ax` and `--retry-tried 3` (newer hits, newest first, at most every
     3 hours) since 12:06.
+  * From zero (exp58a, [notes/2026-11-22-lemma-ax-replay.md](notes/2026-11-22-lemma-ax-replay.md)): replayed on the 59
+    goals Z8's live loop failed in its ancestry pass, each in Z8's context at the time of its run, the fix proved 46
+    (27 of the 36 Z8 never solved), and the unchanged sketches 0 of 15. solve_new.sh's live loop has it
+    by default since 22 Nov 13:26.
 
 **Base-theory runs as generators (exp39, 20 Nov 05:39-07:24;
 [notes/2026-11-20-base-saturation.md](notes/2026-11-20-base-saturation.md)).**
