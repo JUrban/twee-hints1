@@ -210,7 +210,7 @@ def sketch(hits, skdir, goals, per=3, prefix=False):
 
 
 def live(dirs, d, every, j, rest, dst='UL', gfail=('GFAIL', 'GSAT'), allp=ALL, same=True, cap=60, inst_scan=True,
-         same_cap=None, nowait=False, retry_h=0.0, lax=False):
+         same_cap=None, nowait=False, retry_h=0.0, lax=False, retry_times=None):
     """(20 Nov 03:45) beside production: every EVERY s, scan the given logs of DIRS written since the last cycle against
     production's unsolved unit goals (variants; instances within the own original), and run each new hit as exp38
     did: the rule's ancestry first at 20 s, then for the failures the log's prefix with its axioms at 40 s
@@ -346,30 +346,38 @@ def live(dirs, d, every, j, rest, dst='UL', gfail=('GFAIL', 'GSAT'), allp=ALL, s
         hits = {g: pending.pop(g) for g in [g for g in pending if nowait or g in failed][:cap]}
         print(f'  {len(hits)} goals to run (failed in the loop), {len(pending)} pending', flush=True)
         if hits:
-            hp = os.path.join(d, f'hits_{run_}_{cyc}.tsv')
-            with open(hp, 'w') as fo:
-                for g in sorted(hits):
-                    for h in sorted(set(hits[g]), key=lambda h: (h[5], -hstamp(h), h[1], h[2]) if retry_h
-                                    else (h[5], h[1], h[2]))[:5]:
-                        fo.write('\t'.join(map(str, h)) + '\n')
             with open(os.path.join(d, 'solved.tsv'), 'w') as f:   # (production's proofs as context, round 0)
                 for l in open(os.path.join(LOOPS, dst, 'solved.tsv')):
                     w_ = l.split('\t')
                     if len(w_) >= 3 and l.endswith('\n'):
                         f.write(f'{w_[0]}\t0\t{w_[2].strip()}\n')
-            for tag, pre, T in (('a', False, 20), ('p', True, 40)):
-                gp = os.path.join(d, f'goals_{run_}_{cyc}{tag}.tsv')
-                sketch(hp, os.path.join(d, 'sketch' + tag), gp, 3, pre)
-                if lax:   # (--lemma-ax)
-                    lemma_ax(gp, os.path.join(d, 'sketch' + tag), S)
-                if tag == 'p':   # (only the goals the first pass left)
-                    S2 = {l.split('\t')[0] for l in open(os.path.join(LOOPS, dst, 'solved.tsv'))}
-                    keep = [l for l in open(gp) if l.split('\t')[0] not in S2]
-                    open(gp, 'w').writelines(keep)
-                    if not keep:
-                        break
-                subprocess.run([sys.executable, tp, 'run', gp, d, '-j', str(j), '--time', str(T), '--src-lemmas', '6',
-                                '--live-dst', os.path.join(LOOPS, dst), '--'] + rest)
+            # (22 Nov 14:16, --retry-times A,P; exp56c, notes/2026-11-22-gm-retry.md) retried goals run apart, with
+            # longer passes: GMR3's 60 s and 160 s proved 8 of 11 that 20 s and 40 s had failed
+            groups = [('', sorted(hits), (20, 40))] if not retry_times else \
+                [('', sorted(g for g in hits if g not in tried), (20, 40)),
+                 ('r', sorted(g for g in hits if g in tried), retry_times)]
+            for gt, gs, (Ta, Tp) in groups:
+                if not gs:
+                    continue
+                hp = os.path.join(d, f'hits_{run_}_{cyc}{gt}.tsv')
+                with open(hp, 'w') as fo:
+                    for g in gs:
+                        for h in sorted(set(hits[g]), key=lambda h: (h[5], -hstamp(h), h[1], h[2]) if retry_h
+                                        else (h[5], h[1], h[2]))[:5]:
+                            fo.write('\t'.join(map(str, h)) + '\n')
+                for tag, pre, T in ((gt + 'a', False, Ta), (gt + 'p', True, Tp)):
+                    gp = os.path.join(d, f'goals_{run_}_{cyc}{tag}.tsv')
+                    sketch(hp, os.path.join(d, 'sketch' + tag), gp, 3, pre)
+                    if lax:   # (--lemma-ax)
+                        lemma_ax(gp, os.path.join(d, 'sketch' + tag), S)
+                    if pre:   # (only the goals the first pass left)
+                        S2 = {l.split('\t')[0] for l in open(os.path.join(LOOPS, dst, 'solved.tsv'))}
+                        keep = [l for l in open(gp) if l.split('\t')[0] not in S2]
+                        open(gp, 'w').writelines(keep)
+                        if not keep:
+                            break
+                    subprocess.run([sys.executable, tp, 'run', gp, d, '-j', str(j), '--time', str(T), '--src-lemmas',
+                                    '6', '--live-dst', os.path.join(LOOPS, dst), '--'] + rest)
             with open(triedp, 'a') as f:
                 f.writelines(f'{g}\t{cyc}\t{time.time():.0f}\n' for g in sorted(hits))
             tried |= set(hits); tried_t.update((g, time.time()) for g in hits)
@@ -422,7 +430,8 @@ def main():
                     dst=val('--dst', 'UL'), gfail=[x for x in val('--gfail', 'GFAIL,GSAT').split(',') if x],
                     allp=val('--set', ALL), same='--no-same' not in opts, cap=val('--cap', 60),
                     inst_scan='--no-inst' not in opts, same_cap=val('--same-cap', -1) if '--same-cap' in opts else None,
-                    nowait='--no-wait' in opts, retry_h=val('--retry-tried', 0.0), lax='--lemma-ax' in opts)
+                    nowait='--no-wait' in opts, retry_h=val('--retry-tried', 0.0), lax='--lemma-ax' in opts,
+                    retry_times=tuple(float(x) for x in val('--retry-times', '').split(',')) if '--retry-times' in opts else None)
     if sys.argv[1] == 'sketch':
         per = int(sys.argv[sys.argv.index('--per') + 1]) if '--per' in sys.argv else 3
         return sketch(sys.argv[2], sys.argv[3], sys.argv[4], per, '--prefix' in sys.argv)
