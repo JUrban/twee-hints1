@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """(22 Nov 12:08) exp57 (notes/2026-11-22-cp-weights.md): twee's critical-pair weights as members.
 
-  cwana.py [--root /project/hintwork/loops] [--set sets/wheads300] CONTROL TIMED ARM...
+  cwana.py [--root /project/hintwork/loops] CONTROL TIMED ARM...
 
 Per arm: goals run and proved, CPU hours (column 3 of its rows), and against CONTROL (CW0): +/-, the union with it and
 that union against TIMED (CW9, the control at twice the budget, time-matched for "control + one arm"). Then the union

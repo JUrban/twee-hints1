@@ -89,3 +89,13 @@ option can go through LOOPARGS without spaces. Smoke FVS (solve_new.sh, sets/wsm
 `--flag-variants lw2=--lhs-weight=2 --variants lw2@0,unf@0`): the cascade built level Vlw2@0 at 5 s, its twee command
 carried `--lhs-weight 2` (LOOP_PRINT_CMD), it ran on all 3 goals, and there was no traceback.
 
+## Started (22 Nov 11:57:42)
+
+abs/after_exp54w.sh started abs/exp57.sh 6 seconds after exp54 ended. Arm loop.py PIDs: CW0 2044955, CW1 2044958, CW2
+2044960, CW3 2044961, CW4 2044963, CW5 2044965, CW6 2044967, CW7 2044968, CW9 2044969. abs/after_exp54.sh saw
+loops/EXP55.skip and exited.
+
+At 12:08 the arms had run 14 to 24 goals each in 11 minutes, so about 30 s a goal: 300 goals take about 3.2 hours,
+to about 15:10. exp55 then starts about 15:20 and ends about 21:20. Read it with `exp/cwana.py CW0 CW9 CW1 CW2 CW3
+CW4 CW5 CW6 CW7`, which counts only the goals every arm has run.
+
