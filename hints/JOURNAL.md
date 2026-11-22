@@ -775,6 +775,7 @@ Next:
    At 30 min (03:24): Z8 26,836, Z7 24,561 (+2,275; +1,828 at equal abstract work), Z7C 26,757: the early cost is gone.
    At 1 h (03:54): Z8 33,987, Z7 32,154 (+1,833; +1,607 at equal abstract work), Z7C 34,522 (Z8 −535).
    At 2 h (04:54): Z8 38,179, Z7 37,195 (+984; +2,216/+1,820/+1,346 at 30/60/90 min: narrowing), Z7C 38,955.
+   At 3 h (05:54): Z8 40,740, Z7 40,786 (−46; −338 at equal abstract work), Z7C 40,479: the early lead is used up.
    Plan (03:26): at 4 hours, if Z8 leads Z7 by more than about 400 at equal abstract work, stop Z8 (its hours 4-8
    would only give a cross-time difference inside the noise) and start exp54 then instead of at 10:53.
 000000000000000000000000000000. **Proof cost (23:58, [notes/2026-11-21-proof-cost.md](notes/2026-11-21-proof-cost.md)):** twee's `proof` flag is read only
