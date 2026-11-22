@@ -759,6 +759,11 @@ Paused:
 has the history (user, 20 Nov: "update the total numbers in the report etc every now and then").
 
 Next:
+000000000000000000000000000000000. **ul75 (07:13, [notes/2026-11-22-ul75.md](notes/2026-11-22-ul75.md)):** production with
+   `--head-class`. Since ul74's start (14.3 h) L1 proved 17 in 23.8 CPU h (0.71/h), the 5 s variants 8 in 52.7, and
+   253 of the 1,026 heads had no L1 run. **ul74 stopped 07:13:18; ul75 started 07:13:25 (loop.py 1846757, J=6, first
+   row 257,905); class h ran 5 L1 runs in its first 197 s.** Read: L1 runs and proofs per hour from row 257,905,
+   against ul74's 2.2 new per hour.
 00000000000000000000000000000000. **Late A/B (03:00, [notes/2026-11-22-late-ab.md](notes/2026-11-22-late-ab.md)):** the 3-hour half2 tests
    from zero hardly reach the head and deep classes (P2V: 31 runs at the 40 s level in 3 hours). sets/late2: the 3,817
    half2 goals Z7 left unsolved (production has 2,234), with loops/Z7's proofs as the context (solve_new.sh CONTEXT),
@@ -1086,6 +1091,7 @@ reports are written as the experiments run.
 | [notes/2026-11-21-proof-cost.md](notes/2026-11-21-proof-cost.md) | What `--no-proof` saves in a search run: nothing measurable (42 proved runs) |
 | [notes/2026-11-22-z8.md](notes/2026-11-22-z8.md) | Z8: the system as it stands, from zero on all goals (after exp52) |
 | [notes/2026-11-22-late-ab.md](notes/2026-11-22-late-ab.md) | A late-phase A/B: the goals Z7 left, with Z7's proofs as the context; exp54 (`--head-time 20`) |
+| [notes/2026-11-22-ul75.md](notes/2026-11-22-ul75.md) | ul75: production with the head class |
 | [notes/2026-11-20-base-saturation.md](notes/2026-11-20-base-saturation.md) | exp39: base-theory runs as rule generators for the unsolved goals of the stronger theories |
 | [notes/2026-11-20-given-transfer.md](notes/2026-11-20-given-transfer.md) | exp38: unsolved goals that are variants of rules other runs derived and did not use (379 M in the given logs; transfer.py only matches proof steps); their ancestry as hints |
 | [notes/2026-11-19-from-zero-portfolio.md](notes/2026-11-19-from-zero-portfolio.md) | half1 from zero in 2 hours with today's deep portfolio (PGC), against PGA's 18,987 (exp27, from 07:18) |
