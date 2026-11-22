@@ -99,3 +99,23 @@ At 12:08 the arms had run 14 to 24 goals each in 11 minutes, so about 30 s a goa
 to about 15:10. exp55 then starts about 15:20 and ends about 21:20. Read it with `exp/cwana.py CW0 CW9 CW1 CW2 CW3
 CW4 CW5 CW6 CW7`, which counts only the goals every arm has run.
 
+## Interim, 78 goals (22 Nov 12:39)
+
+exp/cwana.py on the 78 goals every arm has run:
+
+| arm | proved | CPU h | +/− vs CW0 | union with CW0 | vs CW9 (18 in 1.29 h) |
+|---|---:|---:|---|---:|---|
+| CW0 control 20 s | 17 | 0.57 | | | |
+| CW9 control 40 s | 18 | 1.29 | +1 −0 | | |
+| CW1 lhs-weight 2 | 15 | 0.57 | +0 −2 | 17 in 1.14 h | −1 |
+| CW2 lhs-weight 8 | 15 | 0.57 | +0 −2 | 17 | −1 |
+| CW3 depth-weight 0 | 15 | 0.48 | +1 −3 | 18 | +0 |
+| CW4 depth-weight 5 | 15 | 0.66 | +0 −2 | 17 | −1 |
+| CW5 var-weight 0.5 | 17 | 0.68 | +1 −1 | 18 | +0 |
+| CW6 var-weight 1.5 | 16 | 0.49 | +0 −1 | 17 | −1 |
+| CW7 dup-factor 1 | 16 | 0.58 | +0 −1 | 17 | −1 |
+
+The union of all nine arms is 19 goals in 5.89 CPU h. Only CW3 proved a goal no other arm proved. So far the weights
+hardly change which heads fall at 20 s, and twice the time adds 1. The heads split into those any setting proves
+within 20 s and those none proves within 40 s.
+
