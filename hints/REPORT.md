@@ -5613,6 +5613,22 @@ index is now rebuilt every 10 minutes, not 30 (about 1 s a rebuild).
     than its 5 s proofs (0.93 against 2.21 times per proof). The hubs' reach builds up over days.
   * kNN centrality (how many unsolved goals would take a goal among their 30 nearest lemmas) picks the biggest hubs
     only weakly (rank correlation 0.20 with reach).
+* **Retries by kNN drift (exp55, 22 Nov; [notes/2026-11-22-knn-drift.md](notes/2026-11-22-knn-drift.md)):
+  adopted.** loop.py `--knn-drift 5` counts, per failed goal, the new proofs that now rank among its 30 nearest kNN
+  lemmas since its last fresh run, sends goals with 5 or more back to the retry class, and orders that class by the
+  count. half2 from zero, 4 workers each, 6 hours, side by side:
+
+  | min | 30 | 60 | 120 | 240 | 360 |
+  |---|---:|---:|---:|---:|---:|
+  | P2X (control) | 15,411 | 17,644 | 19,601 | 21,207 | 21,592 |
+  | P2Z (`--knn-drift 5`) | 15,195 | 17,495 | 19,710 | 21,324 | **21,796** |
+
+  * +204 at 6 hours (the rule was +200; half2 replicas differed by up to about 185). One-arm goals: P2Z-only 297,
+    P2X-only 93, union 21,889.
+  * The count orders the retries as intended: retries with 10 or more new kNN lemmas proved 37.5%, 5-9 23.9%,
+    1-2 12.9%, 0 8.5%.
+  * The cost is early: −216 at 30 minutes, while the retries take workers from first runs. exp60's arm P3C
+    (`--knn-drift-after 60`: the count admits goals only after an hour) tests a delayed start and replicates the gain.
 
 ## 2ba. Soundness: the Prover9 negation bug, re-verification, and a model audit (20 Nov)
 

@@ -858,6 +858,8 @@ Next:
    **Started 14:23:40 by abs/after_exp54w.sh (after exp57): P2X loop.py 2075027 (knn_drift 0), P2Z 2075029 (5);
    both live loops with `--lemma-ax` (solve_new.sh's new default). Ends about 20:24. Readings at 30-360 min.**
    Interim: 30 min −216, 60 min −149, 120 min +109, 180 min +122, **240 min +117** (P2Z 21,324, P2X 21,207).
+   **Result (done 20:25:02): 360 min +204 (P2Z 21,796, P2X 21,592); P2Z-only 297, P2X-only 93, union 21,889.
+   Adopted: `--knn-drift 5` into solve_new.sh's LATE after exp60's arms copied solve_new.sh (P3C = replica).**
 000000000000000000000000000000000. **ul75 (07:13, [notes/2026-11-22-ul75.md](notes/2026-11-22-ul75.md)):** production with
    `--head-class`. Since ul74's start (14.3 h) L1 proved 17 in 23.8 CPU h (0.71/h), the 5 s variants 8 in 52.7, and
    253 of the 1,026 heads had no L1 run. **ul74 stopped 07:13:18; ul75 started 07:13:25 (loop.py 1846757, J=6, first
