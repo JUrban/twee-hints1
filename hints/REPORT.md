@@ -5627,8 +5627,10 @@ index is now rebuilt every 10 minutes, not 30 (about 1 s a rebuild).
     P2X-only 93, union 21,889.
   * The count orders the retries as intended: retries with 10 or more new kNN lemmas proved 37.5%, 5-9 23.9%,
     1-2 12.9%, 0 8.5%.
-  * The cost is early: −216 at 30 minutes, while the retries take workers from first runs. exp60's arm P3C
-    (`--knn-drift-after 60`: the count admits goals only after an hour) tests a delayed start and replicates the gain.
+  * The cost is early: −216 at 30 minutes. The count alone admitted only 13 goals by then, so the likelier cause is
+    the sort of the retry class by the count, from the start. exp60's arm P3C (`--knn-drift-after 60`) delays only
+    the admissions (54 in P2Z's first hour): in effect a replica of the gain. loop.py `--knn-drift-order-after MIN`
+    (delaying the sort) is for a later test.
 
 ## 2ba. Soundness: the Prover9 negation bug, re-verification, and a model audit (20 Nov)
 
@@ -5791,7 +5793,8 @@ rounds of 30 s or more, but about 40% overhead for 8 s rounds.
   against 93. It costs 216 at 30 minutes and pays from the second hour. It is in solve_new.sh's LATE from 20:35.
 * **Running: exp60 (20:35 to about 02:35).** Three half2 arms of 4 workers on the same control: P3A (control),
   P3B (`--floor-ratio-until 120`: the class floors stop after 2 hours) and P3C (`--knn-drift 5 --knn-drift-after 60`:
-  the drift count admits goals only after an hour). P3C is also exp55's replica.
+  the drift count admits goals only after an hour). Since the count admitted only 54 goals in exp55's first hour,
+  P3C is in effect exp55's replica.
 * **Not adopted today, each measured:**
   * the head class's 40 s runs cut to 20 s (exp54, +8 in 3 hours);
   * twee's own critical-pair weights, 7 settings (exp57; each proved fewer than the default, no union pays);
@@ -5801,8 +5804,8 @@ rounds of 30 s or more, but about 40% overhead for 8 s rounds.
   random failed goals proved in the final context). The from-zero runs miss mostly hubs: goals whose proofs open
   chains of 1,200-2,000 others, first proved at 40-80 s, which a 6-hour run reaches only at 5 s (exp59).
 * **What is weak in the evidence:**
-  * exp55's +204 is just over its +200 rule; half2 pairs have differed by up to about 185. P3C checks it, with the
-    drift admitting goals from minute 60 instead of from the start.
+  * exp55's +204 is just over its +200 rule; half2 pairs have differed by up to about 185. P3C, which differs only by
+    the 54 admissions of the first hour, checks it.
   * The late A/B's noise is still not measured.
   * Production's rates are compared across times and contexts.
 * **Data.** 578,449 printed proofs are packed in hintdata/realproofs (24 families, parts of at most 9.9 MB, 121 MB);

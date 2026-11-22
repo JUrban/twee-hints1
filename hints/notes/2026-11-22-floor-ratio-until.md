@@ -25,6 +25,9 @@ exp55 ends (about 20:24) unless loops/EXP60.skip appears.
 KDA, KDB). exp55's drift retries cost 216 at 30 minutes and 149 at 60, and gave +109 to +122 from 2 to 4 hours
 (notes/2026-11-22-knn-drift.md); the drift count now admits goals only after the first hour. P3C shares P3A as its
 control; with exp55 it also gives a second reading of the drift retries (not an exact replica: they start later).
+(20:40) Closer to a replica than meant: the count admitted only 54 goals in P2Z's first hour, and the sort of the
+retry class by the count, the likelier cause of the early cost, still starts at once (notes/2026-11-22-knn-drift.md,
+"Correction").
 Three arms of 4 workers and production's 6 are about 20 CPUs.
 
 ## Measures
