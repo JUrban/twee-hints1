@@ -97,3 +97,7 @@ second: P3A 1.04, P3B 1.11, P3C 1.09 (before them 1.02 against 1.13-1.16): close
 * P3B, from minute 120 without the floor-ratio rule, went from −27 at equal work (P3A's 90 minutes, before the
   change) to −259 (P3A's 170).
 * P3C, in effect exp55's drift arm again, leads by 528 at equal work (exp55 at 3 hours: +122 by wall time).
+* (23:37) Why the sets did not equalise: /proc/stat over 15 s, busy CPUs per arm's 14 cores (and their siblings): P3A
+  5.8 (2.2), P3B 10.3 (1.1), P3C 7.7 (2.6), production 11.2 (1.1). P3B has about 6 processes, so other users' work,
+  which the sandbox does not show, runs on its cores. The sets remove our own loops' socket imbalance, not other
+  users'. Equal abstract work stays the main reading.
