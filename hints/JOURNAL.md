@@ -759,6 +759,12 @@ Paused:
 has the history (user, 20 Nov: "update the total numbers in the report etc every now and then").
 
 Next:
+00000000000000000000000000000000000. **exp56 (11:05, [notes/2026-11-22-gm-retry.md](notes/2026-11-22-gm-retry.md)):** the given-rule
+   hits the live loop gave up on. givenmatch.py live runs a hit goal once and lists it in loops/GML/tried.tsv for
+   good. 30 of the 273 tried goals are still unsolved and all have hit rows; ns_to_aa1_b 673 has 229 from 32 source
+   runs (newest 10:15 today), tried once on 20 Nov 04:57. The live loop's sort by ancestry size sees 0 on every
+   failed-run hit, so it took the oldest logs. exp/gmretry.py runs the same two passes (20 s ancestry, 40 s prefix)
+   on the newest 3 hits of distinct sources, 1 worker, into production. Started 11:05:27 (PID 2023224, loops/GMR).
 0000000000000000000000000000000000. **exp55 (09:33, [notes/2026-11-22-knn-drift.md](notes/2026-11-22-knn-drift.md)):**
    loop.py `--knn-drift M`: retry goals whose kNN lemma sets drifted (M or more new since the last fresh run), and
    the retry class goes by that count. Why: LAA's first runs on Z7's unsolved goals prove 40% with 5+ new kNN
@@ -1115,6 +1121,7 @@ reports are written as the experiments run.
 | [notes/2026-11-22-late-ab.md](notes/2026-11-22-late-ab.md) | A late-phase A/B: the goals Z7 left, with Z7's proofs as the context; exp54 (`--head-time 20`) |
 | [notes/2026-11-22-ul75.md](notes/2026-11-22-ul75.md) | ul75: production with the head class |
 | [notes/2026-11-22-knn-drift.md](notes/2026-11-22-knn-drift.md) | exp55: retry the goals whose kNN lemmas drifted (`--knn-drift`) |
+| [notes/2026-11-22-gm-retry.md](notes/2026-11-22-gm-retry.md) | exp56: retry the given-rule hits the live loop gave up on (exp/gmretry.py) |
 | [notes/2026-11-20-base-saturation.md](notes/2026-11-20-base-saturation.md) | exp39: base-theory runs as rule generators for the unsolved goals of the stronger theories |
 | [notes/2026-11-20-given-transfer.md](notes/2026-11-20-given-transfer.md) | exp38: unsolved goals that are variants of rules other runs derived and did not use (379 M in the given logs; transfer.py only matches proof steps); their ancestry as hints |
 | [notes/2026-11-19-from-zero-portfolio.md](notes/2026-11-19-from-zero-portfolio.md) | half1 from zero in 2 hours with today's deep portfolio (PGC), against PGA's 18,987 (exp27, from 07:18) |
