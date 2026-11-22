@@ -786,6 +786,9 @@ Next:
    loops/GML3.log).**
    **exp56b final (12:39): 13 of 25 (12 at 20 s), 0.48 CPU h; 18 of the 30 given-up goals proved in all. GML3 4 of 4
    in its first 30 minutes. Production 48,329.**
+   Candidate for from zero (exp58, after exp55): solve_new.sh's GIVENARGS + `--lemma-ax --retry-tried 1`. In Z8's live
+   loop (loops/Z8_GML) the ancestry pass proved 665 of 765, the prefix pass 40 of 95, and 682 goals failed there
+   (same-statement runs included), of which Z8 later solved 265. A half2 pair, 6 h, as exp55.
 0000000000000000000000000000000000. **exp55 (09:33, [notes/2026-11-22-knn-drift.md](notes/2026-11-22-knn-drift.md)):**
    loop.py `--knn-drift M`: retry goals whose kNN lemma sets drifted (M or more new since the last fresh run), and
    the retry class goes by that count. Why: LAA's first runs on Z7's unsolved goals prove 40% with 5+ new kNN
