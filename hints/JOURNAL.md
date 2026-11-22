@@ -759,6 +759,12 @@ Paused:
 has the history (user, 20 Nov: "update the total numbers in the report etc every now and then").
 
 Next:
+00000000000000000000000000000000. **Late A/B (03:00, [notes/2026-11-22-late-ab.md](notes/2026-11-22-late-ab.md)):** the 3-hour half2 tests
+   from zero hardly reach the head and deep classes (P2V: 31 runs at the 40 s level in 3 hours). sets/late2: the 3,817
+   half2 goals Z7 left unsolved (production has 2,234), with loops/Z7's proofs as the context (solve_new.sh CONTEXT),
+   abs/late_test.sh. Smoke LSM (200 goals, 2 workers, 10 minutes, --head-time 20) at 03:00:20. Planned exp54 when Z8
+   ends (about 10:53): LAA control and LAB --head-time 20 (exp51), 4 workers each, 3 hours; decision +50, a replica
+   pair first if within ±50.
 0000000000000000000000000000000. **Z8 (planned 00:23, [notes/2026-11-22-z8.md](notes/2026-11-22-z8.md)):** the defaults as they stand
    (LATE + --floor-ratio 20) from zero on all goals, 6 workers, 8 hours, one arm against Z7's curve. abs/after_exp53.sh
    (PID 1485120) starts abs/z8.sh when exp53 ends (about 02:52), after up to 20 minutes for loops/Z8.go or Z8.skip.
@@ -1063,6 +1069,7 @@ reports are written as the experiments run.
 | [notes/2026-11-21-renorm-zero.md](notes/2026-11-21-renorm-zero.md) | exp53: deep runs without queue renormalisation, from zero (`--cp-renormalise-threshold 1000`) |
 | [notes/2026-11-21-proof-cost.md](notes/2026-11-21-proof-cost.md) | What `--no-proof` saves in a search run: nothing measurable (42 proved runs) |
 | [notes/2026-11-22-z8.md](notes/2026-11-22-z8.md) | Z8: the system as it stands, from zero on all goals (after exp52) |
+| [notes/2026-11-22-late-ab.md](notes/2026-11-22-late-ab.md) | A late-phase A/B: the goals Z7 left, with Z7's proofs as the context; exp54 (`--head-time 20`) |
 | [notes/2026-11-20-base-saturation.md](notes/2026-11-20-base-saturation.md) | exp39: base-theory runs as rule generators for the unsolved goals of the stronger theories |
 | [notes/2026-11-20-given-transfer.md](notes/2026-11-20-given-transfer.md) | exp38: unsolved goals that are variants of rules other runs derived and did not use (379 M in the given logs; transfer.py only matches proof steps); their ancestry as hints |
 | [notes/2026-11-19-from-zero-portfolio.md](notes/2026-11-19-from-zero-portfolio.md) | half1 from zero in 2 hours with today's deep portfolio (PGC), against PGA's 18,987 (exp27, from 07:18) |
