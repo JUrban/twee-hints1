@@ -38,6 +38,7 @@ in `/project/hintwork` (not in git).
 | + production's own loop (ul74, 6 workers) and its side loops; at 22 Nov 07:21, all trusted | **48,280** (+55.4% over plain) | **5348** (+67.0%) | – |
 | + production with the head class (ul75), the given-rule retry and its lemma-axiom fix (2al, exp56); at 22 Nov 12:41, all trusted | **48,329** (+55.6% over plain) | **5359** (+67.3%) | – |
 | + the given-rule retry's longer passes (exp56c), production (ul75) and its derived-rule loop (gmlive4); at 22 Nov 18:02, all trusted | **48,357** (+55.7% over plain) | **5363** (+67.4%) | – |
+| + production (ul75) and its side loops; exp55's `--knn-drift 5` in the from-zero system; at 22 Nov 21:39, all trusted | **48,372** (+55.7% over plain) | **5365** (+67.4%) | – |
 
 **Correction (20 Nov 10:40; [notes/2026-11-20-p9-negation-bug.md](notes/2026-11-20-p9-negation-bug.md)).** The counts
 from 15 Nov on include proofs that are not proofs.
@@ -150,6 +151,7 @@ written in loops/UL. Merged proofs count from their merge.
 | 22 Nov 07:21 | 48,280 | 5348 | 20 new: production's own runs 16 (ul74, 6 workers), its side loops (transfer, derived rules) 4; Z8 from zero at 4 hours 42,007 (Z7 42,478); production restarted 07:13 as ul75 (`--head-class`); all 48,280 trusted (trust.py --exposed, loops/TRUSTNOW/t0712x, run 07:09-07:21) |
 | 22 Nov 12:41 | 48,329 | 5359 | 49 new: production's own runs 23 (ul75, `--head-class`, 6 workers), the given-rule retry of goals the live loop had given up on 18 (exp56: newest hits, then the failed runs' lemma axioms named by proven goal), the live given-rule loop 7 (with both changes from 12:06), the transfer loop 1; exp54 ended (+8, not adopted); all 48,329 trusted (trust.py --exposed, loops/TRUSTNOW/t1240, run 12:41-12:50) |
 | 22 Nov 18:02 | 48,357 | 5363 | 28 new: production's own runs 14 (ul75: L0 5, L1 3, 5 s variants 6), the given-rule retry's longer passes 8 (exp56c, GMR3), the live derived-rule loop 6 (gmlive4); exp57 (CP weights), exp62 (-O2) and exp63 (orderings on the frontier) rejected; all 48,357 trusted (trust.py --exposed loops/UNSOUND/exposed.txt, loops/TRUSTNOW/t1802) |
+| 22 Nov 21:39 | 48,372 | 5365 | 15 new: the live derived-rule loop 9 (gmlive4), production's own runs 5 (ul75: L0 1, L1 1, 5 s variants 3), the transfer loop 1; exp55 ended (`--knn-drift 5` adopted from zero, +204); all 48,372 trusted (trust.py --exposed loops/UNSOUND/exposed.txt, loops/TRUSTNOW/t2139, run 21:39-21:43) |
 
 From 15 Nov 05:30 the rate fell from hundreds an hour to 50–100. The
 cheap new contexts are used up; 58% of the unsolved goals sit behind the

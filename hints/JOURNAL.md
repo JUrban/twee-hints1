@@ -758,8 +758,9 @@ exp54/56/57/59, profile; 23 commits in hintdata, parts at most 9.9 MB, realproof
 (20:29-20:58) `--realproofs --skip=P3A,P3B,P3C` added P2X 26,444 and P2Z 26,555 (with their side loops), exp61 9, smoke
 KDA/KDB, production to 369: 632,292 proofs in 27 families, realproofs/ 133 MB, every part under 10 MB. exp60 later.
 
-**Totals (22 Nov 18:02, all trusted, trust.py --exposed loops/UNSOUND/exposed.txt, loops/TRUSTNOW/t1802, run
-18:02-18:11): 48,357 of 51,784 solved (holdout 5,363 of 5,880), 3,427 unsolved.** REPORT's totals table
+**Totals (22 Nov 21:39, all trusted, trust.py -j 2 --exposed loops/UNSOUND/exposed.txt, loops/TRUSTNOW/t2139, run
+21:39-21:43): 48,372 of 51,784 solved (holdout 5,365 of 5,880), 3,412 unsolved.** 15 new since 18:02: gmlive4 9,
+ul75 5, XFL 1. REPORT's totals table
 has the history (user, 20 Nov: "update the total numbers in the report etc every now and then").
 
 Next:
