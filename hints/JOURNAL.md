@@ -764,6 +764,8 @@ Next:
    no other such goal), a few with reach 1,200-1,980 (aK2rev 349, Kproperties_1 314, aKperms_1 342, ...); the top
    10 first fell to production's L2 4, L1 3, L0 2, not its own runs 1; Z7/Z8 ran them mostly at 5 s. Test: the top 24, one 80 s run each in Z8's context
    (loops/Z8F.ctx), 1 worker (abs/hub80.sh, loops/HUB80).
+   **Result (15:24): 15 of 24 proved in Z8's context (7 under 10 s: context drift; 8 at 11-175 s: Z8 never
+   gave any more than 8 s). Next: a kNN-centrality signal for hubs, checked on these roots, then a from-zero pair.**
 00000000000000000000000000000000000000. **exp58b (13:32, [notes/2026-11-22-src-used.md](notes/2026-11-22-src-used.md)):** the same gap in transfer
    runs: a proof's hint file lacks the lemma axioms it used, and same-statement runs get no source lemmas at all.
    transfer.py `--src-used` adds the source proofs' used lemma axioms (from their proof texts), named by goal.
