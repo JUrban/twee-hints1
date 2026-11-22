@@ -27,3 +27,19 @@ rm4t model, 6 + 30 kNN lemmas), two arms at once with 1 worker each: loops/OD (d
 * Proved per arm, one-arm goals, the union; proofs per CPU hour against production's current 0.5.
 * Decision: if OO1 proves at least 4 goals OD does not, add an ordering variant to production's variant list (its
   explore/yield rules then judge it), and test orderings 2-3 the same way.
+
+## Result (22 Nov 18:01; both arms 16:47:34-18:01:04)
+
+| arm | proved | CPU h |
+|---|---:|---:|
+| OD (default ordering) | 0 / 120 | 1.15 |
+| OO1 (ordering 1) | 0 / 120 | 1.22 |
+
+* **Not adopted.** Neither ordering proves anything at 20 s on production's frontier (0 of 120 is below about 2.5% at
+  95%). At production's current 0.5 per CPU hour about 0.6 per arm was expected, so the frontier is as saturated
+  for the new ordering as for the default.
+* An 80 s version would cost about 9 CPU hours for an expected 3 proofs per arm at production's L2 rate (0.73 per
+  CPU hour): too few to tell the arms apart. Not run.
+* The 14 Nov result (8 of 32 under another ordering at 80 s) was on stalled gap-1 goals with fresh hint pools,
+  easier than today's tail.
+

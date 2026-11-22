@@ -765,6 +765,7 @@ Next:
    term ordering on production's frontier. Production yields about 0.5 proofs per CPU h now (698 CPU h spent on the
    3,432 unsolved, median 47 runs), all under twee's default precedence. 120 unsolved unit goals (sets/ulu120, seed
    63) in production's context (loops/ULF.ctx), 20 s fresh: OD default vs OO1 ordering 1. abs/ordtest.sh.
+   **Result (18:01): 0/120 both (1.15 and 1.22 CPU h). Not adopted; no 80 s version (too few expected proofs).**
 000000000000000000000000000000000000000000. **exp62 (16:33, [notes/2026-11-22-o2-build.md](notes/2026-11-22-o2-build.md)):** twee-e61 built with -O2
    (all binaries so far: cabal's default -O1; Prover9-new's josef01-cpu-next audits build flags). Worktree
    /project/hintwork/tw61o2; abs/o2bench.sh runs exp61's command with both binaries at once (loops/OB1, OB2).
