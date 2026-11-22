@@ -1918,7 +1918,10 @@ class Loop:
                             if not av:
                                 break
                             low = [c for c in av if cn_[c] < a.mix * a.j]
-                            if a.floor_ratio and low:
+                            if a.floor_ratio and low and (not a.floor_ratio_until
+                                                          or time.time() - t0 < a.floor_ratio_until * 60):
+                                # (--floor-ratio-until MIN, 22 Nov) only in the first MIN minutes: Z8 led Z7 by
+                                # 1,820 at 1 hour and trailed by 471 at 4 (notes/2026-11-22-z8.md)
                                 # (--floor-ratio K, 21 Nov 13:25) a class of --floor-classes keeps its floor only
                                 # while K times its yield reaches the best class's: in Z7's first 30 minutes the q
                                 # and h floors held half a worker of six at 77 and 12 proofs per run-hour against the
@@ -2405,6 +2408,8 @@ def make_parser():
     ap.add_argument('--floor-ratio', type=float, default=0, metavar='K',
                     help='(21 Nov) --mix: a class of --floor-classes gets its floor of workers only while K times its '
                          'yield (proofs per run-hour, last 300 runs) is at least the best waiting class\'s')
+    ap.add_argument('--floor-ratio-until', type=float, default=0, metavar='MIN',
+                    help='(22 Nov) --floor-ratio only in the first MIN minutes of the cascade (0: always)')
     ap.add_argument('--floor-classes', default='qh', metavar='CLS',
                     help='the classes --floor-ratio applies to (default qh: retries and heads)')
     ap.add_argument('--quick-near', action='store_true',
