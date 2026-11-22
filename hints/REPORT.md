@@ -5672,8 +5672,8 @@ rounds of 30 s or more, but about 40% overhead for 8 s rounds.
   43,767 at 8 hours on 6 workers (Z7), against 44,092 for the 20 Nov system on 12 workers (Z6).
   * Z8 (LATE + `--floor-ratio 20`, 6 workers, from 02:53) is level with the 20 Nov system in the first hour, where
     Z7 was 2,368 behind it. At 1 hour Z8 had 33,987, against Z7's 32,154. Its 4-hour reading comes at about 06:53.
-* **What moved the from-zero curve in the last 1.5 days** (half2 from zero, side by side, against a noise of about
-  105 between identical arms):
+* **What moved the from-zero curve in the last 1.5 days** (half2 from zero, side by side; the same setup run twice,
+  3 hours apart, differed by at most 105 at any reading (P2U, P2V), earlier identical pairs by about 185):
   * failed-before goals as their own mix class, `--retry-class`: +450 at 5 hours (exp44);
   * member yields over the last 2,000 runs with re-exploration: +559 at 5 hours (exp45);
   * both, plus kNN-context retries and a head class (P2O): +241 over the pair (exp48);
