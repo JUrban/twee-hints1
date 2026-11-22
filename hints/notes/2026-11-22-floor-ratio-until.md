@@ -36,7 +36,7 @@ Three arms of 4 workers and production's 6 are about 20 CPUs.
 * The mix lines: class h and q runs per hour before and after minute 120.
 * Decision (each test arm against P3A): ≥ +200 at 6 hours (half2 replicas differed by up to about 185). Within ±200, a replica first.
 
-## Early readings, and a measured A/A (22 Nov 21:12)
+## Early readings, and a measured A/A (22 Nov 21:08)
 
 `--floor-ratio-until 120` changes nothing before minute 120, so **P3B is the control's twin for the first two
 hours**: their difference until then is the noise of a side-by-side half2 pair.
