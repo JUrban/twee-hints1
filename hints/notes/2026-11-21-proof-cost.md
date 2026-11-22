@@ -45,3 +45,16 @@ the same proofs for no extra CPU and leave the queue only for the jobs already i
 
 This changes a method the user set, so the current way (search `--no-proof`, proofq reruns) stays until the user
 agrees.
+
+## Prepared, not switched on (22 Nov 01:00)
+
+loop.py `--proof-in-search` (0ae814a, off by default): search runs drop `--no-proof`; a proved run that printed its
+proof keeps it at once in DIR/proofs/<goal> (and the live destination's proofs/), cut as proofq.py cuts it, through
+a temp file and a rename; a proved run without a printed proof (a Prover9 variant) is still queued for proofq.
+transfer.py runs twee through loop.Loop.run_one, so its loops take the option among their loop options too.
+
+Smoke PIS (sets/smoke487 from zero, 2 workers, 6 minutes, LOOPARGS=--proof-in-search, 22 Nov 00:54-01:00): 473
+runs, 387 goals proved, 387 proofs kept in loops/PIS/proofs, each ending in the RESULT line, 0 jobs in
+loops/PIS/proofq, no keep-proofs errors. Its transfer loops (without the option) queued 5 jobs as before.
+
+Switching on is one line in solve_new.sh (the main and transfer loops' options), once the user agrees.
