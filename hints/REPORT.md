@@ -3355,6 +3355,18 @@ Matching against proof steps covers only about 22 M of the given logs' 400 M rul
   0.34 CPU h, against 4-5 per CPU h on 16 Nov. It now runs in every live cycle.
 * **The hit stream thins fast.** New goals from production's failed runs per hour: 19 (04:15-05:00), 17, then 1
   (06:00-07:00). The first hour harvested hits that had accumulated.
+* **The failed runs' lemmas were missing (exp56, 22 Nov; [notes/2026-11-22-gm-retry.md](notes/2026-11-22-gm-retry.md)).**
+  * The live loop ran a hit goal once and then never again. 30 goals it had tried stayed unsolved, although later
+    failed runs kept deriving them: ns_to_aa1_b 673 had 229 hit rows from 32 source runs.
+  * Rerun on their newest hits (exp/gmretry.py): the 20 s ancestry pass proved 0 of 30, the 40 s prefix pass 5.
+  * The cause is in loop.py's given scan, which marks only the original's axioms as axioms. A failed run's lemma
+    axioms (its sibling and kNN lemmas, all proven goals) therefore reached the target run only as hints.
+  * Fix: givenmatch.lemma_ax names each such rule after the proven goal it states, if that goal's axioms are within
+    the target's, and passes it as a lemma axiom that trust.py resolves. All 105 checked in one problem match their
+    goal's statement.
+  * With it, the 20 s pass proved 7 of the first 12 left goals, several in 3-4 s.
+  * Production's live loop has run with `--lemma-ax` and `--retry-tried 3` (newer hits, newest first, at most every
+    3 hours) since 12:06.
 
 **Base-theory runs as generators (exp39, 20 Nov 05:39-07:24;
 [notes/2026-11-20-base-saturation.md](notes/2026-11-20-base-saturation.md)).**
