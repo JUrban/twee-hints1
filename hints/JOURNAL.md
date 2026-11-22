@@ -759,6 +759,10 @@ Paused:
 has the history (user, 20 Nov: "update the total numbers in the report etc every now and then").
 
 Next:
+0000000000000000000000000000000000000000. **exp60 (15:34, [notes/2026-11-22-floor-ratio-until.md](notes/2026-11-22-floor-ratio-until.md)):** the
+   floor-ratio pair. P3A control vs P3B `--floor-ratio-until 120`, half2 from zero, 4 workers each, 6 h. Why: Z8 led
+   Z7 by 1,820 at 1 h and trailed by 408-471 from 4 h (cross-time); in Z8 the head class got 171 runs in 6 h.
+   abs/after_exp55.sh (PID 2235753) starts it 10 min after exp55 ends unless loops/EXP60.skip. Decision +200 at 6 h.
 000000000000000000000000000000000000000. **exp59 (14:39, [notes/2026-11-22-hub-roots.md](notes/2026-11-22-hub-roots.md)):** 4,355 goals only
    production has (not Z7, not Z8); 2,082 fell at production's 5 s L0. exp/hubroots.py: 502 roots (first proof uses
    no other such goal), a few with reach 1,200-1,980 (aK2rev 349, Kproperties_1 314, aKperms_1 342, ...); the top
@@ -1195,6 +1199,7 @@ reports are written as the experiments run.
 | [notes/2026-11-22-lemma-ax-replay.md](notes/2026-11-22-lemma-ax-replay.md) | exp58a: the lemma-axiom fix replayed on a from-zero live loop (exp/gmreplay.py) |
 | [notes/2026-11-22-src-used.md](notes/2026-11-22-src-used.md) | exp58b: the source proofs' used lemma axioms in transfer runs (transfer.py --src-used, exp/soreplay.py) |
 | [notes/2026-11-22-hub-roots.md](notes/2026-11-22-hub-roots.md) | exp59: the goals only production has, their lemma roots, and the hubs run long in Z8's context |
+| [notes/2026-11-22-floor-ratio-until.md](notes/2026-11-22-floor-ratio-until.md) | exp60: `--floor-ratio-until 120` from zero against the control |
 | [notes/2026-11-20-base-saturation.md](notes/2026-11-20-base-saturation.md) | exp39: base-theory runs as rule generators for the unsolved goals of the stronger theories |
 | [notes/2026-11-20-given-transfer.md](notes/2026-11-20-given-transfer.md) | exp38: unsolved goals that are variants of rules other runs derived and did not use (379 M in the given logs; transfer.py only matches proof steps); their ancestry as hints |
 | [notes/2026-11-19-from-zero-portfolio.md](notes/2026-11-19-from-zero-portfolio.md) | half1 from zero in 2 hours with today's deep portfolio (PGC), against PGA's 18,987 (exp27, from 07:18) |
