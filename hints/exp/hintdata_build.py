@@ -150,7 +150,7 @@ def main_climbs():
 # loops, whose proofs use each other's goals as lemmas
 RP_FAMILIES = [('production', ['UL', 'XFL', 'GML', 'STEPJ', 'SW20', 'ROOTS']),
                ('smoke', ['HCT', 'HCT2', 'KCT', 'KCT2', 'KCT3', 'QKC', 'QKT', 'QKN', 'RCT', 'RTT', 'YDT', 'YDT2', 'HTT',
-                          'HTT2', 'GFT', 'KDS', 'LSM', 'LTD', 'PIS', 'FRS', 'FRT', 'KDA', 'KDB']),
+                          'HTT2', 'GFT', 'KDS', 'LSM', 'LTD', 'PIS', 'FRS', 'FRT', 'KDA', 'KDB', 'KDC']),
                # (22 Nov 15:32) the experiments since 21 Nov 11:50, one family each
                ('profile', ['PRA', 'PRB', 'PRC', 'PRF']),
                ('exp54', ['LAA', 'LAB']),
