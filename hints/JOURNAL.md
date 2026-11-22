@@ -781,6 +781,9 @@ Next:
    (skax_<i>_<goal>, resolved by trust.py); goal_673's 3 sketches get 300. abs/gmr2.sh (PID 2032897) runs it after GMR.
    **exp56 result (11:59): prefix pass 5 of 30 (goal_673 among them), about 5.6 per CPU h; all trusted-resolvable.**
    GMR2 (--lemma-ax) on the 25 left from 11:59:25.
+   **GMR2: 7 of its first 12 at the 20 s ancestry pass (GMR 0 of 30 there); 105 of 105 named skax axioms match
+   their goal. Production's GML restarted 12:06:46 as gmlive3.sh (`--retry-tried 3 --lemma-ax`, PID 2047685,
+   loops/GML3.log).**
 0000000000000000000000000000000000. **exp55 (09:33, [notes/2026-11-22-knn-drift.md](notes/2026-11-22-knn-drift.md)):**
    loop.py `--knn-drift M`: retry goals whose kNN lemma sets drifted (M or more new since the last fresh run), and
    the retry class goes by that count. Why: LAA's first runs on Z7's unsolved goals prove 40% with 5+ new kNN

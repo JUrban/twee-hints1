@@ -24,40 +24,9 @@ import givenmatch
 LOOPS = givenmatch.LOOPS
 
 
-KM = None
-
-
 def lemma_ax(gp, skdir, S):
-    """add the source runs' lemma axioms (see --lemma-ax) to each sketch's .ax, named by their proven goal"""
-    import lemmas
-    global KM
-    if KM is None:
-        KM = {}
-        for m in S:
-            try:
-                ks = givenmatch.gkeys(m)
-            except Exception:
-                continue
-            for k in ks or ():
-                KM.setdefault(k, []).append(m)
-    tot = 0
-    for l in open(gp):
-        g, fs = l.split('\t')[:2]
-        A = lemmas.axiom_set(g)
-        for f in fs.split(','):
-            rel = os.path.relpath(f, skdir).split(os.sep)   # g / DIR / stamp_x / name
-            log = os.path.join(LOOPS, rel[1], rel[2], 'given', rel[3])
-            add = []
-            for x in open(log):
-                w = x.rstrip('\n').split('\t')
-                if len(w) >= 6 and w[0] == '0' and w[4] == '0' and w[5] == '0':
-                    ms = sorted(m for m in KM.get((w[2], w[3]), ()) if lemmas.axiom_set(m) <= A)
-                    if ms:
-                        add.append(f'{w[2]}\t{w[3]}\t{ms[0]}\n')
-            with open(f + '.ax', 'a') as fo:
-                fo.writelines(add)
-            tot += len(add)
-    print(f'--lemma-ax: {tot} lemma axioms added to the sketches of {gp}', flush=True)
+    """(--lemma-ax) givenmatch.lemma_ax: the source runs' lemma axioms into the sketches' .ax, named by proven goal"""
+    givenmatch.lemma_ax(gp, skdir, S)
 
 
 def main():

@@ -127,6 +127,56 @@ def init(w, inst=False):
     W = w; INST = inst
 
 
+_KM, _KMS = {}, set()
+
+
+def lemma_ax(gp, skdir, S):
+    """(22 Nov 12:05, exp56b, notes/2026-11-22-gm-retry.md) name the sketches' source-run lemma axioms after their
+    proven goals. loop.py's given_scan labels only the original's axioms as -1, so a failed run's lemma axioms (its
+    sibling and kNN lemmas, proven goals) are parentless label-0 rules of its log, and sketch() leaves them out of the
+    .ax: GMR's ancestry pass proved 0 of 30 such goals, GMR2's with them 7 of its first 12. Every parentless rule of
+    the source log, and every unnamed .ax row, that is the statement of a goal in S (gkeys) whose axioms are within
+    the target's goes into the .ax with that goal's name in the third column; transfer.py then names the axiom
+    skax_<i>_<goal>, which exp/trust.py resolves. GP: a goals file of sketch(), SKDIR its sketch dir, S the solved goals."""
+    import lemmas
+    for m in set(S) - _KMS:
+        _KMS.add(m)
+        try:
+            ks = gkeys(m)
+        except Exception:
+            continue
+        for k in ks or ():
+            _KM.setdefault(k, []).append(m)
+    tot = 0
+    for l in open(gp):
+        g, fs = l.split('\t')[:2]
+        A = lemmas.axiom_set(g)
+        def name(k):
+            ms = sorted(m for m in _KM.get(k, ()) if m != g and lemmas.axiom_set(m) <= A)
+            return ms[0] if ms else None
+        for f in fs.split(','):
+            rel = os.path.relpath(f, skdir).split(os.sep)   # g / LOOP (one or two parts) / name
+            log = os.path.join(LOOPS, *rel[1:-1], 'given', rel[-1])
+            rows, seen = [], set()
+            for x in (open(f + '.ax') if os.path.exists(f + '.ax') else ()):
+                w = x.rstrip('\n').split('\t')
+                if len(w) >= 2:
+                    nm = w[2] if len(w) > 2 and w[2] else name((w[0], w[1]))
+                    rows.append((w[0], w[1], nm or '')); seen.add((w[0], w[1]))
+            n0 = sum(1 for r in rows if r[2])
+            for x in open(log):
+                w = x.rstrip('\n').split('\t')
+                if len(w) >= 6 and w[0] == '0' and w[4] == '0' and w[5] == '0' and (w[2], w[3]) not in seen:
+                    nm = name((w[2], w[3]))
+                    if nm:
+                        rows.append((w[2], w[3], nm)); seen.add((w[2], w[3]))
+            with open(f + '.ax.tmp', 'w') as fo:
+                fo.writelines(f'{a}\t{b}\t{c}\n' if c else f'{a}\t{b}\n' for a, b, c in rows)
+            os.replace(f + '.ax.tmp', f + '.ax')
+            tot += sum(1 for r in rows if r[2])
+    print(f'--lemma-ax: {tot} named lemma axioms in the sketches of {gp}', flush=True)
+
+
 def sketch(hits, skdir, goals, per=3, prefix=False):
     by = {}
     for l in open(hits):
@@ -160,7 +210,7 @@ def sketch(hits, skdir, goals, per=3, prefix=False):
 
 
 def live(dirs, d, every, j, rest, dst='UL', gfail=('GFAIL', 'GSAT'), allp=ALL, same=True, cap=60, inst_scan=True,
-         same_cap=None, nowait=False, retry_h=0.0):
+         same_cap=None, nowait=False, retry_h=0.0, lax=False):
     """(20 Nov 03:45) beside production: every EVERY s, scan the given logs of DIRS written since the last cycle against
     production's unsolved unit goals (variants; instances within the own original), and run each new hit as exp38
     did: the rule's ancestry first at 20 s, then for the failures the log's prefix with its axioms at 40 s
@@ -310,6 +360,8 @@ def live(dirs, d, every, j, rest, dst='UL', gfail=('GFAIL', 'GSAT'), allp=ALL, s
             for tag, pre, T in (('a', False, 20), ('p', True, 40)):
                 gp = os.path.join(d, f'goals_{run_}_{cyc}{tag}.tsv')
                 sketch(hp, os.path.join(d, 'sketch' + tag), gp, 3, pre)
+                if lax:   # (--lemma-ax)
+                    lemma_ax(gp, os.path.join(d, 'sketch' + tag), S)
                 if tag == 'p':   # (only the goals the first pass left)
                     S2 = {l.split('\t')[0] for l in open(os.path.join(LOOPS, dst, 'solved.tsv'))}
                     keep = [l for l in open(gp) if l.split('\t')[0] not in S2]
@@ -370,7 +422,7 @@ def main():
                     dst=val('--dst', 'UL'), gfail=[x for x in val('--gfail', 'GFAIL,GSAT').split(',') if x],
                     allp=val('--set', ALL), same='--no-same' not in opts, cap=val('--cap', 60),
                     inst_scan='--no-inst' not in opts, same_cap=val('--same-cap', -1) if '--same-cap' in opts else None,
-                    nowait='--no-wait' in opts, retry_h=val('--retry-tried', 0.0))
+                    nowait='--no-wait' in opts, retry_h=val('--retry-tried', 0.0), lax='--lemma-ax' in opts)
     if sys.argv[1] == 'sketch':
         per = int(sys.argv[sys.argv.index('--per') + 1]) if '--per' in sys.argv else 3
         return sketch(sys.argv[2], sys.argv[3], sys.argv[4], per, '--prefix' in sys.argv)
