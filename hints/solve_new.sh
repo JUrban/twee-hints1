@@ -76,7 +76,10 @@ ORDER=${ORDER---mix 0.1 --fail-order}
 # (21 Nov 23:51) + --floor-ratio 20 (exp52, notes/2026-11-21-floor-ratio.md): the retry and head classes keep their
 # one-worker floor only while 20 times their yield reaches the best class's, so they do not hold workers while first
 # runs prove at 100 times their rate. half2 from zero, 4 workers each, 3 hours: P2U 20,876 against P2T's 20,087.
-LATE=${LATE---retry-class --yield-discount 2000 --reexplore 12:0.25 --knn-ctx 10 --head-class --floor-ratio 20}
+# (22 Nov 20:35) + --knn-drift 5 (exp55, notes/2026-11-22-knn-drift.md): a failed goal returns to the retry class once 5
+# or more new proofs rank among its 30 nearest kNN lemmas since its last fresh run, and the class goes by that count.
+# half2 from zero, 4 workers each, 6 hours: P2Z 21,796 against P2X's 21,592 (one-arm goals 297 against 93).
+LATE=${LATE---retry-class --yield-discount 2000 --reexplore 12:0.25 --knn-ctx 10 --head-class --floor-ratio 20 --knn-drift 5}
 [ -n "$OUT" ] && [ -f "$NAMES" ] && [ -f "$CTX/solved.tsv" ] || { sed -n 2,20p "$0"; exit 1; }
 [ -e "$OUT" ] && { echo "$OUT exists"; exit 1; }
 mkdir -p "$OUT.ctx/hints"
