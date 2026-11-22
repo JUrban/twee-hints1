@@ -779,6 +779,8 @@ Next:
    so a failed run's lemma axioms (proven goals) reach the sketch as hints, not in `.ax`. exp56b (`--lemma-ax`): the
    parentless source rules that are statements of proven goals within the target's axioms go into `.ax` named by goal
    (skax_<i>_<goal>, resolved by trust.py); goal_673's 3 sketches get 300. abs/gmr2.sh (PID 2032897) runs it after GMR.
+   **exp56 result (11:59): prefix pass 5 of 30 (goal_673 among them), about 5.6 per CPU h; all trusted-resolvable.**
+   GMR2 (--lemma-ax) on the 25 left from 11:59:25.
 0000000000000000000000000000000000. **exp55 (09:33, [notes/2026-11-22-knn-drift.md](notes/2026-11-22-knn-drift.md)):**
    loop.py `--knn-drift M`: retry goals whose kNN lemma sets drifted (M or more new since the last fresh run), and
    the retry class goes by that count. Why: LAA's first runs on Z7's unsolved goals prove 40% with 5+ new kNN
