@@ -1806,7 +1806,11 @@ class Loop:
                                                     hit_ = True
                                         if c_:
                                             kdc[n] += c_
-                                        if n not in knew and (hit_ or kdc[n] >= a.knn_drift):
+                                        # (--knn-drift-after MIN, 22 Nov) the count admits goals only after MIN minutes;
+                                        # it is kept from the start. exp55: the drift retries cost 216 at 30 minutes
+                                        # and 149 at 60, and gave +109 at 120 and +122 at 180 (P2Z against P2X)
+                                        kd_on_ = not a.knn_drift_after or time.time() - t0 >= a.knn_drift_after * 60
+                                        if n not in knew and (hit_ or (kd_on_ and kdc[n] >= a.knn_drift)):
                                             knew.add(n); nh_ += 1; hn_.append(n); nd_ += 0 if hit_ else 1
                                     elif any(ix_.sim(n, m) > th for m in new_):
                                         knew.add(n); nh_ += 1; hn_.append(n)
@@ -2568,6 +2572,9 @@ def make_parser():
                     help='(22 Nov) with --knn-ctx: count, per goal, the proofs since its last fresh run that score above its '
                          '--lemma-knn-th kNN lemma (about how many of its kNN lemmas are new); M or more is a new context, '
                          'and the retry class (--retry-class) goes by the count, most first (results rows kd=N)')
+    ap.add_argument('--knn-drift-after', type=float, default=0, metavar='MIN',
+                    help='(22 Nov) with --knn-drift: the count admits goals to the retry class only after MIN minutes '
+                         '(it is kept from the start; a kNN hit admits a goal at any time, as with --knn-ctx alone)')
     ap.add_argument('--knn-ctx', type=int, default=0, metavar='K',
                     help='(21 Nov) --retry-knn with --fail-order: a goal one of whose proofs new since the last kNN '
                          'rebuild would enter the top K of its kNN lemmas counts as having a new context (retried '
