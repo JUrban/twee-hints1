@@ -759,6 +759,9 @@ Paused:
 has the history (user, 20 Nov: "update the total numbers in the report etc every now and then").
 
 Next:
+0000000000000000000000000000000. **Z8 (planned 00:23, [notes/2026-11-22-z8.md](notes/2026-11-22-z8.md)):** the defaults as they stand
+   (LATE + --floor-ratio 20) from zero on all goals, 6 workers, 8 hours, one arm against Z7's curve. abs/after_exp53.sh
+   (PID 1485120) starts abs/z8.sh when exp53 ends (about 02:52), after up to 20 minutes for loops/Z8.go or Z8.skip.
 000000000000000000000000000000. **Proof cost (23:58, [notes/2026-11-21-proof-cost.md](notes/2026-11-21-proof-cost.md)):** twee's `proof` flag is read only
    after a successful search (SequentialMain.hs:1618). exp/proofcost.py, 42 queued proof jobs from six dirs, each
    with and without `--no-proof`: 61.1 against 61.2 CPU s, the same output outside the proof block in all 42. So
@@ -1053,6 +1056,7 @@ reports are written as the experiments run.
 | [notes/2026-11-21-floor-ratio.md](notes/2026-11-21-floor-ratio.md) | exp52: floors for the late classes only when they can compete (`--floor-ratio K`); accepted |
 | [notes/2026-11-21-renorm-zero.md](notes/2026-11-21-renorm-zero.md) | exp53: deep runs without queue renormalisation, from zero (`--cp-renormalise-threshold 1000`) |
 | [notes/2026-11-21-proof-cost.md](notes/2026-11-21-proof-cost.md) | What `--no-proof` saves in a search run: nothing measurable (42 proved runs) |
+| [notes/2026-11-22-z8.md](notes/2026-11-22-z8.md) | Z8: the system as it stands, from zero on all goals (after exp52) |
 | [notes/2026-11-20-base-saturation.md](notes/2026-11-20-base-saturation.md) | exp39: base-theory runs as rule generators for the unsolved goals of the stronger theories |
 | [notes/2026-11-20-given-transfer.md](notes/2026-11-20-given-transfer.md) | exp38: unsolved goals that are variants of rules other runs derived and did not use (379 M in the given logs; transfer.py only matches proof steps); their ancestry as hints |
 | [notes/2026-11-19-from-zero-portfolio.md](notes/2026-11-19-from-zero-portfolio.md) | half1 from zero in 2 hours with today's deep portfolio (PGC), against PGA's 18,987 (exp27, from 07:18) |
