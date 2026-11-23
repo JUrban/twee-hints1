@@ -126,3 +126,13 @@ HDW1 result (17:49): 4 of 92 heads in 2.25 CPU h of twee runs (1.8 per CPU h; pr
 | KK_Kcom_to_aK1__goal_283 | 5.7 | 10 | 2 |
 
 Three of the four took 13-54 s, beyond the 5 s sweeps. With these proofs in production the next goal of each original becomes a head.
+
+## 1 hour (17:56)
+
+| | 30 min | 60 min | equal abstract work |
+|---|---:|---:|---:|
+| Q5A | 15,193 | 17,367 | 15,193 at 30 min, 17,300 at 58 min |
+| Q5B | 15,064 | 17,495 | 15,384 at 32 min, 17,492 at 60 min |
+| P4B (exp64, the same configuration as Q5A) | 15,303 | 17,602 | |
+
+Q5B by wall time: 30 min -129, 60 min +128; at equal work (the points above, in order): +191, +192. The replica: Q5A against P4B (same configuration, same CPU set, 6 hours apart) 30 min -110, 60 min -235: the spread between identical runs is as large as Q5B's lead so far.

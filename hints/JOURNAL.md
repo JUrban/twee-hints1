@@ -788,6 +788,7 @@ Next:
    (16:36) With siblings (exp/z9gap9.sh; the earlier pre-checks had none): P4B's plain levels 40, Q5B's 45 (+8 −3, union 48) on the 235 gap goals; exp65 stands.
    (16:36) twee-e63 `--lazy-lemmas` (lemma axioms enter by score, like SOS): startup 8.1 -> 1.2 s at 1,575 axioms, but factor 1 lost 17 proofs and factor 0.5 tied eager (40 and 40, +3 −3) at the same wall time: not used.
    Started 23 16:55:36 (loops/EXP65.pids); loop.py Q5A 3439513, Q5B 3439516; ends about 22:55.
+   1 h (17:56): Q5A 17,367, Q5B 17,495; at equal work +192. Replica Q5A against P4B at 60 min -235.
    (17:01) PLG1 stopped at 1,453 goals, 1 proof (merged; it used a kNN lemma ranked 1,420). The frontier is 92 heads (each original's first unsolved goal, all earlier siblings proved; the other 3,176 sit behind them): plain 60 s sweeps HDW1 (400 kNN) and HDG1 (1,600) on sets/heads92.
    **(17:49) HDW1: 4 of 92 heads proved by plain 60 s runs (400 kNN, 100+30 siblings) in 2.25 CPU h, 1.8 per CPU h; all merged into production (its own loop: about 5 in 6 hours). Next: HDG1 (1,600 kNN), then the live loop with a heads setting (abs/plainlive4.sh).**
 000000000000000000000000000000000000000000000000000. **Lemma ranker (08:59, [notes/2026-11-23-lemma-ranker.md](notes/2026-11-23-lemma-ranker.md)):** the used kNN lemmas of plain
