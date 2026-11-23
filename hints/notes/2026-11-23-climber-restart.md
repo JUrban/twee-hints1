@@ -212,6 +212,31 @@ Last 58500 runs: 135 proofs in 216.1 CPU h (0.62 per CPU h).
 * **exp69** (exp/exp69.sh, loops/CLK69, PID 3709639): a set-mode climb of the 9 (exp/sets/key69) from t2120's trusted
   goals, CLHL4's setting (30 siblings, 400 kNN, `--weaken 12`), 1 climb at a time. Real proofs are merged into loops/UL
   every 10 minutes, so production and the climbers rerun the heads they unlock.
+* The older climbs agree. Over every climb record with used.tsv and assume.tsv (CLA67, CLB67, CLHL2 of 19-20 Nov,
+  CLHL3, CLHL4, CLK69, SMK3; unlock counts against t2120, any unsolved target, not only heads):
+
+| X | head? | unsolved targets it unlocks | in exp69 |
+|---|---|---:|---|
+| Ka_eq_aK3__goal_420 | no | 13 | yes |
+| Ka_eq_aK3__goal_425 | no | 12 | yes |
+| aK2_eq_aK3_1243b__goal_479 | no | 11 | yes |
+| Kproperties_1__goal_332 | no | 10 | yes |
+| aK2_eq_aK3_1243b__goal_476 | yes | 9 | no |
+| aK2_eq_aK3_1243b__goal_522 | no | 8 | yes |
+| nil3_2K__goal_383 | yes | 8 | yes |
+| aKperms_1__goal_368 | no | 7 | no |
+| TLRproperties_2__goal_386 | no | 6 | yes |
+| Ka1_eq_Ka2__goal_428 | yes | 5 | no |
+| a_instances__goal_424 | no | 5 | no |
+| Ka1_eq_Ka2__goal_444 | no | 4 | no |
+| aK1_eq_aK3__goal_409 | no | 4 | no |
+| aK2_eq_aK3_1243b__goal_491 | no | 4 | no |
+| aK2_eq_aK3_1243b__goal_525 | no | 4 | yes |
+
+  Ka_eq_aK3 420 and 425 sit right behind their head Ka_eq_aK3 419, which is itself one of nil4_19K 394's targets: a
+  chain nil4_19K 394, Ka_eq_aK3 419, then 420 and 425 with 13 and 12 targets. The next batch after CLK69: the
+  X in this table that are not in exp69 and not heads (aKperms_1 368, a_instances 424, Ka1_eq_Ka2 444, aK1_eq_aK3 409,
+  aK2_eq_aK3_1243b 491).
 * Why the finals fail (latticedata.py on CLA67, CLB67, CLHL3; realization = the share of a conditional sketch's steps,
   not axioms of the target, that the final run derived as given rules): per target, the best sketch's realization
   has median 0.74 for the 3 proved targets and 0.79 for the 62 not proved. The finals re-derive most of a sketch,
