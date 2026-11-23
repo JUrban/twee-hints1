@@ -774,6 +774,8 @@ Next:
 000000000000000000000000000000000000000000000. **Model audit 2 (23 Nov, [notes/2026-11-23-model-audit2.md](notes/2026-11-23-model-audit2.md)):** exp/modelcheck.py
    again on all of production's proved unit goals (loops/MODELCHECK2, the first audit's models cached), -j 2, after
    the realproofs packing. Reading: false goals (must be 0), false steps against 217 in 71, alarms.
+   **Result (03:31): 0 false goals, 0 alarms, 217 false steps in 71 goals (the same set as 20 Nov's); none in
+   production's 378 proofs since then.**
 00000000000000000000000000000000000000000000. **Z9 (23 Nov 02:46, [notes/2026-11-23-z9.md](notes/2026-11-23-z9.md)):** the system from zero on all
    51,784 goals, 6 workers, 8 hours, CPUs 0-20,28-48 (production keeps 21-27,49-55): solve_new.sh's defaults with
    exp55's `--knn-drift 5` and the GIVENARGS `--lemma-ax`. A measurement against Z8 (42,917 at 6 hours) and Z7, not an

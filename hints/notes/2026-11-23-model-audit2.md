@@ -22,3 +22,13 @@ the check runs again on all of production's proofs.
 
 The number of false goals (self-test, must be 0), false steps and their goals against the first audit's 217 in 71,
 and any alarm (a false step with the same variables on both sides: a wrong derived equation).
+
+## Result (03:32)
+
+Run 03:09:10-03:31:33. `modelcheck: 2504 models, 2442229 steps, 0 skipped, 0 false goals, 217 false steps, 0 theories without models; 71 goals with a false step`
+
+* False goals (self-test): 0. Alarms (a false step with the same variables on both sides): 0.
+* False steps: 217 in 71 goals, the same set as the first audit's (all printed goal terms with different variables on the two sides).
+* Production's hints newer than the first audit (20 Nov 11:16): 378. None of them has a false step.
+* The audit reads production's own proofs (loops/UL); the other loops' proofs count only through exp/trust.py's
+  lemma closure.
