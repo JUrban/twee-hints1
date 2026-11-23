@@ -764,6 +764,11 @@ ul75 5, XFL 1. REPORT's totals table
 has the history (user, 20 Nov: "update the total numbers in the report etc every now and then").
 
 Next:
+0000000000000000000000000000000000000000000000. **Z9C (03:01, [notes/2026-11-23-z9.md](notes/2026-11-23-z9.md), "Continuation"):** Z9 continued after its 8 hours
+   for 16 more (abs/z9cont.sh: Z9's saved loop.py command with `--cascade-continue --cascade-hours 16`, its side
+   loops again, config.json's mtime set back, loops/Z9.toffset for t=). Starts 5 minutes after loops/Z9.done unless
+   loops/Z9C.skip (waiter PID 2816917). Smoke test abs/rst_smoke.sh (02:53-02:59): 365 -> 400 of 487, no solved goal
+   run again.
 000000000000000000000000000000000000000000000. **Model audit 2 (23 Nov, [notes/2026-11-23-model-audit2.md](notes/2026-11-23-model-audit2.md)):** exp/modelcheck.py
    again on all of production's proved unit goals (loops/MODELCHECK2, the first audit's models cached), -j 2, after
    the realproofs packing. Reading: false goals (must be 0), false steps against 217 in 71, alarms.

@@ -16,11 +16,19 @@ import bisect, os, sys
 L = '/project/hintwork/loops'
 
 
+def toffsets(d):
+    """(23 Nov) a continued run (loop.py restarted on its dir) writes t= from 0 again: {L}/{d}.toffset holds
+    'ROW<tab>SECONDS' lines, and rows from ROW (0-based) on get SECONDS (the restart's time after the first start) added"""
+    p = f'{L}/{d}.toffset'
+    return sorted((int(r), float(o)) for r, o in (l.split() for l in open(p) if l.strip())) if os.path.exists(p) else []
+
+
 def acurve(d):
     rows = [l.rstrip('\n').split('\t') for l in open(f'{L}/{d}/r1/results.tsv') if l.strip()]
-    ev = []
-    for w in rows:
+    ev = []; off = toffsets(d)
+    for i, w in enumerate(rows):
         t = float(next(x for x in w if x.startswith('t='))[2:])
+        t += next((o for r, o in reversed(off) if i >= r), 0.0)
         plain = w[4] == 'L0' and w[1] == 'NO' and not ({'q=1', 'r=1', 'f=1'} & set(w[7:]))
         ev.append((t, float(w[2]), plain))
     ev.sort()
