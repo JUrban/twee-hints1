@@ -257,3 +257,14 @@ Last 58500 runs: 135 proofs in 216.1 CPU h (0.62 per CPU h).
 * ul76 has more fill lemmas (3,055 against 2,675), so the count may grow. If it does, the fix is a record per fill
   lemma (a kept proof of each, so trust.py can resolve lemma_fill_N through loop.py's numbering); for 3 proofs it is
   not worth it yet. Each trust run's untrusted count goes in REPORT's summary rows.
+
+## Not only heads (21:42)
+
+* Production's proofs since ul75 started (22 Nov 07:13; 273 goals whose hints file was written since), by the
+  unsolved earlier siblings of the goal when its solved.tsv row was written: 0 (a head): 20, 1: 19, 2: 17, 3: 22,
+  4: 11, 5 or more: 184. Two thirds were deep behind an unsolved goal of their own original (later siblings, kNN
+  lemmas of other originals and the sketches' hints get there without the earlier steps).
+* So the heads are not the only frontier, and a head-only restriction of production's members would be wrong. The
+  climbers climb heads (CLHL4 `--heads-only`) and exp69 the goals the heads' sketches assume. Without `--heads-only` and
+  `--reclimb-heads`, climb.py --live climbs any stalled goal (a failed fresh run in the latest round), fewest proof
+  lines from a proven goal below first: the mode for the deep goals, unused since clhl2.
