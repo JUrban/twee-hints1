@@ -781,6 +781,9 @@ Next:
    on SIB30's problems (abs/stepbed2.sh).**
    PLN1 (05:58): plain 5 s runs (no model, no hints) on all unsolved goals with only trusted siblings (30 earlier, 10
    later) and 100 kNN lemmas: real attempts (abs/pln1.sh, condprove.py --proved, 4 threads, cond/PLN1).
+   **So far (06:15): 10 new proofs in 1,366 runs (1.10 CPU h of twee runs, 9.1 per CPU h; production makes 0.35 per CPU h on
+   these goals), none in any production loop. loop.py `--variants pl[kN][sM]` (f79acac; smoke PLS2: Vplk100s40@0 proved
+   PLN1's first goal where L0 failed). exp/condimport.py makes the loop record for merge.py (test: loops/CI1).**
 00000000000000000000000000000000000000000000000. **Readiness (04:54, [notes/2026-11-23-readiness.md](notes/2026-11-23-readiness.md)):** offline on Z8's rows (exp/triglag.py,
    exp/fresh_ready.py). Late retries are prompt: of 593 proofs that used a lemma proved after the goal's last failure, the
    proving run came 3/8/16/30/50 min after it (deciles 10/25/50/75/90), always the first run after it. First runs wait longer
