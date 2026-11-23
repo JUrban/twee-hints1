@@ -779,6 +779,8 @@ Next:
    **Batch 1 (05:56): KNN29 1, SIB30 41, AFT10 51, KNN100 12, SIB3 4, T20 47 of 300; siblings matter most (SIB30, AFT10). One more unconditional
    proof (aK2_eq_aK3_c__goal_479, KNN100). COND2 (30 earlier siblings, all unsolved goals) runs from 05:56, then batch 2
    on SIB30's problems (abs/stepbed2.sh).**
+   PLN1 (05:58): plain 5 s runs (no model, no hints) on all unsolved goals with only trusted siblings (30 earlier, 10
+   later) and 100 kNN lemmas: real attempts (abs/pln1.sh, condprove.py --proved, 4 threads, cond/PLN1).
 00000000000000000000000000000000000000000000000. **Readiness (04:54, [notes/2026-11-23-readiness.md](notes/2026-11-23-readiness.md)):** offline on Z8's rows (exp/triglag.py,
    exp/fresh_ready.py). Late retries are prompt: of 593 proofs that used a lemma proved after the goal's last failure, the
    proving run came 3/8/16/30/50 min after it (deciles 10/25/50/75/90), always the first run after it. First runs wait longer

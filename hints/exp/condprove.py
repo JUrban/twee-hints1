@@ -27,7 +27,9 @@ ONLY = opt('--only', ''); TWEE = '/project/bin/twee-pg61'
 # (23 Nov, the step test bed) --after N: also the N nearest later siblings (any status; true as well); --args: more
 # twee flags; --all: every goal of --only, solved or not
 AFTER = int(opt('--after', '0')); XARGS = opt('--args', '').split(); ALL = '--all' in a
-a = [x for x in a if x != '--all']
+# --proved: siblings (earlier and --after later) only from TRUSTED, so every proof is a real one (no assumption)
+PROVED = '--proved' in a
+a = [x for x in a if x not in ('--all', '--proved')]
 OUT = os.path.abspath(a[0])
 assert not OUT.startswith('/project/hintwork/loops'), 'OUT must be outside loops/'
 os.makedirs(f'{OUT}/p', exist_ok=True); os.makedirs(f'{OUT}/proofs', exist_ok=True)
@@ -43,7 +45,8 @@ if os.path.exists(RES):
 U = [g for g in U if g not in done]
 allg = collections.defaultdict(set)
 for x in G:
-    o, k = lemmas.split(x); allg[o].add(int(k))
+    if not PROVED or x in T:
+        o, k = lemmas.split(x); allg[o].add(int(k))
 t_ = time.time()
 index = lemmas.LemmaIndex(sorted(T), subsets=True) if KNN else None
 print(f'condprove: {len(U)} unsolved goals to run ({len(done)} done), index {time.time()-t_:.0f}s', flush=True)

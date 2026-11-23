@@ -150,3 +150,13 @@ stands to gain either.
 * The one unconditional proof, aK2_eq_aK3_c__goal_479 (KNN100; SIB30 and T20 proved it too, conditionally: unproved siblings 451,476 and 473,475,476), used 12 kNN
   lemmas, 8 of them ranked 30 or beyond, and 0 siblings; production never proved it although it has k100-k1000 members.
   With COND1's nil3_30__goal_473 that is two new proofs from plain runs (no rule model, no hints): see below.
+
+## Plain runs as real attempts: PLN1 (launched 05:58)
+
+Two goals production never proved fell to plain runs here (nil3_30__goal_473 in COND1, aK2_eq_aK3_c__goal_479 in
+KNN100): no rule model, no hints, no PG, only lemma axioms. Production's members all carry hints, and its model ones
+the rule model too. Is a plain member worth adding? PLN1 (abs/pln1.sh, exp/pln1.sh) runs every unsolved goal once,
+5 s, with only trusted siblings (30 earlier and 10 later, exp/condprove.py --proved) and 100 kNN trusted lemmas, so
+every proof is a real one. 4 threads, cond/PLN1. Reading: new proofs per CPU hour against production's 0.35 on the
+same goals (exp/wallcpu.py). If it pays, the proofs go into production through a loop record (rerun with loop.py's
+--print-hints --print-given, USEDAXIOMS, then merge.py), and loop.py gets a plain variant.
