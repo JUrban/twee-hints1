@@ -781,6 +781,9 @@ Next:
    on SIB30's problems (abs/stepbed2.sh).**
    PLN1 (05:58): plain 5 s runs (no model, no hints) on all unsolved goals with only trusted siblings (30 earlier, 10
    later) and 100 kNN lemmas: real attempts (abs/pln1.sh, condprove.py --proved, 4 threads, cond/PLN1).
+   **Result (05:58-06:40): 24 proofs in 3,412 runs (2.71 CPU h of twee runs, 8.8 per CPU h); production had proved 2
+   of them itself since 21:39 (nslm_to_aa1__goal_981, _1078), so 22 new, merged into loops/UL through loops/CI1
+   (10 at 06:16, 12 at 06:40). COND2 (30 earlier siblings assumed): 2,484 hard, 925 blocked; still no keystones.**
    **So far (06:15): 10 new proofs in 1,366 runs (1.10 CPU h of twee runs, 9.1 per CPU h; production makes 0.35 per CPU h on
    these goals), none in any production loop. loop.py `--variants pl[kN][sM]` (f79acac; smoke PLS2: Vplk100s40@0 proved
    PLN1's first goal where L0 failed). exp/condimport.py makes the loop record for merge.py (test: loops/CI1).**

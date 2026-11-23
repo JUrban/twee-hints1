@@ -195,3 +195,32 @@ loops/Z8F.ctx as the trusted list), 4 threads, cond/PLZ8. Reading: proofs per CP
 retries (r1/results.tsv, t= in hours 4-6: L0 535 proofs in 4,759 runs, 6.64 CPU h, 81 per CPU h; all its main-loop runs
 635 in 6,232, 55 per CPU h). Well above: a plain level goes into solve_new.sh's
 variants, through an A/B.
+
+## COND2: 30 earlier siblings (ran 05:56-06:21; read 06:41)
+
+| | hard | blocked | unconditional |
+|---|---:|---:|---:|
+| COND1 (10 siblings) | 2,826 | 585 | 1 |
+| COND2 (30 siblings) | 2,484 | 925 | 3 |
+
+* Reach (exp/condgraph.py cond/COND2): hard goals >=1 177, >=5 8, >=20 0; the top 10: [11, 10, 9, 9, 8, 7, 6, 6, 4, 4]; blocked >=1 79, >=5 6, >=20 0; the top 10: [8, 8, 6, 6, 6, 5, 4, 3, 3, 3].
+* By Prover9 proof lines from the previous goal: 0-1: 0/0; 2-3: 0/0; 4-7: 0/0; 8-15: 78/177 (44%); 16-31: 156/451 (35%); 32-: 694/2784 (25%).
+* Still no keystones: with 30 siblings assumed 73% are hard steps, and no single goal frees more than the top of
+  the list below. (com_Ralt__goal_254 leads it; production's own com_Ralt streak this morning was about that size.)
+* COND2's unconditional proofs: aK2_eq_aK3_a__goal_520, aK2_eq_aK3_j__goal_435, nil3_30__goal_473; 3 of them PLN1 proved too (COND2's problems carry
+  unproved siblings, so condimport.py takes only PLN1's).
+
+| goal | class | reach | blockers |
+|---|---|---:|---|
+| com_Ralt__goal_254 | hard | 11 | - |
+| nslm_to_aa1__goal_947 | hard | 10 | - |
+| aK2_eq_aK3_j__goal_401 | hard | 9 | - |
+| ns_to_aa1_b__goal_617 | hard | 9 | - |
+| aK2_eq_aK3_j__goal_411 | blocked | 8 | 401 |
+| nslm_to_aa1__goal_950 | blocked | 8 | 947 |
+| nsmr_to_aa1__goal_738 | hard | 8 | - |
+| ns_to_aK1__goal_514 | hard | 7 | - |
+| aK2_eq_aK3_j__goal_430 | blocked | 6 | 411 |
+| im2_24_to_25__goal_471 | hard | 6 | - |
+| nil3_15to7__goal_420 | hard | 6 | - |
+| nil3_23_32_to_26__goal_502 | blocked | 6 | 495,496 |
