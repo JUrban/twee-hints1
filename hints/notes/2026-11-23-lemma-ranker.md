@@ -166,3 +166,21 @@ Q5B (DEEP_A with `plrk400s130@0`, `--lemma-ranker models/lemmarank/lr2`, prior 3
 each, 6 hours, exp64's CPU sets. Launched at exp64's end with DEEP_A chosen then. In a from-zero loop the ranker's
 use counts and proof steps come from the loop's own outputs, smaller than production's; the A/B shows whether the
 model trained on production's context still helps there.
+
+## exp65 changed (13:05): the ranker for every run
+
+exp64's plain levels proved few goals directly (6 of P4B's one-arm goals at 2 hours), so a ranked plain level is
+unlikely to move a from-zero run. The larger lever is the 30 kNN lemmas of every run: exp59 found that most goals
+production has and the from-zero runs lack fall at the 5 s first level once the right lemmas are in the problem
+(notes/2026-11-22-hub-roots.md), and at K = 50 the model's recall of used lemmas is 0.65 against similarity's 0.45.
+
+* loop.py `--lemma-ranker-all` (with `--lemma-ranker MODEL`): start_vix also builds 'plra', the same ranker with
+  `--lemma-ranker-pool` (default 1,000, the training lists' length; 0.13 s per goal, 2,000: 0.27 s, similarity 0.02 s:
+  scratchpad timing on 12 goals of sets/hintbed600), and every run's kNN lemmas come from it (all levels and the kN
+  and pl variants; kp, kd and the cut candidates keep theirs). The retry signals (--retry-knn, --knn-ctx,
+  --knn-drift) still watch the similarity picks: a new proof near the goal still counts as a new context.
+* Smoke test (exp/rankallsmoke.sh, loops/PLA1: 6 goals in loops/ULT.ctx, 1 worker, 0.05 h): the ranker was built
+  in 22 s; a run's problem held 30 kNN lemmas, 16 of them in the similarity top 30; no errors (no proofs: 2 rounds
+  of 5 s runs on hint-bed goals).
+* **exp65** (abs/exp65.sh, exp/exp65.sh): Q5A, DEEP_A (exp64's better arm), against Q5B, the same with
+  `--lemma-ranker models/lemmarank/lr2 --lemma-ranker-all`; otherwise as planned. One change.
