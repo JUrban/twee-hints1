@@ -768,6 +768,10 @@ ul75 5, XFL 1. REPORT's totals table
 has the history (user, 20 Nov: "update the total numbers in the report etc every now and then").
 
 Next:
+00000000000000000000000000000000000000000000000000. **exp64 (07:10, [notes/2026-11-23-plain-level.md](notes/2026-11-23-plain-level.md)):** a plain level from zero: P4A (control) and P4B
+   (DEEP with `plk100s40@0`, prior 3), sets/half2, 4 workers each, 6 hours, CPU sets as exp60's (abs/exp64.sh,
+   abs/or_test3.sh). Starts 5 minutes after Z9 ends, in Z9C's place (loops/Z9C.skip). PLZ8 (Z8's context): 160 of 2,000,
+   85 per CPU h.
 0000000000000000000000000000000000000000000000000. **Plain live loop (06:55, [notes/2026-11-23-conditional.md](notes/2026-11-23-conditional.md), "Plain live loop"):** PLN1's
    plain sweep as a side loop of production: each cycle (30 min or more, 3 threads) takes loops/UL's solved goals as
    context, reruns only goals whose problem changed (condprove.py --prev), imports the proofs into loops/CI2 and merges
@@ -1308,6 +1312,7 @@ reports are written as the experiments run.
 | [notes/2026-11-23-model-audit2.md](notes/2026-11-23-model-audit2.md) | The finite-model audit again on production's proofs since 20 Nov |
 | [notes/2026-11-23-readiness.md](notes/2026-11-23-readiness.md) | How long ready goals wait (Z8), and kNN readiness against the gap order for first runs |
 | [notes/2026-11-23-conditional.md](notes/2026-11-23-conditional.md) | COND1: the unsolved goals with their earlier siblings assumed: hard steps or blocked |
+| [notes/2026-11-23-plain-level.md](notes/2026-11-23-plain-level.md) | exp64: a plain level (no hints, no model) from zero |
 | [notes/2026-11-20-base-saturation.md](notes/2026-11-20-base-saturation.md) | exp39: base-theory runs as rule generators for the unsolved goals of the stronger theories |
 | [notes/2026-11-20-given-transfer.md](notes/2026-11-20-given-transfer.md) | exp38: unsolved goals that are variants of rules other runs derived and did not use (379 M in the given logs; transfer.py only matches proof steps); their ancestry as hints |
 | [notes/2026-11-19-from-zero-portfolio.md](notes/2026-11-19-from-zero-portfolio.md) | half1 from zero in 2 hours with today's deep portfolio (PGC), against PGA's 18,987 (exp27, from 07:18) |

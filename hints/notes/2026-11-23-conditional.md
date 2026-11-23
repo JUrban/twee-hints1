@@ -261,3 +261,10 @@ ended and its proofs are imported (loops/CI2) and merged. Each cycle (at most on
   sibling or kNN lemma) are run, the rest are SAME rows;
 * exp/condimport.py into loops/CI2, then merge.py loops/UL loops/CI2; production's --sync takes the rows in.
 Log cond/PLNL/log, one line a cycle. Stop: touch cond/PLNL.stop (it ends after the cycle).
+
+## PLZ8 result (ran 06:40-07:09)
+
+160 of 2,000 of Z8's unsolved goals proved in Z8's final context, 1.88 CPU h of twee runs: **85 per CPU h** (8.0% per
+run), against Z8's own L0 retries in hours 4-6 at 81 and all its main-loop runs then at 55. All 160 are goals production has
+proved (1,250 of the 2,000 are); none of the others. On goals the from-zero run had tried and failed, a
+plain run proves as much per CPU hour as the best late level does on its own picks: exp64 (notes/2026-11-23-plain-level.md).
