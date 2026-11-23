@@ -5693,6 +5693,12 @@ index is now rebuilt every 10 minutes, not 30 (about 1 s a rebuild).
       among them); every ranked proof used lemmas beyond similarity rank 400. Small numbers; the live loop now runs
       the ranked setting in W's place, and `--variants plr[kN][sM] --lemma-ranker` brings it to loop.py (numpy
       evaluation, no lightgbm needed).
+    * **But not at 30 lemmas (13:37):** on 235 hard goals (production solved them, the 8-hour from-zero run Z9 did not;
+      Z9's context, a model that has not seen their originals), plain 5 s runs with 30 kNN lemmas proved 11 by
+      similarity and 6 by the ranker, all 6 among similarity's. Similarity's 30 are a cluster of near-identical
+      lemmas that proofs use together (up to 18 of 30); the model scores lemmas one at a time. So the ranker is for
+      wide lists (the plain sweeps' 400, perhaps the kN members), not for the first level's 30. lr2 had also seen
+      half2's goals (0.81 recall at 30 in-sample there, 0.54 for lr2h held out): half2 tests use lr2h.
   * loop.py `--variants pl[kN][sM]` makes it a cascade level; abs/plainlive.sh runs it beside production as a live
     side loop; exp64 tests it from zero.
 * **Where the frontier is (COND1, COND2):** with their earlier siblings assumed (proved or not), 73-83% of the unsolved
