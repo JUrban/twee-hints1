@@ -43,3 +43,21 @@ The same lever on production's frontier: abs/sweepq.sh runs PLG1 (`--time 5 --si
 siblings) on production's 3,268 unsolved goals, 3 threads, context loops/UL/solved.tsv at 15:45; proofs into
 loops/CI3 and loops/UL. W (400 kNN, PLW1) proved 23 of 3,318 on this frontier at 08:24 and the live loop's 400-lemma
 cycles 0-4 a cycle since.
+
+## Twee's startup with long lists (15:53)
+
+One problem (aa1_45_c__goal_305) of each size arm, `--max-time 0.01` (twee checks the limit only after it has
+activated every axiom):
+
+| arm | fof lines | seconds to give up |
+|---|---:|---:|
+| ZGS | 31 | 0.06 |
+| ZKS | 101 | 0.13 |
+| ZK4S | 401 | 0.66 |
+| ZK8S | 801 | 1.62 |
+| ZKGS | 1575 | 8.09 |
+
+Superlinear: twee activates every axiom and builds its critical pairs with all earlier ones before the first time
+check (`+RTS -s` at 1,575: 6.6 s mutator, 1.0 s GC). Duplicates up to renaming and orientation are 0.2% of the kNN
+lemmas, so deduplication would not help. At 1,600 lemmas the startup is about half of a 5 s run's wall time. If the
+1,600-lemma level pays (exp65, PLG1), lazy lemma axioms (activated when selected, like passives) are the twee change to make.
