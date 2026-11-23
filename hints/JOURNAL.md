@@ -781,6 +781,7 @@ Next:
    **Frontier (same context c5): PLL1 3 proofs (1.2 per CPU h) against W's 1 (0.3), W's among them; each PLL1 proof used lemmas beyond similarity rank 400. loop.py --variants plr[kN][sM] --lemma-ranker (dc2c652). Live loop: plainlive3.sh (N and L) from 11:24.**
    Packed (12:34, exp/hintdata_build.py --realproofs --skip=P4A,P4B): smoke part 1 (9967 printed twee proofs, 1.4 MB xz); production part 1 (543 printed twee proofs, 2.5 MB xz); Z9 part 2 (26259 printed twee proofs, 4.6 MB xz); Z9 part 1 (32283 printed twee proofs, 6.6 MB xz).
    (13:06) loop.py `--lemma-ranker-all`; exp65 now tests it (one change). Offline pre-check exp/z9gap.sh: 500 of Z9's gap goals in Z9's context, 30 kNN lemmas by similarity (cond/ZGS) or lr2 (cond/ZGR).
+   (13:37) Pre-check at 30 lemmas on 235 held-out half2 gap goals: similarity 11, lr2h 6 (+0 −5), mixed 9 (+1 −3): similarity wins; exp65 (--lemma-ranker-all) not run. Next: the same at 100 lemmas.
 00000000000000000000000000000000000000000000000000. **exp64 (07:10, [notes/2026-11-23-plain-level.md](notes/2026-11-23-plain-level.md)):** a plain level from zero: P4A (control) and P4B
    (DEEP with `plk100s40@0`, prior 3), sets/half2, 4 workers each, 6 hours, CPU sets as exp60's (abs/exp64.sh,
    abs/or_test3.sh). Starts 5 minutes after Z9 ends, in Z9C's place (loops/Z9C.skip). PLZ8 (Z8's context): 160 of 2,000,

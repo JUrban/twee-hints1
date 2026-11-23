@@ -259,3 +259,12 @@ share whose used lemmas are all in the list's top K, with the mixed list (simila
 
 The model is at or above similarity at every size, but for proofs of 10 or more neither covers them at 30: a
 1,000-lemma proof picks among substitutes, so its labels cannot say which 30 suffice. The runs decide.
+
+## The pre-check at 30 lemmas: similarity wins (13:37)
+
+On the 235 half2 goals (held-out lr2h; all 235 paired): similarity 11, ranker 6 (+0 −5, union 11), mixed
+(similarity's top 15, then the ranker's) 9 (+1 −3, union 12). Similarity on all 500: 24. The ranker's 30 lose on these hard goals,
+and the mixed list does not gain. So `--lemma-ranker-all` (every run's 30 from the ranker) would likely cost at L0;
+**exp65 as designed is not run.** The ranker won with 400 lemmas on the frontier (PLL1), where whole clusters fit; the
+from-zero loop's kN members (60-400 lemmas) are where a ranked list could pay. Next pre-check (exp/z9gap5.sh,
+after the half1 arms): the same 235 goals at 100 lemmas, cond/ZKS similarity against cond/ZKH lr2h.
