@@ -500,6 +500,9 @@ class Loop:
                 ix_ = self.vix.get(var, self.lemma_index) if var in ('kp', 'kd') else self.lemma_index
                 if learned_ and 'plr' in self.vix:
                     ix_ = self.vix['plr']
+                elif a.lemma_ranker_all and var not in ('kp', 'kd') and 'plra' in self.vix:
+                    # (23 Nov 13:10, --lemma-ranker-all) every other run's kNN lemmas from the ranker too
+                    ix_ = self.vix['plra']
                 m_ = re.fullmatch(r'(?:k(\d+))?(?:s(\d+))?', var_ or '') if var not in ('kp', 'kd') else None
                 kn_ = int(m_.group(1)) if m_ and m_.group(1) else a.lemma_knn
                 sm_ = int(m_.group(2)) if m_ and m_.group(2) else a.lemmas
@@ -1063,7 +1066,7 @@ class Loop:
         in, the variants are not eligible (opts); later builds replace them, so a variant's index may lag by one."""
         a = self.a
         want = {v.partition('@')[0] for v in a.variants.split(',') if v} & {'kp', 'kd'}
-        if a.lemma_ranker and any(v.startswith('plr') for v in a.variants.split(',')):
+        if a.lemma_ranker and (a.lemma_ranker_all or any(v.startswith('plr') for v in a.variants.split(','))):
             want.add('plr')
         if not want or self.vix_busy:
             return
@@ -1089,7 +1092,10 @@ class Loop:
                     deps = new['kd'].deps if 'kd' in new else lemmas.proof_deps(os.path.join(self.dir, 'hints'), names_)[0]
                     uses = new['kp'].uses if 'kp' in new else lemmas.lemma_uses([self.dir])
                     ctx = lemmarank.Ctx(parts=(ix, uses, deps, os.path.join(self.dir, 'hints')))
+                    ctx.used_by()   # (the kept outputs' grep here, not at the first select in the main thread)
                     new['plr'] = lemmarank.Ranker(a.lemma_ranker, ctx=ctx)
+                    if a.lemma_ranker_all:
+                        new['plra'] = copy.copy(new['plr']); new['plra'].POOL = a.lemma_ranker_pool
                 self.vix = dict(self.vix, **new)
                 print(f'  cascade: variant lemma indexes {sorted(new)} built in {time.time() - t_:.0f}s'
                       + (f' ({len(new["kp"].uses)} goals with uses)' if 'kp' in new else '')
@@ -2439,6 +2445,10 @@ def make_parser():
     ap.add_argument('--lemma-dep-n', type=int, default=50, help='--lemma-deps: the number of nearest proven goals')
     ap.add_argument('--lemma-ranker', default='', help='(23 Nov) --variants plr[kN][sM]: exp/lemmarank.py model path '
                     '(without .txt/.json); the kNN lemmas re-ranked by it (notes/2026-11-23-lemma-ranker.md)')
+    ap.add_argument('--lemma-ranker-all', action='store_true', help='(23 Nov) with --lemma-ranker: every run\'s kNN lemmas '
+                    '(all levels and kN variants; not kp, kd or the cut candidates) from the ranker once it is built')
+    ap.add_argument('--lemma-ranker-pool', type=int, default=1000, help='(23 Nov) --lemma-ranker-all: the ranker re-ranks '
+                    'the similarity list\'s top N (1,000: the training lists\' length, 0.13 s per goal; plr keeps 2,000, 0.27 s)')
     ap.add_argument('--lemma-pop', type=float, default=0.0,
                     help='--lemma-knn: multiply a candidate lemma\'s similarity by 1 + POP * log(1 + its uses in proofs)')
     ap.add_argument('--lemma-uses', default='',
