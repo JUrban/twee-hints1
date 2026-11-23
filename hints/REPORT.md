@@ -101,11 +101,12 @@ exp/trust.py trusts.
 * **Sweep queue:** abs/sweepq.sh runs one-off plain sweeps from cond/SWEEPQ.txt (3 threads, proofs via loops/CI3).
   Idle since HDG1 ended (18:52); PLD1, PLP1, PLT1, PLX1 are held.
 
-**The head climber: abs/clhl3.sh (exp66),** climb.py --live into loops/UL, record loops/CLHL3, started 23 Nov
-after a 3.5-day gap (its predecessor clhl2.sh stopped 20 Nov 10:04 at 1.04 proofs per CPU h and was not restarted).
-2 climbs at a time on the heads: 24 sketch runs of 5 s, then a 160 s final run with the sketch steps as hints.
-Launched with CPUS=28 while exp65 runs; PID 3668941 since the 19:47 restart (each climb run's proof under its own
-name). Production also keeps the old climbs' hints as members sk@0 and sk@1:0.
+**The head climber: abs/clhl4.sh (exp68),** climb.py --live into loops/UL, record loops/CLHL4, PID 3702559 since 23 Nov
+21:07. 2 climbs at a time on the heads: 24 sketch runs of 5 s (conditional proofs with unproved siblings or kNN goals
+assumed, and proofs of weakened goals), then a 160 s final run with the sketch steps as hints. Lemmas: 30 siblings and
+400 kNN goals (exp67's arm B), every weakened goal (`--weaken 12`). Launched with CPUS=28 while exp65 runs. Before it:
+clhl3.sh (exp66, 18:44-21:07, 6+30 lemmas, 0 real proofs in 4.1 CPU h), after a 3.5-day gap (clhl2.sh stopped 20 Nov
+10:04 at 1.04 proofs per CPU h). Production also keeps the old climbs' hints as members sk@0 and sk@1:0.
 [notes/2026-11-23-climber-restart.md](notes/2026-11-23-climber-restart.md).
 
 **3. Not production:** exp67's two set-mode climbs on 91 frozen heads (loops/CLA67, loops/CLB67, 2 climbs each, from

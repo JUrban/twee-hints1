@@ -783,6 +783,10 @@ ul75 5, XFL 1. REPORT's totals table
 has the history (user, 20 Nov: "update the total numbers in the report etc every now and then").
 
 Next:
+0000000000000000000000000000000000000000000000000000000. **exp68 (live climber, [notes/2026-11-23-climber-restart.md](notes/2026-11-23-climber-restart.md), "exp68"):** CLHL3 (arm A's
+   setting) stopped at 21:07, 0 real proofs in 4.1 CPU h. CLHL4 (abs/clhl4.sh, loops/CLHL4): arm B's lemmas (30 siblings, 400 kNN)
+   and --weaken 12 (all weakened goals; the hints of 3 of exp67's 4 proofs came from weakened-goal sketches). Two changes:
+   the production climber, not an A/B; read per CPU h against CLB67 and plainlive4's H runs.
 000000000000000000000000000000000000000000000000000000. **exp67 ([notes/2026-11-23-climber-restart.md](notes/2026-11-23-climber-restart.md), "exp67"):** two climber settings,
    paired, on the 91 heads of t1854 frozen (exp/sets/heads67): CLA67 = clhl3's setting (6+30 lemmas), CLB67 = 30 sibling and
    400 kNN lemmas (the plain sweeps' size finding). Set mode with the new climb.py --targets, the trusted context and a copy of

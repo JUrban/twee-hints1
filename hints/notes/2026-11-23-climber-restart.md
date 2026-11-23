@@ -132,3 +132,14 @@ as it's veroff's main weapon for solving open problems".
 * CC67 matches arm A. With B ahead, B needs its own: **CC67B** (exp/exp67d.sh), like CC67 with B's lemmas
   (30 siblings, 400 kNN) at CLB67's mean CPU per finished target. Armed beside CC67; both start when exp65 ends, -j 4
   each, on the 8 workers exp65 frees.
+
+## exp68: the live climber with arm B's lemmas and every weakening (21:07)
+
+* CLHL3 (arm A's setting, live) stopped at 21:07 with 0 real proofs in 4.1 CPU h (2 climbs in flight lost).
+* **CLHL4** (abs/clhl4.sh, loops/CLHL4, PID 3702559): clhl3's setting with arm B's lemmas (30 siblings, 400 kNN;
+  a generated problem had 30 lemma_goal and 321 lemma_knn axioms, the subset filter trims the rest) and
+  `--weaken 12` (every weakened goal, clhl3 took the first 4). Both from the readings above: B 3 against A 1, and the
+  hints of three of the four proofs came from weakened-goal sketches.
+* Two changes at once: it is the production climber, not an A/B. Read per CPU h against CLB67 (same lemmas, weaken 4,
+  frozen context) and plainlive4's H runs. If it leads CLB67 on the heads both climb, a paired weaken test follows.
+* Launched with CPUS=28 while exp65 runs.
