@@ -768,6 +768,10 @@ ul75 5, XFL 1. REPORT's totals table
 has the history (user, 20 Nov: "update the total numbers in the report etc every now and then").
 
 Next:
+000000000000000000000000000000000000000000000000000. **Lemma ranker (08:59, [notes/2026-11-23-lemma-ranker.md](notes/2026-11-23-lemma-ranker.md)):** the used kNN lemmas of plain
+   proofs are spread evenly over ranks 0-400; a learned ranker could bring needed lemmas into the list. Data sweep
+   RKD1 (abs/rkd1.sh): 800 solved goals near the frontier, 1,000 kNN lemmas, 5 s, 2 threads; then LightGBM, recall at
+   100/400 against similarity, and a frontier sweep with it if recall rises.
 00000000000000000000000000000000000000000000000000. **exp64 (07:10, [notes/2026-11-23-plain-level.md](notes/2026-11-23-plain-level.md)):** a plain level from zero: P4A (control) and P4B
    (DEEP with `plk100s40@0`, prior 3), sets/half2, 4 workers each, 6 hours, CPU sets as exp60's (abs/exp64.sh,
    abs/or_test3.sh). Starts 5 minutes after Z9 ends, in Z9C's place (loops/Z9C.skip). PLZ8 (Z8's context): 160 of 2,000,
@@ -1323,6 +1327,7 @@ reports are written as the experiments run.
 | [notes/2026-11-23-readiness.md](notes/2026-11-23-readiness.md) | How long ready goals wait (Z8), and kNN readiness against the gap order for first runs |
 | [notes/2026-11-23-conditional.md](notes/2026-11-23-conditional.md) | COND1: the unsolved goals with their earlier siblings assumed: hard steps or blocked |
 | [notes/2026-11-23-plain-level.md](notes/2026-11-23-plain-level.md) | exp64: a plain level (no hints, no model) from zero |
+| [notes/2026-11-23-lemma-ranker.md](notes/2026-11-23-lemma-ranker.md) | a learned ranker for the plain runs' kNN lemmas |
 | [notes/2026-11-20-base-saturation.md](notes/2026-11-20-base-saturation.md) | exp39: base-theory runs as rule generators for the unsolved goals of the stronger theories |
 | [notes/2026-11-20-given-transfer.md](notes/2026-11-20-given-transfer.md) | exp38: unsolved goals that are variants of rules other runs derived and did not use (379 M in the given logs; transfer.py only matches proof steps); their ancestry as hints |
 | [notes/2026-11-19-from-zero-portfolio.md](notes/2026-11-19-from-zero-portfolio.md) | half1 from zero in 2 hours with today's deep portfolio (PGC), against PGA's 18,987 (exp27, from 07:18) |
