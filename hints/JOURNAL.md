@@ -783,6 +783,11 @@ ul75 5, XFL 1. REPORT's totals table
 has the history (user, 20 Nov: "update the total numbers in the report etc every now and then").
 
 Next:
+00000000000000000000000000000000000000000000000000000000000. **exp72 (tail allocation, [notes/2026-11-23-tail-allocation.md](notes/2026-11-23-tail-allocation.md)):** the tail's side loops by
+   proofs per CPU h from their records: the plain live loop's L (400 lr2-ranked kNN, 5 s) 0.22 per h, N 0.88, H (heads, 60 s)
+   about 2; CLHL3/CLHL4 0. plainlive5 (23:39) drops L. HLW1: H's setting as a sweep on the 940 local heads (unsolved, the
+   goal before proved), after exp67's arms end; CLS71 excludes them (restarted 23:33). exp67: arm B 7, arm A 2 (+6 −1, 54
+   common heads, 8.2 and 9.1 CPU h); its proofs now merged every 10 minutes (exp/exp67merge.sh).
 0000000000000000000000000000000000000000000000000000000000. **exp71 (the live climber on stalled goals, [notes/2026-11-23-climber-restart.md](notes/2026-11-23-climber-restart.md), "exp71"):**
    all 10 of production's recent sk proofs (climb hints as hints) were in originals with many sketches of CLU (16 Nov,
    stalled goals: 22 real proofs at 0.79 per CPU h, 7,302 sketch files over 108 originals); today's head climbers cover
@@ -1424,6 +1429,7 @@ reports are written as the experiments run.
 | [notes/2026-11-23-plain-sizes.md](notes/2026-11-23-plain-sizes.md) | exp65: plain levels with 400 and 1,600 kNN lemmas from zero; the frontier sweep PLG1 |
 | [notes/production-history.md](notes/production-history.md) | Production's history: every ulNN version's options, members, workers, dates and reason, and the side loops (generated) |
 | [notes/2026-11-23-climber-restart.md](notes/2026-11-23-climber-restart.md) | exp66: the live head climber restarted beside production (stopped 20 Nov, 1.04 per CPU h then); per CPU h against the plain head runs |
+| [notes/2026-11-23-tail-allocation.md](notes/2026-11-23-tail-allocation.md) | exp72: the tail's side loops by proofs per CPU h; the plain live loop without L, a plain 60 s sweep on the 940 local heads, the climber on the other holes |
 | [notes/2026-11-20-base-saturation.md](notes/2026-11-20-base-saturation.md) | exp39: base-theory runs as rule generators for the unsolved goals of the stronger theories |
 | [notes/2026-11-20-given-transfer.md](notes/2026-11-20-given-transfer.md) | exp38: unsolved goals that are variants of rules other runs derived and did not use (379 M in the given logs; transfer.py only matches proof steps); their ancestry as hints |
 | [notes/2026-11-19-from-zero-portfolio.md](notes/2026-11-19-from-zero-portfolio.md) | half1 from zero in 2 hours with today's deep portfolio (PGC), against PGA's 18,987 (exp27, from 07:18) |

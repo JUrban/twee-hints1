@@ -16,3 +16,6 @@ PLG1 --time 5 --sibs 100 --after 30 --knn 1600
 # 1,453 goals with 1 proof: the 5 s frontier is exhausted.
 HDW1 --time 60 --sibs 100 --after 30 --knn 400 --only sets/heads92
 HDG1 --time 60 --sibs 100 --after 30 --knn 1600 --only sets/heads92
+# (23:33) exp72: the 940 local heads (sets/localheads71: unsolved, the goal before proved, not one of the 88 first heads),
+# plain 60 s at W's sizes, as HDW1 on the first heads (4 of 92, 1.78 per CPU h). The stalled-goal climber CLS71 excludes them.
+HLW1 --time 60 --sibs 100 --after 30 --knn 400 --only sets/localheads71

@@ -1,4 +1,7 @@
 #!/bin/bash
+# (23 Nov 23:33) restarted with --exclude sets/localheads71 (exp/sets/localheads71): the 940 unsolved goals right after a
+# proved goal (not the 88 first heads) go to a plain 60 s sweep (HLW1, the sweep queue), so the climber takes the other
+# holes. The first run (23:22-23:33, 22 targets, 0 real proofs in 0.72 CPU h) climbed nearest-first, mostly those.
 # (23 Nov 23:22) exp71: the live climber on stalled goals again (CLU's mode, 16 Nov), beside the head climber (CLHL4).
 # Why: of production's sk@1 proofs (the climb hints as hints, 40 s) in its last 8,000 runs, most came from originals
 # with many sketch files from CLU (stalled goals: 986 targets, 7,302 sketch files over 108 originals, 22 real proofs
@@ -12,7 +15,7 @@
 export TWEE_PG_ARGS="--pg-threshold 0.25 --ground-joining-branch-limit 100"
 cd /project/hintwork
 mkdir -p loops/CLS71
-python3 /project/twee/hints/climb.py sets/all loops/CLS71 --live loops/UL \
+python3 /project/twee/hints/climb.py sets/all loops/CLS71 --live loops/UL --exclude "${EXCLUDE:-sets/localheads71}" \
   --m 8 --knn 8 --theories 4 --theory-explore 2 --theory-lemmas 10 --updown --up-single --weaken 4 --chain --fill 3 \
   --min-sketch-steps 30 --runs 20 --sketch-time 5 --final-time 20 -j "${J:-6}" --cpus "${CPUS:-30}" -- \
   --model --model-fixed /project/hintwork/models/rm4t.bin,/project/hintwork/models/rm4t.vocab --model-theory \

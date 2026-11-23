@@ -404,3 +404,20 @@ proofs in 4.7 CPU h. Its targets were the current heads, the same ones exp67's a
 CPU h each) and controls were climbing at the time, so it mostly repeated them. Heads are covered by exp67 until about
 03:00 and by the plain live loop's H setting (60 s plain runs on the heads; HDW1: 4 of 92 at 1.78 per CPU h); CLS71
 takes its CPU. Whether a head climber comes back depends on the controls (CC67C, CC67D).
+
+## exp67 at 23:41: arm B ahead
+
+| | CLA67 | CLB67 |
+|---|---:|---:|
+| targets both finished | 54 | 54 |
+| proved | 2 | 7 |
+| only this arm | 1 | 6 |
+| CPU h on these targets | 9.05 | 8.22 |
+| proofs per CPU h | 0.22 | 0.85 |
+
+Union 8, both 1. Only CLA67: aa1_14__goal_533. Only CLB67: aK1_to_aK2__goal_76, aK2_eq_aK3_e__goal_326, aK2_eq_aK3_h__goal_279, mbol_com__goal_71, mbol_lem1__goal_391, mbol_to_nil3__goal_623.
+
+On the heads both arms finished, arm B (30 siblings, 400 kNN lemmas) proved 6 that arm A (6 siblings, 30 kNN) did
+not, and A 1 that B did not, at about the same CPU. The arms differ only in the lemma lists. CLB67's proofs of
+23:00-23:08 (mbol_lem1 391, mbol_com 71, mbol_to_nil3 623) reached production at 23:40; exp/exp67merge.sh now merges
+the arms and the controls every 10 minutes until they end.
