@@ -101,3 +101,8 @@ none. abs/stepbed1.sh (exp/stepbed1.sh) runs exp/condprove.py with one change pe
 | T20 | 20 s instead of 5 | 4 |
 
 Reading: each arm's proofs against KNN29's; an arm is a lead only well above the control.
+
+Batch 2, abs/stepbed2.sh (exp/stepbed2.sh), after batch 1, COND1's problems with one twee option each (5 s): GH
+`--goal-heuristic`, HG `--hint-goal`, BG2 `--backwards-goal 2`, FGL `--no-flatten-goal --flatten-goal-lightly`,
+NFG `--no-flatten-goal`, KW0 `--kbo-weight0`, FLIP `--flip-ordering`, GJB `--ground-joining-branch-limit 100`
+(production's limit).
