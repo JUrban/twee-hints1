@@ -157,3 +157,14 @@ Q5B by wall time: 30 min -129, 60 min +128; at equal work (the points above, in 
 * At equal abstract work (abscurve, 118 min): Q5B 19,511, Q5A 19,175, +336.
 * The replica spread is larger: Q5A and P4B run the same setting and differ by 425 at 120 min. Q5B's lead is inside it.
   Readings at 4 and 6 h.
+
+## 4 hours
+
+| min | Q5A (100+400) | Q5B (400+1,600) | P4B (exp64, Q5A's setting) |
+|---:|---:|---:|---:|
+| 180 | 20,456 | 20,643 | 21,053 |
+| 240 | 21,316 | 21,283 | 21,547 |
+
+* Q5B against Q5A: +187 at 180 min, -33 at 240 min; at equal abstract work (abscurve, 238 min) Q5B 21,276, Q5A 21,307, -31.
+* The replica (Q5A against P4B, the same setting 6 hours apart): -597 at 180 min, -231 at 240 min.
+* Q5B's early lead is gone at 4 hours; with the replica spread this size, the bigger kNN lists show no gain. The 6-hour reading (with the one-arm goals) closes exp65.
