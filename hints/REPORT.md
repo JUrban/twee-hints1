@@ -43,6 +43,7 @@ in `/project/hintwork` (not in git).
 | + the live plain loop and wider lemma sets (100+30 siblings, 400 kNN: PLW1, PLK1), the hint bed's proof, production (2az); at 23 Nov 09:33, all trusted | **48,502** (+56.2% over plain) | **5405** (+68.7%) | – |
 | + the live plain loop's ranked lemma sets (lr1, lr2: 2az), production; at 23 Nov 12:56, all trusted (loops/TRUSTNOW/t1256) | **48,512** (+56.2% over plain) | **5410** (+68.9%) | – |
 | + the live plain loop's lr2 cycle (4 proofs; production none since 12:56); at 23 Nov 14:57, all trusted (loops/TRUSTNOW/t1457) | **48,516** (+56.2% over plain) | **5410** (+68.9%) | – |
+| + plain 60 s runs on the 92 heads (HDW1 4, HDG1 1, 2az), the frontier sweep PLG1 1, production and its side loops 15; at 23 Nov 18:54, all trusted (loops/TRUSTNOW/t1854) | **48,537** (+56.3% over plain) | **5415** (+69.1%) | – |
 
 ## Production now
 
