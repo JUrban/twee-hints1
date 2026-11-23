@@ -24,12 +24,16 @@ def opt(k, d):
 SET = opt('--set', '/project/hintwork/sets/all'); TR = opt('--trusted', '/project/hintwork/loops/TRUSTNOW/t2139.trusted')
 J = int(opt('-j', '6')); TM = opt('--time', '5'); SIBS = int(opt('--sibs', '10')); KNN = int(opt('--knn', '30'))
 ONLY = opt('--only', ''); TWEE = '/project/bin/twee-pg61'
+# (23 Nov, the step test bed) --after N: also the N nearest later siblings (any status; true as well); --args: more
+# twee flags; --all: every goal of --only, solved or not
+AFTER = int(opt('--after', '0')); XARGS = opt('--args', '').split(); ALL = '--all' in a
+a = [x for x in a if x != '--all']
 OUT = os.path.abspath(a[0])
 assert not OUT.startswith('/project/hintwork/loops'), 'OUT must be outside loops/'
 os.makedirs(f'{OUT}/p', exist_ok=True); os.makedirs(f'{OUT}/proofs', exist_ok=True)
 G = [l.strip() for l in open(SET) if l.strip()]
 T = {l.split()[0] for l in open(TR) if l.strip()}
-U = [g for g in G if g not in T]
+U = [g for g in G if g not in T or ALL]
 if ONLY:
     keep = {l.strip() for l in open(ONLY) if l.strip()}; U = [g for g in U if g in keep]
 done = set()
@@ -43,7 +47,7 @@ for x in G:
 t_ = time.time()
 index = lemmas.LemmaIndex(sorted(T), subsets=True) if KNN else None
 print(f'condprove: {len(U)} unsolved goals to run ({len(done)} done), index {time.time()-t_:.0f}s', flush=True)
-base = ['--max-time', TM, '--abstract-time', '2000', '--no-colour', '--no-resume-requeue', '--no-eqhint-consider']
+base = ['--max-time', TM, '--abstract-time', '2000', '--no-colour', '--no-resume-requeue', '--no-eqhint-consider'] + XARGS
 AX = re.compile(r'^Axiom \d+ \(([^)]*)\)')
 def one(g):
     o, k = lemmas.split(g)
@@ -51,6 +55,12 @@ def one(g):
         txt, _ = lemmas.lemma_problem_knn(g, allg, SIBS, index, KNN)
     else:
         txt, _ = lemmas.lemma_problem(g, allg, SIBS)
+    if AFTER:
+        up = sorted(j for j in allg[o] if j > int(k))[:AFTER]
+        for j in up:
+            f_ = lemmas.lemma_form(f'{o}__goal_{j}')
+            if f_:
+                txt += f'fof(lemma_goal_{j},axiom,{f_}).\n'
     p = f'{OUT}/p/{g}.p'
     open(p, 'w').write(txt)
     t0 = time.time()

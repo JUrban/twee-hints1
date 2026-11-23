@@ -83,3 +83,21 @@ proof lines after the previous goal, and none frees more than 10 others. "Hard" 
 the rule model, hints or variants; with those some would fall from their siblings, but that does not make keystones
 of them. Progress there needs stronger single-step proving (longer runs, better lemmas and hints
 for one step), not a different order. COND1's proofs stay in cond/COND1, outside loops/.
+
+## Step test bed (launched 05:28)
+
+COND1's hard goals with their siblings assumed are a fast bed for anything meant to prove long steps: a proof there
+is conditional, but a setting that bridges more of them from their predecessors should help production's real
+attempts. sets/hardstep300 (exp/sets/hardstep300): 300 of the 2,826 hard goals (seed 23); COND1's setting proved
+none. abs/stepbed1.sh (exp/stepbed1.sh) runs exp/condprove.py with one change per arm, 6 threads, one arm at a time:
+
+| arm | change | cost |
+|---|---|---|
+| KNN29 | 29 kNN lemmas instead of 30: a perturbation control (what any change proves by chance) | 1 |
+| SIB30 | 30 earlier siblings | 1 |
+| AFT10 | also the 10 nearest later siblings (true as well) | 1 |
+| KNN100 | 100 kNN lemmas | 1 |
+| SIB3 | 3 earlier siblings | 1 |
+| T20 | 20 s instead of 5 | 4 |
+
+Reading: each arm's proofs against KNN29's; an arm is a lead only well above the control.

@@ -774,6 +774,8 @@ Next:
    (reach: hard >=1 184, >=5 5, >=20 0). The hard steps are the long ones (every unsolved goal is 8+ Prover9 lines after
    the previous goal). No keystones: no change. The one unconditional proof (nil3_30__goal_473) is not reproduced by
    loop.py in the trusted context (CU2, with its 8,504 hints) and is not entered.**
+   Step test bed (05:28): sets/hardstep300 (300 of the hard goals), abs/stepbed1.sh: arms KNN29 (perturbation control),
+   SIB30, AFT10, KNN100, SIB3 (5 s each) and T20 (20 s), 6 threads, one at a time, cond/STEP_<arm>.
 00000000000000000000000000000000000000000000000. **Readiness (04:54, [notes/2026-11-23-readiness.md](notes/2026-11-23-readiness.md)):** offline on Z8's rows (exp/triglag.py,
    exp/fresh_ready.py). Late retries are prompt: of 593 proofs that used a lemma proved after the goal's last failure, the
    proving run came 3/8/16/30/50 min after it (deciles 10/25/50/75/90), always the first run after it. First runs wait longer
