@@ -462,7 +462,15 @@ def main():
         hints = hs + [h for h in lp.hints_for(t, pools, None) if h not in seen[o]]
         if tag == 'final':
             lp.capture_given.add(t)
-        n, ok, dt, stats, res = lp.run_one(t, hints, 1, budget, False, a_cpu(budget))
+        # (23 Nov) each run's printed proof as DIR/proofs/<t>.<tag> (.weak for a weakened goal): sketch proofs are kept
+        # as data, and none overwrites the final run's real proof (a target's runs are sequential in one thread)
+        if not hasattr(lp, 'proof_name'):
+            lp.proof_name = {}
+        lp.proof_name[t] = f'{t}.{tag}' + ('.weak' if goal is not None else '')
+        try:
+            n, ok, dt, stats, res = lp.run_one(t, hints, 1, budget, False, a_cpu(budget))
+        finally:
+            lp.proof_name.pop(t, None)
         lp.extra_axioms.pop(t, None)
         if tag == 'final':
             # the final run's given rules, failed or not: which sketch steps the real theory derives

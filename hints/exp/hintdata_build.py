@@ -186,16 +186,20 @@ def main_realproofs():
     skip = {x for a in sys.argv if a.startswith('--skip=') for x in a.split('=', 1)[1].split(',')}
     fam, froot = {}, {}
     for d in dirs:
-        # (23 Nov) a climber's dir (climb.py: climb.tsv) is left out: its proofs/<goal> are sketch runs' proofs, with
-        # unproved sibling goals as axioms (assume_*), not proofs of the goal; its real proofs are in climbs/
-        if os.path.exists(os.path.join(L, d.split('/')[0], 'climb.tsv')):
-            continue
         names = [os.path.join(d, 'proofs', n) for n in os.listdir(os.path.join(L, d, 'proofs')) if '__goal_' in n]
+        # (23 Nov) a climber's dir (climb.py: climb.tsv) is family 'climbers'. Since 23 Nov 20:00 each climb run's
+        # proof is proofs/<goal>.<run tag> (s3, final, s2.weak, ...): a sketch run's proof has unproved goals as axioms
+        # (assume_*), a final run's is a real proof. Before, every run wrote proofs/<goal> over the last one; such an
+        # untagged file is packed only if it is a real proof (no assume_ axiom)
+        climber = os.path.exists(os.path.join(L, d.split('/')[0], 'climb.tsv'))
+        if climber:
+            names = [n for n in names if '.' in n.rpartition('__goal_')[2]
+                     or b'(assume_' not in open(os.path.join(L, n), 'rb').read()]
         if not names:
             continue
         b = d.split('/')[0].split('.')[0]   # a run and its side loops: Z6, Z6.xfer, Z6_GML -> Z6
         b = b[:-4] if b.endswith('_GML') else b
-        f = next((k for k, pats in RP_FAMILIES if b in pats), b)
+        f = 'climbers' if climber else next((k for k, pats in RP_FAMILIES if b in pats), b)
         if (not only or f in only) and f not in skip:
             fam.setdefault(f, []).extend(names); froot[f] = L
     # (23 Nov) the plain sweeps outside loops/ (exp/condprove.py OUT/proofs/<goal>): cond = the one-off sweeps,
@@ -213,7 +217,8 @@ def main_realproofs():
     def key(n):
         d, _, g = n.rpartition('/proofs/')
         o, _, k = g.rpartition('__goal_')
-        return (d, o, int(k))
+        k, _, tag = k.partition('.')   # a climber's <goal>.<run tag>
+        return (d, o, int(k), tag)
     for f in sorted(fam):
         names, bad = [], 0
         for n in sorted(fam[f], key=key):
@@ -246,7 +251,8 @@ def main_realproofs():
                 os.replace(tmp, dst)
             done.append(dst)
             rel = os.path.relpath(dst, R)
-            index.extend('%s\t%s\t%s\n' % (n.rpartition('/proofs/')[2], n.rpartition('/proofs/')[0], rel) for n in c)
+            index.extend('%s\t%s\t%s\n' % (n.rpartition('/proofs/')[2].split('.')[0], n.rpartition('/proofs/')[0], rel)
+                         for n in c)
             commit([dst], 'realproofs: %s part %d (%d printed twee proofs, %.1f MB xz)' % (f, k, len(c), os.path.getsize(dst) / 1e6))
         for old in glob.glob(os.path.join(R, 'realproofs', f, '%s_*.tar.xz' % f)):
             if old not in done:

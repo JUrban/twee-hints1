@@ -719,15 +719,18 @@ class Loop:
             i, j = out.find('GIVEN-BEGIN'), out.find('GIVEN-END')
             with open(os.path.join(od, tag), 'w') as f:
                 f.write(out[:i] + out[j:] if 0 <= i < j else out)  # without the given rules
+        # (23 Nov) proof_name: another file name for this goal's proof; climb.py sets <goal>.<run tag>, so a climb's
+        # sketch runs (unproved goals as axioms) and its final run each keep their own proof, none overwrites another
+        pn = getattr(self, 'proof_name', {}).get(name, name)
         if a.keep_proofs and 'HINTS-END' in out and 'Here is a proof' not in out:
             try:   # (20 Nov 15:03, user) the proof, by a rerun with it printed (exp/proofq.py)
-                self.proof_job(name, tag, cmd, env_)
+                self.proof_job(pn, tag, cmd, env_)
             except Exception as e_:   # (must not cost the run)
                 print(f'  keep-proofs: {name} error {e_!r}', flush=True)
         elif a.keep_proofs and 'HINTS-END' in out:
             try:   # (--proof-in-search) the run printed its proof: keep it, no rerun
-                if not self.proof_write(name, out):
-                    self.proof_job(name, tag, cmd, env_)
+                if not self.proof_write(pn, out):
+                    self.proof_job(pn, tag, cmd, env_)
             except Exception as e_:
                 print(f'  keep-proofs: {name} error {e_!r}', flush=True)
         if hints and not os.environ.get('LOOP_KEEP_TMP'):
