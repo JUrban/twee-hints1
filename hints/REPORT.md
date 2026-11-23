@@ -4906,6 +4906,8 @@ reproduced exactly).
 
 ## 2az. Portfolios: complementary methods kept, not dropped (user's request, 18 Nov 17:00)
 
+*Notes: [notes/2026-11-23-plain-level.md](notes/2026-11-23-plain-level.md).*
+
 *Notes: [notes/2026-11-23-conditional.md](notes/2026-11-23-conditional.md).*
 
 *Notes: [notes/2026-11-23-readiness.md](notes/2026-11-23-readiness.md).*
@@ -5658,15 +5660,23 @@ index is now rebuilt every 10 minutes, not 30 (about 1 s a rebuild).
   * Side-by-side arms differ in throughput: P3A's runs took 1.02 CPU s per abstract second in the second hour,
     the others' 1.13-1.16, because three loops shared one socket. Since 22:37 each arm gets 14 whole cores, 7 per
     socket (abs/or_test3.sh's CPUSET), and arms are also compared at equal abstract work (exp/abscurve.py).
-* **Where the frontier is (COND1, 23 Nov; [notes/2026-11-23-conditional.md](notes/2026-11-23-conditional.md)): hard steps, no keystones.**
-  Each of the 3,412 unsolved goals got one plain 5 s twee run with its 10 nearest earlier siblings as axioms, proved or
-  not (they are steps of Prover9's proofs, so true), and 30 kNN lemmas of trusted goals (exp/condprove.py).
-  * 2,826 (83%) were not proved even so: hard steps. 585 were proved using unproved siblings (blocked), and 1 used
-    none (nil3_30__goal_473; loop.py in the trusted context does not reproduce it, so it is not entered).
-  * No single goal, once proved, frees more than 10 blocked goals (exp/condgraph.py, to a fixpoint): there are no
-    keystones to aim long runs at.
-  * AIM60k samples each Prover9 proof every 3 lines at first, then every 5, 8, 13, 21, 34 and 55 (2z). Every unsolved
-    goal is 8 or more proof lines after the previous goal, most 32 or more: the frontier is the long steps.
+* **Plain runs find frontier proofs that hinted runs miss (23 Nov; [notes/2026-11-23-conditional.md](notes/2026-11-23-conditional.md)).**
+  A plain twee run has no hints, no rule model and no PG, only lemma axioms: here the trusted siblings 30 back and
+  10 ahead, and the 100 nearest kNN lemmas (exp/condprove.py --proved).
+  * **PLN1:** one 5 s plain run on each of production's 3,412 unsolved goals proved 24, 22 of them new (production got the
+    other 2 itself meanwhile), in 2.71 CPU h: 8.1 new per CPU h, where production makes 0.35 on the same goals. They are
+    in production through exp/condimport.py (a loop record: kept output with USEDAXIOMS, canonical hints) and
+    merge.py, and trust.py passes them (t0641: 0 untrusted).
+  * **PLZ8:** on 2,000 of Z8's unsolved goals in Z8's final context, 160 proofs, 85 per CPU h, as many as Z8's own late
+    5 s retries (81) but on goals those had failed.
+  * Production's hint pool for a late goal is the whole original's (one run had 8,504 hints), and its members all
+    use it. The step test bed (300 hard steps with their siblings assumed): siblings far back (SIB30 41) and ahead
+    (AFT10 51) prove most, 100 kNN lemmas 12, against 1 for a perturbation; four times the time 47; none of twee's
+    goal or ordering options adds anything.
+  * loop.py `--variants pl[kN][sM]` makes it a cascade level; abs/plainlive.sh runs it beside production as a live
+    side loop; exp64 tests it from zero.
+* **Where the frontier is (COND1, COND2):** with their earlier siblings assumed (proved or not), 73-83% of the unsolved
+  goals are still not proved at 5 s, and no goal frees more than 11 others: hard steps, no keystones.
 * **Late queues (23 Nov; [notes/2026-11-23-readiness.md](notes/2026-11-23-readiness.md)): no change.** In Z8, a late proof that used a lemma proved
   after the goal's last failure came 3/8/16/30/50 minutes after that lemma (deciles 10/25/50/75/90), at the first run
   after it. First runs came later (6/16/40/98/147 minutes after their latest lemma), but no kNN signal orders them better
@@ -5823,6 +5833,16 @@ rounds of 30 s or more, but about 40% overhead for 8 s rounds.
 | long-run-scalability, mature-back-index-cpu, adaptive-back-index-crossover (indexing side) | paramodulation and back-demodulation indexes that stay cheap as the clause set grows | ported in twee's terms (2v): a fingerprint index for overlap partners (exact, 1.8× on long runs) and a backward-demodulation filter for interreduction. |
 
 ## 3. Assessment
+
+*23 Nov, 07:12 (`date` checked). The 05:27 assessment follows it.*
+
+* **48,466 solved, holdout 5,393** (trust.py t0641, 0 untrusted), +94 since 21:39: production's own streaks
+  (com_Ralt, lra2aa, ns_to_aa1_*) and 22 new proofs from plain runs.
+* **Plain runs are a new member (2az).** No hints, no rule model, only far siblings and 100 kNN lemmas: on
+  production's frontier 8.1 new proofs per CPU h against production's 0.35; in Z8's final context 85 per CPU h on goals
+  Z8 had failed. They now run as a live side loop of production (abs/plainlive.sh), and exp64 tests a plain level
+  from zero in Z9C's place (Z9C is not run).
+* **Z9 at 4 hours:** +571 over Z8 at equal abstract work, but level with Z7 (+29): no evidence about Z9's additions.
 
 *23 Nov, 05:27 (`date` checked). The 02:48 assessment follows it.*
 
@@ -6124,6 +6144,14 @@ rounds of 30 s or more, but about 40% overhead for 8 s rounds.
     time.
 
 ## 4. Next steps
+
+*23 Nov, 07:12 (2az, 3):*
+
+* **exp64** (about 10:51 to 16:51): P4A against P4B (a plain level), half2 from zero, 6 hours. If it pays,
+  solve_new.sh gets the level, and production the variant.
+* **The plain live loop:** its cycles' yield; whether more plain settings (k200, k400, 80 siblings) add more.
+* **Z9** at 6 and 8 hours (holdout count too).
+* **Open:** `--proof-in-search` (the user's decision); the late A/B's replica pair.
 
 *23 Nov, 05:27 (2az, 3):*
 
