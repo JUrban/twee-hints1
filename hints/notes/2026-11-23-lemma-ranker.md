@@ -141,3 +141,20 @@ so most L problems change each cycle: L cycles are full sweeps, as W's were.
   too; the rows of goals the plain sweeps proved first (PLW1, PLK1, PLN1: their records went into loops/UL/out by
   merge.py, which the use counts do not read) had none, and showed the same gains (0.18 to 0.44-0.46 at 50). cond/LR2.pkl is built with the fix; its CV compares lr1's
   features with FEATS2.
+
+## lr2 (11:50)
+
+cond/LR2.pkl (the leak fixed; with PLL1, PLS1 and the live loop's c4N, c4W, c5W): 783 problems, 570,530 rows, 5,138 used. CV
+with lr1's features (cond/LR2.eval.v1) and with FEATS2 (cond/LR2.eval):
+
+| dir | K | problems | recall, similarity | lr1's features | FEATS2 | all used, lr1's features | all used, FEATS2 |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| cond/RKD1 | 100 | 552 | 0.534 | 0.749 | 0.744 | 0.458 | 0.451 |
+| cond/RKD1 | 400 | 536 | 0.784 | 0.933 | 0.941 | 0.741 | 0.752 |
+| cond/PLW1 | 50 | 23 | 0.183 | 0.443 | 0.500 | 0.043 | 0.043 |
+| cond/PLW1 | 100 | 23 | 0.344 | 0.643 | 0.653 | 0.087 | 0.087 |
+| cond/PLK1 | 50 | 16 | 0.176 | 0.469 | 0.497 | 0.000 | 0.000 |
+
+The fix changes little (RKD1 at 400: 0.933 against 0.935 with the leak), so lr1 was not riding it. The sibling features
+add a little at 400 and on the frontier lists. lr2 (models/lemmarank/lr2, FEATS2, all of LR2) replaces lr1 in the live
+loop after its current cycle (abs/plainlive3_lr2.sh, exp/plainlive3_lr2.sh: cond/PLNL.stop, then MODEL=lr2).
