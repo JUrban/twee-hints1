@@ -241,3 +241,21 @@ condprove.py `--rank-mix`, loop.py `--lemma-ranker-mix`; checked on 2 goals: the
 the model's order). Arm exp/z9gap4.sh: cond/ZGM2 (half2 goals, lr2h), then cond/ZGM1 (half1 goals, lr2h1), 1 thread.
 exp65 waits for the pre-check: if the ranked or mixed lists lose to similarity on these goals, its Q5B changes (a mixed
 list, or rk30@0 as a member after L0 instead of a switch for every run).
+
+Proof sizes (13:23; kNN lemmas a proof used, condprove.py's column 6): RKD1 743 proofs, median 2, 80 with 10 or more; PLW1 23 proofs, median 12, 16 with 10 or more; PLL1 3 proofs, median 24, 2 with 10 or more; ZGS 19 proofs, median 3, 8 with 10 or more. The training data
+are mostly small proofs. By proof size on RKD1's half2 problems (exp/lemmarank_bysize.py lr2h, cond/LR2H.bysize), the
+share whose used lemmas are all in the list's top K, with the mixed list (similarity's top K/2, then the model's):
+
+| used | problems | K | similarity | model | mixed |
+|---|---:|---:|---:|---:|---:|
+| 1-1 | 55 | 30 | 0.673 | 0.800 | 0.782 |
+| 1-1 | 55 | 100 | 0.855 | 0.909 | 0.909 |
+| 2-4 | 140 | 30 | 0.193 | 0.314 | 0.293 |
+| 2-4 | 140 | 100 | 0.464 | 0.664 | 0.636 |
+| 5-9 | 85 | 30 | 0.000 | 0.047 | 0.059 |
+| 5-9 | 85 | 100 | 0.294 | 0.353 | 0.341 |
+| 10-999 | 70 | 30 | 0.000 | 0.000 | 0.000 |
+| 10-999 | 70 | 100 | 0.271 | 0.271 | 0.271 |
+
+The model is at or above similarity at every size, but for proofs of 10 or more neither covers them at 30: a
+1,000-lemma proof picks among substitutes, so its labels cannot say which 30 suffice. The runs decide.
