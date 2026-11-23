@@ -501,7 +501,7 @@ class Loop:
                 if learned_ and 'plr' in self.vix:
                     ix_ = self.vix['plr']
                 elif a.lemma_ranker_all and var not in ('kp', 'kd') and 'plra' in self.vix:
-                    # (23 Nov 13:10, --lemma-ranker-all) every other run's kNN lemmas from the ranker too
+                    # (23 Nov, --lemma-ranker-all) every other run's kNN lemmas from the ranker too
                     ix_ = self.vix['plra']
                 m_ = re.fullmatch(r'(?:k(\d+))?(?:s(\d+))?', var_ or '') if var not in ('kp', 'kd') else None
                 kn_ = int(m_.group(1)) if m_ and m_.group(1) else a.lemma_knn

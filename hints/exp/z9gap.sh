@@ -1,5 +1,5 @@
 #!/bin/bash
-# (23 Nov 13:20, notes/2026-11-23-lemma-ranker.md "Z9's gap") Offline pre-check for exp65: 500 goals production solved
+# (23 Nov, notes/2026-11-23-lemma-ranker.md "Z9's gap") Offline pre-check for exp65: 500 goals production solved
 # and Z9 (8 hours from zero) did not (sets/z9gap500, seed 66), in Z9's final context (cond/Z9.trusted: loops/Z9/solved.tsv),
 # plain 5 s twee (condprove.py --proved: Z9-proved siblings only, 4 earlier + 2 later, 30 kNN lemmas), two arms at
 # once, 1 thread each:

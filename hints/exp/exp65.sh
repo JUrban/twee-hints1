@@ -1,5 +1,5 @@
 #!/bin/bash
-# (23 Nov 13:15) exp65 (notes/2026-11-23-lemma-ranker.md, "exp65"): the learned lemma ranker for every run from zero.
+# (23 Nov) exp65 (notes/2026-11-23-lemma-ranker.md, "exp65"): the learned lemma ranker for every run from zero.
 # Two arms as exp64's (abs/or_test3.sh, sets/half2, 4 workers, 6 hours, the same CPU sets), started after exp64 ends
 # (loops/EXP64.pids "exp64 done"):
 #   Q5A: the control, DEEP_A (exp64's better arm, set at the launch);

@@ -73,7 +73,7 @@ elif IX.startswith('learned:') and index:
     # (needs lightgbm: run under /project/hintwork/venv/bin/python3)
     sys.path.insert(0, '/project/twee/hints/exp')
     import lemmarank
-    # (23 Nov 13:20) --rank-loop DIR: the ranker's use counts, proof steps and hints dir from loop DIR (its kept
+    # (23 Nov) --rank-loop DIR: the ranker's use counts, proof steps and hints dir from loop DIR (its kept
     # outputs and DIR/hints) instead of production's, so a test in another loop's context (e.g. Z9's) does not see
     # production's proofs
     RL = opt('--rank-loop', '')
@@ -84,7 +84,7 @@ elif IX.startswith('learned:') and index:
         index = lemmarank.Ranker(IX.split(':', 1)[1], ctx=ctx_)
     else:
         index = lemmarank.Ranker(IX.split(':', 1)[1], TR)
-    index.POOL = int(opt('--rank-pool', '2000'))   # (13:20) loop.py --lemma-ranker-all's pool: 1,000
+    index.POOL = int(opt('--rank-pool', '2000'))   # (23 Nov) loop.py --lemma-ranker-all's pool: 1,000
 elif IX:
     sys.exit(f'--index {IX}: kd, kp or learned:MODEL')
 print(f'condprove: {len(U)} unsolved goals to run ({len(done)} done), index {time.time()-t_:.0f}s', flush=True)
