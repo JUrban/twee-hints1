@@ -784,6 +784,8 @@ Next:
    (13:37) Pre-check at 30 lemmas on 235 held-out half2 gap goals: similarity 11, lr2h 6 (+0 −5), mixed 9 (+1 −3): similarity wins; exp65 (--lemma-ranker-all) not run. Next: the same at 100 lemmas.
    (13:37) The live loop's first lr2 cycle c8L (400 lemmas, the frontier): ran 3002, 4 proved, 4 merged into UL; lr1's c7L before it: ran 2982, 0.
    (14:55) Half1 at 30 lemmas: similarity 13, lr2h1 8 (+0 −5). 100 lemmas on half2: similarity 20, lr2h 14 (+3 −9): the ranker loses at 30 and 100, and the list's size matters more than its order. Next: 200 and 400 (exp/z9gap6.sh), similarity against lr2h.
+   (15:10) **Size, not order.** 235 half2 gap goals, plain 5 s, similarity / lr2h by kNN lemma count: 30: 11 / 6, 100: 20 / 14, 200: 22 / 24, 400: 35 / 30. The ranker is dropped for from-zero runs (it keeps the frontier live loop); exp65 tests list size instead. Next: 800 and 1,600 lemmas, 400 with 40 siblings (exp/z9gap8.sh).
+   **Totals (14:57, loops/TRUSTNOW/t1457): 48,516 trusted, holdout 5,410; the 4 new since 12:56 are c8L's (lr2), production's own loop proved none in those 2 hours.**
 00000000000000000000000000000000000000000000000000. **exp64 (07:10, [notes/2026-11-23-plain-level.md](notes/2026-11-23-plain-level.md)):** a plain level from zero: P4A (control) and P4B
    (DEEP with `plk100s40@0`, prior 3), sets/half2, 4 workers each, 6 hours, CPU sets as exp60's (abs/exp64.sh,
    abs/or_test3.sh). Starts 5 minutes after Z9 ends, in Z9C's place (loops/Z9C.skip). PLZ8 (Z8's context): 160 of 2,000,

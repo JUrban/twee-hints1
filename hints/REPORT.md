@@ -42,6 +42,7 @@ in `/project/hintwork` (not in git).
 | + production's own streaks (ul75) and plain runs: lemma axioms only, no hints, no model (PLN1, 2az); at 23 Nov 06:41, all trusted | **48,466** (+56.0% over plain) | **5393** (+68.4%) | – |
 | + the live plain loop and wider lemma sets (100+30 siblings, 400 kNN: PLW1, PLK1), the hint bed's proof, production (2az); at 23 Nov 09:33, all trusted | **48,502** (+56.2% over plain) | **5405** (+68.7%) | – |
 | + the live plain loop's ranked lemma sets (lr1, lr2: 2az), production; at 23 Nov 12:56, all trusted (loops/TRUSTNOW/t1256) | **48,512** (+56.2% over plain) | **5410** (+68.9%) | – |
+| + the live plain loop's lr2 cycle (4 proofs; production none since 12:56); at 23 Nov 14:57, all trusted (loops/TRUSTNOW/t1457) | **48,516** (+56.2% over plain) | **5410** (+68.9%) | – |
 
 **Correction (20 Nov 10:40; [notes/2026-11-20-p9-negation-bug.md](notes/2026-11-20-p9-negation-bug.md)).** The counts
 from 15 Nov on include proofs that are not proofs.
