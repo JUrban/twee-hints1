@@ -268,3 +268,8 @@ and the mixed list does not gain. So `--lemma-ranker-all` (every run's 30 from t
 **exp65 as designed is not run.** The ranker won with 400 lemmas on the frontier (PLL1), where whole clusters fit; the
 from-zero loop's kN members (60-400 lemmas) are where a ranked list could pay. Next pre-check (exp/z9gap5.sh,
 after the half1 arms): the same 235 goals at 100 lemmas, cond/ZKS similarity against cond/ZKH lr2h.
+
+## The live loop with lr2 (13:37)
+
+c8L (lr2, 100+30 siblings, 400 kNN, the production frontier): ran 3002 problems, 4 proved, 4 of 4 imported, 4 merged into UL.
+c7L before it (lr1, same sizes, a slightly smaller context): ran 2982, 0 proved. At 400 lemmas the ranker keeps paying.
