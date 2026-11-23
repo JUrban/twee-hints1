@@ -808,6 +808,7 @@ Next:
    the production climber, not an A/B; read per CPU h against CLB67 and plainlive4's H runs.
    (21:14) **ul76**: ul75 plus today's climb dirs (CLHL3, CLHL4, CLA67, CLB67) in --climb-hints. In ul75's last 6,000 runs
    member sk@1:0 (40 s with the climb hints) made 8 of 19 proofs, but its dirs were all from 15-20 Nov (exp/memberyield.py).
+   **(23:30) CLHL4 stopped: 21 heads, 0 real proofs in 4.7 CPU h; its heads were exp67's (arms and controls) at the same time.**
 000000000000000000000000000000000000000000000000000000. **exp67 ([notes/2026-11-23-climber-restart.md](notes/2026-11-23-climber-restart.md), "exp67"):** two climber settings,
    paired, on the 91 heads of t1854 frozen (exp/sets/heads67): CLA67 = clhl3's setting (6+30 lemmas), CLB67 = 30 sibling and
    400 kNN lemmas (the plain sweeps' size finding). Set mode with the new climb.py --targets, the trusted context and a copy of

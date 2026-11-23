@@ -396,3 +396,11 @@ the holes too, nearest to a proved goal first.
 2,657 holes with a unit-equation form. (The key is rough: a sample of solved goals finds its own equation in its own
 hints file 105 times in 283; the conjecture's unitized form and twee's proved form differ, e.g. a variable set to
 e. Even so, the holes are not hiding in the siblings' proofs.)
+
+### CLHL4 stopped (23:31)
+
+CLHL4 (exp68, the live head climber with arm B's lemmas and --weaken 12) stopped at 23:30: 21 heads finished, 0 real
+proofs in 4.7 CPU h. Its targets were the current heads, the same ones exp67's arms (CLA67 2, CLB67 4 real proofs in 7.5
+CPU h each) and controls were climbing at the time, so it mostly repeated them. Heads are covered by exp67 until about
+03:00 and by the plain live loop's H setting (60 s plain runs on the heads; HDW1: 4 of 92 at 1.78 per CPU h); CLS71
+takes its CPU. Whether a head climber comes back depends on the controls (CC67C, CC67D).

@@ -105,12 +105,9 @@ all 51,784 problems, 6 workers.
 * **Sweep queue:** abs/sweepq.sh runs one-off plain sweeps from cond/SWEEPQ.txt (3 threads, proofs via loops/CI3).
   Idle since HDG1 ended (18:52); PLD1, PLP1, PLT1, PLX1 are held.
 
-**The head climber: abs/clhl4.sh (exp68),** climb.py --live into loops/UL, record loops/CLHL4, PID 3702559 since 23 Nov
-21:07. 2 climbs at a time on the heads: 24 sketch runs of 5 s (conditional proofs with unproved siblings or kNN goals
-assumed, and proofs of weakened goals), then a 160 s final run with the sketch steps as hints. Lemmas: 30 siblings and
-400 kNN goals (exp67's arm B), every weakened goal (`--weaken 12`). Launched with CPUS=28 while exp65 runs. Before it:
-clhl3.sh (exp66, 18:44-21:07, 6+30 lemmas, 0 real proofs in 4.1 CPU h), after a 3.5-day gap (clhl2.sh stopped 20 Nov
-10:04 at 1.04 proofs per CPU h). Production also keeps the old climbs' hints as members sk@0 and sk@1:0.
+**The head climber: abs/clhl4.sh (exp68),** stopped 23 Nov 23:30 after 21:07-23:30: 21 heads finished, 0 real proofs in
+4.7 CPU h (clhl3.sh before it, 18:44-21:07: 0 in 4.1). Its targets were the heads exp67's arms and controls climb at the
+same time. Production also keeps the old climbs' hints as members sk@0 and sk@1:0.
 **The stalled-goal climber: abs/cls71.sh (exp71),** climb.py --live into loops/UL, record loops/CLS71, PID 3750581
 since 23 Nov 23:22. CLU's mode (16 Nov): any goal whose latest fresh run failed, holes included, nearest to a proved
 goal first; a cheap climb (20 sketch runs of 5 s, a 20 s final, `--weaken 4`, fills of 3 s), 30 siblings and 400 kNN
@@ -131,7 +128,7 @@ climb.py --final-cpu), 4 at a time each, about 4 hours. (The first controls, 22:
 exp65 (Q5A, Q5B) ended at 22:55: -2 at 6 hours, closed.
 
 **CPU at 23:25:** 32 twee processes are running:
-* the main loop 6, proof reruns 2, the plain live loop 1, the head climber 2, the stalled-goal climber 5;
+* the main loop 6, proof reruns 2, the plain live loop 1, the stalled-goal climber 5 (the head climber 2, stopped 23:30);
 * exp67's climbs 4 and controls 8 (CC67C, CC67D), exp70 2, a fill-lemma re-check 2; transfer and given-rule retry 0 at that moment.
 
 That is above the usual 20, for the climber experiments (the user's leave for climbing, 23 Nov). exp67 and its
