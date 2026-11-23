@@ -115,3 +115,14 @@ heads are what blocks the frontier. sets/heads92 (copy exp/sets/heads92). Two pl
 abs/sweepq.sh (cond/SWEEPQ.txt), 3 threads, context loops/UL/solved.tsv, proofs into loops/CI3 and loops/UL:
 HDW1 (W's sizes: 100+30 siblings, 400 kNN) and HDG1 (1,600 kNN). sweepq.sh now passes the sweep's --time to
 condimport.py (whose default of 5 s would have failed to re-prove a 60 s proof).
+
+HDW1 result (17:49): 4 of 92 heads in 2.25 CPU h of twee runs (1.8 per CPU h; production's own loop about 5 in its last 6 hours on 6 workers); condimport: 4 of 4 into loops/CI3; 4 merged into loops/UL (round 5).
+
+| head | seconds | kNN lemmas used | unsolved goals after it in its original |
+|---|---:|---:|---:|
+| aK1_to_aK2__goal_75 | 13.0 | 19 | 1 |
+| aK2_eq_aK3_f__goal_409 | 14.6 | 4 | 0 |
+| gbol_to_aK1__goal_458 | 54.0 | 17 | 1 |
+| KK_Kcom_to_aK1__goal_283 | 5.7 | 10 | 2 |
+
+Three of the four took 13-54 s, beyond the 5 s sweeps. With these proofs in production the next goal of each original becomes a head.
