@@ -237,6 +237,9 @@ def main():
     ap.add_argument('--theory-ts-ab', action='store_true', help='--theory-ts only on targets with bit 1 of crc32')
     ap.add_argument('--theory-explore', type=int, default=0,
                     help='--theories K: the last R slots go to random other stronger theories (seeded by target)')
+    # (23 Nov, exp67) --targets FILE: in set mode, climb only these goals (a frozen head list), so two settings can be
+    # compared on the same targets outside production
+    ap.add_argument('--targets', default='', help='set mode: climb only the goals listed in FILE')
     ap.add_argument('--move-ab', action='store_true', help='--move-model only on targets of odd crc32 (A/B test)')
     ap.add_argument('--move-eps', type=float, default=0.1, help='--move-model: share of uniformly random moves')
     ap.add_argument('--up-single', action='store_true', help='--updown: going up also adds one assumption at a time')
@@ -865,6 +868,10 @@ def main():
         live(c, a, lp, gl, pools, ix, climb, out)
         return
     todo = [n for n in lp.names if n not in lp.solved]
+    if c.targets:
+        keep = {l.split()[0] for l in open(c.targets) if l.strip()}
+        todo = [n for n in todo if n in keep]
+        print(f'--targets: {len(todo)} of {len(keep)} listed goals unsolved here', flush=True)
     t0 = time.time(); nsolved = 0
     with ThreadPoolExecutor(c.j) as ex:
         for t, ok, runs in ex.map(climb, todo):

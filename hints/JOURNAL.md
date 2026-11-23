@@ -783,6 +783,10 @@ ul75 5, XFL 1. REPORT's totals table
 has the history (user, 20 Nov: "update the total numbers in the report etc every now and then").
 
 Next:
+000000000000000000000000000000000000000000000000000000. **exp67 ([notes/2026-11-23-climber-restart.md](notes/2026-11-23-climber-restart.md), "exp67"):** two climber settings,
+   paired, on the 91 heads of t1854 frozen (exp/sets/heads67): CLA67 = clhl3's setting (6+30 lemmas), CLB67 = 30 sibling and
+   400 kNN lemmas (the plain sweeps' size finding). Set mode with the new climb.py --targets, the trusted context and a copy of
+   its hints, 2 climbs each (exp/exp67.sh), from 19:01.
 00000000000000000000000000000000000000000000000000000. **exp66 (climber restart, [notes/2026-11-23-climber-restart.md](notes/2026-11-23-climber-restart.md)):** the live head
    climber back beside production (abs/clhl3.sh, loops/CLHL3; clhl2.sh's setting, a fresh record). clhl2 made 69 proofs in
    66 CPU h (1.04 per CPU h) and stopped 20 Nov 10:04, never restarted. The user: "you should remember to use the climber and

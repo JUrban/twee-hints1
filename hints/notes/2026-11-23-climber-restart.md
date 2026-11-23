@@ -38,3 +38,23 @@ as it's veroff's main weapon for solving open problems".
 * Final runs with the large plain lemma sets that won today: 400 or 1,600 kNN lemmas, no rule model
   (notes/2026-11-23-plain-sizes.md).
 * Climbs started from the plain sweeps' near misses.
+
+## exp67: two climber settings, paired (started 19:02)
+
+* **Question:** do the climber's runs gain from the large lemma sets that won in the plain sweeps?
+  * In those sweeps, 400 kNN lemmas proved 35 of 235 gap goals at 5 s against 11 with 30.
+  * On the heads at 60 s, 400 lemmas proved 4 of 92 and 1,600 proved 1 of 88.
+* **Targets:** the 91 heads of loops/TRUSTNOW/t1854 (exp/heads.py; exp/sets/heads67), frozen.
+* **Arms** (exp/exp67.sh): both are set-mode climbs (climb.py's new `--targets FILE`), from the same context:
+  solved.tsv = the 48,537 trusted goals, and a copy of their production hints, so nothing writes into loops/UL.
+  * CLA67: abs/clhl3.sh's setting, 6 sibling and 30 kNN lemmas;
+  * CLB67: the same with 30 sibling and 400 kNN lemmas.
+  * Both: 24 sketch runs of 5 s, a 160 s final run, 2 climbs at a time, rm4t, twee-pg61 with PG 0.25.
+* **Smoke test:** 2 heads at 2 s sketch and 5 s final runs. Arm B's problems had 400 kNN and 30 sibling lemmas.
+  No proofs.
+* **Readings:**
+  * real proofs per arm (final runs, no unproved assumption, also solved.tsv rows with 1);
+  * CPU h per arm from climb.tsv column 6;
+  * +/−, the union, and the unique proofs.
+  * A target proved by the live climber or production meanwhile still counts here; the context is frozen at 18:54.
+* CPU: about 8 more twees beside exp65, on the user's leave for more CPUs while climbing.
