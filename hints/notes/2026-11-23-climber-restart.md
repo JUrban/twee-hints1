@@ -143,3 +143,44 @@ as it's veroff's main weapon for solving open problems".
 * Two changes at once: it is the production climber, not an A/B. Read per CPU h against CLB67 (same lemmas, weaken 4,
   frozen context) and plainlive4's H runs. If it leads CLB67 on the heads both climb, a paired weaken test follows.
 * Launched with CPUS=28 while exp65 runs.
+
+## ul76: today's climbs' sketches reach production (21:14)
+
+* Production's members by yield (exp/memberyield.py on loops/UL/r5/results.tsv, at the restart):
+
+Last 6000 runs: 19 proofs in 33.8 CPU h (0.56 per CPU h).
+
+| level or member | runs | proofs | CPU h | per CPU h |
+|---|---:|---:|---:|---:|
+| Vsk@1:0 | 775 | 8 | 16.1 | 0.50 |
+| L1 | 82 | 1 | 2.0 | 0.50 |
+| L4 | 9 | 0 | 1.5 | 0.00 |
+| Vpool@1:0 | 59 | 0 | 1.3 | 0.00 |
+| Vk200s12@0 | 487 | 0 | 1.0 | 0.00 |
+| Vm4b@0 | 451 | 0 | 1.0 | 0.00 |
+| Vkp@0 | 500 | 0 | 1.0 | 0.00 |
+| Vunf@0 | 186 | 0 | 0.8 | 0.00 |
+| the other 21 | 3451 | 10 | 9.2 | |
+* Over ul75's whole run (22 Nov 07:13 to 23 Nov 21:14, about 58,500 runs):
+
+Last 58500 runs: 135 proofs in 216.1 CPU h (0.62 per CPU h).
+
+| level or member | runs | proofs | CPU h | per CPU h |
+|---|---:|---:|---:|---:|
+| L1 | 1696 | 58 | 38.3 | 1.51 |
+| Vsk@1:0 | 1142 | 10 | 23.7 | 0.42 |
+| Vunf@0 | 3895 | 2 | 20.1 | 0.10 |
+| L0 | 4400 | 39 | 13.2 | 2.96 |
+| Vk1000@0 | 3453 | 0 | 11.6 | 0.00 |
+| Vk400@0 | 3647 | 1 | 8.8 | 0.11 |
+| the other 33 | 40267 | 25 | 100.3 | |
+* **sk@1:0** (a 40 s fresh run with the climb hints: the sketch and fill steps of the climb dirs in `--climb-hints`) made
+  8 of the last 19 proofs, the most of any member. Its dirs were all from 15-20 Nov (CLH, CLHL, CLU, CLHL2, FUD2p, FUDs),
+  so the sketches of today's climbs, all on the current heads, never reached it.
+* **ul76** (abs/ul76.sh, exp/prod/ul76.sh): ul75 plus loops/CLHL3, CLHL4, CLA67 and CLB67 in `--climb-hints`. One change,
+  6 workers. At start: 87,403 steps of 109 originals and 3,055 fill lemmas of 96 originals (ul75: 85,117 and 2,675).
+  Sketch steps are hints only; the fill lemmas become axioms (lemma_fill_N). A fill run proves the step from the
+  original's axioms, proven lemmas and earlier fill lemmas only (climb.py fill(): no assume_* axiom), so they are sound;
+  trust.py cannot resolve the label, so a proof using one in an exposed original stays untrusted (2 now).
+* Reading: sk@1:0's proofs per CPU h in ul76 against the table above, and whether its proofs fall in the originals of
+  today's climbs.
