@@ -264,6 +264,10 @@ Last 58500 runs: 135 proofs in 216.1 CPU h (0.62 per CPU h).
   unsolved earlier siblings of the goal when its solved.tsv row was written: 0 (a head): 20, 1: 19, 2: 17, 3: 22,
   4: 11, 5 or more: 184. Two thirds were deep behind an unsolved goal of their own original (later siblings, kNN
   lemmas of other originals and the sketches' hints get there without the earlier steps).
+* Who proved the 184 deep ones: production's own runs 84 (L1 35, L0 26, sk@1:0 8, the other members 15), side loops
+  100: the plain sweeps 43 (cond import dirs CI1 19, CI3 14, CI2 and CI2+CI3 9, CI3+PLR1 1), the given-rule retries 23
+  (GMR, GMR2, GMR3, GML), and 34 with no round-1 row in any side dir's solved.tsv (likely the transfer loop XFL,
+  not checked).
 * So the heads are not the only frontier, and a head-only restriction of production's members would be wrong. The
   climbers climb heads (CLHL4 `--heads-only`) and exp69 the goals the heads' sketches assume. Without `--heads-only` and
   `--reclimb-heads`, climb.py --live climbs any stalled goal (a failed fresh run in the latest round), fewest proof
