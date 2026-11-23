@@ -79,6 +79,9 @@ ORDER=${ORDER---mix 0.1 --fail-order}
 # (22 Nov 20:35) + --knn-drift 5 (exp55, notes/2026-11-22-knn-drift.md): a failed goal returns to the retry class once 5
 # or more new proofs rank among its 30 nearest kNN lemmas since its last fresh run, and the class goes by that count.
 # half2 from zero, 4 workers each, 6 hours: P2Z 21,796 against P2X's 21,592 (one-arm goals 297 against 93).
+# (23 Nov 02:47) exp60 (notes/2026-11-22-floor-ratio-until.md): its replica P3C gained +12 at 6 hours (+54 at equal
+# abstract work), so the gain at 6 hours is small, positive or zero; it stays (no CPU cost). --floor-ratio-until 120
+# (P3B: the floors only for the first 2 hours) ended -138: not adopted, --floor-ratio 20 stays for the whole run.
 LATE=${LATE---retry-class --yield-discount 2000 --reexplore 12:0.25 --knn-ctx 10 --head-class --floor-ratio 20 --knn-drift 5}
 [ -n "$OUT" ] && [ -f "$NAMES" ] && [ -f "$CTX/solved.tsv" ] || { sed -n 2,20p "$0"; exit 1; }
 [ -e "$OUT" ] && { echo "$OUT exists"; exit 1; }

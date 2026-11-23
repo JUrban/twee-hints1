@@ -764,10 +764,12 @@ ul75 5, XFL 1. REPORT's totals table
 has the history (user, 20 Nov: "update the total numbers in the report etc every now and then").
 
 Next:
-00000000000000000000000000000000000000000000. **Z9 (queued, [notes/2026-11-23-z9.md](notes/2026-11-23-z9.md)):** the system from zero on all
+00000000000000000000000000000000000000000000. **Z9 (23 Nov 02:46, [notes/2026-11-23-z9.md](notes/2026-11-23-z9.md)):** the system from zero on all
    51,784 goals, 6 workers, 8 hours, CPUs 0-20,28-48 (production keeps 21-27,49-55): solve_new.sh's defaults with
    exp55's `--knn-drift 5` and the GIVENARGS `--lemma-ax`. A measurement against Z8 (42,917 at 6 hours) and Z7, not an
    A/B. abs/after_exp60.sh (PID 2665589) starts it 10 minutes after exp60 ends unless loops/Z9.skip.
+   **Started 02:46:34 (loop.py 2737443, transfer 2737562, givenmatch 2737566; loops/Z9.solve_new.sh = solve_new.sh,
+   checked 02:47; affinity 0-20,28-48). Ends about 10:46. Crash watcher on production and Z9's three loops.**
 0000000000000000000000000000000000000000000. **exp63 (16:48, [notes/2026-11-22-frontier-orderings.md](notes/2026-11-22-frontier-orderings.md)):** another
    term ordering on production's frontier. Production yields about 0.5 proofs per CPU h now (698 CPU h spent on the
    3,432 unsolved, median 47 runs), all under twee's default precedence. 120 unsolved unit goals (sets/ulu120, seed
