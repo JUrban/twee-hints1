@@ -39,6 +39,7 @@ in `/project/hintwork` (not in git).
 | + production with the head class (ul75), the given-rule retry and its lemma-axiom fix (2al, exp56); at 22 Nov 12:41, all trusted | **48,329** (+55.6% over plain) | **5359** (+67.3%) | – |
 | + the given-rule retry's longer passes (exp56c), production (ul75) and its derived-rule loop (gmlive4); at 22 Nov 18:02, all trusted | **48,357** (+55.7% over plain) | **5363** (+67.4%) | – |
 | + production (ul75) and its side loops; exp55's `--knn-drift 5` in the from-zero system; at 22 Nov 21:39, all trusted | **48,372** (+55.7% over plain) | **5365** (+67.4%) | – |
+| + production's own streaks (ul75) and plain runs: lemma axioms only, no hints, no model (PLN1, 2az); at 23 Nov 06:41, all trusted | **48,466** (+56.0% over plain) | **5393** (+68.4% over plain) | – |
 
 **Correction (20 Nov 10:40; [notes/2026-11-20-p9-negation-bug.md](notes/2026-11-20-p9-negation-bug.md)).** The counts
 from 15 Nov on include proofs that are not proofs.
