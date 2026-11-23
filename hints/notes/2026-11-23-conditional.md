@@ -361,3 +361,7 @@ on PLN2's 5 proofs: kd replaced most of the 100 kNN lemmas and proved 4, kp abou
 (`exp/condcmp.py cond/PLN2 cond/PLW1`; PLN2's CPU counts only its changed problems). condimport took 23 of 23, merge.py
 16 (the others production had by then, from PLN2 and HB2000). On this context the wide setting finds every proof the
 narrow one finds and more, at a higher rate. The live loop runs both (plainlive2.sh since 08:27).
+
+Queue changed 08:28: W contains N's proofs, so W is the baseline: PLK1 (N's siblings, W's kNN) and PLS1 (W's siblings, N's
+kNN) split it; kd, kp and 20 s run at W's sizes; PLM1 is dropped. PLX1 (200+60 siblings, 1,000 kNN) proved 2 of PLN2's 5
+in a smoke test (cond/XSMOKE) at 7.4 s a run, so it comes last.
