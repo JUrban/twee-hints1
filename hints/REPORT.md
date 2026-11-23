@@ -39,7 +39,8 @@ in `/project/hintwork` (not in git).
 | + production with the head class (ul75), the given-rule retry and its lemma-axiom fix (2al, exp56); at 22 Nov 12:41, all trusted | **48,329** (+55.6% over plain) | **5359** (+67.3%) | – |
 | + the given-rule retry's longer passes (exp56c), production (ul75) and its derived-rule loop (gmlive4); at 22 Nov 18:02, all trusted | **48,357** (+55.7% over plain) | **5363** (+67.4%) | – |
 | + production (ul75) and its side loops; exp55's `--knn-drift 5` in the from-zero system; at 22 Nov 21:39, all trusted | **48,372** (+55.7% over plain) | **5365** (+67.4%) | – |
-| + production's own streaks (ul75) and plain runs: lemma axioms only, no hints, no model (PLN1, 2az); at 23 Nov 06:41, all trusted | **48,466** (+56.0% over plain) | **5393** (+68.4% over plain) | – |
+| + production's own streaks (ul75) and plain runs: lemma axioms only, no hints, no model (PLN1, 2az); at 23 Nov 06:41, all trusted | **48,466** (+56.0% over plain) | **5393** (+68.4%) | – |
+| + the live plain loop and wider lemma sets (100+30 siblings, 400 kNN: PLW1, PLK1), the hint bed's proof, production (2az); at 23 Nov 09:33, all trusted | **48,502** (+56.2% over plain) | **5405** (+68.7%) | – |
 
 **Correction (20 Nov 10:40; [notes/2026-11-20-p9-negation-bug.md](notes/2026-11-20-p9-negation-bug.md)).** The counts
 from 15 Nov on include proofs that are not proofs.
@@ -5850,7 +5851,7 @@ rounds of 30 s or more, but about 40% overhead for 8 s rounds.
 
 *23 Nov, 09:33 (`date` checked). The 07:12 assessment follows it.*
 
-* **48,502 goals in production's solved list** (48,466 trusted at 06:41; trust.py rerunning): the plain sweeps' proofs
+* **48,502 solved, all trusted (09:33), holdout 5,405** (48,466 at 06:41): the plain sweeps' proofs
   (PLN1 22, PLN2 5, PLW1 16, PLK1 2, live loop 2, the hint bed 1) and production's own.
 * **Plain runs keep paying, and the lemma set is the lever:** hints add nothing to them (the hint bed); wider lists
   prove more; the similarity ranking is weak and a learned ranker doubles recall in cross-validation (2az).
