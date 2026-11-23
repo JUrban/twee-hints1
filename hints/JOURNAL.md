@@ -766,6 +766,10 @@ ul75 5, XFL 1. REPORT's totals table
 has the history (user, 20 Nov: "update the total numbers in the report etc every now and then").
 
 Next:
+000000000000000000000000000000000000000000000000. **COND1 (05:00, [notes/2026-11-23-conditional.md](notes/2026-11-23-conditional.md)):** conditional proofs of the 3,412
+   unsolved goals: each with its 10 nearest earlier siblings assumed (proved or not) and 30 kNN trusted lemmas, one
+   plain 5 s twee run (exp/condprove.py, abs/cond1.sh, 6 threads, cond/COND1 outside loops/). Hard steps against
+   blocked goals, and the blockers' reach.
 00000000000000000000000000000000000000000000000. **Readiness (04:54, [notes/2026-11-23-readiness.md](notes/2026-11-23-readiness.md)):** offline on Z8's rows (exp/triglag.py,
    exp/fresh_ready.py). Late retries are prompt: of 593 proofs that used a lemma proved after the goal's last failure, the
    proving run came 3/8/16/30/50 min after it (deciles 10/25/50/75/90), always the first run after it. First runs wait longer
@@ -1277,6 +1281,7 @@ reports are written as the experiments run.
 | [notes/2026-11-23-z9.md](notes/2026-11-23-z9.md) | Z9: the system from zero on all goals after exp55 and exp60 (6 workers, 8 hours) |
 | [notes/2026-11-23-model-audit2.md](notes/2026-11-23-model-audit2.md) | The finite-model audit again on production's proofs since 20 Nov |
 | [notes/2026-11-23-readiness.md](notes/2026-11-23-readiness.md) | How long ready goals wait (Z8), and kNN readiness against the gap order for first runs |
+| [notes/2026-11-23-conditional.md](notes/2026-11-23-conditional.md) | COND1: the unsolved goals with their earlier siblings assumed: hard steps or blocked |
 | [notes/2026-11-20-base-saturation.md](notes/2026-11-20-base-saturation.md) | exp39: base-theory runs as rule generators for the unsolved goals of the stronger theories |
 | [notes/2026-11-20-given-transfer.md](notes/2026-11-20-given-transfer.md) | exp38: unsolved goals that are variants of rules other runs derived and did not use (379 M in the given logs; transfer.py only matches proof steps); their ancestry as hints |
 | [notes/2026-11-19-from-zero-portfolio.md](notes/2026-11-19-from-zero-portfolio.md) | half1 from zero in 2 hours with today's deep portfolio (PGC), against PGA's 18,987 (exp27, from 07:18) |
