@@ -107,7 +107,7 @@ after a 3.5-day gap (its predecessor clhl2.sh stopped 20 Nov 10:04 at 1.04 proof
 Launched with CPUS=28 while exp65 runs. Production also keeps the old climbs' hints as members sk@0 and sk@1:0.
 [notes/2026-11-23-climber-restart.md](notes/2026-11-23-climber-restart.md).
 
-**3. Not production:** exp65's two from-zero arms (loops/Q5A and loops/Q5B, 4 workers each, until about 22:55).
+**3. Not production:** exp67's two set-mode climbs on 91 frozen heads (loops/CLA67, loops/CLB67, 2 climbs each, from 19:01); exp65's two from-zero arms (loops/Q5A and loops/Q5B, 4 workers each, until about 22:55).
 
 **CPU at 18:08:** 23 twee processes are running:
 * the main loop 6, proof reruns 3, the sweep 3, the plain live loop 3, exp65 8;
