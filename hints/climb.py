@@ -204,6 +204,9 @@ def main():
     ap.add_argument('--m', type=int, default=8, help='candidate assumptions per target')
     ap.add_argument('--sketch-time', type=float, default=5)
     ap.add_argument('--final-time', type=float, default=20)
+    ap.add_argument('--final-cpu', type=float, default=0,
+                    help='(23 Nov, exp67\'s controls) the final run\'s CPU cap in seconds (twee --max-cpu) in place of 10 x\n'
+                         '--final-time; with a large --final-time, the final runs for this much CPU (CPU-matched controls)')
     ap.add_argument('--max-sketch-time', type=float, default=None,
                     help='cap of the doubled sketch budget (default 4 x --sketch-time); a top set that fails '
                          'at the cap ends the climb')
@@ -474,7 +477,8 @@ def main():
             lp.proof_name = {}
         lp.proof_name[t] = f'{t}.{tag}' + ('.weak' if goal is not None else '')
         try:
-            n, ok, dt, stats, res = lp.run_one(t, hints, 1, budget, False, a_cpu(budget))
+            n, ok, dt, stats, res = lp.run_one(t, hints, 1, budget, False,
+                                               c.final_cpu if tag == 'final' and c.final_cpu else a_cpu(budget))
         finally:
             lp.proof_name.pop(t, None)
         lp.extra_axioms.pop(t, None)

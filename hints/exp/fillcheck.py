@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""fillcheck.py TRUSTRUN [-j 2] [--time 60]: re-prove, with their premises recorded, the old fill lemmas that
+"""fillcheck.py TRUSTRUN [-j 2] [--time 60] [--retry]: re-prove, with their premises recorded, the old fill lemmas that
 production's untrusted proofs use (23 Nov, notes/2026-11-23-climber-restart.md "Fill lemmas get a premise record").
 
 A fill lemma (climb.py --fill) proved before 23 Nov 23:03 has no premise record, so trust.py cannot trust a
@@ -28,8 +28,8 @@ done = set()
 if os.path.exists(OUT):
     for l in open(OUT):
         w = l.rstrip('\n').split('\t')
-        if len(w) >= 3:
-            done.add((w[0], w[1]))
+        if len(w) >= 3 and not ('--retry' in a and w[2] == '0'):
+            done.add((w[0], w[1]))   # (--retry: the rows not proved are tried again, e.g. with a longer --time)
 todo = []
 for g in (l.strip() for l in open(R + '.roots') if l.strip()):
     pf = os.path.join(L, 'UL', 'proofs', g)

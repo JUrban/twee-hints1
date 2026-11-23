@@ -783,6 +783,11 @@ ul75 5, XFL 1. REPORT's totals table
 has the history (user, 20 Nov: "update the total numbers in the report etc every now and then").
 
 Next:
+0000000000000000000000000000000000000000000000000000000000. **exp71 (the live climber on stalled goals, [notes/2026-11-23-climber-restart.md](notes/2026-11-23-climber-restart.md), "exp71"):**
+   all 10 of production's recent sk proofs (climb hints as hints) were in originals with many sketches of CLU (16 Nov,
+   stalled goals: 22 real proofs at 0.79 per CPU h, 7,302 sketch files over 108 originals); today's head climbers cover
+   14-15 originals each, and 2,700 of the 3,229 unsolved are holes. CLS71 (exp/prod/side/cls71.sh, 23:22): CLU's cheap
+   climb with today's binary and arm B's lemmas, -j 6. **ul77** (23:24): ul76 plus CLS71, CLK69, K70F, K70R in --climb-hints.
 000000000000000000000000000000000000000000000000000000000. **exp70 (a second round on the key goals, [notes/2026-11-23-climber-restart.md](notes/2026-11-23-climber-restart.md), "exp70"):**
    the 9 key goals again from CLK69's sketches and fill hints and t2300. K70F: gap filling 30 s per fill run (CLK69: 3 s);
    K70R: CLK69's setting (the round-2 control). -j 1 each, merged into loops/UL every 10 minutes (exp/exp70.sh, 23:04).
@@ -814,6 +819,9 @@ Next:
    (exp/exp67d.sh) for arm B at its CPU per target, beside CC67 after exp65.
    (21:05) trust.py counted every sketch run's assume_* as premises of a climber's proof: no climber proof in an exposed
    original was trusted (aa1_14 533). Now the target's last used.tsv row (the run that made the real proof); 3 -> 2 untrusted.
+   (23:27) The controls CC67/CC67B (22:56) were over budget: CPU/1.07 as abstract time, but these heads run 2.3-3.6 CPU s
+   per abstract s, so about 2.3 times the arm's CPU per head. Stopped (kept as .v1; CC67.v1's proof of aa3_12 487 merged);
+   CC67C and CC67D (exp/exp67e.sh, 23:28) cap each run by CPU (climb.py --final-cpu, 608 and 552 s).
 00000000000000000000000000000000000000000000000000000. **exp66 (climber restart, [notes/2026-11-23-climber-restart.md](notes/2026-11-23-climber-restart.md)):** the live head
    climber back beside production (abs/clhl3.sh, loops/CLHL3; clhl2.sh's setting, a fresh record). clhl2 made 69 proofs in
    66 CPU h (1.04 per CPU h) and stopped 20 Nov 10:04, never restarted. The user: "you should remember to use the climber and

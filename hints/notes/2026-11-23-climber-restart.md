@@ -346,3 +346,53 @@ CC67B) still write none; exp70's arms do.
   proved ones in 1.1-2.7 s; not proved: aK2_eq_aK3_s `m(X, k(X2, X3)) = rd(X, k(X3, X2))`; aK2_eq_aK3_s `m(rd(e, X), k(m(Yc1, Yc2), Yc0)) = rd(e, ld(k(m(Yc1, Yc2), Yc0), X))`.
 * loops/TRUSTNOW/t2314: 48558 solved: 43497 before T0, 5058 later with trusted records; 3 untrusted (0 without a record, 2 with an unresolved lemma name, 1 using an untrusted or unsolved lemma); 34 fill lemmas trusted
 * Untrusted: aK2_eq_aK3_s__goal_489, aK2_eq_aK3_s__goal_494, aK2_eq_aK3_s__goal_515 (two fill lemmas of aK2_eq_aK3_s not re-proved at 60 s; 494 uses 515).
+
+## The controls, corrected (23:29)
+
+CC67 and CC67B (22:56) got the arm's CPU per finished head divided by 1.07, exp65's CPU per abstract second, as an
+abstract budget (564 and 525 s). On these heads the ratio is far higher: the arms' failed 160 s finals ran at a
+median 3.45 (CLA67) and 3.17 (CLB67) CPU s per abstract s, the controls' long runs at
+about 2.3-2.5 (the start-up with 400 lemmas and the hints is spread over a longer run). So each head got about 2.3
+times the arm's CPU, and the 91 heads would have taken until the evening of 24 Nov. Their rows before the stop:
+
+| dir | goal | result | CPU s |
+|---|---|---|---:|
+| CC67.v1 | aa1_14__goal_533 | THM | 94 |
+| CC67.v1 | aa3_12__goal_487 | THM | 1313 |
+| CC67B.v1 | aa1_14__goal_533 | THM | 547 |
+| CC67B.v1 | aa2_12__goal_355 | NO | 1409 |
+
+Stopped at 23:27 (kept as loops/CC67.v1, CC67B.v1). climb.py has a new option `--final-cpu S`: the final run's CPU
+cap (twee --max-cpu) in place of 10 x --final-time. The corrected controls (abs/exp67e.sh, exp/exp67e.sh; 23:28) run
+each head once with `--final-time 3000 --final-cpu C`, C the arm's CPU per finished head at launch: CC67C (arm A's
+lemmas) 608 s, CC67D (arm B's) 552 s; -j 4 each, about 4 hours. Reading: exp/ccpair.py CLA67 CC67C and CLB67 CC67D.
+
+## exp71: the live climber on stalled goals again, and ul77 (23:29)
+
+**Why.** Production's sk members take every climb dir's sketch and fill steps of the goal's original as hints (sk@1:0:
+40 s fresh runs). Of the sk proofs in production's last 8,000 runs (10, 23 Nov 17:19-22:35), every one was in an
+original with CLU's sketches (26-293 sketch files each; CLU: 16 Nov, the live climber on stalled goals) and with
+CLHL2's; today's head climbers had 2-18 files for some of them. CLU's own record (exp/climbread.py): 986 targets, 22
+real proofs in 27.9 CPU h (0.79 per CPU h), 7,302 sketch files over 108 originals. The head climbers today: CLHL3 0 in
+4.1 CPU h, CLHL4 0 in 3.5, CLA67 2 and CLB67 4 in 7.5 each; sketches for 14-15 originals each.
+
+And most of the unsolved are holes: of 3,229 unsolved goals (t2314), 2,700 have a later goal of the same original
+proved (529 are in an original's unsolved suffix). A head proof seldom unlocks later goals: of exp67's five proved
+heads, the next goals after aK1_to_aK2 76, aK2_eq_aK3_h 279 and aK2_eq_aK3_e 326 were already proved (one of
+326's was proved after it), gbol_to_aK1 460 is its original's last goal, and aa1_14 533 had 2 unsolved after it. Stalled mode climbs
+the holes too, nearest to a proved goal first.
+
+* abs/cls71.sh (exp/prod/side/cls71.sh), loops/CLS71, climb.py PID 3750581 (bash 3750577), since 23 Nov 23:22.
+  CLU's climb (20 sketch runs of 5 s, final 20 s, --weaken 4, fill 3 s) with twee-pg61, rm4t, and arm B's lemmas
+  (30 siblings, 400 kNN); no move-model or theory-ts arms. -j 6 while fewer than 30 other twee processes run (that
+  cap counts the others, not the total: it started 5 climbs at once, 32 twee processes in all; about 21 once exp67
+  ends).
+* abs/ul77.sh (exp/prod/ul77.sh): ul76 plus loops/CLS71, CLK69, K70F, K70R in --climb-hints, rescanned every 10
+  minutes. loop.py PID 3751009 since 23:24 (ul76 stopped at 23:23).
+* Reading: CLS71's real proofs per CPU h (exp/climbread.py CLS71); production's sk proofs in originals CLS71 climbed
+  after its sketches, against ul76's sk rate (2 proofs in 7.0 CPU h of sk@1:0 in its 1,800 runs; exp/memberyield.py).
+
+**A check that came to nothing:** is a hole's equation a step of a proved sibling's proof (its hints file)? 0 of
+2,657 holes with a unit-equation form. (The key is rough: a sample of solved goals finds its own equation in its own
+hints file 105 times in 283; the conjecture's unitized form and twee's proved form differ, e.g. a variable set to
+e. Even so, the holes are not hiding in the siblings' proofs.)
