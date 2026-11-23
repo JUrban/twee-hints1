@@ -5683,11 +5683,15 @@ index is now rebuilt every 10 minutes, not 30 (about 1 s a rebuild).
   * **Wider lemma sets prove more (09:33):** W (100 earlier and 30 later siblings, 400 kNN; PLW1) proved 23 on the
     frontier, 7.0 per CPU h, every one of N's (PLN2) and 18 more. The 400 kNN do most of it (PLK1, N's siblings with 400 kNN:
     16, 3 of its own); 1,000 kNN slow twee down. The live loop runs N and W each cycle (abs/plainlive2.sh).
-  * **The kNN ranking is weak, a learned one is not (09:33; [notes/2026-11-23-lemma-ranker.md](notes/2026-11-23-lemma-ranker.md)):** the
-    used kNN lemmas are spread almost evenly over ranks 0-400. exp/lemmarank.py (LightGBM on goal/candidate features,
-    CV grouped by original) raises the share of used lemmas in the top 50 of 400-lists from 0.183 to 0.436, in the top 100
-    from 0.344 to 0.633, from 213 proofs. It is being tested on the frontier (PLL1 against the live loop's W cycle in
-    the same context), trained with 800 more proofs of solved goals (RKD1).
+  * **The kNN ranking is weak, a learned one is not (11:55; [notes/2026-11-23-lemma-ranker.md](notes/2026-11-23-lemma-ranker.md)):** the
+    used kNN lemmas are spread almost evenly over similarity ranks 0-400. exp/lemmarank.py (LightGBM on features of the
+    goal and the candidate; CV grouped by original; 783 proofs, most of them of 800 solved goals run with 1,000 kNN
+    lemmas): of the used lemmas, the model's top 400 holds 0.941 (similarity 0.784), and all of a proof's used lemmas are in it in
+    0.752 of the problems (0.517); on the frontier lists the top 50 hold 0.500 instead of 0.183.
+    * On the frontier, in the same context as the live loop's W cycle: the ranked sweep (PLL1) 3 proofs, W 1 (W's
+      among them); every ranked proof used lemmas beyond similarity rank 400. Small numbers; the live loop now runs
+      the ranked setting in W's place, and `--variants plr[kN][sM] --lemma-ranker` brings it to loop.py (numpy
+      evaluation, no lightgbm needed).
   * loop.py `--variants pl[kN][sM]` makes it a cascade level; abs/plainlive.sh runs it beside production as a live
     side loop; exp64 tests it from zero.
 * **Where the frontier is (COND1, COND2):** with their earlier siblings assumed (proved or not), 73-83% of the unsolved
