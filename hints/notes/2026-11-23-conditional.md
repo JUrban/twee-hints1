@@ -365,3 +365,17 @@ narrow one finds and more, at a higher rate. The live loop runs both (plainlive2
 Queue changed 08:28: W contains N's proofs, so W is the baseline: PLK1 (N's siblings, W's kNN) and PLS1 (W's siblings, N's
 kNN) split it; kd, kp and 20 s run at W's sizes; PLM1 is dropped. PLX1 (200+60 siblings, 1,000 kNN) proved 2 of PLN2's 5
 in a smoke test (cond/XSMOKE) at 7.4 s a run, so it comes last.
+
+## PLK1 result (07:54-08:55; read 08:56)
+
+N's siblings (30+10) with W's 400 kNN: 16 proofs of 3,313; condimport took 3 (the rest were PLW1's, already in loops/CI3),
+merge.py 2. On the goals both ran (exp/condcmp.py cond/PLW1 cond/PLK1):
+
+3,313 goals in all of cond/PLW1, cond/PLK1
+| dir | proved | CPU h | per CPU h | + vs cond/PLW1 | − vs cond/PLW1 | only here |
+|---|---:|---:|---:|---:|---:|---:|
+| cond/PLW1 | 18 | 3.28 | 5.5 | 0 | 0 | 5 |
+| cond/PLK1 | 16 | 2.98 | 5.4 | 3 | 5 | 3 |
+union 21
+
+The 400 kNN lemmas give most of W's gain over N; W's wider siblings add the rest, and PLK1 still has proofs of its own.
