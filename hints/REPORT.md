@@ -6190,6 +6190,23 @@ rounds of 30 s or more, but about 40% overhead for 8 s rounds.
 
 ## 4. Next steps
 
+*23 Nov, 16:58 (2az, 3):*
+
+* **exp64 ended** (16:53): P4B (plain levels 100 and 400 kNN) +113 at equal work at 6 hours, after +607 at 3 hours: the
+  plain levels make the from-zero loop about an hour faster to the same count, not stronger at 6 hours (under the +200
+  rule; solve_new.sh unchanged).
+* **exp65** (16:55-22:55, [notes/2026-11-23-plain-sizes.md](notes/2026-11-23-plain-sizes.md)): Q5A is P4B's configuration
+  again (a cross-time replica, so the spread is measured), Q5B has plain levels with 400 and 1,600 kNN lemmas. Offline on
+  235 held-out gap goals (with siblings), Q5B's levels prove 45 against P4B's 40.
+* **The learned lemma ranker** is not the lever: on those goals the list's size matters more than its order (similarity
+  11/20/22/35/35/40 proofs at 30-1,600 lemmas; the ranked list lost at 30, 100 and 400). It stays in the frontier live
+  loop, where lr2 found 4 proofs in one cycle.
+* **Twee's startup with long lemma lists** is superlinear (8 s at 1,575 axioms), but activating lemmas lazily
+  (twee-e63 `--lazy-lemmas`) proved the same or less: the early pairing is the useful work.
+* **The frontier:** production's own loop found about 5 proofs in 6 hours; the 1,600-lemma sweep PLG1 runs on the
+  3,268 unsolved goals: 1 proof in its first 1,434 (W's 400-lemma sweep had none of them at 08:24).
+* **Open:** `--proof-in-search` (the user's decision).
+
 *23 Nov, 12:54 (2az, 3):*
 
 * **exp64** (10:52-16:52): at 2 hours P4B (plain levels) +235 by wall time, +85 at equal work; its plain levels
