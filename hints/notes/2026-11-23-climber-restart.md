@@ -418,6 +418,8 @@ takes its CPU. Whether a head climber comes back depends on the controls (CC67C,
 Union 8, both 1. Only CLA67: aa1_14__goal_533. Only CLB67: aK1_to_aK2__goal_76, aK2_eq_aK3_e__goal_326, aK2_eq_aK3_h__goal_279, mbol_com__goal_71, mbol_lem1__goal_391, mbol_to_nil3__goal_623.
 
 On the heads both arms finished, arm B (30 siblings, 400 kNN lemmas) proved 6 that arm A (6 siblings, 30 kNN) did
-not, and A 1 that B did not, at about the same CPU. The arms differ only in the lemma lists. CLB67's proofs of
+not, and A 1 that B did not, at about the same CPU. The arms differ only in the lemma lists. With 7 discordant heads
+the sign test gives p = 0.0625 one-sided (0.125 two-sided): suggestive, not settled; the plain head runs (400 kNN)
+point the same way. exp73 builds on it as a production member, measured there by its own yield. CLB67's proofs of
 23:00-23:08 (mbol_lem1 391, mbol_com 71, mbol_to_nil3 623) reached production at 23:40; exp/exp67merge.sh now merges
 the arms and the controls every 10 minutes until they end.

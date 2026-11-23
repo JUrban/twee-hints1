@@ -52,8 +52,8 @@ Production itself: in ul76's 1,800 runs (21:14-23:23) 5 proofs in 11.6 CPU h (0.
 
 sk@1:0 (40 s fresh after L0: the pool plus the original's climb hints, and its fill lemmas as axioms) is production's
 top member: 2 of ul76's 5 proofs, 7.0 of its 11.6 CPU h. Its lemma axioms are the default 6 siblings and 30 kNN. On
-the frozen heads, exp67's climber with 30 siblings and 400 kNN proved 7 against 2 with 6 and 30 at the same CPU, and
-the plain live loop's best setting (H) also takes 400 kNN.
+the frozen heads, exp67's climber with 30 siblings and 400 kNN proved 7 against 2 with 6 and 30 at the same CPU (+6 −1;
+sign test p = 0.125 two-sided, so suggestive only), and the plain live loop's best setting (H) also takes 400 kNN.
 
 * loop.py: members skkNsM (sk's hints and fill lemmas with N kNN and M sibling lemmas; `sk` alone is unchanged).
 * abs/ul78.sh (exp/prod/ul78.sh): ul77 plus skk400s30@1:0, after sk@1:0. loop.py PID 3756717 since 23:43 (ul77
