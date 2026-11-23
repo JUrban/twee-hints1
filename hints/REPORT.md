@@ -6175,6 +6175,16 @@ rounds of 30 s or more, but about 40% overhead for 8 s rounds.
 
 ## 4. Next steps
 
+*23 Nov, 12:54 (2az, 3):*
+
+* **exp64** (10:52-16:52): at 2 hours P4B (plain levels) +235 by wall time, +85 at equal work; its plain levels
+  proved 50 goals directly, 6 of them unsolved in P4A. The 6-hour reading and its one-arm goals decide; under about
+  400 a replica pair comes first.
+* **exp65** (after exp64): the ranked plain level (`plrk400s130@0`, lr2) from zero against exp64's better arm.
+* **The live loop** (N and the ranked L): the 5 s plain frontier is exhausted in the present context (the last cycles
+  0-1 proofs); L cycles will run less often if lr2's first one finds nothing.
+* **Open:** `--proof-in-search` (the user's decision); the late A/B's replica pair.
+
 *23 Nov, 07:12 (2az, 3):*
 
 * **exp64** (about 10:51 to 16:51): P4A against P4B (a plain level), half2 from zero, 6 hours. If it pays,
