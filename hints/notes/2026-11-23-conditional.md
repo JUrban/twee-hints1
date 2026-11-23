@@ -268,3 +268,11 @@ Log cond/PLNL/log, one line a cycle. Stop: touch cond/PLNL.stop (it ends after t
 run), against Z8's own L0 retries in hours 4-6 at 81 and all its main-loop runs then at 55. All 160 are goals production has
 proved (1,250 of the 2,000 are); none of the others. On goals the from-zero run had tried and failed, a
 plain run proves as much per CPU hour as the best late level does on its own picks: exp64 (notes/2026-11-23-plain-level.md).
+
+## Wide plain sweep (armed 07:13)
+
+abs/plw1.sh (exp/plw1.sh): once PLN2 has ended, one sweep of production's unsolved goals with a wider lemma set:
+100 earlier and 30 later trusted siblings and 400 kNN lemmas (PLN1/PLN2: 30, 10, 100), plain 5 s, 3 threads,
+the context production's solved list at its start (cond/PLW1.trusted). Its proofs go into loops/CI3 and loops/UL
+as PLN1's did. Read: its proofs against PLN2's on the same goals, the union, and the proofs per CPU h; the step
+bed's SIB30 and AFT10 suggest that more siblings bridge more.
