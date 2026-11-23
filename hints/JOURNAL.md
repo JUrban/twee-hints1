@@ -700,6 +700,13 @@ before writing any time.
 7.12 **Losing track** of what had already been discussed, which is why this file exists. The compaction
 summaries keep results but lose the reasons and the user's exact words. Keep section 1 current.
 
+7.13 **Appending by `open(p, 'w').write(open(p).read() + x)`** (23 Nov): the 'w' open runs first and empties the file,
+so two notes lost all but their newest section, four times, and commits 56d49d8 and 2216deb carried it. Rebuilt from
+9caa5fa plus each appended section. **Instead:** `open(p, 'a')`, or read into a variable on its own line; check `wc -l`
+or `git diff --stat` before a commit. Same day: the Z9-gap pre-checks had no sibling lemmas at all (condprove.py's
+sibling pool is --set, here the 500 unproved gap goals), and a note said "40 siblings changed nothing". **Instead:**
+look at one generated problem of each arm before reading an arm's numbers.
+
 ---------------------------------------------------------------------------------------------------------
 
 ## 8. Open threads (19 Nov 12:56; `date` checked)

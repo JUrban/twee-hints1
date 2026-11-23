@@ -8,3 +8,6 @@ PLS1 --time 5 --sibs 100 --after 30 --knn 100
 #held PLP1 --time 5 --sibs 100 --after 30 --knn 400 --index kp
 #held PLT1 --time 20 --sibs 100 --after 30 --knn 400
 #held PLX1 --time 5 --sibs 200 --after 60 --knn 1000
+# (15:45) G (1,600 kNN): on 235 held-out Z9 gap goals plain 5 s proved 40 with 1,600 similarity lemmas, 35 with 400
+# (+11 -6; notes/2026-11-23-lemma-ranker.md "Size, not order"); W's siblings
+PLG1 --time 5 --sibs 100 --after 30 --knn 1600
