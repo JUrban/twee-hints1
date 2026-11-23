@@ -244,6 +244,7 @@ Repositories and directories:
 | e60 | 18 Nov 07:06 | e59 + the parental filter judged before unification again unless it is a full forest (e51 had moved it after unification for all filters: +10% CPU, +8% memory for the same pairs with the sum filter). On aa1_45_c 292 at 80 s: e48 83.0 s, e60 86.5 s, e59 96.6 s; output identical to e48 |
 | e61 | 18 Nov 07:25 | e60 with e50's strict rejected set for the early parental check (e60's lazy memo cost 6-8%): e50's speed; output byte-identical to e50 on 8 goals; resumes e50 states. **Production since 18 Nov 07:30** (twee-pg61) |
 | e62 | 19 Nov 17:07 | e61 plus `--pg-order F` (exp35): a new pair's score × F ** sigmoid(q1 + q2), from the parents' stored rule-model scores, two lookups per pair; F = 1 (default) byte-identical to e61 on 3 goals. Wrapper `twee-pg62` (e62 with $TWEE_PG_ARGS) |
+| e63 | 23 Nov 15:59 | e62 plus `--lazy-lemmas`: axioms named lemma_* wait in a list by critical-pair score (times `--lazy-lemma-factor`, default 1) and become active when at most the best queued pair's score; startup at 1,575 axioms 8.1 s -> 1.2 s. Off: byte-identical to e62 on 3 goals. Not kept in --dump-state |
 
 Wrappers: `twee-pg` (e48 with $TWEE_PG_ARGS), `twee-pg50` (e50 with $TWEE_PG_ARGS; production until 18 Nov 07:30), `twee-pg61` (e61 with $TWEE_PG_ARGS; production since 18 Nov 07:30).
 
@@ -784,6 +785,8 @@ Next:
    plk1600s130@0 in place of plk100s40@0 and plk400s130@0, on P4A's set. sets/half2, 4 workers, 6 hours (abs/exp65.sh), after
    exp64 ends, if P4B still leads at 6 hours. Why: on 235 held-out Z9 gap goals, plain 5 s, kNN only, 100+400 prove 39 and
    400+1,600 prove 46. The ranker design (--lemma-ranker-all) dropped. Frontier sweep PLG1 (1,600 kNN, W's siblings) from 15:45.
+   (16:36) With siblings (exp/z9gap9.sh; the earlier pre-checks had none): P4B's plain levels 40, Q5B's 45 (+8 −3, union 48) on the 235 gap goals; exp65 stands.
+   (16:36) twee-e63 `--lazy-lemmas` (lemma axioms enter by score, like SOS): startup 8.1 -> 1.2 s at 1,575 axioms, but factor 1 lost 17 proofs and factor 0.5 tied eager (40 and 40, +3 −3) at the same wall time: not used.
 000000000000000000000000000000000000000000000000000. **Lemma ranker (08:59, [notes/2026-11-23-lemma-ranker.md](notes/2026-11-23-lemma-ranker.md)):** the used kNN lemmas of plain
    proofs are spread evenly over ranks 0-400; a learned ranker could bring needed lemmas into the list. Data sweep
    RKD1 (abs/rkd1.sh): 800 solved goals near the frontier, 1,000 kNN lemmas, 5 s, 2 threads; then LightGBM, recall at

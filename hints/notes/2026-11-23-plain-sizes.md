@@ -61,3 +61,39 @@ Superlinear: twee activates every axiom and builds its critical pairs with all e
 check (`+RTS -s` at 1,575: 6.6 s mutator, 1.0 s GC). Duplicates up to renaming and orientation are 0.2% of the kNN
 lemmas, so deduplication would not help. At 1,600 lemmas the startup is about half of a 5 s run's wall time. If the
 1,600-lemma level pays (exp65, PLG1), lazy lemma axioms (activated when selected, like passives) are the twee change to make.
+
+## Lazy lemma axioms: twee-e63 (16:01)
+
+twee-e63 `--lazy-lemmas` (commit d262fb3): the axioms named lemma_* are not added before the first step. They wait in
+a list sorted by their critical-pair score (scoreCP at depth 0, times `--lazy-lemma-factor`, default 1), and the
+main loop activates the next one whenever its score is at most the best queued pair's. So a lemma enters the search
+when a pair of its size would, the way an SOS clause does in Otter or Prover9. Without the flag e63 is byte-identical
+to e62 on 3 goals. On the 1,575-axiom problem, giving up at `--max-time 0.01` takes 1.2 s instead of 8.1 s. On 10 of
+ZKGS's proofs, a biased pick, the lazy runs proved 4, faster in wall time. Lazy runs reach the 5 s abstract limit
+sooner, because each step pairs with fewer active rules.
+
+A/B (exp/z9lazy.sh): the 235 goals with ZKGS's settings (1,600 kNN, no siblings), cond/ZLG1 (factor 1) and cond/ZLG5
+(factor 0.5) against cond/ZKGS (eager, 40 proofs).
+
+Result (16:36):
+
+| arm | goals | proved | eager ZKGS on them | + | − | wall s | eager wall s |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| cond/ZLG1, factor 1 (stopped) | 165 | 11 | 28 | 0 | 17 | 699 | 1319 |
+| cond/ZLG5, factor 0.5 | 235 | 40 | 40 | 3 | 3 | 1932 | 1870 |
+
+At factor 1 the lemmas enter too late (stopped when it was 17 proofs behind); at 0.5 they enter early enough to prove as much, and the wall time is the same, so the startup is not waste: pairing the lemmas early is the work that proves these goals. e63 is not used; the eager default stays.
+
+
+## Pre-check with siblings (16:36)
+
+exp/z9gap9.sh: the 235 goals with the sibling pool from sets/all (each problem checked: 40 or 121 sibling lemmas), the plain levels' settings in condprove.py's terms (earlier+later siblings):
+
+| arm | level | proved | wall s |
+|---|---|---:|---:|
+| cond/ZQA1 | P4B's plk100s40 (30+10, 100 kNN) | 26 | 796 |
+| cond/ZQA2 | P4B's plk400s130 (100+30, 400) | 36 | 999 |
+| cond/ZQB1 | Q5B's plk400s40 (30+10, 400) | 36 | 929 |
+| cond/ZQB2 | Q5B's plk1600s130 (100+30, 1,600) | 39 | 2082 |
+
+As pairs: P4B's levels 40, Q5B's 45 (+8 −3, union 48). Q5B's first level against P4B's: +14 −4 at 1.17 times the wall time; the second: +9 −6 at 2.08 times. Siblings against none at the same kNN size: 100 kNN +9 −3, 400 +4 −3, 1,600 +1 −2: siblings matter at 100 kNN lemmas and hardly beyond. exp65's design stands.
