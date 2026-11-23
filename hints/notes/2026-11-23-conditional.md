@@ -160,3 +160,10 @@ the rule model too. Is a plain member worth adding? PLN1 (abs/pln1.sh, exp/pln1.
 every proof is a real one. 4 threads, cond/PLN1. Reading: new proofs per CPU hour against production's 0.35 on the
 same goals (exp/wallcpu.py). If it pays, the proofs go into production through a loop record (rerun with loop.py's
 --print-hints --print-given, USEDAXIOMS, then merge.py), and loop.py gets a plain variant.
+
+PLN1's first proof (06:01), aK2_eq_aK3_a__goal_520 in 0.79 s: a goal production never proved. Its record
+(USEDAXIOMS) names 5 trusted siblings (493, 495, 504, 507, 512) and 15 kNN lemmas, 9 of them ranked 30 or
+beyond. exp/condimport.py (06:02) reran it into loops/CI1 the way loop.py runs it: kept output r1/out/<goal> with
+RESULT and USEDAXIOMS, 73 canonical hints, solved.tsv row, the printed proof. merge.py loops/UL loops/CI1 takes such dirs into
+production (UL/hints, UL/out for trust.py, a solved.tsv row that the live loop's --sync reads). The merge waits
+for PLN1's end, all its proofs at once.
