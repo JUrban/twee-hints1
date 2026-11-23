@@ -810,6 +810,7 @@ Next:
    1 h (11:53): P4A 17,562, P4B 17,602 (+40); at equal work −46. Plain runs 124, 25 proved.
    2 h (12:53): P4A 19,434, P4B 19,669 (+235); at equal work +85. Plain levels 50 of 353 runs proved.
    4 h (14:55): P4A 21,146, P4B 21,547; at equal work +397. One-arm goals P4A 87, P4B 488 (the plain level proved 80 of P4B's itself); P4B ran the unfiltered member 227 times, P4A 939: the plain runs take goals Vunf would have run, and L0 gets the time.
+   **6 h (16:53): P4A 21,697, P4B 21,803; at equal work +113 (under the +200 rule). One-arm goals P4A 114, P4B 220. The plain levels make the loop faster (P4B's 240-minute count came about an hour later in P4A), not stronger at 6 h; solve_new.sh unchanged. exp65 follows with P4B as the control.**
 0000000000000000000000000000000000000000000000000. **Plain live loop (06:55, [notes/2026-11-23-conditional.md](notes/2026-11-23-conditional.md), "Plain live loop"):** PLN1's
    plain sweep as a side loop of production: each cycle (30 min or more, 3 threads) takes loops/UL's solved goals as
    context, reruns only goals whose problem changed (condprove.py --prev), imports the proofs into loops/CI2 and merges

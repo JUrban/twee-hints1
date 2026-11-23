@@ -90,3 +90,28 @@ P4B-only 488, by how P4B proved them: first L0 233, later L0 92, later Vplk100s4
 Runs so far by level: P4A L0 21787, Vunf@0 939, Vk100@0 234, Vk200@0 212, Vkd@0 206, Vk400@0 184, L1 127, Vk60@0 5, L2 1; P4B L0 22555, Vplk100s40@0 1549, Vplk400s130@0 239, Vunf@0 227, Vk100@0 199, Vkd@0 198, Vk200@0 189, Vk400@0 172, L1 85.
 
 Now the plain level proves P4B-only goals itself (later Vplk100s40: 80, against 3 at 2 h), and P4B ran Vunf@0 227 times against P4A's 939: the cheap plain runs take goals the unfiltered member would have run, and that work goes to L0 instead (the P4B-only "first L0" goals that P4A has not run yet). The lead grows with time; the 6-hour reading decides, and a replica pair comes before a production change.
+
+## 6 hours (16:53)
+
+| | 120 min | 240 min | 300 min | 360 min | equal abstract work |
+|---|---:|---:|---:|---:|---:|
+| P4A | 19,434 | 21,146 | 21,541 | 21,697 | 19,433 at 120 min, 21,146 at 240 min, 21,541 at 300 min, 21,687 at 355 min |
+| P4B | 19,669 | 21,547 | 21,724 | 21,803 | 19,578 at 118 min, 21,538 at 238 min, 21,723 at 300 min, 21,800 at 356 min |
+
+P4B by wall time: 120 min +235, 240 min +401, 300 min +183, 360 min +106; at equal work (the points above, in order): +145, +392, +182, +113.
+
+exp/armdiff.py P4A P4B --at 360:
+
+```
+at 360 min: P4A 21697, P4B 21803, P4A-only 114, P4B-only 220, union 21917
+P4A-only 114, by how P4A proved them: synced 27, later L0 27, later Vunf 23, first L0 20, later L1 11, later Vk100 5, later Vk200 1
+   the proved-by-a-run ones had from P4B (rows so far): 0 runs 0, 1-2 runs 7, 3+ runs 80
+   proved at their first run (20): minute of the first run, quartiles: P4A 179/240/293, P4B 152/181/249
+P4B-only 220, by how P4B proved them: later Vplk100s40 62, first L0 58, synced 54, later L0 30, later L1 7, later Vplk400s130 4, later Vk100 2, later Vunf 2, later Vk400 1
+   the proved-by-a-run ones had from P4A (rows so far): 0 runs 34, 1-2 runs 53, 3+ runs 79
+   proved at their first run (26): minute of the first run, quartiles: P4B 160/174/222, P4A 188/230/260
+```
+
+P4B's plain levels over the 6 hours: Vplk100s40@0 201 of 2496 runs proved, Vplk400s130@0 33 of 378 runs proved; the unfiltered member ran 227 times in P4B, 1358 in P4A.
+
+**Reading.** The lead peaked between 3 and 4 hours (+607 at 180 minutes and +397 at 238 in the 4-hour reading, at equal work) and was +113 at 6 hours, under the +200 rule: both arms near the end of what this system proves on half2 in 6 hours, and P4A catching up. So the plain levels make the loop faster rather than stronger: P4B had 21,547 at 240 minutes, a count P4A had not reached at 300 minutes (21,541) and passed before 360 (21,697): about an hour later. solve_new.sh's default is not changed on this; exp65's control is P4B as planned (the plain levels are the frontier lever, and Q5A against P4B gives the spread a replica needs).
