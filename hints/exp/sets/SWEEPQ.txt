@@ -11,3 +11,8 @@ PLS1 --time 5 --sibs 100 --after 30 --knn 100
 # (15:45) G (1,600 kNN): on 235 held-out Z9 gap goals plain 5 s proved 40 with 1,600 similarity lemmas, 35 with 400
 # (+11 -6; notes/2026-11-23-lemma-ranker.md "Size, not order"); W's siblings
 PLG1 --time 5 --sibs 100 --after 30 --knn 1600
+# (17:00) The 92 ready heads (sets/heads92: each original's first unsolved goal, all earlier siblings proved; the other
+# 3,176 unsolved goals sit behind them), plain 60 s: W's sizes (HDW1) and 1,600 kNN (HDG1). PLG1 (5 s, 1,600) stopped at
+# 1,453 goals with 1 proof: the 5 s frontier is exhausted.
+HDW1 --time 60 --sibs 100 --after 30 --knn 400 --only sets/heads92
+HDG1 --time 60 --sibs 100 --after 30 --knn 1600 --only sets/heads92

@@ -12,7 +12,9 @@ while [ ! -e cond/SWEEPQ.stop ]; do
   cut -f1 loops/UL/solved.tsv | sort -u > cond/$n.trusted
   echo "$n start $(date '+%d %T') context $(wc -l < cond/$n.trusted) args $args" >> cond/SWEEPQ.log
   python3 -u /project/twee/hints/exp/condprove.py cond/$n --trusted cond/$n.trusted -j ${J:-3} --proved $args > cond/$n.log 2>&1
-  python3 /project/twee/hints/exp/condimport.py cond/$n loops/CI3 --trusted cond/$n.trusted > cond/$n.import 2>&1
+  # (23 Nov) the import reruns at the sweep's --time (condimport.py's default is 5 s: a 60 s proof would not be re-proved)
+  tm=$(echo " $args " | sed -n 's/.* --time \([0-9.]*\) .*/\1/p'); tm=${tm:-5}
+  python3 /project/twee/hints/exp/condimport.py cond/$n loops/CI3 --trusted cond/$n.trusted --time $tm > cond/$n.import 2>&1
   flock cond/merge.lock python3 /project/twee/hints/merge.py loops/UL loops/CI3 > cond/$n.merge 2>&1
   echo "$n done $(date '+%d %T') ran $(grep -c . cond/$n/results.tsv) THM $(grep -c -P '\tTHM\t' cond/$n/results.tsv) $(tail -1 cond/$n.import) | $(tail -1 cond/$n.merge)" >> cond/SWEEPQ.log
 done

@@ -101,3 +101,17 @@ As pairs: P4B's levels 40, Q5B's 45 (+8 −3, union 48). Q5B's first level again
 ## Started
 
 loops/EXP65.pids: Q5A 3439500 23 16:55:36; Q5B 3439502 23 16:55:36. loop.py PIDs: Q5A 3439513 (CPUs 7-13,35-41), Q5B 3439516 (CPUs 0-6,28-34); the DEEP strings in loops/EXP65.args. Crash watcher on these and production's processes. Readings at 60, 120, 240 and 360 minutes, and Q5A against P4B at the same minutes.
+
+## The frontier is 92 heads (17:01)
+
+PLG1 (5 s, 1,600 kNN, W's siblings, production's frontier) was stopped after 1,453 of 3,268 goals with 1 proof
+(lra2aa__goal_390, merged into production; it used a kNN lemma ranked 1,420, beyond any 400-list). The 400-lemma sweep
+PLW1 had no proof among these goals either: the 5 s frontier is exhausted in this context.
+
+Of the 3,268 unsolved goals (loops/TRUSTNOW/t1457), 92 have every earlier sibling proved, one in each of the 92
+originals that still have unsolved goals: each original's first unsolved step. The rest have 1 to hundreds of
+unproved earlier siblings (2,496 have 10 or more). With siblings assumed, most of those are easy (COND1), so these 92
+heads are what blocks the frontier. sets/heads92 (copy exp/sets/heads92). Two plain 60 s sweeps of them by
+abs/sweepq.sh (cond/SWEEPQ.txt), 3 threads, context loops/UL/solved.tsv, proofs into loops/CI3 and loops/UL:
+HDW1 (W's sizes: 100+30 siblings, 400 kNN) and HDG1 (1,600 kNN). sweepq.sh now passes the sweep's --time to
+condimport.py (whose default of 5 s would have failed to re-prove a 60 s proof).
