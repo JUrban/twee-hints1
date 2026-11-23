@@ -212,5 +212,10 @@ Last 58500 runs: 135 proofs in 216.1 CPU h (0.62 per CPU h).
 * **exp69** (exp/exp69.sh, loops/CLK69, PID 3709639): a set-mode climb of the 9 (exp/sets/key69) from t2120's trusted
   goals, CLHL4's setting (30 siblings, 400 kNN, `--weaken 12`), 1 climb at a time. Real proofs are merged into loops/UL
   every 10 minutes, so production and the climbers rerun the heads they unlock.
+* Why the finals fail (latticedata.py on CLA67, CLB67, CLHL3; realization = the share of a conditional sketch's steps,
+  not axioms of the target, that the final run derived as given rules): per target, the best sketch's realization
+  has median 0.74 for the 3 proved targets and 0.79 for the 62 not proved. The finals re-derive most of a sketch,
+  failed or not; what they miss is the part that rests on the assumption. A better final cannot supply that: proving the
+  assumption can. This is the case for exp69.
 * Veroff's way with sketches: an assumption a proof needs becomes the next target. Reading: the X proved, then
   whether their targets follow (production's reruns with X as a kNN lemma, the climbers).
