@@ -294,3 +294,11 @@ as twee's `--hints-file`, the problem text unchanged.
 * abs/hintbed.sh (exp/hintbed.sh): 600 goals plain failed in PLN2 (sets/hintbed600, seed 64), PLN2's problems,
   5 s, 3 threads; arms HBC (a perturbation control: `--abstract-time 1990`), HB200 and HB2000 (`--hints-lemmas`).
   Gains over plain are counted against HBC's.
+
+## What the plain proofs used (read 07:22)
+
+The 29 plain proofs of PLN1 and PLN2, by their proofs' Axiom lines, against production's base lemma set
+(`--lemmas 6 --lemma-knn 30`): 23 used an earlier trusted sibling beyond the 6 nearest, 11 a later sibling, 27 a kNN lemma
+ranked 30 or beyond; **29 of 29 used at least one of these**. Production's variants widen one of these at a
+time (s40@0, s200@0, k100@0, k200s12@0, ...), always with the original's hint pool. The plain runs widen all at
+once and have no hints: the hint bed separates the two.
