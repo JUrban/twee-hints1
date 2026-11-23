@@ -4910,6 +4910,8 @@ reproduced exactly).
 
 ## 2az. Portfolios: complementary methods kept, not dropped (user's request, 18 Nov 17:00)
 
+*Notes: [notes/2026-11-23-plain-sizes.md](notes/2026-11-23-plain-sizes.md).*
+
 *Notes: [notes/2026-11-23-lemma-ranker.md](notes/2026-11-23-lemma-ranker.md).*
 
 *Notes: [notes/2026-11-23-plain-level.md](notes/2026-11-23-plain-level.md).*
@@ -5700,6 +5702,11 @@ index is now rebuilt every 10 minutes, not 30 (about 1 s a rebuild).
       lemmas that proofs use together (up to 18 of 30); the model scores lemmas one at a time. So the ranker is for
       wide lists (the plain sweeps' 400, perhaps the kN members), not for the first level's 30. lr2 had also seen
       half2's goals (0.81 recall at 30 in-sample there, 0.54 for lr2h held out): half2 tests use lr2h.
+    * **Size, not order (15:45):** on the same 235 goals (kNN lemmas only: the pre-checks' sibling pool was empty), similarity
+      proved 11, 20, 22, 35, 35, 40 with 30, 100, 200, 400, 800 and 1,600 lemmas; lr2h's list lost at 30, 100 and 400 and won
+      by 2 at 200. As two plain levels 100+400 prove 39, 400+1,600 46. So exp65 tests longer lists in the plain
+      levels from zero ([notes/2026-11-23-plain-sizes.md](notes/2026-11-23-plain-sizes.md)), and the frontier sweep PLG1 runs 1,600
+      lemmas on production's unsolved goals. The ranker stays in the frontier live loop (lr2's c8L: 4 proofs).
   * loop.py `--variants pl[kN][sM]` makes it a cascade level; abs/plainlive.sh runs it beside production as a live
     side loop; exp64 tests it from zero.
 * **Where the frontier is (COND1, COND2):** with their earlier siblings assumed (proved or not), 73-83% of the unsolved

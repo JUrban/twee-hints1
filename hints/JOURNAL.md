@@ -779,6 +779,11 @@ ul75 5, XFL 1. REPORT's totals table
 has the history (user, 20 Nov: "update the total numbers in the report etc every now and then").
 
 Next:
+0000000000000000000000000000000000000000000000000000. **exp65 (redesigned 15:47, [notes/2026-11-23-plain-sizes.md](notes/2026-11-23-plain-sizes.md)):** larger kNN lists in the plain levels
+   from zero. Q5A: P4B's DEEP exactly, on P4B's CPU set (also a cross-time replica of P4B); Q5B: plain levels plk400s40@0 and
+   plk1600s130@0 in place of plk100s40@0 and plk400s130@0, on P4A's set. sets/half2, 4 workers, 6 hours (abs/exp65.sh), after
+   exp64 ends, if P4B still leads at 6 hours. Why: on 235 held-out Z9 gap goals, plain 5 s, kNN only, 100+400 prove 39 and
+   400+1,600 prove 46. The ranker design (--lemma-ranker-all) dropped. Frontier sweep PLG1 (1,600 kNN, W's siblings) from 15:45.
 000000000000000000000000000000000000000000000000000. **Lemma ranker (08:59, [notes/2026-11-23-lemma-ranker.md](notes/2026-11-23-lemma-ranker.md)):** the used kNN lemmas of plain
    proofs are spread evenly over ranks 0-400; a learned ranker could bring needed lemmas into the list. Data sweep
    RKD1 (abs/rkd1.sh): 800 solved goals near the frontier, 1,000 kNN lemmas, 5 s, 2 threads; then LightGBM, recall at
@@ -1354,6 +1359,7 @@ reports are written as the experiments run.
 | [notes/2026-11-23-conditional.md](notes/2026-11-23-conditional.md) | COND1: the unsolved goals with their earlier siblings assumed: hard steps or blocked |
 | [notes/2026-11-23-plain-level.md](notes/2026-11-23-plain-level.md) | exp64: a plain level (no hints, no model) from zero |
 | [notes/2026-11-23-lemma-ranker.md](notes/2026-11-23-lemma-ranker.md) | a learned ranker for the plain runs' kNN lemmas |
+| [notes/2026-11-23-plain-sizes.md](notes/2026-11-23-plain-sizes.md) | exp65: plain levels with 400 and 1,600 kNN lemmas from zero; the frontier sweep PLG1 |
 | [notes/2026-11-20-base-saturation.md](notes/2026-11-20-base-saturation.md) | exp39: base-theory runs as rule generators for the unsolved goals of the stronger theories |
 | [notes/2026-11-20-given-transfer.md](notes/2026-11-20-given-transfer.md) | exp38: unsolved goals that are variants of rules other runs derived and did not use (379 M in the given logs; transfer.py only matches proof steps); their ancestry as hints |
 | [notes/2026-11-19-from-zero-portfolio.md](notes/2026-11-19-from-zero-portfolio.md) | half1 from zero in 2 hours with today's deep portfolio (PGC), against PGA's 18,987 (exp27, from 07:18) |
