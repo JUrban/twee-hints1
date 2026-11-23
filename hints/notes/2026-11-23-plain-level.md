@@ -35,3 +35,13 @@ work; under about 400 it needs a replica pair before production or solve_new.sh 
 loops/EXP64.pids: P4A 3128630 23 10:52:03; P4B 3128632 23 10:52:03. loop.py PIDs: P4A 3128645 (CPUs 0-6,28-34), P4B 3128644 (CPUs 7-13,35-41); P4B's
 command line has both plain variants with their priors and explore labels. Crash watcher from 10:52 on these and
 production's processes. Readings at 30, 60, 120, 240 and 360 minutes.
+
+## 1 hour (11:53)
+
+| | 30 min | 60 min | equal abstract work (P4A's 58 min) |
+|---|---:|---:|---:|
+| P4A | 15,273 | 17,562 | 17,441 at 58 min |
+| P4B | 15,303 | 17,602 | 17,395 at 56 min |
+
+P4B +40 by wall time, −46 at equal work. P4B's plain runs so far: 124, 25 proved (the plain levels follow 3 failed attempts,
+so they start late). Too early to read.
