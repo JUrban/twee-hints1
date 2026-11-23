@@ -5673,6 +5673,9 @@ index is now rebuilt every 10 minutes, not 30 (about 1 s a rebuild).
     use it. The step test bed (300 hard steps with their siblings assumed): siblings far back (SIB30 41) and ahead
     (AFT10 51) prove most, 100 kNN lemmas 12, against 1 for a perturbation; four times the time 47; none of twee's
     goal or ordering options adds anything.
+  * **Hints do not help there (the hint bed):** on 600 frontier goals plain runs failed, adding the hints of the lemma
+    goals' own proofs proved 0 (200 hints) and 1 (2,000, twice the CPU), the control 0; 2,000 hints lost 3 of 5 plain
+    proofs. Most lemmas the proofs use are kNN goals of other originals: the lemma set does the work.
   * loop.py `--variants pl[kN][sM]` makes it a cascade level; abs/plainlive.sh runs it beside production as a live
     side loop; exp64 tests it from zero.
 * **Where the frontier is (COND1, COND2):** with their earlier siblings assumed (proved or not), 73-83% of the unsolved
