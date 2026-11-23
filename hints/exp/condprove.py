@@ -64,7 +64,8 @@ index = lemmas.LemmaIndex(sorted(T), subsets=True) if KNN else None
 # (USEDAXIOMS of production's kept outputs, pop 0.3)
 IX = opt('--index', '')
 if IX == 'kd' and index:
-    index.deps, index.dep_idf = lemmas.proof_deps(HDIR, sorted(T)); index.dep_w = 1.0; index.dep_n = 50
+    index.deps, index.dep_idf = lemmas.proof_deps(HDIR, sorted(T)); index.dep_w = 1.0
+    index.dep_n = max(50, KNN)   # (09:00) dep_n 50 left 203 of 400 kNN lemmas: kd re-ranks only its dep_n nearest and their deps
 elif IX == 'kp' and index:
     index.uses = lemmas.lemma_uses(['/project/hintwork/loops/UL']); index.pop = 0.3
 elif IX:
