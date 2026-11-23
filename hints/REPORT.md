@@ -44,6 +44,69 @@ in `/project/hintwork` (not in git).
 | + the live plain loop's ranked lemma sets (lr1, lr2: 2az), production; at 23 Nov 12:56, all trusted (loops/TRUSTNOW/t1256) | **48,512** (+56.2% over plain) | **5410** (+68.9%) | – |
 | + the live plain loop's lr2 cycle (4 proofs; production none since 12:56); at 23 Nov 14:57, all trusted (loops/TRUSTNOW/t1457) | **48,516** (+56.2% over plain) | **5410** (+68.9%) | – |
 
+## Production now
+
+*Checked 23 Nov 18:08 from the running processes (`ps`, /proc environ). Updated at every production restart or side-loop
+change; the history is in JOURNAL section 4.3 and the headers of abs/ul*.sh.*
+
+Everything below writes proofs into **loops/UL**, production's solved list. The totals above count only what
+exp/trust.py trusts.
+
+**1. The main loop: abs/ul75.sh.** loop.py, PID 1846757, since 22 Nov 07:13, all 51,784 problems, 6 workers.
+* **Binary:** `twee-pg61`, which is twee-e61 with `--pg-threshold 0.25 --ground-joining-branch-limit 100`. The first
+  flag is the parental-guidance filter, the second stops ground-joining hangs. Every run gets `--abstract-time 2000
+  --no-resume-requeue --no-eqhint-consider`.
+* **A run's inputs:**
+  * hints: the original's pool at 5 s, and its siblings' proof chain from the 40 s level (chain_records2.tsv);
+  * the rule model rm4t (theory block; `--rule-threshold 0.1 --rule-penalty 2`);
+  * lemma axioms: the 6 nearest proved siblings (later ones too) and 30 kNN proved goals of the same or weaker
+    axioms.
+* **The cascade:** L0, a 5 s fresh run, then L1, a 40 s fresh run with the chain, then L2-L4, resumes to 80, 160 and
+  320 s. A goal is retried when its context changes (`--retry-knn`, `--knn-refresh 600`, `--retry-gap 3`).
+* **Members:** optional attempts after a level. Each goal takes the eligible one with the best live yield
+  (`--ratio-order`). `--explore 1` measures every member once, and `--reexplore 150:0.25` measures it again when it
+  falls behind.
+  * At 5 s (`@0`):
+    * unfolded definitions: unf;
+    * lemma sets: k60, k100, k200, k400, k1000, k2000 (kNN counts), kp (by use counts), kd (by proof dependencies),
+      s12, s40, s200 (sibling counts), k200s12;
+    * hint sets: hl (the kNN lemmas' proof steps), pw (ProofWatch), sk (climb hints);
+    * rule models: m7t, m4b, m9a, m10f, m9h, m9e, r2 (threshold 0.2), nopg (no PG), nom (no model).
+  * At 40 or 80 s, fresh: pool@1:0, pool@2:0 and sk@1:0.
+  * At 80 s, after the 160 s level: k60, k400, p9 (Prover9 for 60 s with the chain), unf, two (the two-sided chain)
+    and nom.
+* **Scheduling:**
+  * `--mix 0.25` work classes;
+  * `--head-class`: a head (the goal right after a proved sibling) goes to L1 in its own class;
+  * the learned scheduler sched/m4 and `--far-retry`;
+  * `--given-scan loops/GFAIL`: failed runs' given rules are checked against the unsolved goals;
+  * an A/B on half the goals' deep runs, `--cp-renormalise-threshold 1000` (exp26).
+
+**2. Side loops.** Each one merges its proofs into loops/UL.
+* **Proof reruns:** exp/proofq.py --follow, PID 1177545, 3 threads. It reruns proved runs with the proof printed
+  (loops/*/proofs).
+* **Proof-step transfer:** transfer.py live into loops/XFL, PID 3454195, since 20 Nov 12:09. 2 threads, 20 s runs,
+  every 5 minutes, binary twee-e39.
+* **Given-rule retry:** givenmatch.py live into loops/GML, PID 2074661, since 22 Nov 14:17. 2 threads, 60 and 160 s
+  runs on GFAIL's hits.
+* **Plain live loop:** abs/plainlive3.sh, PID 3326168, since 23 Nov 12:38. Every 30 minutes it runs plain 5 s runs (no
+  hints, no rule model, no PG) on changed problems only, 3 threads, proofs via loops/CI2. Two settings:
+  * N: 30+10 siblings, 100 kNN lemmas;
+  * L: 100+30 siblings, 400 kNN lemmas ranked by lr2.
+
+  abs/plainlive4_start.sh (armed) will replace it with abs/plainlive4.sh once HDG1 ends. That adds setting H: the
+  heads (each original's first unsolved goal, 92 at 14:57) at 60 s, with 400 kNN lemmas.
+* **Sweep queue:** abs/sweepq.sh, PID 3471143. One-off plain sweeps from cond/SWEEPQ.txt, 3 threads, proofs via
+  loops/CI3. Now running HDG1: the 92 heads at 60 s with 1,600 kNN lemmas. HDW1 (400 kNN) proved 4 of them.
+
+**3. Not production:** exp65's two from-zero arms (loops/Q5A and loops/Q5B, 4 workers each, until about 22:55).
+
+**CPU at 18:08:** 23 twee processes are running:
+* the main loop 6, proof reruns 3, the sweep 3, the plain live loop 3, exp65 8;
+* transfer and given-rule retry 0 at that moment.
+
+The plain live loop is idle between its cycles.
+
 **Correction (20 Nov 10:40; [notes/2026-11-20-p9-negation-bug.md](notes/2026-11-20-p9-negation-bug.md)).** The counts
 from 15 Nov on include proofs that are not proofs.
 * p9twee.py's TPTP-to-LADR conversion wrote `~ a = b` as `- a = b`, which Prover9 reads as the equation (-a) = b.
