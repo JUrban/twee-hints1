@@ -789,6 +789,11 @@ Next:
    its hints, 2 climbs each (exp/exp67.sh), from 19:01.
    Control CC67 (exp/exp67c.sh, after exp65): the same heads and context, one run per head of CLA67's CPU per target, no sketches
    (climb.py --runs 0): does climbing beat a long run (the 14 Nov lesson)?
+   **(21:05) 2 h: CLB67 3 real proofs, CLA67 1, CLHL3 0, at about 4 CPU h each (exp/climbread.py).** Plain 60 s head runs
+   had failed on all four; in three the hints came from weakened-goal sketches. Merged into production. Control CC67B
+   (exp/exp67d.sh) for arm B at its CPU per target, beside CC67 after exp65.
+   (21:05) trust.py counted every sketch run's assume_* as premises of a climber's proof: no climber proof in an exposed
+   original was trusted (aa1_14 533). Now the target's last used.tsv row (the run that made the real proof); 3 -> 2 untrusted.
 00000000000000000000000000000000000000000000000000000. **exp66 (climber restart, [notes/2026-11-23-climber-restart.md](notes/2026-11-23-climber-restart.md)):** the live head
    climber back beside production (abs/clhl3.sh, loops/CLHL3; clhl2.sh's setting, a fresh record). clhl2 made 69 proofs in
    66 CPU h (1.04 per CPU h) and stopped 20 Nov 10:04, never restarted. The user: "you should remember to use the climber and

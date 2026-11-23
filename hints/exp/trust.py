@@ -140,14 +140,32 @@ def main():
     for p in glob.glob(os.path.join(L, '*', 'used.tsv')):
         d = p.split('/')[-2]
         mu = os.path.getmtime(p)
+        # (23 Nov) the climber's own real proofs (its solved.tsv rows of round 1): the record is the target's LAST
+        # used.tsv row, the run that made the real proof (climb.py: an assumption-free sketch proof ends the climb,
+        # else the final run, then 'direct'). The earlier rows are sketch proofs with assume_* axioms; the real proof
+        # only took their steps as hints, so they are not its premises. (Before, every row counted and any assume_*
+        # made the record unresolved: no climber proof in an exposed original could be trusted.)
+        own = set()
+        if os.path.exists(os.path.join(L, d, 'climb.tsv')) and os.path.exists(os.path.join(L, d, 'solved.tsv')):
+            own = {l.split('\t')[0] for l in open(os.path.join(L, d, 'solved.tsv')) if l.split('\t')[1:2] == ['1']}
+        # (20 Nov 13:38) when production's hints file is newer than the whole used.tsv, that proof has since been
+        # replaced (CLHL2 stopped at 10:04; its old rows kept REVER4's sound re-proofs of mbol_12lemmas 526 and three
+        # more untrusted through a quarantined lemma). Only for a dir whose hints are production's (a symlink: live
+        # climbers); a dir with its own hints (set mode, merged with merge.py, which copies the file later than the
+        # rows) is matched by same()'s byte comparison
+        link = os.path.islink(os.path.join(L, d, 'hints'))
+        last = {}
         for l in open(p):
             w = l.rstrip('\n').split('\t')
-            # (20 Nov 13:38) a climber's rows describe its own proof. When production's hints file is newer than the
-            # whole used.tsv, that proof has since been replaced (CLHL2 stopped at 10:04; its old rows kept REVER4's
-            # sound re-proofs of mbol_12lemmas 526 and three more untrusted through a quarantined lemma)
-            if len(w) >= 3 and w[0] in S and same(d, w[0]) and \
-                    os.path.getmtime(os.path.join(L, 'UL', 'hints', w[0])) <= mu:
+            if len(w) < 3 or w[0] not in S or not same(d, w[0]) or \
+                    (link and os.path.getmtime(os.path.join(L, 'UL', 'hints', w[0])) > mu):
+                continue
+            if w[0] in own:
+                last[w[0]] = w
+            else:
                 add(w[0], d, [x for x in w[2].split(',') if x])
+        for g, w in last.items():
+            add(g, d, [x for x in w[2].split(',') if x])
     old = {g for g in S if os.path.getmtime(os.path.join(L, 'UL', 'hints', g)) < T0}
     trusted = set(old)
     if '--exposed' in sys.argv:

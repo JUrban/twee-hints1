@@ -86,3 +86,49 @@ as it's veroff's main weapon for solving open problems".
     22:55), on exp65's CPUs, with 4 at a time.
 * Reading: CLA67 against CC67 per head and per CPU h, +/− and union. The climbing pays only if CLA67 beats CC67 by
   more than single heads (the sets are small).
+
+## Readings at 21:04
+
+| climber | targets | finished | real proofs | CPU h | per CPU h | proved |
+|---|---:|---:|---:|---:|---:|---|
+| CLHL3 | 20 | 18 | 0 | 4.10 | 0.00 |  |
+| CLA67 | 24 | 22 | 1 | 3.86 | 0.26 | aa1_14__goal_533 |
+| CLB67 | 28 | 26 | 3 | 3.98 | 0.75 | aK1_to_aK2__goal_76, aK2_eq_aK3_e__goal_326, aK2_eq_aK3_h__goal_279 |
+
+* CPU h is every run of the climbs (sketch, fill, final, direct). CLHL3's rows include its runs before the 19:47 restart.
+* **CLB67 (400 kNN) leads CLA67 (30 kNN), 3 proofs to 1**, at about the same CPU. Climb by climb (climb.tsv; a
+  ":weak" row is a sketch run on a weakened goal, an instance of the conjecture, --weaken 4):
+  * aK2_eq_aK3_h 279 (CLB67): s0 proved it with one assumed kNN goal; s1-s8 proved weakened goals with no
+    assumption; the final run, with their steps as hints, proved the target in 7.3 s.
+  * aK1_to_aK2 76 (CLB67): s0-s16 failed; s17 and s21 proved weakened goals; the final proved the target in 380 s
+    (wall). CLA67's climb of 76 had 18 conditional sketches in 24 runs and a failed final (643 s).
+  * aK2_eq_aK3_e 326 (CLB67): s0-s2 conditional sketches (3, 3 and 1 assumptions), s3-s10 weakened goals; the final
+    proved it with fill lemmas in 244 s, then 'direct' without them in 44 s (the real proof). CLA67's final failed
+    (599 s).
+  * aa1_14 533 (CLA67's proof, final 165 s): CLB67's climb had 4 conditional sketches in 6 runs and a failed final.
+  * In three of the four, the hints came from weakened-goal proofs.
+* **The plain 60 s head runs failed on all four**: HDW1 (400 kNN, 100+30 siblings) on 326, 279 and 533 (plainlive4's
+  H cycle c19H did not rerun them: the same problem text, SAME rows), and c19H on 76 (154 s wall). Whether a plain
+  run of the climb's length gets them is what CC67 and CC67B (below) answer.
+* Merged into production (merge.py loops/UL loops/CLA67 loops/CLB67), 4 proofs: the arms' contexts are frozen at
+  18:54, so the merge does not change exp67.
+
+## trust.py read climber proofs wrong
+
+* trust.py took a climber's record of a goal as the union of all its used.tsv rows: every sketch run's axioms,
+  assume_* included. Any assume_* made the record unresolved, so no climber proof in one of the 43 exposed
+  originals could be trusted. aa1_14 is exposed: its proof was untrusted.
+* The real proof does not rest on the sketch runs: it takes their steps only as hints. Fix: for the climber's own real
+  proofs (its solved.tsv rows of round 1), the record is the target's last used.tsv row, the run that made the real
+  proof (climb.py ends a climb at an assumption-free sketch proof, else runs the final and then direct).
+* The mtime rule (production's hints newer than used.tsv: the proof was replaced) now applies only to dirs whose hints
+  are production's (a symlink, the live climbers). merge.py copies the hints file after the rows were written, so the
+  rule dropped every merged set-mode proof.
+* Old against new, same moment: 3 untrusted against 2 of 48,547; the difference is aa1_14 533. The 2 left use
+  production's lemma_fill_N (climbers' fill lemmas from true.tsv), which trust.py does not resolve.
+
+## A control for arm B (CC67B)
+
+* CC67 matches arm A. With B ahead, B needs its own: **CC67B** (exp/exp67d.sh), like CC67 with B's lemmas
+  (30 siblings, 400 kNN) at CLB67's mean CPU per finished target. Armed beside CC67; both start when exp65 ends, -j 4
+  each, on the 8 workers exp65 frees.
