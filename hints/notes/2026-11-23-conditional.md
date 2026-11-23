@@ -327,3 +327,16 @@ its start, with its proofs into loops/CI3 and loops/UL (merges under flock cond/
 
 With N (PLN2) and W (PLW1) they separate the dimensions: kNN alone (PLK1), siblings alone (PLS1), between (PLM1), and
 four times the time (PLT1). Read: each sweep's proofs, those no other sweep found, and proofs per CPU h.
+
+## Hint bed result (07:20-07:54; read 07:55)
+
+| arm | proved | CPU h |
+|---|---:|---:|
+| HBC | 0 of 600 | 0.39 |
+| HB200 | 0 of 600 | 0.42 |
+| HB2000 | 1 of 600 | 0.87 |
+
+On 600 frontier goals plain runs had failed, the hints of the lemma goals' own proofs add nothing: 0 with 200, 1 with 2,000
+at twice the CPU (the control 0). With the smoke test (2,000 hints lost 3 of 5 plain proofs), hints hurt more
+than they help on the frontier; **the lemma set is what proves these goals**. HB2000's proof (aa2_to_aa3__goal_267) went
+into production through loops/CI4 (condimport.py now reruns a hinted sweep's proof with its hints file).

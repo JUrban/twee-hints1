@@ -782,6 +782,7 @@ Next:
    Hint bed (07:20, abs/hintbed.sh): 600 goals plain failed, PLN2's problems with 200 or 2,000 hints from the lemma goals' proofs, against a perturbation control. Smoke: with 2,000 hints 2 of PLN2's 5 plain proofs.
    Two settings (07:48): PLW1 so far 14 proofs in 1,541 goals, 11 not PLN2's; abs/plainlive2.sh runs N and W each cycle with their own --prev chains, from PLW1's end (starter cond/PLNL2.starter).
    Sweep queue (07:49, abs/sweepq.sh after the hint bed): PLK1, PLS1, PLM1, PLT1: kNN alone, siblings alone, between, 20 s; proofs into loops/CI3 and loops/UL.
+   **Hint bed (07:20-07:54): on 600 plain-failed frontier goals, 200 lemma-proof hints 0, 2,000 hints 1 (2x CPU), control 0: the lemma set proves these goals, not hints.**
 000000000000000000000000000000000000000000000000. **COND1 (05:00, [notes/2026-11-23-conditional.md](notes/2026-11-23-conditional.md)):** conditional proofs of the 3,412
    unsolved goals: each with its 10 nearest earlier siblings assumed (proved or not) and 30 kNN trusted lemmas, one
    plain 5 s twee run (exp/condprove.py, abs/cond1.sh, 6 threads, cond/COND1 outside loops/). Hard steps against

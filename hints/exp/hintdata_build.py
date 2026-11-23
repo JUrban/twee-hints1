@@ -149,7 +149,7 @@ def main_climbs():
 # loop.py's proof_job and exp/proofq.py), grouped by run family: a run with its transfer (.xfer) and derived-rule (_GML)
 # loops, whose proofs use each other's goals as lemmas
 RP_FAMILIES = [('production', ['UL', 'XFL', 'GML', 'STEPJ', 'SW20', 'ROOTS',
-                               'CI1', 'CI2', 'CI3']),   # (23 Nov) the plain sweeps' proofs, merged into UL
+                               'CI1', 'CI2', 'CI3', 'CI4']),   # (23 Nov) the plain sweeps' proofs, merged into UL
                ('smoke', ['HCT', 'HCT2', 'KCT', 'KCT2', 'KCT3', 'QKC', 'QKT', 'QKN', 'RCT', 'RTT', 'YDT', 'YDT2', 'HTT',
                           'HTT2', 'GFT', 'KDS', 'LSM', 'LTD', 'PIS', 'FRS', 'FRT', 'KDA', 'KDB', 'KDC',
                           'RST']),

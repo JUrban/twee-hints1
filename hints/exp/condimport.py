@@ -57,8 +57,13 @@ with open(f'{DEST}/solved.tsv', 'a') as sf:
             print(f'{g}\tskip: lemma axioms not trusted: {" ".join(bad[:5])}'); continue
         p = f'{DEST}/p/{g}.p'
         open(p, 'w').write(src)
+        # (23 Nov) a hinted sweep (condprove.py --hints-lemmas): rerun with its hints file too
+        hx = []
+        if os.path.exists(f'{SRC}/h/{g}.hints'):
+            os.makedirs(f'{DEST}/h', exist_ok=True)
+            open(f'{DEST}/h/{g}.hints', 'w').write(open(f'{SRC}/h/{g}.hints').read()); hx = ['--hints-file', f'{DEST}/h/{g}.hints']
         t0 = time.time()
-        r = subprocess.run([TWEE, p] + base + ['--quiet', '--no-proof', '--print-hints', '--print-given'],
+        r = subprocess.run([TWEE, p] + base + hx + ['--quiet', '--no-proof', '--print-hints', '--print-given'],
                            capture_output=True, text=True, timeout=600, env=env)
         dt = time.time() - t0; out = r.stdout
         if 'RESULT: Theorem' not in out:
@@ -83,7 +88,7 @@ with open(f'{DEST}/solved.tsv', 'a') as sf:
         with open(f'{DEST}/hints/{g}', 'w') as hf:
             for l, rr in hs:
                 hf.write(f'{l}\t{rr}\n')
-        r2 = subprocess.run([TWEE, p] + base, capture_output=True, text=True, timeout=600, env=env)
+        r2 = subprocess.run([TWEE, p] + base + hx, capture_output=True, text=True, timeout=600, env=env)
         open(f'{DEST}/proofs/{g}', 'w').write(r2.stdout)
         sf.write(f'{g}\t1\t{dt:.2f}\n'); sf.flush(); ok_n += 1
         print(f'{g}\tok {dt:.2f}s, {len(hs)} hints, used {" ".join(sorted(n for n in used if n.startswith("lemma_")))}')
