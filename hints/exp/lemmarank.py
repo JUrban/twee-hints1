@@ -5,7 +5,8 @@
                                                    axioms (rank i), used those in the proof's Axiom lines
   lemmarank.py eval DATA.pkl [FEATS]               5 folds grouped by the goal's original: recall at 50/100/400 of the
                                                    used kNN lemmas, the model's order against the similarity rank
-  lemmarank.py train DATA.pkl MODEL [FEATS]        LightGBM on all rows (FEATS: v1 = lr1's, or a comma list) (MODEL.txt and MODEL.json: the feature names)
+  lemmarank.py train DATA.pkl MODEL [FEATS] [--exclude SET]  LightGBM on all rows (FEATS: v1 = lr1's, or a comma list;
+                                                   SET: its originals' problems left out) (MODEL.txt and MODEL.json: the feature names)
 
 As a module: Ranker(MODEL, trusted).select(goal, k, exclude) re-ranks LemmaIndex.select's top POOL (2,000) by the
 model (condprove.py --index learned:MODEL). Features are computed against one context (TRUSTED; production's hints
@@ -196,14 +197,21 @@ def cmd_eval(data, feats=''):
     imp = sorted(zip(m.booster_.feature_importance('gain'), fs), reverse=True)
     print('gain:', ', '.join(f'{f} {g:.0f}' for g, f in imp))
 
-def cmd_train(data, out, feats=''):
+def cmd_train(data, out, feats='', exclude=''):
+    """(23 Nov) EXCLUDE: a goal set whose originals' problems are left out (a model for a test on that set)"""
     import numpy as np
     D = pickle.load(open(data, 'rb'))
     cols, fs = cols_of(D, feats)
-    m = model().fit(np.array(D['X'])[:, cols], np.array(D['y']))
+    X = np.array(D['X'])[:, cols]; y = np.array(D['y'])
+    if exclude:
+        eo = {lemmas.split(l.strip())[0] for l in open(exclude) if l.strip()}
+        keep = np.array([lemmas.split(D['meta'][i][1])[0] not in eo for i in D['grp']])
+        print(f'lemmarank: {exclude}: {len(set(np.array(D["grp"])[keep].tolist()))} of {len(D["meta"])} problems kept', flush=True)
+        X, y = X[keep], y[keep]
+    m = model().fit(X, y)
     m.booster_.save_model(out + '.txt')
-    json.dump({'feats': fs}, open(out + '.json', 'w'))
-    print(f'lemmarank: model {out}.txt from {len(D["y"]):,} rows')
+    json.dump({'feats': fs, 'exclude': exclude}, open(out + '.json', 'w'))
+    print(f'lemmarank: model {out}.txt from {len(y):,} rows ({int(y.sum()):,} used)')
 
 class Trees:
     """(23 Nov) LightGBM's text model evaluated with numpy (raw scores), for pythons without lightgbm (loop.py,
@@ -276,4 +284,6 @@ if __name__ == '__main__':
     elif a[0] == 'eval':
         cmd_eval(a[1], a[2] if len(a) > 2 else '')
     elif a[0] == 'train':
-        cmd_train(a[1], a[2], a[3] if len(a) > 3 else '')
+        ex_ = a[a.index('--exclude') + 1] if '--exclude' in a else ''
+        a = [x for x in a if x not in ('--exclude', ex_)] if ex_ else a
+        cmd_train(a[1], a[2], a[3] if len(a) > 3 else '', ex_)

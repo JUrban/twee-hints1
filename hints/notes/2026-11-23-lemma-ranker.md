@@ -193,3 +193,24 @@ proofs). Plain 5 s twee (condprove.py `--proved`: only Z9-proved siblings, 4 ear
 about L0's lemma part without its hints and rule model), both arms at once on 1 thread each: cond/ZGS by similarity,
 cond/ZGR by lr2 from the similarity list's top 1,000 with use counts, proof steps and sibling features from loops/Z9
 (condprove.py `--rank-loop`, new), so no production proof enters. Measures: proved in each, +/−, union.
+
+## lr2 has seen half2: lr2h (13:12)
+
+350 of LR2.pkl's 783 problems are goals of sets/half2 (exp64 and exp65's set; half1 and half2 split by original).
+lr2h (`lemmarank.py train cond/LR2.pkl models/lemmarank/lr2h --exclude sets/half2`) is trained on the other 433. On
+RKD1's 250 half2 problems (exp/lemmarank_held.py, cond/LR2H.held):
+
+| model | K | recall, similarity | recall, model | all used in top K, similarity | model |
+|---|---:|---:|---:|---:|---:|
+| lr2h | 30 | 0.355 | 0.539 | 0.188 | 0.264 |
+| lr2h | 50 | 0.405 | 0.622 | 0.208 | 0.324 |
+| lr2h | 100 | 0.512 | 0.737 | 0.284 | 0.428 |
+| lr2 | 30 | 0.355 | 0.807 | 0.188 | 0.508 |
+| lr2 | 50 | 0.405 | 0.856 | 0.208 | 0.568 |
+| lr2 | 100 | 0.512 | 0.916 | 0.284 | 0.688 |
+
+lr2's numbers there are in-sample; lr2h's are held out, and still well above similarity. exp65's Q5B now runs lr2h.
+The Z9-gap pre-check had the same problem (25 of its 500 goals are lr2 training problems, 403 of their originals
+have some): its lr2 arm was stopped at 44 goals; exp/z9gap2.sh runs lr2h on the 235 of the 500 in half2
+(exp/sets/z9gap500h2, cond/ZGH), compared with cond/ZGS on those. The live loop keeps lr2: its goals are unsolved,
+so none has a proof in the training data.
