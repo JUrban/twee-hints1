@@ -30,3 +30,31 @@ PLN2, PLW1, PLK1, ...) are more data of the same kind; COND1/COND2 and the step 
   is left out.
 * If recall rises clearly: condprove.py `--index learned:MODEL` (top 2,000 by similarity, re-ranked, top K) as a
   sweep against W on the frontier, as the queue's sweeps are read.
+
+## First test (read 09:04)
+
+exp/lemmarank.py (features, grouped 5-fold CV by original, LightGBM; venv/bin/python3) on the frontier sweeps' proofs
+so far (PLW1, PLK1, PLN1, PLZ8: 213 problems with a used kNN lemma, 32,986 candidate rows, 2,071 used):
+
+| dir | K | problems | recall, similarity | recall, model | all used in top K, similarity | all used, model |
+|---|---:|---:|---:|---:|---:|---:|
+| cond/PLW1 | 50 | 23 | 0.183 | 0.436 | 0.043 | 0.043 |
+| cond/PLW1 | 100 | 23 | 0.344 | 0.633 | 0.043 | 0.043 |
+| cond/PLK1 | 50 | 16 | 0.176 | 0.448 | 0.000 | 0.000 |
+| cond/PLK1 | 100 | 16 | 0.386 | 0.669 | 0.000 | 0.000 |
+| cond/PLN1 | 50 | 24 | 0.584 | 0.728 | 0.083 | 0.208 |
+| cond/PLZ8 | 50 | 150 | 0.665 | 0.816 | 0.273 | 0.400 |
+gain: len_x 7710, simrel 7320, lhint 7209, uses 6921, len_ratio 6748, rank 6588, pos_x 6413, len_g 6154, sim 5518, sym_xonly 3199, dep50w 2763, sym_jac 2461, nvar_x 1871, dep50 1520, same_key 1369, lrank 1353, sib_dist 1191, sym_shared 1010, same_orig 74, eq_goal 0
+
+Recall = the share of a proof's used kNN lemmas in the top K of its list (lists longer than K only). Even from 213
+problems the model about doubles it at 50 and 100 within 400-lists. A caveat: the positives are what one proof used;
+other candidates might have served as well.
+
+## Frontier test (armed 09:04)
+
+abs/lrab.sh (exp/lrab.sh, PID in cond/LRAB.pid): after RKD1, data from RKD1 and the frontier sweeps (cond/LR1.pkl),
+the CV (cond/LR1.eval), model models/lemmarank/lr1; then the sweep queue is paused after PLS1, and PLL1 runs W's sizes
+ranked by lr1 (condprove.py `--index learned:MODEL`: the similarity list's top 2,000 re-ranked) on production's
+unsolved goals in the context of the live loop's cycle c5 (cond/PLNL/c5.trusted). The control is that cycle's W run
+(c5W, the changed problems; the other goals failed under W with the same problem in an earlier cycle), in the same
+context. Then PLL1's proofs into loops/CI3 and loops/UL, and the queue restarts.

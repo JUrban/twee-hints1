@@ -68,8 +68,14 @@ if IX == 'kd' and index:
     index.dep_n = max(50, KNN)   # (09:00) dep_n 50 left 203 of 400 kNN lemmas: kd re-ranks only its dep_n nearest and their deps
 elif IX == 'kp' and index:
     index.uses = lemmas.lemma_uses(['/project/hintwork/loops/UL']); index.pop = 0.3
+elif IX.startswith('learned:') and index:
+    # (23 Nov, notes/2026-11-23-lemma-ranker.md) exp/lemmarank.py's model re-ranks the similarity list's top 2,000
+    # (needs lightgbm: run under /project/hintwork/venv/bin/python3)
+    sys.path.insert(0, '/project/twee/hints/exp')
+    import lemmarank
+    index = lemmarank.Ranker(IX.split(':', 1)[1], TR)
 elif IX:
-    sys.exit(f'--index {IX}: kd or kp')
+    sys.exit(f'--index {IX}: kd, kp or learned:MODEL')
 print(f'condprove: {len(U)} unsolved goals to run ({len(done)} done), index {time.time()-t_:.0f}s', flush=True)
 base = ['--max-time', TM, '--abstract-time', '2000', '--no-colour', '--no-resume-requeue', '--no-eqhint-consider'] + XARGS
 AX = re.compile(r'^Axiom \d+ \(([^)]*)\)')
