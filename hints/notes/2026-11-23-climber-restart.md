@@ -267,4 +267,4 @@ Last 58500 runs: 135 proofs in 216.1 CPU h (0.62 per CPU h).
 * So the heads are not the only frontier, and a head-only restriction of production's members would be wrong. The
   climbers climb heads (CLHL4 `--heads-only`) and exp69 the goals the heads' sketches assume. Without `--heads-only` and
   `--reclimb-heads`, climb.py --live climbs any stalled goal (a failed fresh run in the latest round), fewest proof
-  lines from a proven goal below first: the mode for the deep goals, unused since clhl2.
+  lines from a proven goal below first: the mode for the deep goals, last used by clu4.sh (16 Nov, loops/CLU).
