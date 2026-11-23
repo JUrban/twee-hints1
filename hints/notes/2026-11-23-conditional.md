@@ -310,3 +310,20 @@ complement each other, so the live loop runs both: abs/plainlive2.sh (exp/plainl
 100 kNN) and W (100+30, 400 kNN) each cycle, each with its own `--prev` chain (cond/PLNL/c<k>N, c<k>W). Starter
 abs/plainlive2_start.sh (PID in cond/PLNL2.starter): after PLW1's import it stops plainlive.sh (cond/PLNL.stop, after its
 cycle) and starts plainlive2.sh with PREV_N its last cycle and PREV_W cond/PLW1.
+
+## Sweep queue (armed 07:49)
+
+The live loop runs only changed problems, so it is idle most of each cycle; new proofs also come from new settings.
+abs/sweepq.sh (exp/sweepq.sh, PID in cond/SWEEPQ.pid) runs the full plain sweeps of cond/SWEEPQ.txt (copy
+exp/sets/SWEEPQ.txt) one after another after the hint bed, 3 threads, each in the context of loops/UL/solved.tsv at
+its start, with its proofs into loops/CI3 and loops/UL (merges under flock cond/merge.lock, as plainlive2.sh's):
+
+| sweep | condprove.py arguments |
+|---|---|
+| PLK1 | `--time 5 --sibs 30 --after 10 --knn 400` |
+| PLS1 | `--time 5 --sibs 100 --after 30 --knn 100` |
+| PLM1 | `--time 5 --sibs 60 --after 20 --knn 200` |
+| PLT1 | `--time 20 --sibs 30 --after 10 --knn 100` |
+
+With N (PLN2) and W (PLW1) they separate the dimensions: kNN alone (PLK1), siblings alone (PLS1), between (PLM1), and
+four times the time (PLT1). Read: each sweep's proofs, those no other sweep found, and proofs per CPU h.

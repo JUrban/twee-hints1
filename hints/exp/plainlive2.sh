@@ -18,7 +18,7 @@ while [ ! -e cond/PLNL.stop ]; do
     python3 -u /project/twee/hints/exp/condprove.py $C --trusted cond/PLNL/c$k.trusted --prev ${PREV[$S]} -j ${J:-3} --time 5 \
       ${ARGS[$S]} --proved > $C.log 2>&1
     python3 /project/twee/hints/exp/condimport.py $C loops/CI2 --trusted cond/PLNL/c$k.trusted > $C.import 2>&1
-    python3 /project/twee/hints/merge.py loops/UL loops/CI2 > $C.merge 2>&1
+    flock cond/merge.lock python3 /project/twee/hints/merge.py loops/UL loops/CI2 > $C.merge 2>&1
     echo "c$k$S $(date '+%d %T') ran $(grep -c -P '\t(THM|NO|TIMEOUT)\t' $C/results.tsv) THM $(grep -c -P '\tTHM\t' $C/results.tsv) $(tail -1 $C.import) | $(tail -1 $C.merge)" >> cond/PLNL/log
     PREV[$S]=$C
   done

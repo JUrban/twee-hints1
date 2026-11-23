@@ -1,0 +1,5 @@
+# NAME condprove-args (abs/sweepq.sh; notes/2026-11-23-conditional.md, "Sweep queue")
+PLK1 --time 5 --sibs 30 --after 10 --knn 400
+PLS1 --time 5 --sibs 100 --after 30 --knn 100
+PLM1 --time 5 --sibs 60 --after 20 --knn 200
+PLT1 --time 20 --sibs 30 --after 10 --knn 100
