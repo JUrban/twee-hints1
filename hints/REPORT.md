@@ -91,15 +91,15 @@ exp/trust.py trusts.
   every 5 minutes, binary twee-e39.
 * **Given-rule retry:** givenmatch.py live into loops/GML, PID 2074661, since 22 Nov 14:17. 2 threads, 60 and 160 s
   runs on GFAIL's hits.
-* **Plain live loop:** abs/plainlive3.sh, PID 3326168, since 23 Nov 12:38. Every 30 minutes it runs plain 5 s runs (no
-  hints, no rule model, no PG) on changed problems only, 3 threads, proofs via loops/CI2. Two settings:
-  * N: 30+10 siblings, 100 kNN lemmas;
-  * L: 100+30 siblings, 400 kNN lemmas ranked by lr2.
-
-  abs/plainlive4_start.sh (armed) will replace it with abs/plainlive4.sh once HDG1 ends. That adds setting H: the
-  heads (each original's first unsolved goal, 92 at 14:57) at 60 s, with 400 kNN lemmas.
-* **Sweep queue:** abs/sweepq.sh, PID 3471143. One-off plain sweeps from cond/SWEEPQ.txt, 3 threads, proofs via
-  loops/CI3. Now running HDG1: the 92 heads at 60 s with 1,600 kNN lemmas. HDW1 (400 kNN) proved 4 of them.
+* **Plain live loop:** abs/plainlive4.sh, PID 3666095, since 23 Nov 19:41 (plainlive3.sh before, from 12:38). Every 30
+  minutes it runs plain runs (no hints, no rule model, no PG) on changed problems only, 3 threads, proofs via
+  loops/CI2. Three settings:
+  * N: 5 s, 30+10 siblings, 100 kNN lemmas;
+  * L: 5 s, 100+30 siblings, 400 kNN lemmas ranked by lr2;
+  * H: 60 s on the heads (each original's first unsolved goal), 100+30 siblings, 400 kNN lemmas. HDW1 with this
+    setting proved 4 of 92 heads (1.78 per CPU h); 1,600 lemmas (HDG1) proved 1 of 88.
+* **Sweep queue:** abs/sweepq.sh runs one-off plain sweeps from cond/SWEEPQ.txt (3 threads, proofs via loops/CI3).
+  Idle since HDG1 ended (18:52); PLD1, PLP1, PLT1, PLX1 are held.
 
 **The head climber: abs/clhl3.sh (exp66),** climb.py --live into loops/UL, record loops/CLHL3, started 23 Nov
 after a 3.5-day gap (its predecessor clhl2.sh stopped 20 Nov 10:04 at 1.04 proofs per CPU h and was not restarted).
