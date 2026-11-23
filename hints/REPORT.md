@@ -5847,7 +5847,7 @@ rounds of 30 s or more, but about 40% overhead for 8 s rounds.
 
 ## 3. Assessment
 
-*23 Nov, 09:33 (`date` checked). The 07:13 assessment follows it.*
+*23 Nov, 09:33 (`date` checked). The 07:12 assessment follows it.*
 
 * **48,502 goals in production's solved list** (48,466 trusted at 06:41; trust.py rerunning): the plain sweeps' proofs
   (PLN1 22, PLN2 5, PLW1 16, PLK1 2, live loop 2, the hint bed 1) and production's own.
