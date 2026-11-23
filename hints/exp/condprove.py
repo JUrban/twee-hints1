@@ -24,6 +24,8 @@ def opt(k, d):
 SET = opt('--set', '/project/hintwork/sets/all'); TR = opt('--trusted', '/project/hintwork/loops/TRUSTNOW/t2139.trusted')
 J = int(opt('-j', '6')); TM = opt('--time', '5'); SIBS = int(opt('--sibs', '10')); KNN = int(opt('--knn', '30'))
 ONLY = opt('--only', ''); TWEE = '/project/bin/twee-pg61'
+# (23 Nov) --twee PATH: another binary (e.g. /project/bin/twee-e63 with --args --lazy-lemmas)
+TWEE = opt('--twee', TWEE)
 # (23 Nov, the step test bed) --after N: also the N nearest later siblings (any status; true as well); --args: more
 # twee flags; --all: every goal of --only, solved or not
 AFTER = int(opt('--after', '0')); XARGS = opt('--args', '').split(); ALL = '--all' in a

@@ -184,7 +184,9 @@ data State f =
     st_messages_rev   :: ![Message f],
     st_random_seed    :: Maybe (ReadShowBinary QCGen),
     st_problem_term   :: Maybe (ConfluenceFailure f),
-    st_pg             :: !PG }
+    st_pg             :: !PG,
+    -- (e63, --lazy-lemmas) lemma axioms not yet added, by critical-pair score (not saved)
+    st_lazy           :: ![(Float, Axiom f)] }
   deriving (Generic, Binary)
 
 -- | Parental guidance (--pg-threshold): the --rule-model raw score of each active by
@@ -502,7 +504,8 @@ initialState Config{..} =
         False -> Nothing
         True -> Just (ReadShowBinary (mkQCGen 12345)),
     st_problem_term = Nothing,
-    st_pg = emptyPG }
+    st_pg = emptyPG,
+    st_lazy = [] }
 
 ----------------------------------------------------------------------
 -- * Messages.
@@ -2263,16 +2266,23 @@ complete1 config@Config{..} state
   | otherwise =
     case st_random_seed state of
       Nothing -> -- normal mode
-        case dequeue config state of
-          (Nothing, state)
-            | isJust cfg_pg_threshold, not (pg_thawed (st_pg state)) ->
-              -- parental guidance: empty the freezer and go on
-              (if cfg_pg_log then Debug.Trace.trace "PGTHAW" else id) (True, thawPG config state)
-            | otherwise -> (False, state)
-          (Just (info, overlap, _, _, passive), state) ->
-            (True, (consider config state{st_cur_passive = Just passive,
-                                          st_cur_parents = (fromIntegral (passive_rule1 passive), fromIntegral (passive_rule2 passive))}
-                      info overlap){st_cur_passive = Nothing, st_cur_parents = (0, 0)})
+        case st_lazy state of
+          -- (e63, --lazy-lemmas) the next lemma axiom, when its score is at most the best queued pair's
+          ((sc, ax):rest)
+            | maybe True (\(p, _) -> sc <= passive_score p)
+                (Queue.removeMinFilter (\i -> fromIntegral i `IntMap.member` st_active_set state) (st_queue state)) ->
+              (True, addAxiom config state{st_lazy = rest} ax)
+          _ ->
+            case dequeue config state of
+              (Nothing, state)
+                | isJust cfg_pg_threshold, not (pg_thawed (st_pg state)) ->
+                  -- parental guidance: empty the freezer and go on
+                  (if cfg_pg_log then Debug.Trace.trace "PGTHAW" else id) (True, thawPG config state)
+                | otherwise -> (False, state)
+              (Just (info, overlap, _, _, passive), state) ->
+                (True, (consider config state{st_cur_passive = Just passive,
+                                              st_cur_parents = (fromIntegral (passive_rule1 passive), fromIntegral (passive_rule2 passive))}
+                          info overlap){st_cur_passive = Nothing, st_cur_parents = (0, 0)})
       Just (ReadShowBinary g) -> -- random mode
         let (g1, g2) = Random.split g in
         let state' = state { st_random_seed = Just (ReadShowBinary g2) } in

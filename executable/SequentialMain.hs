@@ -90,6 +90,8 @@ data MainFlags =
     flags_print_hints :: Bool,
     flags_print_hint_matchers :: Bool,
     flags_print_goal_nf :: Int,
+    flags_lazy_lemmas :: Bool,
+    flags_lazy_lemma_factor :: Float,
     flags_hints_file :: Maybe FilePath,
     flags_track_hints :: Maybe FilePath,
     flags_rule_model :: Maybe FilePath,
@@ -277,6 +279,18 @@ parseMainFlags = do
     flag "print-goal-nf"
       ["When the goal is not proved, print the N smallest normal forms of each side of each goal (GOALNF L|R lines with a TPTP clause t = t), for subgoal conjectures (0 by default)."]
       0 argNum
+  flags_lazy_lemmas <-
+    expert $
+    inGroup "Completion heuristics" $
+    bool "lazy-lemmas"
+      ["(e63) Keep the axioms named lemma_* out of the initial state: each waits in a list sorted by its critical-pair score and becomes active when its score is at most the best queued pair's, so a problem with many lemma axioms does not pair them all with each other before the first step (off by default; not kept in --dump-state)."]
+      False
+  flags_lazy_lemma_factor <-
+    expert $
+    inGroup "Completion heuristics" $
+    flag "lazy-lemma-factor"
+      ["(e63) With --lazy-lemmas: a lemma axiom's score is its critical-pair score times this (1 by default; 0 adds them all before the first step, as without --lazy-lemmas but one by one)."]
+      1 argNum
   flags_rule_model <-
     expert $
     inGroup "Critical pair weighting heuristics" $
@@ -1346,7 +1360,11 @@ runTwee globals (TSTPFlags tstp) horn precedence config0 flags@MainFlags{..} lat
       IntMap.fromList ([ (f, Just d) | (f, d) <- flatDefs ] ++ [ (f, Nothing) | f <- IntSet.toList skolemSyms ])
     withHints = foldl' addTrackedHint (setEqHintGoalConsts withHints1 goalConsts) [ e | (e, _, _) <- trackHints ]
     withGoals = foldl' (addGoal config) withHints goals
-    withAxioms = foldl' (addAxiom config) withGoals axioms
+    -- (e63, --lazy-lemmas) lemma axioms wait in st_lazy, sorted by their critical-pair score
+    isLazy ax = flags_lazy_lemmas && "lemma_" `isPrefixOf` axiom_name ax
+    withAxioms0 = foldl' (addAxiom config) withGoals (filter (not . isLazy) axioms)
+    withAxioms = withAxioms0 { st_lazy = sortBy (comparing fst)
+      [ (flags_lazy_lemma_factor * scoreCP config (CP.Depth 0) (st_hints withAxioms0) (axiom_eqn ax), ax) | ax <- axioms, isLazy ax ] }
     withBackwardsGoal = foldn rewriteGoalsBackwards withAxioms flags_backwards_goal
 
   -- Set up tracing.
