@@ -126,3 +126,17 @@ Live loop: abs/plainlive3.sh (exp/plainlive3.sh, PID in cond/PLNL3.pid) runs N a
 under the system python) each cycle, from 11:24: plainlive2.sh was stopped in c6N (partial, 0 proofs, not imported);
 PREV_N cond/PLNL/c5N, PREV_L cond/PLL1. The ranker's use counts and proof steps change with production's outputs,
 so most L problems change each cycle: L cycles are full sweeps, as W's were.
+
+## lr2's features, and a leak fixed (11:39)
+
+* LambdaRank (lightgbm's LGBMRanker, the same features, cond/LR1.pkl, RKD1's problems): recall at 100 0.778 (binary
+  0.748), all used in the top 100 0.493 (0.455); at 400 0.938 against 0.935, 0.746 against 0.743. The sweeps use 400:
+  the binary model stays.
+* New features (FEATS2): the goal's proved siblings within 20 goals whose proof steps (deps) or kept output's
+  USEDAXIOMS hold the candidate, and the nearest such sibling's distance. A model's .json names its features and takes
+  its columns (lr1 keeps FEATS; the same order for lr1 through the new code on 3 goals).
+* **A leak in lr1's training rows:** for a solved goal (RKD1's), production's own kept output counted in the
+  candidate's use count, so a lemma production's proof had used scored higher. Now the goal's own output is left out
+  (unsolved goals have none, so lr1's frontier ranking is unchanged). The frontier problems' CV rows (PLW1, PLK1,
+  PLN1, PLZ8) had no such leak, and showed the same gains. cond/LR2.pkl is built with the fix; its CV compares lr1's
+  features with FEATS2.

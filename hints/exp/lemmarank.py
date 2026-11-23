@@ -3,9 +3,9 @@
   lemmarank.py data OUT.pkl DIR... [--trusted T]   (goal, candidate, used) rows with features, from the THM rows of
                                                    exp/condprove.py dirs: candidates are the problem's lemma_knn_<i>_<x>
                                                    axioms (rank i), used those in the proof's Axiom lines
-  lemmarank.py eval DATA.pkl                       5 folds grouped by the goal's original: recall at 50/100/400 of the
+  lemmarank.py eval DATA.pkl [FEATS]               5 folds grouped by the goal's original: recall at 50/100/400 of the
                                                    used kNN lemmas, the model's order against the similarity rank
-  lemmarank.py train DATA.pkl MODEL                LightGBM on all rows (MODEL.txt and MODEL.json: the feature names)
+  lemmarank.py train DATA.pkl MODEL [FEATS]        LightGBM on all rows (FEATS: v1 = lr1's, or a comma list) (MODEL.txt and MODEL.json: the feature names)
 
 As a module: Ranker(MODEL, trusted).select(goal, k, exclude) re-ranks LemmaIndex.select's top POOL (2,000) by the
 model (condprove.py --index learned:MODEL). Features are computed against one context (TRUSTED; production's hints
@@ -18,6 +18,10 @@ HW = '/project/hintwork'
 HDIR = f'{HW}/loops/UL/hints'
 FEATS = ['rank', 'lrank', 'sim', 'simrel', 'same_orig', 'sib_dist', 'same_key', 'len_x', 'len_g', 'len_ratio', 'nvar_x',
          'sym_jac', 'sym_shared', 'sym_xonly', 'uses', 'dep50', 'dep50w', 'pos_x', 'lhint', 'eq_goal']
+# (23 Nov 11:40) lr2's features: the goal's proved siblings within 20 goals whose proof steps (deps) or kept output's
+# USEDAXIOMS hold the candidate, and the nearest such sibling's distance. A model's .json names its features; rows
+# hold all of FEATS2, and a model takes its own columns (lr1: FEATS)
+FEATS2 = FEATS + ['sib_dep20', 'sib_used20', 'sib_near']
 SYM = re.compile(r'\b([a-z][A-Za-z0-9_]*)\b')
 VAR = re.compile(r'\bX\d+\b')
 
@@ -27,12 +31,18 @@ class Ctx:
     def __init__(self, trusted=None, parts=None):
         if parts:
             self.index, self.uses, self.deps, self.hdir = parts
+            solved = set(self.deps)
         else:
             T = sorted({l.split()[0] for l in open(trusted) if l.strip()})
             self.index = lemmas.LemmaIndex(T, subsets=True)
             self.uses = lemmas.lemma_uses([f'{HW}/loops/UL'])
             self.deps, _ = lemmas.proof_deps(HDIR, T)
             self.hdir = HDIR
+            solved = set(T)
+        self.sibs = collections.defaultdict(list)
+        for x in solved:
+            o, k = lemmas.split(x); self.sibs[o].append(int(k))
+        self._used_by = None; self._sibc = {}
         self.maxk = collections.Counter()
         for l in open(f'{HW}/sets/all'):
             o, k = lemmas.split(l.strip())
@@ -43,6 +53,42 @@ class Ctx:
         if f is None:
             f = self._form[x] = lemmas.lemma_form(x) or ''
         return f
+    def used_by(self):
+        """target -> the lemma goals its kept output's USEDAXIOMS names (the loop dir above the hints dir)"""
+        if self._used_by is None:
+            import glob, subprocess
+            d = os.path.dirname(self.hdir.rstrip('/'))
+            outs = glob.glob(os.path.join(d, 'r*', 'out'))
+            ub = collections.defaultdict(set)
+            if outs:
+                p = subprocess.run(['grep', '-r', '-m1', '^USEDAXIOMS'] + outs, capture_output=True, text=True)
+                for line in p.stdout.splitlines():
+                    path, _, rest = line.partition(':USEDAXIOMS')
+                    t = os.path.basename(path); o = t.rsplit('__goal_', 1)[0]
+                    for x in rest.split():
+                        m = re.match(r'lemma_knn_\d+_(\S+__goal_\d+)$', x)
+                        if m:
+                            ub[t].add(m.group(1)); continue
+                        m = re.match(r'lemma_goal_(\d+)$', x)
+                        if m:
+                            ub[t].add(f'{o}__goal_{m.group(1)}')
+            self._used_by = ub
+        return self._used_by
+    def sib_counts(self, g):
+        """(deps Counter, used Counter, nearest distance per goal) over G's proved siblings within 20 goals"""
+        v = self._sibc.get(g)
+        if v is None:
+            o, k = lemmas.split(g); k = int(k); ub = self.used_by()
+            cd, cu, near = collections.Counter(), collections.Counter(), {}
+            for j in self.sibs.get(o, ()):
+                if j != k and abs(j - k) <= 20:
+                    m = f'{o}__goal_{j}'
+                    for x in self.deps.get(m, ()):
+                        cd[x] += 1; near[x] = min(near.get(x, 99), abs(j - k))
+                    for x in ub.get(m, ()):
+                        cu[x] += 1; near[x] = min(near.get(x, 99), abs(j - k))
+            v = self._sibc[g] = (cd, cu, near)
+        return v
     def neighbours(self, g):
         v = self._nb.get(g)
         if v is None:
@@ -58,6 +104,10 @@ class Ctx:
         nb = self.neighbours(g)
         top = ix.sim(g, cands[0][1]) if cands else 0.0
         keyg = ix.info[g][0]
+        cd, cu, near = self.sib_counts(g)
+        # (23 Nov 11:50) a solved goal's own kept output is not counted in the use counts (it leaked the label into
+        # lr1's training rows of solved goals, RKD1); an unsolved goal has none
+        own = self.used_by().get(g, ())
         rows = []
         for r, x in cands:
             ox, kx = lemmas.split(x)
@@ -72,8 +122,8 @@ class Ctx:
                          abs(int(kx) - int(kg)) if ox == og else -1, float(ix.info.get(x, (None,))[0] == keyg),
                          len(fx), lg, len(fx) / max(1, lg), len(set(VAR.findall(fx))),
                          len(sx & sg) / max(1, len(sx | sg)), len(sx & sg), len(sx - sg),
-                         math.log1p(self.uses.get(x, 0)), len(d50), sum(d50), int(kx) / max(1, self.maxk[ox]),
-                         math.log1p(hb), float(fx == fg)])
+                         math.log1p(max(0, self.uses.get(x, 0) - (x in own))), len(d50), sum(d50), int(kx) / max(1, self.maxk[ox]),
+                         math.log1p(hb), float(fx == fg), cd.get(x, 0), cu.get(x, 0), near.get(x, 99)])
         return rows
 
 AX = re.compile(r'^Axiom \d+ \(([^)]*)\)')
@@ -100,7 +150,7 @@ def cmd_data(out, dirs, trusted):
             meta.append((d, g, len(cands), len(pos)))
             n += 1
         print(f'lemmarank: {d}: {n} problems', flush=True)
-    pickle.dump({'X': X, 'y': y, 'grp': grp, 'meta': meta, 'feats': FEATS}, open(out, 'wb'))
+    pickle.dump({'X': X, 'y': y, 'grp': grp, 'meta': meta, 'feats': FEATS2}, open(out, 'wb'))
     print(f'lemmarank: {len(meta)} problems, {len(y):,} rows, {sum(y):,} positives -> {out}')
 
 def model(n=None):
@@ -108,10 +158,16 @@ def model(n=None):
     return lgb.LGBMClassifier(n_estimators=n or 300, learning_rate=0.05, num_leaves=31, min_child_samples=20,
                               subsample=0.8, subsample_freq=1, colsample_bytree=0.8, n_jobs=2, verbose=-1)
 
-def cmd_eval(data):
+def cols_of(D, feats):
+    """(23 Nov) the columns of D's rows for FEATS ('v1': lr1's features; '' : all)"""
+    fs = FEATS if feats == 'v1' else (feats.split(',') if feats else D['feats'])
+    return [D['feats'].index(f) for f in fs], fs
+
+def cmd_eval(data, feats=''):
     import numpy as np
     D = pickle.load(open(data, 'rb'))
-    X = np.array(D['X']); y = np.array(D['y']); grp = np.array(D['grp']); meta = D['meta']
+    cols, fs = cols_of(D, feats)
+    X = np.array(D['X'])[:, cols]; y = np.array(D['y']); grp = np.array(D['grp']); meta = D['meta']
     orig = np.array([lemmas.split(meta[i][1])[0] for i in grp])
     uo = sorted(set(orig)); fold = {o: i % 5 for i, o in enumerate(uo)}
     fo = np.array([fold[o] for o in orig])
@@ -137,15 +193,16 @@ def cmd_eval(data):
             v = np.array(res[d][K])
             print(f'| {d} | {K} | {len(v)} | {v[:,0].mean():.3f} | {v[:,1].mean():.3f} | {v[:,2].mean():.3f} | {v[:,3].mean():.3f} |')
     m = model().fit(X, y)
-    imp = sorted(zip(m.booster_.feature_importance('gain'), D['feats']), reverse=True)
+    imp = sorted(zip(m.booster_.feature_importance('gain'), fs), reverse=True)
     print('gain:', ', '.join(f'{f} {g:.0f}' for g, f in imp))
 
-def cmd_train(data, out):
+def cmd_train(data, out, feats=''):
     import numpy as np
     D = pickle.load(open(data, 'rb'))
-    m = model().fit(np.array(D['X']), np.array(D['y']))
+    cols, fs = cols_of(D, feats)
+    m = model().fit(np.array(D['X'])[:, cols], np.array(D['y']))
     m.booster_.save_model(out + '.txt')
-    json.dump({'feats': D['feats']}, open(out + '.json', 'w'))
+    json.dump({'feats': fs}, open(out + '.json', 'w'))
     print(f'lemmarank: model {out}.txt from {len(D["y"]):,} rows')
 
 class Trees:
@@ -192,7 +249,8 @@ class Ranker:
     """condprove.py --index learned:MODEL; lightgbm if it is there, else Trees"""
     POOL = 2000
     def __init__(self, path, trusted=None, ctx=None):
-        assert json.load(open(path + '.json'))['feats'] == FEATS
+        fs = json.load(open(path + '.json'))['feats']
+        self.cols = [FEATS2.index(f) for f in fs]
         try:
             import lightgbm as lgb
             b = lgb.Booster(model_file=path + '.txt'); self.score = lambda X: b.predict(X, num_threads=2)
@@ -204,7 +262,7 @@ class Ranker:
         C = self.ctx.index.select(g, self.POOL, exclude=exclude)
         if len(C) <= k:
             return C
-        s = self.score(np.array(self.ctx.features(g, list(enumerate(C)))))
+        s = self.score(np.array(self.ctx.features(g, list(enumerate(C))))[:, self.cols])
         order = np.argsort(-s, kind='stable')[:k]
         return [C[i] for i in order]
 
@@ -216,6 +274,6 @@ if __name__ == '__main__':
             i = a.index('--trusted'); tr = a[i + 1]; a = a[:i] + a[i + 2:]
         cmd_data(a[1], a[2:], tr)
     elif a[0] == 'eval':
-        cmd_eval(a[1])
+        cmd_eval(a[1], a[2] if len(a) > 2 else '')
     elif a[0] == 'train':
-        cmd_train(a[1], a[2])
+        cmd_train(a[1], a[2], a[3] if len(a) > 3 else '')
