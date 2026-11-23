@@ -100,10 +100,11 @@ exp/trust.py trusts.
 * **Sweep queue:** abs/sweepq.sh, PID 3471143. One-off plain sweeps from cond/SWEEPQ.txt, 3 threads, proofs via
   loops/CI3. Now running HDG1: the 92 heads at 60 s with 1,600 kNN lemmas. HDW1 (400 kNN) proved 4 of them.
 
-**Not running: the head climber.** climb.py's last run (abs/clhl2.sh, exp32, loops/CLHL2) ran 19 Nov 15:39 to 20 Nov
-10:04, 69 proofs in 66 CPU h (1.04 per CPU h, 68 still trusted). It stopped 3 minutes before the 20 Nov quarantine
-and was never restarted; no decision to drop it is recorded. Production keeps the old climbs' hints as members
-sk@0 and sk@1:0, from climb records that stopped growing on 20 Nov.
+**The head climber: abs/clhl3.sh (exp66),** climb.py --live into loops/UL, record loops/CLHL3, started 23 Nov
+after a 3.5-day gap (its predecessor clhl2.sh stopped 20 Nov 10:04 at 1.04 proofs per CPU h and was not restarted).
+2 climbs at a time on the heads: 24 sketch runs of 5 s, then a 160 s final run with the sketch steps as hints.
+Launched with CPUS=28 while exp65 runs. Production also keeps the old climbs' hints as members sk@0 and sk@1:0.
+[notes/2026-11-23-climber-restart.md](notes/2026-11-23-climber-restart.md).
 
 **3. Not production:** exp65's two from-zero arms (loops/Q5A and loops/Q5B, 4 workers each, until about 22:55).
 
@@ -4978,6 +4979,8 @@ reproduced exactly).
 * exp12 stage B.
 
 ## 2az. Portfolios: complementary methods kept, not dropped (user's request, 18 Nov 17:00)
+
+*Notes: [notes/2026-11-23-climber-restart.md](notes/2026-11-23-climber-restart.md).*
 
 *Notes: [notes/production-history.md](notes/production-history.md).*
 

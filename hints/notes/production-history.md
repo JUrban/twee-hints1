@@ -1,6 +1,6 @@
 # Production history
 
-Generated 23 Nov 2026 18:12 by [exp/prodhistory.py](../exp/prodhistory.py) from the scripts abs/ul3.sh … ul75.sh (copies in [exp/prod/](../exp/prod/)) and their logs; rerun it after every production restart. What runs now, with the side loops, is in REPORT.md "Production now"; the totals over time are REPORT's summary table.
+Generated 23 Nov 2026 18:50 by [exp/prodhistory.py](../exp/prodhistory.py) from the scripts abs/ul3.sh … ul75.sh (copies in [exp/prod/](../exp/prod/)) and their logs; rerun it after every production restart. What runs now, with the side loops, is in REPORT.md "Production now"; the totals over time are REPORT's summary table.
 
 * **Written** is the newest dated entry of the script's header: when the version was written or first started.
 * **Last run** is the span of loops/ULNN.log (first and last write). A script that ran twice keeps only its second log (ul74: written 20 Nov 04:14, its log is the run of 21 Nov 16:50 to 22 Nov 07:12); some versions ran for minutes before a fix.
@@ -82,7 +82,7 @@ Generated 23 Nov 2026 18:12 by [exp/prodhistory.py](../exp/prodhistory.py) from 
 | [ul72](../exp/prod/ul72.sh) | 19 Nov 23:30 | 19 Nov 23:30 – 20 Nov 02:16 | 2.8 | J= (default 17); ≥11 in flight | twee-pg61 + `--pg-threshold 0.25 --ground-joining-branch-limit 100` | 47 | variants +m9f@0,m9h@0,m9i@0 |
 | [ul73](../exp/prod/ul73.sh) | 20 Nov 02:16 | 20 Nov 02:16 – 20 Nov 04:14 | 2.0 | J= (default 17); ≥11 in flight | twee-pg61 + `--pg-threshold 0.25 --ground-joining-branch-limit 100` | 23 | variants +m9e@0 −m9i@0 |
 | [ul74](../exp/prod/ul74.sh) | 20 Nov 04:14 | 21 Nov 16:50 – 22 Nov 07:12 | 14.4 | J= (default 17); ≥5 in flight | twee-pg61 + `--pg-threshold 0.25 --ground-joining-branch-limit 100` | 32 | +`--given-scan` `/project/hintwork/loops/GFAIL`; variants +m10f@0 −m9f@0 |
-| [ul75](../exp/prod/ul75.sh) | 22 Nov 07:13 | 22 Nov 07:13 – 23 Nov 18:12 | 35.0 | 6 (the running process) | twee-pg61 + `--pg-threshold 0.25 --ground-joining-branch-limit 100` | 128 | +`--head-class` |
+| [ul75](../exp/prod/ul75.sh) | 22 Nov 07:13 | 22 Nov 07:13 – 23 Nov 18:45 | 35.5 | 6 (the running process) | twee-pg61 + `--pg-threshold 0.25 --ground-joining-branch-limit 100` | 131 | +`--head-class` |
 
 ## Why each version (the header's newest entry, verbatim)
 
@@ -199,6 +199,8 @@ Each line is the script's first header entry. Which ones run now is in REPORT.md
 * [clh.sh](../exp/prod/side/clh.sh): Long climbs on the stuck heads (16 Nov 04:20). sets/heads_stuck = the 111 heads (each original's first unsolved goal); every one failed a short live climb (5 s sketches, 20 s final). Here: the live climber's config (FUD + one more axiom up steps + 2 random theory slots) with a 160 abstract s final run and 24 sketch runs, from snapshot ULsY (UL at 04:15), 4 workers, --chain. Baseline: a second shor …
 * [clhl.sh](../exp/prod/side/clhl.sh): Live head climber (16 Nov 06:40; --lemma-knn 30 from 07:47, as production, 2am): after abs/clh.sh (long climbs on the 111 heads: 12 of the first 65 proved, 1.4 per CPU hour), climb.py --live loops/UL --heads-only --reclimb-heads 3 climbs each original's first unsolved goal as it appears, and a climbed head again once its original has gained a proof, with clh.sh's config (160 s final run, 24 sketch …
 * [clhl2.sh](../exp/prod/side/clhl2.sh): (19 Nov 15:39) exp32: the live head climber measured again as a deep member (portfolio rule; the user's message of 15:20: dropped on 16 Nov before the rule existed, at 0.47-1.2 per CPU hour, above members still in the portfolio). abs/clhl.sh's setting with today's binary (twee-pg61 via TWEE_PG_ARGS), a fresh climb record (loops/CLHL2), 2 climbs at a time beside production (ul66 on 17 workers). not …
+* [clhl3.sh](../exp/prod/side/clhl3.sh): (23 Nov 18:44) exp66: the live head climber back beside production. abs/clhl2.sh (exp32) ran 19 Nov 15:39 to 20 Nov 10:04: 69 proofs in 66 CPU h (1.04 per CPU h), stopped 3 minutes before the quarantine and never restarted (an oversight; the user asked 23 Nov 18:20 whether any climbing runs). Same setting, a fresh record loops/CLHL3 (CLHL2's fill lemmas and assumptions predate the quarantine), --c …
+* [clhl3_start.sh](../exp/prod/side/clhl3_start.sh): (23 Nov 18:44) exp66's start: after exp65 (loops/Q5A.done and loops/Q5B.done, about 22:55) frees its 8 CPUs, start abs/clhl3.sh; its PID into loops/CLHL3.pid. Gives up at 24 Nov 02:00 (epoch) if exp65 has not ended.
 * [climbablate.sh](../exp/prod/side/climbablate.sh): (19 Nov 17:45) exp36: the climbs' sketch hints, ablated on the climber's own proofs (notes/2026-11-19-climb-ablation.md; user 17:20: "presumably they helped inside the climb"). 55 climber proofs; per proof the pool alone (P) and the sketch steps saved before it plus the pool (S), at the directory's final time, context as of the proof.
 
 **Prover9 side worker**

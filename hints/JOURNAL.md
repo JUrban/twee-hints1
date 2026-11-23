@@ -783,6 +783,11 @@ ul75 5, XFL 1. REPORT's totals table
 has the history (user, 20 Nov: "update the total numbers in the report etc every now and then").
 
 Next:
+00000000000000000000000000000000000000000000000000000. **exp66 (climber restart, [notes/2026-11-23-climber-restart.md](notes/2026-11-23-climber-restart.md)):** the live head
+   climber back beside production (abs/clhl3.sh, loops/CLHL3; clhl2.sh's setting, a fresh record). clhl2 made 69 proofs in
+   66 CPU h (1.04 per CPU h) and stopped 20 Nov 10:04, never restarted. The user: "you should remember to use the climber and
+   experiment with it as it's veroff's main weapon for solving open problems". Launched with CPUS=28 (more CPUs allowed for
+   a limited time); read per CPU h against plainlive4's H setting on the same heads.
 0000000000000000000000000000000000000000000000000000. **exp65 (redesigned 15:47, [notes/2026-11-23-plain-sizes.md](notes/2026-11-23-plain-sizes.md)):** larger kNN lists in the plain levels
    from zero. Q5A: P4B's DEEP exactly, on P4B's CPU set (also a cross-time replica of P4B); Q5B: plain levels plk400s40@0 and
    plk1600s130@0 in place of plk100s40@0 and plk400s130@0, on P4A's set. sets/half2, 4 workers, 6 hours (abs/exp65.sh), after
@@ -1372,6 +1377,7 @@ reports are written as the experiments run.
 | [notes/2026-11-23-lemma-ranker.md](notes/2026-11-23-lemma-ranker.md) | a learned ranker for the plain runs' kNN lemmas |
 | [notes/2026-11-23-plain-sizes.md](notes/2026-11-23-plain-sizes.md) | exp65: plain levels with 400 and 1,600 kNN lemmas from zero; the frontier sweep PLG1 |
 | [notes/production-history.md](notes/production-history.md) | Production's history: every ulNN version's options, members, workers, dates and reason, and the side loops (generated) |
+| [notes/2026-11-23-climber-restart.md](notes/2026-11-23-climber-restart.md) | exp66: the live head climber restarted beside production (stopped 20 Nov, 1.04 per CPU h then); per CPU h against the plain head runs |
 | [notes/2026-11-20-base-saturation.md](notes/2026-11-20-base-saturation.md) | exp39: base-theory runs as rule generators for the unsolved goals of the stronger theories |
 | [notes/2026-11-20-given-transfer.md](notes/2026-11-20-given-transfer.md) | exp38: unsolved goals that are variants of rules other runs derived and did not use (379 M in the given logs; transfer.py only matches proof steps); their ancestry as hints |
 | [notes/2026-11-19-from-zero-portfolio.md](notes/2026-11-19-from-zero-portfolio.md) | half1 from zero in 2 hours with today's deep portfolio (PGC), against PGA's 18,987 (exp27, from 07:18) |
