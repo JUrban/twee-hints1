@@ -30,5 +30,6 @@ Run 03:09:10-03:31:33. `modelcheck: 2504 models, 2442229 steps, 0 skipped, 0 fal
 * False goals (self-test): 0. Alarms (a false step with the same variables on both sides): 0.
 * False steps: 217 in 71 goals, the same set as the first audit's (all printed goal terms with different variables on the two sides).
 * Production's hints newer than the first audit (20 Nov 11:16): 378. None of them has a false step.
-* The audit reads production's own proofs (loops/UL); the other loops' proofs count only through exp/trust.py's
-  lemma closure.
+* The audit reads loops/UL's solved list and proofs. Production syncs every loop's proofs into it: all 48,372 goals
+  of the 22 Nov 21:39 trusted list are there (and 4 more that are not trusted), so the audit covers every trusted
+  unit goal.
