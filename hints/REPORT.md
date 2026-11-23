@@ -5618,7 +5618,7 @@ index is now rebuilt every 10 minutes, not 30 (about 1 s a rebuild).
   * kNN centrality (how many unsolved goals would take a goal among their 30 nearest lemmas) picks the biggest hubs
     only weakly (rank correlation 0.20 with reach).
 * **Retries by kNN drift (exp55, 22 Nov; [notes/2026-11-22-knn-drift.md](notes/2026-11-22-knn-drift.md)):
-  adopted.** loop.py `--knn-drift 5` counts, per failed goal, the new proofs that now rank among its 30 nearest kNN
+  adopted; its replica gained +12.** loop.py `--knn-drift 5` counts, per failed goal, the new proofs that now rank among its 30 nearest kNN
   lemmas since its last fresh run, sends goals with 5 or more back to the retry class, and orders that class by the
   count. half2 from zero, 4 workers each, 6 hours, side by side:
 
@@ -5634,6 +5634,26 @@ index is now rebuilt every 10 minutes, not 30 (about 1 s a rebuild).
   * The early −216 (30 minutes) is within noise: in exp60, P3B, identical to its control until minute 120, trailed
     it by 313-381 in the first 30 minutes, from throughput alone. exp60's arm P3C (`--knn-drift-after 60`) delays
     only the count's admissions (54 in P2Z's first hour), so it is in effect a replica of the gain.
+  * **The replica (exp60's P3C, 23 Nov; [notes/2026-11-22-floor-ratio-until.md](notes/2026-11-22-floor-ratio-until.md)): +12 at 6 hours** by wall time
+    (21,682 against 21,670), +54 at equal abstract work; one-arm goals 166 against 154. It led in the
+    middle (+390 at equal work at 3 hours), but exp60's identical twins were −305 apart at equal work at
+    2 hours. Over two replicas the 6-hour gain is small, positive or zero. The option stays: it costs no CPU and
+    was not worse at 6 hours in either replica.
+* **Class floors for the first two hours only (exp60, 23 Nov; [notes/2026-11-22-floor-ratio-until.md](notes/2026-11-22-floor-ratio-until.md)): not adopted.**
+  P3B (`--floor-ratio-until 120`) against P3A, half2 from zero, 4 workers each, 6 hours, side by side with P3C:
+
+  | min | 30 | 120 | 180 | 240 | 360 |
+  |---|---:|---:|---:|---:|---:|
+  | P3A | 15,203 | 19,520 | 20,510 | 21,092 | 21,670 |
+  | P3B | 14,838 | 19,061 | 20,028 | 20,952 | 21,532 |
+  | P3C | 14,981 | 19,299 | 20,809 | 21,233 | 21,682 |
+
+  * At 6 hours P3B −138 by wall time, −101 at equal abstract work; one-arm goals 159 against 297.
+    P3B ran P3A's rules until minute 120, and the twins were −459 apart by wall time then, so this is no gain
+    rather than a measured loss. `--floor-ratio 20` stays for the whole run.
+  * Side-by-side arms differ in throughput: P3A's runs took 1.02 CPU s per abstract second in the second hour,
+    the others' 1.13-1.16, because three loops shared one socket. Since 22:37 each arm gets 14 whole cores, 7 per
+    socket (abs/or_test3.sh's CPUSET), and arms are also compared at equal abstract work (exp/abscurve.py).
 
 ## 2ba. Soundness: the Prover9 negation bug, re-verification, and a model audit (20 Nov)
 

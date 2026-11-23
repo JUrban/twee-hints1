@@ -804,6 +804,10 @@ Next:
    New A/Bs: abs/or_test3.sh with CPUSET per arm (exp/or_test3.sh); Z9 pinned to 0-20,28-48. Production keeps
    21-27,49-55 until its next restart (the set is lost then; pin it again).
    180 min: P3A 20,510, P3B 20,028, P3C 20,809 by wall; at equal abstract work P3B −259, P3C +528.
+   **Result (done 02:36:26, read 02:39): 360 min P3A 21,670, P3B 21,532 (−138; −101 at equal work, P3A's 340), P3C 21,682 (+12; +54).
+   P3B not adopted: the twins were −305 apart at equal work at 120, more than the end gap. P3C: exp55's
+   +204 does not replicate (one-arm 166 against 154); +390 at equal work at 180. `--knn-drift 5` kept,
+   lower claim. The 4-hour reading was lost: its waiter took a bare clock time, which after midnight is the evening.**
 000000000000000000000000000000000000000. **exp59 (14:39, [notes/2026-11-22-hub-roots.md](notes/2026-11-22-hub-roots.md)):** 4,355 goals only
    production has (not Z7, not Z8); 2,082 fell at production's 5 s L0. exp/hubroots.py: 502 roots (first proof uses
    no other such goal), a few with reach 1,200-1,980 (aK2rev 349, Kproperties_1 314, aKperms_1 342, ...); the top

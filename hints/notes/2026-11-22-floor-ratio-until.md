@@ -101,3 +101,27 @@ second: P3A 1.04, P3B 1.11, P3C 1.09 (before them 1.02 against 1.13-1.16): close
   5.8 (2.2), P3B 10.3 (1.1), P3C 7.7 (2.6), production 11.2 (1.1). P3B has about 6 processes, so other users' work,
   which the sandbox does not show, runs on its cores. The sets remove our own loops' socket imbalance, not other
   users'. Equal abstract work stays the main reading.
+
+## Result at 6 hours (exp60 done 02:36:26; read 02:38)
+
+| minute | P3A | P3B | P3C | P3B − P3A wall | P3C − P3A wall | P3B − P3A equal work | P3C − P3A equal work |
+|---:|---:|---:|---:|---:|---:|---:|---:|
+| 30 | 15,203 | 14,838 | 14,981 | −365 | −222 |  |  |
+| 60 | 17,541 | 17,196 | 17,312 | −345 | −229 |  |  |
+| 120 | 19,520 | 19,061 | 19,299 | −459 | −221 | −305 (P3A's 120) | +96 |
+| 180 | 20,510 | 20,028 | 20,809 | −482 | +299 | −340 (P3A's 180) | +390 |
+| 240 | 21,092 | 20,952 | 21,233 | −140 | +141 | −46 (P3A's 240) | +181 |
+| 300 | 21,476 | 21,372 | 21,465 | −104 | −11 | −75 (P3A's 300) | +22 |
+| 360 | 21,670 | 21,532 | 21,682 | −138 | +12 | −101 (P3A's 340) | +54 |
+
+Equal abstract work: exp/abscurve.py, each arm read where its abstract worker seconds match P3A's at the minute named (P3A's runs took 0.96-1.10 CPU s per abstract s after the first hour, P3B's 1.02-1.16, P3C's 1.01-1.13). The last equal-work point is P3A's 340, since the others reach it only at 349-352 wall minutes.
+
+* P3B against P3A at 360 min (exp/armdiff.py): P3B-only 159, P3A-only 297, union 21,829 (+159 over P3A).
+* P3C against P3A at 360 min (exp/armdiff.py): P3C-only 166, P3A-only 154, union 21,836 (+166 over P3A).
+
+**P3B (`--floor-ratio-until 120`): not adopted.** At the end −138 by wall time and −101 at equal work; one-arm goals 159 against P3A's 297. But P3B was P3A's twin until minute 120, and the twins were then −459 apart by wall time and −305 at equal work, more than the end gap. So this reads as no gain, not as a measured loss. `--floor-ratio 20` stays on for the whole run.
+
+**P3C (`--knn-drift 5 --knn-drift-after 60`, in effect a replica of exp55's drift arm): the 6-hour gain does not replicate.** +12 by wall time and +54 at equal work at the end, below the +200 rule; one-arm goals 166 against 154 (exp55: 297 against 93). The lead in the middle, at equal work +390 at P3A's 180 minutes and +181 at 240, is about the size of the twins' gap at 120 (−305), so it is weak evidence too. Over the two replicas the end gains by wall time are +204 and +12.
+
+**Decision: `--knn-drift 5` stays in solve_new.sh, with a lower claim.** Neither replica is worse at 6 hours (both trailed by about 220 by wall time in the first 30 minutes); the effect at 6 hours is small, positive or zero, not the +200 its adoption rested on. It costs no CPU (the same workers, a different order). Z9 runs with it. The A/A twins show that half2 arms with 4 workers each differ by about 300-450 at 2 hours, by wall time and at equal work alike, so mid-run readings of single pairs decide nothing.
+
