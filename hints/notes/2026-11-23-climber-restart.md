@@ -423,3 +423,26 @@ the sign test gives p = 0.0625 one-sided (0.125 two-sided): suggestive, not sett
 point the same way. exp73 builds on it as a production member, measured there by its own yield. CLB67's proofs of
 23:00-23:08 (mbol_lem1 391, mbol_com 71, mbol_to_nil3 623) reached production at 23:40; exp/exp67merge.sh now merges
 the arms and the controls every 10 minutes until they end.
+
+## exp70 early, and exp74: long plain runs on the cluster's heads (23:49)
+
+exp70 so far: gaps proved per gap tried, K70F (30 s fills) 21 of 54 (39%), K70R (3 s) 29 of 73 (40%), CLK69 (3 s) 93
+of 219 (42%). Ten times the fill time proves no larger share: these gaps depend on the assumption, as the key goals do.
+
+The cluster's way in is each of its 7 originals' first unsolved goal, all earlier goals proved
+(sets/clusterheads74, exp/sets/clusterheads74):
+
+| head | unsolved goals in its original | production runs | longest single run, s |
+|---|---:|---:|---:|
+| Ka_eq_aK3 419 | 32 | 128 | 60 |
+| Kproperties_1 326 | 3 | 56 | 77 |
+| TLRproperties_2 367 | 10 | 70 | 124 |
+| aK2_eq_aK3_1243b 476 | 77 | 119 | 96 |
+| aKperms_1 355 | 11 | 66 | 88 |
+| nil3_2K 383 | 13 | 70 | 100 |
+| nil4_19K 394 | 20 | 86 | 141 |
+
+(production's results.tsv rows, round 5; a resumed run's row is its increment, and the cascade stops at 320 abstract
+s.) exp74 (abs/exp74.sh, exp/exp74.sh, bash 3758318, 23:52): one plain run of 1200 abstract s per head, H's lemma
+lists (100+30 siblings, 400 kNN), 2 threads, through condprove.py into cond/LCH74; proofs to loops/CI3 and loops/UL.
+A problem (aK2_eq_aK3_1243b 476) has 129 lemma_goal and 400 lemma_knn axioms.

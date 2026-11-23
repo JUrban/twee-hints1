@@ -783,6 +783,10 @@ ul75 5, XFL 1. REPORT's totals table
 has the history (user, 20 Nov: "update the total numbers in the report etc every now and then").
 
 Next:
+0000000000000000000000000000000000000000000000000000000000000. **exp74 (long plain runs on the cluster heads, [notes/2026-11-23-climber-restart.md](notes/2026-11-23-climber-restart.md), "exp74"):**
+   exp70 so far: 30 s fills prove 39% of the gaps they try, 3 s fills 40% (CLK69 42%): fill time is not the limit. The 7
+   cluster originals' first heads (166 unsolved goals behind them) never had more than production's 320 s cascade. One plain
+   1200 s run each, H's lemma lists, 2 threads (exp/exp74.sh, 23:52).
 000000000000000000000000000000000000000000000000000000000000. **exp73 (sk with long lemma lists, [notes/2026-11-23-tail-allocation.md](notes/2026-11-23-tail-allocation.md), "exp73"):**
    loop.py members skkNsM; **ul78** (23:43) adds skk400s30@1:0: production's top member sk@1:0 (2 of ul76's 5 proofs, 60% of
    its CPU) with exp67 arm B's 30 siblings and 400 kNN in place of 6 and 30. Explored and ordered by live yield.
