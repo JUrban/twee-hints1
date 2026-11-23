@@ -302,3 +302,11 @@ The 29 plain proofs of PLN1 and PLN2, by their proofs' Axiom lines, against prod
 ranked 30 or beyond; **29 of 29 used at least one of these**. Production's variants widen one of these at a
 time (s40@0, s200@0, k100@0, k200s12@0, ...), always with the original's hint pool. The plain runs widen all at
 once and have no hints: the hint bed separates the two.
+
+## Two settings (armed 07:48)
+
+PLW1 so far: 14 proofs in its first 1,541 goals, 11 of them not among PLN2's. The settings
+complement each other, so the live loop runs both: abs/plainlive2.sh (exp/plainlive2.sh) runs N (30+10 siblings,
+100 kNN) and W (100+30, 400 kNN) each cycle, each with its own `--prev` chain (cond/PLNL/c<k>N, c<k>W). Starter
+abs/plainlive2_start.sh (PID in cond/PLNL2.starter): after PLW1's import it stops plainlive.sh (cond/PLNL.stop, after its
+cycle) and starts plainlive2.sh with PREV_N its last cycle and PREV_W cond/PLW1.
