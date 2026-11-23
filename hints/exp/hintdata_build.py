@@ -163,15 +163,16 @@ RP_FAMILIES = [('production', ['UL', 'XFL', 'GML', 'STEPJ', 'SW20', 'ROOTS',
 RP_MAX = 9_900_000          # bytes of one .tar.xz
 RP_RAW = 120_000_000        # tar bytes per first try (xz -6 makes proofs about 16 times smaller)
 
-def rp_tarxz(names, dst):
-    """deterministic .tar.xz of loops/<dir>/proofs/<goal> as <dir>/<goal>.proof (names sorted, mtime 0, no owners)"""
+def rp_tarxz(names, dst, root=None):
+    """deterministic .tar.xz of ROOT/<dir>/proofs/<goal> as <dir>/<goal>.proof (names sorted, mtime 0, no owners);
+    ROOT is loops/ by default, hintwork itself for the cond/ families"""
     tmp, lst = dst + '.tmp', dst + '.lst'
     os.makedirs(os.path.dirname(dst), exist_ok=True)
     with open(lst, 'w') as f:
         f.writelines(n + '\n' for n in sorted(names))
     subprocess.run(['bash', '-c', 'tar -C "$1" --sort=name --mtime=@0 --owner=0 --group=0 --numeric-owner --no-recursion '
                     '--transform "s,/proofs/\\([^/]*\\)\\$,/\\1.proof," -T "$3" -cf - | nice -n 10 xz -T1 -6 > "$2"', '-',
-                    os.path.join(HW, 'loops'), tmp, lst], check=True)
+                    root or os.path.join(HW, 'loops'), tmp, lst], check=True)
     os.unlink(lst)
     return tmp
 
@@ -183,8 +184,12 @@ def main_realproofs():
     only = [a.split('=', 1)[1] for a in sys.argv if a.startswith('--family=')]
     # (22 Nov 15:32) --skip=F,G: leave out families still being written (running arms); the index is still rebuilt
     skip = {x for a in sys.argv if a.startswith('--skip=') for x in a.split('=', 1)[1].split(',')}
-    fam = {}
+    fam, froot = {}, {}
     for d in dirs:
+        # (23 Nov) a climber's dir (climb.py: climb.tsv) is left out: its proofs/<goal> are sketch runs' proofs, with
+        # unproved sibling goals as axioms (assume_*), not proofs of the goal; its real proofs are in climbs/
+        if os.path.exists(os.path.join(L, d.split('/')[0], 'climb.tsv')):
+            continue
         names = [os.path.join(d, 'proofs', n) for n in os.listdir(os.path.join(L, d, 'proofs')) if '__goal_' in n]
         if not names:
             continue
@@ -192,7 +197,17 @@ def main_realproofs():
         b = b[:-4] if b.endswith('_GML') else b
         f = next((k for k, pats in RP_FAMILIES if b in pats), b)
         if (not only or f in only) and f not in skip:
-            fam.setdefault(f, []).extend(names)
+            fam.setdefault(f, []).extend(names); froot[f] = L
+    # (23 Nov) the plain sweeps outside loops/ (exp/condprove.py OUT/proofs/<goal>): cond = the one-off sweeps,
+    # plainlive = the live plain loop's cycles (cond/PLNL/c*). Many are conditional (unproved sibling goals as lemma
+    # axioms); realproofs/cond_status.tsv.gz says which
+    C = os.path.join(HW, 'cond')
+    for p in sorted(glob.glob(os.path.join(C, '*/proofs')) + glob.glob(os.path.join(C, '*/*/proofs'))):
+        d = os.path.relpath(os.path.dirname(p), HW)
+        names = [os.path.join(d, 'proofs', n) for n in os.listdir(p) if '__goal_' in n]
+        f = 'plainlive' if d.startswith('cond/PLNL/') else 'cond'
+        if names and (not only or f in only) and f not in skip:
+            fam.setdefault(f, []).extend(names); froot[f] = HW
     os.makedirs(os.path.join(R, 'realproofs'), exist_ok=True)
     index = []
     def key(n):
@@ -202,7 +217,7 @@ def main_realproofs():
     for f in sorted(fam):
         names, bad = [], 0
         for n in sorted(fam[f], key=key):
-            with open(os.path.join(L, n), 'rb') as h:
+            with open(os.path.join(froot[f], n), 'rb') as h:
                 if b'RESULT: Theorem' in h.read()[-200:]:
                     names.append(n)
                 else:
@@ -210,7 +225,7 @@ def main_realproofs():
         # chunks of about RP_RAW tar bytes, halved until each .tar.xz is at most RP_MAX
         chunks, cur, size = [], [], 0
         for n in names:
-            b = 512 + (os.path.getsize(os.path.join(L, n)) + 511) // 512 * 512
+            b = 512 + (os.path.getsize(os.path.join(froot[f], n)) + 511) // 512 * 512
             if cur and size + b > RP_RAW:
                 chunks.append(cur); cur, size = [], 0
             cur.append(n); size += b
@@ -219,7 +234,7 @@ def main_realproofs():
         done, k = [], 0
         while chunks:
             c = chunks.pop(0)
-            tmp = rp_tarxz(c, os.path.join(R, 'realproofs', f, 'chunk.tar.xz'))
+            tmp = rp_tarxz(c, os.path.join(R, 'realproofs', f, 'chunk.tar.xz'), froot[f])
             if os.path.getsize(tmp) > RP_MAX and len(c) > 1:
                 os.unlink(tmp); chunks[:0] = [c[:len(c) // 2], c[len(c) // 2:]]
                 continue
@@ -238,11 +253,41 @@ def main_realproofs():
                 git('rm', '-q', '--', os.path.relpath(old, R))
         print(f, len(names), 'proofs in', k, 'parts', ('(%d files without a Theorem line left out)' % bad) if bad else '',
               flush=True)
-    if only:
-        return
     tmp = os.path.join(R, 'realproofs', 'index.tsv')
+    if only:
+        # (23 Nov) --family=F: the index keeps the other families' rows (read from the committed index) and gets
+        # F's rows anew
+        import gzip
+        old = []
+        with gzip.open(tmp + '.gz', 'rt') as h:
+            next(h)
+            old = [l for l in h if l.split('\t')[2].split('/')[1] not in only]
+        index = old + index
     with open(tmp, 'w') as h:
         h.write('goal\tdir\ttarball\n'); h.writelines(sorted(index))
+    if 'cond' in fam or 'plainlive' in fam:
+        # goal, sweep dir, unproved siblings used (lemma_goal_J numbers, '-' if none: an unconditional proof),
+        # proved siblings used, kNN lemmas used: the sweep's results.tsv row for each packed cond proof
+        st = []
+        for f in ('cond', 'plainlive'):
+            for d in sorted({n.rpartition('/proofs/')[0] for n in fam.get(f, [])}):
+                rows = {}
+                try:
+                    for l in open(os.path.join(HW, d, 'results.tsv')):
+                        w = l.rstrip('\n').split('\t')
+                        if len(w) >= 6 and w[1] == 'THM':
+                            rows[w[0]] = w
+                except OSError:
+                    pass
+                for n in fam[f]:
+                    if n.startswith(d + '/proofs/'):
+                        g = n.rpartition('/proofs/')[2]; w = rows.get(g)
+                        st.append('%s\t%s\t%s\t%s\t%s\n' % (g, d, w[3], w[4], w[5]) if w else '%s\t%s\t?\t?\t?\n' % (g, d))
+        sp = os.path.join(R, 'realproofs', 'cond_status.tsv')
+        with open(sp, 'w') as h:
+            h.write('goal\tdir\tunproved siblings used\tproved siblings used\tkNN lemmas used\n'); h.writelines(sorted(st))
+        gz(sp, sp + '.gz'); os.unlink(sp)
+        commit(['realproofs/cond_status.tsv.gz'], 'realproofs: cond_status (which plain-sweep proofs used unproved siblings)')
     gz(tmp, tmp + '.gz'); os.unlink(tmp)
     commit(['realproofs/index.tsv.gz', 'realproofs/README.md'], 'realproofs: index (goal, loop dir, tarball) and README')
 
