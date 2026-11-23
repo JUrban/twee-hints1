@@ -112,3 +112,23 @@ Batch 2 was replaced before it started (05:37): abs/stepbed2.sh (exp/stepbed2.sh
 * batch 2 on SIB30's problems (30 earlier siblings, 30 kNN, 5 s): S30KNN29 (control), S30GH `--goal-heuristic`,
   S30HG `--hint-goal`, S30BG2 `--backwards-goal 2`, S30FGL `--no-flatten-goal --flatten-goal-lightly`, S30KW0
   `--kbo-weight0`, S30FLIP `--flip-ordering`, S30GJB `--ground-joining-branch-limit 100`.
+
+## Walls, and where production's CPU goes (05:38)
+
+A wall here is an unsolved goal whose 30 nearest earlier siblings are all trusted: a run on it with its siblings is a
+real attempt, not a conditional one. 99 of the 3,412 unsolved goals are walls (sets/walls30, exp/sets/walls30);
+COND1 proved 1 of them (nil3_30__goal_473). The rest have unproved goals among their 30 earlier siblings.
+
+exp/wallcpu.py (loops/UL/r5/results.tsv: the last 30,000 rows; walls 99):
+
+| goals | runs | CPU h (share) | THM | THM per CPU h |
+|---|---:|---:|---:|---:|
+| unsolved, 6+ of 30 earlier unproved | 24,242 | 68.5 (75%) | 24 | 0.35 |
+| unsolved, 1-5 of 30 earlier unproved | 4,645 | 17.6 (19%) | 5 | 0.28 |
+| wall | 883 | 4.2 (5%) | 0 | 0.00 |
+| trusted at the list's time | 230 | 0.6 (1%) | 14 | 22.21 |
+
+Production's recent proofs come from goals deep in unproved stretches, at the same low rate as the rest, through the
+cross-original lemmas (kNN, transfer), not from the walls. Its 40-sibling variant (Vs40@0: 11,911 runs in loops/UL)
+already reaches the far parents where they are proved. So extending the chains at the walls is not where production
+stands to gain either.
