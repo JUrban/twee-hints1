@@ -758,7 +758,7 @@ exp54/56/57/59, profile; 23 commits in hintdata, parts at most 9.9 MB, realproof
 (20:29-20:58) `--realproofs --skip=P3A,P3B,P3C` added P2X 26,444 and P2Z 26,555 (with their side loops), exp61 9, smoke
 KDA/KDB, production to 369: 632,292 proofs in 27 families, realproofs/ 133 MB, every part under 10 MB. exp60 later.
 (23 Nov 02:39-03:08) `--realproofs --skip=Z9` added exp60's arms (P3A 26,645, P3B 26,633, P3C 26,761 with their side
-loops), production to 383, smoke with KDC and RST: 712,749 proofs in 30 families, realproofs/ 151 MB, every part under 10 MB.
+loops), production to 383, smoke with KDC (RST, started later, comes next time): 712,749 proofs in 30 families, realproofs/ 151 MB, every part under 10 MB.
 
 **Totals (22 Nov 21:39, all trusted, trust.py -j 2 --exposed loops/UNSOUND/exposed.txt, loops/TRUSTNOW/t2139, run
 21:39-21:43): 48,372 of 51,784 solved (holdout 5,365 of 5,880), 3,412 unsolved.** 15 new since 18:02: gmlive4 9,
