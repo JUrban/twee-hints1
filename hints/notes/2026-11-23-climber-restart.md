@@ -332,3 +332,17 @@ fill premise was recorded: the 6 untrusted goals at t2300 (aK2_eq_aK3_s 489, 494
 nil3_23_32_to_28 572, nil3_23_32_to_30 549) are production sk@1 proofs with lemma_fill_N axioms, every one from
 CLHL2's true.tsv, or proofs that use those goals. Climbers started before the change (CLHL4, CLA67, CLB67, CC67,
 CC67B) still write none; exp70's arms do.
+
+### trust.py checks fill lemmas (23:17)
+
+* trust.py: each fill lemma is a node FILL:<dir>:<original>:<true label>, trusted when every premise of its
+  fillprem.tsv row is (true_k: the same dir's fill lemma k). A formula is trusted when any fill lemma with it is.
+  A climber's real proof that names true_k gets a record through its dir's fill nodes. A production goal in an
+  exposed original without a complete record gets one from its printed proof (loops/UL/proofs/<goal>): that proof's
+  axiom list, lemma_fill_N matched by formula (loop.py renumbers the fill lemmas at each refresh).
+* exp/fillcheck.py re-proves the fill lemmas behind the untrusted roots with their premises recorded: the formula as
+  the conjecture, the original's axioms and all its trusted goals as lemma axioms, the goal's hints, 60 abstract s.
+  On t2300's roots: 20 of 22 proved (aK2_eq_aK3_s 4, nil3_23_32_to_27 13, nil3_23_32_to_28 3), the
+  proved ones in 1.1-2.7 s; not proved: aK2_eq_aK3_s `m(X, k(X2, X3)) = rd(X, k(X3, X2))`; aK2_eq_aK3_s `m(rd(e, X), k(m(Yc1, Yc2), Yc0)) = rd(e, ld(k(m(Yc1, Yc2), Yc0), X))`.
+* loops/TRUSTNOW/t2314: 48558 solved: 43497 before T0, 5058 later with trusted records; 3 untrusted (0 without a record, 2 with an unresolved lemma name, 1 using an untrusted or unsolved lemma); 34 fill lemmas trusted
+* Untrusted: aK2_eq_aK3_s__goal_489, aK2_eq_aK3_s__goal_494, aK2_eq_aK3_s__goal_515 (two fill lemmas of aK2_eq_aK3_s not re-proved at 60 s; 494 uses 515).

@@ -788,6 +788,8 @@ Next:
    K70R: CLK69's setting (the round-2 control). -j 1 each, merged into loops/UL every 10 minutes (exp/exp70.sh, 23:04).
    climb.py now records each fill lemma's premises (fillprem.tsv, from twee's USEDAXIOMS), so trust.py can check fill
    lemmas: the 6 untrusted goals at t2300 are production sk@1 proofs with CLHL2's fill lemmas (or use those goals).
+   (23:14) trust.py checks fill lemmas (fill nodes from fillprem.tsv; production's lemma_fill_N matched by formula through
+   the printed proof); exp/fillcheck.py re-proved 20 of the 22 old fill lemmas behind them. t2314: 48,555 trusted, 3 untrusted.
 00000000000000000000000000000000000000000000000000000000. **exp69 (climb the assumptions, [notes/2026-11-23-climber-restart.md](notes/2026-11-23-climber-restart.md), "exp69"):**
    most climbed heads have a 5 s sketch proof from a single assumption, nearly always an unsolved goal X of another
    original. exp/keylemmas.py ranks the X by the unsolved targets they unlock: Kproperties_1 332 and nil4_19K 394 4 each,

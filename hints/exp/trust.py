@@ -166,6 +166,127 @@ def main():
                 add(w[0], d, [x for x in w[2].split(',') if x])
         for g, w in last.items():
             add(g, d, [x for x in w[2].split(',') if x])
+    # (23 Nov) fill lemmas (climb.py --fill: a gap of a sketch proved on its own, a true lemma of the original). Each
+    # is a node FILL:<dir>:<original>:<true label>, with a record from the dir's fillprem.tsv (written since 23 Nov
+    # 23:03: the lemma names the fill run's proofs used; true_k is another fill lemma of the same dir). A formula's
+    # node FORM:<original>:<formula> is trusted when any of its fill lemmas is. A climber's real proof names its fill
+    # lemmas true_k; production's lemma_fill_N (loop.py --climb-hints numbers the dirs' true.tsv rows per original,
+    # differently at each refresh) is matched by formula through the goal's printed proof, loops/UL/proofs/<goal>:
+    # that proof's axiom list is an alternative record of the goal (any proof from trusted premises will do).
+    def norm(f):
+        f = re.sub(r'^\s*!\s*\[[^\]]*\]\s*:\s*', '', f.strip().rstrip('.'))
+        if '=' not in f or '!=' in f:
+            return None
+        ren = {}
+        f = re.sub(r'\b[A-Z][A-Za-z0-9_]*\b', lambda m: ren.setdefault(m.group(0), f'V{len(ren)}'), f.replace(' ', ''))
+        l, r = f.split('=', 1)
+        ren2 = {}
+        g2 = re.sub(r'\bV\d+\b', lambda m: ren2.setdefault(m.group(0), f'W{len(ren2)}'), r + '=' + l)
+        return min(f, g2.replace('W', 'V'))
+    frec = {}                                   # FILL node -> deps (None: unresolved)
+    forms = collections.defaultdict(set)        # FORM node -> its FILL nodes
+    nfp = 0
+    for p in glob.glob(os.path.join(L, '*', 'true.tsv')):
+        d = p.split('/')[-2]
+        prem = {}
+        pp = os.path.join(L, d, 'fillprem.tsv')
+        if os.path.exists(pp):
+            for l in open(pp):
+                w = l.rstrip('\n').split('\t')
+                if len(w) >= 6:
+                    prem[(w[0], w[1])] = (w[3], [x for x in w[5].split(',') if x])
+        for l in open(p):
+            w = l.rstrip('\n').split('\t')
+            if len(w) < 3:
+                continue
+            node = f'FILL:{d}:{w[0]}:{w[1]}'
+            nf = norm(w[2])
+            if nf:
+                forms[f'FORM:{w[0]}:{nf}'].add(node)
+            if (w[0], w[1]) not in prem or node in frec:
+                continue
+            t, names = prem[(w[0], w[1])]
+            deps = set()
+            for x in names:
+                if re.fullmatch(r'true_\d+', x):
+                    deps.add(f'FILL:{d}:{w[0]}:{x}'); continue
+                r = resolve(t, d, x)
+                if r is None:
+                    deps = None; break
+                if r:
+                    deps.add(r)
+            frec[node] = deps; nfp += 1
+    # exp/fillcheck.py's re-proofs of old fill lemmas (no fillprem record): proved rows, premises from USEDAXIOMS
+    pc = os.path.join(L, 'TRUSTNOW', 'fillcheck.tsv')
+    for i, l in enumerate(open(pc) if os.path.exists(pc) else ()):
+        w = l.rstrip('\n').split('\t')
+        if len(w) < 6 or w[2] != '1':
+            continue
+        nf = norm(w[1])
+        if not nf:
+            continue
+        node = f'FILL:fillcheck:{w[0]}:{i}'
+        forms[f'FORM:{w[0]}:{nf}'].add(node)
+        deps = set()
+        for x in (x for x in w[3].split(',') if x):
+            r = resolve(w[5], 'UL', x)
+            if r is None:
+                deps = None; break
+            if r:
+                deps.add(r)
+        frec[node] = deps; nfp += 1
+    # the climbers' real proofs that used true_k: the record is unresolved (resolve() gives None for 'true'), so
+    # it is redone here with the dir's fill nodes, as an alternative record
+    alt = {}                                    # goal -> [deps of another record]; trusted when one is
+    for p in glob.glob(os.path.join(L, '*', 'used.tsv')):
+        d = p.split('/')[-2]
+        if not os.path.exists(os.path.join(L, d, 'fillprem.tsv')):
+            continue
+        own = {l.split('\t')[0] for l in open(os.path.join(L, d, 'solved.tsv')) if l.split('\t')[1:2] == ['1']}
+        last = {}
+        for l in open(p):
+            w = l.rstrip('\n').split('\t')
+            if len(w) >= 3 and w[0] in own and w[0] in S and same(d, w[0]):
+                last[w[0]] = w
+        for g, w in last.items():
+            deps = set()
+            for x in (x for x in w[2].split(',') if x):
+                if re.fullmatch(r'true_\d+', x):
+                    deps.add(f'FILL:{d}:{orig(g)}:{x}'); continue
+                r = resolve(g, d, x)
+                if r is None:
+                    deps = None; break
+                if r:
+                    deps.add(r)
+            if deps is not None:
+                alt.setdefault(g, []).append(deps)
+    ex_ = set()
+    if '--exposed' in sys.argv:
+        ex_ = {l.strip() for l in open(sys.argv[sys.argv.index('--exposed') + 1]) if l.strip()}
+    nalt = 0
+    for g in S:
+        if orig(g) not in ex_ or (g in rec and rec[g] is not None):
+            continue
+        pf = os.path.join(L, 'UL', 'proofs', g)
+        if not os.path.exists(pf):
+            continue
+        deps = set()
+        for m in re.finditer(r'^Axiom \d+ \(([^)]*)\): (.*)$', open(pf, errors='replace').read(), re.M):
+            x, f = m.group(1), m.group(2)
+            if re.fullmatch(r'lemma_fill_\d+', x):
+                nf = norm(f)
+                if not nf:
+                    deps = None; break
+                deps.add(f'FORM:{orig(g)}:{nf}'); continue
+            r = resolve(g, 'UL', x)
+            if r is None:
+                deps = None; break
+            if r:
+                deps.add(r)
+        if deps is not None:
+            alt.setdefault(g, []).append(deps); nalt += 1
+    print(f'fill lemmas: {sum(len(v) for v in forms.values())} in true.tsv files, {nfp} with a premise record; '
+          f'{nalt} exposed goals with a printed proof as an alternative record', flush=True)
     old = {g for g in S if os.path.getmtime(os.path.join(L, 'UL', 'hints', g)) < T0}
     trusted = set(old)
     if '--exposed' in sys.argv:
@@ -182,8 +303,16 @@ def main():
         changed = False
         for g in S - trusted:
             deps = rec.get(g)
-            if deps is not None and g in rec and deps <= trusted:
+            if (deps is not None and g in rec and deps <= trusted) or any(a_ <= trusted for a_ in alt.get(g, ())):
                 trusted.add(g); changed = True
+        for n_, deps in frec.items():
+            if n_ not in trusted and deps is not None and deps <= trusted:
+                trusted.add(n_); changed = True
+        for n_, fs in forms.items():
+            if n_ not in trusted and fs & trusted:
+                trusted.add(n_); changed = True
+    nfill = sum(1 for n_ in frec if n_ in trusted)
+    trusted &= S
     un = sorted(S - trusted)
     norec = sum(1 for g in un if g not in rec)
     unres = sum(1 for g in un if g in rec and rec[g] is None)
@@ -205,7 +334,7 @@ def main():
     open(out + '.roots', 'w').writelines(g + '\n' for g in un if g not in rec or rec[g] is None)
     print(f'{len(S)} solved: {len(old)} before T0, {len(trusted) - len(old)} later with trusted records; '
           f'{len(un)} untrusted ({norec} without a record, {unres} with an unresolved lemma name, '
-          f'{len(un) - norec - unres} using an untrusted or unsolved lemma)', flush=True)
+          f'{len(un) - norec - unres} using an untrusted or unsolved lemma); {nfill} fill lemmas trusted', flush=True)
 
 
 if __name__ == '__main__':
