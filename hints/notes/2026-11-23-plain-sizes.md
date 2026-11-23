@@ -136,3 +136,12 @@ Three of the four took 13-54 s, beyond the 5 s sweeps. With these proofs in prod
 | P4B (exp64, the same configuration as Q5A) | 15,303 | 17,602 | |
 
 Q5B by wall time: 30 min -129, 60 min +128; at equal work (the points above, in order): +191, +192. The replica: Q5A against P4B (same configuration, same CPU set, 6 hours apart) 30 min -110, 60 min -235: the spread between identical runs is as large as Q5B's lead so far.
+
+## HDG1: 1,600 kNN lemmas on the heads
+
+* HDG1 ran the 88 heads left after HDW1 (60 s, 100+30 siblings, 1,600 kNN lemmas; exp/sets/SWEEPQ.txt), ended 18:52.
+* **1 proof in 88** (aK1_nil3_b__goal_177, 40 s, 49 kNN lemmas used), 3.02 CPU h: 0.33 per CPU h. HDW1 with 400
+  lemmas: 4 in 92, 2.25 CPU h, 1.78 per CPU h. The 4 HDW1 proofs were not rerun (already trusted), so this is not a
+  paired test on them.
+* At 60 s on the heads, 1,600 lemmas cost a third more CPU (startup) and prove less. plainlive4's H setting keeps 400.
+  Merged into loops/UL through CI3.
