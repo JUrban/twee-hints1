@@ -787,6 +787,7 @@ Next:
    400+1,600 prove 46. The ranker design (--lemma-ranker-all) dropped. Frontier sweep PLG1 (1,600 kNN, W's siblings) from 15:45.
    (16:36) With siblings (exp/z9gap9.sh; the earlier pre-checks had none): P4B's plain levels 40, Q5B's 45 (+8 −3, union 48) on the 235 gap goals; exp65 stands.
    (16:36) twee-e63 `--lazy-lemmas` (lemma axioms enter by score, like SOS): startup 8.1 -> 1.2 s at 1,575 axioms, but factor 1 lost 17 proofs and factor 0.5 tied eager (40 and 40, +3 −3) at the same wall time: not used.
+   Started 23 16:55:36 (loops/EXP65.pids); loop.py Q5A 3439513, Q5B 3439516; ends about 22:55.
 000000000000000000000000000000000000000000000000000. **Lemma ranker (08:59, [notes/2026-11-23-lemma-ranker.md](notes/2026-11-23-lemma-ranker.md)):** the used kNN lemmas of plain
    proofs are spread evenly over ranks 0-400; a learned ranker could bring needed lemmas into the list. Data sweep
    RKD1 (abs/rkd1.sh): 800 solved goals near the frontier, 1,000 kNN lemmas, 5 s, 2 threads; then LightGBM, recall at

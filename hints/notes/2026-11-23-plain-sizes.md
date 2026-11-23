@@ -97,3 +97,7 @@ exp/z9gap9.sh: the 235 goals with the sibling pool from sets/all (each problem c
 | cond/ZQB2 | Q5B's plk1600s130 (100+30, 1,600) | 39 | 2082 |
 
 As pairs: P4B's levels 40, Q5B's 45 (+8 −3, union 48). Q5B's first level against P4B's: +14 −4 at 1.17 times the wall time; the second: +9 −6 at 2.08 times. Siblings against none at the same kNN size: 100 kNN +9 −3, 400 +4 −3, 1,600 +1 −2: siblings matter at 100 kNN lemmas and hardly beyond. exp65's design stands.
+
+## Started
+
+loops/EXP65.pids: Q5A 3439500 23 16:55:36; Q5B 3439502 23 16:55:36. loop.py PIDs: Q5A 3439513 (CPUs 7-13,35-41), Q5B 3439516 (CPUs 0-6,28-34); the DEEP strings in loops/EXP65.args. Crash watcher on these and production's processes. Readings at 60, 120, 240 and 360 minutes, and Q5A against P4B at the same minutes.
