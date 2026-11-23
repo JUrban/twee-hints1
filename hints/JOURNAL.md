@@ -775,6 +775,7 @@ Next:
    RKD1 (abs/rkd1.sh): 800 solved goals near the frontier, 1,000 kNN lemmas, 5 s, 2 threads; then LightGBM, recall at
    100/400 against similarity, and a frontier sweep with it if recall rises.
    First CV (09:04, 213 frontier proofs): recall of used kNN lemmas in the top 50 of 400-lists 0.18 -> 0.44 (PLW1), top 100 0.34 -> 0.63. Frontier test PLL1 armed (abs/lrab.sh): lr1 after RKD1, the context of cycle c5, control c5W.
+   **lr1 (09:59; 770 problems): in RKD1's 1,000-lists the top 400 by the model hold 0.94 of the used lemmas (similarity 0.78), all of them in 0.74 of the problems (0.52). PLL1 (lr1, W's sizes, context c5) started; control c5W.**
 00000000000000000000000000000000000000000000000000. **exp64 (07:10, [notes/2026-11-23-plain-level.md](notes/2026-11-23-plain-level.md)):** a plain level from zero: P4A (control) and P4B
    (DEEP with `plk100s40@0`, prior 3), sets/half2, 4 workers each, 6 hours, CPU sets as exp60's (abs/exp64.sh,
    abs/or_test3.sh). Starts 5 minutes after Z9 ends, in Z9C's place (loops/Z9C.skip). PLZ8 (Z8's context): 160 of 2,000,

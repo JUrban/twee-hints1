@@ -58,3 +58,31 @@ ranked by lr1 (condprove.py `--index learned:MODEL`: the similarity list's top 2
 unsolved goals in the context of the live loop's cycle c5 (cond/PLNL/c5.trusted). The control is that cycle's W run
 (c5W, the changed problems; the other goals failed under W with the same problem in an earlier cycle), in the same
 context. Then PLL1's proofs into loops/CI3 and loops/UL, and the queue restarts.
+
+## RKD1 and lr1 (read 09:59)
+
+RKD1 (08:59-09:55): 743 of 800 solved goals proved with 1,000 kNN lemmas. cond/LR1.pkl: 770 problems with a used kNN lemma, 567,430
+rows, 4,933 used (RKD1 and the frontier sweeps PLW1, PLK1, PLN1, PLN2, PLZ8). Grouped 5-fold CV (cond/LR1.eval):
+
+| dir | K | problems | recall, similarity | recall, model | all used in top K, similarity | all used, model |
+|---|---:|---:|---:|---:|---:|---:|
+| cond/RKD1 | 50 | 552 | 0.446 | 0.651 | 0.246 | 0.375 |
+| cond/RKD1 | 100 | 552 | 0.534 | 0.748 | 0.308 | 0.455 |
+| cond/RKD1 | 400 | 536 | 0.784 | 0.935 | 0.517 | 0.743 |
+| cond/PLW1 | 50 | 23 | 0.183 | 0.436 | 0.043 | 0.043 |
+| cond/PLW1 | 100 | 23 | 0.344 | 0.637 | 0.043 | 0.087 |
+| cond/PLK1 | 50 | 16 | 0.176 | 0.460 | 0.000 | 0.000 |
+| cond/PLK1 | 100 | 16 | 0.386 | 0.671 | 0.000 | 0.062 |
+| cond/PLN1 | 50 | 24 | 0.584 | 0.780 | 0.083 | 0.292 |
+| cond/PLN2 | 50 | 5 | 0.533 | 0.883 | 0.200 | 0.600 |
+| cond/PLZ8 | 50 | 150 | 0.665 | 0.843 | 0.273 | 0.440 |
+gain: rank 40331, simrel 29873, uses 23670, len_x 23214, len_ratio 19349, len_g 16405, pos_x 15864, lhint 15364, sim 13993, lrank 12370, dep50w 6374, sym_xonly 6020, nvar_x 4516, sym_jac 4271, dep50 4068, sib_dist 4011, same_key 2528, sym_shared 2054, eq_goal 634, same_orig 260
+
+On RKD1's 1,000-lists the model keeps 0.94 of the used lemmas in its top 400 (similarity 0.78), and all of a proof's used
+lemmas in 0.74 of the problems (0.52): with the same 400 lemmas twee would see the whole lemma set of half again as
+many proofs. The leading features are the similarity rank and score, the candidate's use count and its size.
+lr1 (models/lemmarank/lr1) is trained on all rows.
+
+PLL1 started 09:59 by abs/lrab2.sh (exp/lrab2.sh): lrab.sh's last steps without its wait for c5W's end (the context file
+cond/PLNL/c5.trusted is all PLL1 needs; the queue had ended, its other sweeps held). The control c5W runs at the same
+time in the same context.
