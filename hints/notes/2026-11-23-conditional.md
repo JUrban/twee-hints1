@@ -249,3 +249,15 @@ SIB30's problems (30 earlier siblings assumed, 30 kNN, 5 s) with one twee option
 
 exp/trust.py loops/TRUSTNOW/t0641 (-j 2, --exposed loops/UNSOUND/exposed.txt): **48,466 trusted, 0 untrusted; holdout
 5,393 of 5,880**. All 24 goals of loops/CI1 are trusted.
+
+## Plain live loop (started 06:55)
+
+The plain member runs beside production instead of in it (no restart of production): abs/plainlive.sh
+(exp/plainlive.sh), started by abs/plainlive_start.sh (exp/plainlive_start.sh, PID in cond/PLNL.pid) once PLN2 has
+ended and its proofs are imported (loops/CI2) and merged. Each cycle (at most one every 30 minutes, 3 threads):
+* the trusted context: the goals of loops/UL/solved.tsv (production's solved list; trust.py checks it later, as it
+  does production's own proofs; 0 untrusted at 06:41);
+* exp/condprove.py --proved, PLN1's setting, `--prev` the cycle before: only goals whose problem changed (a new
+  sibling or kNN lemma) are run, the rest are SAME rows;
+* exp/condimport.py into loops/CI2, then merge.py loops/UL loops/CI2; production's --sync takes the rows in.
+Log cond/PLNL/log, one line a cycle. Stop: touch cond/PLNL.stop (it ends after the cycle).

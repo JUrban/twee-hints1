@@ -768,6 +768,11 @@ ul75 5, XFL 1. REPORT's totals table
 has the history (user, 20 Nov: "update the total numbers in the report etc every now and then").
 
 Next:
+0000000000000000000000000000000000000000000000000. **Plain live loop (06:55, [notes/2026-11-23-conditional.md](notes/2026-11-23-conditional.md), "Plain live loop"):** PLN1's
+   plain sweep as a side loop of production: each cycle (30 min or more, 3 threads) takes loops/UL's solved goals as
+   context, reruns only goals whose problem changed (condprove.py --prev), imports the proofs into loops/CI2 and merges
+   them into loops/UL. abs/plainlive_start.sh (PID in cond/PLNL.pid) starts it after PLN2. Log cond/PLNL/log; stop with
+   cond/PLNL.stop.
 000000000000000000000000000000000000000000000000. **COND1 (05:00, [notes/2026-11-23-conditional.md](notes/2026-11-23-conditional.md)):** conditional proofs of the 3,412
    unsolved goals: each with its 10 nearest earlier siblings assumed (proved or not) and 30 kNN trusted lemmas, one
    plain 5 s twee run (exp/condprove.py, abs/cond1.sh, 6 threads, cond/COND1 outside loops/). Hard steps against
