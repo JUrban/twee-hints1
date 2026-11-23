@@ -152,7 +152,7 @@ RP_FAMILIES = [('production', ['UL', 'XFL', 'GML', 'STEPJ', 'SW20', 'ROOTS',
                                'CI1', 'CI2', 'CI3', 'CI4']),   # (23 Nov) the plain sweeps' proofs, merged into UL
                ('smoke', ['HCT', 'HCT2', 'KCT', 'KCT2', 'KCT3', 'QKC', 'QKT', 'QKN', 'RCT', 'RTT', 'YDT', 'YDT2', 'HTT',
                           'HTT2', 'GFT', 'KDS', 'LSM', 'LTD', 'PIS', 'FRS', 'FRT', 'KDA', 'KDB', 'KDC',
-                          'RST']),
+                          'RST', 'PLS2', 'PLR1']),   # (23 Nov) the plain and ranked-plain variants' smoke tests
                # (22 Nov 15:32) the experiments since 21 Nov 11:50, one family each
                ('profile', ['PRA', 'PRB', 'PRC', 'PRF']),
                ('exp54', ['LAA', 'LAB']),
