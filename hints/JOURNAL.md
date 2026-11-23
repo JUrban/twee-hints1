@@ -783,6 +783,7 @@ Next:
    (13:06) loop.py `--lemma-ranker-all`; exp65 now tests it (one change). Offline pre-check exp/z9gap.sh: 500 of Z9's gap goals in Z9's context, 30 kNN lemmas by similarity (cond/ZGS) or lr2 (cond/ZGR).
    (13:37) Pre-check at 30 lemmas on 235 held-out half2 gap goals: similarity 11, lr2h 6 (+0 −5), mixed 9 (+1 −3): similarity wins; exp65 (--lemma-ranker-all) not run. Next: the same at 100 lemmas.
    (13:37) The live loop's first lr2 cycle c8L (400 lemmas, the frontier): ran 3002, 4 proved, 4 merged into UL; lr1's c7L before it: ran 2982, 0.
+   (14:55) Half1 at 30 lemmas: similarity 13, lr2h1 8 (+0 −5). 100 lemmas on half2: similarity 20, lr2h 14 (+3 −9): the ranker loses at 30 and 100, and the list's size matters more than its order. Next: 200 and 400 (exp/z9gap6.sh), similarity against lr2h.
 00000000000000000000000000000000000000000000000000. **exp64 (07:10, [notes/2026-11-23-plain-level.md](notes/2026-11-23-plain-level.md)):** a plain level from zero: P4A (control) and P4B
    (DEEP with `plk100s40@0`, prior 3), sets/half2, 4 workers each, 6 hours, CPU sets as exp60's (abs/exp64.sh,
    abs/or_test3.sh). Starts 5 minutes after Z9 ends, in Z9C's place (loops/Z9C.skip). PLZ8 (Z8's context): 160 of 2,000,
@@ -791,6 +792,7 @@ Next:
    Started 10:52:03 (loops/EXP64.pids); loop.py P4A 3128645, P4B 3128644; ends about 16:52.
    1 h (11:53): P4A 17,562, P4B 17,602 (+40); at equal work −46. Plain runs 124, 25 proved.
    2 h (12:53): P4A 19,434, P4B 19,669 (+235); at equal work +85. Plain levels 50 of 353 runs proved.
+   4 h (14:55): P4A 21,146, P4B 21,547; at equal work +397. One-arm goals P4A 87, P4B 488 (the plain level proved 80 of P4B's itself); P4B ran the unfiltered member 227 times, P4A 939: the plain runs take goals Vunf would have run, and L0 gets the time.
 0000000000000000000000000000000000000000000000000. **Plain live loop (06:55, [notes/2026-11-23-conditional.md](notes/2026-11-23-conditional.md), "Plain live loop"):** PLN1's
    plain sweep as a side loop of production: each cycle (30 min or more, 3 threads) takes loops/UL's solved goals as
    context, reruns only goals whose problem changed (condprove.py --prev), imports the proofs into loops/CI2 and merges
