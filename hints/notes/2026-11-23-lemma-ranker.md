@@ -214,3 +214,7 @@ The Z9-gap pre-check had the same problem (25 of its 500 goals are lr2 training 
 have some): its lr2 arm was stopped at 44 goals; exp/z9gap2.sh runs lr2h on the 235 of the 500 in half2
 (exp/sets/z9gap500h2, cond/ZGH), compared with cond/ZGS on those. The live loop keeps lr2: its goals are unsolved,
 so none has a proof in the training data.
+
+The other half (13:13): lr2h1 (`train ... --exclude sets/half1`, the 350 half2 problems) for the 265 goals of the 500 in
+half1 (exp/sets/z9gap500h1, exp/z9gap3.sh, cond/ZGH1), started when cond/ZGS ends; with cond/ZGH every goal then has
+a ranker that has not seen its original, against cond/ZGS's similarity lists.
