@@ -143,20 +143,63 @@ def cmd_train(data, out):
     json.dump({'feats': D['feats']}, open(out + '.json', 'w'))
     print(f'lemmarank: model {out}.txt from {len(D["y"]):,} rows')
 
+class Trees:
+    """(23 Nov) LightGBM's text model evaluated with numpy (raw scores), for pythons without lightgbm (loop.py,
+    production); numeric splits only (x <= threshold goes left; no missing values in these features)"""
+    def __init__(self, path):
+        import numpy as np
+        self.trees = []
+        cur = None
+        for l in open(path):
+            l = l.strip()
+            if l.startswith('Tree='):
+                cur = {}; self.trees.append(cur)
+            elif cur is not None and '=' in l and not l.startswith('end of trees'):
+                k, v = l.split('=', 1)
+                if k in ('split_feature', 'left_child', 'right_child'):
+                    cur[k] = np.array([int(x) for x in v.split()], dtype=np.int64)
+                elif k in ('threshold', 'leaf_value'):
+                    cur[k] = np.array([float(x) for x in v.split()])
+                elif k == 'decision_type':
+                    assert all(int(x) & 1 == 0 for x in v.split()), 'categorical split'
+                elif k == 'num_leaves':
+                    cur[k] = int(v)
+            elif l.startswith('end of trees'):
+                break
+    def predict(self, X):
+        import numpy as np
+        X = np.asarray(X, dtype=float); out = np.zeros(len(X)); rows = np.arange(len(X))
+        for t in self.trees:
+            if t['num_leaves'] == 1:
+                out += t['leaf_value'][0]; continue
+            node = np.zeros(len(X), dtype=np.int64)
+            while True:
+                m = node >= 0
+                if not m.any():
+                    break
+                n = node[m]
+                left = X[rows[m], t['split_feature'][n]] <= t['threshold'][n]
+                node[m] = np.where(left, t['left_child'][n], t['right_child'][n])
+            out += t['leaf_value'][-node - 1]
+        return out
+
 class Ranker:
-    """condprove.py --index learned:MODEL"""
+    """condprove.py --index learned:MODEL; lightgbm if it is there, else Trees"""
     POOL = 2000
-    def __init__(self, path, trusted):
-        import lightgbm as lgb
-        self.b = lgb.Booster(model_file=path + '.txt')
+    def __init__(self, path, trusted=None, ctx=None):
         assert json.load(open(path + '.json'))['feats'] == FEATS
-        self.ctx = Ctx(trusted)
+        try:
+            import lightgbm as lgb
+            b = lgb.Booster(model_file=path + '.txt'); self.score = lambda X: b.predict(X, num_threads=2)
+        except ImportError:
+            t = Trees(path + '.txt'); self.score = t.predict
+        self.ctx = ctx or Ctx(trusted)
     def select(self, g, k, exclude=()):
         import numpy as np
         C = self.ctx.index.select(g, self.POOL, exclude=exclude)
         if len(C) <= k:
             return C
-        s = self.b.predict(np.array(self.ctx.features(g, list(enumerate(C)))), num_threads=2)
+        s = self.score(np.array(self.ctx.features(g, list(enumerate(C)))))
         order = np.argsort(-s, kind='stable')[:k]
         return [C[i] for i in order]
 

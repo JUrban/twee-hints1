@@ -101,3 +101,9 @@ already failed under W at least once (PLW1, c4W), so W's own proofs here are onl
 | nsmr_to_aa1__goal_891 | 24 | 5 | 586 |
 
 Every proof needs lemmas W's list (similarity top 400) does not hold: the ranker brought them in.
+
+exp/lemmarank.py now evaluates the model with numpy when lightgbm is missing (class Trees: the text model's trees,
+numeric splits): the same raw scores as lightgbm (max difference 0.0 on 2,000 rows of cond/LR1.pkl), 0.1 s for 2,000
+candidates, so condprove.py and loop.py run it under the system python3. Rerun of PLL1's 3 proofs that way
+(cond/LRSYS, 11:06): all 3 proved; their kNN lists are the same but for 2 lemmas, in a slightly different order (the use counts and
+proof steps come from production's current outputs, which grew since 09:59).
