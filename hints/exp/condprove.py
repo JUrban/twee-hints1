@@ -29,6 +29,9 @@ ONLY = opt('--only', ''); TWEE = '/project/bin/twee-pg61'
 AFTER = int(opt('--after', '0')); XARGS = opt('--args', '').split(); ALL = '--all' in a
 # --proved: siblings (earlier and --after later) only from TRUSTED, so every proof is a real one (no assumption)
 PROVED = '--proved' in a
+# --prev DIR (a sweep before this one): a goal whose problem text is the same as in DIR and failed there is not run
+# again (twee is deterministic); its row is written with status SAME
+PREV = opt('--prev', '')
 a = [x for x in a if x not in ('--all', '--proved')]
 OUT = os.path.abspath(a[0])
 assert not OUT.startswith('/project/hintwork/loops'), 'OUT must be outside loops/'
@@ -47,6 +50,9 @@ allg = collections.defaultdict(set)
 for x in G:
     if not PROVED or x in T:
         o, k = lemmas.split(x); allg[o].add(int(k))
+prevno = {}
+if PREV:
+    prevno = {l.split('\t')[0]: l.split('\t')[1] in ('NO', 'SAME') for l in open(f'{PREV}/results.tsv') if l.strip()}
 t_ = time.time()
 index = lemmas.LemmaIndex(sorted(T), subsets=True) if KNN else None
 print(f'condprove: {len(U)} unsolved goals to run ({len(done)} done), index {time.time()-t_:.0f}s', flush=True)
@@ -66,6 +72,8 @@ def one(g):
                 txt += f'fof(lemma_goal_{j},axiom,{f_}).\n'
     p = f'{OUT}/p/{g}.p'
     open(p, 'w').write(txt)
+    if PREV and prevno.get(g) and os.path.exists(f'{PREV}/p/{g}.p') and open(f'{PREV}/p/{g}.p').read() == txt:
+        return f'{g}\tSAME\t0.00\t-\t-\t0\n'
     t0 = time.time()
     r = subprocess.run([TWEE, p] + base + ['--quiet', '--no-proof'], capture_output=True, text=True, timeout=600)
     dt = time.time() - t0
