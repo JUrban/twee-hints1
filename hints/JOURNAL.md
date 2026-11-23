@@ -301,7 +301,8 @@ Each goal is one twee run on the goal's problem.
 
 ### 4.3 Production
 **Current production: REPORT.md, section "Production now"** (main loop, members, side loops, PIDs; kept current at every
-restart). Below: the history, newest first (it stops at ul63; ul64-ul75 are in the headers of abs/ul*.sh and section 8).
+restart). **Every version's options, members, workers, dates and reason, ul3 to now: [notes/production-history.md](notes/production-history.md)**
+(exp/prodhistory.py, from the scripts in exp/prod/; rerun after every restart). Below: the older prose history, newest first (it stops at ul63).
 * No side workers. Prover9 with chain hints (the P9C side worker, abs/p9c.sh and p9c4.sh, 16:46–19:38) is now the
   cascade's `p9` level.
 * `abs/ul63.sh` since 19 Nov 10:16:50 (UL63.log): ul62 plus k400@0, k200s12@0, hl@0 (loop.py 5fc6b48), m7t@0, m4b@0
@@ -1370,6 +1371,7 @@ reports are written as the experiments run.
 | [notes/2026-11-23-plain-level.md](notes/2026-11-23-plain-level.md) | exp64: a plain level (no hints, no model) from zero |
 | [notes/2026-11-23-lemma-ranker.md](notes/2026-11-23-lemma-ranker.md) | a learned ranker for the plain runs' kNN lemmas |
 | [notes/2026-11-23-plain-sizes.md](notes/2026-11-23-plain-sizes.md) | exp65: plain levels with 400 and 1,600 kNN lemmas from zero; the frontier sweep PLG1 |
+| [notes/production-history.md](notes/production-history.md) | Production's history: every ulNN version's options, members, workers, dates and reason, and the side loops (generated) |
 | [notes/2026-11-20-base-saturation.md](notes/2026-11-20-base-saturation.md) | exp39: base-theory runs as rule generators for the unsolved goals of the stronger theories |
 | [notes/2026-11-20-given-transfer.md](notes/2026-11-20-given-transfer.md) | exp38: unsolved goals that are variants of rules other runs derived and did not use (379 M in the given logs; transfer.py only matches proof steps); their ancestry as hints |
 | [notes/2026-11-19-from-zero-portfolio.md](notes/2026-11-19-from-zero-portfolio.md) | half1 from zero in 2 hours with today's deep portfolio (PGC), against PGA's 18,987 (exp27, from 07:18) |
