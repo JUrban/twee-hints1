@@ -475,6 +475,13 @@ class Loop:
             return self.run_p9(name, hints)
         a = self.a
         tag = name + (f'.v{variant}' if variant else '')   # tmp file names
+        # (23 Nov, --variants pl[kN][sM]) a plain run: no hints, no rule model, no PG, only the lemma axioms (kN kNN
+        # and sM sibling lemmas, as kNsM). Plain 5 s runs proved goals production's hinted members never did
+        # (notes/2026-11-23-conditional.md: COND1, the step bed's KNN100, PLN1)
+        plain_ = bool(var) and var.startswith('pl')
+        if plain_:
+            hints = []
+        var_ = var[2:] if plain_ else var
         T = budget if budget is not None else self.timeout(rnd)
         resume = a.resume if resume is None else resume
         path = os.path.join(PROB, name + '.p')
@@ -486,7 +493,7 @@ class Loop:
                 # similarity (notes/2026-11-16-knn-lemma-count.md: 6, 7 and 5 of 150, 10 distinct)
                 # (19 Nov 09:30) kNsM: N kNN lemmas and M sibling lemmas (either part may be left out: k100, s12)
                 ix_ = self.vix.get(var, self.lemma_index) if var in ('kp', 'kd') else self.lemma_index
-                m_ = re.fullmatch(r'(?:k(\d+))?(?:s(\d+))?', var or '') if var not in ('kp', 'kd') else None
+                m_ = re.fullmatch(r'(?:k(\d+))?(?:s(\d+))?', var_ or '') if var not in ('kp', 'kd') else None
                 kn_ = int(m_.group(1)) if m_ and m_.group(1) else a.lemma_knn
                 sm_ = int(m_.group(2)) if m_ and m_.group(2) else a.lemmas
                 txt, nl = lemmas.lemma_problem_knn(name, self.lemma_src, sm_, ix_, kn_, a.lemma_after)
@@ -622,7 +629,7 @@ class Loop:
             k = (self.p9_attempt(name, rnd) * max(1, a.p9_parallel) + variant + a.p9_order_offset) % a.p9_orders
             if k:
                 cmd += ['--precedence', ','.join(self.p9_precedence(orig_path, k))]
-        if self.model and var != 'nom':
+        if self.model and var != 'nom' and not plain_:
             m, v, gdir = self.model
             mm_ = re.fullmatch(r'm(\w+)', var or '')
             if mm_:
@@ -681,7 +688,7 @@ class Loop:
         t0 = time.time()
         try:
             env_ = None
-            if var in ('nopg', 'nom'):
+            if var in ('nopg', 'nom') or plain_:
                 # (--variants nopg/nom) no parental guidance: none in the arguments, and none from the twee-pg wrapper's
                 # TWEE_PG_ARGS (production's binary appends them); nom has no model, so PG would be idle anyway
                 import re as re_
@@ -1248,6 +1255,7 @@ class Loop:
             assert (nm in ('two', 'unf', 'sub', 'sj', 'pool', 'r2', 'nom', 'nopg', 'x', 'p9', 'kp', 'kd', 'hl', 'pw', 'sk')
                     or nm in self.fv
                     or (nm and re.fullmatch(r'(k\d+)?(s\d+)?', nm))
+                    or (nm and re.fullmatch(r'pl(k\d+)?(s\d+)?', nm))
                     or (nm and re.fullmatch(r'm\w+', nm) and a.model_fixed
                         and os.path.exists(os.path.join(os.path.dirname(a.model_fixed.split(',')[0]), 'r' + nm + '.bin')))), v
             # NAME@B: level B's budget and hints, after level B; NAME@B:F (19 Nov 16:30): level B's budget after level F

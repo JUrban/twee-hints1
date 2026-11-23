@@ -167,3 +167,22 @@ beyond. exp/condimport.py (06:02) reran it into loops/CI1 the way loop.py runs i
 RESULT and USEDAXIOMS, 73 canonical hints, solved.tsv row, the printed proof. merge.py loops/UL loops/CI1 takes such dirs into
 production (UL/hints, UL/out for trust.py, a solved.tsv row that the live loop's --sync reads). The merge waits
 for PLN1's end, all its proofs at once.
+
+## loop.py's plain variant (06:14)
+
+loop.py `--variants pl[kN][sM]` (this commit): a plain run, no hints, no rule model, no PG (as nopg), with kN kNN and
+sM sibling lemmas as for kNsM. Smoke abs/plsmoke2.sh (exp/plsmoke2.sh; abs/plsmoke.sh first: without a prior the
+level never came up in 3 minutes): solve_new.sh on sets/plsmoke (3 goals) in loops/ULT.ctx, 1 worker, 0.05 h,
+`--variants plk100s40@0,unf@0 --priors Vplk100s40@0=9,...`; loops/PLS2, no traceback.
+
+| goal | level | result | wall s |
+|---|---|---|---:|
+| aK2_eq_aK3_a__goal_520 | L0 | NO | 10.22 |
+| aK2_eq_aK3_a__goal_616 | L0 | NO | 7.52 |
+| nil3_32__goal_490 | L0 | NO | 5.79 |
+| aK2_eq_aK3_a__goal_520 | Vplk100s40@0 | THM | 1.26 |
+| aK2_eq_aK3_a__goal_616 | Vplk100s40@0 | NO | 3.53 |
+| nil3_32__goal_490 | Vplk100s40@0 | NO | 2.78 |
+
+The plain level proves PLN1's goal inside the loop where production's L0 does not, and its failed runs take a third of
+L0's wall time (no model, no hints to match).
