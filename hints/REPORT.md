@@ -4906,6 +4906,10 @@ reproduced exactly).
 
 ## 2az. Portfolios: complementary methods kept, not dropped (user's request, 18 Nov 17:00)
 
+*Notes: [notes/2026-11-23-conditional.md](notes/2026-11-23-conditional.md).*
+
+*Notes: [notes/2026-11-23-readiness.md](notes/2026-11-23-readiness.md).*
+
 *Notes: [notes/2026-11-23-z9.md](notes/2026-11-23-z9.md).*
 
 *Notes: [notes/2026-11-22-frontier-orderings.md](notes/2026-11-22-frontier-orderings.md).*
@@ -5654,6 +5658,19 @@ index is now rebuilt every 10 minutes, not 30 (about 1 s a rebuild).
   * Side-by-side arms differ in throughput: P3A's runs took 1.02 CPU s per abstract second in the second hour,
     the others' 1.13-1.16, because three loops shared one socket. Since 22:37 each arm gets 14 whole cores, 7 per
     socket (abs/or_test3.sh's CPUSET), and arms are also compared at equal abstract work (exp/abscurve.py).
+* **Where the frontier is (COND1, 23 Nov; [notes/2026-11-23-conditional.md](notes/2026-11-23-conditional.md)): hard steps, no keystones.**
+  Each of the 3,412 unsolved goals got one plain 5 s twee run with its 10 nearest earlier siblings as axioms, proved or
+  not (they are steps of Prover9's proofs, so true), and 30 kNN lemmas of trusted goals (exp/condprove.py).
+  * 2,826 (83%) were not proved even so: hard steps. 585 were proved using unproved siblings (blocked), and 1 used
+    none (nil3_30__goal_473; loop.py in the trusted context does not reproduce it, so it is not entered).
+  * No single goal, once proved, frees more than 10 blocked goals (exp/condgraph.py, to a fixpoint): there are no
+    keystones to aim long runs at.
+  * AIM60k samples each Prover9 proof every 3 lines at first, then every 5, 8, 13, 21, 34 and 55 (2z). Every unsolved
+    goal is 8 or more proof lines after the previous goal, most 32 or more: the frontier is the long steps.
+* **Late queues (23 Nov; [notes/2026-11-23-readiness.md](notes/2026-11-23-readiness.md)): no change.** In Z8, a late proof that used a lemma proved
+  after the goal's last failure came 3/8/16/30/50 minutes after that lemma (deciles 10/25/50/75/90), at the first run
+  after it. First runs came later (6/16/40/98/147 minutes after their latest lemma), but no kNN signal orders them better
+  than the gap order (AUC 0.730; the best kNN one 0.658).
 
 ## 2ba. Soundness: the Prover9 negation bug, re-verification, and a model audit (20 Nov)
 
@@ -5806,6 +5823,18 @@ rounds of 30 s or more, but about 40% overhead for 8 s rounds.
 | long-run-scalability, mature-back-index-cpu, adaptive-back-index-crossover (indexing side) | paramodulation and back-demodulation indexes that stay cheap as the clause set grows | ported in twee's terms (2v): a fingerprint index for overlap partners (exact, 1.8× on long runs) and a backward-demodulation filter for interreduction. |
 
 ## 3. Assessment
+
+*23 Nov, 05:27 (`date` checked). The 02:48 assessment follows it.*
+
+* **Z9 at 2 hours: 39,248 by wall time against Z8's 38,169; at equal abstract work 37,992 against 38,027.** The wall lead
+  is the machine (Z9's runs take 0.92-0.97 CPU s per abstract second on CPUs of their own, Z8's 1.01-1.09); at equal
+  work the two are level. Z9 runs to about 10:46, then continues as Z9C for 16 more hours.
+* **The frontier is hard steps, not blocked chains (COND1, 2az).** 83% of the 3,412 unsolved goals are not proved
+  even with their earlier siblings assumed, and no goal frees more than 10 others. The unsolved goals are the long
+  steps of Prover9's proofs (32 or more proof lines from the previous goal, for most). What is left needs stronger
+  proving of one step, not a better order; production's rate (about 0.5 per CPU hour) is what that costs now.
+* **The late queue is not the bottleneck either (2az).** Late retries come at the first run after their lemma; the
+  order of first runs is already the best signal measured.
 
 *23 Nov, 02:48 (`date` checked). The 22 Nov 20:36 assessment follows it.*
 
@@ -6095,6 +6124,15 @@ rounds of 30 s or more, but about 40% overhead for 8 s rounds.
     time.
 
 ## 4. Next steps
+
+*23 Nov, 05:27 (2az, 3):*
+
+* **Z9's readings** at 4, 6 and 8 hours, then **Z9C** (24 hours in all) at 12, 16, 20 and 24: how far the system
+  from zero gets towards production's 48,372 by itself.
+* **One-step strength on the hard steps.** COND1's hard goals with their siblings assumed are a clean test bed for
+  anything that should prove long steps (longer runs, other hint and lemma choices): a proof there is a conditional
+  one, but what proves them would carry over to production's real attempts.
+* **Open:** `--proof-in-search` (the user's decision); the late A/B's replica pair.
 
 *23 Nov, 02:48 (2az, 3):*
 
