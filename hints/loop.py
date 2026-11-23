@@ -1098,6 +1098,7 @@ class Loop:
                     new['plr'] = lemmarank.Ranker(a.lemma_ranker, ctx=ctx)
                     if a.lemma_ranker_all:
                         new['plra'] = copy.copy(new['plr']); new['plra'].POOL = a.lemma_ranker_pool
+                        new['plra'].MIX = a.lemma_ranker_mix
                 self.vix = dict(self.vix, **new)
                 print(f'  cascade: variant lemma indexes {sorted(new)} built in {time.time() - t_:.0f}s'
                       + (f' ({len(new["kp"].uses)} goals with uses)' if 'kp' in new else '')
@@ -2450,6 +2451,8 @@ def make_parser():
                     '(without .txt/.json); the kNN lemmas re-ranked by it (notes/2026-11-23-lemma-ranker.md)')
     ap.add_argument('--lemma-ranker-all', action='store_true', help='(23 Nov) with --lemma-ranker: every run\'s kNN lemmas '
                     '(all levels and kN variants; not kp, kd or the cut candidates) from the ranker once it is built')
+    ap.add_argument('--lemma-ranker-mix', type=int, default=0, help='(23 Nov) --lemma-ranker-all: the similarity '
+                    'list\'s top N first, then the ranker\'s best of the rest (lemmarank.Ranker.MIX)')
     ap.add_argument('--lemma-ranker-pool', type=int, default=1000, help='(23 Nov) --lemma-ranker-all: the ranker re-ranks '
                     'the similarity list\'s top N (1,000: the training lists\' length, 0.13 s per goal; plr keeps 2,000, 0.27 s)')
     ap.add_argument('--lemma-pop', type=float, default=0.0,

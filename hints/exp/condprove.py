@@ -85,6 +85,7 @@ elif IX.startswith('learned:') and index:
     else:
         index = lemmarank.Ranker(IX.split(':', 1)[1], TR)
     index.POOL = int(opt('--rank-pool', '2000'))   # (23 Nov) loop.py --lemma-ranker-all's pool: 1,000
+    index.MIX = int(opt('--rank-mix', '0'))        # (23 Nov) the similarity list's top N first, then the model's
 elif IX:
     sys.exit(f'--index {IX}: kd, kp or learned:MODEL')
 print(f'condprove: {len(U)} unsolved goals to run ({len(done)} done), index {time.time()-t_:.0f}s', flush=True)

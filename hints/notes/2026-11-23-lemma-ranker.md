@@ -227,3 +227,17 @@ per CPU hour instead of a switch for every run. Smoke test exp/rksmoke.sh (loops
 loops/ULT.ctx, 1 worker, 0.05 h, rk30@0 first): the ranker built in 24 s, 6 Vrk30@0 runs with hints, no errors.
 For production (its goals are unsolved, so lr2 has seen no proof of them) after the pre-checks: rk30@0 and
 plrk400s130@0 as explored members.
+
+## Why the ranker's 30 can lose: clusters (13:22)
+
+The first 127 paired goals of the pre-check: similarity 8 proofs, lr2h 4. In the goals only similarity proved, its
+proofs used 3, 15 and 18 of their 30 kNN lemmas, and lr2h's 30 held 1, 6 and 3 of those: similarity gives twee a
+cluster of near-identical lemmas that work together, while the model scores each lemma alone, trained on 1,000-lemma
+problems where a proof takes a few of many substitutes. Recall of used lemmas there does not say a 30-lemma set
+suffices.
+
+A mixed list: the similarity list's top 15 first, then the model's best 15 of the rest (lemmarank.Ranker.MIX,
+condprove.py `--rank-mix`, loop.py `--lemma-ranker-mix`; checked on 2 goals: the head is similarity's top 15, the tail
+the model's order). Arm exp/z9gap4.sh: cond/ZGM2 (half2 goals, lr2h), then cond/ZGM1 (half1 goals, lr2h1), 1 thread.
+exp65 waits for the pre-check: if the ranked or mixed lists lose to similarity on these goals, its Q5B changes (a mixed
+list, or rk30@0 as a member after L0 instead of a switch for every run).

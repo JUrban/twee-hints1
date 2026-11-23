@@ -256,6 +256,7 @@ class Trees:
 class Ranker:
     """condprove.py --index learned:MODEL; lightgbm if it is there, else Trees"""
     POOL = 2000
+    MIX = 0
     def __init__(self, path, trusted=None, ctx=None):
         fs = json.load(open(path + '.json'))['feats']
         self.cols = [FEATS2.index(f) for f in fs]
@@ -271,8 +272,11 @@ class Ranker:
         if len(C) <= k:
             return C
         s = self.score(np.array(self.ctx.features(g, list(enumerate(C))))[:, self.cols])
-        order = np.argsort(-s, kind='stable')[:k]
-        return [C[i] for i in order]
+        # (23 Nov, MIX) the similarity list's top MIX first, then the model's best of the rest: in the Z9-gap pre-check
+        # similarity's 30-lemma proofs used 3, 15 and 18 of their lemmas, a cluster the model's 30 held 1-6 of
+        h = min(self.MIX, k)
+        order = [i for i in np.argsort(-s, kind='stable') if i >= h][:k - h]
+        return C[:h] + [C[i] for i in order]
 
 if __name__ == '__main__':
     a = sys.argv[1:]
