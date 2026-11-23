@@ -760,7 +760,7 @@ KDA/KDB, production to 369: 632,292 proofs in 27 families, realproofs/ 133 MB, e
 (23 Nov 02:39-03:08) `--realproofs --skip=Z9` added exp60's arms (P3A 26,645, P3B 26,633, P3C 26,761 with their side
 loops), production to 383, smoke with KDC (RST, started later, comes next time): 712,749 proofs in 30 families, realproofs/ 151 MB, every part under 10 MB.
 
-**Totals (23 Nov 12:56, trust.py loops/TRUSTNOW/t1256): 48,512 of 51,784 solved (holdout 5,410 of 5,880), 3,272 unsolved, 0 untrusted.** Since 09:33: the live plain loop (c5W, the ranked PLL1 sweep, the lr2 cycle) and production.
+**Totals (23 Nov 12:56, trust.py loops/TRUSTNOW/t1256): 48,512 of 51,784 solved (holdout 5,410 of 5,880), 3,272 unsolved, 0 untrusted.** Since 09:33 (10): loops/CI3 5 (the queue's last sweeps and the ranked PLL1), loops/CI2 1 (the live loop's c5W), production 4.
 
 **Totals (23 Nov 09:33, trust.py loops/TRUSTNOW/t0933): 48,502 of 51,784 solved (holdout 5,405 of 5,880), 3,282 unsolved, 0 untrusted.** Since 06:41: the plain sweeps (PLN2, PLW1, PLK1), the live plain loop, the hint bed's proof and production.
 
