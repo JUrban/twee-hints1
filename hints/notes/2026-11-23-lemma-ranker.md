@@ -115,3 +115,14 @@ in the loop's own context (its lemma index, the use counts of its kept outputs, 
 in start_vix's background thread with kp/kd and rebuilt with them; a plr variant is eligible once its ranker is in.
 Smoke test abs/plrsmoke.sh (exp/plrsmoke.sh; PLL1's 3 goals in loops/ULT.ctx, the context of 22 Nov 21:39, 1 worker):
 the ranker was built in 24 s; the ranked level ran 3 times and proved 1 (nil3_27__goal_533).
+
+## The control, and the live loop (read 11:24)
+
+c5W (W in the same context, 09:46-11:23; 3,143 problems run, 139 SAME): **1 proof, 3.30 CPU h, 0.3 per CPU h**;
+PLL1: **3, 2.61 CPU h, 1.2 per CPU h**, and W's 1 among them (+2 −0; exp/condcmp.py cond/PLNL/c5W cond/PLL1). Small
+numbers, but every PLL1 proof needed lemmas beyond W's list, so the mechanism is the one the CV measures.
+
+Live loop: abs/plainlive3.sh (exp/plainlive3.sh, PID in cond/PLNL3.pid) runs N and L (W's sizes ranked by lr1, numpy
+under the system python) each cycle, from 11:24: plainlive2.sh was stopped in c6N (partial, 0 proofs, not imported);
+PREV_N cond/PLNL/c5N, PREV_L cond/PLL1. The ranker's use counts and proof steps change with production's outputs,
+so most L problems change each cycle: L cycles are full sweeps, as W's were.
