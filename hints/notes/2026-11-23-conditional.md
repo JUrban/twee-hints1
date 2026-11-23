@@ -283,3 +283,14 @@ PLN1's setting in the context of t0641 (48,466), `--prev cond/PLN1`: 1,778 goals
 were not run; 1,540 were run, 5 proved (com_Ralt__goal_387, lra2aa__goal_352, lra2aa__goal_382, ns_to_aa1_c__goal_393, ns_to_aa1_c__goal_394), 1.10 CPU h, 4.5 per CPU h. All 5 imported into loops/CI2
 and merged into loops/UL (07:17). The second pass yields about half of the first per CPU h, still more than ten
 times production's.
+
+## Hint bed (started 07:20)
+
+Do hints help or hurt plain frontier runs? exp/condprove.py `--hints-lemmas CAP` adds the hints of the problem's
+lemma goals (loops/UL/hints/<goal>: their proofs' steps; the siblings nearest first, then the kNN lemmas by rank)
+as twee's `--hints-file`, the problem text unchanged.
+* Smoke test (cond/HBSMOKE): PLN2's 5 proved goals on PLN2's exact problems with 2,000 such hints: 2 of 5
+  proved (plain: 5 of 5).
+* abs/hintbed.sh (exp/hintbed.sh): 600 goals plain failed in PLN2 (sets/hintbed600, seed 64), PLN2's problems,
+  5 s, 3 threads; arms HBC (a perturbation control: `--abstract-time 1990`), HB200 and HB2000 (`--hints-lemmas`).
+  Gains over plain are counted against HBC's.

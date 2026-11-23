@@ -32,6 +32,10 @@ PROVED = '--proved' in a
 # --prev DIR (a sweep before this one): a goal whose problem text is the same as in DIR and failed there is not run
 # again (twee is deterministic); its row is written with status SAME
 PREV = opt('--prev', '')
+# (23 Nov, the hint bed) --hints-lemmas CAP: also the hints of the problem's lemma goals (their proofs' steps,
+# /project/hintwork/loops/UL/hints/<goal>), the siblings nearest first, then the kNN lemmas by rank, at most CAP, as
+# twee's --hints-file OUT/h/<goal>.hints (default factor); the problem text stays as without
+HCAP = int(opt('--hints-lemmas', '0')); HDIR = opt('--hints-dir', '/project/hintwork/loops/UL/hints')
 a = [x for x in a if x not in ('--all', '--proved')]
 OUT = os.path.abspath(a[0])
 assert not OUT.startswith('/project/hintwork/loops'), 'OUT must be outside loops/'
@@ -74,9 +78,28 @@ def one(g):
     open(p, 'w').write(txt)
     if PREV and prevno.get(g) and os.path.exists(f'{PREV}/p/{g}.p') and open(f'{PREV}/p/{g}.p').read() == txt:
         return f'{g}\tSAME\t0.00\t-\t-\t0\n'
+    hx = []
+    if HCAP:
+        names = re.findall(r'fof\((lemma_\w+),axiom,', txt)
+        sib = sorted((n_ for n_ in names if n_.startswith('lemma_goal_')), key=lambda n_: abs(int(n_[11:]) - int(k)))
+        kn = sorted((n_ for n_ in names if n_.startswith('lemma_knn_')), key=lambda n_: int(n_.split('_')[2]))
+        seen, hs = set(), []
+        for n_ in sib + kn:
+            src = f'{o}__goal_{n_[11:]}' if n_.startswith('lemma_goal_') else n_.split('_', 3)[3]
+            try:
+                for l in open(f'{HDIR}/{src}'):
+                    w = l.rstrip('\n').split('\t')
+                    if len(w) >= 2 and (w[0], w[1]) not in seen:
+                        seen.add((w[0], w[1])); hs.append(f'{w[0]}\t{w[1]}\n')
+            except OSError:
+                pass
+            if len(hs) >= HCAP:
+                break
+        os.makedirs(f'{OUT}/h', exist_ok=True)
+        hp = f'{OUT}/h/{g}.hints'; open(hp, 'w').write(''.join(hs[:HCAP])); hx = ['--hints-file', hp]
     t0 = time.time()
     try:
-        r = subprocess.run([TWEE, p] + base + ['--quiet', '--no-proof'], capture_output=True, text=True, timeout=600)
+        r = subprocess.run([TWEE, p] + base + hx + ['--quiet', '--no-proof'], capture_output=True, text=True, timeout=600)
     except subprocess.TimeoutExpired:
         # (23 Nov) --backwards-goal 2 ran past the abstract-time limit (10 minutes, 5.8 GB): a row, not a crash
         return f'{g}\tTIMEOUT\t{time.time() - t0:.2f}\t-\t-\t0\n'
@@ -84,7 +107,7 @@ def one(g):
     ok = 'RESULT: Theorem' in r.stdout
     unp, pro, nk = '-', '-', 0
     if ok:
-        r2 = subprocess.run([TWEE, p] + base, capture_output=True, text=True, timeout=600)
+        r2 = subprocess.run([TWEE, p] + base + hx, capture_output=True, text=True, timeout=600)
         open(f'{OUT}/proofs/{g}', 'w').write(r2.stdout)
         used = [m[1] for l in r2.stdout.splitlines() for m in [AX.match(l)] if m]
         sib = [int(x[len('lemma_goal_'):]) for x in used if x.startswith('lemma_goal_')]
