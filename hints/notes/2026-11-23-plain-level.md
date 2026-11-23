@@ -17,6 +17,9 @@ in the from-zero cascade raise the curve?
   `--knn-drift 5`), transfer every 5 minutes, SCHED= .
 * P4A: control. P4B: DEEP is solve_new.sh's with `plk100s40@0` after `unf@0` (loop.py's plain variant, f79acac:
   100 kNN and 40 sibling lemmas, either side, 5 s), `--priors ...,Vplk100s40@0=3` and in `--explore-labels`.
+  **Changed 07:57 (before the start):** P4B has two plain levels, `plk100s40@0` and `plk400s130@0` (the live loop's N
+  and W settings, which find different proofs: notes/2026-11-23-conditional.md, "Two settings"), each with prior 3
+  and in `--explore-labels`. The reading is of the plain levels together.
 * It takes Z9C's slot: loops/Z9C.skip (07:10) keeps abs/z9cont.sh from continuing Z9. Z9's 6- and 8-hour readings
   stay; a long-horizon run comes later with the plain level if it pays.
 * Proofs: loop.py's proof jobs and exp/proofq.py into loops/P4A/proofs, loops/P4B/proofs.
