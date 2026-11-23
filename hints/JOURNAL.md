@@ -766,6 +766,11 @@ ul75 5, XFL 1. REPORT's totals table
 has the history (user, 20 Nov: "update the total numbers in the report etc every now and then").
 
 Next:
+00000000000000000000000000000000000000000000000. **Readiness (04:54, [notes/2026-11-23-readiness.md](notes/2026-11-23-readiness.md)):** offline on Z8's rows (exp/triglag.py,
+   exp/fresh_ready.py). Late retries are prompt: of 593 proofs that used a lemma proved after the goal's last failure, the
+   proving run came 3/8/16/30/50 min after it (deciles 10/25/50/75/90), always the first run after it. First runs wait longer
+   (6/16/40/98/147 min after their latest lemma), but no kNN signal orders them better than the gap order: its AUC is
+   the highest in every hour (0.730 over all, n30 0.658, s1 0.575). **No change.**
 0000000000000000000000000000000000000000000000. **Z9C (03:01, [notes/2026-11-23-z9.md](notes/2026-11-23-z9.md), "Continuation"):** Z9 continued after its 8 hours
    for 16 more (abs/z9cont.sh: Z9's saved loop.py command with `--cascade-continue --cascade-hours 16`, its side
    loops again, config.json's mtime set back, loops/Z9.toffset for t=). Starts 5 minutes after loops/Z9.done unless
@@ -1271,6 +1276,7 @@ reports are written as the experiments run.
 | [notes/2026-11-22-frontier-orderings.md](notes/2026-11-22-frontier-orderings.md) | exp63: another term ordering on production's frontier |
 | [notes/2026-11-23-z9.md](notes/2026-11-23-z9.md) | Z9: the system from zero on all goals after exp55 and exp60 (6 workers, 8 hours) |
 | [notes/2026-11-23-model-audit2.md](notes/2026-11-23-model-audit2.md) | The finite-model audit again on production's proofs since 20 Nov |
+| [notes/2026-11-23-readiness.md](notes/2026-11-23-readiness.md) | How long ready goals wait (Z8), and kNN readiness against the gap order for first runs |
 | [notes/2026-11-20-base-saturation.md](notes/2026-11-20-base-saturation.md) | exp39: base-theory runs as rule generators for the unsolved goals of the stronger theories |
 | [notes/2026-11-20-given-transfer.md](notes/2026-11-20-given-transfer.md) | exp38: unsolved goals that are variants of rules other runs derived and did not use (379 M in the given logs; transfer.py only matches proof steps); their ancestry as hints |
 | [notes/2026-11-19-from-zero-portfolio.md](notes/2026-11-19-from-zero-portfolio.md) | half1 from zero in 2 hours with today's deep portfolio (PGC), against PGA's 18,987 (exp27, from 07:18) |
