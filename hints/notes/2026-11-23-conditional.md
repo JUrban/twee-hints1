@@ -379,3 +379,19 @@ merge.py 2. On the goals both ran (exp/condcmp.py cond/PLW1 cond/PLK1):
 union 21
 
 The 400 kNN lemmas give most of W's gain over N; W's wider siblings add the rest, and PLK1 still has proofs of its own.
+
+## Where the used kNN lemmas rank (read 08:56)
+
+The kNN lemmas the 400-kNN sweeps' proofs used, by their rank in the problem's list:
+
+| sweep | proofs | 0-49 | 50-99 | 100-149 | 150-199 | 200-249 | 250-299 | 300-349 | 350-399 | proofs using one ranked 300+ |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| PLW1 | 23 | 50 | 63 | 50 | 45 | 43 | 36 | 25 | 24 | 15 |
+| PLK1 | 16 | 49 | 57 | 30 | 41 | 29 | 20 | 19 | 19 | 14 |
+
+Almost flat: the similarity ranking (idf-weighted Jaccard of goal features) carries little signal about which lemmas a
+proof needs, and most proofs need one from the bottom quarter. A better ranker could bring lemmas now ranked
+beyond 400 into the list, which widening cannot (PLX1's 1,000 make twee slower). PLD1 (kd, MaSh-style) and PLP1
+(kp, use counts) test the two rankings production has. If either beats W, a learned ranker comes next: positives are the
+used lemmas of the plain, conditional and step-bed proofs (cond/*/p and proofs), negatives the unused ones of the same
+problems.
