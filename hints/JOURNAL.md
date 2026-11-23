@@ -783,11 +783,18 @@ ul75 5, XFL 1. REPORT's totals table
 has the history (user, 20 Nov: "update the total numbers in the report etc every now and then").
 
 Next:
+000000000000000000000000000000000000000000000000000000000. **exp70 (a second round on the key goals, [notes/2026-11-23-climber-restart.md](notes/2026-11-23-climber-restart.md), "exp70"):**
+   the 9 key goals again from CLK69's sketches and fill hints and t2300. K70F: gap filling 30 s per fill run (CLK69: 3 s);
+   K70R: CLK69's setting (the round-2 control). -j 1 each, merged into loops/UL every 10 minutes (exp/exp70.sh, 23:04).
+   climb.py now records each fill lemma's premises (fillprem.tsv, from twee's USEDAXIOMS), so trust.py can check fill
+   lemmas: the 6 untrusted goals at t2300 are production sk@1 proofs with CLHL2's fill lemmas (or use those goals).
 00000000000000000000000000000000000000000000000000000000. **exp69 (climb the assumptions, [notes/2026-11-23-climber-restart.md](notes/2026-11-23-climber-restart.md), "exp69"):**
    most climbed heads have a 5 s sketch proof from a single assumption, nearly always an unsolved goal X of another
    original. exp/keylemmas.py ranks the X by the unsolved targets they unlock: Kproperties_1 332 and nil4_19K 394 4 each,
    7 more 2 each; 7 of the 9 are not heads (1-9 goals behind one), so nothing climbed them. CLK69 (exp/exp69.sh): a set-mode
    climb of the 9 from t2120, CLHL4's setting, 1 climb at a time, real proofs merged into loops/UL every 10 minutes (21:22).
+   **Ended 22:55: 0 of 9 in 1.51 CPU h. The 9 and their own sketches' assumptions are one cluster of 7 originals: each
+   follows from another unsolved one; fills (3 s) proved 93 of 219 gaps.**
 0000000000000000000000000000000000000000000000000000000. **exp68 (live climber, [notes/2026-11-23-climber-restart.md](notes/2026-11-23-climber-restart.md), "exp68"):** CLHL3 (arm A's
    setting) stopped at 21:07, 0 real proofs in 4.1 CPU h. CLHL4 (abs/clhl4.sh, loops/CLHL4): arm B's lemmas (30 siblings, 400 kNN)
    and --weaken 12 (all weakened goals; the hints of 3 of exp67's 4 proofs came from weakened-goal sketches). Two changes:
@@ -826,6 +833,7 @@ Next:
    HDG1 (18:52): 1,600 kNN lemmas on the 88 other heads at 60 s, 1 proof (aK1_nil3_b 177) in 3.02 CPU h (0.33 per CPU h) against HDW1's 4 in 2.25 (400 lemmas, 1.78); H keeps 400.
    2 h: Q5A 19,244, Q5B 19,523 (+279; +336 at equal work), P4B (Q5A's setting) 19,669: replica spread 425, so no signal yet.
    4 h (20:56): Q5A 21,316, Q5B 21,283 (-33; -31 at equal work), P4B 21,547: Q5B's early lead is gone; no gain from the bigger lists so far.
+   **6 h (22:56): Q5A 21,749, Q5B 21,747 (-2; -2 at equal work), P4B 21,803; +151 −149, union 21,898. Rule not met: closed, production keeps 100+400.**
 000000000000000000000000000000000000000000000000000. **Lemma ranker (08:59, [notes/2026-11-23-lemma-ranker.md](notes/2026-11-23-lemma-ranker.md)):** the used kNN lemmas of plain
    proofs are spread evenly over ranks 0-400; a learned ranker could bring needed lemmas into the list. Data sweep
    RKD1 (abs/rkd1.sh): 800 solved goals near the frontier, 1,000 kNN lemmas, 5 s, 2 threads; then LightGBM, recall at

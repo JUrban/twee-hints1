@@ -272,3 +272,63 @@ Last 58500 runs: 135 proofs in 216.1 CPU h (0.62 per CPU h).
   climbers climb heads (CLHL4 `--heads-only`) and exp69 the goals the heads' sketches assume. Without `--heads-only` and
   `--reclimb-heads`, climb.py --live climbs any stalled goal (a failed fresh run in the latest round), fewest proof
   lines from a proven goal below first: the mode for the deep goals, last used by clu4.sh (16 Nov, loops/CLU).
+
+## exp69 ended: 0 of 9 (23:05)
+
+| climber | targets | finished | real proofs | CPU h | per CPU h | proved |
+|---|---:|---:|---:|---:|---:|---|
+| CLK69 | 9 | 9 | 0 | 1.51 | 0.00 |  |
+
+| key goal | fill runs | gaps tried | gaps proved | final CPU s |
+|---|---:|---:|---:|---:|
+| Ka_eq_aK3__goal_420 | 5 | 7 | 2 | 384 |
+| Ka_eq_aK3__goal_425 | 7 | 25 | 9 | 498 |
+| Kproperties_1__goal_332 | 3 | 8 | 1 | 439 |
+| TLRproperties_2__goal_386 | 13 | 68 | 32 | 386 |
+| aK2_eq_aK3_1243b__goal_479 | 7 | 25 | 11 | 475 |
+| aK2_eq_aK3_1243b__goal_522 | 5 | 11 | 1 | 533 |
+| aK2_eq_aK3_1243b__goal_525 | 9 | 13 | 7 | 494 |
+| nil3_2K__goal_383 | 3 | 13 | 12 | 707 |
+| nil4_19K__goal_394 | 7 | 49 | 18 | 711 |
+
+Gaps proved 93 of 219 tried. The proofs (used.tsv rows) by their assumptions: 0 assumptions 44, 1 assumptions 73, 2 assumptions 19, 3 assumptions 7, 4 assumptions 3, 5 assumptions 2: the 44 without one proved weakened goals (instances; a run on the goal itself without an assumption would be a real proof).
+The key goals' own single-assumption sketches assume other unsolved goals of the same cluster (exp/keylemmas.py CLK69):
+
+* Ka_eq_aK3__goal_420 follows from TLRproperties_2__goal_369
+* Ka_eq_aK3__goal_425 follows from TLRproperties_2__goal_376
+* nil3_2K__goal_383 follows from aK2_eq_aK3_1243b__goal_479
+* TLRproperties_2__goal_386 follows from aK2_eq_aK3_1243b__goal_522
+* Kproperties_1__goal_332 follows from aKperms_1__goal_365
+* aK2_eq_aK3_1243b__goal_525 follows from aKperms_1__goal_387
+* aK2_eq_aK3_1243b__goal_522 follows from nil4_19K__goal_426
+
+So the 9 and their assumptions are one cluster of goals of 7 originals (Ka_eq_aK3, Kproperties_1, TLRproperties_2,
+aK2_eq_aK3_1243b, aKperms_1, nil3_2K, nil4_19K): each follows from another unsolved one in a 5 s sketch, and none
+was proved without one. Veroff's way through such a cluster is the gaps: the sketch steps that depend on the
+assumption, proved on their own until a final run needs no assumption. CLK69's fills, 3 s each, proved 93 of 219.
+
+## exp70: a second round on the key goals, with longer gap filling (23:05)
+
+Question: does gap filling 10 times longer (30 s per fill run instead of 3 s) get a key goal of the cluster proved
+in a second round? A control arm repeats CLK69's setting from the same state.
+
+* abs/exp70.sh (exp/exp70.sh), launched with TRUSTED=loops/TRUSTNOW/t2300.trusted (48,549 trusted). Targets
+  loops/EXP69.targets (exp/sets/key69, the same 9).
+* Both arms start from CLK69's sketches/ and fillhints/ (805 sketch hints of 6 originals, reloaded as hints),
+  a fresh copy of the trusted solved set and production's hints, CLHL4's setting (30 siblings, 400 kNN, --weaken
+  12, 24 sketch runs of 5 s, final 160 s), --true-max 200, -j 1 each:
+  * K70F: `--fill 30` (at most 300 CPU s per fill run);
+  * K70R: `--fill 3`, CLK69's.
+* CLK69's true.tsv is not copied: its fill lemmas have no premise record (below), so each arm proves its own.
+* Real proofs are merged into loops/UL every 10 minutes (loops/EXP70.merge).
+* Reading: exp/climbread.py K70F K70R CLK69, real proofs and CPU h; gaps tried and proved per arm (fill.tsv).
+
+### Fill lemmas get a premise record
+
+climb.py now writes fillprem.tsv: for each lemma a fill run proved, the original, the true label, the formula, the
+target, the tag, and the lemma names the run's proofs used (twee's USEDAXIOMS line; all the run's proved gaps
+together, so a superset of each lemma's). Without that line, every lemma name in the fill problem. Before, no
+fill premise was recorded: the 6 untrusted goals at t2300 (aK2_eq_aK3_s 489, 494, 515, nil3_23_32_to_27 549,
+nil3_23_32_to_28 572, nil3_23_32_to_30 549) are production sk@1 proofs with lemma_fill_N axioms, every one from
+CLHL2's true.tsv, or proofs that use those goals. Climbers started before the change (CLHL4, CLA67, CLB67, CC67,
+CC67B) still write none; exp70's arms do.

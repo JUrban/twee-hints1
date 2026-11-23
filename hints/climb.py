@@ -330,6 +330,12 @@ def main():
     fu = open(os.path.join(c.dir, 'used.tsv'), 'a')
     #   fillattempts.tsv   original, formula, proved (0/1), target, tag: every gap --fill tried (which are fillable)
     ffa = open(os.path.join(c.dir, 'fillattempts.tsv'), 'a')
+    #   fillprem.tsv       original, true label, formula, target, tag, premises: for each lemma --fill proved, the
+    #                      axiom and lemma names the fill run's proofs used (twee's USEDAXIOMS, all the run's proved
+    #                      gaps together: a superset of this lemma's), or, without that line, every lemma name in
+    #                      the fill problem. (23 Nov) trust.py checks fill lemmas by it (before, none was recorded,
+    #                      and production's proofs with lemma_fill_N axioms in exposed originals stayed untrusted).
+    fpr = open(os.path.join(c.dir, 'fillprem.tsv'), 'a')
     csrc = {}   # (target, label) -> the goal an assumption states
     nre = [0, 0]
     for l_ in (open(os.path.join(c.dir, 'true.tsv')) if os.path.getsize(os.path.join(c.dir, 'true.tsv')) else ()):
@@ -592,6 +598,10 @@ def main():
             o_ = (e.stdout or b'').decode('utf8', 'replace')
         dt = time.time() - t0
         got = {line.split()[1] for line in o_.splitlines() if line.startswith('SOLVEDGOAL ')}
+        ua = next((line.split()[1:] for line in o_.splitlines() if line.startswith('USEDAXIOMS')), None)
+        if ua is None:
+            ua = [m_.group(1) for m_ in (re.match(r'fof\(((?:lemma|true)_[^,]*),', x) for x in lines) if m_]
+        prem = ','.join(sorted(x for x in ua if x.startswith(('lemma_', 'true_'))))
         new = []
         sig = lp.signature(t)
         with lock:
@@ -604,6 +614,7 @@ def main():
                     tkey[(o, true[o][f])] = loop.canon_key(l, r, sig)
                     ft.write(f'{o}\t{true[o][f]}\t{f}\t{tkey[(o, true[o][f])][0]}\t{tkey[(o, true[o][f])][1]}\t{t}\t{tag}\n')
                     ft.flush()
+                    fpr.write(f'{o}\t{true[o][f]}\t{f}\t{t}\t{tag}\t{prem}\n'); fpr.flush()
             if got and 'HINTS-END' in o_:
                 L, G = hintlib.extract_hints(o_)
                 fh_ = []

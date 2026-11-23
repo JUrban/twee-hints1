@@ -168,3 +168,20 @@ Q5B by wall time: 30 min -129, 60 min +128; at equal work (the points above, in 
 * Q5B against Q5A: +187 at 180 min, -33 at 240 min; at equal abstract work (abscurve, 238 min) Q5B 21,276, Q5A 21,307, -31.
 * The replica (Q5A against P4B, the same setting 6 hours apart): -597 at 180 min, -231 at 240 min.
 * Q5B's early lead is gone at 4 hours; with the replica spread this size, the bigger kNN lists show no gain. The 6-hour reading (with the one-arm goals) closes exp65.
+
+## 6 hours (22:57): closed
+
+| min | Q5A (100+400) | Q5B (400+1,600) | P4B (exp64, Q5A's setting) |
+|---:|---:|---:|---:|
+| 300 | 21,610 | 21,596 | 21,724 |
+| 360 | 21,749 | 21,747 | 21,803 |
+
+* Q5B against Q5A at 360 min: -2; at equal abstract work (abscurve, 358 min) Q5B 21,743, Q5A 21,745, -2.
+* The replica (Q5A against P4B): -114 at 300 min, -54 at 360 min.
+* armdiff at 360 min: +151 −149, union 21,898 (+149 over the better arm). The one-arm goals proved by the plain
+  levels: Q5A 36 of 151 (plk100s40, plk400s130), Q5B 27 of 149 (plk400s40, plk1600s130); the rest came from the
+  levels both arms share (L0, L1) or were synced. The other arm had run 3 or more times on 76 of Q5A's and 77 of Q5B's.
+* Rule (+200 at 6 h, at equal work, beyond the replica spread): not met. The 4-times-longer kNN lists in the plain levels
+  neither help nor hurt from zero on half2. exp65 closed; production keeps its plain levels. The Z9 gap pre-check's 46
+  against 39 did not carry over to the loop, where the plain levels are a small share of the runs and most of their proofs
+  come at the same rate either way.
