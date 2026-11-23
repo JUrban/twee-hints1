@@ -158,3 +158,11 @@ with lr1's features (cond/LR2.eval.v1) and with FEATS2 (cond/LR2.eval):
 The fix changes little (RKD1 at 400: 0.933 against 0.935 with the leak), so lr1 was not riding it. The sibling features
 add a little at 400 and on the frontier lists. lr2 (models/lemmarank/lr2, FEATS2, all of LR2) replaces lr1 in the live
 loop after its current cycle (abs/plainlive3_lr2.sh, exp/plainlive3_lr2.sh: cond/PLNL.stop, then MODEL=lr2).
+
+## exp65 (planned 11:56)
+
+abs/exp65.sh (exp/exp65.sh): after exp64, the ranked plain level from zero: Q5A (DEEP_A, exp64's better arm) against
+Q5B (DEEP_A with `plrk400s130@0`, `--lemma-ranker models/lemmarank/lr2`, prior 3, in `--explore-labels`); half2, 4 workers
+each, 6 hours, exp64's CPU sets. Launched at exp64's end with DEEP_A chosen then. In a from-zero loop the ranker's
+use counts and proof steps come from the loop's own outputs, smaller than production's; the A/B shows whether the
+model trained on production's context still helps there.
