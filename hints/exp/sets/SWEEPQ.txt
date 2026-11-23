@@ -1,9 +1,10 @@
 # NAME condprove-args (abs/sweepq.sh; notes/2026-11-23-conditional.md, "Sweep queue")
 # (08:29) W (PLW1: 100+30 siblings, 400 kNN) contains N's proofs: the baseline. PLK1 and PLS1 split W's two dimensions;
 # kd, kp and 20 s at W's sizes; X (1000 kNN) proved 2 of PLN2's 5 at twice the cost a run, so it comes late.
+# (09:24) PLD1-PLX1 held (#held): over 20 CPUs while exp64 runs; uncomment to run
 PLK1 --time 5 --sibs 30 --after 10 --knn 400
 PLS1 --time 5 --sibs 100 --after 30 --knn 100
-PLD1 --time 5 --sibs 100 --after 30 --knn 400 --index kd
-PLP1 --time 5 --sibs 100 --after 30 --knn 400 --index kp
-PLT1 --time 20 --sibs 100 --after 30 --knn 400
-PLX1 --time 5 --sibs 200 --after 60 --knn 1000
+#held PLD1 --time 5 --sibs 100 --after 30 --knn 400 --index kd
+#held PLP1 --time 5 --sibs 100 --after 30 --knn 400 --index kp
+#held PLT1 --time 20 --sibs 100 --after 30 --knn 400
+#held PLX1 --time 5 --sibs 200 --after 60 --knn 1000

@@ -395,3 +395,7 @@ beyond 400 into the list, which widening cannot (PLX1's 1,000 make twee slower).
 (kp, use counts) test the two rankings production has. If either beats W, a learned ranker comes next: positives are the
 used lemmas of the plain, conditional and step-bed proofs (cond/*/p and proofs), negatives the unused ones of the same
 problems.
+
+Queue held (09:24): PLD1, PLP1, PLT1 and PLX1 are commented out (`#held`) in cond/SWEEPQ.txt. With exp64 in Z9's slot,
+production, exp64, the live loop and PLL1 already come to over 20 CPUs. The live loop's W cycles are nearly full
+sweeps: c4W reran 1,883 changed problems (206 SAME) for 2 proofs so far, as a few new proofs change most 400-lemma lists.
