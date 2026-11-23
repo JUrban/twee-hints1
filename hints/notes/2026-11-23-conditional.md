@@ -129,6 +129,6 @@ exp/wallcpu.py (loops/UL/r5/results.tsv: the last 30,000 rows; walls 99):
 | trusted at the list's time | 230 | 0.6 (1%) | 14 | 22.21 |
 
 Production's recent proofs come from goals deep in unproved stretches, at the same low rate as the rest, through the
-cross-original lemmas (kNN, transfer), not from the walls. Its 40-sibling variant (Vs40@0: 11,911 runs in loops/UL)
+cross-original lemmas (kNN, transfer), not from the walls. Its 40-sibling variant (Vs40@0: 11,911 runs in loops/UL's r*/results.tsv)
 already reaches the far parents where they are proved. So extending the chains at the walls is not where production
 stands to gain either.
