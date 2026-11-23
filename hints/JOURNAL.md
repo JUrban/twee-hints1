@@ -785,6 +785,7 @@ Next:
    30 min (03:17): Z9 27,339, Z8 26,777 (+562), Z7 24,561 by wall; at equal abstract work (Z8's 28 min) Z9 25,481 at 26 min against Z8's 26,147 (−666).
    The machine is faster tonight (Z9 0.97 CPU s per abstract s, Z8 1.01 in its first hour). Cross-time and early: noise.
    60 min (03:47): Z9 34,436, Z8 33,971 (+465), Z7 32,154 by wall; at equal abstract work (Z8's 58 min) Z9 33,347 at 52 min (−451).
+   2 h (04:47): Z9 39,248, Z8 38,169 (+1,079), Z7 37,195 by wall; at equal abstract work (Z8's 115 min) Z9 37,992 at 100 min (−35). The wall lead is the faster machine; at equal work Z9 has caught up.
 0000000000000000000000000000000000000000000. **exp63 (16:48, [notes/2026-11-22-frontier-orderings.md](notes/2026-11-22-frontier-orderings.md)):** another
    term ordering on production's frontier. Production yields about 0.5 proofs per CPU h now (698 CPU h spent on the
    3,432 unsolved, median 47 runs), all under twee's default precedence. 120 unsolved unit goals (sets/ulu120, seed
