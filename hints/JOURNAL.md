@@ -770,6 +770,10 @@ Next:
    unsolved goals: each with its 10 nearest earlier siblings assumed (proved or not) and 30 kNN trusted lemmas, one
    plain 5 s twee run (exp/condprove.py, abs/cond1.sh, 6 threads, cond/COND1 outside loops/). Hard steps against
    blocked goals, and the blockers' reach.
+   **Result (05:26; ran 05:00-05:23): 2,826 hard, 585 blocked, 1 unconditional of 3,412; no single goal frees more than 10
+   (reach: hard >=1 184, >=5 5, >=20 0). The hard steps are the long ones (every unsolved goal is 8+ Prover9 lines after
+   the previous goal). No keystones: no change. The one unconditional proof (nil3_30__goal_473) is not reproduced by
+   loop.py in the trusted context (CU2, with its 8,504 hints) and is not entered.**
 00000000000000000000000000000000000000000000000. **Readiness (04:54, [notes/2026-11-23-readiness.md](notes/2026-11-23-readiness.md)):** offline on Z8's rows (exp/triglag.py,
    exp/fresh_ready.py). Late retries are prompt: of 593 proofs that used a lemma proved after the goal's last failure, the
    proving run came 3/8/16/30/50 min after it (deciles 10/25/50/75/90), always the first run after it. First runs wait longer
