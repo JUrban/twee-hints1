@@ -59,6 +59,16 @@ if PREV:
     prevno = {l.split('\t')[0]: l.split('\t')[1] in ('NO', 'SAME') for l in open(f'{PREV}/results.tsv') if l.strip()}
 t_ = time.time()
 index = lemmas.LemmaIndex(sorted(T), subsets=True) if KNN else None
+# (23 Nov) --index kd|kp: loop.py's other kNN selections (start_vix): kd adds MaSh-style proof dependencies (the
+# steps of the nearest proven goals' proofs, HDIR, weight 1, 50 nearest), kp weights similarity by lemma use counts
+# (USEDAXIOMS of production's kept outputs, pop 0.3)
+IX = opt('--index', '')
+if IX == 'kd' and index:
+    index.deps, index.dep_idf = lemmas.proof_deps(HDIR, sorted(T)); index.dep_w = 1.0; index.dep_n = 50
+elif IX == 'kp' and index:
+    index.uses = lemmas.lemma_uses(['/project/hintwork/loops/UL']); index.pop = 0.3
+elif IX:
+    sys.exit(f'--index {IX}: kd or kp')
 print(f'condprove: {len(U)} unsolved goals to run ({len(done)} done), index {time.time()-t_:.0f}s', flush=True)
 base = ['--max-time', TM, '--abstract-time', '2000', '--no-colour', '--no-resume-requeue', '--no-eqhint-consider'] + XARGS
 AX = re.compile(r'^Axiom \d+ \(([^)]*)\)')

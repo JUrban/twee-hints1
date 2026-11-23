@@ -350,3 +350,7 @@ into production through loops/CI4 (condimport.py now reruns a hinted sweep's pro
 
 Most kNN lemmas a proof uses are goals of other originals with the same or weaker axioms: what other Prover9 proofs
 established bridges these steps, beside the original's own earlier steps.
+
+Added 07:58: condprove.py `--index kd|kp`, loop.py's other kNN selections (kd: MaSh-style proof dependencies;
+kp: similarity weighted by lemma use counts), as PLD1 (after PLK1) and PLP1 in the queue, at N's sizes. Smoke test
+on PLN2's 5 proofs: kd replaced most of the 100 kNN lemmas and proved 4, kp about a quarter and proved 5.
