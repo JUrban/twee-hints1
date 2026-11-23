@@ -781,6 +781,7 @@ Next:
    abs/or_test3.sh). Starts 5 minutes after Z9 ends, in Z9C's place (loops/Z9C.skip). PLZ8 (Z8's context): 160 of 2,000,
    85 per CPU h.
    Changed 07:57 (before the start): P4B has two plain levels, plk100s40@0 and plk400s130@0 (N and W), prior 3 each.
+   Started 10:52:03 (loops/EXP64.pids); loop.py P4A 3128645, P4B 3128644; ends about 16:52.
 0000000000000000000000000000000000000000000000000. **Plain live loop (06:55, [notes/2026-11-23-conditional.md](notes/2026-11-23-conditional.md), "Plain live loop"):** PLN1's
    plain sweep as a side loop of production: each cycle (30 min or more, 3 threads) takes loops/UL's solved goals as
    context, reruns only goals whose problem changed (condprove.py --prev), imports the proofs into loops/CI2 and merges

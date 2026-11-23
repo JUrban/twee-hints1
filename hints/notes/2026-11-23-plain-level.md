@@ -29,3 +29,9 @@ in the from-zero cascade raise the curve?
 abs/setcurve.py sets/half2 P4A P4B and exp/abscurve.py at 30, 60, 120, 240 and 360 minutes; at 6 hours the one-arm
 goals (exp/armdiff.py) and P4B's proofs by the plain level. Rule: +200 or more at 6 hours by wall time and at equal
 work; under about 400 it needs a replica pair before production or solve_new.sh change.
+
+## Started
+
+loops/EXP64.pids: P4A 3128630 23 10:52:03; P4B 3128632 23 10:52:03. loop.py PIDs: P4A 3128645 (CPUs 0-6,28-34), P4B 3128644 (CPUs 7-13,35-41); P4B's
+command line has both plain variants with their priors and explore labels. Crash watcher from 10:52 on these and
+production's processes. Readings at 30, 60, 120, 240 and 360 minutes.
