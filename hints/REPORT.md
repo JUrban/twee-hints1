@@ -5805,6 +5805,20 @@ rounds of 30 s or more, but about 40% overhead for 8 s rounds.
 
 ## 3. Assessment
 
+*23 Nov, 02:48 (`date` checked). The 22 Nov 20:36 assessment follows it.*
+
+* **exp60 (done 02:36; 2az).** P3B (`--floor-ratio-until 120`: the class floors only for the first 2 hours) ended
+  −138 by wall time and −101 at equal abstract work: not adopted. P3C, in effect exp55's replica, ended +12 (+54 at
+  equal work): the 6-hour gain of `--knn-drift 5` is small, positive or zero, not +204. It stays; it costs no CPU.
+* **What exp60 says about the A/B rule.** P3B ran P3A's rules for its first 2 hours and was then −459 behind by wall
+  time and −305 at equal work. exp55's +204 and its replica's +12 differ by 192. So a single half2 pair at 6 hours
+  cannot tell an effect of about 200 from none. Options measured well above that stand: the floors that wait
+  (exp52, +789 at 3 hours) and the derived-rule transfer (exp40 +282 at 2 hours on half1, exp41 +769 on half2).
+  Options adopted from one pair near that size are unconfirmed: exp29 (+392 at 2 hours, −118 in its replica exp30)
+  and exp55.
+* **Running: Z9 (02:46 to about 10:46),** the system from zero on all 51,784 goals, 6 workers, 8 hours, on its own
+  CPUs. A measurement against Z8 and Z7, not an A/B.
+
 *22 Nov, 20:36 (`date` checked). The 22 Nov 12:52 assessment follows it.*
 
 * **Where it stands.** **48,357 solved (+55.7% over plain twee at 4 s), holdout 5,363 (+67.4%)**, all trusted (18:02).
@@ -6079,6 +6093,14 @@ rounds of 30 s or more, but about 40% overhead for 8 s rounds.
     time.
 
 ## 4. Next steps
+
+*23 Nov, 02:48 (2az, 3):*
+
+* **Z9's readings** at 30 minutes and 1, 2, 4, 6 and 8 hours against Z8 and Z7 (abs/setcurve.py, exp/abscurve.py),
+  and the holdout count at 6 and 8 hours.
+* **A/B design.** An option whose effect at 6 hours is under about 400 on half2 gets a replica pair before it is
+  adopted; arms get CPU sets (abs/or_test3.sh) and are read at equal abstract work as well as by wall time.
+* **Open:** `--proof-in-search` (the user's decision); the late A/B's replica pair.
 
 *22 Nov, 20:36 (2az, 3):*
 
