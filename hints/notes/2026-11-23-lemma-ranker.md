@@ -184,3 +184,12 @@ production has and the from-zero runs lack fall at the 5 s first level once the 
   of 5 s runs on hint-bed goals).
 * **exp65** (abs/exp65.sh, exp/exp65.sh): Q5A, DEEP_A (exp64's better arm), against Q5B, the same with
   `--lemma-ranker models/lemmarank/lr2 --lemma-ranker-all`; otherwise as planned. One change.
+
+## Z9's gap: an offline pre-check for exp65 (started 13:06)
+
+exp/z9gap.sh (abs/z9gap.sh): 500 goals production solved and Z9 (8 hours from zero, 6 workers) did not
+(exp/sets/z9gap500, seed 66, of the 4,355 such goals at loops/TRUSTNOW/t1256), in Z9's final context (its 44,161
+proofs). Plain 5 s twee (condprove.py `--proved`: only Z9-proved siblings, 4 earlier and 2 later, and 30 kNN lemmas,
+about L0's lemma part without its hints and rule model), both arms at once on 1 thread each: cond/ZGS by similarity,
+cond/ZGR by lr2 from the similarity list's top 1,000 with use counts, proof steps and sibling features from loops/Z9
+(condprove.py `--rank-loop`, new), so no production proof enters. Measures: proved in each, +/−, union.
