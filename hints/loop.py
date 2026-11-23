@@ -482,6 +482,11 @@ class Loop:
         if plain_:
             hints = []
         var_ = var[2:] if plain_ else var
+        # (23 Nov, exp73) skkNsM: sk's climb hints and fill lemmas with N kNN and M sibling lemmas (exp67: on frozen heads
+        # the climber with 30 siblings and 400 kNN proved 7, with 6 and 30 proved 2, at the same CPU)
+        sk_ = bool(var) and re.fullmatch(r'sk(k\d+)?(s\d+)?', var) is not None
+        if sk_:
+            var_ = var[2:]
         # (23 Nov, --variants plr[kN][sM], --lemma-ranker MODEL) the kNN lemmas re-ranked by exp/lemmarank.py's model
         # (notes/2026-11-23-lemma-ranker.md: the similarity list's top 2,000, features of goal and candidate)
         # (23 Nov, --variants rkN[sM]) a hinted run whose N kNN lemmas come from the ranker: a member of its own beside
@@ -580,7 +585,7 @@ class Loop:
             with open(path, 'w') as f:
                 f.write(txt)
         extra = getattr(self, 'extra_axioms', {}).get(name)
-        if var == 'sk':
+        if sk_:
             # (19 Nov 18:30, --variants sk) also the original's fill lemmas (climb.py's true.tsv: gaps of sketch proofs
             # proved from the real axioms) as lemma axioms; sound, as the climber's own later runs use them
             extra = (extra or []) + self.fill_lemmas(orig_of(name))
@@ -1284,6 +1289,7 @@ class Loop:
             nm, _, at = v.partition('@')
             assert (nm in ('two', 'unf', 'sub', 'sj', 'pool', 'r2', 'nom', 'nopg', 'x', 'p9', 'kp', 'kd', 'hl', 'pw', 'sk')
                     or nm in self.fv
+                    or (nm and re.fullmatch(r'sk(k\d+)?(s\d+)?', nm))
                     or (nm and re.fullmatch(r'(k\d+)?(s\d+)?', nm))
                     or (nm and re.fullmatch(r'plr?(k\d+)?(s\d+)?', nm) and (not nm.startswith('plr') or a.lemma_ranker))
                     or (nm and re.fullmatch(r'rk\d+(s\d+)?', nm) and a.lemma_ranker)
@@ -2115,7 +2121,7 @@ class Loop:
                                     # --hl-factor (16 Nov, 2ap: F = 0.1 and 0.01 each +1 -2 against the pool, union 7-8
                                     # of 150 against 6; dropped then as not better on count)
                                     hv = list(hv) + self.lemma_proof_hints(n, set((h[0], h[1]) for h in hv), a.hl_factor)
-                                elif v_ == 'sk':
+                                elif re.fullmatch(r'sk(k\d+)?(s\d+)?', v_ or ''):
                                     # (19 Nov 18:00; user: "why not collect the climb hints anyway?") the pool plus the
                                     # steps of the original's climb proofs (sketch proofs with assumptions, weakened goals,
                                     # fill lemmas) from --climb-hints directories, after the pool, at the default boost

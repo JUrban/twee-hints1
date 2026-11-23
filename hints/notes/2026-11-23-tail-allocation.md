@@ -47,3 +47,18 @@ Production itself: in ul76's 1,800 runs (21:14-23:23) 5 proofs in 11.6 CPU h (0.
 * HLW1: proofs per CPU h, against HDW1's 1.78 on the first heads.
 * CLS71: real proofs per CPU h (exp/climbread.py CLS71) and production's sk proofs in the originals it climbed.
 * The plain live loop: N and H per h as above, from cycle 23 on.
+
+## exp73: production's climb-hint member with the long lemma lists (23:45)
+
+sk@1:0 (40 s fresh after L0: the pool plus the original's climb hints, and its fill lemmas as axioms) is production's
+top member: 2 of ul76's 5 proofs, 7.0 of its 11.6 CPU h. Its lemma axioms are the default 6 siblings and 30 kNN. On
+the frozen heads, exp67's climber with 30 siblings and 400 kNN proved 7 against 2 with 6 and 30 at the same CPU, and
+the plain live loop's best setting (H) also takes 400 kNN.
+
+* loop.py: members skkNsM (sk's hints and fill lemmas with N kNN and M sibling lemmas; `sk` alone is unchanged).
+* abs/ul78.sh (exp/prod/ul78.sh): ul77 plus skk400s30@1:0, after sk@1:0. loop.py PID 3756717 since 23:43 (ul77
+  stopped 23:43, 2 new proofs in its 150 runs). Explored and ordered by live yield like every member.
+* Checked: its first runs are labelled Vskk400s30@1:0; a problem (aa2_12 355) has 400 lemma_knn, 30 lemma_goal and 14
+  lemma_fill axioms; 40 abstract s took 76-80 s.
+* Reading: exp/memberyield.py over ul78's runs: skk400s30@1:0 against sk@1:0, proofs per CPU h and the goals only one
+  of them proved.

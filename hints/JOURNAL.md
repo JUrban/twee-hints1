@@ -783,6 +783,9 @@ ul75 5, XFL 1. REPORT's totals table
 has the history (user, 20 Nov: "update the total numbers in the report etc every now and then").
 
 Next:
+000000000000000000000000000000000000000000000000000000000000. **exp73 (sk with long lemma lists, [notes/2026-11-23-tail-allocation.md](notes/2026-11-23-tail-allocation.md), "exp73"):**
+   loop.py members skkNsM; **ul78** (23:43) adds skk400s30@1:0: production's top member sk@1:0 (2 of ul76's 5 proofs, 60% of
+   its CPU) with exp67 arm B's 30 siblings and 400 kNN in place of 6 and 30. Explored and ordered by live yield.
 00000000000000000000000000000000000000000000000000000000000. **exp72 (tail allocation, [notes/2026-11-23-tail-allocation.md](notes/2026-11-23-tail-allocation.md)):** the tail's side loops by
    proofs per CPU h from their records: the plain live loop's L (400 lr2-ranked kNN, 5 s) 0.22 per h, N 0.88, H (heads, 60 s)
    about 2; CLHL3/CLHL4 0. plainlive5 (23:39) drops L. HLW1: H's setting as a sweep on the 940 local heads (unsolved, the
