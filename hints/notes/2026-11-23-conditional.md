@@ -186,3 +186,11 @@ level never came up in 3 minutes): solve_new.sh on sets/plsmoke (3 goals) in loo
 
 The plain level proves PLN1's goal inside the loop where production's L0 does not, and its failed runs take a third of
 L0's wall time (no model, no hints to match).
+
+## From zero: PLZ8 (queued 06:20)
+
+Would a plain member help a from-zero run's late phase? abs/plz8.sh (exp/plz8.sh), after PLN1: PLN1's setting on
+2,000 of Z8's unsolved goals (sets/z8un2000, exp/sets/z8un2000, seed 88) in Z8's final context (42,920 goals of
+loops/Z8F.ctx as the trusted list), 4 threads, cond/PLZ8. Reading: proofs per CPU hour against Z8's own late 5 s
+retries (L0: 81 per CPU h in hours 4-6, notes/2026-11-23-z9.md). Well above: a plain level goes into solve_new.sh's
+variants, through an A/B.
