@@ -107,3 +107,11 @@ numeric splits): the same raw scores as lightgbm (max difference 0.0 on 2,000 ro
 candidates, so condprove.py and loop.py run it under the system python3. Rerun of PLL1's 3 proofs that way
 (cond/LRSYS, 11:06): all 3 proved; their kNN lists are the same but for 2 lemmas, in a slightly different order (the use counts and
 proof steps come from production's current outputs, which grew since 09:59).
+
+## In loop.py (11:13)
+
+`--variants plr[kN][sM]` with `--lemma-ranker MODEL` (loop.py): a plain run whose kNN lemmas are re-ranked by the model,
+in the loop's own context (its lemma index, the use counts of its kept outputs, the proof steps in its hints dir), built
+in start_vix's background thread with kp/kd and rebuilt with them; a plr variant is eligible once its ranker is in.
+Smoke test abs/plrsmoke.sh (exp/plrsmoke.sh; PLL1's 3 goals in loops/ULT.ctx, the context of 22 Nov 21:39, 1 worker):
+the ranker was built in 24 s; the ranked level ran 3 times and proved 1 (nil3_27__goal_533).

@@ -22,12 +22,17 @@ SYM = re.compile(r'\b([a-z][A-Za-z0-9_]*)\b')
 VAR = re.compile(r'\bX\d+\b')
 
 class Ctx:
-    """the context the features are computed in"""
-    def __init__(self, trusted):
-        T = sorted({l.split()[0] for l in open(trusted) if l.strip()})
-        self.index = lemmas.LemmaIndex(T, subsets=True)
-        self.uses = lemmas.lemma_uses([f'{HW}/loops/UL'])
-        self.deps, _ = lemmas.proof_deps(HDIR, T)
+    """the context the features are computed in: TRUSTED's index with production's use counts and proof steps, or
+    (loop.py, 23 Nov) PARTS = (index, uses, deps, hints dir) of a loop"""
+    def __init__(self, trusted=None, parts=None):
+        if parts:
+            self.index, self.uses, self.deps, self.hdir = parts
+        else:
+            T = sorted({l.split()[0] for l in open(trusted) if l.strip()})
+            self.index = lemmas.LemmaIndex(T, subsets=True)
+            self.uses = lemmas.lemma_uses([f'{HW}/loops/UL'])
+            self.deps, _ = lemmas.proof_deps(HDIR, T)
+            self.hdir = HDIR
         self.maxk = collections.Counter()
         for l in open(f'{HW}/sets/all'):
             o, k = lemmas.split(l.strip())
@@ -60,7 +65,7 @@ class Ctx:
             s = ix.sim(g, x)
             d50 = [sm for sm, m in nb if x in self.deps.get(m, ())]
             try:
-                hb = os.path.getsize(f'{HDIR}/{x}')
+                hb = os.path.getsize(f'{self.hdir}/{x}')
             except OSError:
                 hb = 0
             rows.append([r, math.log1p(r), s, s / top if top > 0 else 0.0, float(ox == og),

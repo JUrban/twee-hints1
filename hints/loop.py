@@ -482,6 +482,11 @@ class Loop:
         if plain_:
             hints = []
         var_ = var[2:] if plain_ else var
+        # (23 Nov, --variants plr[kN][sM], --lemma-ranker MODEL) the kNN lemmas re-ranked by exp/lemmarank.py's model
+        # (notes/2026-11-23-lemma-ranker.md: the similarity list's top 2,000, features of goal and candidate)
+        learned_ = plain_ and var_.startswith('r')
+        if learned_:
+            var_ = var_[1:]
         T = budget if budget is not None else self.timeout(rnd)
         resume = a.resume if resume is None else resume
         path = os.path.join(PROB, name + '.p')
@@ -493,6 +498,8 @@ class Loop:
                 # similarity (notes/2026-11-16-knn-lemma-count.md: 6, 7 and 5 of 150, 10 distinct)
                 # (19 Nov 09:30) kNsM: N kNN lemmas and M sibling lemmas (either part may be left out: k100, s12)
                 ix_ = self.vix.get(var, self.lemma_index) if var in ('kp', 'kd') else self.lemma_index
+                if learned_ and 'plr' in self.vix:
+                    ix_ = self.vix['plr']
                 m_ = re.fullmatch(r'(?:k(\d+))?(?:s(\d+))?', var_ or '') if var not in ('kp', 'kd') else None
                 kn_ = int(m_.group(1)) if m_ and m_.group(1) else a.lemma_knn
                 sm_ = int(m_.group(2)) if m_ and m_.group(2) else a.lemmas
@@ -1056,6 +1063,8 @@ class Loop:
         in, the variants are not eligible (opts); later builds replace them, so a variant's index may lag by one."""
         a = self.a
         want = {v.partition('@')[0] for v in a.variants.split(',') if v} & {'kp', 'kd'}
+        if a.lemma_ranker and any(v.startswith('plr') for v in a.variants.split(',')):
+            want.add('plr')
         if not want or self.vix_busy:
             return
         import copy, threading, lemmas
@@ -1072,6 +1081,15 @@ class Loop:
                     ix.deps, ix.dep_idf = lemmas.proof_deps(os.path.join(self.dir, 'hints'), names_)
                     ix.dep_w = a.lemma_deps or 1.0; ix.dep_n = a.lemma_dep_n
                     new['kd'] = ix
+                if 'plr' in want:
+                    # (23 Nov) the ranker's context: this loop's index, use counts (its kept outputs) and proof steps
+                    sys.path.insert(0, os.path.join(HERE, 'exp'))
+                    import lemmarank
+                    ix = copy.copy(base); ix._memo = {}
+                    deps = new['kd'].deps if 'kd' in new else lemmas.proof_deps(os.path.join(self.dir, 'hints'), names_)[0]
+                    uses = new['kp'].uses if 'kp' in new else lemmas.lemma_uses([self.dir])
+                    ctx = lemmarank.Ctx(parts=(ix, uses, deps, os.path.join(self.dir, 'hints')))
+                    new['plr'] = lemmarank.Ranker(a.lemma_ranker, ctx=ctx)
                 self.vix = dict(self.vix, **new)
                 print(f'  cascade: variant lemma indexes {sorted(new)} built in {time.time() - t_:.0f}s'
                       + (f' ({len(new["kp"].uses)} goals with uses)' if 'kp' in new else '')
@@ -1255,7 +1273,7 @@ class Loop:
             assert (nm in ('two', 'unf', 'sub', 'sj', 'pool', 'r2', 'nom', 'nopg', 'x', 'p9', 'kp', 'kd', 'hl', 'pw', 'sk')
                     or nm in self.fv
                     or (nm and re.fullmatch(r'(k\d+)?(s\d+)?', nm))
-                    or (nm and re.fullmatch(r'pl(k\d+)?(s\d+)?', nm))
+                    or (nm and re.fullmatch(r'plr?(k\d+)?(s\d+)?', nm) and (not nm.startswith('plr') or a.lemma_ranker))
                     or (nm and re.fullmatch(r'm\w+', nm) and a.model_fixed
                         and os.path.exists(os.path.join(os.path.dirname(a.model_fixed.split(',')[0]), 'r' + nm + '.bin')))), v
             # NAME@B: level B's budget and hints, after level B; NAME@B:F (19 Nov 16:30): level B's budget after level F
@@ -1552,7 +1570,8 @@ class Loop:
             if h < 0:
                 return [0]
             o_ = [v for v in VLEVS if FOL[v] <= h and v not in vtried[n]
-                  and (VAR[v] not in ('kp', 'kd') or VAR[v] in self.vix)]   # (kp, kd: once their index is in)
+                  and (VAR[v] not in ('kp', 'kd') or VAR[v] in self.vix)   # (kp, kd: once their index is in)
+                  and (not str(VAR[v]).startswith('plr') or 'plr' in self.vix)]   # (plr: once the ranker is in)
             if NOWN[h] < len(T):
                 o_.append(NOWN[h])
             return o_
@@ -2418,6 +2437,8 @@ def make_parser():
                     help='--lemma-knn, MaSh-style: also score the lemmas that the nearest proven goals\' proofs have '
                          'as steps, with this weight (lemmas.proof_deps)')
     ap.add_argument('--lemma-dep-n', type=int, default=50, help='--lemma-deps: the number of nearest proven goals')
+    ap.add_argument('--lemma-ranker', default='', help='(23 Nov) --variants plr[kN][sM]: exp/lemmarank.py model path '
+                    '(without .txt/.json); the kNN lemmas re-ranked by it (notes/2026-11-23-lemma-ranker.md)')
     ap.add_argument('--lemma-pop', type=float, default=0.0,
                     help='--lemma-knn: multiply a candidate lemma\'s similarity by 1 + POP * log(1 + its uses in proofs)')
     ap.add_argument('--lemma-uses', default='',
