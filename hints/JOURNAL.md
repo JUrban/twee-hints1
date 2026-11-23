@@ -778,6 +778,7 @@ Next:
    them into loops/UL. abs/plainlive_start.sh (PID in cond/PLNL.pid) starts it after PLN2. Log cond/PLNL/log; stop with
    cond/PLNL.stop.
    Wide sweep PLW1 (armed 07:13, abs/plw1.sh): after PLN2, 100 earlier and 30 later siblings, 400 kNN; proofs into loops/CI3 and loops/UL.
+   PLN2 (06:54-07:17): 1,540 changed problems run (1,778 SAME), 5 proved, 4.5 per CPU h; merged. The live loop started 07:17 (c1).
 000000000000000000000000000000000000000000000000. **COND1 (05:00, [notes/2026-11-23-conditional.md](notes/2026-11-23-conditional.md)):** conditional proofs of the 3,412
    unsolved goals: each with its 10 nearest earlier siblings assumed (proved or not) and 30 kNN trusted lemmas, one
    plain 5 s twee run (exp/condprove.py, abs/cond1.sh, 6 threads, cond/COND1 outside loops/). Hard steps against

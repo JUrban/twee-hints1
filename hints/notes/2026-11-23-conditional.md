@@ -276,3 +276,10 @@ abs/plw1.sh (exp/plw1.sh): once PLN2 has ended, one sweep of production's unsolv
 the context production's solved list at its start (cond/PLW1.trusted). Its proofs go into loops/CI3 and loops/UL
 as PLN1's did. Read: its proofs against PLN2's on the same goals, the union, and the proofs per CPU h; the step
 bed's SIB30 and AFT10 suggest that more siblings bridge more.
+
+## PLN2 (ran 06:54-07:17; read 07:18)
+
+PLN1's setting in the context of t0641 (48,466), `--prev cond/PLN1`: 1,778 goals had the same problem as in PLN1 and
+were not run; 1,540 were run, 5 proved (com_Ralt__goal_387, lra2aa__goal_352, lra2aa__goal_382, ns_to_aa1_c__goal_393, ns_to_aa1_c__goal_394), 1.10 CPU h, 4.5 per CPU h. All 5 imported into loops/CI2
+and merged into loops/UL (07:17). The second pass yields about half of the first per CPU h, still more than ten
+times production's.
