@@ -776,6 +776,9 @@ Next:
    loop.py in the trusted context (CU2, with its 8,504 hints) and is not entered.**
    Step test bed (05:28): sets/hardstep300 (300 of the hard goals), abs/stepbed1.sh: arms KNN29 (perturbation control),
    SIB30, AFT10, KNN100, SIB3 (5 s each) and T20 (20 s), 6 threads, one at a time, cond/STEP_<arm>.
+   **Batch 1 (05:56): KNN29 1, SIB30 41, AFT10 51, KNN100 12, SIB3 4, T20 47 of 300; siblings matter most (SIB30, AFT10). One more unconditional
+   proof (aK2_eq_aK3_c__goal_479, KNN100). COND2 (30 earlier siblings, all unsolved goals) runs from 05:56, then batch 2
+   on SIB30's problems (abs/stepbed2.sh).**
 00000000000000000000000000000000000000000000000. **Readiness (04:54, [notes/2026-11-23-readiness.md](notes/2026-11-23-readiness.md)):** offline on Z8's rows (exp/triglag.py,
    exp/fresh_ready.py). Late retries are prompt: of 593 proofs that used a lemma proved after the goal's last failure, the
    proving run came 3/8/16/30/50 min after it (deciles 10/25/50/75/90), always the first run after it. First runs wait longer

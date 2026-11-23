@@ -132,3 +132,21 @@ Production's recent proofs come from goals deep in unproved stretches, at the sa
 cross-original lemmas (kNN, transfer), not from the walls. Its 40-sibling variant (Vs40@0: 11,911 runs in loops/UL's r*/results.tsv)
 already reaches the far parents where they are proved. So extending the chains at the walls is not where production
 stands to gain either.
+
+## Step test bed, batch 1 (ended 05:56; parsed from cond/STEP.done)
+
+| arm | change from COND1's setting | proved | per unit of cost | unconditional |
+|---|---|---:|---:|---|
+| KNN29 | 29 kNN lemmas (control) | 1 of 300 | 1.0 | - |
+| SIB30 | 30 earlier siblings | 41 of 300 | 41.0 | - |
+| AFT10 | +10 later siblings | 51 of 300 | 51.0 | - |
+| KNN100 | 100 kNN lemmas | 12 of 300 | 12.0 | aK2_eq_aK3_c__goal_479 |
+| SIB3 | 3 earlier siblings | 4 of 300 | 4.0 | - |
+| T20 | 20 s | 47 of 300 | 11.8 | - |
+
+* Siblings matter most: 30 earlier ones (SIB30) or 10 later ones as well (AFT10) prove 40-50 times the control, at
+  the same cost; four times the time (T20) about as many as SIB30 at four times the cost. Three siblings (SIB3) are
+  within what a perturbation proves. More kNN lemmas (KNN100) help some.
+* The one unconditional proof, aK2_eq_aK3_c__goal_479 (KNN100; SIB30 and T20 proved it too, conditionally: unproved siblings 451,476 and 473,475,476), used 12 kNN
+  lemmas, 8 of them ranked 30 or beyond, and 0 siblings; production never proved it although it has k100-k1000 members.
+  With COND1's nil3_30__goal_473 that is two new proofs from plain runs (no rule model, no hints): see below.
