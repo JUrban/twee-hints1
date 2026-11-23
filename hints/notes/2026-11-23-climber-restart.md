@@ -73,3 +73,16 @@ as it's veroff's main weapon for solving open problems".
   untagged file only if it has no assume_ axiom.
 * The live climber was restarted at 19:47 with the fix, losing 2 climbs in flight. exp67's arms keep the old naming to
   the end, so as not to disturb the pair; only their real (untagged, assume-free) files will be packed.
+
+## The control: one long run per head (CC67)
+
+* exp67 compares two climber settings, but neither arm says whether climbing helps. On 14 Nov the climber's apparent
+  gain was its long final run, found only when the right control ran (notes/2026-11-14-sketch-climbing.md). The
+  19 Nov test of the sketch hints found they caused 3 of 54 climber proofs (notes/2026-11-19-climb-ablation.md).
+* **CC67** (exp/exp67c.sh): the same 91 frozen heads, the same frozen context (t1854) and arm A's lemma sets
+  (6+30), one run per head with the pool hints and the rule model, no sketch runs (`climb.py --runs 0`), no fill.
+  * Its length is CLA67's mean CPU per finished target when it starts, in abstract seconds (/1.07).
+  * The context is frozen, so it need not run at the same time as the other arms. It starts when exp65 ends (about
+    22:55), on exp65's CPUs, with 4 at a time.
+* Reading: CLA67 against CC67 per head and per CPU h, +/− and union. The climbing pays only if CLA67 beats CC67 by
+  more than single heads (the sets are small).

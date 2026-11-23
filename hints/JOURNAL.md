@@ -787,6 +787,8 @@ Next:
    paired, on the 91 heads of t1854 frozen (exp/sets/heads67): CLA67 = clhl3's setting (6+30 lemmas), CLB67 = 30 sibling and
    400 kNN lemmas (the plain sweeps' size finding). Set mode with the new climb.py --targets, the trusted context and a copy of
    its hints, 2 climbs each (exp/exp67.sh), from 19:01.
+   Control CC67 (exp/exp67c.sh, after exp65): the same heads and context, one run per head of CLA67's CPU per target, no sketches
+   (climb.py --runs 0): does climbing beat a long run (the 14 Nov lesson)?
 00000000000000000000000000000000000000000000000000000. **exp66 (climber restart, [notes/2026-11-23-climber-restart.md](notes/2026-11-23-climber-restart.md)):** the live head
    climber back beside production (abs/clhl3.sh, loops/CLHL3; clhl2.sh's setting, a fresh record). clhl2 made 69 proofs in
    66 CPU h (1.04 per CPU h) and stopped 20 Nov 10:04, never restarted. The user: "you should remember to use the climber and
