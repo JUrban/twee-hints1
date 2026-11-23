@@ -104,10 +104,14 @@ exp/trust.py trusts.
 **The head climber: abs/clhl3.sh (exp66),** climb.py --live into loops/UL, record loops/CLHL3, started 23 Nov
 after a 3.5-day gap (its predecessor clhl2.sh stopped 20 Nov 10:04 at 1.04 proofs per CPU h and was not restarted).
 2 climbs at a time on the heads: 24 sketch runs of 5 s, then a 160 s final run with the sketch steps as hints.
-Launched with CPUS=28 while exp65 runs. Production also keeps the old climbs' hints as members sk@0 and sk@1:0.
+Launched with CPUS=28 while exp65 runs; PID 3668941 since the 19:47 restart (each climb run's proof under its own
+name). Production also keeps the old climbs' hints as members sk@0 and sk@1:0.
 [notes/2026-11-23-climber-restart.md](notes/2026-11-23-climber-restart.md).
 
-**3. Not production:** exp67's two set-mode climbs on 91 frozen heads (loops/CLA67, loops/CLB67, 2 climbs each, from 19:01); exp65's two from-zero arms (loops/Q5A and loops/Q5B, 4 workers each, until about 22:55).
+**3. Not production:** exp67's two set-mode climbs on 91 frozen heads (loops/CLA67, loops/CLB67, 2 climbs each, from
+19:01; their 4 real proofs by 21:05 merged into loops/UL by hand); exp65's two from-zero arms (loops/Q5A and loops/Q5B,
+4 workers each, until about 22:55). Armed for when exp65 ends: exp67's controls CC67 and CC67B (abs/exp67c.sh,
+exp67d.sh; one long plain run per head, 4 at a time each).
 
 **CPU at 18:08:** 23 twee processes are running:
 * the main loop 6, proof reruns 3, the sweep 3, the plain live loop 3, exp65 8;
