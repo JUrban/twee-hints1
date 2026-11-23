@@ -244,3 +244,16 @@ Last 58500 runs: 135 proofs in 216.1 CPU h (0.62 per CPU h).
   assumption can. This is the case for exp69.
 * Veroff's way with sketches: an assumption a proof needs becomes the next target. Reading: the X proved, then
   whether their targets follow (production's reruns with X as a kNN lemma, the climbers).
+
+## Fill lemmas and trust (21:38)
+
+* Production's member sk@1:0 adds the climbers' fill lemmas as axioms (lemma_fill_N, loop.py climb_hints: true.tsv of
+  every --climb-hints dir). A fill run proves a sketch step from the original's axioms, proven lemmas and earlier
+  fill lemmas, with no assumption (climb.py fill()), so the lemmas are sound; but their premises are not recorded and
+  trust.py cannot resolve the label. In an exposed original such a proof stays untrusted: 3 at t2120
+  (aK2_eq_aK3_s 489 and 515, nil3_23_32_to_28 572; 515 is sk@1:0's proof of 21:06).
+* Re-proof without them (abs/revf.sh, one pass of rever2.py's recipe: trusted lemmas only, no climb hints, the goal's
+  own proof steps as hints, 60 s; loops/REVF1): 0 of 3. These proofs need the fill lemmas.
+* ul76 has more fill lemmas (3,055 against 2,675), so the count may grow. If it does, the fix is a record per fill
+  lemma (a kept proof of each, so trust.py can resolve lemma_fill_N through loop.py's numbering); for 3 proofs it is
+  not worth it yet. Each trust run's untrusted count goes in REPORT's summary rows.
