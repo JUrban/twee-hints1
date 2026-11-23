@@ -75,7 +75,11 @@ def one(g):
     if PREV and prevno.get(g) and os.path.exists(f'{PREV}/p/{g}.p') and open(f'{PREV}/p/{g}.p').read() == txt:
         return f'{g}\tSAME\t0.00\t-\t-\t0\n'
     t0 = time.time()
-    r = subprocess.run([TWEE, p] + base + ['--quiet', '--no-proof'], capture_output=True, text=True, timeout=600)
+    try:
+        r = subprocess.run([TWEE, p] + base + ['--quiet', '--no-proof'], capture_output=True, text=True, timeout=600)
+    except subprocess.TimeoutExpired:
+        # (23 Nov) --backwards-goal 2 ran past the abstract-time limit (10 minutes, 5.8 GB): a row, not a crash
+        return f'{g}\tTIMEOUT\t{time.time() - t0:.2f}\t-\t-\t0\n'
     dt = time.time() - t0
     ok = 'RESULT: Theorem' in r.stdout
     unp, pro, nk = '-', '-', 0
