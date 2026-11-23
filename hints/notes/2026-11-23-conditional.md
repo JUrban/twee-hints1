@@ -354,3 +354,10 @@ established bridges these steps, beside the original's own earlier steps.
 Added 07:58: condprove.py `--index kd|kp`, loop.py's other kNN selections (kd: MaSh-style proof dependencies;
 kp: similarity weighted by lemma use counts), as PLD1 (after PLK1) and PLP1 in the queue, at N's sizes. Smoke test
 on PLN2's 5 proofs: kd replaced most of the 100 kNN lemmas and proved 4, kp about a quarter and proved 5.
+
+## PLW1 result (07:17-08:24; read 08:27)
+
+23 proofs of 3,318 goals in 3.28 CPU h, 7.0 per CPU h; 18 not among PLN2's 5, and all of PLN2's 5 among them
+(`exp/condcmp.py cond/PLN2 cond/PLW1`; PLN2's CPU counts only its changed problems). condimport took 23 of 23, merge.py
+16 (the others production had by then, from PLN2 and HB2000). On this context the wide setting finds every proof the
+narrow one finds and more, at a higher rate. The live loop runs both (plainlive2.sh since 08:27).
