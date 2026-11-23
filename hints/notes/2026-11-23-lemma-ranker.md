@@ -137,6 +137,7 @@ so most L problems change each cycle: L cycles are full sweeps, as W's were.
   its columns (lr1 keeps FEATS; the same order for lr1 through the new code on 3 goals).
 * **A leak in lr1's training rows:** for a solved goal (RKD1's), production's own kept output counted in the
   candidate's use count, so a lemma production's proof had used scored higher. Now the goal's own output is left out
-  (unsolved goals have none, so lr1's frontier ranking is unchanged). The frontier problems' CV rows (PLW1, PLK1,
-  PLN1, PLZ8) had no such leak, and showed the same gains. cond/LR2.pkl is built with the fix; its CV compares lr1's
+  (unsolved goals have none, so lr1's frontier ranking is unchanged). PLZ8's goals are all production-solved, so its rows had it
+  too; the rows of goals the plain sweeps proved first (PLW1, PLK1, PLN1: their records went into loops/UL/out by
+  merge.py, which the use counts do not read) had none, and showed the same gains (0.18 to 0.44-0.46 at 50). cond/LR2.pkl is built with the fix; its CV compares lr1's
   features with FEATS2.
