@@ -783,6 +783,11 @@ ul75 5, XFL 1. REPORT's totals table
 has the history (user, 20 Nov: "update the total numbers in the report etc every now and then").
 
 Next:
+00000000000000000000000000000000000000000000000000000000. **exp69 (climb the assumptions, [notes/2026-11-23-climber-restart.md](notes/2026-11-23-climber-restart.md), "exp69"):**
+   most climbed heads have a 5 s sketch proof from a single assumption, nearly always an unsolved goal X of another
+   original. exp/keylemmas.py ranks the X by the unsolved targets they unlock: Kproperties_1 332 and nil4_19K 394 4 each,
+   7 more 2 each; 7 of the 9 are not heads (1-9 goals behind one), so nothing climbed them. CLK69 (exp/exp69.sh): a set-mode
+   climb of the 9 from t2120, CLHL4's setting, 1 climb at a time, real proofs merged into loops/UL every 10 minutes (21:22).
 0000000000000000000000000000000000000000000000000000000. **exp68 (live climber, [notes/2026-11-23-climber-restart.md](notes/2026-11-23-climber-restart.md), "exp68"):** CLHL3 (arm A's
    setting) stopped at 21:07, 0 real proofs in 4.1 CPU h. CLHL4 (abs/clhl4.sh, loops/CLHL4): arm B's lemmas (30 siblings, 400 kNN)
    and --weaken 12 (all weakened goals; the hints of 3 of exp67's 4 proofs came from weakened-goal sketches). Two changes:

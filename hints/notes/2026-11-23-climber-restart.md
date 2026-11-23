@@ -184,3 +184,33 @@ Last 58500 runs: 135 proofs in 216.1 CPU h (0.62 per CPU h).
   trust.py cannot resolve the label, so a proof using one in an exposed original stays untrusted (2 now).
 * Reading: sk@1:0's proofs per CPU h in ul76 against the table above, and whether its proofs fall in the originals of
   today's climbs.
+
+## exp69: climb the assumptions (21:22)
+
+* The conditional proofs say more than "not yet". Each target's smallest assumption set in a sketch proof
+  (used.tsv, at 21:20): CLA67 25 of 27 targets with a single assumption, CLB67 21 of 24, CLHL3
+  19 of 19. The single assumption is nearly always an unsolved goal of another original (assume_knn: 21, 18 and 13),
+  else a later sibling or a theory axiom.
+* So "head T follows from unsolved goal X in 5 s" is an edge between unsolved goals. exp/keylemmas.py collects the
+  edges and ranks each X by the unsolved targets it unlocks:
+
+| X (the assumption) | head? | unsolved targets it unlocks |
+|---|---|---:|
+| Kproperties_1__goal_332 | no | 4 |
+| nil4_19K__goal_394 | yes | 4 |
+| Ka_eq_aK3__goal_420 | no | 2 |
+| Ka_eq_aK3__goal_425 | no | 2 |
+| TLRproperties_2__goal_386 | no | 2 |
+| aK2_eq_aK3_1243b__goal_479 | no | 2 |
+| aK2_eq_aK3_1243b__goal_522 | no | 2 |
+| aK2_eq_aK3_1243b__goal_525 | no | 2 |
+| nil3_2K__goal_383 | yes | 2 |
+
+* (Unlock counts against t2120's trusted goals at 21:20; the exp69 target list is the same 9.) 7 of the 9 are not
+  heads, so no climber or plain head run tried them. They sit 1-9 goals behind their original's
+  head (Kproperties_1 332: 1 unsolved earlier sibling, the head 326).
+* **exp69** (exp/exp69.sh, loops/CLK69, PID 3709639): a set-mode climb of the 9 (exp/sets/key69) from t2120's trusted
+  goals, CLHL4's setting (30 siblings, 400 kNN, `--weaken 12`), 1 climb at a time. Real proofs are merged into loops/UL
+  every 10 minutes, so production and the climbers rerun the heads they unlock.
+* Veroff's way with sketches: an assumption a proof needs becomes the next target. Reading: the X proved, then
+  whether their targets follow (production's reruns with X as a kNN lemma, the climbers).

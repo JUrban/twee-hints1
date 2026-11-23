@@ -109,6 +109,9 @@ assumed, and proofs of weakened goals), then a 160 s final run with the sketch s
 400 kNN goals (exp67's arm B), every weakened goal (`--weaken 12`). Launched with CPUS=28 while exp65 runs. Before it:
 clhl3.sh (exp66, 18:44-21:07, 6+30 lemmas, 0 real proofs in 4.1 CPU h), after a 3.5-day gap (clhl2.sh stopped 20 Nov
 10:04 at 1.04 proofs per CPU h). Production also keeps the old climbs' hints as members sk@0 and sk@1:0.
+**The key-goal climb: abs/exp69.sh (exp69),** loops/CLK69, PID 3709639 since 23 Nov 21:22, 1 climb at a time: the 9
+unsolved goals that the most heads' single-assumption sketch proofs assume (exp/keylemmas.py), CLHL4's setting; real
+proofs merged into loops/UL every 10 minutes.
 [notes/2026-11-23-climber-restart.md](notes/2026-11-23-climber-restart.md).
 
 **3. Not production:** exp67's two set-mode climbs on 91 frozen heads (loops/CLA67, loops/CLB67, 2 climbs each, from
