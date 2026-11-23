@@ -218,3 +218,12 @@ so none has a proof in the training data.
 The other half (13:13): lr2h1 (`train ... --exclude sets/half1`, the 350 half2 problems) for the 265 goals of the 500 in
 half1 (exp/sets/z9gap500h1, exp/z9gap3.sh, cond/ZGH1), started when cond/ZGS ends; with cond/ZGH every goal then has
 a ranker that has not seen its original, against cond/ZGS's similarity lists.
+
+## A hinted ranked member for production (13:20)
+
+loop.py `--variants rkN[sM]` (with `--lemma-ranker`): a hinted run (pool hints, rule model) whose N kNN lemmas come
+from the ranker (pool 2,000), a member of its own beside kN, so production's explore machinery measures it in proofs
+per CPU hour instead of a switch for every run. Smoke test exp/rksmoke.sh (loops/PRK1, sets/rankall_smoke in
+loops/ULT.ctx, 1 worker, 0.05 h, rk30@0 first): the ranker built in 24 s, 6 Vrk30@0 runs with hints, no errors.
+For production (its goals are unsolved, so lr2 has seen no proof of them) after the pre-checks: rk30@0 and
+plrk400s130@0 as explored members.

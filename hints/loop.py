@@ -484,7 +484,9 @@ class Loop:
         var_ = var[2:] if plain_ else var
         # (23 Nov, --variants plr[kN][sM], --lemma-ranker MODEL) the kNN lemmas re-ranked by exp/lemmarank.py's model
         # (notes/2026-11-23-lemma-ranker.md: the similarity list's top 2,000, features of goal and candidate)
-        learned_ = plain_ and var_.startswith('r')
+        # (23 Nov, --variants rkN[sM]) a hinted run whose N kNN lemmas come from the ranker: a member of its own beside
+        # kN, so the explore machinery measures it (rk30@0: L0's run with the ranked 30)
+        learned_ = (plain_ and var_.startswith('r')) or bool(var and re.fullmatch(r'rk\d+(s\d+)?', var))
         if learned_:
             var_ = var_[1:]
         T = budget if budget is not None else self.timeout(rnd)
@@ -1066,7 +1068,7 @@ class Loop:
         in, the variants are not eligible (opts); later builds replace them, so a variant's index may lag by one."""
         a = self.a
         want = {v.partition('@')[0] for v in a.variants.split(',') if v} & {'kp', 'kd'}
-        if a.lemma_ranker and (a.lemma_ranker_all or any(v.startswith('plr') for v in a.variants.split(','))):
+        if a.lemma_ranker and (a.lemma_ranker_all or any(v.startswith('plr') or re.match(r'rk\d', v) for v in a.variants.split(','))):
             want.add('plr')
         if not want or self.vix_busy:
             return
@@ -1280,6 +1282,7 @@ class Loop:
                     or nm in self.fv
                     or (nm and re.fullmatch(r'(k\d+)?(s\d+)?', nm))
                     or (nm and re.fullmatch(r'plr?(k\d+)?(s\d+)?', nm) and (not nm.startswith('plr') or a.lemma_ranker))
+                    or (nm and re.fullmatch(r'rk\d+(s\d+)?', nm) and a.lemma_ranker)
                     or (nm and re.fullmatch(r'm\w+', nm) and a.model_fixed
                         and os.path.exists(os.path.join(os.path.dirname(a.model_fixed.split(',')[0]), 'r' + nm + '.bin')))), v
             # NAME@B: level B's budget and hints, after level B; NAME@B:F (19 Nov 16:30): level B's budget after level F
@@ -1577,7 +1580,7 @@ class Loop:
                 return [0]
             o_ = [v for v in VLEVS if FOL[v] <= h and v not in vtried[n]
                   and (VAR[v] not in ('kp', 'kd') or VAR[v] in self.vix)   # (kp, kd: once their index is in)
-                  and (not str(VAR[v]).startswith('plr') or 'plr' in self.vix)]   # (plr: once the ranker is in)
+                  and (not (str(VAR[v]).startswith('plr') or re.match(r'rk\d', str(VAR[v]))) or 'plr' in self.vix)]   # (plr: once the ranker is in)
             if NOWN[h] < len(T):
                 o_.append(NOWN[h])
             return o_
