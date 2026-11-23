@@ -86,3 +86,18 @@ lr1 (models/lemmarank/lr1) is trained on all rows.
 PLL1 started 09:59 by abs/lrab2.sh (exp/lrab2.sh): lrab.sh's last steps without its wait for c5W's end (the context file
 cond/PLNL/c5.trusted is all PLL1 needs; the queue had ended, its other sweeps held). The control c5W runs at the same
 time in the same context.
+
+## PLL1 result (09:59-10:54; read 10:55)
+
+3 proofs of 3,282 goals, 2.61 CPU h, all merged into production (loops/CI3, 10:54). In this context every goal had
+already failed under W at least once (PLW1, c4W), so W's own proofs here are only what c5W finds on changed problems
+(the control; still running). The kNN lemmas the proofs used, by their similarity rank (LemmaIndex.select's top
+2,000 in the context c5):
+
+| goal | kNN lemmas used | ranked 400 or beyond by similarity | deepest similarity rank |
+|---|---:|---:|---:|
+| aKperms_1__goal_386 | 26 | 13 | 1617 |
+| nil3_27__goal_533 | 8 | 4 | 1776 |
+| nsmr_to_aa1__goal_891 | 24 | 5 | 586 |
+
+Every proof needs lemmas W's list (similarity top 400) does not hold: the ranker brought them in.
