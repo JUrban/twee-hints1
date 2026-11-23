@@ -792,6 +792,8 @@ Next:
    66 CPU h (1.04 per CPU h) and stopped 20 Nov 10:04, never restarted. The user: "you should remember to use the climber and
    experiment with it as it's veroff's main weapon for solving open problems". Launched with CPUS=28 (more CPUs allowed for
    a limited time); read per CPU h against plainlive4's H setting on the same heads.
+   (19:47) Restarted with per-run proof names (d79c82e): every climb run wrote proofs/<target> over the last, sketch proofs
+   (assume_* axioms) included; now <target>.<tag>, sketch proofs kept, finals safe. No sketch proof was in loops/UL/proofs.
 0000000000000000000000000000000000000000000000000000. **exp65 (redesigned 15:47, [notes/2026-11-23-plain-sizes.md](notes/2026-11-23-plain-sizes.md)):** larger kNN lists in the plain levels
    from zero. Q5A: P4B's DEEP exactly, on P4B's CPU set (also a cross-time replica of P4B); Q5B: plain levels plk400s40@0 and
    plk1600s130@0 in place of plk100s40@0 and plk400s130@0, on P4A's set. sets/half2, 4 workers, 6 hours (abs/exp65.sh), after
