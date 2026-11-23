@@ -59,3 +59,9 @@ At the same reading the solved lists: P4B 19,720, P4A 19,470; only P4B 421, only
 goals, 6 of them unsolved in P4A: the direct effect is small, so most of P4B's lead is indirect (a plain proof's
 steps become hints and its goal a lemma for its neighbours) or the arms' own spread. The 6-hour one-arm goals will
 say more; a replica pair is needed before a change either way.
+
+Where the lead is from (12:56, solved lists): only P4B 421 (L0 334, transfer or GML 79, Vplk100s40 3, Vplk400s130 3, Vunf 2), only P4A 161 (L0 127, transfer or GML 23, Vunf 4, L1 2, Vk100 2, Vk200 2). Of
+P4B's one-arm goals with a kept output (342), 3 used a plain-proved goal as a lemma. So the lead is in the first
+hinted level, not in the plain proofs or their lemmas. The arms' speeds differ: P4A's CPU set ran 1.30 CPU s per
+abstract second in hour 1 against P4B's 1.07, so by wall time P4A did less work; the equal-work difference (+85)
+is the fair one, and it is within the spread of a replica pair.
