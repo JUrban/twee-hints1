@@ -4906,6 +4906,8 @@ reproduced exactly).
 
 ## 2az. Portfolios: complementary methods kept, not dropped (user's request, 18 Nov 17:00)
 
+*Notes: [notes/2026-11-23-lemma-ranker.md](notes/2026-11-23-lemma-ranker.md).*
+
 *Notes: [notes/2026-11-23-plain-level.md](notes/2026-11-23-plain-level.md).*
 
 *Notes: [notes/2026-11-23-conditional.md](notes/2026-11-23-conditional.md).*
@@ -5676,6 +5678,14 @@ index is now rebuilt every 10 minutes, not 30 (about 1 s a rebuild).
   * **Hints do not help there (the hint bed):** on 600 frontier goals plain runs failed, adding the hints of the lemma
     goals' own proofs proved 0 (200 hints) and 1 (2,000, twice the CPU), the control 0; 2,000 hints lost 3 of 5 plain
     proofs. Most lemmas the proofs use are kNN goals of other originals: the lemma set does the work.
+  * **Wider lemma sets prove more (09:33):** W (100 earlier and 30 later siblings, 400 kNN; PLW1) proved 23 on the
+    frontier, 7.0 per CPU h, every one of N's (PLN2) and 18 more. The 400 kNN do most of it (PLK1, N's siblings with 400 kNN:
+    16, 3 of its own); 1,000 kNN slow twee down. The live loop runs N and W each cycle (abs/plainlive2.sh).
+  * **The kNN ranking is weak, a learned one is not (09:33; [notes/2026-11-23-lemma-ranker.md](notes/2026-11-23-lemma-ranker.md)):** the
+    used kNN lemmas are spread almost evenly over ranks 0-400. exp/lemmarank.py (LightGBM on goal/candidate features,
+    CV grouped by original) raises the share of used lemmas in the top 50 of 400-lists from 0.183 to 0.436, in the top 100
+    from 0.344 to 0.633, from 213 proofs. It is being tested on the frontier (PLL1 against the live loop's W cycle in
+    the same context), trained with 800 more proofs of solved goals (RKD1).
   * loop.py `--variants pl[kN][sM]` makes it a cascade level; abs/plainlive.sh runs it beside production as a live
     side loop; exp64 tests it from zero.
 * **Where the frontier is (COND1, COND2):** with their earlier siblings assumed (proved or not), 73-83% of the unsolved
@@ -5836,6 +5846,17 @@ rounds of 30 s or more, but about 40% overhead for 8 s rounds.
 | long-run-scalability, mature-back-index-cpu, adaptive-back-index-crossover (indexing side) | paramodulation and back-demodulation indexes that stay cheap as the clause set grows | ported in twee's terms (2v): a fingerprint index for overlap partners (exact, 1.8× on long runs) and a backward-demodulation filter for interreduction. |
 
 ## 3. Assessment
+
+*23 Nov, 09:33 (`date` checked). The 07:13 assessment follows it.*
+
+* **48,502 goals in production's solved list** (48,466 trusted at 06:41; trust.py rerunning): the plain sweeps' proofs
+  (PLN1 22, PLN2 5, PLW1 16, PLK1 2, live loop 2, the hint bed 1) and production's own.
+* **Plain runs keep paying, and the lemma set is the lever:** hints add nothing to them (the hint bed); wider lists
+  prove more; the similarity ranking is weak and a learned ranker doubles recall in cross-validation (2az).
+* **Z9 at 6 hours:** +598 over Z8 and +155 over Z7 at equal abstract work; Z9 ends 10:46, exp64 (a plain level from
+  zero) takes its slot.
+* **CPU:** above 20 while the sweeps, production, Z9/exp64 and the live loop overlap; the sweep queue's last four
+  settings are held.
 
 *23 Nov, 07:12 (`date` checked). The 05:27 assessment follows it.*
 
