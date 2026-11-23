@@ -102,7 +102,13 @@ none. abs/stepbed1.sh (exp/stepbed1.sh) runs exp/condprove.py with one change pe
 
 Reading: each arm's proofs against KNN29's; an arm is a lead only well above the control.
 
-Batch 2, abs/stepbed2.sh (exp/stepbed2.sh), after batch 1, COND1's problems with one twee option each (5 s): GH
-`--goal-heuristic`, HG `--hint-goal`, BG2 `--backwards-goal 2`, FGL `--no-flatten-goal --flatten-goal-lightly`,
-NFG `--no-flatten-goal`, KW0 `--kbo-weight0`, FLIP `--flip-ordering`, GJB `--ground-joining-branch-limit 100`
-(production's limit).
+Batch 1 so far (05:37; parsed from cond/STEP.done): KNN29 1 of 300, SIB30 41, AFT10 51; 0 unconditional among them. 41 of
+the 41 SIB30 proofs used a sibling more than 10 goals back: a long step's parents are 11-30 goals earlier, so COND1's
+10-sibling window called too many goals hard, and its "no keystones" needs a recheck.
+
+Batch 2 was replaced before it started (05:37): abs/stepbed2.sh (exp/stepbed2.sh) now runs, after batch 1,
+* **COND2:** COND1 with 30 earlier siblings (earlier only, so the blocking graph stays well-founded), all unsolved
+  goals, cond/COND2; then exp/condgraph.py again;
+* batch 2 on SIB30's problems (30 earlier siblings, 30 kNN, 5 s): S30KNN29 (control), S30GH `--goal-heuristic`,
+  S30HG `--hint-goal`, S30BG2 `--backwards-goal 2`, S30FGL `--no-flatten-goal --flatten-goal-lightly`, S30KW0
+  `--kbo-weight0`, S30FLIP `--flip-ordering`, S30GJB `--ground-joining-branch-limit 100`.
