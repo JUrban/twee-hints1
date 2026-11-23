@@ -54,3 +54,8 @@ so they start late). Too early to read.
 | P4B | 17,602 | 18,601 | 19,669 | 19,472 at 116 min |
 
 P4B +235 by wall time, +85 at equal work. Its plain levels: Vplk100s40@0 34 of 203, Vplk400s130@0 16 of 150 proved.
+
+At the same reading the solved lists: P4B 19,720, P4A 19,470; only P4B 421, only P4A 171. The plain levels proved 50 of P4B's
+goals, 6 of them unsolved in P4A: the direct effect is small, so most of P4B's lead is indirect (a plain proof's
+steps become hints and its goal a lemma for its neighbours) or the arms' own spread. The 6-hour one-arm goals will
+say more; a replica pair is needed before a change either way.
