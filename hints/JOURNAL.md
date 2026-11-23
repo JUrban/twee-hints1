@@ -785,6 +785,7 @@ Next:
    Changed 07:57 (before the start): P4B has two plain levels, plk100s40@0 and plk400s130@0 (N and W), prior 3 each.
    Started 10:52:03 (loops/EXP64.pids); loop.py P4A 3128645, P4B 3128644; ends about 16:52.
    1 h (11:53): P4A 17,562, P4B 17,602 (+40); at equal work −46. Plain runs 124, 25 proved.
+   2 h (12:53): P4A 19,434, P4B 19,669 (+235); at equal work +85. Plain levels 50 of 353 runs proved.
 0000000000000000000000000000000000000000000000000. **Plain live loop (06:55, [notes/2026-11-23-conditional.md](notes/2026-11-23-conditional.md), "Plain live loop"):** PLN1's
    plain sweep as a side loop of production: each cycle (30 min or more, 3 threads) takes loops/UL's solved goals as
    context, reruns only goals whose problem changed (condprove.py --prev), imports the proofs into loops/CI2 and merges

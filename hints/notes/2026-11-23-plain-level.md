@@ -45,3 +45,12 @@ production's processes. Readings at 30, 60, 120, 240 and 360 minutes.
 
 P4B +40 by wall time, −46 at equal work. P4B's plain runs so far: 124, 25 proved (the plain levels follow 3 failed attempts,
 so they start late). Too early to read.
+
+## 2 hours (12:53)
+
+| | 60 min | 90 min | 120 min | equal abstract work (P4A's 118 min) |
+|---|---:|---:|---:|---:|
+| P4A | 17,562 | 18,523 | 19,434 | 19,387 at 118 min |
+| P4B | 17,602 | 18,601 | 19,669 | 19,472 at 116 min |
+
+P4B +235 by wall time, +85 at equal work. Its plain levels: Vplk100s40@0 34 of 203, Vplk400s130@0 16 of 150 proved.
