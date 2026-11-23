@@ -224,3 +224,28 @@ variants, through an A/B.
 | im2_24_to_25__goal_471 | hard | 6 | - |
 | nil3_15to7__goal_420 | hard | 6 | - |
 | nil3_23_32_to_26__goal_502 | blocked | 6 | 495,496 |
+
+## Step test bed, batch 2 (ended; read 06:54)
+
+SIB30's problems (30 earlier siblings assumed, 30 kNN, 5 s) with one twee option each:
+
+| arm | option | proved |
+|---|---|---:|
+| S30KNN29 | 29 kNN lemmas (control) | 41 of 300 |
+| S30GH | `--goal-heuristic` | 41 of 300 |
+| S30HG | `--hint-goal` | 42 of 300 |
+| S30BG2 | `--backwards-goal 2` | 6 of 40 |
+| S30FGL | `--no-flatten-goal --flatten-goal-lightly` | 42 of 300 |
+| S30KW0 | `--kbo-weight0` | 40 of 300 |
+| S30FLIP | `--flip-ordering` | 39 of 300 |
+| S30GJB | `--ground-joining-branch-limit 100` | 41 of 300 |
+
+* No option bridges more long steps than the control. S30BG2 has no result: twee with `--backwards-goal 2` ran past
+  the abstract-time limit (one run 10 minutes, another killed at 8 minutes and 5.8 GB); condprove.py's subprocess
+  timeout then ended the arm after 40 rows (condprove.py now writes TIMEOUT rows instead).
+* What bridges long steps is the lemmas (siblings far back, many kNN lemmas), not twee's search options.
+
+## Totals after PLN1 (06:54)
+
+exp/trust.py loops/TRUSTNOW/t0641 (-j 2, --exposed loops/UNSOUND/exposed.txt): **48,466 trusted, 0 untrusted; holdout
+5,393 of 5,880**. All 24 goals of loops/CI1 are trusted.
