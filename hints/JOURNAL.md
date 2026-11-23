@@ -800,6 +800,7 @@ Next:
    (17:01) PLG1 stopped at 1,453 goals, 1 proof (merged; it used a kNN lemma ranked 1,420). The frontier is 92 heads (each original's first unsolved goal, all earlier siblings proved; the other 3,176 sit behind them): plain 60 s sweeps HDW1 (400 kNN) and HDG1 (1,600) on sets/heads92.
    **(17:49) HDW1: 4 of 92 heads proved by plain 60 s runs (400 kNN, 100+30 siblings) in 2.25 CPU h, 1.8 per CPU h; all merged into production (its own loop: about 5 in 6 hours). Next: HDG1 (1,600 kNN), then the live loop with a heads setting (abs/plainlive4.sh).**
    HDG1 (18:52): 1,600 kNN lemmas on the 88 other heads at 60 s, 1 proof (aK1_nil3_b 177) in 3.02 CPU h (0.33 per CPU h) against HDW1's 4 in 2.25 (400 lemmas, 1.78); H keeps 400.
+   2 h: Q5A 19,244, Q5B 19,523 (+279; +336 at equal work), P4B (Q5A's setting) 19,669: replica spread 425, so no signal yet.
 000000000000000000000000000000000000000000000000000. **Lemma ranker (08:59, [notes/2026-11-23-lemma-ranker.md](notes/2026-11-23-lemma-ranker.md)):** the used kNN lemmas of plain
    proofs are spread evenly over ranks 0-400; a learned ranker could bring needed lemmas into the list. Data sweep
    RKD1 (abs/rkd1.sh): 800 solved goals near the frontier, 1,000 kNN lemmas, 5 s, 2 threads; then LightGBM, recall at

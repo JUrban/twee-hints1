@@ -145,3 +145,15 @@ Q5B by wall time: 30 min -129, 60 min +128; at equal work (the points above, in 
   paired test on them.
 * At 60 s on the heads, 1,600 lemmas cost a third more CPU (startup) and prove less. plainlive4's H setting keeps 400.
   Merged into loops/UL through CI3.
+
+## 2 hours
+
+| min | Q5A (100+400) | Q5B (400+1,600) | P4B (exp64, Q5A's setting) |
+|---:|---:|---:|---:|
+| 60 | 17,367 | 17,495 | 17,602 |
+| 90 | 18,334 | 18,611 | 18,601 |
+| 120 | 19,244 | 19,523 | 19,669 |
+
+* At equal abstract work (abscurve, 118 min): Q5B 19,511, Q5A 19,175, +336.
+* The replica spread is larger: Q5A and P4B run the same setting and differ by 425 at 120 min. Q5B's lead is inside it.
+  Readings at 4 and 6 h.
