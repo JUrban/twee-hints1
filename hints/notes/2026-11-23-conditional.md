@@ -340,3 +340,13 @@ On 600 frontier goals plain runs had failed, the hints of the lemma goals' own p
 at twice the CPU (the control 0). With the smoke test (2,000 hints lost 3 of 5 plain proofs), hints hurt more
 than they help on the frontier; **the lemma set is what proves these goals**. HB2000's proof (aa2_to_aa3__goal_267) went
 into production through loops/CI4 (condimport.py now reruns a hinted sweep's proof with its hints file).
+
+## Which lemmas the plain proofs used (read 07:56)
+
+| sweep | proofs | sibling lemmas used | kNN lemmas, same original | kNN lemmas, other originals | lemmas per proof (median) |
+|---|---:|---:|---:|---:|---:|
+| PLN1 | 24 | 86 | 19 | 181 | 10 |
+| PLN2 | 5 | 17 | 2 | 20 | 6 |
+
+Most kNN lemmas a proof uses are goals of other originals with the same or weaker axioms: what other Prover9 proofs
+established bridges these steps, beside the original's own earlier steps.
