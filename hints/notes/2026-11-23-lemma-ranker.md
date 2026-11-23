@@ -230,8 +230,8 @@ plrk400s130@0 as explored members.
 
 ## Why the ranker's 30 can lose: clusters (13:22)
 
-The first 127 paired goals of the pre-check: similarity 8 proofs, lr2h 4. In the goals only similarity proved, its
-proofs used 3, 15 and 18 of their 30 kNN lemmas, and lr2h's 30 held 1, 6 and 3 of those: similarity gives twee a
+The first 127 paired goals of the pre-check: similarity 8 proofs, lr2h 4. In the 4 goals only similarity proved
+(at the note's writing), its proofs used 3, 15, 18, 11 of their 30 kNN lemmas, and lr2h's 30 held 1, 6, 3, 6 of those: similarity gives twee a
 cluster of near-identical lemmas that work together, while the model scores each lemma alone, trained on 1,000-lemma
 problems where a proof takes a few of many substitutes. Recall of used lemmas there does not say a 30-lemma set
 suffices.

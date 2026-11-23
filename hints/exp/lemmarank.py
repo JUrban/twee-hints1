@@ -273,7 +273,7 @@ class Ranker:
             return C
         s = self.score(np.array(self.ctx.features(g, list(enumerate(C))))[:, self.cols])
         # (23 Nov, MIX) the similarity list's top MIX first, then the model's best of the rest: in the Z9-gap pre-check
-        # similarity's 30-lemma proofs used 3, 15 and 18 of their lemmas, a cluster the model's 30 held 1-6 of
+        # similarity's 30-lemma proofs used clusters of their lemmas, which the model's 30 mostly lacked (notes, "clusters")
         h = min(self.MIX, k)
         order = [i for i in np.argsort(-s, kind='stable') if i >= h][:k - h]
         return C[:h] + [C[i] for i in order]
