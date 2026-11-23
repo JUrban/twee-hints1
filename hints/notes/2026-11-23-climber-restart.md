@@ -58,3 +58,18 @@ as it's veroff's main weapon for solving open problems".
   * +/−, the union, and the unique proofs.
   * A target proved by the live climber or production meanwhile still counts here; the context is frozen at 18:54.
 * CPU: about 8 more twees beside exp65, on the user's leave for more CPUs while climbing.
+
+## Climb proofs under their own names (19:47)
+
+* Every THM run inside a climb, sketch runs too, queued a proof rerun (loop.py's proof job, exp/proofq.py). Each one
+  wrote DIR/proofs/<target> over the last. A sketch proof takes unproved goals as axioms (assume_*), so the file
+  held whichever run was rerun last. A late sketch rerun could replace a final run's real proof; jobs run oldest first,
+  so that is unlikely, but it can happen.
+* Checked: no file in loops/UL/proofs has an assume_ axiom, and CLA67's real proof of aa1_14 533 is intact.
+* Fix (twee repo d79c82e): climb.py names each run's proof <target>.<tag> (s0, s3.weak, final, ...) through loop.py's
+  new proof_name. The sketch proofs are kept as data, and nothing overwrites anything. A 2-head smoke test queued
+  jobs named aa1_45_c__goal_340.s0, .s1.weak, .s2.weak.
+* The packer (exp/hintdata_build.py) packs climber dirs as family climbers. It takes every tagged file, and an
+  untagged file only if it has no assume_ axiom.
+* The live climber was restarted at 19:47 with the fix, losing 2 climbs in flight. exp67's arms keep the old naming to
+  the end, so as not to disturb the pair; only their real (untagged, assume-free) files will be packed.

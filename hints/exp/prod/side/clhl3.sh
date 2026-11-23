@@ -5,6 +5,7 @@
 # assumptions predate the quarantine), --cpus 20: a climb starts only while fewer than 20 twee processes run.
 # (18:44) Started now on the user's word ("you can start the climber now, taking some more cpus for this limited time is ok"),
 # launched with CPUS=28 while exp65 runs (to about 22:55); the default 20 is for later restarts.
+# (19:47) Restarted for the per-run proof names (proofs/<goal>.<tag>, twee repo d79c82e); still CPUS=28.
 # Measured per CPU h against plainlive4's H setting (plain 60 s runs on the same heads). notes/2026-11-23-climber-restart.md.
 export TWEE_PG_ARGS="--pg-threshold 0.25 --ground-joining-branch-limit 100"
 cd /project/hintwork
