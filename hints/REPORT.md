@@ -119,7 +119,7 @@ proofs in 63 minutes.
   * plainlive5 had dropped L (5 s, 100+30 siblings, 400 kNN ranked by lr2): 4 proofs in 18 h of run time since 12:38
     ([notes/2026-11-23-tail-allocation.md](notes/2026-11-23-tail-allocation.md)).
 * **Quick climber finals CLQ83 (exp83):** abs/clq83.sh, climb.py --live into loops/UL, record loops/CLQ83, since 24 Nov
-  15:33: no climbs (--runs 0), the final capped at 40 CPU s, -j 3, on CLS71's stalled queue and order; it excludes
+  15:33 (restarted 16:05 after a refresh race in climb.py, fixed in 8733753): no climbs (--runs 0), the final capped at 40 CPU s, -j 3, on CLS71's stalled queue and order; it excludes
   what CLS71 finished since 06:05. Half of CLS71's proving finals took under 40 s, a failed one a median 409 s
   ([notes/2026-11-24-quick-finals.md](notes/2026-11-24-quick-finals.md)). HLS2 (the kNN-slice sweep, 09:05-15:30)
   was stopped at 750 of 1,012 heads: 9 proofs, 0.47 per CPU h ([notes/2026-11-24-plain-time.md](notes/2026-11-24-plain-time.md), "HLS2").
