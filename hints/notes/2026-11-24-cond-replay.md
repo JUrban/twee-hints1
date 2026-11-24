@@ -161,3 +161,15 @@ sketch at 90 s marked and retried again.
 
 **Reading.** Proofs among the goals in loops/UL/climbretry.tsv (each goal's runs after its retry), proofs per CPU h of
 those runs, against production's overall rate.
+
+### exp78 result: negative, reverted (02:26)
+
+ul79's 63 minutes (01:15-02:18, exp/climbretry.py at 02:18): 1,312 runs, 0 proofs, 5.96 CPU h. 1,304 of the runs
+(5.94 CPU h) were on 287 climb-retried goals, a fresh run and then the variants (about 4.5 runs each), 0 proved. ul78
+before it: 8 new proofs in 1,950 runs. At the stop, loops/UL/climbretry.tsv had 300 retries of 291 goals; 8 goals were
+retried more than once (at most 3), so the re-marking of goals still being climbed was not the cost (ul80.sh's header
+says it was; the running script is left as it is). The cost is the retry itself: climbed stalled goals do not fall
+to production's cascade with their climb hints.
+
+**ul80** (abs/ul80.sh, exp/prod/ul80.sh): ul79 without the flag, so ul78's setting (the scripts differ only in the
+UL label). loop.py PID 3794779 since 02:19. loop.py keeps --retry-climb (off by default).

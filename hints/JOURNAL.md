@@ -787,6 +787,7 @@ Next:
    loop.py --retry-climb: a goal whose climb sketches are newer than its last fresh run gets one fresh run (then the sk members).
    Before, 127 of CLS71's first 149 climbed targets had no production run after their climb. **ul79** (01:15) = ul78 plus
    --retry-climb --retry-climb-hours 6; 212 goals marked at the start; retries in loops/UL/climbretry.tsv.
+   **(02:18) Negative: 1,312 runs in 63 minutes, 0 proofs; 1,304 on 287 retried goals (5.9 CPU h, 0 proved). ul80 (02:19) = ul78's setting.**
 0000000000000000000000000000000000000000000000000000000000000000. **exp77 (twee's CASC strategies on local heads, [notes/2026-11-24-cond-replay.md](notes/2026-11-24-cond-replay.md), "exp77"):**
    every run so far used twee's default queue. Four of twee's UEQ portfolio strategies (lhs-weight 1 or 9 with flip-ordering,
    ground connectedness, kbo-weight0) as plain 60 s runs on 120 local heads; HLW1 is the control. --complete-subsets and
