@@ -36,11 +36,16 @@ PROVED = '--proved' in a
 # goal decides (e.g. plainlive's last H cycle, then the HLW1 sweep, when H moves to the local heads)
 PREV = opt('--prev', '')
 PREVS = [x for x in PREV.split(',') if x]
+# (24 Nov) --prev-ignore-knn: compare the problems without their lemma_knn_* lines, so a goal is rerun only when its
+# axioms or sibling lemmas changed (a newly proved sibling), not when its kNN list moved (plainlive's local heads)
+PIK = '--prev-ignore-knn' in a
+def _pk(x):
+    return ''.join(l for l in x.splitlines(True) if not l.startswith('fof(lemma_knn_')) if PIK else x
 # (23 Nov, the hint bed) --hints-lemmas CAP: also the hints of the problem's lemma goals (their proofs' steps,
 # /project/hintwork/loops/UL/hints/<goal>), the siblings nearest first, then the kNN lemmas by rank, at most CAP, as
 # twee's --hints-file OUT/h/<goal>.hints (default factor); the problem text stays as without
 HCAP = int(opt('--hints-lemmas', '0')); HDIR = opt('--hints-dir', '/project/hintwork/loops/UL/hints')
-a = [x for x in a if x not in ('--all', '--proved')]
+a = [x for x in a if x not in ('--all', '--proved', '--prev-ignore-knn')]
 OUT = os.path.abspath(a[0])
 assert not OUT.startswith('/project/hintwork/loops'), 'OUT must be outside loops/'
 os.makedirs(f'{OUT}/p', exist_ok=True); os.makedirs(f'{OUT}/proofs', exist_ok=True)
@@ -111,7 +116,7 @@ def one(g):
                 txt += f'fof(lemma_goal_{j},axiom,{f_}).\n'
     p = f'{OUT}/p/{g}.p'
     open(p, 'w').write(txt)
-    if prevno.get(g) and os.path.exists(f'{prevdir[g]}/p/{g}.p') and open(f'{prevdir[g]}/p/{g}.p').read() == txt:
+    if prevno.get(g) and os.path.exists(f'{prevdir[g]}/p/{g}.p') and _pk(open(f'{prevdir[g]}/p/{g}.p').read()) == _pk(txt):
         return f'{g}\tSAME\t0.00\t-\t-\t0\n'
     hx = []
     if HCAP:
