@@ -788,6 +788,8 @@ Next:
    same stalled queue and order as CLS71. Half of CLS71's proving finals since 08:59 took under 40 s, a failed one a median
    409 s; production had run only 5 s runs on those goals. A failed quick final keeps its place in CLS71's queue (not exp49).
    Rule after about 3 h: keep at twice CLS71's proofs per CPU h or more, stop at its rate or below.
+   **(18:40) CLQ83 765 finished, 40 proved, 4.57 per CPU h; CLS71 since 15:33 223, 44, 1.49: kept (3.07x). The two overlap little (CLS71
+   proved 9 of 63 targets CLQ83 had failed; 3 of CLQ83's 42 proofs on targets CLS71 also ran); the total rate (2.24) shows no gain.**
 0000000000000000000000000000000000000000000000000000000000000000000000. **exp82 (Horn sibling lemmas, [notes/2026-11-24-horn-lemmas.md](notes/2026-11-24-horn-lemmas.md)).** 2,771 proved
    goals are genuine Horn clauses with no unit form, and lemma import has always dropped them (REPORT 2ae). TWEE_LEMMA_HORN=1
    adds the ones in a problem's sibling window as clause axioms (twee's ifeq encoding), on top of the same unit ones.

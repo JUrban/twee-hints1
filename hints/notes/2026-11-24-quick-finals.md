@@ -76,3 +76,26 @@ about 18:40.
 
 **Fix verified (17:08):** the first refresh after the 16:37 restart ran at 17:08:13 ("live: refreshed with 53 new proofs
 of loops/UL in 7s"); CLQ83 is alive, with no new traceback.
+
+## Result and decision (24 Nov 18:40, exp/clqread.py 1570 20123, both instances)
+
+| | finished | proved | CPU h | per CPU h |
+|---|---:|---:|---:|---:|
+| CLQ83 (40 s finals, no climbs, -j 3) | 765 | 40 | 8.76 | 4.57 |
+| CLS71 (since 15:33, -j 10) | 223 | 44 | 29.63 | 1.49 |
+
+**By the rule (twice CLS71's rate or more): kept.** The ratio is 3.07. A critical look at the rule: CLQ83 runs ahead
+on the same queue, so it could skim CLS71's easy targets, and the two rates would then not show what CLQ83 adds. The
+overlap says it mostly does not (counted at 18:41):
+* CLS71 finished 223 targets since 15:33; 63 of them CLQ83 had failed first, and CLS71 proved 9 of those (14%; their
+  proofs need more than 40 s), against 35 of its other 160 (22%).
+* Of CLQ83's 42 proofs, 3 were on targets CLS71 also finished since 08:59. CLQ83 ran 768 targets in about 3 hours,
+  CLS71 about 70 an hour: most of CLQ83's targets CLS71 would have reached many hours later.
+* So CLQ83's proofs are mostly additional and come sooner, at 4.57 per CPU h, against about 1.5 for CLS71's threads now.
+  The two together made 86 proofs in 38.4 CPU h (2.24 per CPU h), close to CLS71 alone before 15:33 (about 2.5,
+  falling through the day as the near targets go): no controlled gain in the total rate is shown.
+* As CLQ83 gets ahead, more of CLS71's targets are ones CLQ83 failed (the second stage: full finals on goals that
+  need more than 40 s). 545 unsolved, not excluded goals are left that CLQ83 has not finished; after them it takes only
+  newly stalled goals, so its threads will idle.
+* Next: the staged final inside the climber (40 s for every new target first, the full final later) is the clean form
+  of this; proposed to the user after the final-only A/B, which keeps running unchanged.
