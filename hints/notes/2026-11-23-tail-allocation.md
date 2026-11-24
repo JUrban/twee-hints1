@@ -147,3 +147,14 @@ the W cycles' runs and proofs per CPU h, against HLW1's 0.90.
 First cycle c39: N (5 s) 1,459 runs, 0 proofs, 09:04-09:23; H (heads, 60 s) 59 runs, 0 proofs, to 09:53; W from 09:53. W's
 first rows: aa1_45_b 370-398 SAME (unchanged since HLW1 apart from kNN lemmas, not rerun), aa1_45_c 343, 350 and 355
 rerun: each gained lemma_goal_365 (aa1_45_c 365, proved by HLW1) as a later sibling, the only line that changed.
+
+## ul84 (24 Nov 11:23)
+
+Totals at 11:18 (loops/TRUSTNOW/t1118): 48,947 trusted, holdout 5,476, 353 more than at 07:29. ul83 (2 workers,
+07:34-11:23): 2,250 runs, 98 proofs, 95 of them at L0 (1,555 L0 runs, 4.06 CPU h). By hour of the instance: runs/L0/THM
+398/75/3, 584/281/1, 703/661/77, 576/538/17. The climber's chains (62 proofs 08:59-11:18) give the goals after each
+proof new sibling lemmas, and the cascade's fresh L0 runs prove many of them; GML and XFL also match the new runs'
+rules and steps (166 and 23 of the 353 goals have a fresh proof file there). With 94% of its runs at L0 production was
+saturated, so **ul84 = ul83 with J=4** (abs/ul84.sh, exp/prod/ul84.sh). Attribution note: the solved.tsv files of GML and
+other side loops mirror loops/UL's, so they cannot say who proved a goal; the climber's log, results.tsv THM rows and
+fresh proof files can (overlapping).
