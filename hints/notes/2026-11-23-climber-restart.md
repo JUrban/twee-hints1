@@ -580,7 +580,7 @@ finals, all final-only targets, and three 5 s sketch runs, all climbing ones. 6 
 sets/cls71re (864). Reading: real proofs per CPU h by arm (crc32 of the target), new targets and re-climbs apart; a
 final-only rate at or above the climbing one means long finals without climbs.
 
-**A/B reading at 24 Nov 10:18** (exp/climbab.py, the instance from 08:59): new climb: 50 finished, 15 proved, 5.15 CPU h, h per CPU h; new final-only: 54 finished, 18 proved, 4.85 CPU h, h per CPU h.
+**A/B reading at 24 Nov 10:18** (exp/climbab.py, the instance from 08:59): new climb: 50 finished, 15 proved, 5.15 CPU h, 2.91 per CPU h; new final-only: 54 finished, 18 proved, 4.85 CPU h, 3.71 per CPU h.
 33 proofs in 79 minutes, all in loops/UL, mostly in tails: aK2_eq_aK3_gen 6, nil3_23_32_to_26 5, nil3_27 4,
 nil3_23_32_to_30 3, nil3_23_32_to_28 3, aK2_eq_aK3_b 3. With --chain a proof becomes a sibling lemma (and hints) of the
 original's later targets at once, so a tail falls in runs. No re-climb has started yet (new stalled goals keep coming).
