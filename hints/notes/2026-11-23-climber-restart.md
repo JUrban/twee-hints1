@@ -535,3 +535,11 @@ targets whose 20 s finals had failed, +1 −0 for the climb hints), CLS71 restar
 (exp/prod/side/cls71b.sh): the same record dir, lemma lists, cap (CPUS=20) and climb, `--final-time 160`.
 Reading: real proofs per CPU h from 06:05 on (exp/climbread.py CLS71 on the climbs started after the restart),
 against the 20 s finals' 1 in 23 Nov 23:33-24 Nov 06:05.
+
+**First reading with 160 s finals (24 Nov 07:33).** After the 06:05 restart, 54 targets finished, 5 proved (aK1_eq_aK3 457
+and 460, aK2_eq_aK3_o 522, aK2rev 450, aa1_14 538), 7.36 CPU h (climb.tsv seconds of those targets), **0.68 per CPU h**.
+Before it, with 20 s finals: 3 real proofs in about 35 CPU h (climbread.py CLS71: 8 in 42.63 CPU h in all). The targets
+differ (each is climbed once, in order), so this is not an A/B; exp76 was one (the same 30 targets: 160 s finals 2 with
+the climb hints, 1 without, 20 s finals 0). The climber is now the best use of CPU per proof: HLW1 0.63 and falling,
+production ul82 0 in 2,501 runs (9.4 CPU h). Production goes to 2 workers so the climber (cap: fewer than 20 other
+twee processes) gets their threads.
