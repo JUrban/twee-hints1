@@ -46,6 +46,9 @@ def conjecture(name):
 # AIM60k's 9,052 conditional goals (15 Nov; Prover9 proved stalled goals with such siblings, which
 # lemma import had skipped). TWEE_LEMMA_UNITIZE=0 turns the conversion off (controls).
 UNITIZE = os.environ.get('TWEE_LEMMA_UNITIZE', '1') != '0'
+# (24 Nov, exp82) TWEE_LEMMA_HORN=1: lemma_problem also adds the genuine Horn siblings (no unit form) met in its window,
+# on top of the M unit ones, as clause axioms (twee encodes them with ifeq); 2,771 proved goals are Horn clauses.
+HORN = os.environ.get('TWEE_LEMMA_HORN', '0') == '1'
 _VAR = re.compile(r'X\d+')
 
 def unitize(f):
@@ -121,17 +124,21 @@ def lemma_problem(name, solved, m, after=False):
     set of goal numbers) as extra axioms, and the number of lemmas added."""
     o, k = split(name)
     cands = sorted((j for j in solved.get(o, ()) if j != k and (after or j < k)), key=lambda j: (abs(k - j), j))
-    lem = []
+    lem, horn = [], []
     for j in cands:
         if len(lem) >= m:
             break
         f = lemma_form(f'{o}__goal_{j}')
         if f:
             lem.append((j, f))
+        elif HORN:
+            h = conjecture(f'{o}__goal_{j}')
+            if h:
+                horn.append((j, h))
     txt = open(os.path.join(PROB, name + '.p')).read().rstrip('\n') + '\n'
-    for j, f in lem:
+    for j, f in lem + horn:
         txt += f'fof(lemma_goal_{j},axiom,{f}).\n'
-    return txt, len(lem)
+    return txt, len(lem) + len(horn)
 
 _axkey = {}
 def axiom_key(name):

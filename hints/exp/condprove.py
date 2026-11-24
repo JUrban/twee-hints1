@@ -113,7 +113,7 @@ def one(g):
     if AFTER:
         up = sorted(j for j in allg[o] if j > int(k))[:AFTER]
         for j in up:
-            f_ = lemmas.lemma_form(f'{o}__goal_{j}')
+            f_ = lemmas.lemma_form(f'{o}__goal_{j}') or (lemmas.HORN and lemmas.conjecture(f'{o}__goal_{j}'))  # (exp82) Horn
             if f_:
                 txt += f'fof(lemma_goal_{j},axiom,{f_}).\n'
     p = f'{OUT}/p/{g}.p'
