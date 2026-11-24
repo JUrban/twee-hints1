@@ -93,6 +93,10 @@ It waits for exp67's arms to end (about 03:00) so the CPU stays near its level (
 arm, +/-, CPU h (exp/ccpair.py F76S F76C). If F76S > F76C, CLS71's finals get longer; if they tie, the stalled goals
 need time, not climb hints.
 
+Before it: exp36 (notes/2026-11-19-climb-ablation.md, 19 Nov) gave the climber's final the sketch hints or the pool
+only, on 54 targets the climber had proved, each at its dir's final time: both 35, sketch hints only 3, pool only 0.
+exp76 asks the same on targets whose 20 s final failed, at 160 s.
+
 ## A term-size cap would not prune (00:31)
 
 Veroff's Prover9 runs use weight limits (max_weight); twee has `--max-term-size` (rules whose left side is bigger
