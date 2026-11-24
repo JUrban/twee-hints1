@@ -35,3 +35,31 @@ the same context snapshot cond/EXP82.trusted.
 
 **Decision.** Proofs only with the Horn lemmas (+2 or more, −0) make TWEE_LEMMA_HORN=1 the default for plainlive6 and
 production's lemma problems (after a check of loop.py's other lemma paths); a tie leaves it off.
+
+## Encoding (24 Nov 08:11)
+
+H82H's first two runs hit condprove's 600 s wall limit (aa3_45 359 and 486); the control H82C proved 486 in 48 s.
+On aa3_45 486's Horn problem (3 Horn axioms beside 500 unit ones), 10 abstract s, twee-e61 (CPU s, peak memory):
+
+| Jukebox `--conditional-encoding` | CPU s | memory |
+|---|---:|---:|
+| none needed (H82C's problem, no Horn axioms) | 11.6 | 114 MB |
+| if-then-else (the default) | 91.3 | 350 MB |
+| if-then | 295.4 | 697 MB |
+| fresh | 9.8 | 117 MB |
+| if | 9.9 | 119 MB |
+| `--passivise` (default encoding) | 10.0 | 119 MB |
+| `--passivise` with fresh | 9.1 | 100 MB |
+
+The default run printed 7,130 lines with ifeq: each conditional rule is rewritten by the unit lemmas and overlapped
+with `ifeq(X,X,Y,Z) = Y`. At 60 abstract s: fresh proves 486 in 29.8 CPU s (the control problem 42.5), `--passivise`
+runs out at 600 s. Without Horn axioms the flag changes nothing: byte-identical outputs on 486's control problem and on
+aa3_45 359's (a Horn goal: its negation is unit facts, no encoding).
+
+H82H was stopped at 07:53 (2 runs, both over the limit). **H82F** (abs/exp82b.sh, exp/exp82b.sh): TWEE_LEMMA_HORN=1 and
+`--args "--conditional-encoding fresh"` for the runs and condimport's reruns, the same set, snapshot and settings, one
+thread, against the control H82C, which still runs.
+
+**Elsewhere.** 7 of the 814 problems in the climber's loops/CLS71/tmp have a Horn axiom (assumptions such as
+`assume_knn_4`, from Horn goals of other originals) and run with the default encoding; production's 259 in loops/UL/tmp
+have none. The flag would change only those runs; it goes into the climber at its next restart.
