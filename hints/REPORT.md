@@ -114,7 +114,9 @@ runs on 287 climbed goals, 0 proofs in 63 minutes.
   0 ready at 00:17 ([notes/2026-11-24-cond-replay.md](notes/2026-11-24-cond-replay.md)).
 * **Sweep queue:** abs/sweepq.sh runs one-off plain sweeps from cond/SWEEPQ.txt (3 threads, proofs via loops/CI3).
   Next: HLW1 (exp72), H's setting on the 940 local heads (unsolved goals right after a proved one, the first heads
-  left out), about 12 hours; bash 3753974, running since 24 Nov 03:47 (cond/HLW1). PLD1, PLP1,
+  left out), about 12 hours; bash 3753974, running since 24 Nov 03:47 (cond/HLW1). abs/hlwimport.sh (bash 3816406, exp/prod/side/hlwimport.sh) imports its proofs into loops/UL
+every 30 minutes through loops/CI3 (cond/HLW1.parts), so that production has them as lemmas: its first 27 runs proved
+3 new local heads in 0.62 CPU h, merged at 04:03. PLD1, PLP1,
   PLT1, PLX1 are held.
 
 **The head climber: abs/clhl4.sh (exp68),** stopped 23 Nov 23:30 after 21:07-23:30: 21 heads finished, 0 real proofs in
