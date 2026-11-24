@@ -1003,18 +1003,21 @@ def live(c, a, lp, gl, pools, ix, climb, out):
                 mixed.append(res.pop(0))
         return mixed
     def refresh(S):
-        new = [n for n in S if n not in lp.solved]
-        for n in new:
-            lp.solved[n] = (0, 0.0)
-        if new:
-            t1 = time.time()
-            pools.clear(); pools.update(lp.build_pools())
-            lp.lemma_src = {o: set(v) for o, v in lemmas.by_original(lp.solved).items()}
-            if a.lemma_knn:
-                lp.lemma_index = lemmas.LemmaIndex(sorted(lp.solved), subsets=a.lemma_subsets)
-            if c.knn:
-                ix['u'] = lemmas.LemmaIndex(sorted(n for n in gl if n not in lp.solved), subsets=True)
-            print(f'live: refreshed with {len(new)} new proofs of {D} in {time.time()-t1:.0f}s', flush=True)
+        # (24 Nov) under the lock: a worker's --chain proof adds to lp.solved (under the lock) while build_pools
+        # iterates it ("dictionary changed size during iteration" ended CLQ83 at 16:03)
+        with lock:
+            new = [n for n in S if n not in lp.solved]
+            for n in new:
+                lp.solved[n] = (0, 0.0)
+            if new:
+                t1 = time.time()
+                pools.clear(); pools.update(lp.build_pools())
+                lp.lemma_src = {o: set(v) for o, v in lemmas.by_original(lp.solved).items()}
+                if a.lemma_knn:
+                    lp.lemma_index = lemmas.LemmaIndex(sorted(lp.solved), subsets=a.lemma_subsets)
+                if c.knn:
+                    ix['u'] = lemmas.LemmaIndex(sorted(n for n in gl if n not in lp.solved), subsets=True)
+                print(f'live: refreshed with {len(new)} new proofs of {D} in {time.time()-t1:.0f}s', flush=True)
     def others():
         """twee processes of this user that are not this climber's"""
         n = 0
