@@ -28,3 +28,53 @@ of e61's source (`-fprof-auto-top`, notes/2026-11-19-hint-cost.md), `+RTS -p`.
 | 5 | 4.62 | 0.92 | 88 MB |
 | 20 | 23.32 | 1.17 | 185 MB |
 | 120 | 234.44 | 1.95 | 812 MB |
+| 300 | 730.99 | 2.44 | 1,994 MB |
+
+The cost per abstract second grows with the run: 0.9 at 5 s, 2.4 at 300 s, and the memory with it (2 GB at 300 s).
+A 1,200 s run is then about 3 CPU s per abstract second, as exp74's were.
+
+## Where the time goes (profile at 120 abstract s, 1,813 profiled CPU s)
+
+Inherited shares (summed over outermost occurrences in the call tree; script
+scratchpad/profinh.py):
+
+| cost centre | inherited | entries |
+|---|---:|---:|
+| makePassives (a new rule's critical pairs with all active rules) | 80.2% | 29,738 |
+| indexedOverlaps (finding the overlaps and building them) | 71.5% | 29,738 |
+| simplify (normal forms, oriented rules) | 56.2% | 96,037,433 |
+| simpleRewrite (index lookups for a rewrite step) | 33.6% | 706,445,693 |
+| termSubst + buildReplacePositionSub (building the pairs' terms) | 26.6% | |
+| simplifyQueue (renormalising the queue) | 13.0% | 2 |
+| makePassive (scoring a pair) | 8.6% | 10,316,704 |
+| interreduce | 4.5% | 119 |
+| joinCriticalPair (the considered pairs) | 2.7% | 169,606 |
+
+* The run made 10.3 million critical pairs from 29,738 new rules (about 350 each) and considered 135,773 of them
+  (1.3%). Each made pair is unified, built and simplified on both sides against all rules (simplifyOverlap) before
+  it is scored, and that is most of the run. Considering pairs (joining, ground joining) is under 3%.
+* So the cost is the size of the rule set the new rules overlap with, and hundreds of lemma axioms make that set
+  larger from the start. It is the search itself, not overhead around it.
+
+## A speed-up that did not work (e64, deleted)
+
+simplifyOutermost repeats a rewriting pass over the whole term until nothing changes, and each pass rebuilds the
+term: 154 million passes for 96 million calls, so every call ends with a pass that only confirms the normal form.
+e64 checked first whether any non-variable subterm is reducible and returned the term unbuilt if not; the pass is
+skipped only when it would change nothing, so the normal forms are the same.
+
+| binary | 20 abstract s | 120 abstract s (same socket, cores 12 and 13) | trace |
+|---|---:|---:|---|
+| e61 | 27.54 CPU s | 226.49 | |
+| e64 | 26.63 | 252.43 (+11%) | byte-identical (17,352 and 60,131 lines) |
+
+The rebuild is cheap; the index lookups are the cost, and the check repeats them for every pass that does rewrite.
+Reverted, binary deleted (04:48).
+
+## Reading
+
+* There is no free factor here. What remains changes the search: fewer pairs (a smaller active set, as lazy lemmas
+  did: notes/2026-11-23-plain-sizes.md, a tie at factor 0.5), or pairs simplified later (cheaper per pair, but the
+  clock counts the junk that simplification would have dropped). Neither is promising enough for an A/B now.
+* Twee's long runs with hundreds of lemma axioms will stay at 2-3 CPU s per abstract second. Compare such settings by
+  CPU, not abstract time (exp67's controls were capped by CPU, so its comparison stands).

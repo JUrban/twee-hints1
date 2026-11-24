@@ -787,6 +787,9 @@ Next:
    tonight's winning setting at the frontier is runs with 30-130 siblings and 400 kNN lemma axioms (exp67, HLW1), and those
    get slow as they lengthen: exp74's 1,200 abstract s took about 3 CPU s per abstract s. One plain 505-lemma problem (aa1_45_c 355)
    at 5-300 abstract s with +RTS -s, and a cost-centre profile at 120 s (dist-prof2). 120 s: 1.95 CPU s per abstract s.
+   **Result: 0.9 (5 s) to 2.4 (300 s) CPU s per abstract s. makePassives is 80%: 10.3M pairs made (350 per new rule), 1.3% considered;
+   simplify 56%, mostly index lookups. e64 (skip the no-change rewriting pass, same normal forms, byte-identical trace) was 11% slower:
+   reverted and deleted. No free speed-up; the remaining levers change the search. Closed.**
 0000000000000000000000000000000000000000000000000000000000000000000. **exp79 (CC67D's run as a production member, [notes/2026-11-23-climber-restart.md](notes/2026-11-23-climber-restart.md), "exp79"):**
    **ul81** (02:56) = ul80 plus k400s30@3:0: a fresh 160 s run after L0 with 30 siblings and 400 kNN, the run that proved 9 of
    91 heads in exp67's control (0.66 per CPU h; production's last 6,000 runs 0.48). Explored and ordered by live yield.
