@@ -173,3 +173,17 @@ to production's cascade with their climb hints.
 
 **ul80** (abs/ul80.sh, exp/prod/ul80.sh): ul79 without the flag, so ul78's setting (the scripts differ only in the
 UL label). loop.py PID 3794779 since 02:19. loop.py keeps --retry-climb (off by default).
+
+### exp77 stopped: it was tried before (03:53)
+
+**Correction.** "Only Prover9-style loops and exp63 varied anything" above is wrong. I searched only REPORT and
+JOURNAL for the flag names. notes/2026-11-22-cp-weights.md (exp57, 22 Nov) has twee's queue weights as portfolio
+members: lhs-weight 2 and 8, depth-weight 0 and 5, var-weight 0.5 and 1.5, dup-factor 1, on 300 half2 heads at 20 s,
+hinted. Every setting proved fewer heads than the defaults (98) at the same 20 s (76-95), and as a second member each
+union stayed 12-18 below one 40 s default run (116). Before that, 15 Nov (abs/var_test.sh), --flip-ordering,
+--kbo-weight0, --no-flatten-goal and --flatten-goal-lightly proved 0 on stalled goals at 5-20 s.
+
+So exp77's prior was poor, and at about 19 CPU h it was stopped at 03:49 (cond/STR77.status) after A1 ran 14 goals
+(0 proved) and A2 17 (1 proved: aK2_eq_aK3_gen 594). That proof was re-checked under A2's flags (condimport.py --args,
+73 s) and merged into loops/UL through loops/CI77. The same problem with twee's defaults: proved in 11 s. It is the
+setting (119 sibling and 400 kNN lemmas, plain), not the strategy; HLW1 would have found it. A4 and A8 never ran.
