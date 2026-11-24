@@ -65,3 +65,11 @@ CLS71 runs the same code and never did. Fix (climb.py 8733753): refresh holds th
 3952184); it skips the targets of its climb.tsv. Its 30 minutes before the crash (exp/clqread.py 1570 20123): CLQ83
 finished 129, proved 5, 1.43 CPU h, 3.49 per CPU h; CLS71 in the same time 37, 11, 4.39 CPU h, 2.50 per CPU h.
 The reading at 18:35 counts both instances.
+
+**Second crash (16:37).** My fix was wrong: `lock` is main()'s local, and refresh() is inside live(), so the first
+refresh after the 16:05 restart (refreshes come every 30 minutes, none at start) ended CLQ83 at 16:36:00 with
+`NameError: name 'lock' is not defined`. I had not checked the scope. Fixed in 78c430a: main passes its lock to
+live(); a symtable check now shows every name refresh() uses is defined. Restarted 16:37:21 (climb.py 3956168); a
+waiter checks its first refresh. Reading at 16:36 over both instances (about an hour of running): CLQ83 finished
+252, proved 8, 2.83 CPU h, 2.83 per CPU h; CLS71 73, 19, 9.04 CPU h, 2.10 per CPU h. The 3-hour reading moves to
+about 18:40.
