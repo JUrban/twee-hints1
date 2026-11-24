@@ -56,8 +56,11 @@ added) is [notes/production-history.md](notes/production-history.md), generated 
 Everything below writes proofs into **loops/UL**, production's solved list. The totals above count only what
 exp/trust.py trusts.
 
-**1. The main loop: abs/ul81.sh.** loop.py, PID 3804373, since 24 Nov 02:56 (ul80 02:19-02:56, ul79 01:15-02:18, ul78
-from 23 Nov 23:43, ul77 from 23:24, ul76 from 21:14), all 51,784 problems, 6 workers. ul81 is ul78's setting plus member
+**1. The main loop: abs/ul82.sh.** loop.py, PID 3830111, since 24 Nov 04:57 (ul81 02:56-04:57, ul80 02:19-02:56, ul79
+01:15-02:18, ul78 from 23 Nov 23:43, ul77 from 23:24, ul76 from 21:14), all 51,784 problems, **4 workers** (6 until
+04:57). ul82 is ul81 with J=4: over the last 30,000 runs the optional variant members took 76% of the CPU at 0.26 proofs
+per CPU h, the fresh levels L0 and L1 1.86, and the plain side loops 0.88-1.8, so 2 CPUs moved to those
+([notes/2026-11-23-tail-allocation.md](notes/2026-11-23-tail-allocation.md), "ul82"). ul81 is ul78's setting plus member
 k400s30@3:0 (exp79), exp67's control run as a member. ul79's `--retry-climb` (exp78) was dropped: 1,304 of its 1,312
 runs on 287 climbed goals, 0 proofs in 63 minutes.
 * **Binary:** `twee-pg61`, which is twee-e61 with `--pg-threshold 0.25 --ground-joining-branch-limit 100`. The first

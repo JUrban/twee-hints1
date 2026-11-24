@@ -100,3 +100,20 @@ sign test p = 0.125 two-sided, so suggestive only), and the plain live loop's be
   --prev cond/HLW1. abs/plainlive6_start.sh (bash 3829136) waits for "HLW1 done" after "HLW1 resumed" in
   cond/SWEEPQ.log, stops plainlive5 after its cycle and starts plainlive6 (PID in cond/PLNL6.pid).
 * Reading: W's runs and proofs per cycle (cond/PLNL/log c<k>W), against H's.
+
+## ul82: production with 4 workers (24 Nov 04:57)
+
+Production's last 30,000 runs (loops/UL/r5/results.tsv, several instances), by kind:
+
+| kind | runs | proofs | CPU h | per CPU h |
+|---|---:|---:|---:|---:|
+| L0 (fresh 5 s) | 2,430 | 22 | 7.8 | 2.81 |
+| L1 (40 s) | 868 | 32 | 21.2 | 1.51 |
+| L2-L4 | 38 | 0 | 3.5 | 0 |
+| the optional variant members | 26,664 | 26 | 101.5 | 0.26 |
+
+The variants fill the workers whenever no fresh level is due, and took 76% of the CPU at 0.26 per CPU h. The plain
+side loops measure 0.88 (N) to about 1.8 (HDW1) per CPU h, and HLW1 1.32 so far. ul81's last 1,900 runs (2 hours)
+made 0 proofs. So ul82 is ul81 with 4 workers instead of 6 (abs/ul82.sh, exp/prod/ul82.sh; loop.py 3830111, log
+loops/UL82.log): the fresh levels still run, somewhat later, and the 2 CPUs go back to the side loops (the stalled-goal
+climber takes them by its cap until exp81 starts). Reading: production's proofs per CPU h and per hour against ul81's.
