@@ -140,3 +140,24 @@ is HLW1 (the same setting with twee's defaults, on all local heads, from about 0
 
 **Reading.** Per arm on the 120: proofs, +/- against HLW1, the union, CPU h (the results' seconds). A strategy with
 3 or more proofs the default does not find at about the same CPU becomes a setting of the plain live loop.
+
+## exp78: production retries climbed goals (ul79, 01:16)
+
+**Why.** Production reloads the climb hints every 10 minutes but does not schedule a goal again because it was
+climbed. Over production's rows since 23 Nov 21:14, only 22 of the 149 targets CLS71 had finished (with sketches)
+had any production run after their climb (16 with an sk member; the first came a median 18 minutes after the climb).
+The rest wait for a context change. 193 unsolved targets have sketches from the last 6 hours over the 14 climb dirs.
+
+**Change** (loop.py `--retry-climb`, `--retry-climb-hours H`): at each climb-hint rescan (at most every 10
+minutes, from the sync points), a goal whose newest sketch in any --climb-hints dir is newer than the last rescan's,
+or than the cascade start minus H hours, counts as grown (like --retry-hints): the next pass gives it a fresh run,
+after which the variants (sk@1:0, skk400s30@1:0 ...) follow by yield. The mark is dropped at that fresh run, and each
+such retry is appended to DIR/climbretry.tsv (epoch, goal). Smoke test exp/retryclimb_smoke.sh (2 climbed targets,
+rescans every 30 s via LOOP_CLIMB_RESCAN): both marked at the start with H = 24, retried once, and the one given a new
+sketch at 90 s marked and retried again.
+
+**ul79** (abs/ul79.sh, exp/prod/ul79.sh): ul78 plus `--retry-climb --retry-climb-hours 6`; loop.py PID 3780013 since
+01:15 (ul78 stopped 01:15: 1,950 runs, 8 new proofs). The first rescan marked 212 goals (some already solved).
+
+**Reading.** Proofs among the goals in loops/UL/climbretry.tsv (each goal's runs after its retry), proofs per CPU h of
+those runs, against production's overall rate.

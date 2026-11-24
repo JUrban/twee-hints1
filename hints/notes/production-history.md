@@ -1,6 +1,6 @@
 # Production history
 
-Generated 24 Nov 2026 00:18 by [exp/prodhistory.py](../exp/prodhistory.py) from the scripts abs/ul3.sh … ul78.sh (copies in [exp/prod/](../exp/prod/)) and their logs; rerun it after every production restart. What runs now, with the side loops, is in REPORT.md "Production now"; the totals over time are REPORT's summary table.
+Generated 24 Nov 2026 01:16 by [exp/prodhistory.py](../exp/prodhistory.py) from the scripts abs/ul3.sh … ul79.sh (copies in [exp/prod/](../exp/prod/)) and their logs; rerun it after every production restart. What runs now, with the side loops, is in REPORT.md "Production now"; the totals over time are REPORT's summary table.
 
 * **Written** is the newest dated entry of the script's header: when the version was written or first started.
 * **Last run** is the span of loops/ULNN.log (first and last write). A script that ran twice keeps only its second log (ul74: written 20 Nov 04:14, its log is the run of 21 Nov 16:50 to 22 Nov 07:12); some versions ran for minutes before a fix.
@@ -85,7 +85,8 @@ Generated 24 Nov 2026 00:18 by [exp/prodhistory.py](../exp/prodhistory.py) from 
 | [ul75](../exp/prod/ul75.sh) | 22 Nov 07:13 | 22 Nov 07:13 – 23 Nov 21:12 | 38.0 | J= (default 17); ≥5 in flight | twee-pg61 + `--pg-threshold 0.25 --ground-joining-branch-limit 100` | 136 | +`--head-class` |
 | [ul76](../exp/prod/ul76.sh) | 23 Nov 21:14 | 23 Nov 21:14 – 23 Nov 23:21 | 2.1 | J= (default 17); ≥5 in flight | twee-pg61 + `--pg-threshold 0.25 --ground-joining-branch-limit 100` | 5 | `--climb-hints` `/project/hintwork/loops/CLH,/project/hintwork/loops/CLHL,/project/hintwork/loops/CLU,/project/hintwork/loops/CLHL2,/project/hintwork/loops/FUD2p,/project/hintwork/loops/FUDs` → `/project/hintwork/loops/CLH,/project/hintwork/loops/CLHL,/project/hintwork/loops/CLU,/project/hintwork/loops/CLHL2,/project/hintwork/loops/FUD2p,/project/hintwork/loops/FUDs,/project/hintwork/loops/CLHL3,/project/hintwork/loops/CLHL4,/project/hintwork/loops/CLA67,/project/hintwork/loops/CLB67` |
 | [ul77](../exp/prod/ul77.sh) | 23 Nov 23:23 | 23 Nov 23:24 – 23 Nov 23:43 | 0.3 | J= (default 17); ≥5 in flight | twee-pg61 + `--pg-threshold 0.25 --ground-joining-branch-limit 100` | 2 | `--climb-hints` `/project/hintwork/loops/CLH,/project/hintwork/loops/CLHL,/project/hintwork/loops/CLU,/project/hintwork/loops/CLHL2,/project/hintwork/loops/FUD2p,/project/hintwork/loops/FUDs,/project/hintwork/loops/CLHL3,/project/hintwork/loops/CLHL4,/project/hintwork/loops/CLA67,/project/hintwork/loops/CLB67` → `/project/hintwork/loops/CLH,/project/hintwork/loops/CLHL,/project/hintwork/loops/CLU,/project/hintwork/loops/CLHL2,/project/hintwork/loops/FUD2p,/project/hintwork/loops/FUDs,/project/hintwork/loops/CLHL3,/project/hintwork/loops/CLHL4,/project/hintwork/loops/CLA67,/project/hintwork/loops/CLB67,/project/hintwork/loops/CLK69,/project/hintwork/loops/K70F,/project/hintwork/loops/K70R,/project/hintwork/loops/CLS71` |
-| [ul78](../exp/prod/ul78.sh) | 23 Nov 23:42 | 23 Nov 23:43 – 24 Nov 00:16 | 0.6 | 6 (the running process) | twee-pg61 + `--pg-threshold 0.25 --ground-joining-branch-limit 100` | 7 | variants +skk400s30@1:0 |
+| [ul78](../exp/prod/ul78.sh) | 23 Nov 23:42 | 23 Nov 23:43 – 24 Nov 01:15 | 1.5 | J= (default 17); ≥5 in flight | twee-pg61 + `--pg-threshold 0.25 --ground-joining-branch-limit 100` | 8 | variants +skk400s30@1:0 |
+| [ul79](../exp/prod/ul79.sh) | 24 Nov 01:14 | 24 Nov 01:15 – 24 Nov 01:16 | 0.0 | 6 (the running process) | twee-pg61 + `--pg-threshold 0.25 --ground-joining-branch-limit 100` |  | +`--retry-climb`; +`--retry-climb-hours` `6` |
 
 ## Why each version (the header's newest entry, verbatim)
 
@@ -165,6 +166,7 @@ Generated 24 Nov 2026 00:18 by [exp/prodhistory.py](../exp/prodhistory.py) from 
 * **ul76** (23 Nov 21:14): (23 Nov 21:14) ul76: ul75 plus today's climbers in --climb-hints (loops/CLHL3, CLHL4, CLA67, CLB67: their sketches and fill steps). In ul75's last 6,000 runs member sk@1:0 (40 s fresh runs with the climb hints) made 8 of the 19 proofs, the most of any member; its dirs were all from 15-20 Nov, so the sketches of today's heads never reached it (notes/2026-11-23-climber-restart.md, "ul76"). One change; J=6 as ul75.
 * **ul77** (23 Nov 23:23): (23 Nov 23:23) ul77: ul76 plus four climb dirs in --climb-hints: loops/CLS71 (exp71, the live climber on stalled goals, started 23:22; CLU's mode, whose 7,302 sketch files over 108 originals lie behind most of sk@1's recent proofs) and the key-goal climbs loops/CLK69, K70F, K70R (exp69/exp70: sketches of the cluster of 7 originals). The dirs are re-scanned every 10 minutes, so CLS71's sketches reach sk@0 and sk@1:0 as they come. One change; J=6 as ul76 (notes/2026-11-23-climber-restart.md, "exp71").
 * **ul78** (23 Nov 23:42): (23 Nov 23:42) ul78: ul77 plus member skk400s30@1:0: sk@1:0 (40 s fresh after L0, the climb hints and fill lemmas) with 30 sibling and 400 kNN lemmas in place of 6 and 30 (exp73, loop.py's new skkNsM members). exp67's arms on the same frozen heads: 30+400 lemmas proved 7, 6+30 proved 2, at the same CPU; the plain head runs (H: 100+30, 400, 60 s) are the plain live loop's best setting; sk@1:0 is production's top member (2 of ul76's 5 proofs, 60% of its CPU). Explored and ordered by live yield like every member. One change; J=6 (notes/2026-11-23-tail-allocation.md, "exp73").
+* **ul79** (24 Nov 01:14): (24 Nov 01:14) ul79: ul78 plus --retry-climb --retry-climb-hours 6 (exp78): a goal whose climb sketches (any --climb-hints dir) are newer than its last fresh run, or than 6 hours before the start, counts as grown and gets one fresh run, so the sk members try its new climb hints. 127 of CLS71's first 149 climbed targets had no production run after their climb; 193 unsolved targets have sketches from the last 6 hours. Each such retry is logged in loops/UL/climbretry.tsv (notes/2026-11-24-cond-replay.md, "exp78"). One change; J=6.
 
 ## Side loops (their scripts, oldest first; copies in [exp/prod/side/](../exp/prod/side/))
 
@@ -217,7 +219,7 @@ Each line is the script's first header entry. Which ones run now is in REPORT.md
 * [p9c4.sh](../exp/prod/side/p9c4.sh): (18 Nov 17:52) p9c with 4 workers instead of 2 (log P9C4.log). By the portfolio's ratio rule it is the best deep member per CPU: 1.98 new proofs per CPU hour on the walls twee's chain failed (exp16), 1.44 live from 16:46 to 17:49 (3 proofs in 126 runs), against 1.16 for production's 80 s chain level. Its 225 queued stalled goals would take 2 workers about 2 hours. Restarting keeps loops/P9C/result …
 
 
-## The current version's full option list (ul78)
+## The current version's full option list (ul79)
 
 ```
 export TWEE_PG_ARGS="--pg-threshold 0.25 --ground-joining-branch-limit 100"
@@ -243,6 +245,8 @@ loop.py sets/all loops/UL
   --given-scan /project/hintwork/loops/GFAIL
   --line-gaps 80,80
   --retry-hints 1.25
+  --retry-climb
+  --retry-climb-hours 6
   --sync 60
   --fresh-first
   --far-retry

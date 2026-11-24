@@ -1186,8 +1186,8 @@ class Loop:
         fill lemmas) first, then DIR/sketches/<target>/<tag> (proofs under assumptions or of weakened goals), oldest
         first, over the --climb-hints directories; re-scanned at most every 10 minutes (the live climber adds more)"""
         c_ = getattr(self, 'chcache', None)
-        if c_ is None or time.time() - c_[0] > 600:
-            by = collections.defaultdict(list); seen = collections.defaultdict(set)
+        if c_ is None or time.time() - c_[0] > float(os.environ.get('LOOP_CLIMB_RESCAN', '600')):   # (smoke tests: shorter)
+            by = collections.defaultdict(list); seen = collections.defaultdict(set); tmx = {}
             for d in (x for x in self.a.climb_hints.split(',') if x):
                 for sub in ('fillhints', 'sketches'):
                     sd = os.path.join(d, sub)
@@ -1198,6 +1198,8 @@ class Loop:
                         for g in os.listdir(os.path.join(sd, t)):
                             p = os.path.join(sd, t, g)
                             fs.append((os.path.getmtime(p), orig_of(t), p))
+                            if sub == 'sketches':
+                                tmx[t] = max(tmx.get(t, 0), fs[-1][0])
                     for _, o_, p in sorted(fs):
                         for l in open(p):
                             w = l.rstrip('\n').split('\t')
@@ -1212,6 +1214,12 @@ class Loop:
                         if len(w) >= 3 and (w[0], w[2]) not in fseen and not re.search(r'\b(x\d+(_\d+)?|constant)\b', w[2]):
                             fseen.add((w[0], w[2])); fl[w[0]].append((f'lemma_fill_{len(fl[w[0]])}', w[2]))
             self.chcache = c_ = (time.time(), by, fl)
+            if getattr(self, 'climb_base', None) is not None:
+                # (--retry-climb) goals whose newest sketch is newer than the last scan's (or than the cascade start)
+                prev_ = getattr(self, 'climb_tm', {})
+                new_ = {t for t, m in tmx.items() if m > max(prev_.get(t, 0), self.climb_base)}
+                self.climb_new |= new_; self.climb_tm = tmx
+                print(f'  --retry-climb: {len(new_)} goals newly climbed, {len(self.climb_new)} waiting', flush=True)
             print(f'  climb hints: {sum(len(v) for v in by.values())} steps of {len(by)} originals; fill lemmas: '
                   f'{sum(len(v) for v in fl.values())} of {len(fl)} originals', file=sys.stderr, flush=True)
         return c_[1].get(o, [])
@@ -1717,8 +1725,14 @@ class Loop:
                 hp[n] = psz(n) * lastL0[n] / latest[k] if n in lastL0 and latest.get(k) else psz(n)
             print(f'  cascade: hint pools grown by {a.retry_hints}x since the last fresh run: '
                   f'{sum(1 for n in att if psz(n) >= hp[n] * a.retry_hints)} goals', flush=True)
+        # (24 Nov, exp78) --retry-climb: a goal climbed since the cascade started or since its last fresh run counts as
+        # grown, so the next pass gives it a fresh run, and the sk members its new climb hints. Without it, 127 of
+        # CLS71's first 149 climbed targets had no production run after their climb (notes/2026-11-24-cond-replay.md)
+        if a.retry_climb:
+            self.climb_base = time.time() - 3600 * a.retry_climb_hours; self.climb_new = set()
+            crf = open(os.path.join(self.dir, 'climbretry.tsv'), 'a')   # (time, goal): each retry a climb caused
         def grown(n):
-            return a.retry_hints and psz(n) >= hp[n] * a.retry_hints
+            return (a.retry_hints and psz(n) >= hp[n] * a.retry_hints) or (a.retry_climb and n in self.climb_new)
         # --sched-model M: order the fresh runs by a model's predicted success (schedmodel.py on
         # schedfeats.py features). Above all it weighs whether the nearest proven goal below
         # changed since the goal's last failed fresh run (UL r5: 43% then, 11-15% otherwise,
@@ -1799,6 +1813,8 @@ class Loop:
                     tm[3] += time.time() - t_r
                 if a.sync and time.time() - sync_t >= a.sync:
                     sync(); sync_t = time.time()
+                    if a.retry_climb:
+                        self.climb_hints('')   # (a rescan at most every 10 minutes marks newly climbed goals)
                 busy = {n for n, _ in running.values()}
                 tq_ = time.time()
                 if tq_ - t0 < a.cascade_hours * 3600:
@@ -2036,6 +2052,9 @@ class Loop:
                             t0_ = a.retry_time if a.retry_time and not qk_ and nf.get(n) else T[0]
                             qf.discard(n)
                             att[n] = (ctx(n), 0); vtried.pop(n, None)
+                            if a.retry_climb and n in self.climb_new:
+                                self.climb_new.discard(n)
+                                crf.write(f'{time.time():.0f}\t{n}\n'); crf.flush()
                             if RK:
                                 knn_at[n] = knn_sig(n)
                                 kf.write(f'{n}\t{",".join(sorted(knn_at[n]))}\n')
@@ -2169,6 +2188,8 @@ class Loop:
                     if a.sync and time.time() - t0 < a.cascade_hours * 3600:
                         # nothing to run: wait for proofs from the side workers (new contexts)
                         time.sleep(a.sync); sync(); sync_t = time.time()
+                        if a.retry_climb:
+                            self.climb_hints('')
                         continue
                     break
                 tq_ = time.time()
@@ -2530,6 +2551,11 @@ def make_parser():
                     help='--cascade: unsolved goals count as tried up to this level in their current context')
     ap.add_argument('--retry-hints', type=float, default=0,
                     help='G: --cascade also retries goals whose hint pool grew by the factor G since their last fresh run')
+    ap.add_argument('--retry-climb', action='store_true',
+                    help='(24 Nov, exp78) --cascade also retries, once, a goal whose climb sketches (sketches/<goal>/ in the '
+                         '--climb-hints dirs) are newer than the cascade start or its last fresh run')
+    ap.add_argument('--retry-climb-hours', type=float, default=0,
+                    help='--retry-climb: sketches up to this many hours before the cascade start count too (after a restart)')
     ap.add_argument('--p9-order-offset', type=int, default=0,
                     help='--p9-orders: shift the ordering index (e.g. 1: a single round runs ordering 1, not the default)')
     ap.add_argument('--line-gaps', default='',

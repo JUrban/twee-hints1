@@ -783,6 +783,10 @@ ul75 5, XFL 1. REPORT's totals table
 has the history (user, 20 Nov: "update the total numbers in the report etc every now and then").
 
 Next:
+00000000000000000000000000000000000000000000000000000000000000000. **exp78 (production retries climbed goals, [notes/2026-11-24-cond-replay.md](notes/2026-11-24-cond-replay.md), "exp78"):**
+   loop.py --retry-climb: a goal whose climb sketches are newer than its last fresh run gets one fresh run (then the sk members).
+   Before, 127 of CLS71's first 149 climbed targets had no production run after their climb. **ul79** (01:15) = ul78 plus
+   --retry-climb --retry-climb-hours 6; 212 goals marked at the start; retries in loops/UL/climbretry.tsv.
 0000000000000000000000000000000000000000000000000000000000000000. **exp77 (twee's CASC strategies on local heads, [notes/2026-11-24-cond-replay.md](notes/2026-11-24-cond-replay.md), "exp77"):**
    every run so far used twee's default queue. Four of twee's UEQ portfolio strategies (lhs-weight 1 or 9 with flip-ordering,
    ground connectedness, kbo-weight0) as plain 60 s runs on 120 local heads; HLW1 is the control. --complete-subsets and
