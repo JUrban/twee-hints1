@@ -73,3 +73,6 @@ live(); a symtable check now shows every name refresh() uses is defined. Restart
 waiter checks its first refresh. Reading at 16:36 over both instances (about an hour of running): CLQ83 finished
 252, proved 8, 2.83 CPU h, 2.83 per CPU h; CLS71 73, 19, 9.04 CPU h, 2.10 per CPU h. The 3-hour reading moves to
 about 18:40.
+
+**Fix verified (17:08):** the first refresh after the 16:37 restart ran at 17:08:13 ("live: refreshed with 53 new proofs
+of loops/UL in 7s"); CLQ83 is alive, with no new traceback.
