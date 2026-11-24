@@ -149,7 +149,8 @@ CC67C 5 and CC67D 9 of 91, ended 03:23 and 02:54): each climber's proofs are a s
 lemmas beat 6+30 by +6 −2 ([notes/2026-11-23-climber-restart.md](notes/2026-11-23-climber-restart.md)).
 exp/exp67merge.sh merged their proofs into loops/UL every 10 minutes and ended with a last merge after the last arm (03:46).
 exp76 (abs/exp76.sh, bash 3766581, since 24 Nov 03:47): final-only climbs at 160 s on 30 of CLS71's failed
-targets, with (F76S) and without (F76C) CLS71's climb hints, -j 2 each.
+targets, with (F76S) and without (F76C) CLS71's climb hints, -j 2 each. At 04:55: F76S 2 new proofs in 18 targets,
+F76C 0 in 16; exp/exp76merge.sh (bash 3829658, exp/prod/side/) merges both into loops/UL every 10 minutes.
 exp74 (one plain 1,200 s run on each first head of the key-goal cluster's 7 originals, cond/LCH74) ended 24 Nov 04:34:
 1 of 7, a head exp67 had proved meanwhile; closed.
 exp65 (Q5A, Q5B) ended at 22:55: -2 at 6 hours, closed.

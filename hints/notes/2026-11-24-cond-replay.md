@@ -97,6 +97,11 @@ Before it: exp36 (notes/2026-11-19-climb-ablation.md, 19 Nov) gave the climber's
 only, on 54 targets the climber had proved, each at its dir's final time: both 35, sketch hints only 3, pool only 0.
 exp76 asks the same on targets whose 20 s final failed, at 160 s.
 
+**Started 24 Nov 03:47** (after exp67). **Interim (04:55):** F76S 18 of 30 finished, 2 real proofs (mbol_com 75 in 134 s,
+nslm_to_aa1 1080 in 219 s), 2.22 CPU h; F76C 16 finished, 0, 2.14 CPU h. On the 16 both finished: +1 −0 (mbol_com 75:
+F76C failed it in 355 s). Both proofs were new to production and were merged by hand; exp/exp76merge.sh (bash 3829658)
+merges both arms every 10 minutes from now to the end, as exp67merge did.
+
 ## A term-size cap would not prune (00:31)
 
 Veroff's Prover9 runs use weight limits (max_weight); twee has `--max-term-size` (rules whose left side is bigger
