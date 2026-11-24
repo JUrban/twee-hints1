@@ -151,9 +151,8 @@ the 9 and their own sketches' assumptions are one cluster of 7 originals).
 CC67C 5 and CC67D 9 of 91, ended 03:23 and 02:54): each climber's proofs are a subset of its control's, and 30+400
 lemmas beat 6+30 by +6 −2 ([notes/2026-11-23-climber-restart.md](notes/2026-11-23-climber-restart.md)).
 exp/exp67merge.sh merged their proofs into loops/UL every 10 minutes and ended with a last merge after the last arm (03:46).
-exp76 (abs/exp76.sh, bash 3766581, since 24 Nov 03:47): final-only climbs at 160 s on 30 of CLS71's failed
-targets, with (F76S) and without (F76C) CLS71's climb hints, -j 2 each. At 04:55: F76S 2 new proofs in 18 targets,
-F76C 0 in 16; exp/exp76merge.sh (bash 3829658, exp/prod/side/) merges both into loops/UL every 10 minutes.
+exp76 (160 s final-only climbs on 30 of CLS71's failed targets, with and without its climb hints) ended 24 Nov 06:01:
+with 2, without 1 (+1 −0), both merged; CLS71's finals go to 160 s.
 exp81 (abs/exp81.sh, bash 3836270, waiting for exp76's end): plain 300 s, 60 s with all earlier siblings, and 60 s with
 the kNN lemmas ranked 400-799, against 60 s on 60 of HLW1's failed local
 heads, 2 threads each ([notes/2026-11-24-plain-time.md](notes/2026-11-24-plain-time.md)).

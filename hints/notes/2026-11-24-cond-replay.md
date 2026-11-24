@@ -102,6 +102,21 @@ nslm_to_aa1 1080 in 219 s), 2.22 CPU h; F76C 16 finished, 0, 2.14 CPU h. On the 
 F76C failed it in 355 s). Both proofs were new to production and were merged by hand; exp/exp76merge.sh (bash 3829658)
 merges both arms every 10 minutes from now to the end, as exp67merge did.
 
+**Result (exp76 done 24 Nov 06:01:59, loops/EXP76.pids; exp/ccpair.py F76S F76C on all 30):**
+
+| arm | proved | CPU h | per CPU h |
+|---|---:|---:|---:|
+| F76S (CLS71's climb hints, 160 s final) | 2 (mbol_com 75, nslm_to_aa1 1080) | 4.38 | 0.46 |
+| F76C (none, 160 s final) | 1 (nslm_to_aa1 1080) | 4.18 | 0.24 |
+
+* +1 −0, union 2. mbol_com 75 is the one goal only the climb hints proved (F76C failed it in 355 s; F76S 134 s).
+  One goal is weak evidence that the climb hints matter; in exp36 too they were a cause of 3 of 54 (+3 −0).
+* The clearer finding: 160 s finals proved 2 of 30 targets whose 20 s finals had all failed. CLS71 ended 119 of its
+  20 s finals with 0 real proofs by 00:40 and 1 by 03:25. A climb (20 sketch runs of 5 s, fills of 3 s) costs about
+  150 CPU s before its final; with a 160 s final (about 450 CPU s with these lemma lists) the climb costs about 600
+  CPU s, and at 2 of 30 that is about 0.4 real proofs per CPU h, against about 0.1 with 20 s finals.
+* Decision (as planned): CLS71's finals go to 160 s (abs/cls71b.sh). Both proofs are in production: merged by hand before exp/exp76merge.sh started (its first pass, 05:05, found nothing new).
+
 ## A term-size cap would not prune (00:31)
 
 Veroff's Prover9 runs use weight limits (max_weight); twee has `--max-term-size` (rules whose left side is bigger

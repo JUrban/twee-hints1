@@ -819,6 +819,8 @@ Next:
    CLS71's 20 s finals: 0 real proofs in 119 (1,174 sketch proofs). 30 of its failed targets get one 160 s final with its
    climb hints (F76S) and without (F76C), after exp67's arms end. Also: condprove.py capped every run at 600 s wall, so
    exp74's first run stopped early (rerun since 00:19).
+   **(06:01) Done: F76S 2, F76C 1 of 30 (+1 −0; mbol_com 75 only with the climb hints), 4.38 / 4.18 CPU h. 160 s finals prove targets
+   whose 20 s finals failed: about 0.4 real proofs per CPU h per climb against about 0.1. CLS71's finals go to 160 s (cls71b.sh).**
 00000000000000000000000000000000000000000000000000000000000000. **exp75 (replaying conditional climber proofs, [notes/2026-11-24-cond-replay.md](notes/2026-11-24-cond-replay.md)):**
    0 ready now. A first scan found 25 sketch proofs of unsolved targets whose assumptions production had proved; 21 were
    proofs of weakened goals (climb.py --weaken: `goal=` in the sketch header), the 4 others rest on a kNN label one of
