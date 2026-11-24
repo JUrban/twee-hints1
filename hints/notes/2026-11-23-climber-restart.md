@@ -529,3 +529,9 @@ HLW1 sweep started, and exp77 at 03:24 after the controls (03:48).
 CLB67 and CC67D had proved meanwhile, so it adds nothing; condimport.py's rerun of it hit its wall cap, which loses
 nothing either. The 6 others failed at 1,200 abstract s (2,909-4,393 wall s each). One long plain run on the key
 cluster's first heads gives nothing new: closed.
+
+**exp71 with 160 s finals (24 Nov 06:05).** After exp76 (notes/2026-11-24-cond-replay.md: 160 s finals proved 2 of 30
+targets whose 20 s finals had failed, +1 −0 for the climb hints), CLS71 restarted as abs/cls71b.sh
+(exp/prod/side/cls71b.sh): the same record dir, lemma lists, cap (CPUS=20) and climb, `--final-time 160`.
+Reading: real proofs per CPU h from 06:05 on (exp/climbread.py CLS71 on the climbs started after the restart),
+against the 20 s finals' 1 in 23 Nov 23:33-24 Nov 06:05.
