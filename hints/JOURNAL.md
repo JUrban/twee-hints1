@@ -783,6 +783,11 @@ ul75 5, XFL 1. REPORT's totals table
 has the history (user, 20 Nov: "update the total numbers in the report etc every now and then").
 
 Next:
+00000000000000000000000000000000000000000000000000000000000000000000000. **exp83 (a quick climber final ahead of the climber, [notes/2026-11-24-quick-finals.md](notes/2026-11-24-quick-finals.md)):**
+   abs/clq83.sh, loops/CLQ83 (15:33): climb.py --live with no climbs (--runs 0) and the final capped at 40 CPU s, -j 3, on the
+   same stalled queue and order as CLS71. Half of CLS71's proving finals since 08:59 took under 40 s, a failed one a median
+   409 s; production had run only 5 s runs on those goals. A failed quick final keeps its place in CLS71's queue (not exp49).
+   Rule after about 3 h: keep at twice CLS71's proofs per CPU h or more, stop at its rate or below.
 0000000000000000000000000000000000000000000000000000000000000000000000. **exp82 (Horn sibling lemmas, [notes/2026-11-24-horn-lemmas.md](notes/2026-11-24-horn-lemmas.md)).** 2,771 proved
    goals are genuine Horn clauses with no unit form, and lemma import has always dropped them (REPORT 2ae). TWEE_LEMMA_HORN=1
    adds the ones in a problem's sibling window as clause axioms (twee's ifeq encoding), on top of the same unit ones.
@@ -805,6 +810,7 @@ Next:
    3 threads, a production sweep.
    **(11:23) Done: A (60 s) 0, B (300 s) 2 in 10.4 h (0.19 per h: no 300 s pass), C (all siblings) 0, D (kNN ranks 400-799) 2 in
    1.6 h (+2 −0 at A's cost). The second kNN slice it is: HLS2 runs it on all local heads.**
+   **(15:30) HLS2 stopped at 750 of 1,012 local heads: 9 proofs in 19.1 CPU h (0.47 per CPU h; HLW1 0.90), none after 13:18. Its threads went to exp83.**
 00000000000000000000000000000000000000000000000000000000000000000000. **exp80 (what runs with hundreds of lemma axioms cost, [notes/2026-11-24-lemma-cost.md](notes/2026-11-24-lemma-cost.md)):**
    tonight's winning setting at the frontier is runs with 30-130 siblings and 400 kNN lemma axioms (exp67, HLW1), and those
    get slow as they lengthen: exp74's 1,200 abstract s took about 3 CPU s per abstract s. One plain 505-lemma problem (aa1_45_c 355)
@@ -1518,6 +1524,7 @@ reports are written as the experiments run.
 | [notes/2026-11-24-lemma-cost.md](notes/2026-11-24-lemma-cost.md) | exp80: what twee's runs with hundreds of lemma axioms cost per abstract second, and where the time goes |
 | [notes/2026-11-24-plain-time.md](notes/2026-11-24-plain-time.md) | exp81: plain 300 s against 60 s on local heads that failed at 60 s |
 | [notes/2026-11-24-horn-lemmas.md](notes/2026-11-24-horn-lemmas.md) | exp82: genuine Horn siblings as clause lemma axioms in plain 60 s runs on local heads |
+| [notes/2026-11-24-quick-finals.md](notes/2026-11-24-quick-finals.md) | exp83: a second live climber with no climbs and a 40 CPU s final, ahead of the climber on its stalled queue |
 | [notes/2026-11-20-base-saturation.md](notes/2026-11-20-base-saturation.md) | exp39: base-theory runs as rule generators for the unsolved goals of the stronger theories |
 | [notes/2026-11-20-given-transfer.md](notes/2026-11-20-given-transfer.md) | exp38: unsolved goals that are variants of rules other runs derived and did not use (379 M in the given logs; transfer.py only matches proof steps); their ancestry as hints |
 | [notes/2026-11-19-from-zero-portfolio.md](notes/2026-11-19-from-zero-portfolio.md) | half1 from zero in 2 hours with today's deep portfolio (PGC), against PGA's 18,987 (exp27, from 07:18) |

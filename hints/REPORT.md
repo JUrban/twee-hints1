@@ -118,10 +118,11 @@ proofs in 63 minutes.
     HLW1's problems (cond/HLW1: 20 proofs in 936 runs, 0.90 per CPU h).
   * plainlive5 had dropped L (5 s, 100+30 siblings, 400 kNN ranked by lr2): 4 proofs in 18 h of run time since 12:38
     ([notes/2026-11-23-tail-allocation.md](notes/2026-11-23-tail-allocation.md)).
-* **kNN-slice sweep HLS2:** abs/hls2.sh, bash 3880367 (condprove 3880379), since 24 Nov 09:05: HLW1's plain 60 s setting
-  with kNN ranks 400-799 (`--knn-skip 400`) on all 1,012 unsolved local and first heads, 3 threads, proofs into
-  loops/UL every 30 minutes (exp81's P81D: 2 of 60 HLW1 failures, ranks 0-399 0;
-  [notes/2026-11-24-plain-time.md](notes/2026-11-24-plain-time.md), "HLS2").
+* **Quick climber finals CLQ83 (exp83):** abs/clq83.sh, climb.py --live into loops/UL, record loops/CLQ83, since 24 Nov
+  15:33: no climbs (--runs 0), the final capped at 40 CPU s, -j 3, on CLS71's stalled queue and order; it excludes
+  what CLS71 finished since 06:05. Half of CLS71's proving finals took under 40 s, a failed one a median 409 s
+  ([notes/2026-11-24-quick-finals.md](notes/2026-11-24-quick-finals.md)). HLS2 (the kNN-slice sweep, 09:05-15:30)
+  was stopped at 750 of 1,012 heads: 9 proofs, 0.47 per CPU h ([notes/2026-11-24-plain-time.md](notes/2026-11-24-plain-time.md), "HLS2").
 * **Conditional-proof replay:** abs/crploop.sh (exp75), bash 3764622 since 24 Nov 00:17. Every hour, exp/condreplay.py
   reruns the climbers' sketch proofs of unsolved targets (not of weakened goals) whose assumptions are now trusted
   goals, as lemma axioms with the sketch's hints; proofs via condimport.py into loops/CRP75 and merge.py into loops/UL.
@@ -173,7 +174,7 @@ default encoding cost 8x) ended 24 Nov 12:59: 11 against 11 on 120 local heads (
 ([notes/2026-11-24-horn-lemmas.md](notes/2026-11-24-horn-lemmas.md)).
 
 **CPU at 13:28:** 21 twee processes: the stalled-goal climber 10 (it starts climbs only while fewer than 20 other twee
-processes run, so it takes what the others leave), the main loop 4, the kNN-slice sweep HLS2 3, the plain live loop 3
+processes run, so it takes what the others leave), the main loop 4, the quick climber finals CLQ83 3, the plain live loop 3
 (its H cycle), proof reruns 1.
 
 **Trust** (exp/trust.py, run after each restart): since 23 Nov 23:14 it also checks fill lemmas, the climbers'
@@ -5073,6 +5074,8 @@ reproduced exactly).
 * exp12 stage B.
 
 ## 2az. Portfolios: complementary methods kept, not dropped (user's request, 18 Nov 17:00)
+
+*Notes: [notes/2026-11-24-quick-finals.md](notes/2026-11-24-quick-finals.md).*
 
 *Notes: [notes/2026-11-24-horn-lemmas.md](notes/2026-11-24-horn-lemmas.md).*
 

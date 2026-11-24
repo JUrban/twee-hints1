@@ -96,3 +96,8 @@ HLW1's 0.90), not exp81's decision.
 * **D against A:** +2 −0 at the same cost; **A ∪ D** (two 60 s runs, 3.1 h) proves as many as B (10.4 h). The second kNN
   slice is the cheap way to more lemmas: HLS2 (started 09:05) runs it on all 1,012 local heads.
 * Caveat: 2 proofs per arm; B and D share 658.
+
+**HLS2 stopped (24 Nov 15:30:45):** 750 of the 1,012 heads ran, 9 proved (all imported), 19.05 CPU h, 0.47 per CPU h
+(HLW1's 60 s pass on the first slice: 0.90). None after 13:18 (the last 300 or so runs). The second kNN slice adds
+little on the whole set: 9 of 750, against exp81's 2 of 60 on a sample of HLW1's failures, which overstated it. Its 3 threads went to exp83
+([notes/2026-11-24-quick-finals.md](2026-11-24-quick-finals.md)).
