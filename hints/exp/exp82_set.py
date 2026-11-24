@@ -1,6 +1,7 @@
 """(24 Nov, exp82; notes/2026-11-24-horn-lemmas.md) Run from /project/hintwork: the unsolved local heads by proved Horn
 siblings in their window (100 proved before, 30 after), and cond/EXP82.set: 60 of those with at least 2, not in
-exp81's set, random with seed 82. The code that made the set at 07:26 (it read loops/UL/solved.tsv then)."""
+exp81's set, random with seed 82. The code that made the set at 07:26 (it read loops/UL/solved.tsv then).
+(09:33, exp82c) --seed N, --exclude F,G (default cond/EXP81.set), --out FILE (default cond/EXP82.set; written with --write)."""
 import sys, collections, random
 sys.path.insert(0, '/project/twee/hints'); import lemmas
 T = {l.split('\t')[0] for l in open('loops/UL/solved.tsv') if l.strip()}
@@ -21,11 +22,16 @@ for o, ks in by.items():
         heads.append(g)
 c = collections.Counter(min(cnt[g], 5) for g in heads)
 print('heads', len(heads), 'by Horn siblings in window (5 = 5+):', sorted(c.items()))
-E81 = {l.strip() for l in open('cond/EXP81.set')}
+def opt(k, d):
+    return sys.argv[sys.argv.index(k) + 1] if k in sys.argv else d
+SEED = int(opt('--seed', '82')); OUT = opt('--out', 'cond/EXP82.set')
+E81 = set()
+for f in opt('--exclude', 'cond/EXP81.set').split(','):
+    E81 |= {l.strip() for l in open(f) if l.strip()}
 cand = [g for g in heads if cnt[g] >= 2 and g not in E81]
-random.seed(82); random.shuffle(cand)
+random.seed(SEED); random.shuffle(cand)
 pick = sorted(cand[:60])
 if '--write' in sys.argv:
-    open('cond/EXP82.set', 'w').write(''.join(g + '\n' for g in pick))
+    open(OUT, 'w').write(''.join(g + '\n' for g in pick))
 print('candidates (>= 2, not in exp81)', len(cand), 'picked', len(pick), 'Horn mean', sum(cnt[g] for g in pick) / len(pick),
       'originals', len({g.rsplit('__goal_', 1)[0] for g in pick}))
