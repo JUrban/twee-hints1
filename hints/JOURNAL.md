@@ -856,6 +856,8 @@ Next:
    **(24 Nov 04:50-04:57) HLW1 resumed with 5 threads (4 new in 123 runs, 1.32 per CPU h); ul82 = ul81 with 4 workers: the variant
    members took 76% of production's CPU at 0.26 per CPU h (last 30,000 runs), the fresh levels 1.86, plain side loops 0.88-1.8.
    plainlive6 (W: the local heads, rerun on sibling changes only) starts after HLW1.**
+   **(08:48) HLW1 done: 936 runs, 20 proofs, 22.3 CPU h (0.90 per CPU h), all in production; from 15 originals, median 24.8 s.
+   ul83 (07:34): production on 2 workers after ul82's 0 in 2,501 runs.**
 0000000000000000000000000000000000000000000000000000000000. **exp71 (the live climber on stalled goals, [notes/2026-11-23-climber-restart.md](notes/2026-11-23-climber-restart.md), "exp71"):**
    all 10 of production's recent sk proofs (climb hints as hints) were in originals with many sketches of CLU (16 Nov,
    stalled goals: 22 real proofs at 0.79 per CPU h, 7,302 sketch files over 108 originals); today's head climbers cover
