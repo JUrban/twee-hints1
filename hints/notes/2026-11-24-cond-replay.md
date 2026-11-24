@@ -92,3 +92,16 @@ sets/exp76, exp/sets/exp76; 22 originals).
 It waits for exp67's arms to end (about 03:00) so the CPU stays near its level (bash 3766581). Reading: proofs per
 arm, +/-, CPU h (exp/ccpair.py F76S F76C). If F76S > F76C, CLS71's finals get longer; if they tie, the stalled goals
 need time, not climb hints.
+
+## A term-size cap would not prune (00:31)
+
+Veroff's Prover9 runs use weight limits (max_weight); twee has `--max-term-size` (rules whose left side is bigger
+are discarded), tried only in a small speed test (exp/pg/tm/cap.py, twee-e44). Sizes, counting symbols and variables:
+* Proofs near the frontier (production's hints of the 5 solved goals before and after each original's first
+  unsolved goal, 846 proofs): the largest left side per proof has median 13, p90 22, p95 27, p99 39, max 58.
+* A failing 60 s plain run on the cluster head nil3_2K 383 (exp74's problem, 400 kNN and 129 sibling lemmas):
+  18,471 rules, 97.5% with a left side of size <= 10, 99.7% <= 15, the largest 26.
+
+Twee's queue, ordered by size, already keeps its rules small, so a cap at 25-30 removes next to nothing, and one
+below 15 would cut many real proofs. Not run. The proofs' few rules of size 13-27, which a run reaches late, are what
+the hints are for.
