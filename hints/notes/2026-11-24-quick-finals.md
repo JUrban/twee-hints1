@@ -99,3 +99,7 @@ overlap says it mostly does not (counted at 18:41):
   newly stalled goals, so its threads will idle.
 * Next: the staged final inside the climber (40 s for every new target first, the full final later) is the clean form
   of this; proposed to the user after the final-only A/B, which keeps running unchanged.
+
+**Ran dry (about 21:00).** At 21:25: 1,301 targets finished, 55 proved since 15:31; 3 targets finished in the half hour
+before 21:18. It stays on: it takes newly stalled goals as production's fresh runs fail on them, and its threads
+are free otherwise.
