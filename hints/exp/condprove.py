@@ -130,7 +130,10 @@ def one(g):
         hp = f'{OUT}/h/{g}.hints'; open(hp, 'w').write(''.join(hs[:HCAP])); hx = ['--hints-file', hp]
     t0 = time.time()
     try:
-        r = subprocess.run([TWEE, p] + base + hx + ['--quiet', '--no-proof'], capture_output=True, text=True, timeout=600)
+        # (24 Nov) the wall cap 10 x --time (at least 600 s): a flat 600 s stopped exp74's 1200 abstract s runs at about
+        # a third of their time
+        r = subprocess.run([TWEE, p] + base + hx + ['--quiet', '--no-proof'], capture_output=True, text=True,
+                           timeout=max(600, 10 * float(TM)))
     except subprocess.TimeoutExpired:
         # (23 Nov) --backwards-goal 2 ran past the abstract-time limit (10 minutes, 5.8 GB): a row, not a crash
         return f'{g}\tTIMEOUT\t{time.time() - t0:.2f}\t-\t-\t0\n'
@@ -138,7 +141,7 @@ def one(g):
     ok = 'RESULT: Theorem' in r.stdout
     unp, pro, nk = '-', '-', 0
     if ok:
-        r2 = subprocess.run([TWEE, p] + base + hx, capture_output=True, text=True, timeout=600)
+        r2 = subprocess.run([TWEE, p] + base + hx, capture_output=True, text=True, timeout=max(600, 10 * float(TM)))
         open(f'{OUT}/proofs/{g}', 'w').write(r2.stdout)
         used = [m[1] for l in r2.stdout.splitlines() for m in [AX.match(l)] if m]
         sib = [int(x[len('lemma_goal_'):]) for x in used if x.startswith('lemma_goal_')]

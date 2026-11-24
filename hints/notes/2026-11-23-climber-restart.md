@@ -446,3 +446,8 @@ The cluster's way in is each of its 7 originals' first unsolved goal, all earlie
 s.) exp74 (abs/exp74.sh, exp/exp74.sh, bash 3758318, 23:52): one plain run of 1200 abstract s per head, H's lemma
 lists (100+30 siblings, 400 kNN), 2 threads, through condprove.py into cond/LCH74; proofs to loops/CI3 and loops/UL.
 A problem (aK2_eq_aK3_1243b 476) has 129 lemma_goal and 400 lemma_knn axioms.
+
+**exp74 rerun (00:20, 24 Nov).** The first run's 6 finished goals were all TIMEOUT at 600 s wall: condprove.py capped
+every run at a flat 600 s, well short of 1200 abstract s on this machine. No other sweep had a TIMEOUT row (every
+cond/*/results.tsv checked). condprove.py now caps at 10 x --time (at least 600 s); the first run is kept as
+cond/LCH74.v1, the rerun (bash 3765398) writes cond/LCH74.

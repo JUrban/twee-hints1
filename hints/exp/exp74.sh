@@ -6,6 +6,8 @@
 # cascade (single runs 60-141 s). Plain runs (no hints, no model, no PG) with 100+30 siblings and 400 kNN lemmas are
 # the plain live loop's best tail setting (H, 60 s); here 1200 abstract s, 2 threads. Proofs via condimport.py into
 # loops/CI3 and merge.py into loops/UL.
+# (24 Nov 00:19) rerun: the first run (cond/LCH74.v1) stopped every goal at condprove.py's flat 600 s wall cap (TIMEOUT rows);
+# condprove.py now caps at 10 x --time.
 cd /project/hintwork
 N=LCH74
 [ -e cond/$N ] && { echo "cond/$N exists"; exit 1; }
