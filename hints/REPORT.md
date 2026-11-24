@@ -1533,6 +1533,15 @@ out longer and make the rule set smaller. On nil3_31, 150 goals at 20 s
 with 6 lemmas: penalty 2 solves 76, 5 solves 77 and 20 solves 75. Wall
 time does not change. Penalty 2 stays.
 
+**Long runs with hundreds of lemma axioms (exp80, 24 Nov).** The frontier's best runs now carry 30-130 sibling and 400
+kNN lemma axioms. On one such plain problem (505 lemma axioms), the CPU per abstract second grows with the run: 0.92
+at 5 s, 1.17 at 20 s, 1.95 at 120 s, 2.44 at 300 s (memory 2 GB). In a cost-centre profile at 120 s, 80% of the time is
+making critical pairs: 10.3 million made from 29,738 new rules (about 350 each), 1.3% of them ever considered. Each
+made pair is built and normalised against all rules before it is scored, and normalising (simplify) is 56%, mostly
+index lookups. Considering pairs (joining, ground joining) is under 3%. Skipping the rewriting pass that changes
+nothing (same normal forms, byte-identical trace) was 11% slower, so there is no free speed-up: what remains would
+change the search. Compare such settings by CPU, not abstract time.
+
 ## 2u. ENIGMA-style looping and a Deepire-style model (user's question, 14 Nov)
 
 *Notes: [notes/2026-11-14-enigma-looping-deepire.md](notes/2026-11-14-enigma-looping-deepire.md).*
