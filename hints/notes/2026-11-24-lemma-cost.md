@@ -36,7 +36,7 @@ A 1,200 s run is then about 3 CPU s per abstract second, as exp74's were.
 ## Where the time goes (profile at 120 abstract s, 1,813 profiled CPU s)
 
 Inherited shares (summed over outermost occurrences in the call tree; script
-scratchpad/profinh.py):
+exp/profinh.py):
 
 | cost centre | inherited | entries |
 |---|---:|---:|
