@@ -911,7 +911,7 @@ def main():
         climb = climb2
 
     if c.live:
-        live(c, a, lp, gl, pools, ix, climb, out)
+        live(c, a, lp, gl, pools, ix, climb, out, lock)
         return
     todo = [n for n in lp.names if n not in lp.solved]
     if c.targets:
@@ -926,7 +926,7 @@ def main():
     print(f'climb: {nsolved}/{len(todo)} {time.time()-t0:.0f}s', flush=True)
 
 
-def live(c, a, lp, gl, pools, ix, climb, out):
+def live(c, a, lp, gl, pools, ix, climb, out, lock):
     """--live: climb the stalled goals of the running loop c.live, as they come."""
     import glob
     from concurrent.futures import wait, FIRST_COMPLETED
