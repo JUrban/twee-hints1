@@ -138,3 +138,9 @@ The rate did not fall off: 14 proofs by 07:48, 20 by 08:18 (the later heads alph
 plainlive6 (abs/plainlive6_start.sh) takes over after plainlive5's current cycle; its W cycles run the same setting on
 local heads whose siblings changed since HLW1 (`--prev cond/HLW1 --prev-ignore-knn`). HLW1's 5 threads go to the
 climber (up to its -j 6) and the experiments.
+
+## plainlive6 started (24 Nov 09:04)
+
+plainlive5 stopped after its cycle c38 (09:03:59); abs/plainlive6_start.sh started abs/plainlive6.sh at 09:04:03, PID
+3879710, its first --prev c38N, c38H and cond/HLW1. Cycle c39: 83 heads, 929 other local heads (c39.lheads). Reading:
+the W cycles' runs and proofs per CPU h, against HLW1's 0.90.

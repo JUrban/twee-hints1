@@ -1,6 +1,6 @@
 # Production history
 
-Generated 24 Nov 2026 08:59 by [exp/prodhistory.py](../exp/prodhistory.py) from the scripts abs/ul3.sh … ul83.sh (copies in [exp/prod/](../exp/prod/)) and their logs; rerun it after every production restart. What runs now, with the side loops, is in REPORT.md "Production now"; the totals over time are REPORT's summary table.
+Generated 24 Nov 2026 09:05 by [exp/prodhistory.py](../exp/prodhistory.py) from the scripts abs/ul3.sh … ul83.sh (copies in [exp/prod/](../exp/prod/)) and their logs; rerun it after every production restart. What runs now, with the side loops, is in REPORT.md "Production now"; the totals over time are REPORT's summary table.
 
 * **Written** is the newest dated entry of the script's header: when the version was written or first started.
 * **Last run** is the span of loops/ULNN.log (first and last write). A script that ran twice keeps only its second log (ul74: written 20 Nov 04:14, its log is the run of 21 Nov 16:50 to 22 Nov 07:12); some versions ran for minutes before a fix.
@@ -90,7 +90,7 @@ Generated 24 Nov 2026 08:59 by [exp/prodhistory.py](../exp/prodhistory.py) from 
 | [ul80](../exp/prod/ul80.sh) | 24 Nov 02:18 | 24 Nov 02:19 – 24 Nov 02:56 | 0.6 | J= (default 17); ≥5 in flight | twee-pg61 + `--pg-threshold 0.25 --ground-joining-branch-limit 100` | 0 | −`--retry-climb`; −`--retry-climb-hours` |
 | [ul81](../exp/prod/ul81.sh) | 24 Nov 02:56 | 24 Nov 02:56 – 24 Nov 04:57 | 2.0 | J= (default 17); ≥5 in flight | twee-pg61 + `--pg-threshold 0.25 --ground-joining-branch-limit 100` | 0 | variants +k400s30@3:0 |
 | [ul82](../exp/prod/ul82.sh) | 24 Nov | 24 Nov 04:57 – 24 Nov 07:32 | 2.6 | J= (default 17); ≥3 in flight | twee-pg61 + `--pg-threshold 0.25 --ground-joining-branch-limit 100` | 0 | (same options: a restart, or loop.py's code or the launch arguments changed) |
-| [ul83](../exp/prod/ul83.sh) | 24 Nov | 24 Nov 07:34 – 24 Nov 08:59 | 1.4 | 2 (the running process) | twee-pg61 + `--pg-threshold 0.25 --ground-joining-branch-limit 100` | 3 | (same options: a restart, or loop.py's code or the launch arguments changed) |
+| [ul83](../exp/prod/ul83.sh) | 24 Nov | 24 Nov 07:34 – 24 Nov 09:03 | 1.5 | 2 (the running process) | twee-pg61 + `--pg-threshold 0.25 --ground-joining-branch-limit 100` | 3 | (same options: a restart, or loop.py's code or the launch arguments changed) |
 
 ## Why each version (the header's newest entry, verbatim)
 

@@ -106,17 +106,17 @@ proofs in 63 minutes.
   every 5 minutes, binary twee-e39.
 * **Given-rule retry:** givenmatch.py live into loops/GML, PID 2074661, since 22 Nov 14:17. 2 threads, 60 and 160 s
   runs on GFAIL's hits.
-* **Plain live loop:** abs/plainlive5.sh, PID 3755461, since 23 Nov 23:39 (plainlive4.sh from 19:41, plainlive3.sh from
-  12:38). Every 30 minutes it runs plain runs (no hints, no rule model, no PG) on changed problems only, 3 threads,
-  proofs via loops/CI2. Two settings:
+* **Plain live loop:** abs/plainlive6.sh, PID 3879710, since 24 Nov 09:04 (plainlive5.sh 23 Nov 23:39-24 Nov 09:04,
+  plainlive4.sh from 19:41, plainlive3.sh from 12:38). Every 30 minutes it runs plain runs (no hints, no rule model, no
+  PG) on changed problems only, 3 threads, proofs via loops/CI2. Three settings:
   * N: 5 s, 30+10 siblings, 100 kNN lemmas;
   * H: 60 s on the heads (each original's first unsolved goal), 100+30 siblings, 400 kNN lemmas. HDW1 with this
     setting proved 4 of 92 heads (1.78 per CPU h); 1,600 lemmas (HDG1) proved 1 of 88.
-  * plainlive5 dropped L (5 s, 100+30 siblings, 400 kNN ranked by lr2): 4 proofs in 18 h of run time since 12:38
+  * W (new): H's setting on the other local heads (unsolved goals right after a proved one; 929 at c39), rerun only
+    when a goal's axioms or sibling lemmas changed (`condprove.py --prev-ignore-knn`), the first cycle against
+    HLW1's problems (cond/HLW1: 20 proofs in 936 runs, 0.90 per CPU h).
+  * plainlive5 had dropped L (5 s, 100+30 siblings, 400 kNN ranked by lr2): 4 proofs in 18 h of run time since 12:38
     ([notes/2026-11-23-tail-allocation.md](notes/2026-11-23-tail-allocation.md)).
-  * Next: abs/plainlive6_start.sh (bash 3829136, exp/prod/side/) waits for HLW1's end, stops plainlive5 after its
-    cycle and starts abs/plainlive6.sh: N and H as now, plus W, H's setting on the other local heads, rerun only
-    when a goal's axioms or sibling lemmas changed (`condprove.py --prev-ignore-knn`), its first --prev cond/HLW1.
 * **Conditional-proof replay:** abs/crploop.sh (exp75), bash 3764622 since 24 Nov 00:17. Every hour, exp/condreplay.py
   reruns the climbers' sketch proofs of unsolved targets (not of weakened goals) whose assumptions are now trusted
   goals, as lemma axioms with the sketch's hints; proofs via condimport.py into loops/CRP75 and merge.py into loops/UL.
