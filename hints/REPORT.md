@@ -151,6 +151,8 @@ exp/exp67merge.sh merged their proofs into loops/UL every 10 minutes and ended w
 exp76 (abs/exp76.sh, bash 3766581, since 24 Nov 03:47): final-only climbs at 160 s on 30 of CLS71's failed
 targets, with (F76S) and without (F76C) CLS71's climb hints, -j 2 each. At 04:55: F76S 2 new proofs in 18 targets,
 F76C 0 in 16; exp/exp76merge.sh (bash 3829658, exp/prod/side/) merges both into loops/UL every 10 minutes.
+exp81 (abs/exp81.sh, bash 3829770, waiting for exp76's end): plain 300 s against 60 s on 60 of HLW1's failed local
+heads, 2 threads each ([notes/2026-11-24-plain-time.md](notes/2026-11-24-plain-time.md)).
 exp74 (one plain 1,200 s run on each first head of the key-goal cluster's 7 originals, cond/LCH74) ended 24 Nov 04:34:
 1 of 7, a head exp67 had proved meanwhile; closed.
 exp65 (Q5A, Q5B) ended at 22:55: -2 at 6 hours, closed.
@@ -5047,6 +5049,8 @@ reproduced exactly).
 * exp12 stage B.
 
 ## 2az. Portfolios: complementary methods kept, not dropped (user's request, 18 Nov 17:00)
+
+*Notes: [notes/2026-11-24-plain-time.md](notes/2026-11-24-plain-time.md).*
 
 *Notes: [notes/2026-11-24-cond-replay.md](notes/2026-11-24-cond-replay.md).*
 

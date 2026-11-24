@@ -783,6 +783,10 @@ ul75 5, XFL 1. REPORT's totals table
 has the history (user, 20 Nov: "update the total numbers in the report etc every now and then").
 
 Next:
+000000000000000000000000000000000000000000000000000000000000000000000. **exp81 (longer plain runs on the local heads, [notes/2026-11-24-plain-time.md](notes/2026-11-24-plain-time.md)):** HLW1's
+   60 s plain proofs on local heads came within 27 s; CC67D's long hinted runs on first heads mostly after 150 s. 60 of HLW1's
+   failed local heads (seed 81), the same context: P81A 60 s (control) and P81B 300 s, plain, 100+30 siblings, 400 kNN, 2 threads
+   each; waits for exp76's end. Decision: B beyond A at 0.5 per CPU h or better gives a 300 s pass over the local heads.
 00000000000000000000000000000000000000000000000000000000000000000000. **exp80 (what runs with hundreds of lemma axioms cost, [notes/2026-11-24-lemma-cost.md](notes/2026-11-24-lemma-cost.md)):**
    tonight's winning setting at the frontier is runs with 30-130 siblings and 400 kNN lemma axioms (exp67, HLW1), and those
    get slow as they lengthen: exp74's 1,200 abstract s took about 3 CPU s per abstract s. One plain 505-lemma problem (aa1_45_c 355)
@@ -1476,6 +1480,7 @@ reports are written as the experiments run.
 | [notes/2026-11-23-tail-allocation.md](notes/2026-11-23-tail-allocation.md) | exp72: the tail's side loops by proofs per CPU h; the plain live loop without L, a plain 60 s sweep on the 940 local heads, the climber on the other holes |
 | [notes/2026-11-24-cond-replay.md](notes/2026-11-24-cond-replay.md) | exp75: replaying the climbers' conditional proofs once their assumptions are proved (exp/condreplay.py, abs/crploop.sh); weakened-goal sketches; exact assumption records in used.tsv |
 | [notes/2026-11-24-lemma-cost.md](notes/2026-11-24-lemma-cost.md) | exp80: what twee's runs with hundreds of lemma axioms cost per abstract second, and where the time goes |
+| [notes/2026-11-24-plain-time.md](notes/2026-11-24-plain-time.md) | exp81: plain 300 s against 60 s on local heads that failed at 60 s |
 | [notes/2026-11-20-base-saturation.md](notes/2026-11-20-base-saturation.md) | exp39: base-theory runs as rule generators for the unsolved goals of the stronger theories |
 | [notes/2026-11-20-given-transfer.md](notes/2026-11-20-given-transfer.md) | exp38: unsolved goals that are variants of rules other runs derived and did not use (379 M in the given logs; transfer.py only matches proof steps); their ancestry as hints |
 | [notes/2026-11-19-from-zero-portfolio.md](notes/2026-11-19-from-zero-portfolio.md) | half1 from zero in 2 hours with today's deep portfolio (PGC), against PGA's 18,987 (exp27, from 07:18) |

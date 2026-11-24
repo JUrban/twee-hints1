@@ -1,0 +1,37 @@
+# Longer plain runs on the local heads (exp81)
+
+Written 24 Nov 2026, 04:55 UTC, at launch (abs/exp81.sh, bash 3829770; exp/exp81.sh).
+
+## Question
+
+Do plain runs longer than 60 s pay on the local heads that fail at 60 s?
+
+* HLW1 (exp72, notes/2026-11-23-tail-allocation.md) runs plain 60 s on the 940 local heads (unsolved goals whose
+  previous goal is proved). It proved 4 of its first 123 at 1.32 per CPU h, all within 27 s of their 60 s.
+* On the first heads, CC67D's long hinted runs (30 siblings, 400 kNN, production's hints, 552 CPU s each) proved 6 of
+  their 9 after 150 CPU s (exp67, notes/2026-11-23-climber-restart.md).
+* Before: plain runs longer than 60 s were only exp74's 1,200 s on 7 cluster heads (1 of 7, already proved
+  elsewhere). The plain lemma-size tests (notes/2026-11-23-plain-sizes.md) were all at 5 or 60 s.
+
+## Set
+
+60 of HLW1's failed goals that are still unsolved at launch, random.seed(81) from the sorted list (cond/EXP81.set,
+written at launch). HLW1's rows are in two contexts (cond/HLW1.trusted to 04:50, cond/HLW1.trusted2 after).
+
+## Arms
+
+Plain (no hints, no rule model, no PG), H's lemma lists (100 earlier and 30 later siblings, 400 kNN), the context
+loops/UL/solved.tsv at launch for both (cond/EXP81.trusted), condprove.py --proved, 2 threads each, at the same time:
+* P81A: 60 s, the control. The context has moved since HLW1, so a P81A proof is the context's, not time's.
+* P81B: 300 s.
+
+It waits for exp76's end (loops/EXP76.pids "exp76 done") so that the total stays near 20 twee processes. Proofs go
+into loops/CI3 and loops/UL at each arm's end (cond/EXP81.status).
+
+## Measures
+
+* Proofs per arm, B only and A only; CPU h per arm (results.tsv seconds are wall; 300 abstract s cost about 2.4 CPU s
+  each with these lemma lists: exp80).
+* B's proofs' times: how many came after 60 s.
+* Decision: if B's proofs beyond A's come at 0.5 per CPU h or better (production makes 0-0.4), a 300 s plain pass over
+  the local heads that fail at 60 s follows (a W2 setting in the live loop or a sweep).
