@@ -67,3 +67,14 @@ The printed proofs of HLW1's first 5 (cond/HLW1/proofs), by lemma axiom:
 * Later siblings are rarely used (2 of 5 proofs, one each).
 * Four of 5 use a kNN lemma ranked 381-397 of 400: the useful kNN lemmas are spread over the whole list, as "size, not
   order" found (23 Nov); 1,600 at 60 s on the first heads still lost (HDG1), by its cost.
+
+## HLS2: the second kNN slice on all local heads (24 Nov 09:05)
+
+Interim at 09:00: P81D (kNN ranks 400-799, 60 s) proved 2 of 60 of HLW1's failed heads (aK2_eq_aK3_a 658, aK2_eq_aK3_d
+571), P81A (ranks 0-399, 60 s) 0 of 60, P81C (all earlier siblings) 0 of 60; P81B (300 s) 2 of 30 so far. HLW1's own
+proofs used kNN ranks up to 397. With 5 CPUs free (exp81's 60 s chain done, the climber at its -j 8), abs/hls2.sh
+(exp/prod/side/hls2.sh) sweeps P81D's setting over every unsolved local head and first head of plainlive6's cycle c39:
+1,012 goals, context 48,625, 3 threads, cond/HLS2; proofs into loops/UL through loops/CI3 every 30 minutes
+(cond/HLS2.parts). First problem: aa1_14 537, 103 sibling and 400 kNN lemma axioms, ranks 400-799. This acts on an
+interim reading (2 against 0): it is a production sweep with the reading in its own rows (proofs per CPU h against
+HLW1's 0.90), not exp81's decision.

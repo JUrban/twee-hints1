@@ -1,6 +1,6 @@
 # Production history
 
-Generated 24 Nov 2026 09:05 by [exp/prodhistory.py](../exp/prodhistory.py) from the scripts abs/ul3.sh … ul83.sh (copies in [exp/prod/](../exp/prod/)) and their logs; rerun it after every production restart. What runs now, with the side loops, is in REPORT.md "Production now"; the totals over time are REPORT's summary table.
+Generated 24 Nov 2026 09:06 by [exp/prodhistory.py](../exp/prodhistory.py) from the scripts abs/ul3.sh … ul83.sh (copies in [exp/prod/](../exp/prod/)) and their logs; rerun it after every production restart. What runs now, with the side loops, is in REPORT.md "Production now"; the totals over time are REPORT's summary table.
 
 * **Written** is the newest dated entry of the script's header: when the version was written or first started.
 * **Last run** is the span of loops/ULNN.log (first and last write). A script that ran twice keeps only its second log (ul74: written 20 Nov 04:14, its log is the run of 21 Nov 16:50 to 22 Nov 07:12); some versions ran for minutes before a fix.
