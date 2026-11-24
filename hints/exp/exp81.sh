@@ -9,6 +9,8 @@
 #   P81C (after P81A, on its 2 threads): 60 s with every earlier sibling (--sibs 1000) and 100 later, 400 kNN: no plain
 #   run at 60 s had more than 100+30 siblings (5 s: 200+60 with 1,000 kNN), and a long original's later goals miss
 #   most of their proved earlier siblings, which are steps of the same Prover9 proof
+#   P81D (after P81C): 60 s, 100+30 siblings, the kNN lemmas ranked 400-799 (--knn-skip 400): HLW1's proofs use kNN
+#   lemmas up to rank 397 of 400, and 1,600 at once cost too much at 60 s (HDG1); a disjoint slice costs what A does
 # Waits for exp76's end (loops/EXP76.pids "exp76 done", its 4 threads), so the total stays near 20.
 cd /project/hintwork
 until grep -q "^exp76 done" loops/EXP76.pids 2>/dev/null; do sleep 60; done
@@ -22,15 +24,15 @@ open('cond/EXP81.set', 'w').writelines(g + '\n' for g in sorted(random.sample(F,
 print(len(F), 'failed and unsolved; 60 sampled')
 PY
 echo "exp81 start $(date '+%d %T') context $(wc -l < cond/EXP81.trusted) set $(wc -l < cond/EXP81.set)" >> cond/EXP81.status
-arm() {   # NAME TIME SIBS AFTER
-  n=$1; tm=$2
+arm() {   # NAME TIME SIBS AFTER [condprove flags]
+  n=$1; tm=$2; x="${5:-}"
   python3 -u /project/twee/hints/exp/condprove.py cond/$n --trusted cond/EXP81.trusted -j 2 --proved --time $tm \
-    --sibs $3 --after $4 --knn 400 --only cond/EXP81.set > cond/$n.log 2>&1
+    --sibs $3 --after $4 --knn 400 $x --only cond/EXP81.set > cond/$n.log 2>&1
   python3 /project/twee/hints/exp/condimport.py cond/$n loops/CI3 --trusted cond/EXP81.trusted --time $tm > cond/$n.import 2>&1
   flock cond/merge.lock python3 /project/twee/hints/merge.py loops/UL loops/CI3 > cond/$n.merge 2>&1
   echo "$n done $(date '+%d %T') ran $(grep -c . cond/$n/results.tsv) THM $(grep -c -P '\tTHM\t' cond/$n/results.tsv) | $(tail -1 cond/$n.import) | $(tail -1 cond/$n.merge)" >> cond/EXP81.status
 }
-( arm P81A 60 100 30; arm P81C 60 1000 100 ) &
+( arm P81A 60 100 30; arm P81C 60 1000 100; arm P81D 60 100 30 "--knn-skip 400" ) &
 arm P81B 300 100 30 &
 wait
 echo "exp81 done $(date '+%d %T')" >> cond/EXP81.status

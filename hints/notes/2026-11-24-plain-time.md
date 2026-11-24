@@ -28,6 +28,10 @@ loops/UL/solved.tsv at launch for both (cond/EXP81.trusted), condprove.py --prov
   400 kNN. No plain run at 60 s had more than 100+30 siblings (at 5 s, 200+60 with 1,000 kNN). A long original's
   later goals miss most of their proved earlier siblings, and those are steps of the same Prover9 proof. Smoke:
   aK2_eq_aK3_1243b 606 got 499 sibling and 400 kNN lemma axioms (6.5 s wall for a 2 s run).
+* P81D (added 05:21, after P81C): 60 s, 100+30 siblings, the kNN lemmas ranked 400-799 (`condprove.py --knn-skip
+  400`, lemmas.lemma_problem_knn skip=): a disjoint slice that costs what A's does. HLW1's proofs use kNN lemmas up
+  to rank 397 of 400 (below), and 1,600 at once lost at 60 s by its cost (HDG1). Smoke: skip 0 gives a byte-identical
+  problem; skip 400 on aK2_eq_aK3_1243b 606 gives ranks 400-618 (its pool ends there), none of the first 400.
 
 It waits for exp76's end (loops/EXP76.pids "exp76 done") so that the total stays near 20 twee processes. Proofs go
 into loops/CI3 and loops/UL at each arm's end (cond/EXP81.status).
@@ -38,6 +42,8 @@ into loops/CI3 and loops/UL at each arm's end (cond/EXP81.status).
   each with these lemma lists: exp80).
 * B's proofs' times: how many came after 60 s.
 * C against A: proofs only with the full sibling window, at equal time.
+* D against A: proofs only with the second kNN slice; A ∪ D against B at about the same CPU (two 60 s runs against one
+  300 s run).
 * Decision: if B's proofs beyond A's come at 0.5 per CPU h or better (production makes 0-0.4), a 300 s plain pass over
   the local heads that fail at 60 s follows (a W2 setting in the live loop or a sweep).
 
