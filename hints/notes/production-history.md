@@ -1,6 +1,6 @@
 # Production history
 
-Generated 24 Nov 2026 06:05 by [exp/prodhistory.py](../exp/prodhistory.py) from the scripts abs/ul3.sh … ul82.sh (copies in [exp/prod/](../exp/prod/)) and their logs; rerun it after every production restart. What runs now, with the side loops, is in REPORT.md "Production now"; the totals over time are REPORT's summary table.
+Generated 24 Nov 2026 07:34 by [exp/prodhistory.py](../exp/prodhistory.py) from the scripts abs/ul3.sh … ul83.sh (copies in [exp/prod/](../exp/prod/)) and their logs; rerun it after every production restart. What runs now, with the side loops, is in REPORT.md "Production now"; the totals over time are REPORT's summary table.
 
 * **Written** is the newest dated entry of the script's header: when the version was written or first started.
 * **Last run** is the span of loops/ULNN.log (first and last write). A script that ran twice keeps only its second log (ul74: written 20 Nov 04:14, its log is the run of 21 Nov 16:50 to 22 Nov 07:12); some versions ran for minutes before a fix.
@@ -89,7 +89,8 @@ Generated 24 Nov 2026 06:05 by [exp/prodhistory.py](../exp/prodhistory.py) from 
 | [ul79](../exp/prod/ul79.sh) | 24 Nov 01:14 | 24 Nov 01:15 – 24 Nov 02:19 | 1.1 | J= (default 17); ≥5 in flight | twee-pg61 + `--pg-threshold 0.25 --ground-joining-branch-limit 100` | 0 | +`--retry-climb`; +`--retry-climb-hours` `6` |
 | [ul80](../exp/prod/ul80.sh) | 24 Nov 02:18 | 24 Nov 02:19 – 24 Nov 02:56 | 0.6 | J= (default 17); ≥5 in flight | twee-pg61 + `--pg-threshold 0.25 --ground-joining-branch-limit 100` | 0 | −`--retry-climb`; −`--retry-climb-hours` |
 | [ul81](../exp/prod/ul81.sh) | 24 Nov 02:56 | 24 Nov 02:56 – 24 Nov 04:57 | 2.0 | J= (default 17); ≥5 in flight | twee-pg61 + `--pg-threshold 0.25 --ground-joining-branch-limit 100` | 0 | variants +k400s30@3:0 |
-| [ul82](../exp/prod/ul82.sh) | 24 Nov | 24 Nov 04:57 – 24 Nov 06:02 | 1.1 | 4 (the running process) | twee-pg61 + `--pg-threshold 0.25 --ground-joining-branch-limit 100` | 0 | (same options: a restart, or loop.py's code or the launch arguments changed) |
+| [ul82](../exp/prod/ul82.sh) | 24 Nov | 24 Nov 04:57 – 24 Nov 07:32 | 2.6 | J= (default 17); ≥3 in flight | twee-pg61 + `--pg-threshold 0.25 --ground-joining-branch-limit 100` | 0 | (same options: a restart, or loop.py's code or the launch arguments changed) |
+| [ul83](../exp/prod/ul83.sh) | 24 Nov | 24 Nov 07:34 – 24 Nov 07:34 | 0.0 | 2 (the running process) | twee-pg61 + `--pg-threshold 0.25 --ground-joining-branch-limit 100` |  | (same options: a restart, or loop.py's code or the launch arguments changed) |
 
 ## Why each version (the header's newest entry, verbatim)
 
@@ -173,6 +174,7 @@ Generated 24 Nov 2026 06:05 by [exp/prodhistory.py](../exp/prodhistory.py) from 
 * **ul80** (24 Nov 02:18): (24 Nov 02:18) ul80: ul79 without --retry-climb (exp78 negative): ul79's first 63 minutes, 1,312 runs, 0 proofs; 1,304 of them on 287 climb-retried goals (0 proved, 5.9 CPU h), and a goal still being climbed was marked again at each rescan. ul78 had 8 proofs in 1,950 runs. So: ul78's setting again (notes/2026-11-24-cond-replay.md, "exp78"). J=6.
 * **ul81** (24 Nov 02:56): (24 Nov 02:56) ul81: ul80 plus member k400s30@3:0 (exp79): a fresh run at level 3's budget (160 s) right after L0, with 30 sibling and 400 kNN lemmas, production's hints, model and PG: exp67's control CC67D, which with one such run per head (552 CPU s cap) proved 9 of 91 frozen heads, every head the climber CLB67 proved and one more, at 13.6 CPU h (0.66 per CPU h; production's last 6,000 runs 0.48). Explored and ordered by live yield like every member. One change; J=6 (notes/2026-11-23-climber-restart.md, "exp79").
 * **ul82** (24 Nov): (24 Nov) ul82: ul81 with J=4 instead of 6. Over production's last 30,000 runs the optional variant members took 101.5 of 134 CPU h (76%) for 26 proofs (0.26 per CPU h), the fresh levels L0 and L1 54 proofs in 29 CPU h (1.86); every plain side loop measures 0.88 per CPU h or more (N 0.88, H about 1.5, HDW1 1.78, HLW1 1.32). With fewer workers the fresh levels still run (somewhat later) and the variants fill less; the 2 CPUs go to the plain sweeps and the climber (notes/2026-11-23-tail-allocation.md, "ul82"). Launch: J=4 bash abs/ul82.sh.
+* **ul83** (24 Nov): (24 Nov) ul83: ul82 with J=2 instead of 4. ul82's 2,501 runs from 04:57 to 07:29 (9.4 CPU h) made 0 proofs; 2,316 were the variant members. Its cascade did follow HLW1's new proofs (71 runs on the 3 goals after each, 0 proved). The stalled-goal climber with 160 s finals made 5 in 7.4 CPU h (0.68 per CPU h) since 06:05, and takes the freed threads (it starts climbs while fewer than 20 other twee processes run). Launch: J=2 bash abs/ul83.sh.
 
 ## Side loops (their scripts, oldest first; copies in [exp/prod/side/](../exp/prod/side/))
 
@@ -227,7 +229,7 @@ Each line is the script's first header entry. Which ones run now is in REPORT.md
 * [p9c4.sh](../exp/prod/side/p9c4.sh): (18 Nov 17:52) p9c with 4 workers instead of 2 (log P9C4.log). By the portfolio's ratio rule it is the best deep member per CPU: 1.98 new proofs per CPU hour on the walls twee's chain failed (exp16), 1.44 live from 16:46 to 17:49 (3 proofs in 126 runs), against 1.16 for production's 80 s chain level. Its 225 queued stalled goals would take 2 workers about 2 hours. Restarting keeps loops/P9C/result …
 
 
-## The current version's full option list (ul82)
+## The current version's full option list (ul83)
 
 ```
 export TWEE_PG_ARGS="--pg-threshold 0.25 --ground-joining-branch-limit 100"

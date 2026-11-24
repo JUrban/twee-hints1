@@ -117,3 +117,13 @@ side loops measure 0.88 (N) to about 1.8 (HDW1) per CPU h, and HLW1 1.32 so far.
 made 0 proofs. So ul82 is ul81 with 4 workers instead of 6 (abs/ul82.sh, exp/prod/ul82.sh; loop.py 3830111, log
 loops/UL82.log): the fresh levels still run, somewhat later, and the 2 CPUs go back to the side loops (the stalled-goal
 climber takes them by its cap until exp81 starts). Reading: production's proofs per CPU h and per hour against ul81's.
+
+## ul83 (24 Nov 07:34)
+
+ul82 (J=4, 04:57-07:34): 2,501 runs, 9.4 CPU h, **0 proofs**. By member: Vs12 506 runs, Vk1000 439, Vkd 201, Vr2 141,
+Vs40 139, Vunf 138, Vk400 138, Vk200 130, Vk60 126, Vnom 125, Vk100 124, L0 122, Vsk 109, L1 63 (2,316 variant runs). Its
+cascade did follow HLW1's new proofs: 71 runs on the 3 goals after each, 0 proved. In the same time the stalled-goal
+climber, restarted at 06:05 with 160 s finals, proved 5 targets in 7.36 CPU h (0.68 per CPU h;
+notes/2026-11-23-climber-restart.md) and HLW1 about 0.6. **ul83 = ul82 with J=2** (abs/ul83.sh, exp/prod/ul83.sh); the
+climber starts climbs while fewer than 20 other twee processes run, so it takes the 2 threads. Reading: ul83's
+proofs and the climber's per CPU h over the next hours.
