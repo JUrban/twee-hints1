@@ -1,6 +1,6 @@
 # Production history
 
-Generated 24 Nov 2026 04:51 by [exp/prodhistory.py](../exp/prodhistory.py) from the scripts abs/ul3.sh … ul81.sh (copies in [exp/prod/](../exp/prod/)) and their logs; rerun it after every production restart. What runs now, with the side loops, is in REPORT.md "Production now"; the totals over time are REPORT's summary table.
+Generated 24 Nov 2026 04:53 by [exp/prodhistory.py](../exp/prodhistory.py) from the scripts abs/ul3.sh … ul81.sh (copies in [exp/prod/](../exp/prod/)) and their logs; rerun it after every production restart. What runs now, with the side loops, is in REPORT.md "Production now"; the totals over time are REPORT's summary table.
 
 * **Written** is the newest dated entry of the script's header: when the version was written or first started.
 * **Last run** is the span of loops/ULNN.log (first and last write). A script that ran twice keeps only its second log (ul74: written 20 Nov 04:14, its log is the run of 21 Nov 16:50 to 22 Nov 07:12); some versions ran for minutes before a fix.
@@ -88,7 +88,7 @@ Generated 24 Nov 2026 04:51 by [exp/prodhistory.py](../exp/prodhistory.py) from 
 | [ul78](../exp/prod/ul78.sh) | 23 Nov 23:42 | 23 Nov 23:43 – 24 Nov 01:15 | 1.5 | J= (default 17); ≥5 in flight | twee-pg61 + `--pg-threshold 0.25 --ground-joining-branch-limit 100` | 8 | variants +skk400s30@1:0 |
 | [ul79](../exp/prod/ul79.sh) | 24 Nov 01:14 | 24 Nov 01:15 – 24 Nov 02:19 | 1.1 | J= (default 17); ≥5 in flight | twee-pg61 + `--pg-threshold 0.25 --ground-joining-branch-limit 100` | 0 | +`--retry-climb`; +`--retry-climb-hours` `6` |
 | [ul80](../exp/prod/ul80.sh) | 24 Nov 02:18 | 24 Nov 02:19 – 24 Nov 02:56 | 0.6 | J= (default 17); ≥5 in flight | twee-pg61 + `--pg-threshold 0.25 --ground-joining-branch-limit 100` | 0 | −`--retry-climb`; −`--retry-climb-hours` |
-| [ul81](../exp/prod/ul81.sh) | 24 Nov 02:56 | 24 Nov 02:56 – 24 Nov 04:50 | 1.9 | 6 (the running process) | twee-pg61 + `--pg-threshold 0.25 --ground-joining-branch-limit 100` | 0 | variants +k400s30@3:0 |
+| [ul81](../exp/prod/ul81.sh) | 24 Nov 02:56 | 24 Nov 02:56 – 24 Nov 04:52 | 1.9 | 6 (the running process) | twee-pg61 + `--pg-threshold 0.25 --ground-joining-branch-limit 100` | 0 | variants +k400s30@3:0 |
 
 ## Why each version (the header's newest entry, verbatim)
 
@@ -204,6 +204,8 @@ Each line is the script's first header entry. Which ones run now is in REPORT.md
 * [plainlive4.sh](../exp/prod/side/plainlive4.sh): (23 Nov, notes/2026-11-23-plain-sizes.md "The frontier is 92 heads") abs/plainlive3.sh plus a heads setting H: N: 30 earlier and 10 later siblings, 100 kNN, 5 s L: 100 earlier and 30 later siblings, 400 kNN ranked by models/lemmarank/${MODEL:-lr2}, 5 s H: the cycle's heads only (each original's first unsolved goal in the cycle's context), 100+30 siblings, 400 kNN by similarity, 60 s (HDW1's settin …
 * [plainlive4_start.sh](../exp/prod/side/plainlive4_start.sh): (23 Nov, notes/2026-11-23-plain-sizes.md) After the head sweeps (cond/SWEEPQ.log "HDG1 done"): stop abs/plainlive3.sh after its cycle (cond/PLNL.stop), then start abs/plainlive4.sh (N, L with lr2, and the 60 s heads setting H) with PREV_N and PREV_L plainlive3's last cycle and PREV_H cond/HDW1 (H's settings, so unchanged heads are not rerun).
 * [plainlive5.sh](../exp/prod/side/plainlive5.sh): (23 Nov 23:39) plainlive5: plainlive4 without L (100+30 siblings, 400 kNN ranked by lr2, 5 s): since 23 Nov 12:38 L made 4 proofs in 19,994 runs (17.1 h of run time, 0.23 per h), against N's 4 in 4.5 h (0.88) and H's 2 in 1.3 h (1.51), and took most of each cycle (50-60 minutes of 3 threads). N and H unchanged. Earlier header: (23 Nov, notes/2026-11-23-plain-sizes.md "The frontier is 92 heads") ab …
+* [plainlive6.sh](../exp/prod/side/plainlive6.sh): (24 Nov, notes/2026-11-23-tail-allocation.md "plainlive6") plainlive5 plus W: the local heads (unsolved goals whose previous goal is proved, exp/heads.py --local) other than the first heads, at H's setting (100+30 siblings, 400 kNN, 60 s), rerun only when a goal's axioms or sibling lemmas changed (condprove.py --prev-ignore-knn): a newly proved sibling, not a moved kNN list (with kNN changes nearl …
+* [plainlive6_start.sh](../exp/prod/side/plainlive6_start.sh): (24 Nov) When the resumed HLW1 sweep has ended (cond/SWEEPQ.log "HLW1 done" after "HLW1 resumed"): stop abs/plainlive5.sh after its cycle (cond/PLNL.stop), then start abs/plainlive6.sh (N, H, and W on the local heads) with PREV_N, PREV_H plainlive5's last cycle and PREV_W cond/HLW1.
 * [plainlive_start.sh](../exp/prod/side/plainlive_start.sh): (23 Nov) After PLN2: import and merge its proofs (loops/CI2), then start abs/plainlive.sh (PREV=cond/PLN2).
 * [sweepq.sh](../exp/prod/side/sweepq.sh): (23 Nov) A queue of full plain sweeps (notes/2026-11-23-conditional.md, "Sweep queue"): each line of cond/SWEEPQ.txt is "NAME condprove-args"; a sweep runs once (cond/NAME), on production's unsolved goals with the context loops/UL/solved.tsv at its start, --proved, ${J:-3} threads, then its proofs go into loops/CI3 and loops/UL. Waits for $AFTER (a file) first. Stops when the queue is done or cond …
 

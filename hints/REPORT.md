@@ -108,6 +108,9 @@ runs on 287 climbed goals, 0 proofs in 63 minutes.
     setting proved 4 of 92 heads (1.78 per CPU h); 1,600 lemmas (HDG1) proved 1 of 88.
   * plainlive5 dropped L (5 s, 100+30 siblings, 400 kNN ranked by lr2): 4 proofs in 18 h of run time since 12:38
     ([notes/2026-11-23-tail-allocation.md](notes/2026-11-23-tail-allocation.md)).
+  * Next: abs/plainlive6_start.sh (bash 3829136, exp/prod/side/) waits for HLW1's end, stops plainlive5 after its
+    cycle and starts abs/plainlive6.sh: N and H as now, plus W, H's setting on the other local heads, rerun only
+    when a goal's axioms or sibling lemmas changed (`condprove.py --prev-ignore-knn`), its first --prev cond/HLW1.
 * **Conditional-proof replay:** abs/crploop.sh (exp75), bash 3764622 since 24 Nov 00:17. Every hour, exp/condreplay.py
   reruns the climbers' sketch proofs of unsolved targets (not of weakened goals) whose assumptions are now trusted
   goals, as lemma axioms with the sketch's hints; proofs via condimport.py into loops/CRP75 and merge.py into loops/UL.

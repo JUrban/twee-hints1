@@ -85,3 +85,18 @@ sign test p = 0.125 two-sided, so suggestive only), and the plain live loop's be
   again on the new condprove (bash 3828344). The stalled-goal climber gives up the 2 CPUs by its own cap.
 * So HLW1's rows are in two contexts: the first 123 in cond/HLW1.trusted, the rest in cond/HLW1.trusted2. For a
   per-CPU-h reading this does not matter; it is a production sweep, not an A/B.
+
+## plainlive6: the local heads in the live loop (prepared 24 Nov 04:53)
+
+* When HLW1 ends, its local heads should keep getting plain 60 s runs as their problems change. plainlive's H reruns
+  every changed problem, and with the kNN lists nearly every problem changes every cycle (c29H: 79 of 85 first heads);
+  on about 935 local heads that would be 15-20 CPU h a cycle.
+* So W reruns a local head only when its axioms or sibling lemmas changed: condprove.py `--prev-ignore-knn` compares
+  the problems without their lemma_knn_* lines. A newly proved sibling (the unlock this is for) triggers a rerun; a moved
+  kNN list does not. Smoke: 4 HLW1 goals in the 04:50 context all rerun without the flag and are all SAME with it;
+  aa1_45_c 368, whose sibling 365 was proved in between, reruns with it.
+* condprove.py `--prev DIR,DIR` (the first dir that has the goal decides) and exp/heads.py `--local` were added for it.
+* abs/plainlive6.sh (exp/prod/side/): N and H as plainlive5, plus W on `heads.py --local` minus the first heads, first
+  --prev cond/HLW1. abs/plainlive6_start.sh (bash 3829136) waits for "HLW1 done" after "HLW1 resumed" in
+  cond/SWEEPQ.log, stops plainlive5 after its cycle and starts plainlive6 (PID in cond/PLNL6.pid).
+* Reading: W's runs and proofs per cycle (cond/PLNL/log c<k>W), against H's.
