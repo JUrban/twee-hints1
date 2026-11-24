@@ -783,6 +783,9 @@ ul75 5, XFL 1. REPORT's totals table
 has the history (user, 20 Nov: "update the total numbers in the report etc every now and then").
 
 Next:
+000000000000000000000000000000000000000000000000000000000000000000. **exp67 arm B against its CPU-matched control ([notes/2026-11-23-climber-restart.md](notes/2026-11-23-climber-restart.md)):**
+   on all 91 frozen heads the climber CLB67 proved 8 and one long run per head with the same lemma lists (CC67D, 552 CPU s each)
+   proved 9, +0 −1, at 14.90 against 13.58 CPU h. Climbing added nothing beyond the long lemma lists. Arm A's pair still runs.
 00000000000000000000000000000000000000000000000000000000000000000. **exp78 (production retries climbed goals, [notes/2026-11-24-cond-replay.md](notes/2026-11-24-cond-replay.md), "exp78"):**
    loop.py --retry-climb: a goal whose climb sketches are newer than its last fresh run gets one fresh run (then the sk members).
    Before, 127 of CLS71's first 149 climbed targets had no production run after their climb. **ul79** (01:15) = ul78 plus

@@ -464,3 +464,21 @@ Ten times the fill time (K70F) proved 44% of its gaps against K70R's 40%, at 7 t
 proved a key goal: the second Veroff round from CLK69's sketches added nothing. The key goals' gaps are not short of
 time; their sketches rest on assumptions that do not follow. Closed. No climber returns to these 9; exp74 tries the
 cluster's heads with long plain runs instead.
+
+## exp67, arm B against its control: climbing adds nothing (24 Nov, 02:55)
+
+CLB67 ended at 02:35 (8 of 91 heads), its control CC67D at 02:54 (9 of 91). exp/ccpair.py on the 91 heads both
+finished:
+
+| | CLB67 (climber: sketches, fills, 160 s finals) | CC67D (one run per head, the climber's CPU per head) |
+|---|---:|---:|
+| heads proved | 8 | 9 |
+| only this one | 0 | 1 (mbol_to_aaxx 377) |
+| CPU h | 14.90 | 13.58 |
+
+Both have the same lemma lists (30 siblings, 400 kNN), production's hints, rule model and PG; the control has no
+sketches, fill lemmas or climb hints, and each run is capped at 552 CPU s (climb.py --final-cpu: CLB67's CPU per
+finished head at launch). Every head the climber proved, one long run with the same lemmas proved too, at about the
+same CPU. On these heads the long lemma lists made arm B's lead over arm A (7 against 2 at 23:41), not the climbing.
+Arm A's pair (CLA67, CC67C) is still running. What follows for the stalled goals is long runs with long lemma lists
+(exp74, HLW1); exp76 asks the same of CLS71's climbs.
