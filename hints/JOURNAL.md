@@ -783,6 +783,10 @@ ul75 5, XFL 1. REPORT's totals table
 has the history (user, 20 Nov: "update the total numbers in the report etc every now and then").
 
 Next:
+00000000000000000000000000000000000000000000000000000000000000000000. **exp80 (what runs with hundreds of lemma axioms cost, [notes/2026-11-24-lemma-cost.md](notes/2026-11-24-lemma-cost.md)):**
+   tonight's winning setting at the frontier is runs with 30-130 siblings and 400 kNN lemma axioms (exp67, HLW1), and those
+   get slow as they lengthen: exp74's 1,200 abstract s took about 3 CPU s per abstract s. One plain 505-lemma problem (aa1_45_c 355)
+   at 5-300 abstract s with +RTS -s, and a cost-centre profile at 120 s (dist-prof2). 120 s: 1.95 CPU s per abstract s.
 0000000000000000000000000000000000000000000000000000000000000000000. **exp79 (CC67D's run as a production member, [notes/2026-11-23-climber-restart.md](notes/2026-11-23-climber-restart.md), "exp79"):**
    **ul81** (02:56) = ul80 plus k400s30@3:0: a fresh 160 s run after L0 with 30 siblings and 400 kNN, the run that proved 9 of
    91 heads in exp67's control (0.66 per CPU h; production's last 6,000 runs 0.48). Explored and ordered by live yield.
@@ -800,7 +804,7 @@ Next:
    every run so far used twee's default queue. Four of twee's UEQ portfolio strategies (lhs-weight 1 or 9 with flip-ordering,
    ground connectedness, kbo-weight0) as plain 60 s runs on 120 local heads; HLW1 is the control. --complete-subsets and
    --depth-weight 60 are out: 5-10 times the CPU per critical pair with 529 lemma axioms (abstract time counts pairs).
-   **Stopped (03:49): not new. exp57 (notes/2026-11-22-cp-weights.md) found every queue weight below the defaults, and 15 Nov's
+   **Stopped (03:49): not new. exp57 ([notes/2026-11-22-cp-weights.md](notes/2026-11-22-cp-weights.md)) found every queue weight below the defaults, and 15 Nov's
    var_test flip-ordering and kbo-weight0 0 at 5-20 s. A2's one proof (aK2_eq_aK3_gen 594, merged) the defaults find in 11 s.**
 000000000000000000000000000000000000000000000000000000000000000. **exp76 (CLS71's finals at 160 s, [notes/2026-11-24-cond-replay.md](notes/2026-11-24-cond-replay.md), "exp76"):**
    CLS71's 20 s finals: 0 real proofs in 119 (1,174 sketch proofs). 30 of its failed targets get one 160 s final with its
@@ -1467,6 +1471,7 @@ reports are written as the experiments run.
 | [notes/2026-11-23-climber-restart.md](notes/2026-11-23-climber-restart.md) | exp66: the live head climber restarted beside production (stopped 20 Nov, 1.04 per CPU h then); per CPU h against the plain head runs |
 | [notes/2026-11-23-tail-allocation.md](notes/2026-11-23-tail-allocation.md) | exp72: the tail's side loops by proofs per CPU h; the plain live loop without L, a plain 60 s sweep on the 940 local heads, the climber on the other holes |
 | [notes/2026-11-24-cond-replay.md](notes/2026-11-24-cond-replay.md) | exp75: replaying the climbers' conditional proofs once their assumptions are proved (exp/condreplay.py, abs/crploop.sh); weakened-goal sketches; exact assumption records in used.tsv |
+| [notes/2026-11-24-lemma-cost.md](notes/2026-11-24-lemma-cost.md) | exp80: what twee's runs with hundreds of lemma axioms cost per abstract second, and where the time goes |
 | [notes/2026-11-20-base-saturation.md](notes/2026-11-20-base-saturation.md) | exp39: base-theory runs as rule generators for the unsolved goals of the stronger theories |
 | [notes/2026-11-20-given-transfer.md](notes/2026-11-20-given-transfer.md) | exp38: unsolved goals that are variants of rules other runs derived and did not use (379 M in the given logs; transfer.py only matches proof steps); their ancestry as hints |
 | [notes/2026-11-19-from-zero-portfolio.md](notes/2026-11-19-from-zero-portfolio.md) | half1 from zero in 2 hours with today's deep portfolio (PGC), against PGA's 18,987 (exp27, from 07:18) |

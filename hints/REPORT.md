@@ -1495,6 +1495,8 @@ the axioms in under 10 s each.
 
 ## 2t. Where twee's time goes, and the rule penalty
 
+*Notes: [notes/2026-11-24-lemma-cost.md](notes/2026-11-24-lemma-cost.md).*
+
 **Profile.** twee-e22 built with `-f profile` (Twee.Profile now uses GHC's
 monotonic clock instead of rdtsc). The test run is one failing
 nil3_1K goal at 20 abstract s (40k critical pairs considered) in the full
