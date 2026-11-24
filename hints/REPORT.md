@@ -121,13 +121,12 @@ proofs in 63 minutes.
   reruns the climbers' sketch proofs of unsolved targets (not of weakened goals) whose assumptions are now trusted
   goals, as lemma axioms with the sketch's hints; proofs via condimport.py into loops/CRP75 and merge.py into loops/UL.
   0 ready at 00:17 ([notes/2026-11-24-cond-replay.md](notes/2026-11-24-cond-replay.md)).
-* **Sweep queue:** abs/sweepq.sh ran one-off plain sweeps from cond/SWEEPQ.txt (3 threads, proofs via loops/CI3);
-  it ended at 04:50, after its last line, HLW1 (exp72), H's setting on the 940 local heads (unsolved goals right after a proved one, the first heads
-  left out), from 24 Nov 03:47 (cond/HLW1). At 04:50, after 123 runs with 4 new proofs (1.32 per CPU h; production 0 in
-  its last 1,000 runs), it was resumed with 5 threads instead of 3 and the current context for the other 813 goals
-  (abs/hlw1b.sh, exp/prod/side/hlw1b.sh; bash and condprove PIDs in cond/HLW1b.pid); sweepq.sh ended, HLW1 was its last
-  line. abs/hlwimport.sh (exp/prod/side/hlwimport.sh, bash 3828344) imports its proofs into loops/UL every 30 minutes
-  through loops/CI3 (cond/HLW1.parts), so that production has them as lemmas.
+* **Sweep queue:** abs/sweepq.sh ran one-off plain sweeps from cond/SWEEPQ.txt (3 threads, proofs via loops/CI3); it
+  ended at 04:50 with its last line, HLW1 (exp72): H's setting on the 940 local heads (unsolved goals right after a
+  proved one, the first heads left out), from 24 Nov 03:47 (cond/HLW1), resumed at 04:50 with 5 threads and the
+  current context (abs/hlw1b.sh). **HLW1 ended 24 Nov 08:48: 936 runs, 20 proofs, 22.3 CPU h (0.90 per CPU h)**, all in
+  loops/UL through abs/hlwimport.sh (every 30 minutes) and the final import
+  ([notes/2026-11-23-tail-allocation.md](notes/2026-11-23-tail-allocation.md), "HLW1 done").
   PLT1, PLX1 are held.
 
 **The head climber: abs/clhl4.sh (exp68),** stopped 23 Nov 23:30 after 21:07-23:30: 21 heads finished, 0 real proofs in

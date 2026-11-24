@@ -127,3 +127,14 @@ climber, restarted at 06:05 with 160 s finals, proved 5 targets in 7.36 CPU h (0
 notes/2026-11-23-climber-restart.md) and HLW1 about 0.6. **ul83 = ul82 with J=2** (abs/ul83.sh, exp/prod/ul83.sh); the
 climber starts climbs while fewer than 20 other twee processes run, so it takes the 2 threads. Reading: ul83's
 proofs and the climber's per CPU h over the next hours.
+
+## HLW1 done (24 Nov 08:48)
+
+The plain 60 s sweep of the local heads (sets/localheads71; 100 earlier and 30 later siblings, 400 kNN lemmas; 3 threads
+03:46-04:50, then 5 with the context cond/HLW1.trusted2) ended at 08:48:11: **936 runs, 20 proofs (915 NO, 1 timeout),
+22.29 CPU h, 0.90 per CPU h**, all 20 in loops/UL (imported every 30 minutes by abs/hlwimport.sh and at the end). The
+proofs are from 15 originals (nslm_to_aa1 3, ns_to_aa1_c 3, nil3_25 2); median 24.8 s, the longest 122.7 s (wall).
+The rate did not fall off: 14 proofs by 07:48, 20 by 08:18 (the later heads alphabetically are the larger originals).
+plainlive6 (abs/plainlive6_start.sh) takes over after plainlive5's current cycle; its W cycles run the same setting on
+local heads whose siblings changed since HLW1 (`--prev cond/HLW1 --prev-ignore-knn`). HLW1's 5 threads go to the
+climber (up to its -j 6) and the experiments.
