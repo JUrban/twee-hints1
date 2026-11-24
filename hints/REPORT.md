@@ -172,9 +172,9 @@ exp82 and exp82c (Horn siblings as clause lemma axioms, TWEE_LEMMA_HORN=1 with t
 default encoding cost 8x) ended 24 Nov 12:59: 11 against 11 on 120 local heads (+1 −1), equal cost: off
 ([notes/2026-11-24-horn-lemmas.md](notes/2026-11-24-horn-lemmas.md)).
 
-**CPU at 05:02:** 20 twee processes: the HLW1 sweep 5, the stalled-goal climber 4 (it starts climbs only while fewer
-than 20 other twee processes run, so it takes what the others leave), the main loop 3 (of 4 workers), the plain live
-loop 3 (its H cycle), exp76's two arms 2 each, proof reruns 1. When exp76 ends, exp81 takes its 4.
+**CPU at 13:28:** 21 twee processes: the stalled-goal climber 10 (it starts climbs only while fewer than 20 other twee
+processes run, so it takes what the others leave), the main loop 4, the kNN-slice sweep HLS2 3, the plain live loop 3
+(its H cycle), proof reruns 1.
 
 **Trust** (exp/trust.py, run after each restart): since 23 Nov 23:14 it also checks fill lemmas, the climbers'
 gap proofs that production gets as lemma_fill_N. climb.py records each one's premises (fillprem.tsv), and
