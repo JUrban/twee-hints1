@@ -47,7 +47,7 @@ in `/project/hintwork` (not in git).
 | + exp67's climbs on the heads (CLA67 2, CLB67 3 proofs), production with today's climb hints (ul76) 8 and its side loops 5; at 23 Nov 23:14, 3 untrusted (fill lemmas without a record; loops/TRUSTNOW/t2314) | **48,555** (+56.3% over plain) | **5418** (+69.2%) | – |
 | + exp67's controls and climbs (CC67C, CC67D, CLB67), production (ul77-ul81: climb-hint members), the stalled-goal climber CLS71 and exp77's one proof; at 24 Nov 03:54, 4 untrusted (loops/TRUSTNOW/t0354) | **48,575** (+56.4% over plain) | **5421** (+69.2%) | – |
 | + 19 since 03:54: the plain imports (loops/CI3, mostly HLW1) 9, the stalled-goal climber CLS71 7 (5 with 160 s finals since 06:05), exp76's finals 2, GML 1; production ul82 0; at 24 Nov 07:29, 4 untrusted (loops/TRUSTNOW/t0729) | **48,594** (+56.5% over plain) | **5423** (+69.3%) | – |
-| + 353 since 07:29: the climber with 160 s finals and re-climbs (71 by its log), production's cascade following its chains (ul83, 98, nearly all at L0), the given-rule retry GML (166 goals with a fresh GML proof), XFL 23, the plain sweeps' imports 19 (HLW1, HLS2, exp81, exp82); at 24 Nov 11:18, 4 untrusted (loops/TRUSTNOW/t1118) | **48,947** (+57.6% over plain) | **5476** (+71.0%) | – |
+| + 353 since 07:29: the climber's 160 s finals 71 (by its log; all new targets, no re-climb finished), 72 more on originals right after a climber proof of theirs, 210 on other originals (production 98 in ul83, nearly all at L0; the given-rule retry GML, 166 goals with a fresh GML proof; XFL 23; the plain sweeps' imports 19: HLW1, HLS2, exp81, exp82; overlapping); at 24 Nov 11:18, 4 untrusted (loops/TRUSTNOW/t1118) | **48,947** (+57.6% over plain) | **5476** (+71.0%) | – |
 
 ## Production now
 
