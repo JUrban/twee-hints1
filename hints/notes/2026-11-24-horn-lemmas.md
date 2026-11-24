@@ -78,3 +78,7 @@ have none. The flag would change only those runs; it goes into the climber at it
 * The decision rule (+2 or more, −0) is not met by one proof. The mechanism is real and the cost neutral, so the test
   is extended rather than closed: exp82c, 60 more heads with at least 2 Horn siblings (seed 821, not in exp81's or
   exp82's sets), the same two arms, on exp81's two threads when it ends. The rule then applies to the 120.
+
+**exp82c started 24 Nov 11:24:18** (exp/sets/exp82c.set): context 48,953, 60 heads from 498 candidates (seed 821, not in
+exp81's or exp82's sets), mean 3.07 Horn siblings, 32 originals. First problem aa3_45 497: H82G 106 sibling axioms (3
+Horn) and 400 kNN, H82D 103 and 400; only H82G's twee runs have `--conditional-encoding fresh`.
