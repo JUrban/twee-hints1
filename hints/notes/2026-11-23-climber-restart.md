@@ -495,3 +495,20 @@ or 80 s (k400 after level 3) with 6 siblings, and skk400s30@1:0 (40 s) had 51 ru
 * Checked: its first run (com_Ralt 254, 160 s, 309 s wall) is labelled Vk400s30@3:0; recent problems have 400
   lemma_knn, 30 lemma_goal and no lemma_fill axioms.
 * Reading: exp/memberyield.py, its proofs per CPU h against the other members, and the goals only it proved.
+
+## exp67's controls ended (24 Nov 03:23): arm A agrees (03:24)
+
+CC67C (arm A's lemma lists, 6 siblings and 30 kNN, one run per head at CLA67's CPU per head) ended at 03:23 with 5 of
+91 heads. exp/ccpair.py:
+
+| pair | heads both finished | proved | +/− | union | CPU h |
+|---|---:|---|---|---:|---|
+| CLA67 (climber) vs CC67C (control) | 88 | 2 / 5 | +0 −3 | 5 | 15.85 / 14.80 |
+| CLB67 (climber) vs CC67D (control) | 91 | 8 / 9 | +0 −1 | 9 | 14.90 / 13.58 |
+| CC67C (6+30) vs CC67D (30+400) | 91 | 5 / 9 | +2 −6 | 11 | 15.32 / 13.58 |
+
+* In both arms every head the climber proved, its control proved too: climbing (sketches with assumptions, fills,
+  climb hints in 160 s finals) added nothing beyond one run of the same CPU with the same lemmas.
+* The lemma lists matter: 30+400 beats 6+30 by +6 −2 at less CPU, and the two are complementary (union 11: CC67C's
+  aa1_14 533 and mbol_aa1sqrd_to_aa1 559 only with the short lists).
+* CLA67 has its last heads running; exp76, exp77 and HLW1 start when it ends.
