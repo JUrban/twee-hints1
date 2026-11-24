@@ -2106,6 +2106,21 @@ only from `--far-retry`, after every L1 run. UL14 (`abs/ul14.sh`) uses
 `--line-gaps 80,13`, so they now come before the resumes. 7,256 goals
 still had no fresh run in round 5.
 
+**Against CPU-matched long runs (exp67, 23-24 Nov).** Two set-mode climbs on 91 frozen heads (each original's
+first unsolved goal), with production's lemma lists of two sizes, and for each one control: one fresh run per head
+with the same lemmas and production's hints, capped at the climber's CPU per finished head (552 and 608 CPU s;
+abs/exp67e.sh). exp/ccpair.py on all 91:
+
+| lemmas (siblings + kNN) | climber | control | +/− | union | CPU h (climber / control) |
+|---|---:|---:|---|---:|---|
+| 30 + 400 (CLB67, CC67D) | 8 | 9 | +0 −1 | 9 | 14.90 / 13.58 |
+| 6 + 30 (CLA67, CC67C) | 2 | 5 | +0 −3 | 5 | 16.91 / 15.32 |
+
+Every head a climber proved, its control proved too. The lemma lists matter more than the climb: 30 + 400 against
+6 + 30 is +6 −2 for the controls. The climber's 20 s finals on 30 stalled targets get a second look at 160 s with
+and without their climb hints (exp76), and the stalled-goal climber keeps running at low priority.
+*Notes: [notes/2026-11-23-climber-restart.md](notes/2026-11-23-climber-restart.md).*
+
 ## 2ac. A learned scheduler for the cascade (15 Nov)
 
 *Notes: [notes/2026-11-15-learned-scheduler.md](notes/2026-11-15-learned-scheduler.md).*
