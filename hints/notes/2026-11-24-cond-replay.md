@@ -73,3 +73,22 @@ targets, but fewer for some:
 
 (At 00:18, over every climber dir with used.tsv. keylemmas.py's own counts at 21:20 were smaller: it kept one candidate
 per label.)
+
+## exp76: CLS71's finals at 160 s, with and without the climb hints (00:24)
+
+**Question.** CLS71 (the live stalled-goal climber) ends each climb with a 20 s final. By 00:40 it had made 1,174
+sketch proofs and 0 real proofs in 119 finals. exp67's arm B made all 7 of its real proofs in 160 s finals
+(CPU 7-380 s each; its 'direct' rows are re-proofs without fill lemmas). Do these targets fall to 160 s finals, and
+do the climb hints matter at that length?
+
+**Set.** 30 of CLS71's targets whose 20 s final failed, unsolved and not local heads (108 such at 00:40; seed 76;
+sets/exp76, exp/sets/exp76; 22 originals).
+
+**Arms** (abs/exp76.sh, exp/exp76.sh): final-only climbs (`--runs 0`, `--final-time 160`), CLS71's lemma lists
+(30 siblings, 400 kNN) and model, the newest trusted set and production's hints at launch, -j 2 each:
+* F76S: CLS71's sketches/ and fillhints/ copied at launch (reloaded as each original's climb hints);
+* F76C: none (pool hints and lemmas only: a long production-like run).
+
+It waits for exp67's arms to end (about 03:00) so the CPU stays near its level (bash 3766581). Reading: proofs per
+arm, +/-, CPU h (exp/ccpair.py F76S F76C). If F76S > F76C, CLS71's finals get longer; if they tie, the stalled goals
+need time, not climb hints.

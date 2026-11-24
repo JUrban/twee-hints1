@@ -783,6 +783,10 @@ ul75 5, XFL 1. REPORT's totals table
 has the history (user, 20 Nov: "update the total numbers in the report etc every now and then").
 
 Next:
+000000000000000000000000000000000000000000000000000000000000000. **exp76 (CLS71's finals at 160 s, [notes/2026-11-24-cond-replay.md](notes/2026-11-24-cond-replay.md), "exp76"):**
+   CLS71's 20 s finals: 0 real proofs in 119 (1,174 sketch proofs). 30 of its failed targets get one 160 s final with its
+   climb hints (F76S) and without (F76C), after exp67's arms end. Also: condprove.py capped every run at 600 s wall, so
+   exp74's first run stopped early (rerun since 00:27).
 00000000000000000000000000000000000000000000000000000000000000. **exp75 (replaying conditional climber proofs, [notes/2026-11-24-cond-replay.md](notes/2026-11-24-cond-replay.md)):**
    0 ready now. A first scan found 25 sketch proofs of unsolved targets whose assumptions production had proved; 21 were
    proofs of weakened goals (climb.py --weaken: `goal=` in the sketch header), the 4 others rest on a kNN label one of
