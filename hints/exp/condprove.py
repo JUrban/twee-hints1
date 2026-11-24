@@ -32,8 +32,10 @@ AFTER = int(opt('--after', '0')); XARGS = opt('--args', '').split(); ALL = '--al
 # --proved: siblings (earlier and --after later) only from TRUSTED, so every proof is a real one (no assumption)
 PROVED = '--proved' in a
 # --prev DIR (a sweep before this one): a goal whose problem text is the same as in DIR and failed there is not run
-# again (twee is deterministic); its row is written with status SAME
+# again (twee is deterministic); its row is written with status SAME. (24 Nov) DIR,DIR...: the first dir that has the
+# goal decides (e.g. plainlive's last H cycle, then the HLW1 sweep, when H moves to the local heads)
 PREV = opt('--prev', '')
+PREVS = [x for x in PREV.split(',') if x]
 # (23 Nov, the hint bed) --hints-lemmas CAP: also the hints of the problem's lemma goals (their proofs' steps,
 # /project/hintwork/loops/UL/hints/<goal>), the siblings nearest first, then the kNN lemmas by rank, at most CAP, as
 # twee's --hints-file OUT/h/<goal>.hints (default factor); the problem text stays as without
@@ -56,9 +58,11 @@ allg = collections.defaultdict(set)
 for x in G:
     if not PROVED or x in T:
         o, k = lemmas.split(x); allg[o].add(int(k))
-prevno = {}
-if PREV:
-    prevno = {l.split('\t')[0]: l.split('\t')[1] in ('NO', 'SAME') for l in open(f'{PREV}/results.tsv') if l.strip()}
+prevno, prevdir = {}, {}
+for d_ in PREVS:
+    for l in open(f'{d_}/results.tsv'):
+        if l.strip() and l.split('\t')[0] not in prevno:
+            prevno[l.split('\t')[0]] = l.split('\t')[1] in ('NO', 'SAME'); prevdir[l.split('\t')[0]] = d_
 t_ = time.time()
 index = lemmas.LemmaIndex(sorted(T), subsets=True) if KNN else None
 # (23 Nov) --index kd|kp: loop.py's other kNN selections (start_vix): kd adds MaSh-style proof dependencies (the
@@ -107,7 +111,7 @@ def one(g):
                 txt += f'fof(lemma_goal_{j},axiom,{f_}).\n'
     p = f'{OUT}/p/{g}.p'
     open(p, 'w').write(txt)
-    if PREV and prevno.get(g) and os.path.exists(f'{PREV}/p/{g}.p') and open(f'{PREV}/p/{g}.p').read() == txt:
+    if prevno.get(g) and os.path.exists(f'{prevdir[g]}/p/{g}.p') and open(f'{prevdir[g]}/p/{g}.p').read() == txt:
         return f'{g}\tSAME\t0.00\t-\t-\t0\n'
     hx = []
     if HCAP:
