@@ -45,6 +45,7 @@ in `/project/hintwork` (not in git).
 | + the live plain loop's lr2 cycle (4 proofs; production none since 12:56); at 23 Nov 14:57, all trusted (loops/TRUSTNOW/t1457) | **48,516** (+56.2% over plain) | **5410** (+68.9%) | – |
 | + plain 60 s runs on the 92 heads (HDW1 4, HDG1 1, 2az), the frontier sweep PLG1 1, production and its side loops 15; at 23 Nov 18:54, all trusted (loops/TRUSTNOW/t1854) | **48,537** (+56.3% over plain) | **5415** (+69.1%) | – |
 | + exp67's climbs on the heads (CLA67 2, CLB67 3 proofs), production with today's climb hints (ul76) 8 and its side loops 5; at 23 Nov 23:14, 3 untrusted (fill lemmas without a record; loops/TRUSTNOW/t2314) | **48,555** (+56.3% over plain) | **5418** (+69.2%) | – |
+| + exp67's controls and climbs (CC67C, CC67D, CLB67), production (ul77-ul81: climb-hint members), the stalled-goal climber CLS71 and exp77's one proof; at 24 Nov 03:54, 4 untrusted (loops/TRUSTNOW/t0354) | **48,575** (+56.4% over plain) | **5421** (+69.2%) | – |
 
 ## Production now
 
