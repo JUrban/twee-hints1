@@ -590,3 +590,15 @@ So far the final-only targets do as well as the climbed ones per CPU h.
 exp82c's end freed two threads (the 20-process cap still holds). 6 cut-off climbs went onto sets/cls71re (870). A/B from
 08:59 to 13:00 (exp/climbab.py --from 1047, the new targets; no re-climb started): climb: 37 of 144, 17.13 CPU h, 2.16 per CPU h; final-only: 44 of 149, 13.91 CPU h, 3.16 per CPU h.
 The final-only targets stay ahead per CPU h (3.2 against 2.2) and in count. Read across restarts with --from 1047.
+
+**What the final-only arm is (24 Nov 13:40).** Every final since 08:59 had sketch hints from the original's climbs
+(loops/CLS71/realized/<t> headers, `sketch_hints=`): the 163 final-only finals a median 679 (45 proved), the 154
+climbing ones a median 727 (37 proved); no final had none. So the A/B measures a target's **own** climb on top of its
+siblings' sketch hints, not finals without climbs. The question of the sketch hints themselves was exp36's
+([notes/2026-11-19-climb-ablation.md](2026-11-19-climb-ablation.md), loops/CA1): the same final with and without the
+sketch steps, context as of the proof. Split by budget from loops/CA1/results.tsv: at 20 s 12 both, 7 neither,
+3 sketch only, 0 pool only; **at 160 s 24 both, 9 neither, 0 sketch only, 0 pool only.** Together: at today's 160 s
+finals neither the target's own climb nor the original's sketch steps add proofs; the climber's yield is the 160 s
+final with production's pool and lemmas, on goals its stalled() order picks (nearest a proved goal first), chained.
+By the rule set at 08:59 the final-only rate (2.95 against 2.17 at 13:18) points to finals without climbs. The A/B
+keeps running for more targets; turning the climbs off is the user's call (climbing is the method asked for).
