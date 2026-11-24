@@ -605,3 +605,17 @@ keeps running for more targets; turning the climbs off is the user's call (climb
 
 **User, 24 Nov 13:43:** "keep the climbs for now, let the A/B run". cls71e.sh stays as it is (climbs on the crc32
 bit-2-clear targets, final-only on the others); the reading goes on with exp/climbab.py --from 1047.
+
+## The untrusted aK2_eq_aK3_s roots re-proved (24 Nov 17:03)
+
+trust.py's run at 16:52 (loops/TRUSTNOW/t1652) left 21 untrusted, all aK2_eq_aK3_s: the roots 489 and 515 (untrusted
+since 23 Nov, see "trust.py checks fill lemmas") and 19 goals resting on them, 17 of them proved since 11:18 (the
+climbers' chains in that original). The loop in the records: 515's printed proof uses the fill lemma
+`m(X, k(X2, X3)) = rd(X, k(X3, X2))` (CLHL2's true_4 of 20 Nov, no premise record); the only premise record of that
+formula is CLS71's true_40, proved from lemma_goal_494; 494's proof uses lemma_goal_515. fillcheck.py had failed on
+the formula at 60 s and on a retry (770 s).
+REVF2 (abs/revf2.sh = revf.sh with TIME, LEM, KNN settable; exp/revf2.sh; roots exp/sets/revf2.roots): the context
+production's solved rows that t1652 trusts (so none of the 21), production's hints, 30 siblings and 400 kNN, 160 s,
+-j 3. All three proved: 515 in 1.86 s, 494 in 2.36 s, 489 in 10.36 s (loops/REVF2/transfer.tsv, kept outputs in
+r1/out). trust.py at 17:03 (t1703): 49,325 solved, **0 untrusted**, holdout 5,540. revf.sh's 6 siblings and 30 kNN
+at 60 s had failed on 489 and 515 (REVF1, 23 Nov); the long lemma lists were enough.
