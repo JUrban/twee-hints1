@@ -103,3 +103,16 @@ overlap says it mostly does not (counted at 18:41):
 **Ran dry (about 21:00).** At 21:25: 1,301 targets finished, 55 proved since 15:31; 3 targets finished in the half hour
 before 21:18. It stays on: it takes newly stalled goals as production's fresh runs fail on them, and its threads
 are free otherwise.
+
+## exp83b: the quick finals on the local heads (24 Nov 23:49)
+
+**Why.** sets/localheads71 (940 goals: unsolved, the previous goal proved, at 23 Nov 23:30) was left out of both
+climbers only to split the work: HLW1's plain 60 s sweep took them, CLS71 the other holes (notes/2026-11-23-
+tail-allocation.md, "Changes"). HLW1 ended 24 Nov 08:48 and HLS2 (their second kNN slice) was stopped at 15:30, so they
+get only the plain live loop's 60 s W runs (no hints) and production's 5 s runs. 672 of them are still unsolved; none
+ever had a climber final (production's hints, 30 siblings and 400 kNN, fill lemmas, sketch hints). CLQ83 had run dry.
+**Change.** CLQ83 restarted at 23:49:34 (climb.py 4013658) with EXCLUDE=sets/clq83b.excl (exp/sets/clq83b.excl): only
+CLS71's 1,226 targets finished since its 06:05 instance, so the local heads are now open to it; CLS71 still excludes
+them, so the final-only A/B is untouched. Its first three targets: nslm_to_aa1 852, R1dist_to_aa1 464 and 460, all
+local heads. Reading from CLQ83.log line 1355 and climb.tsv row 1354 on: proofs per CPU h, against its 3.69 before and
+the plain W cycles on the same heads (HLW1 0.90 per CPU h). Keep at 1 per CPU h or more; else go back to sets/clq83.excl.
