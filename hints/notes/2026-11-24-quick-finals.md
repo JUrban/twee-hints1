@@ -55,3 +55,13 @@ all finals CPU h 47.4; the same finals capped at 40 s 5.2
   staged final for the climber once the user's final-only A/B is done; if it is at or below CLS71's rate, stop it.
 * Caveat: CLQ83 takes the quick targets first, so CLS71's later targets are harder in both A/B arms alike (the arm is
   by crc32 of the target, not by who runs it first). CLS71's readings after 15:33 are not comparable with those before.
+
+## Crash and restart (16:05)
+
+CLQ83 ended at 16:03:37 with a traceback in climb.py's live refresh: `RuntimeError: dictionary changed size during
+iteration` in loop.py build_pools (`for n in self.solved`). A worker's --chain proof adds to lp.solved (under the
+lock) while the main thread's refresh iterates it; with three quick finals the proofs come often enough to hit it.
+CLS71 runs the same code and never did. Fix (climb.py 8733753): refresh holds the lock. Restarted 16:05:19 (climb.py
+3952184); it skips the targets of its climb.tsv. Its 30 minutes before the crash (exp/clqread.py 1570 20123): CLQ83
+finished 129, proved 5, 1.43 CPU h, 3.49 per CPU h; CLS71 in the same time 37, 11, 4.39 CPU h, 2.50 per CPU h.
+The reading at 18:35 counts both instances.
