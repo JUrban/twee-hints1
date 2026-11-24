@@ -74,3 +74,14 @@ sign test p = 0.125 two-sided, so suggestive only), and the plain live loop's be
   own final import adds the rest. The first 3 were imported and merged by hand at 04:03.
 * If the rate holds (HDW1 on the first heads: 1.78 per CPU h), plainlive5's H cycle should take the local heads too,
   not only the first heads, so that new local heads get their plain 60 s run as they appear.
+
+### HLW1 resumed with 5 threads (24 Nov 04:50)
+
+* At 04:49: 122 runs, 4 new proofs (aa1_45_c 365, aa3_45 485, aa_instances_4 384, aK2eq_1234 427), 3.03 CPU h, 1.32 per
+  CPU h; production's last 1,000 runs 0 in 3.5 CPU h. The 30-minute import merged the fourth at 04:31.
+* HLW1's condprove was stopped at 04:50 (123 rows); abs/sweepq.sh then imported (nothing new: all 4 were in) and ended,
+  HLW1 being its last line. abs/hlw1b.sh resumes the same dir with 5 threads and the current production context
+  (cond/HLW1.trusted2, 48,584 goals) for the other 813 goals; condprove.py skips the done ones. The import loop runs
+  again on the new condprove (bash 3828344). The stalled-goal climber gives up the 2 CPUs by its own cap.
+* So HLW1's rows are in two contexts: the first 123 in cond/HLW1.trusted, the rest in cond/HLW1.trusted2. For a
+  per-CPU-h reading this does not matter; it is a production sweep, not an A/B.
