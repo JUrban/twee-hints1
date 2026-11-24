@@ -40,3 +40,21 @@ into loops/CI3 and loops/UL at each arm's end (cond/EXP81.status).
 * C against A: proofs only with the full sibling window, at equal time.
 * Decision: if B's proofs beyond A's come at 0.5 per CPU h or better (production makes 0-0.4), a 300 s plain pass over
   the local heads that fail at 60 s follows (a W2 setting in the live loop or a sweep).
+
+## What HLW1's proofs use (05:19)
+
+The printed proofs of HLW1's first 5 (cond/HLW1/proofs), by lemma axiom:
+
+| proof | earlier siblings (farthest back, goal numbers) | later siblings | kNN lemmas (highest rank) |
+|---|---|---:|---|
+| aa1_45_c 365 | 4 (29) | 1 | 24 (385) |
+| aa3_45 485 | 2 (87) | 0 | 26 (381) |
+| aa_instances_4 384 | 11 (106) | 1 | 45 (395) |
+| aK2eq_1234 427 | 5 (33) | 0 | 5 (218) |
+| aK2_eq_aK3_d 542 | 16 (131) | 0 | 29 (397) |
+
+* Two proofs reach more than 100 goal numbers back (the window is the 100 nearest proved earlier siblings, so it can
+  reach past 100 numbers): P81C asks what the rest of the window gives.
+* Later siblings are rarely used (2 of 5 proofs, one each).
+* Four of 5 use a kNN lemma ranked 381-397 of 400: the useful kNN lemmas are spread over the whole list, as "size, not
+  order" found (23 Nov); 1,600 at 60 s on the first heads still lost (HDG1), by its cost.
