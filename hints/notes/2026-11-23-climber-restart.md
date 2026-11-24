@@ -585,3 +585,8 @@ final-only rate at or above the climbing one means long finals without climbs.
 nil3_23_32_to_30 3, nil3_23_32_to_28 3, aK2_eq_aK3_b 3. With --chain a proof becomes a sibling lemma (and hints) of the
 original's later targets at once, so a tail falls in runs. No re-climb has started yet (new stalled goals keep coming).
 So far the final-only targets do as well as the climbed ones per CPU h.
+
+**Restart with -j 10 (24 Nov 13:00).** abs/cls71e.sh (exp/prod/side/cls71e.sh), PID 3926911: cls71d.sh with -j 10, after
+exp82c's end freed two threads (the 20-process cap still holds). 6 cut-off climbs went onto sets/cls71re (870). A/B from
+08:59 to 13:00 (exp/climbab.py --from 1047, the new targets; no re-climb started): climb: 37 of 144, 17.13 CPU h, 2.16 per CPU h; final-only: 44 of 149, 13.91 CPU h, 3.16 per CPU h.
+The final-only targets stay ahead per CPU h (3.2 against 2.2) and in count. Read across restarts with --from 1047.

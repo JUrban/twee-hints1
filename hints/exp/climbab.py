@@ -1,16 +1,20 @@
 #!/usr/bin/env python3
-"""climbab.py [DIR] (default loops/CLS71): the --final-only-ab reading (24 Nov, notes/2026-11-23-climber-restart.md).
+"""climbab.py [DIR] [--from LINE] (default loops/CLS71): the --final-only-ab reading (24 Nov, notes/2026-11-23-climber-restart.md).
 
 The climbs the current climber instance finished (DIR's log after its last 'reloaded' line), split by arm (bit 2 of
 crc32 of the target's name: final-only, else the full climb) and by kind (a target in sets/cls71re is a re-climb):
 finished, proved, CPU h (climb.tsv seconds of the instance's runs: tags with the r1 prefix for a re-climb, the others
-for a new target), proofs per CPU h."""
+for a new target), proofs per CPU h. --from LINE: from that log line (1-based) on instead, across restarts (the 08:59
+instance, the first with --final-only-ab, starts at line 1047)."""
 import collections, re, sys, zlib
 H = '/project/hintwork'
-D = sys.argv[1] if len(sys.argv) > 1 else f'{H}/loops/CLS71'
+A = sys.argv[1:]
+FROM = int(A[A.index('--from') + 1]) if '--from' in A else 0
+A = [x for i, x in enumerate(A) if x != '--from' and (i == 0 or A[i - 1] != '--from')]
+D = A[0] if A else f'{H}/loops/CLS71'
 log = f'{H}/loops/{D.rstrip("/").split("/")[-1]}.log'
 L = open(log).read().splitlines()
-i = max(n for n, l in enumerate(L) if l.startswith('reloaded'))
+i = FROM - 1 if FROM else max(n for n, l in enumerate(L) if l.startswith('reloaded'))
 fin = {}
 for l in L[i:]:
     m = re.match(r'(\S+__goal_\d+) (THM|NO) ', l)

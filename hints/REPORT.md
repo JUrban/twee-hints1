@@ -137,11 +137,11 @@ proofs in 63 minutes.
 **The head climber: abs/clhl4.sh (exp68),** stopped 23 Nov 23:30 after 21:07-23:30: 21 heads finished, 0 real proofs in
 4.7 CPU h (clhl3.sh before it, 18:44-21:07: 0 in 4.1). Its targets were the heads exp67's arms and controls climb at the
 same time. Production also keeps the old climbs' hints as members sk@0 and sk@1:0.
-**The stalled-goal climber: abs/cls71d.sh (exp71),** climb.py --live into loops/UL, record loops/CLS71, PID 3878982
-since 24 Nov 08:59: **160 s finals**, **`--reclimb sets/cls71re`** (864 targets whose 20 s final failed or whose climb a
+**The stalled-goal climber: abs/cls71e.sh (exp71),** climb.py --live into loops/UL, record loops/CLS71, PID 3926911
+since 24 Nov 13:00 (cls71d.sh, -j 8, from 08:59; A/B 08:59-13:00: climb: 37 of 144, 17.13 CPU h, 2.16 per CPU h; final-only: 44 of 149, 13.91 CPU h, 3.16 per CPU h): **160 s finals**, **`--reclimb sets/cls71re`** (864 targets whose 20 s final failed or whose climb a
 restart cut off get one more climb, after the new stalled goals), **`--final-only-ab`** (targets with bit 2 of crc32 of
 the name set get only the final, the others the full climb: what does the climb add?), twee `--conditional-encoding
-fresh` (exp82), `-j 8`, `CPUS=20` (a climb starts only while fewer than 20 other twee processes run). Per CPU h: 20 s
+fresh` (exp82), `-j 10`, `CPUS=20` (a climb starts only while fewer than 20 other twee processes run). Per CPU h: 20 s
 finals 0.09 (3 in 34.7 CPU h, to 06:05), 160 s finals 0.79 (06:05-07:37), 1.20 with --reclimb (07:37-08:47, 7 in 5.8 CPU
 h, all new targets) ([notes/2026-11-23-climber-restart.md](notes/2026-11-23-climber-restart.md)). Scripts before:
 abs/cls71c.sh 07:37-08:59, cls71b.sh 06:05-07:37, cls71.sh (20 s finals) 23 Nov 23:22-24 Nov 06:05. Since the restart its used.tsv rows record each assumption's goal (exp75). The 940 local heads are excluded (`--exclude sets/localheads71`: the sweep
