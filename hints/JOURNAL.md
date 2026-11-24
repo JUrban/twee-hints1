@@ -783,6 +783,10 @@ ul75 5, XFL 1. REPORT's totals table
 has the history (user, 20 Nov: "update the total numbers in the report etc every now and then").
 
 Next:
+0000000000000000000000000000000000000000000000000000000000000000. **exp77 (twee's CASC strategies on local heads, [notes/2026-11-24-cond-replay.md](notes/2026-11-24-cond-replay.md), "exp77"):**
+   every run so far used twee's default queue. Four of twee's UEQ portfolio strategies (lhs-weight 1 or 9 with flip-ordering,
+   ground connectedness, kbo-weight0) as plain 60 s runs on 120 local heads; HLW1 is the control. --complete-subsets and
+   --depth-weight 60 are out: 5-10 times the CPU per critical pair with 529 lemma axioms (abstract time counts pairs).
 000000000000000000000000000000000000000000000000000000000000000. **exp76 (CLS71's finals at 160 s, [notes/2026-11-24-cond-replay.md](notes/2026-11-24-cond-replay.md), "exp76"):**
    CLS71's 20 s finals: 0 real proofs in 119 (1,174 sketch proofs). 30 of its failed targets get one 160 s final with its
    climb hints (F76S) and without (F76C), after exp67's arms end. Also: condprove.py capped every run at 600 s wall, so

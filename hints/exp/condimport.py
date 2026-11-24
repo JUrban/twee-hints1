@@ -1,4 +1,4 @@
-"""condimport.py SRC DEST [--time 5] [--trusted T.trusted] [--only GOALS]: exp/condprove.py --proved proofs of SRC
+"""condimport.py SRC DEST [--time 5] [--trusted T.trusted] [--only GOALS] [--args 'TWEE FLAGS']: exp/condprove.py --proved proofs of SRC
 (a cond/ dir) as a loop dir DEST (under loops/) that merge.py can take into production, with the record trust.py
 needs.
 
@@ -22,10 +22,12 @@ def opt(k, d):
         i = a.index(k); v = a[i + 1]; a = a[:i] + a[i + 2:]; return v
     return d
 TM = opt('--time', '5'); TR = opt('--trusted', '/project/hintwork/loops/TRUSTNOW/t2139.trusted'); ONLY = opt('--only', '')
+# (24 Nov, exp77) --args: the sweep's extra twee flags (condprove.py --args, e.g. another strategy), for the reruns too
+XARGS = opt('--args', '').split()
 SRC, DEST = a
 TWEE = '/project/bin/twee-pg61'
 T = {l.split()[0] for l in open(TR) if l.strip()}
-base = ['--max-time', TM, '--abstract-time', '2000', '--no-colour', '--no-resume-requeue', '--no-eqhint-consider']
+base = ['--max-time', TM, '--abstract-time', '2000', '--no-colour', '--no-resume-requeue', '--no-eqhint-consider'] + XARGS
 rows = [l.rstrip('\n').split('\t') for l in open(f'{SRC}/results.tsv') if l.strip()]
 goals = [r[0] for r in rows if r[1] == 'THM']
 if ONLY:

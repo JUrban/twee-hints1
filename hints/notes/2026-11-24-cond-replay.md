@@ -105,3 +105,38 @@ are discarded), tried only in a small speed test (exp/pg/tm/cap.py, twee-e44). S
 Twee's queue, ordered by size, already keeps its rules small, so a cap at 25-30 removes next to nothing, and one
 below 15 would cut many real proofs. Not run. The proofs' few rules of size 13-27, which a run reaches late, are what
 the hints are for.
+
+## exp77: twee's CASC strategies on local heads (00:51)
+
+**Question.** Production's runs, the climbers and the plain sweeps all use twee's default queue and ordering
+(lhs-weight 4, depth-weight 2, no flip-ordering, kbo-weight0-unary only). Only Prover9-style loops and exp63 (another
+KBO precedence: 0 of 120 for both at 20 s) varied anything. Twee's own parallel portfolio
+(/project/twee/executable/ParallelMain.hs) runs 8 strategies for UEQ problems. Do they prove local heads the default
+does not?
+
+**Smoke test** (production's binary twee-pg61 without PG, 10 abstract s; an easy goal, aa1_12 20, and a cluster head
+with 529 lemma axioms, nil3_2K 383, exp74's problem):
+* S0 (default), S2, S8: the easy goal proved, the head gave up at about 12 s.
+* S4 (lhs-weight 9, flip-ordering, complete-subsets, renormalising) did not prove the easy goal in 10 s.
+* S1, S3, S4, S5, S7 (all with `--complete-subsets`) and S6 (`--depth-weight 60`) ran past 120 s on the head.
+  One flag at a time, 60 s cap: `--complete-subsets` made 833 rules in 60 s and `--depth-weight 60` 3,617, against
+  about 8,200 rules in 12 s for `--flip-ordering`, `--distributivity-heuristic`, `--lhs-weight 1` or 9 and
+  `--ground-joining-limit 15`. Abstract time counts critical pairs (src/Twee.hs), so a strategy that spends more CPU
+  per pair gets that much more CPU at the same abstract budget. These two are left out.
+
+**Arms** (abs/exp77.sh, exp/exp77.sh, bash 3774081; starts when exp67's controls end, about 03:30): plain 60 s runs,
+H's lemma lists (100+30 siblings, 400 kNN), condprove.py --proved, 2 threads, two arms at a time:
+* A1: S1 without complete-subsets (`--lhs-weight 1 --flip-ordering --normalise-queue-percent 10
+  --cp-renormalise-threshold 10 --ground-joining-incomplete-limit 15`);
+* A2: S2 (`--no-flatten-goal --ground-joining-incomplete-limit 15 --ground-connectedness --normalise-queue-percent 10
+  --cp-renormalise-threshold 10`);
+* A4: S4 without complete-subsets (`--lhs-weight 9 --flip-ordering --normalise-queue-percent 10
+  --cp-renormalise-threshold 10`);
+* A8: S8 (`--no-kbo-weight0-unary --kbo-weight0 --no-flatten-goal`).
+
+**Set.** 120 of the 937 unsolved local heads (sets/exp77, exp/sets/exp77; random.seed(77); 55 originals). The control
+is HLW1 (the same setting with twee's defaults, on all local heads, from about 03:00). condimport.py now takes
+`--args`, so a proof is re-checked under its own strategy; proofs go to loops/CI77 and loops/UL.
+
+**Reading.** Per arm on the 120: proofs, +/- against HLW1, the union, CPU h (the results' seconds). A strategy with
+3 or more proofs the default does not find at about the same CPU becomes a setting of the plain live loop.
