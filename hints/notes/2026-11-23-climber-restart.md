@@ -543,3 +543,12 @@ differ (each is climbed once, in order), so this is not an A/B; exp76 was one (t
 the climb hints, 1 without, 20 s finals 0). The climber is now the best use of CPU per proof: HLW1 0.63 and falling,
 production ul82 0 in 2,501 runs (9.4 CPU h). Production goes to 2 workers so the climber (cap: fewer than 20 other
 twee processes) gets their threads.
+
+**Re-climbs (24 Nov 07:37).** CLS71's live targets are new stalled goals only, and with production on 2 workers (ul83)
+few come. climb.py `--reclimb FILE` (21a6d73): the listed goals may be climbed again while they have fewer than 2
+finals, after the new targets, nearest proven goal below first, with the r1 tag prefix (as --reclimb-heads). The list
+sets/cls71re (exp/sets/cls71re): 841 unsolved targets whose 20 s final failed (exp76's 30 left out) and 17 climbs cut off
+by the two restarts (rows in climb.tsv, no final). A full re-climb costs about what a bare 160 s re-final does (the
+sketches are about 150 of 600 CPU s) and makes its sketches in today's context. abs/cls71c.sh (exp/prod/side/cls71c.sh),
+PID 3864270. The 20 s-final climber also proved mbol_to_nil3 636 just before the stop (6 since 06:05).
+Reading: real proofs per CPU h of the r1 climbs (their climb.tsv rows have the r1 prefix) against the new targets'.
