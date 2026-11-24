@@ -443,7 +443,7 @@ The cluster's way in is each of its 7 originals' first unsolved goal, all earlie
 | nil4_19K 394 | 20 | 86 | 141 |
 
 (production's results.tsv rows, round 5; a resumed run's row is its increment, and the cascade stops at 320 abstract
-s.) exp74 (abs/exp74.sh, exp/exp74.sh, bash 3758318, 23:52): one plain run of 1200 abstract s per head, H's lemma
+s.) exp74 (abs/exp74.sh, exp/exp74.sh, bash 3758318, 23:49): one plain run of 1200 abstract s per head, H's lemma
 lists (100+30 siblings, 400 kNN), 2 threads, through condprove.py into cond/LCH74; proofs to loops/CI3 and loops/UL.
 A problem (aK2_eq_aK3_1243b 476) has 129 lemma_goal and 400 lemma_knn axioms.
 
