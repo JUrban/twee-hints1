@@ -144,3 +144,6 @@ climber (up to its -j 6) and the experiments.
 plainlive5 stopped after its cycle c38 (09:03:59); abs/plainlive6_start.sh started abs/plainlive6.sh at 09:04:03, PID
 3879710, its first --prev c38N, c38H and cond/HLW1. Cycle c39: 83 heads, 929 other local heads (c39.lheads). Reading:
 the W cycles' runs and proofs per CPU h, against HLW1's 0.90.
+First cycle c39: N (5 s) 1,459 runs, 0 proofs, 09:04-09:23; H (heads, 60 s) 59 runs, 0 proofs, to 09:53; W from 09:53. W's
+first rows: aa1_45_b 370-398 SAME (unchanged since HLW1 apart from kNN lemmas, not rerun), aa1_45_c 343, 350 and 355
+rerun: each gained lemma_goal_365 (aa1_45_c 365, proved by HLW1) as a later sibling, the only line that changed.
