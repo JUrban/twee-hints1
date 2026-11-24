@@ -451,3 +451,16 @@ A problem (aK2_eq_aK3_1243b 476) has 129 lemma_goal and 400 lemma_knn axioms.
 every run at a flat 600 s, well short of 1200 abstract s on this machine. No other sweep had a TIMEOUT row (every
 cond/*/results.tsv checked). condprove.py now caps at 10 x --time (at least 600 s); the first run is kept as
 cond/LCH74.v1, the rerun (bash 3765398) writes cond/LCH74.
+
+## exp70 ended (24 Nov 01:14): 0 of 9 in both arms (01:17)
+
+| arm | key goals proved | CPU h | fill runs | gaps tried | gaps proved | fill CPU s |
+|---|---:|---:|---:|---:|---:|---:|
+| K70F | 0 of 9 | 1.55 | 57 | 211 | 92 (44%) | 2254 |
+| K70R | 0 of 9 | 1.54 | 57 | 213 | 85 (40%) | 314 |
+| CLK69 | 0 of 9 | 1.51 | 59 | 219 | 93 (42%) | 307 |
+
+Ten times the fill time (K70F) proved 44% of its gaps against K70R's 40%, at 7 times the fill CPU, and neither arm
+proved a key goal: the second Veroff round from CLK69's sketches added nothing. The key goals' gaps are not short of
+time; their sketches rest on assumptions that do not follow. Closed. No climber returns to these 9; exp74 tries the
+cluster's heads with long plain runs instead.

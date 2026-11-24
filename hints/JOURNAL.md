@@ -801,6 +801,7 @@ Next:
    whose 2 candidate goals is unproved. climb.py's used.tsv now records each label's goal and the weakened flag; abs/crploop.sh
    replays ready proofs hourly. keylemmas.py (exp69's key goals) counted weakened sketches too; recounted in the notes.
 0000000000000000000000000000000000000000000000000000000000000. **exp74 (long plain runs on the cluster heads, [notes/2026-11-23-climber-restart.md](notes/2026-11-23-climber-restart.md), "exp74"):**
+   **exp70 ended 01:14: 0 of 9 in both arms (K70F 30 s fills 44% of gaps, K70R 40%); closed.**
    exp70 so far: 30 s fills prove 39% of the gaps they try, 3 s fills 40% (CLK69 42%): fill time is not the limit. The 7
    cluster originals' first heads (166 unsolved goals behind them) never had more than production's 320 s cascade. One plain
    1200 s run each, H's lemma lists, 2 threads (exp/exp74.sh, 23:52).
