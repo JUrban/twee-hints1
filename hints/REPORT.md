@@ -132,13 +132,14 @@ proofs in 63 minutes.
 **The head climber: abs/clhl4.sh (exp68),** stopped 23 Nov 23:30 after 21:07-23:30: 21 heads finished, 0 real proofs in
 4.7 CPU h (clhl3.sh before it, 18:44-21:07: 0 in 4.1). Its targets were the heads exp67's arms and controls climb at the
 same time. Production also keeps the old climbs' hints as members sk@0 and sk@1:0.
-**The stalled-goal climber: abs/cls71c.sh (exp71),** climb.py --live into loops/UL, record loops/CLS71, PID 3864270
-since 24 Nov 07:37: **160 s finals** and **`--reclimb sets/cls71re`**: its 841 unsolved targets whose 20 s final failed
-(exp76's 30 left out) and 17 climbs cut off by restarts get one more climb, after the new stalled goals, nearest proven
-goal first. With 160 s finals (abs/cls71b.sh, 06:05-07:37) it proved 6 targets, 5 of them in 7.36 CPU h by 07:29 (0.68
-per CPU h); exp76 had shown 160 s finals prove targets whose 20 s finals failed (2 of 30). `CPUS=20`: it starts a climb
-only while fewer than 20 other twee processes run. Before: abs/cls71.sh with 20 s finals, 03:25-06:05 with `CPUS=20`,
-23 Nov 23:33-24 Nov 03:25 with 30 (3 real proofs in about 35 CPU h), first run 23:22-23:33. Since the restart its used.tsv rows record each assumption's goal (exp75). The 940 local heads are excluded (`--exclude sets/localheads71`: the sweep
+**The stalled-goal climber: abs/cls71d.sh (exp71),** climb.py --live into loops/UL, record loops/CLS71, PID 3878982
+since 24 Nov 08:59: **160 s finals**, **`--reclimb sets/cls71re`** (864 targets whose 20 s final failed or whose climb a
+restart cut off get one more climb, after the new stalled goals), **`--final-only-ab`** (targets with bit 2 of crc32 of
+the name set get only the final, the others the full climb: what does the climb add?), twee `--conditional-encoding
+fresh` (exp82), `-j 8`, `CPUS=20` (a climb starts only while fewer than 20 other twee processes run). Per CPU h: 20 s
+finals 0.09 (3 in 34.7 CPU h, to 06:05), 160 s finals 0.79 (06:05-07:37), 1.20 with --reclimb (07:37-08:47, 7 in 5.8 CPU
+h, all new targets) ([notes/2026-11-23-climber-restart.md](notes/2026-11-23-climber-restart.md)). Scripts before:
+abs/cls71c.sh 07:37-08:59, cls71b.sh 06:05-07:37, cls71.sh (20 s finals) 23 Nov 23:22-24 Nov 06:05. Since the restart its used.tsv rows record each assumption's goal (exp75). The 940 local heads are excluded (`--exclude sets/localheads71`: the sweep
 HLW1 takes them). CLU's mode (16 Nov): any goal whose latest fresh run failed, holes included, nearest to a proved
 goal first; a cheap climb (20 sketch runs of 5 s, a 20 s final, `--weaken 4`, fills of 3 s), 30 siblings and 400 kNN
 lemmas. Up to 6 climbs, started only while fewer than 30 other twee processes run. Its sketches feed production's sk

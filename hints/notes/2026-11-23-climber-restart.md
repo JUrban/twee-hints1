@@ -569,3 +569,13 @@ New stalled goals still come (50 in 70 minutes), so no re-climb has run yet. HLW
 nothing beyond CPU-matched long runs. A climb costs about 600 CPU s, a bare final about 450. Next: an online A/B in the
 live climber (alternate targets by crc32: full climb or final only), with `--conditional-encoding fresh`, at its next
 restart.
+
+**Final-only A/B (24 Nov 08:59).** climb.py `--final-only-ab` (8f54292): targets with bit 2 of crc32 of their name set
+get no sketch runs, only the 160 s final (with the climb hints their original has, their siblings' climbs included);
+the others the full climb. By target, not by original: 391 of the 864 re-climb targets and 1,540 of the 3,159 unsolved
+goals are final-only. The question is what a target's own climb adds to its final, at about 150 of a climb's 600 CPU
+s. abs/cls71d.sh (exp/prod/side/cls71d.sh), PID 3878982, also with twee `--conditional-encoding fresh` (Horn assumptions
+cost 8x under the default encoding, exp82; no change without them) and -j 8 (HLW1 ended). Its first runs: five 160 s
+finals, all final-only targets, and three 5 s sketch runs, all climbing ones. 6 climbs cut off by the restart went onto
+sets/cls71re (864). Reading: real proofs per CPU h by arm (crc32 of the target), new targets and re-climbs apart; a
+final-only rate at or above the climbing one means long finals without climbs.
