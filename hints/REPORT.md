@@ -154,12 +154,16 @@ lemmas beat 6+30 by +6 −2 ([notes/2026-11-23-climber-restart.md](notes/2026-11
 exp/exp67merge.sh merged their proofs into loops/UL every 10 minutes and ended with a last merge after the last arm (03:46).
 exp76 (160 s final-only climbs on 30 of CLS71's failed targets, with and without its climb hints) ended 24 Nov 06:01:
 with 2, without 1 (+1 −0), both merged; CLS71's finals go to 160 s.
-exp81 (abs/exp81.sh, bash 3836270, waiting for exp76's end): plain 300 s, 60 s with all earlier siblings, and 60 s with
+exp81 (abs/exp81.sh, bash 3836270, since 24 Nov 06:02): plain 300 s, 60 s with all earlier siblings, and 60 s with
 the kNN lemmas ranked 400-799, against 60 s on 60 of HLW1's failed local
 heads, 2 threads each ([notes/2026-11-24-plain-time.md](notes/2026-11-24-plain-time.md)).
 exp74 (one plain 1,200 s run on each first head of the key-goal cluster's 7 originals, cond/LCH74) ended 24 Nov 04:34:
 1 of 7, a head exp67 had proved meanwhile; closed.
 exp65 (Q5A, Q5B) ended at 22:55: -2 at 6 hours, closed.
+
+exp82 (abs/exp82.sh, bash 3858632, since 24 Nov 07:26, 2 threads): genuine Horn siblings as clause lemma axioms
+(TWEE_LEMMA_HORN=1) in plain 60 s runs on 60 local heads, against the same problems without them
+(notes/2026-11-24-horn-lemmas.md).
 
 **CPU at 05:02:** 20 twee processes: the HLW1 sweep 5, the stalled-goal climber 4 (it starts climbs only while fewer
 than 20 other twee processes run, so it takes what the others leave), the main loop 3 (of 4 workers), the plain live
@@ -5062,6 +5066,8 @@ reproduced exactly).
 * exp12 stage B.
 
 ## 2az. Portfolios: complementary methods kept, not dropped (user's request, 18 Nov 17:00)
+
+*Notes: [notes/2026-11-24-horn-lemmas.md](notes/2026-11-24-horn-lemmas.md).*
 
 *Notes: [notes/2026-11-24-plain-time.md](notes/2026-11-24-plain-time.md).*
 
