@@ -801,6 +801,8 @@ Next:
    (05:21) Arm P81D after P81C: 60 s with the kNN lemmas ranked 400-799 (--knn-skip 400): HLW1's proofs use ranks up to 397 of 400.
    (09:05) P81D 2 of 60, P81A 0, P81C 0, P81B 2 of 30 so far. HLS2 (abs/hls2.sh): P81D's setting on all 1,012 local and first heads,
    3 threads, a production sweep.
+   **(11:23) Done: A (60 s) 0, B (300 s) 2 in 10.4 h (0.19 per h: no 300 s pass), C (all siblings) 0, D (kNN ranks 400-799) 2 in
+   1.6 h (+2 −0 at A's cost). The second kNN slice it is: HLS2 runs it on all local heads.**
 00000000000000000000000000000000000000000000000000000000000000000000. **exp80 (what runs with hundreds of lemma axioms cost, [notes/2026-11-24-lemma-cost.md](notes/2026-11-24-lemma-cost.md)):**
    tonight's winning setting at the frontier is runs with 30-130 siblings and 400 kNN lemma axioms (exp67, HLW1), and those
    get slow as they lengthen: exp74's 1,200 abstract s took about 3 CPU s per abstract s. One plain 505-lemma problem (aa1_45_c 355)

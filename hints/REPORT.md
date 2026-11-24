@@ -164,12 +164,9 @@ lemmas beat 6+30 by +6 −2 ([notes/2026-11-23-climber-restart.md](notes/2026-11
 exp/exp67merge.sh merged their proofs into loops/UL every 10 minutes and ended with a last merge after the last arm (03:46).
 exp76 (160 s final-only climbs on 30 of CLS71's failed targets, with and without its climb hints) ended 24 Nov 06:01:
 with 2, without 1 (+1 −0), both merged; CLS71's finals go to 160 s.
-exp81 (abs/exp81.sh, bash 3836270, since 24 Nov 06:02): plain 300 s, 60 s with all earlier siblings, and 60 s with
-the kNN lemmas ranked 400-799, against 60 s on 60 of HLW1's failed local
-heads, 2 threads each ([notes/2026-11-24-plain-time.md](notes/2026-11-24-plain-time.md)).
-exp74 (one plain 1,200 s run on each first head of the key-goal cluster's 7 originals, cond/LCH74) ended 24 Nov 04:34:
-1 of 7, a head exp67 had proved meanwhile; closed.
-exp65 (Q5A, Q5B) ended at 22:55: -2 at 6 hours, closed.
+exp81 (longer or wider plain runs on 60 of HLW1's failed local heads) ended 24 Nov 11:23: 60 s control 0, 300 s 2 in
+10.4 h (no 300 s pass), all earlier siblings 0, kNN ranks 400-799 2 in 1.6 h, which HLS2 now runs on all local heads
+([notes/2026-11-24-plain-time.md](notes/2026-11-24-plain-time.md)).
 
 exp82 (Horn siblings as clause lemma axioms, TWEE_LEMMA_HORN=1 with twee `--conditional-encoding fresh`; the default
 encoding cost 8x) ended 24 Nov 09:32: 2 against 1 of 60 local heads (+1 −0; aK2rev 444's proof uses the Horn lemma

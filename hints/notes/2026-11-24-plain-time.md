@@ -78,3 +78,21 @@ proofs used kNN ranks up to 397. With 5 CPUs free (exp81's 60 s chain done, the 
 (cond/HLS2.parts). First problem: aa1_14 537, 103 sibling and 400 kNN lemma axioms, ranks 400-799. This acts on an
 interim reading (2 against 0): it is a production sweep with the reading in its own rows (proofs per CPU h against
 HLW1's 0.90), not exp81's decision.
+
+## Result (exp81 done 24 Nov 11:23:56, cond/EXP81.status)
+
+| arm | setting | proved of 60 | wall h | per wall h |
+|---|---|---:|---:|---:|
+| P81A | 60 s, 100+30 siblings, kNN ranks 0-399 (HLW1's) | 0 | 1.53 | 0 |
+| P81B | 300 s, the same lemmas | 2 (aK2_eq_aK3_a 658 at 270 s, aK2_eq_aK3_b 568 at 137 s) | 10.44 | 0.19 |
+| P81C | 60 s, every earlier sibling and 100 later | 0 | 1.70 | 0 |
+| P81D | 60 s, kNN ranks 400-799 | 2 (aK2_eq_aK3_a 658 at 78 s, aK2_eq_aK3_d 571 at 102 s) | 1.59 | 1.26 |
+
+(Wall seconds of single-threaded runs, about their CPU.) The goals are 60 that HLW1's 60 s run had failed.
+
+* **B against A:** +2 −0, but 0.19 per h, below the 0.5 the decision asked for: **no 300 s pass.** One of B's two (568)
+  took 137 s, so a 160 s run would have had it; the other (658) also fell to D at 60 s.
+* **C against A:** 0 −0: hundreds of earlier siblings (on average 367 against 123) add nothing at 60 s.
+* **D against A:** +2 −0 at the same cost; **A ∪ D** (two 60 s runs, 3.1 h) proves as many as B (10.4 h). The second kNN
+  slice is the cheap way to more lemmas: HLS2 (started 09:05) runs it on all 1,012 local heads.
+* Caveat: 2 proofs per arm; B and D share 658.
