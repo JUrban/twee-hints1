@@ -112,11 +112,13 @@ runs on 287 climbed goals, 0 proofs in 63 minutes.
   reruns the climbers' sketch proofs of unsolved targets (not of weakened goals) whose assumptions are now trusted
   goals, as lemma axioms with the sketch's hints; proofs via condimport.py into loops/CRP75 and merge.py into loops/UL.
   0 ready at 00:17 ([notes/2026-11-24-cond-replay.md](notes/2026-11-24-cond-replay.md)).
-* **Sweep queue:** abs/sweepq.sh runs one-off plain sweeps from cond/SWEEPQ.txt (3 threads, proofs via loops/CI3).
-  Next: HLW1 (exp72), H's setting on the 940 local heads (unsolved goals right after a proved one, the first heads
-  left out), about 12 hours; bash 3753974, running since 24 Nov 03:47 (cond/HLW1). abs/hlwimport.sh (bash 3816406, exp/prod/side/hlwimport.sh) imports its proofs into loops/UL
-every 30 minutes through loops/CI3 (cond/HLW1.parts), so that production has them as lemmas: its first 27 runs proved
-3 new local heads in 0.62 CPU h, merged at 04:03. PLD1, PLP1,
+* **Sweep queue:** abs/sweepq.sh ran one-off plain sweeps from cond/SWEEPQ.txt (3 threads, proofs via loops/CI3);
+  it ended at 04:50, after its last line, HLW1 (exp72), H's setting on the 940 local heads (unsolved goals right after a proved one, the first heads
+  left out), from 24 Nov 03:47 (cond/HLW1). At 04:50, after 123 runs with 4 new proofs (1.32 per CPU h; production 0 in
+  its last 1,000 runs), it was resumed with 5 threads instead of 3 and the current context for the other 813 goals
+  (abs/hlw1b.sh, exp/prod/side/hlw1b.sh; bash and condprove PIDs in cond/HLW1b.pid); sweepq.sh ended, HLW1 was its last
+  line. abs/hlwimport.sh (exp/prod/side/hlwimport.sh, bash 3828344) imports its proofs into loops/UL every 30 minutes
+  through loops/CI3 (cond/HLW1.parts), so that production has them as lemmas.
   PLT1, PLX1 are held.
 
 **The head climber: abs/clhl4.sh (exp68),** stopped 23 Nov 23:30 after 21:07-23:30: 21 heads finished, 0 real proofs in
@@ -149,12 +151,10 @@ exp74 (one plain 1,200 s run on each first head of the key-goal cluster's 7 orig
 1 of 7, a head exp67 had proved meanwhile; closed.
 exp65 (Q5A, Q5B) ended at 22:55: -2 at 6 hours, closed.
 
-**CPU at 23:25:** 32 twee processes are running:
-* the main loop 6, proof reruns 2, the plain live loop 1, the stalled-goal climber 5 (the head climber 2, stopped 23:30);
-* exp67's climbs 4 and controls 8 (CC67C, CC67D), exp70 2, a fill-lemma re-check 2; transfer and given-rule retry 0 at that moment.
-
-That is above the usual 20, for the climber experiments (the user's leave for climbing, 23 Nov). exp67 and its
-controls end by about 03:30; the stalled-goal climber takes at most 6, so the total then falls to about 21.
+**CPU at 04:50:** 21 twee processes: the HLW1 sweep 5, the main loop 4 (of 6 workers; the others between runs),
+the plain live loop 3 (its H cycle), exp76's two arms 2 each, the stalled-goal climber 2 (it starts climbs only while
+fewer than 20 other twee processes run), the transfer or given-rule retry 1. exp67 and its controls ended at 03:46;
+exp76 ends in some hours, then the total is about 18-20.
 
 **Trust** (exp/trust.py, run after each restart): since 23 Nov 23:14 it also checks fill lemmas, the climbers'
 gap proofs that production gets as lemma_fill_N. climb.py records each one's premises (fillprem.tsv), and
