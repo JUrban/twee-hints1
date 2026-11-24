@@ -1540,7 +1540,8 @@ making critical pairs: 10.3 million made from 29,738 new rules (about 350 each),
 made pair is built and normalised against all rules before it is scored, and normalising (simplify) is 56%, mostly
 index lookups. Considering pairs (joining, ground joining) is under 3%. Skipping the rewriting pass that changes
 nothing (same normal forms, byte-identical trace) was 11% slower, so there is no free speed-up: what remains would
-change the search. Compare such settings by CPU, not abstract time.
+change the search. Compare such settings by CPU, not abstract time. This confirms the 14 Nov finding above (the
+cost grows with the square of the number of rules; normalising at creation is by design) for lemma-heavy runs.
 
 ## 2u. ENIGMA-style looping and a Deepire-style model (user's question, 14 Nov)
 

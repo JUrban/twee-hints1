@@ -78,3 +78,8 @@ Reverted, binary deleted (04:48).
   clock counts the junk that simplification would have dropped). Neither is promising enough for an A/B now.
 * Twee's long runs with hundreds of lemma axioms will stay at 2-3 CPU s per abstract second. Compare such settings by
   CPU, not abstract time (exp67's controls were capped by CPU, so its comparison stands).
+
+**Note (06:06).** REPORT 2t had found this on 14 Nov for hinted runs ("the cost per abstract second grows with the square
+of the number of rules. Twee normalises every new critical pair at creation, by design, and changing that would be a
+large redesign"). I had read the profile notes' tables but not 2t's conclusion before starting; exp80 confirms it for
+runs with hundreds of lemma axioms and adds the failed no-change-pass skip.
