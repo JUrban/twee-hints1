@@ -62,3 +62,15 @@ sign test p = 0.125 two-sided, so suggestive only), and the plain live loop's be
   lemma_fill axioms; 40 abstract s took 76-80 s.
 * Reading: exp/memberyield.py over ul78's runs: skk400s30@1:0 against sk@1:0, proofs per CPU h and the goals only one
   of them proved.
+
+## exp72 started, and its proofs go in early (24 Nov 04:05)
+
+* HLW1 started 24 Nov 03:46:52 (cond/SWEEPQ.log, context 48,578), after exp67, in sets/localheads71's order
+  (alphabetical by original). At 04:05: 34 runs, 3 proved, 0.81 CPU h.
+* Its first 3 proofs (aa1_45_c 365, aa3_45 485, aa_instances_4 384) were new to production. abs/sweepq.sh imports a
+  sweep's proofs only at its end, about 12 hours on, and each proved local head gives its later siblings a new lemma.
+  So abs/hlwimport.sh (exp/prod/side/hlwimport.sh, bash 3816406) imports them every 30 minutes through loops/CI3
+  while the sweep's condprove runs (cond/HLW1.parts); condimport.py skips goals already in loops/CI3, so the sweep's
+  own final import adds the rest. The first 3 were imported and merged by hand at 04:03.
+* If the rate holds (HDW1 on the first heads: 1.78 per CPU h), plainlive5's H cycle should take the local heads too,
+  not only the first heads, so that new local heads get their plain 60 s run as they appear.
