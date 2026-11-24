@@ -142,7 +142,7 @@ the 9 and their own sketches' assumptions are one cluster of 7 originals).
 23 Nov 19:01; CLB67 ended 24 Nov 02:35 with 8, CLA67 03:46 with 2) and their CPU-matched controls (abs/exp67e.sh,
 CC67C 5 and CC67D 9 of 91, ended 03:23 and 02:54): each climber's proofs are a subset of its control's, and 30+400
 lemmas beat 6+30 by +6 −2 ([notes/2026-11-23-climber-restart.md](notes/2026-11-23-climber-restart.md)).
-exp/exp67merge.sh merges their proofs into loops/UL every 10 minutes.
+exp/exp67merge.sh merged their proofs into loops/UL every 10 minutes and ended with a last merge after the last arm (03:46).
 exp76 (abs/exp76.sh, bash 3766581, since 24 Nov 03:47): final-only climbs at 160 s on 30 of CLS71's failed
 targets, with (F76S) and without (F76C) CLS71's climb hints, -j 2 each.
 exp74 (abs/exp74.sh, bash 3765398 since 24 Nov 00:19, rerun: the first stopped at a 600 s wall cap): one plain 1200 s run on each first head of the key-goal cluster's
