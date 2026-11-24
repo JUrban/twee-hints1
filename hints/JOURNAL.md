@@ -840,6 +840,7 @@ Next:
    targets; no re-climb reached yet); HLW1 0.90. Open: the climb against the long final alone (exp76 +1 −0, exp67 nil).
    (08:59) CLS71 restarted (abs/cls71d.sh): --final-only-ab (half the targets by crc32 get only the 160 s final), twee
    --conditional-encoding fresh, -j 8.
+   **(10:18) Since 08:59: 33 proofs in 79 minutes (tails of nil3_23_32_to_*, aK2_eq_aK3_gen, nil3_27); A/B: new climb: 50 finished, 15 proved, 5.15 CPU h, h per CPU h; new final-only: 54 finished, 18 proved, 4.85 CPU h, h per CPU h.**
 00000000000000000000000000000000000000000000000000000000000000. **exp75 (replaying conditional climber proofs, [notes/2026-11-24-cond-replay.md](notes/2026-11-24-cond-replay.md)):**
    0 ready now. A first scan found 25 sketch proofs of unsolved targets whose assumptions production had proved; 21 were
    proofs of weakened goals (climb.py --weaken: `goal=` in the sketch header), the 4 others rest on a kNN label one of
