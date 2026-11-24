@@ -126,8 +126,8 @@ goal first; a cheap climb (20 sketch runs of 5 s, a 20 s final, `--weaken 4`, fi
 lemmas. Up to 6 climbs, started only while fewer than 30 other twee processes run. Its sketches feed production's sk
 members (ul77). Why: most of sk@1's recent proofs came from originals with many of CLU's sketches (7,302 files over
 108 originals; CLU itself made 22 real proofs at 0.79 per CPU h).
-**The key-goal climb, second round: abs/exp70.sh (exp70),** loops/K70F (PID 3746596) and loops/K70R (PID 3746612)
-since 23 Nov 23:04, 1 climb at a time each: the 9 unsolved goals that the most heads' single-assumption sketch proofs
+**The key-goal climb, second round: abs/exp70.sh (exp70), ended 24 Nov 01:14, 0 of 9 in both arms (closed).** loops/K70F
+and loops/K70R from 23 Nov 23:04, 1 climb at a time each: the 9 unsolved goals that the most heads' single-assumption sketch proofs
 assume (exp/keylemmas.py), from CLK69's sketches and fill hints, CLHL4's setting; K70F fills gaps for 30 s, K70R for
 3 s. Real proofs merged into loops/UL every 10 minutes. Before it: exp69 (loops/CLK69, 21:22-22:55, 0 of 9 in 1.5 CPU h;
 the 9 and their own sketches' assumptions are one cluster of 7 originals).
