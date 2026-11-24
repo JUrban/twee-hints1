@@ -272,6 +272,10 @@ def main():
                          'and a link to its hints. SET: sets/all (the rule model\'s goal files).')
     ap.add_argument('--refresh', type=float, default=1800, help='--live: seconds between context refreshes')
     ap.add_argument('--exclude', default='', help='--live: comma-separated goal list files to skip')
+    # (24 Nov) --reclimb FILE: goals there may be climbed again while they have fewer than 2 finals, after the new targets,
+    # nearest proven goal below first: CLS71's targets whose 20 s final failed get one climb with the current final time
+    # (exp76: 160 s finals proved 2 of 30 such targets)
+    ap.add_argument('--reclimb', default='', help='--live: goals that may be climbed once more (fewer than 2 finals)')
     ap.add_argument('--cpus', type=int, default=0,
                     help='--live: start a climb only while fewer than N twee processes run on the machine '
                          '(own ones included), so the climber fills the CPUs the loop leaves idle; -j caps it')
@@ -924,6 +928,7 @@ def live(c, a, lp, gl, pools, ix, climb, out):
     nclimb = collections.Counter(l.split('\t')[0] for l in open(os.path.join(c.dir, 'climb.tsv'))
                                  if l.split('\t')[1:2] == ['final'])
     at_climb = {}    # head -> its original's number of proven goals at its last climb (--reclimb-heads)
+    RECL = [l.split()[0] for l in open(c.reclimb) if l.strip()] if c.reclimb else []   # (--reclimb)
     c.cprefix = {}   # target -> run tag prefix of a re-climb (r1, r2, ...), so its sketch logs stay apart
     def dst():
         S, R = set(), 0
@@ -951,6 +956,10 @@ def live(c, a, lp, gl, pools, ix, climb, out):
         res = [n for n, (ok, lev) in last.items() if ok == 'NO' and lev != 'L0' and n in fresh and n not in S
                and n not in climbed and n not in skip and n not in busy]
         res.sort(key=lambda n: (dist(n), n))
+        if RECL:   # (--reclimb) after the new targets
+            rs = set(res)
+            res += sorted((n for n in RECL if n not in S and n not in skip and n not in busy and n not in rs
+                           and nclimb[n] < 2), key=lambda n: (dist(n), n))
         if not c.reclimb_heads:
             return res
         # (--reclimb-heads N) each original's first unsolved goal, climbed up to N times (the climbs are randomized
