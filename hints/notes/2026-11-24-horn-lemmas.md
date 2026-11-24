@@ -63,3 +63,18 @@ thread, against the control H82C, which still runs.
 **Elsewhere.** 7 of the 814 problems in the climber's loops/CLS71/tmp have a Horn axiom (assumptions such as
 `assume_knn_4`, from Horn goals of other originals) and run with the default encoding; production's 259 in loops/UL/tmp
 have none. The flag would change only those runs; it goes into the climber at its next restart.
+
+## Result (24 Nov 09:32)
+
+| arm | proved of 60 | timeouts | wall h |
+|---|---:|---:|---:|
+| H82F: Horn siblings, `--conditional-encoding fresh` | 2 (aa3_45 486, aK2rev 444) | 0 | 1.36 |
+| H82C: the same problems without them | 1 (aa3_45 486) | 0 | 1.41 |
+
+* +1 −0. **aK2rev 444's proof uses a Horn lemma:** both equations of lemma_goal_450 (aK2rev 450, a proved Horn goal) are
+  among the proof's axioms (Axioms 32 and 34 of the printed proof, `fresh2(m(m(X0,X1),X2),X0,X1,X2,X3,X4) = X2` and its
+  partner). It is in production (condimport 1 of 2; aa3_45 486 came with H82C).
+* With the fresh encoding the Horn problems cost the same (1.36 against 1.41 wall h for the 60).
+* The decision rule (+2 or more, −0) is not met by one proof. The mechanism is real and the cost neutral, so the test
+  is extended rather than closed: exp82c, 60 more heads with at least 2 Horn siblings (seed 821, not in exp81's or
+  exp82's sets), the same two arms, on exp81's two threads when it ends. The rule then applies to the 120.

@@ -791,6 +791,8 @@ Next:
    (07:53) H82H stopped: twee's default Horn encoding (if-then-else) cost 8x the CPU per abstract s and both its runs hit the 600 s
    wall limit. `--conditional-encoding fresh` costs what a problem without Horn axioms does and changes nothing without them;
    arm H82F (exp/exp82b.sh) uses it, against the same control.
+   **(09:32) H82F 2, H82C 1 of 60 (+1 −0: aK2rev 444, whose proof uses the Horn lemma aK2rev 450), equal cost. Below the +2 rule;
+   exp82c repeats it on 60 more heads after exp81.**
 000000000000000000000000000000000000000000000000000000000000000000000. **exp81 (longer plain runs on the local heads, [notes/2026-11-24-plain-time.md](notes/2026-11-24-plain-time.md)):** HLW1's
    60 s plain proofs on local heads came within 27 s; CC67D's long hinted runs on first heads mostly after 150 s. 60 of HLW1's
    failed local heads (seed 81), the same context: P81A 60 s (control) and P81B 300 s, plain, 100+30 siblings, 400 kNN, 2 threads
