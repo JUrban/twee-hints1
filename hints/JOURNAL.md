@@ -783,6 +783,11 @@ ul75 5, XFL 1. REPORT's totals table
 has the history (user, 20 Nov: "update the total numbers in the report etc every now and then").
 
 Next:
+00000000000000000000000000000000000000000000000000000000000000. **exp75 (replaying conditional climber proofs, [notes/2026-11-24-cond-replay.md](notes/2026-11-24-cond-replay.md)):**
+   0 ready now. A first scan found 25 sketch proofs of unsolved targets whose assumptions production had proved; 21 were
+   proofs of weakened goals (climb.py --weaken: `goal=` in the sketch header), the 4 others rest on a kNN label one of
+   whose 2 candidate goals is unproved. climb.py's used.tsv now records each label's goal and the weakened flag; abs/crploop.sh
+   replays ready proofs hourly. keylemmas.py (exp69's key goals) counted weakened sketches too; recounted in the notes.
 0000000000000000000000000000000000000000000000000000000000000. **exp74 (long plain runs on the cluster heads, [notes/2026-11-23-climber-restart.md](notes/2026-11-23-climber-restart.md), "exp74"):**
    exp70 so far: 30 s fills prove 39% of the gaps they try, 3 s fills 40% (CLK69 42%): fill time is not the limit. The 7
    cluster originals' first heads (166 unsolved goals behind them) never had more than production's 320 s cascade. One plain
@@ -1437,6 +1442,7 @@ reports are written as the experiments run.
 | [notes/production-history.md](notes/production-history.md) | Production's history: every ulNN version's options, members, workers, dates and reason, and the side loops (generated) |
 | [notes/2026-11-23-climber-restart.md](notes/2026-11-23-climber-restart.md) | exp66: the live head climber restarted beside production (stopped 20 Nov, 1.04 per CPU h then); per CPU h against the plain head runs |
 | [notes/2026-11-23-tail-allocation.md](notes/2026-11-23-tail-allocation.md) | exp72: the tail's side loops by proofs per CPU h; the plain live loop without L, a plain 60 s sweep on the 940 local heads, the climber on the other holes |
+| [notes/2026-11-24-cond-replay.md](notes/2026-11-24-cond-replay.md) | exp75: replaying the climbers' conditional proofs once their assumptions are proved (exp/condreplay.py, abs/crploop.sh); weakened-goal sketches; exact assumption records in used.tsv |
 | [notes/2026-11-20-base-saturation.md](notes/2026-11-20-base-saturation.md) | exp39: base-theory runs as rule generators for the unsolved goals of the stronger theories |
 | [notes/2026-11-20-given-transfer.md](notes/2026-11-20-given-transfer.md) | exp38: unsolved goals that are variants of rules other runs derived and did not use (379 M in the given logs; transfer.py only matches proof steps); their ancestry as hints |
 | [notes/2026-11-19-from-zero-portfolio.md](notes/2026-11-19-from-zero-portfolio.md) | half1 from zero in 2 hours with today's deep portfolio (PGC), against PGA's 18,987 (exp27, from 07:18) |

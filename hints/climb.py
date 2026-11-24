@@ -328,7 +328,8 @@ def main():
     #   assume.tsv         target, climb prefix, label, source goal (or -), formula: what each assumption label meant
     #                      (kNN labels are positions in a list that changes as goals get proved)
     #   used.tsv           target, tag, every axiom label a proof used (lemma_goal_J, lemma_knn_I_<goal>, assume_*,
-    #                      true_*): a conditional proof's full premises, so it can be replayed once they are proven
+    #                      true_*): a conditional proof's full premises, so it can be replayed once they are proven;
+    #                      (24 Nov) then label=source goal for each assume_*, and 1 if the proof was of a weakened goal
     ft = open(os.path.join(c.dir, 'true.tsv'), 'a'); fa = open(os.path.join(c.dir, 'assume.tsv'), 'a')
     fu = open(os.path.join(c.dir, 'used.tsv'), 'a')
     #   fillattempts.tsv   original, formula, proved (0/1), target, tag: every gap --fill tried (which are fillable)
@@ -498,8 +499,15 @@ def main():
                     out.write(f'{t}\t{tag}:weak\t{len(S)}\tTHM\t-\t{dt:.2f}\t{goal[:120]}\n'); out.flush()
         used = lp.used.pop(t, set()) if ok else set()
         if ok:
+            # (24 Nov, exp75) columns 4 and 5: each assume_* label's source goal at this run (csrc; assume_goal_J: the
+            # original's goal J; '-' for a theory conjecture), and 1 for a proof of a weakened goal (a sketch with
+            # goal= in its header): kNN labels are rewritten as the list changes, so assume.tsv alone cannot say which
+            # goal a proof assumed, and a weakened goal's proof is not one of the target
+            ou_ = t.rsplit('__goal_', 1)[0]
+            su_ = ','.join(f'{x}=' + (csrc.get((t, x)) or (f'{ou_}__goal_{x[12:]}' if x.startswith('assume_goal_') else '-'))
+                           for x in sorted(used) if x.startswith('assume_'))
             with lock:
-                fu.write(f'{t}\t{tag}\t{",".join(sorted(used))}\n'); fu.flush()
+                fu.write(f'{t}\t{tag}\t{",".join(sorted(used))}\t{su_}\t{int(goal is not None)}\n'); fu.flush()
         deps = lp.assumed.pop(t, [])
         U = {x for x in used if x.startswith('assume_')}
         ut = sorted(x for x in used if x.startswith('true_'))
