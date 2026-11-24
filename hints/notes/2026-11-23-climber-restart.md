@@ -512,3 +512,15 @@ CC67C (arm A's lemma lists, 6 siblings and 30 kNN, one run per head at CLA67's C
 * The lemma lists matter: 30+400 beats 6+30 by +6 −2 at less CPU, and the two are complementary (union 11: CC67C's
   aa1_14 533 and mbol_aa1sqrd_to_aa1 559 only with the short lists).
 * CLA67 has its last heads running; exp76, exp77 and HLW1 start when it ends.
+
+**exp67 ended at 03:46** (CLA67's last heads; every dir finished all 91). Final, exp/ccpair.py on all 91:
+
+| pair | proved | +/− | union | CPU h |
+|---|---|---|---:|---|
+| CLA67 vs CLB67 (the arms) | 2 / 8 | +1 −7 | 9 | 16.91 / 14.90 |
+| CLA67 vs CC67C | 2 / 5 | +0 −3 | 5 | 16.91 / 15.32 |
+| CLB67 vs CC67D | 8 / 9 | +0 −1 | 9 | 14.90 / 13.58 |
+| CC67C vs CC67D | 5 / 9 | +2 −6 | 11 | 15.32 / 13.58 |
+
+All four together proved 11 of the 91 heads, every one also proved by a control. Closed. Then (03:47) exp76 and the
+HLW1 sweep started, and exp77 at 03:24 after the controls (03:48).

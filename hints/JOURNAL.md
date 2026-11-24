@@ -790,6 +790,7 @@ Next:
    on all 91 frozen heads the climber CLB67 proved 8 and one long run per head with the same lemma lists (CC67D, 552 CPU s each)
    proved 9, +0 −1, at 14.90 against 13.58 CPU h. Climbing added nothing beyond the long lemma lists. Arm A's pair still runs.
    **(03:23) Arm A agrees: CLA67 2, CC67C 5 (+0 −3) on 88 heads. Controls: 30+400 lemmas 9, 6+30 lemmas 5 (+6 −2, union 11).**
+   **(03:46) exp67 done, all 91 heads in every dir: arms 2 / 8, CLA67 vs CC67C 2 / 5, CLB67 vs CC67D 8 / 9; 11 heads in all. Closed.**
 00000000000000000000000000000000000000000000000000000000000000000. **exp78 (production retries climbed goals, [notes/2026-11-24-cond-replay.md](notes/2026-11-24-cond-replay.md), "exp78"):**
    loop.py --retry-climb: a goal whose climb sketches are newer than its last fresh run gets one fresh run (then the sk members).
    Before, 127 of CLS71's first 149 climbed targets had no production run after their climb. **ul79** (01:15) = ul78 plus

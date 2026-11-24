@@ -136,13 +136,13 @@ the 9 and their own sketches' assumptions are one cluster of 7 originals).
 [notes/2026-11-23-climber-restart.md](notes/2026-11-23-climber-restart.md).
 
 **3. Not production:** exp67's two set-mode climbs on 91 frozen heads (loops/CLA67, loops/CLB67, 2 climbs each, from
-23 Nov 19:01; CLB67 ended 24 Nov 02:35 with 8, CLA67 has its last heads) and their CPU-matched controls (abs/exp67e.sh,
+23 Nov 19:01; CLB67 ended 24 Nov 02:35 with 8, CLA67 03:46 with 2) and their CPU-matched controls (abs/exp67e.sh,
 CC67C 5 and CC67D 9 of 91, ended 03:23 and 02:54): each climber's proofs are a subset of its control's, and 30+400
 lemmas beat 6+30 by +6 −2 ([notes/2026-11-23-climber-restart.md](notes/2026-11-23-climber-restart.md)).
 exp/exp67merge.sh merges their proofs into loops/UL every 10 minutes.
 exp77 (abs/exp77.sh, bash 3774081, since 24 Nov 03:24): twee's CASC strategies A1, A2, A4, A8 as plain 60 s runs
 on 120 local heads (cond/STR77_*), 2 arms at a time, 2 threads each; HLW1 is the control.
-exp76 (abs/exp76.sh, bash 3766581, waiting for exp67's arms): final-only climbs at 160 s on 30 of CLS71's failed
+exp76 (abs/exp76.sh, bash 3766581, since 24 Nov 03:47): final-only climbs at 160 s on 30 of CLS71's failed
 targets, with (F76S) and without (F76C) CLS71's climb hints, -j 2 each.
 exp74 (abs/exp74.sh, bash 3765398 since 24 Nov 00:19, rerun: the first stopped at a 600 s wall cap): one plain 1200 s run on each first head of the key-goal cluster's
 7 originals (cond/LCH74, 2 threads; proofs into loops/UL).
