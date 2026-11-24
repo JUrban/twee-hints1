@@ -787,6 +787,7 @@ Next:
    60 s plain proofs on local heads came within 27 s; CC67D's long hinted runs on first heads mostly after 150 s. 60 of HLW1's
    failed local heads (seed 81), the same context: P81A 60 s (control) and P81B 300 s, plain, 100+30 siblings, 400 kNN, 2 threads
    each; waits for exp76's end. Decision: B beyond A at 0.5 per CPU h or better gives a 300 s pass over the local heads.
+   (05:06) Arm P81C after P81A: 60 s with every earlier sibling (--sibs 1000) and 100 later: no plain 60 s run had more than 100+30.
 00000000000000000000000000000000000000000000000000000000000000000000. **exp80 (what runs with hundreds of lemma axioms cost, [notes/2026-11-24-lemma-cost.md](notes/2026-11-24-lemma-cost.md)):**
    tonight's winning setting at the frontier is runs with 30-130 siblings and 400 kNN lemma axioms (exp67, HLW1), and those
    get slow as they lengthen: exp74's 1,200 abstract s took about 3 CPU s per abstract s. One plain 505-lemma problem (aa1_45_c 355)

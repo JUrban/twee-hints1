@@ -24,6 +24,10 @@ Plain (no hints, no rule model, no PG), H's lemma lists (100 earlier and 30 late
 loops/UL/solved.tsv at launch for both (cond/EXP81.trusted), condprove.py --proved, 2 threads each, at the same time:
 * P81A: 60 s, the control. The context has moved since HLW1, so a P81A proof is the context's, not time's.
 * P81B: 300 s.
+* P81C (added 05:06, after P81A on its 2 threads): 60 s with every earlier sibling (`--sibs 1000`) and 100 later,
+  400 kNN. No plain run at 60 s had more than 100+30 siblings (at 5 s, 200+60 with 1,000 kNN). A long original's
+  later goals miss most of their proved earlier siblings, and those are steps of the same Prover9 proof. Smoke:
+  aK2_eq_aK3_1243b 606 got 499 sibling and 400 kNN lemma axioms (6.5 s wall for a 2 s run).
 
 It waits for exp76's end (loops/EXP76.pids "exp76 done") so that the total stays near 20 twee processes. Proofs go
 into loops/CI3 and loops/UL at each arm's end (cond/EXP81.status).
@@ -33,5 +37,6 @@ into loops/CI3 and loops/UL at each arm's end (cond/EXP81.status).
 * Proofs per arm, B only and A only; CPU h per arm (results.tsv seconds are wall; 300 abstract s cost about 2.4 CPU s
   each with these lemma lists: exp80).
 * B's proofs' times: how many came after 60 s.
+* C against A: proofs only with the full sibling window, at equal time.
 * Decision: if B's proofs beyond A's come at 0.5 per CPU h or better (production makes 0-0.4), a 300 s plain pass over
   the local heads that fail at 60 s follows (a W2 setting in the live loop or a sweep).
