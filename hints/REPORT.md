@@ -130,10 +130,11 @@ runs on 287 climbed goals, 0 proofs in 63 minutes.
 **The head climber: abs/clhl4.sh (exp68),** stopped 23 Nov 23:30 after 21:07-23:30: 21 heads finished, 0 real proofs in
 4.7 CPU h (clhl3.sh before it, 18:44-21:07: 0 in 4.1). Its targets were the heads exp67's arms and controls climb at the
 same time. Production also keeps the old climbs' hints as members sk@0 and sk@1:0.
-**The stalled-goal climber: abs/cls71.sh (exp71),** climb.py --live into loops/UL, record loops/CLS71, PID 3810055
-since 24 Nov 03:25 with `CPUS=20` (it starts a climb only while fewer than 20 other twee processes run, so it waits
-while the experiments run; before: 23 Nov 23:33-24 Nov 03:25 with 30, 1 real proof, ns_to_aa1_c 339 in a 20 s final;
-first run 23:22-23:33). Since the restart its used.tsv rows record each assumption's goal (exp75). The 940 local heads are excluded (`--exclude sets/localheads71`: the sweep
+**The stalled-goal climber: abs/cls71b.sh (exp71),** climb.py --live into loops/UL, record loops/CLS71, PID 3845781
+since 24 Nov 06:05 with **160 s finals** (exp76: on 30 targets whose 20 s finals had failed, 160 s finals proved 2 with
+the climb hints and 1 without; about 0.4 real proofs per CPU h per climb against 0.1), `CPUS=20` (it starts a climb
+only while fewer than 20 other twee processes run). Before: abs/cls71.sh with 20 s finals, 03:25-06:05 with `CPUS=20`,
+23 Nov 23:33-24 Nov 03:25 with 30 (1 real proof, ns_to_aa1_c 339), first run 23:22-23:33. Since the restart its used.tsv rows record each assumption's goal (exp75). The 940 local heads are excluded (`--exclude sets/localheads71`: the sweep
 HLW1 takes them). CLU's mode (16 Nov): any goal whose latest fresh run failed, holes included, nearest to a proved
 goal first; a cheap climb (20 sketch runs of 5 s, a 20 s final, `--weaken 4`, fills of 3 s), 30 siblings and 400 kNN
 lemmas. Up to 6 climbs, started only while fewer than 30 other twee processes run. Its sketches feed production's sk
