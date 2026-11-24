@@ -13,6 +13,8 @@ Do the frontier's plain runs prove more with them?
 * Proved Horn siblings near the heads: 846 of the 1,018 heads have at least one in their window (100 proved before, 30
   after), about 1.4 on average among the 100 before, beside about 81 unit ones. By count (5 = 5 or more): 0: 172,
   1: 296, 2: 229, 3: 181, 4: 71, 5: 69.
+* Scripts: exp/frontier_shape.py (distances, holes), exp/horn_count.py (Horn counts), exp/exp82_set.py (the window
+  counts and the set; `--write` rewrites cond/EXP82.set).
 * Earlier work: REPORT 2j and 2ae on conditional goals (solved as often as unit ones; unit forms imported). No note
   has tried Horn lemma axioms (grep "horn", "ifeq" in notes/, REPORT, JOURNAL, exp/).
 
