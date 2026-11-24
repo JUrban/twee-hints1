@@ -1,6 +1,6 @@
 # Production history
 
-Generated 24 Nov 2026 03:03 by [exp/prodhistory.py](../exp/prodhistory.py) from the scripts abs/ul3.sh … ul81.sh (copies in [exp/prod/](../exp/prod/)) and their logs; rerun it after every production restart. What runs now, with the side loops, is in REPORT.md "Production now"; the totals over time are REPORT's summary table.
+Generated 24 Nov 2026 03:25 by [exp/prodhistory.py](../exp/prodhistory.py) from the scripts abs/ul3.sh … ul81.sh (copies in [exp/prod/](../exp/prod/)) and their logs; rerun it after every production restart. What runs now, with the side loops, is in REPORT.md "Production now"; the totals over time are REPORT's summary table.
 
 * **Written** is the newest dated entry of the script's header: when the version was written or first started.
 * **Last run** is the span of loops/ULNN.log (first and last write). A script that ran twice keeps only its second log (ul74: written 20 Nov 04:14, its log is the run of 21 Nov 16:50 to 22 Nov 07:12); some versions ran for minutes before a fix.
@@ -88,7 +88,7 @@ Generated 24 Nov 2026 03:03 by [exp/prodhistory.py](../exp/prodhistory.py) from 
 | [ul78](../exp/prod/ul78.sh) | 23 Nov 23:42 | 23 Nov 23:43 – 24 Nov 01:15 | 1.5 | J= (default 17); ≥5 in flight | twee-pg61 + `--pg-threshold 0.25 --ground-joining-branch-limit 100` | 8 | variants +skk400s30@1:0 |
 | [ul79](../exp/prod/ul79.sh) | 24 Nov 01:14 | 24 Nov 01:15 – 24 Nov 02:19 | 1.1 | J= (default 17); ≥5 in flight | twee-pg61 + `--pg-threshold 0.25 --ground-joining-branch-limit 100` | 0 | +`--retry-climb`; +`--retry-climb-hours` `6` |
 | [ul80](../exp/prod/ul80.sh) | 24 Nov 02:18 | 24 Nov 02:19 – 24 Nov 02:56 | 0.6 | J= (default 17); ≥5 in flight | twee-pg61 + `--pg-threshold 0.25 --ground-joining-branch-limit 100` | 0 | −`--retry-climb`; −`--retry-climb-hours` |
-| [ul81](../exp/prod/ul81.sh) | 24 Nov 02:56 | 24 Nov 02:56 – 24 Nov 02:57 | 0.0 | 6 (the running process) | twee-pg61 + `--pg-threshold 0.25 --ground-joining-branch-limit 100` |  | variants +k400s30@3:0 |
+| [ul81](../exp/prod/ul81.sh) | 24 Nov 02:56 | 24 Nov 02:56 – 24 Nov 03:24 | 0.5 | 6 (the running process) | twee-pg61 + `--pg-threshold 0.25 --ground-joining-branch-limit 100` | 0 | variants +k400s30@3:0 |
 
 ## Why each version (the header's newest entry, verbatim)
 
