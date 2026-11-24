@@ -244,6 +244,10 @@ def main():
     # compared on the same targets outside production
     ap.add_argument('--targets', default='', help='set mode: climb only the goals listed in FILE')
     ap.add_argument('--move-ab', action='store_true', help='--move-model only on targets of odd crc32 (A/B test)')
+    # (24 Nov) --final-only-ab: targets with bit 2 of crc32 of the name set get no sketch runs (the final only, with the
+    # climb hints their original already has, their siblings' climbs included), the others the full climb: does a target's
+    # climb add to its long final? (exp76 +1 -0, exp67 nil)
+    ap.add_argument('--final-only-ab', action='store_true', help='no sketch runs on targets with bit 2 of crc32 (A/B test)')
     ap.add_argument('--move-eps', type=float, default=0.1, help='--move-model: share of uniformly random moves')
     ap.add_argument('--up-single', action='store_true', help='--updown: going up also adds one assumption at a time')
     ap.add_argument('--up-levels', type=int, default=2, help='--up-single: levels of one-more-axiom')
@@ -660,6 +664,13 @@ def main():
 
     tgroups = {}
 
+    def nruns(t):
+        """--final-only-ab: 0 sketch runs (the final only) on targets with bit 2 of crc32 set, else --runs"""
+        if not c.final_only_ab:
+            return c.runs
+        import zlib
+        return 0 if (zlib.crc32(t.encode()) >> 2) % 2 == 1 else c.runs   # by target: its own climb against its final alone
+
     def climb(t):
         cands[t] = candidates(t)
         with lock:
@@ -677,7 +688,7 @@ def main():
         tried = set(); runs = 0; real = None
         bt = c.sketch_time; anyproof = False
         banned = set(); minU = None; nt = 0
-        while runs < c.runs:
+        while runs < nruns(t):
             if not queue and minU:
                 # stuck at minU (no smaller set proves T): ban its assumptions and climb again from
                 # the top without them, for proofs (and hints) that go another way
@@ -806,7 +817,7 @@ def main():
                 return (1 if m_.group(2) else 0, int(m_.group(1)), int(m_.group(3)))
             return (2 if x.startswith('assume_law_') else 3, 0, 0)
         singles = sorted((x for x in S0 if x.startswith(PRE)), key=single_key)
-        while runs < c.runs:
+        while runs < nruns(t):
             if not queue:
                 if anyproof or up_level >= (c.up_levels if c.up_single else 1):
                     break
