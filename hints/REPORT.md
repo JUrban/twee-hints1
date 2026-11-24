@@ -135,6 +135,8 @@ the 9 and their own sketches' assumptions are one cluster of 7 originals).
 CC67D (PID 3752361), abs/exp67e.sh, one run per head capped at the arm's CPU per finished head (608 and 552 CPU s,
 climb.py --final-cpu), 4 at a time each, about 4 hours. (The first controls, 22:56-23:27, got about 2.3 times that.)
 exp/exp67merge.sh merges the arms' and controls' proofs into loops/UL every 10 minutes (CLB67 has 7, CLA67 2).
+exp76 (abs/exp76.sh, bash 3766581, waiting for exp67's arms): final-only climbs at 160 s on 30 of CLS71's failed
+targets, with (F76S) and without (F76C) CLS71's climb hints, -j 2 each.
 exp74 (abs/exp74.sh, bash 3765398 since 24 Nov 00:27, rerun: the first stopped at a 600 s wall cap): one plain 1200 s run on each first head of the key-goal cluster's
 7 originals (cond/LCH74, 2 threads; proofs into loops/UL).
 exp65 (Q5A, Q5B) ended at 22:55: -2 at 6 hours, closed.
