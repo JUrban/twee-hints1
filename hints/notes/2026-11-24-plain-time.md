@@ -12,6 +12,9 @@ Do plain runs longer than 60 s pay on the local heads that fail at 60 s?
   their 9 after 150 CPU s (exp67, notes/2026-11-23-climber-restart.md).
 * Before: plain runs longer than 60 s were only exp74's 1,200 s on 7 cluster heads (1 of 7, already proved
   elsewhere). The plain lemma-size tests (notes/2026-11-23-plain-sizes.md) were all at 5 or 60 s.
+* Siblings before: REPORT 2r (14 Nov), hinted 20 s runs with up to 20 siblings: 6 beat 3, 10 and 20 added little, and
+  a proof uses about 20% of the siblings it is offered almost regardless of distance (19% of those 11 or more
+  away); all kNN ranks were used. Hundreds of siblings in plain 60 s runs (P81C) were not tried.
 
 ## Set
 
