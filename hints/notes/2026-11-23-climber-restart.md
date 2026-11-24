@@ -482,3 +482,16 @@ finished head at launch). Every head the climber proved, one long run with the s
 same CPU. On these heads the long lemma lists made arm B's lead over arm A (7 against 2 at 23:41), not the climbing.
 Arm A's pair (CLA67, CC67C) is still running. What follows for the stalled goals is long runs with long lemma lists
 (exp74, HLW1); exp76 asks the same of CLS71's climbs.
+
+## exp79: CC67D's run as a production member (ul81, 03:03)
+
+CC67D's run (one fresh run with 30 siblings and 400 kNN, production's hints, model and PG, 552 CPU s cap) proved 9
+of 91 heads at 0.66 per CPU h; production's last 6,000 runs made 0.48 per CPU h (exp/memberyield.py 6000 at 02:56),
+and ul80 ran dry (550 runs, 0 proofs; at times 1 of 6 workers busy). Production's runs with 400 kNN were 5 s (k400@0)
+or 80 s (k400 after level 3) with 6 siblings, and skk400s30@1:0 (40 s) had 51 runs and 0 proofs.
+
+* **ul81** (abs/ul81.sh, exp/prod/ul81.sh): ul80 plus member k400s30@3:0, a fresh run at level 3's budget (160
+  abstract s) right after L0. loop.py PID 3804373 since 02:56 (ul80 stopped 02:56: 550 runs, 0 new).
+* Checked: its first run (com_Ralt 254, 160 s, 309 s wall) is labelled Vk400s30@3:0; recent problems have 400
+  lemma_knn, 30 lemma_goal and no lemma_fill axioms.
+* Reading: exp/memberyield.py, its proofs per CPU h against the other members, and the goals only it proved.
