@@ -168,10 +168,9 @@ exp81 (longer or wider plain runs on 60 of HLW1's failed local heads) ended 24 N
 10.4 h (no 300 s pass), all earlier siblings 0, kNN ranks 400-799 2 in 1.6 h, which HLS2 now runs on all local heads
 ([notes/2026-11-24-plain-time.md](notes/2026-11-24-plain-time.md)).
 
-exp82 (Horn siblings as clause lemma axioms, TWEE_LEMMA_HORN=1 with twee `--conditional-encoding fresh`; the default
-encoding cost 8x) ended 24 Nov 09:32: 2 against 1 of 60 local heads (+1 −0; aK2rev 444's proof uses the Horn lemma
-aK2rev 450), equal cost. exp82c (abs/exp82c.sh, bash 3886129) repeats it on 60 more heads when exp81 ends
-(notes/2026-11-24-horn-lemmas.md).
+exp82 and exp82c (Horn siblings as clause lemma axioms, TWEE_LEMMA_HORN=1 with twee `--conditional-encoding fresh`; the
+default encoding cost 8x) ended 24 Nov 12:59: 11 against 11 on 120 local heads (+1 −1), equal cost: off
+([notes/2026-11-24-horn-lemmas.md](notes/2026-11-24-horn-lemmas.md)).
 
 **CPU at 05:02:** 20 twee processes: the HLW1 sweep 5, the stalled-goal climber 4 (it starts climbs only while fewer
 than 20 other twee processes run, so it takes what the others leave), the main loop 3 (of 4 workers), the plain live

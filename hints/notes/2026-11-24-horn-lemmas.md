@@ -82,3 +82,17 @@ have none. The flag would change only those runs; it goes into the climber at it
 **exp82c started 24 Nov 11:24:18** (exp/sets/exp82c.set): context 48,953, 60 heads from 498 candidates (seed 821, not in
 exp81's or exp82's sets), mean 3.07 Horn siblings, 32 originals. First problem aa3_45 497: H82G 106 sibling axioms (3
 Horn) and 400 kNN, H82D 103 and 400; only H82G's twee runs have `--conditional-encoding fresh`.
+
+## exp82c result and decision (24 Nov 12:59)
+
+| batch | Horn arm | control | + | − | wall h (Horn / control) |
+|---|---:|---:|---|---|---|
+| exp82 (seed 82) | 2 (H82F) | 1 (H82C) | aK2rev 444 | – | 1.36 / 1.41 |
+| exp82c (seed 821) | 9 (H82G) | 10 (H82D) | – | nil3_31 546 | 1.36 / 1.40 |
+| **both, 120 heads** | **11** | **11** | 1 | 1 | 2.72 / 2.81 |
+
+exp82c's heads were picked at 11:24, after the climber's chains had changed many contexts, so both arms proved far more
+than exp82's. **Decision: TWEE_LEMMA_HORN stays off** (the rule, +2 or more and −0 over the 120, is not met). The Horn
+lemmas are usable (one proof used one, at no extra cost with the fresh encoding) but their net effect at 60 s is nil:
+the one gain is matched by one loss, a perturbation. `--conditional-encoding fresh` stays in the climber (cls71d.sh):
+no change without Horn axioms, 8x cheaper with them. **exp82 is closed.**
