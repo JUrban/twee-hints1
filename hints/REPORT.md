@@ -145,8 +145,8 @@ lemmas beat 6+30 by +6 −2 ([notes/2026-11-23-climber-restart.md](notes/2026-11
 exp/exp67merge.sh merged their proofs into loops/UL every 10 minutes and ended with a last merge after the last arm (03:46).
 exp76 (abs/exp76.sh, bash 3766581, since 24 Nov 03:47): final-only climbs at 160 s on 30 of CLS71's failed
 targets, with (F76S) and without (F76C) CLS71's climb hints, -j 2 each.
-exp74 (abs/exp74.sh, bash 3765398 since 24 Nov 00:19, rerun: the first stopped at a 600 s wall cap): one plain 1200 s run on each first head of the key-goal cluster's
-7 originals (cond/LCH74, 2 threads; proofs into loops/UL).
+exp74 (one plain 1,200 s run on each first head of the key-goal cluster's 7 originals, cond/LCH74) ended 24 Nov 04:34:
+1 of 7, a head exp67 had proved meanwhile; closed.
 exp65 (Q5A, Q5B) ended at 22:55: -2 at 6 hours, closed.
 
 **CPU at 23:25:** 32 twee processes are running:

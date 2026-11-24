@@ -524,3 +524,8 @@ CC67C (arm A's lemma lists, 6 siblings and 30 kNN, one run per head at CLA67's C
 
 All four together proved 11 of the 91 heads, every one also proved by a control. Closed. Then (03:47) exp76 and the
 HLW1 sweep started, and exp77 at 03:24 after the controls (03:48).
+
+**exp74 ended (24 Nov 04:34, cond/LCH74.status): 1 of 7 proved, 6.77 CPU h (wall s summed).** The one proof is TLRproperties_2 367 (2,033 s), which
+CLB67 and CC67D had proved meanwhile, so it adds nothing; condimport.py's rerun of it hit its wall cap, which loses
+nothing either. The 6 others failed at 1,200 abstract s (2,909-4,393 wall s each). One long plain run on the key
+cluster's first heads gives nothing new: closed.
