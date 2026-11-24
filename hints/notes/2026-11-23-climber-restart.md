@@ -552,3 +552,20 @@ by the two restarts (rows in climb.tsv, no final). A full re-climb costs about w
 sketches are about 150 of 600 CPU s) and makes its sketches in today's context. abs/cls71c.sh (exp/prod/side/cls71c.sh),
 PID 3864270. The 20 s-final climber also proved mbol_to_nil3 636 just before the stop (6 since 06:05).
 Reading: real proofs per CPU h of the r1 climbs (their climb.tsv rows have the r1 prefix) against the new targets'.
+
+**Reading at 24 Nov 08:47** (CLS71.log split at its "reloaded" lines; CPU = climb.tsv seconds of the targets finished in
+each part; every proof is in loops/UL):
+
+| climber | targets finished | proved | CPU h | per CPU h |
+|---|---:|---:|---:|---:|
+| 20 s finals (23 Nov 23:33 - 24 Nov 06:05) | 878 | 3 | 34.66 | 0.09 |
+| 160 s finals (06:05-07:37) | 57 | 6 | 7.63 | 0.79 |
+| 160 s finals with --reclimb (07:37 on), new targets | 50 | 7 | 5.81 | 1.20 |
+| the same, re-climbs | 0 | 0 | 0 | – |
+
+New stalled goals still come (50 in 70 minutes), so no re-climb has run yet. HLW1 (plain 60 s sweep) for comparison:
+20 proofs in 22.3 CPU h (0.90). **What is not known:** how much of this is the climb and how much the long final with
+30+400 lemmas. exp76 gave the climb hints +1 −0 at equal 160 s finals (30 targets); exp67 found the climbing added
+nothing beyond CPU-matched long runs. A climb costs about 600 CPU s, a bare final about 450. Next: an online A/B in the
+live climber (alternate targets by crc32: full climb or final only), with `--conditional-encoding fresh`, at its next
+restart.

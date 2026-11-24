@@ -832,6 +832,8 @@ Next:
    (07:37) CLS71 with 160 s finals from 06:05: 6 proofs, 5 of them in 7.36 CPU h by 07:29 (0.68 per CPU h; 3 in about 35 CPU h with
    20 s finals). Restarted with climb.py --reclimb sets/cls71re (abs/cls71c.sh): its 858 failed or cut-off targets get one more climb
    after the new ones. Production to 2 workers (ul83: ul82 0 proofs in 2,501 runs).
+   (08:47) Climber per CPU h: 20 s finals 0.09 (3 in 34.7 CPU h), 160 s finals 0.79 (6 in 7.6), since 07:37 1.20 (7 in 5.8, all new
+   targets; no re-climb reached yet); HLW1 0.90. Open: the climb against the long final alone (exp76 +1 −0, exp67 nil).
 00000000000000000000000000000000000000000000000000000000000000. **exp75 (replaying conditional climber proofs, [notes/2026-11-24-cond-replay.md](notes/2026-11-24-cond-replay.md)):**
    0 ready now. A first scan found 25 sketch proofs of unsolved targets whose assumptions production had proved; 21 were
    proofs of weakened goals (climb.py --weaken: `goal=` in the sketch header), the 4 others rest on a kNN label one of
