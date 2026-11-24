@@ -844,6 +844,7 @@ Next:
    targets; no re-climb reached yet); HLW1 0.90. Open: the climb against the long final alone (exp76 +1 −0, exp67 nil).
    (08:59) CLS71 restarted (abs/cls71d.sh): --final-only-ab (half the targets by crc32 get only the 160 s final), twee
    --conditional-encoding fresh, -j 8.
+   **(13:43) User: keep the climbs for now, let the A/B run.**
    **(13:28) Every final had sibling sketch hints (median 679-727), so the A/B prices a target's own climb only. exp36's ablation at 160 s
    (loops/CA1): 24 both, 9 neither, 0 sketch only. Neither the climb nor its sketch steps add proofs at 160 s; the 160 s final does the work.**
    **(10:18) Since 08:59: 33 proofs in 79 minutes (tails of nil3_23_32_to_*, aK2_eq_aK3_gen, nil3_27); A/B: new climb: 50 finished, 15 proved, 5.15 CPU h, 2.91 per CPU h; new final-only: 54 finished, 18 proved, 4.85 CPU h, 3.71 per CPU h.**

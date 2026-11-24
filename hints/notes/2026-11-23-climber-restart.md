@@ -602,3 +602,6 @@ finals neither the target's own climb nor the original's sketch steps add proofs
 final with production's pool and lemmas, on goals its stalled() order picks (nearest a proved goal first), chained.
 By the rule set at 08:59 the final-only rate (2.95 against 2.17 at 13:18) points to finals without climbs. The A/B
 keeps running for more targets; turning the climbs off is the user's call (climbing is the method asked for).
+
+**User, 24 Nov 13:43:** "keep the climbs for now, let the A/B run". cls71e.sh stays as it is (climbs on the crc32
+bit-2-clear targets, final-only on the others); the reading goes on with exp/climbab.py --from 1047.
