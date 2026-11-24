@@ -621,5 +621,5 @@ r1/out). trust.py at 17:03 (t1703): 49,325 solved, **0 untrusted**, holdout 5,54
 at 60 s had failed on 489 and 515 (REVF1, 23 Nov); the long lemma lists were enough.
 
 **A/B reading at 24 Nov 21:25** (exp/climbab.py --from 1047): climb: 111 of 480, 62.67 CPU h, 1.77 per CPU h; final-only: 94 of 472, 50.21 CPU h, 1.87 per CPU h. The climbing arm now proves more targets
-(it led 64 to 64 at 15:18 and trailed before); per CPU h the two are level. Since 15:33 CLQ83's 40 s finals take the
+(64 each at 15:18; it trailed before); per CPU h the two are level. Since 15:33 CLQ83's 40 s finals take the
 quick targets of both arms alike, so CLS71's later targets are the slower ones, where the climbs seem to help.
