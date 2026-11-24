@@ -166,8 +166,9 @@ exp74 (one plain 1,200 s run on each first head of the key-goal cluster's 7 orig
 1 of 7, a head exp67 had proved meanwhile; closed.
 exp65 (Q5A, Q5B) ended at 22:55: -2 at 6 hours, closed.
 
-exp82 (abs/exp82.sh, bash 3858632, since 24 Nov 07:26, 2 threads): genuine Horn siblings as clause lemma axioms
-(TWEE_LEMMA_HORN=1) in plain 60 s runs on 60 local heads, against the same problems without them
+exp82 (abs/exp82.sh, bash 3858632, since 24 Nov 07:26; arm H82F abs/exp82b.sh, bash 3869035, since 08:10; 2 threads):
+genuine Horn siblings as clause lemma axioms (TWEE_LEMMA_HORN=1, twee `--conditional-encoding fresh`: the default
+encoding cost 8x) in plain 60 s runs on 60 local heads, against the same problems without them
 (notes/2026-11-24-horn-lemmas.md).
 
 **CPU at 05:02:** 20 twee processes: the HLW1 sweep 5, the stalled-goal climber 4 (it starts climbs only while fewer
