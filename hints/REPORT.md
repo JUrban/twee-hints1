@@ -160,10 +160,9 @@ exp74 (one plain 1,200 s run on each first head of the key-goal cluster's 7 orig
 1 of 7, a head exp67 had proved meanwhile; closed.
 exp65 (Q5A, Q5B) ended at 22:55: -2 at 6 hours, closed.
 
-**CPU at 04:50:** 21 twee processes: the HLW1 sweep 5, the main loop 4 (of 6 workers; the others between runs),
-the plain live loop 3 (its H cycle), exp76's two arms 2 each, the stalled-goal climber 2 (it starts climbs only while
-fewer than 20 other twee processes run), the transfer or given-rule retry 1. exp67 and its controls ended at 03:46;
-exp76 ends in some hours, then the total is about 18-20.
+**CPU at 05:02:** 20 twee processes: the HLW1 sweep 5, the stalled-goal climber 4 (it starts climbs only while fewer
+than 20 other twee processes run, so it takes what the others leave), the main loop 3 (of 4 workers), the plain live
+loop 3 (its H cycle), exp76's two arms 2 each, proof reruns 1. When exp76 ends, exp81 takes its 4.
 
 **Trust** (exp/trust.py, run after each restart): since 23 Nov 23:14 it also checks fill lemmas, the climbers'
 gap proofs that production gets as lemma_fill_N. climb.py records each one's premises (fillprem.tsv), and
