@@ -414,13 +414,14 @@ def knn_picks(name, solved, m, index, k, after=False):
     o, _ = split(name)
     return index.select(name, k, exclude={f'{o}__goal_{j}' for j in sibling_lemmas(name, solved, m, after)})
 
-def lemma_problem_knn(name, solved, m, index, k, after=False):
-    """lemma_problem plus up to K lemmas from INDEX (same axioms, any original)."""
+def lemma_problem_knn(name, solved, m, index, k, after=False, skip=0):
+    """lemma_problem plus up to K lemmas from INDEX (same axioms, any original). (24 Nov, exp82) SKIP: the K lemmas
+    after the first SKIP of the ranking (ranks SKIP..SKIP+K-1, named by their rank), a disjoint slice of the list."""
     txt, n = lemma_problem(name, solved, m, after)
     have = set(re.findall(r'fof\(lemma_goal_(\d+),', txt))
     o, _ = split(name)
-    extra = index.select(name, k, exclude={f'{o}__goal_{j}' for j in have})
-    for i, x in enumerate(extra):
+    extra = index.select(name, k + skip, exclude={f'{o}__goal_{j}' for j in have})[skip:]
+    for i, x in enumerate(extra, skip):
         txt += f'fof(lemma_knn_{i}_{x},axiom,{lemma_form(x)}).\n'   # (source goal in the name: USEDAXIOMS)
     return txt, n + len(extra)
 

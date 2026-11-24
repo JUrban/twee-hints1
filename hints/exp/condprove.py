@@ -23,6 +23,8 @@ def opt(k, d):
     return d
 SET = opt('--set', '/project/hintwork/sets/all'); TR = opt('--trusted', '/project/hintwork/loops/TRUSTNOW/t2139.trusted')
 J = int(opt('-j', '6')); TM = opt('--time', '5'); SIBS = int(opt('--sibs', '10')); KNN = int(opt('--knn', '30'))
+# (24 Nov, exp82) --knn-skip S: the kNN lemmas ranked S..S+KNN-1 (a disjoint slice of the ranking)
+KSKIP = int(opt('--knn-skip', '0'))
 ONLY = opt('--only', ''); TWEE = '/project/bin/twee-pg61'
 # (23 Nov) --twee PATH: another binary (e.g. /project/bin/twee-e63 with --args --lazy-lemmas)
 TWEE = opt('--twee', TWEE)
@@ -105,7 +107,7 @@ AX = re.compile(r'^Axiom \d+ \(([^)]*)\)')
 def one(g):
     o, k = lemmas.split(g)
     if index:
-        txt, _ = lemmas.lemma_problem_knn(g, allg, SIBS, index, KNN)
+        txt, _ = lemmas.lemma_problem_knn(g, allg, SIBS, index, KNN, skip=KSKIP)
     else:
         txt, _ = lemmas.lemma_problem(g, allg, SIBS)
     if AFTER:
