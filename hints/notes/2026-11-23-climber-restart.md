@@ -624,17 +624,22 @@ at 60 s had failed on 489 and 515 (REVF1, 23 Nov); the long lemma lists were eno
 (64 each at 15:18; it trailed before); per CPU h the two are level. Since 15:33 CLQ83's 40 s finals take the
 quick targets of both arms alike, so CLS71's later targets are the slower ones, where the climbs seem to help.
 
-## A/B reading at 25 Nov 03:48 (exp/climbab.py --from 1047)
+## A/B reading at 25 Nov 03:48, re-read 25 Nov 03:50 (exp/climbab.py --from 1047)
 
 | targets | arm | finished | proved | CPU h | per CPU h |
 |---|---|---:|---:|---:|---:|
 | new | climb | 572 | 114 | 79.07 | 1.44 |
 | new | final-only | 564 | 100 | 63.77 | 1.57 |
-| re-climb | climb | 120 | 18 | 3.27 | 5.50 |
-| re-climb | final-only | 108 | 17 | 18.72 | 0.91 |
+| re-climb | climb | 121 | 18 | 19.51 | 0.92 |
+| re-climb | final-only | 109 | 17 | 14.13 | 1.20 |
 
-The new targets have nearly run out: 1136 new targets in all, against 1,129 at 00:18 (568 + 561), so 7 more in 3.5
-hours. Since then CLS71 finishes mostly re-climbs: 228 targets climbed again in this instance, after new proofs made
-them eligible again. On new targets, final-only still leads per CPU h and the climbing arm on count. The re-climb rows'
-CPU differ by a factor of 5.7 at nearly equal counts; that asymmetry is not yet explained (read climb.tsv for both
-arms' re-climbs before drawing anything from them).
+* **The never-climbed targets ran out about 00:18.** Since then (by the log's elapsed seconds; this instance began
+  13:00) CLS71 finished 242 targets: 230 re-climbs (sets/cls71re: targets earlier instances had climbed before 08:59),
+  7 new ones, 5 finished a second time in this instance. All the re-climbs so far came after 00:18.
+* **climbab.py's CPU for re-climbs was wrong until now** (fixed 25 Nov): a re-climb counted only its r1-tagged rows
+  when it had any, so the climbing arm's re-climbs left out their final (tagged `final`), 3.27 CPU h; and every row
+  when it had none, so the final-only arm's re-climbs took in the earlier climb's runs, 18.72 CPU h. It now counts a
+  target's rows from the instance's first climb.tsv row on (the first row of a new target, row 15853). The new
+  targets' figures do not change.
+* On the re-climbs, final-only leads per CPU h as on the new targets; counts are nearly equal. On new targets the
+  climbing arm leads on count, final-only per CPU h. The A/B keeps running (the user's decision, 24 Nov 13:43).
