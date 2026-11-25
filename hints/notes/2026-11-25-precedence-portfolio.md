@@ -102,3 +102,21 @@ for every tied order) and writes REPLAY.blistr (order, best-on count, its D_i, i
 minimal cover (greedy only), and BliStr's growing step: local search over precedences (swaps of adjacent symbols,
 then other twee options) on each eligible order's D_i at the low limit, evaluating new orders on all goals. The
 space is 9! = 362,880 orders, so after stage 2 that step is the way to new orders beyond the 120 sampled.
+
+## exp85's dev set was too hard; exp85b (09:22)
+
+* The user (09:2x): the goals may be too hard for the ordering test to give reliable statistics (BliStr's heuristics).
+  BliStr keeps a problem only when its best value lies in [c_min, c_max] = [500, 30000] given-clause loops: too easy
+  problems steer to strategies that do not help harder ones, too hard ones cannot be solved at the limit.
+* exp85's dev set: 19 of 50 failed even the 40 CPU s capture and 15 needed 10-40 s, while the cap was 10,000 pairs
+  (about 5 abstract s). Reading at 09:18 (14 goals with all 121 orders): the default proved 3, the union 5, 9 goals
+  no order proved. The replay was stopped at 09:21 (1,929 rows kept in loops/P85C/replay.v2.tsv).
+* **exp85b** (abs/exp85b.sh, exp/exp85b.sh, bash 4096805 from 09:22:47; loops/P85D; log lines in loops/EXP85.pids):
+  * 300 random trusted goals (sets/exp85b.cand, exp/sets/exp85b.cand: random.seed(851) over t0758.trusted without
+    exp85's candidates; 109 originals), as BliStr's 200 random problems, not hard ones;
+  * captured as before in t0758's context without them (49,444 solved), CLQ83's final at 40 CPU s, -j 5;
+  * pre-pass: orders 0 (default) and 60 (exp/sets/exp85.pre.orders) at `--abstract 20` (40,000 pairs);
+  * dev set: the goals whose lesser work of the two lies in [500, 10000] pairs (BliStr's window on the best value,
+    with two orders standing in for all); at most 60 (seed 85). Selecting on order 0 and 60 favours those two a little;
+  * replay: all 121 orders at `--abstract 10` (20,000 pairs, twice the window's top, so an order twice as slow as the
+    better of the two still proves), `--cpu 60` safety cap, -j 5. About 60 x 121 runs; expected 2-3 hours.

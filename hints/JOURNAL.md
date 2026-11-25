@@ -794,6 +794,8 @@ Next:
    proved-but-not-easy goals made unsolved in the context, each goal's captured final replayed per ordering at 10 CPU s.
    Capture from 08:07 (loops/P85C).
    **(08:34) Replay restarted to record twee's work (the user: faster also dominates) under an abstract cap of 5 s (10,000 pairs).**
+   **(09:22) The dev set was too hard (the user; 9 of the first 14 goals unproved by all 121 orders): exp85b, 300 random goals, a pre-pass
+   keeps those whose better work of orders 0 and 60 lies in [500, 10000] pairs (BliStr's window), replay at 20,000.**
 000000000000000000000000000000000000000000000000000000000000000000000000. **exp84 (other symbol precedences on the quick finals' failures, [notes/2026-11-25-precedences.md](notes/2026-11-25-precedences.md)):**
    the user asked whether our portfolios try symbol precedences as Veroff does; they do not. 100 unsolved targets
    whose CLQ83 40 s final failed (sets/exp84.targets, seed 84), CLQ83's final rerun in five arms: P84O0 default
