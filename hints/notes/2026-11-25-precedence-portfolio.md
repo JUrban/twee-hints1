@@ -133,3 +133,6 @@ space is 9! = 362,880 orders, so after stage 2 that step is the way to new order
   So work is measured to about one abstract second. exp/prec_portfolio.py now rounds work up to steps of `--level
   2000` pairs, so equal steps are ties (BliStr's best-on counts every tied order); the dominance and cost views use
   the rounded values. BliStr's window [500, 10000] on the best value thus means: proved within 1 to 5 abstract s.
+* 09:48: CLS71 had no target left (0 runs since its 09:45 refresh; new targets ran out about 00:18 and 596 of its 870
+  re-climbs are done) and CLQ83 idles, so the replay was resumed with -j 10 (abs/exp85c.sh, exp/exp85c.sh, from 09:48:57;
+  1,011 rows kept, 6,249 to go). Runs are deterministic under the abstract cap, so the thread count does not change rows.
