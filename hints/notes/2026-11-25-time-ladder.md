@@ -275,3 +275,5 @@ siblings as extra goals, credited by SOLVEDGOAL and a proof rerun), as a measure
   main options (no --given-scan, --sync, variants), -j 2, --listen 300, 7 minutes: goal 5's run credited 10 and 7, goal
   6's run 8 and 9, each with a solved row, hints, kept output with USEDAXIOMS, proof and a `listen` results row; goal
   420's run, started earlier, listened to goals solved meanwhile (hence the skip).
+* **CLQ83** as abs/clq87e.sh (`--listen 300 --listen-dist 100000`) from 22:26:50, climb.py 66157, log line 2180,
+  climb.tsv row 3004 on (4 finals of 200-1,576 s were cut).

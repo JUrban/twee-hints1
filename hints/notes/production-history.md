@@ -1,6 +1,6 @@
 # Production history
 
-Generated 25 Nov 2026 22:19 by [exp/prodhistory.py](../exp/prodhistory.py) from the scripts abs/ul3.sh … ul86.sh (copies in [exp/prod/](../exp/prod/)) and their logs; rerun it after every production restart. What runs now, with the side loops, is in REPORT.md "Production now"; the totals over time are REPORT's summary table.
+Generated 25 Nov 2026 22:27 by [exp/prodhistory.py](../exp/prodhistory.py) from the scripts abs/ul3.sh … ul86.sh (copies in [exp/prod/](../exp/prod/)) and their logs; rerun it after every production restart. What runs now, with the side loops, is in REPORT.md "Production now"; the totals over time are REPORT's summary table.
 
 * **Written** is the newest dated entry of the script's header: when the version was written or first started.
 * **Last run** is the span of loops/ULNN.log (first and last write). A script that ran twice keeps only its second log (ul74: written 20 Nov 04:14, its log is the run of 21 Nov 16:50 to 22 Nov 07:12); some versions ran for minutes before a fix.
@@ -93,7 +93,7 @@ Generated 25 Nov 2026 22:19 by [exp/prodhistory.py](../exp/prodhistory.py) from 
 | [ul83](../exp/prod/ul83.sh) | 24 Nov | 24 Nov 07:34 – 24 Nov 11:22 | 3.8 | J= (default 17); ≥1 in flight | twee-pg61 + `--pg-threshold 0.25 --ground-joining-branch-limit 100` | 98 | (same options: a restart, or loop.py's code or the launch arguments changed) |
 | [ul84](../exp/prod/ul84.sh) | 24 Nov | 24 Nov 11:23 – 25 Nov 15:30 | 28.1 | J= (default 17); ≥3 in flight | twee-pg61 + `--pg-threshold 0.25 --ground-joining-branch-limit 100` | 274 | (same options: a restart, or loop.py's code or the launch arguments changed) |
 | [ul85](../exp/prod/ul85.sh) | 25 Nov 15:30 | 25 Nov 15:30 – 25 Nov 22:17 | 6.8 | J= (default 17); ≥3 in flight | twee-pg61 + `--pg-threshold 0.25 --ground-joining-branch-limit 100` | 16 | `--climb-hints` `/project/hintwork/loops/CLH,/project/hintwork/loops/CLHL,/project/hintwork/loops/CLU,/project/hintwork/loops/CLHL2,/project/hintwork/loops/FUD2p,/project/hintwork/loops/FUDs,/project/hintwork/loops/CLHL3,/project/hintwork/loops/CLHL4,/project/hintwork/loops/CLA67,/project/hintwork/loops/CLB67,/project/hintwork/loops/CLK69,/project/hintwork/loops/K70F,/project/hintwork/loops/K70R,/project/hintwork/loops/CLS71` → `/project/hintwork/loops/CLH,/project/hintwork/loops/CLHL,/project/hintwork/loops/CLU,/project/hintwork/loops/CLHL2,/project/hintwork/loops/FUD2p,/project/hintwork/loops/FUDs,/project/hintwork/loops/CLHL3,/project/hintwork/loops/CLHL4,/project/hintwork/loops/CLA67,/project/hintwork/loops/CLB67,/project/hintwork/loops/CLK69,/project/hintwork/loops/K70F,/project/hintwork/loops/K70R,/project/hintwork/loops/CLS71,/project/hintwork/loops/CLQ83` |
-| [ul86](../exp/prod/ul86.sh) | 25 Nov 22:18 | 25 Nov 22:18 – 25 Nov 22:18 | 0.0 | 4 (the running process) | twee-pg61l + `--pg-threshold 0.25 --ground-joining-branch-limit 100` |  | `--twee` `/project/bin/twee-pg61` → `/project/bin/twee-pg61l`; +`--listen` `${LISTEN:-300}` |
+| [ul86](../exp/prod/ul86.sh) | 25 Nov 22:18 | 25 Nov 22:18 – 25 Nov 22:25 | 0.1 | 4 (the running process) | twee-pg61l + `--pg-threshold 0.25 --ground-joining-branch-limit 100` | 0 | `--twee` `/project/bin/twee-pg61` → `/project/bin/twee-pg61l`; +`--listen` `${LISTEN:-300}` |
 
 ## Why each version (the header's newest entry, verbatim)
 
