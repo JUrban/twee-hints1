@@ -798,6 +798,9 @@ Next:
    keeps those whose better work of orders 0 and 60 lies in [500, 10000] pairs (BliStr's window), replay at 20,000.**
    **(10:21) exp85b: all 121 orders prove all 60 dev goals; total CPU 176-199 s (the default 191, rank 62); some order twice as fast on
    2 of 60. On goals proved in 1-5 abstract s the precedence hardly matters. Next: medium-hard goals (5-30 abstract s), 40 s cap.**
+   **(13:05) exp85d (30 goals of 5-20 abstract s, 121 orders at 82,000 pairs): the default 29, union 30; the best order saves 4% of total
+   work; the per-goal scatter is about 20%, so k orders at B/k lose to the default at B (40,000: 29 against 18 with 2).
+   exp85e: 4 orders at 80,000 against the default at 320,000 on the 22 goals both orders failed.**
 000000000000000000000000000000000000000000000000000000000000000000000000. **exp84 (other symbol precedences on the quick finals' failures, [notes/2026-11-25-precedences.md](notes/2026-11-25-precedences.md)):**
    the user asked whether our portfolios try symbol precedences as Veroff does; they do not. 100 unsolved targets
    whose CLQ83 40 s final failed (sets/exp84.targets, seed 84), CLQ83's final rerun in five arms: P84O0 default

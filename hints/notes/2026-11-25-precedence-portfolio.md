@@ -174,3 +174,30 @@ space is 9! = 362,880 orders, so after stage 2 that step is the way to new order
 * The stopped hard replay (replay.v2.tsv, 10,000-pair cap; 15 goals with all 121 orders): 10 proved by none; goal 420
   (default 10,407 pairs, over the cap) proved by 86 orders, 32 of them in one 2000-pair step; goal 522 (default
   fails) by 39 orders; goal 340 by 107 orders in 2 to 5 steps.
+
+## exp85d result (13:05; exp/prec_portfolio.py loops/P85C/replay40.tsv, the equal-budget figures from the rows)
+
+* 30 dev goals x 121 orders at 82,000 pairs. The default proves 29; per order min 28, median 29, max 30; the union 30
+  (one goal only non-default orders prove, 47 of them). Goals proved by all 121 orders: 22.
+* Work: no order dominates the default, none is "much faster"; all 121 non-dominated. Total work (unproved = 82,000):
+  the default 779,251 (rank 25 of 121), the best order 750,412 (113), the median 826,645: no order is systematically
+  better (the best saves 4%). Per goal the least work of all 121 orders against the default's: median 0.80, q25 0.55.
+  Order 113 against the default: median 1.01, under half on 5 of 29, over twice on 0.
+* Equal budget (k orders each at B/k pairs, chosen on these same goals, so optimistic) against the default at B:
+  B 20,000: the default 12, 2 orders 7, 3 orders 3; B 40,000: 29 against 18 and 12; B 80,000: 29 against 30, 24, 19.
+  The dev window favours the default (selected on its or order 60's work), but per-goal work ratios near 1 mean
+  slicing must lose: the orders' work on a goal is spread about +-20%, a light tail, so a restart with another order
+  rarely costs less than half of continuing.
+* **Reading.** On AIM goals of 5-20 abstract s, twee's symbol precedence changes the work by a scatter of about 20%,
+  not systematically; best-of-121 is a minimum over that scatter. A fixed-budget portfolio of orders loses against
+  the default. A precedence portfolio can only pay where extra budget is spent anyway on stalled goals.
+
+## exp85e: orders on stalled goals at equal work (pre-registered 13:1x)
+
+* The user's last stage: the portfolio against the default at equal work on stalled goals. Goals: the 22 of exp85's
+  120 that neither order 0 nor 60 proved within 80,000 pairs (exp/sets/exp85e.goals, 12 originals).
+* Arm D: the default at `--abstract 160` (320,000 pairs; --cpu 900). Arm P: orders 3, 116, 104, 20 (exp85d's
+  coverage and cost greedy, exp/sets/exp85e.orders) at `--abstract 40` (80,000 pairs) each: 320,000 pairs in all.
+  Orders 0 and 60 at 80,000 are known to fail on all 22 (pre40.tsv). -j 10; rows loops/P85C/e85d.tsv, e85p.tsv.
+* Expected: if precedence variety matters on hard goals, P proves more than D; if the scatter is light as above, D
+  (one long run) wins.
