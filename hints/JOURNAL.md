@@ -803,6 +803,8 @@ Next:
    definition axioms (flatten-goal, on by default), listened ones too. Fix twee-e61m (also the precedence count and the
    symbol numbers): the same given rules with and without them. twee-pg61l runs e61m from 21:41:49; the finals started
    20:34-21:41 ran a changed search. The cost with e61m: exp/listencost90m.sh, below.
+   **Cost with e61m (same final, same search): 8 listened goals +1.2% CPU, all 120 of nsmr_to_aa1 +4.6%. CLS71 as
+   cls71j.sh from 22:03 (`--listen 300 --listen-dist 100000`: all unsolved plain siblings), climb.py 60285; CLQ83 follows.**
 000000000000000000000000000000000000000000000000000000000000000000000000000000. **exp26 reading (25 Nov 21:21, [notes/2026-11-19-queue-renorm-ab.md](notes/2026-11-19-queue-renorm-ab.md)):** production's
    A/B on half the goals' deep runs (`--cp-renormalise-threshold 1000`, no queue renormalisation) over its last
    180,000 results: B 648 proofs in 291.4 CPU h (2.22 per CPU h) against A 615 in 317.8 (1.93), +15%; ahead in each of

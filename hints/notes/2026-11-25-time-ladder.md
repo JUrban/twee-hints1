@@ -254,3 +254,10 @@ siblings as extra goals, credited by SOLVEDGOAL and a proof rerun), as a measure
   never credited. Test loops/LST90 (as LST89, twee-pg61l = e61m): goal 10's 20 s final credited goals 5, 7, 8 and 9
   (LST89 with e61l: 5 and 6; e61l flattened the listened goals, which helps some of them, and changed the search);
   goal 5's hints file byte-identical to LST89's.
+* **The cost with twee-e61m** (the same final, 320,000 pairs, exp/listencost90m.sh and exp/listencost90all.sh; time's
+  user+sys): without listened goals `without cpu 559.12+24.95 wall 581.80 maxrss 1363712`; with its 8 `with cpu 586.56+4.37 wall 589.17 maxrss 1163008`; with all 120 unsolved plain goals of
+  nsmr_to_aa1 `all cpu 608.14+2.89 wall 609.08 maxrss 1249920`. The same search in all three (49,581 rules); none of the listened goals proved in this final.
+  So 8 cost about 1% and 120 about 5%.
+* **Deployed:** CLS71 as abs/cls71j.sh (cls71i.sh plus `--listen 300 --listen-dist 100000`: all the original's unsolved
+  plain goals) from 22:03:48, climb.py 60285, log line 3301, climb.tsv row 35134 on; CLQ83 as abs/clq87e.sh when its two
+  oldest 640 s finals end.

@@ -157,8 +157,9 @@ proofs in 63 minutes.
 **The head climber: abs/clhl4.sh (exp68),** stopped 23 Nov 23:30 after 21:07-23:30: 21 heads finished, 0 real proofs in
 4.7 CPU h (clhl3.sh before it, 18:44-21:07: 0 in 4.1). Its targets were the heads exp67's arms and controls climb at the
 same time. Production also keeps the old climbs' hints as members sk@0 and sk@1:0.
-**The climber: abs/cls71i.sh (exp71; the 160 s rung of exp87),** climb.py --live into loops/UL, record loops/CLS71, **climb.py
-46097 since 25 Nov 20:49** (listen fixed: climb.py 43358 from 20:34 listened to 6 goals production had solved and overwrote
+**The climber: abs/cls71j.sh (exp71; the 160 s rung of exp87),** climb.py --live into loops/UL, record loops/CLS71, **climb.py
+60285 since 25 Nov 22:03** (cls71i.sh plus `--listen 300 --listen-dist 100000`: each final listens to all its original's
+unsolved plain goals, +5% CPU for 120, exp90; cls71i.sh, climb.py 46097, ran 20:49-22:03) (listen fixed: climb.py 43358 from 20:34 listened to 6 goals production had solved and overwrote
 their hints files, restored; cls71h.sh plus **`--listen 8`** with **twee-e61m** from 21:41:49 (twee-e61l before, whose
 listened goals changed the search, exp90) (`--twee /project/bin/twee-pg61l`): each final
 carries up to 8 unsolved plain-equation siblings within 10 as listened goals, credited when proved, exp89; climb.tsv row 34179
