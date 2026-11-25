@@ -97,6 +97,26 @@ if work:
     if sp:
         print(f'  on the {len(sp)} goals the default proves: least work in the cost portfolio / the default\'s, median {sp[len(sp) // 2]:.2f},'
               f' q25 {sp[len(sp) // 4]:.2f}')
+    # (25 Nov) BliStr's selection heuristic (Urban 2013, arXiv:1301.2683, section 2.4): per goal only the best (least)
+    # work counts, and only within [CMIN, CMAX]; an order is eligible when it is best on at least V goals; at most N
+    # eligible, by that count. Ties: every order with the least work counts as best.
+    CMIN, CMAX, V, N = int(opt('--cmin', 500)), int(opt('--cmax', cap)), int(opt('--versatility', 2)), int(opt('--n', 20))
+    best = collections.Counter(); Dset = collections.defaultdict(list)
+    for g in G:
+        ws = [(wk(g, o), o) for o in ids if wk(g, o) is not None]
+        if not ws:
+            continue
+        m = min(w for w, _ in ws)
+        if CMIN <= m <= CMAX:
+            for w, o in ws:
+                if w == m:
+                    best[o] += 1; Dset[o].append(g)
+    el = [o for o, n in best.most_common() if n >= V][:N]
+    print(f'  BliStr best-on (least work in [{CMIN}, {CMAX}], versatility {V}, at most {N}): {len(el)} eligible;'
+          f' default best on {best["0"]}')
+    print('   ', [(o, best[o]) for o in el])
+    with open(P + '.blistr', 'w') as f:
+        f.writelines(f'{o}\t{best[o]}\t{",".join(Dset[o])}\t{lists[o]}\n' for o in el)
     with open(P + '.costportfolio', 'w') as f:
         f.writelines(f'{o}\t{lists[o]}\n' for o in ch)
     print('wrote', P + '.costportfolio')

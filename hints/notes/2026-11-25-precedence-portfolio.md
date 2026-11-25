@@ -74,3 +74,31 @@ Written 25 Nov 2026, 08:08 UTC.
   user's sense (a superset of their goals in at most half their total work); and a cost-greedy portfolio (cost: the
   sum over goals of the least work among the chosen orders, an unproved goal twice the cap), beside the coverage
   greedy with redundancy 2.
+
+## BliStr's recipe (the user pointed to it; Urban 2013, arXiv:1301.2683, read in full 25 Nov)
+
+* **Start set** (2.1): all 280 predefined E strategies on 200 random problems of the 1000 at a low 5 s limit (117
+  solved); a minimal set covering those solutions (exact, MiniSat++): 6 strategies; those 6 on all 1000 at 60 s.
+* **Metric** (2.3): given-clause loops, not CPU (hard to measure on easy problems); unsolved within the low limit:
+  10^6. Here: twee's critical pairs considered, unproved = twice the cap.
+* **Selection heuristic** (2.4): the performance matrix of all strategies on all problems at t_high = 10 s; keep per
+  problem only the best (lowest) value, and only within [c_min, c_max] = [500, 30000] loops (too easy problems steer
+  to strategies that do not help the hard ones, too hard ones cannot guide the low-limit search); a strategy is
+  eligible if it is best on at least V = 8 problems (generality), at most N = 20 (size), ordered by that count; its
+  problem set D_i = the problems where it is best.
+* **Growing strategies** (2.2-2.4): ParamILS (iterated local search: perturb, then first-improvement) on the best
+  eligible strategy with its D_i at t_low = 1 s (400 s per run); each new strategy evaluated on all problems at
+  t_high, the matrices and the eligible list updated; next eligible strategy (not one already run with the same D_i);
+  stop when none is left. The idea: make solvable problems much easier, and related harder ones become solvable.
+* **Result** (3): 6 runs, 113 ParamILS runs in 30 h on 12 cores: 659 of 1000 at 10 s (597 at start with 60 s); a
+  greedy cover needs 22 strategies (22 x 10 s = 220 s, less than 6 x 60 s); on 400 unseen problems at 160 s, 16 new
+  strategies 253 against 6 old 233. Random search from scratch on the 403 unsolved (section 4): 15 solved in 7 h,
+  first after about 1000 tries.
+
+**Mapping to exp85.** Stage 1 here is BliStr's start-set step with the 121 orderings as the predefined strategies
+(50 problems, abstract 5 s, work = considered pairs). exp/prec_portfolio.py now also prints BliStr's selection
+(`--cmin 500 --cmax <cap> --versatility 2 --n 20`: V scaled to 50 goals from BliStr's 8 of about 600 solved; ties count
+for every tied order) and writes REPLAY.blistr (order, best-on count, its D_i, its list). Not yet done: an exact
+minimal cover (greedy only), and BliStr's growing step: local search over precedences (swaps of adjacent symbols,
+then other twee options) on each eligible order's D_i at the low limit, evaluating new orders on all goals. The
+space is 9! = 362,880 orders, so after stage 2 that step is the way to new orders beyond the 120 sampled.
