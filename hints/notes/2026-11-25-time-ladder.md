@@ -44,3 +44,20 @@ below first, sharing the 20-process budget (each starts a run only while fewer t
   outcome, and the climb (20 sketch runs of 5 s, 3 s fills) is cheap next to a 640 s final. So the 640 s rung now climbs:
   abs/clq87b.sh (exp/prod/side/clq87b.sh; abs/clq87.sh with `--runs 20`), CPUS=23, climb.py 4159470 (bash 4159464)
   from 15:22:17; log line 2109, climb.tsv row 2093 on (no final finished before). The 160 s rung (CLS71) keeps its A/B.
+
+## The climbers' hints in the global hint store (15:29-15:35; the user)
+
+* The user: "I hope you are keeping the hints from the strengthened-theory runs in your global hint db?" Checked:
+  real proofs' hints all go into loops/UL/hints; production's sketch members (`--climb-hints`) read CLS71's sketches and
+  fill lemmas (rescanned every 10 minutes); each climber reloads only its own dir. Gaps: (1) loops/CLQ83 was not in
+  production's --climb-hints (it made no sketches of its own until the 640 s rung started climbing at 15:22); (2) the
+  climbers did not read each other's hints; (3) hintdata had no records of the climbers after 23 Nov (CLS71, CLQ83,
+  CLHL3/4, CLA67/B67, CLK69, K70F/R).
+* (2) climb.py `--share DIRS`: also load the sketches/ and fillhints/ of other climber dirs as hints (their true lemmas
+  are not taken as axioms). The 640 s rung restarted with `--share loops/CLS71` (abs/clq87c.sh, exp/prod/side/clq87c.sh;
+  climb.py 4160478, bash 4160472, from 15:29:21; log line 2112, climb.tsv row 2186 on): 45,123 sketch hints loaded
+  instead of 35,824 (CLQ83's own were nearly a subset of CLS71's). CLS71 gets --share loops/CLQ83 at its next restart.
+* (1) production ul85 (abs/ul85.sh, exp/prod/ul85.sh): ul84 with loops/CLQ83 in --climb-hints; loop.py 4160713 (bash
+  4160707) from 15:30:10, J=4, log loops/UL85.log. Its climb hints rose from 121,325 steps and 6,036 fill lemmas to
+  122,371 and 6,078 at the first rescan.
+* (3) `exp/hintdata_build.py --climbs` (now skipping exp85's copies P85C/P85D), from 15:35.

@@ -792,6 +792,8 @@ Next:
    (15:08) The user: harder goals need more time. Unsolved goals had a median 0.34 CPU h in all, the longest run 5-17 min for most;
    production's 80-320 s levels got 17 runs since yesterday. Rungs: CLS71 160 s on 1,465 goals, CLQ83 640 s on 561 (abs/clq87.sh).
    (15:22) The user: climbers make hints on demand from the strengthened theory; the 640 s rung now climbs (abs/clq87b.sh).
+   (15:30) The user: keep those hints in the global store. climb.py --share (the 640 s rung loads CLS71's hints), production ul85
+   reads loops/CLQ83 too, and hintdata --climbs packs the climbers since 23 Nov.
 00000000000000000000000000000000000000000000000000000000000000000000000000. **exp86 (long finals on the 576 local heads, [notes/2026-11-25-long-finals-heads.md](notes/2026-11-25-long-finals-heads.md)).**
    (13:34) Production dry since 10:00, both climbers idle; 576 unsolved local heads only ever had CLQ83's 40 s final. CLQ83
    restarted (abs/clq86.sh) with the 160 abstract s final and --reclimb sets/exp86.heads, -j 10; keep at 1 per CPU h after 8 CPU h.
