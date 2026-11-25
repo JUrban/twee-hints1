@@ -167,3 +167,10 @@ space is 9! = 362,880 orders, so after stage 2 that step is the way to new order
 * Question: on goals that need 5-20 abstract s, do orders other than the default prove goals the default misses
   within 40 abstract s, or prove them much faster (the user's dominance)? If so, the greedy and cost portfolios
   pick the complementary ones for stage 2 (a bigger random set); if not, precedences are not worth a portfolio slot.
+* Pre-pass (10:23:57-10:37:15): 98 of 120 proved by order 0 or 60 within 80,000 pairs; the lesser work under 10,000
+  for 40, in [10000, 40000] for 45, over 40,000 for 13; dev set 30 (loops/P85C/dev40.txt). Between the two orders
+  alone: both 88, only the default 3, only order 60 7, neither 22; on the 88 the work ratio 60/default median 1.00,
+  under 0.5 on 7, over 2 on 8. So on harder goals single orders already differ. Replay from 10:37:15, 3,630 runs.
+* The stopped hard replay (replay.v2.tsv, 10,000-pair cap; 15 goals with all 121 orders): 10 proved by none; goal 420
+  (default 10,407 pairs, over the cap) proved by 86 orders, 32 of them in one 2000-pair step; goal 522 (default
+  fails) by 39 orders; goal 340 by 107 orders in 2 to 5 steps.
