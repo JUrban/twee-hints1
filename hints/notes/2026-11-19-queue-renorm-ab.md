@@ -81,3 +81,20 @@ windows of 60,000 results:
   (first runs after the first hour, easier goals) does not carry over. My plan to drop the B arm at the next
   restart is withdrawn; the candidate instead is B for all deep runs (one arm then), with this table as the
   baseline to watch.
+
+### Correction (25 Nov 22:05 UTC): the table above did not separate deep runs
+
+results.tsv's `t=` column is the time since the loop started, not the run's budget, so the filter "budget above 5 s"
+kept nearly every run. By the level column instead (rows 183944-363943; deep includes variants whose budget may be 5 s,
+which get no B args):
+
+| runs | arm | runs | proofs | CPU h | per CPU h | proofs a run | CPU s a run |
+|---|---|---:|---:|---:|---:|---:|---:|
+| L0 (first runs, the same flags in both arms) | A | 12393 | 310 | 35.5 | 8.72 | 2.50% | 10.3 |
+| L0 (first runs, the same flags in both arms) | B | 12546 | 338 | 35.8 | 9.43 | 2.69% | 10.3 |
+| deep (every other level and variant) | A | 77208 | 287 | 283.0 | 1.01 | 0.37% | 13.2 |
+| deep (every other level and variant) | B | 77853 | 288 | 255.8 | 1.13 | 0.37% | 11.8 |
+
+* Deep runs: B +11% proofs per CPU h. But on the first runs, where both arms run the same flags, B's
+  goals give +8% too: the two halves of the goals differ by chance about as much. Adjusted, the arms
+  are about even; the evidence for B is weak. The A/B goes on as it is; neither dropped nor extended.

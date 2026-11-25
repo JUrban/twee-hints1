@@ -807,9 +807,11 @@ Next:
    cls71j.sh from 22:03 (`--listen 300 --listen-dist 100000`: all unsolved plain siblings), climb.py 60285; CLQ83 follows.**
 000000000000000000000000000000000000000000000000000000000000000000000000000000. **exp26 reading (25 Nov 21:21, [notes/2026-11-19-queue-renorm-ab.md](notes/2026-11-19-queue-renorm-ab.md)):** production's
    A/B on half the goals' deep runs (`--cp-renormalise-threshold 1000`, no queue renormalisation) over its last
-   180,000 results: B 648 proofs in 291.4 CPU h (2.22 per CPU h) against A 615 in 317.8 (1.93), +15%; ahead in each of
-   three 60,000-row windows; proofs a run 0.72% against 0.69%. exp53's rejection from zero does not carry over to the
-   hard goals. Withdrawn: dropping B at the next restart. Candidate: B for all deep runs.
+   180,000 results. **Corrected 22:05:** my first table filtered on results.tsv's `t=` column, which is the time since
+   the loop started, not the budget, so it kept nearly every run. By level: deep runs B 288 proofs in 255.8 CPU h (1.13
+   per CPU h) against A 287 in 283.0 (1.01), +11%, the same 0.37% a run, 11% less CPU a run; but on the first runs (L0),
+   the same flags in both arms, B's goals give +8% too. About even; the evidence for B is weak. The A/B goes on as it
+   is (neither dropped at the next restart nor extended).
 00000000000000000000000000000000000000000000000000000000000000000000000000000. **exp89 (unsolved siblings as extra goals of a long run, [notes/2026-11-25-time-ladder.md](notes/2026-11-25-time-ladder.md), "exp89"):**
    the user: Prover9 searches with several goals and reports each proved one; would that spare long runs? twee --multi-goal
    (e21, 13 Nov: lost as a replacement of separate runs, REPORT 2p). exp/multigoal89.py: 23 exp85 captures at 320,000 pairs

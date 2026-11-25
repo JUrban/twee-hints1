@@ -104,8 +104,8 @@ proofs in 63 minutes.
   * `--head-class`: a head (the goal right after a proved sibling) goes to L1 in its own class;
   * the learned scheduler sched/m4 and `--far-retry`;
   * `--given-scan loops/GFAIL`: failed runs' given rules are checked against the unsolved goals;
-  * an A/B on half the goals' deep runs, `--cp-renormalise-threshold 1000` (exp26); 25 Nov 21:21 reading over the
-    last 180,000 results: B +15% proofs per CPU h (2.22 against 1.93), the same proofs a run; candidate for all deep runs.
+  * an A/B on half the goals' deep runs, `--cp-renormalise-threshold 1000` (exp26); 25 Nov 22:05 reading over the
+    last 180,000 results: deep runs B +11% proofs per CPU h, but on first runs (same flags) B's goals +8% too: about even.
 
 **2. Side loops.** Each one merges its proofs into loops/UL.
 * **Proof reruns:** exp/proofq.py --follow, PID 1177545, 3 threads. It reruns proved runs with the proof printed
