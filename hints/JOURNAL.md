@@ -788,6 +788,8 @@ Next:
    whose CLQ83 40 s final failed (sets/exp84.targets, seed 84), CLQ83's final rerun in five arms: P84O0 default
    (control), P84O1-O4 four seeded precedences (`--p9-orders 5 --p9-order-offset k-1`), -j 1 each, from 04:19.
    Adopt an ordering stage in the quick finals if O1-O4 prove at least 5 targets O0 does not.
+   **Result (05:29): not adopted. Each arm 1 of 100, the same target (nslm_to_aa1 1093, from the grown context); the four orderings add
+   0 in 4.58 CPU h. The orderings do change the search (five different proofs of 1093). 1093 imported into UL.**
 00000000000000000000000000000000000000000000000000000000000000000000000. **exp83 (a quick climber final ahead of the climber, [notes/2026-11-24-quick-finals.md](notes/2026-11-24-quick-finals.md)):**
    abs/clq83.sh, loops/CLQ83 (15:33): climb.py --live with no climbs (--runs 0) and the final capped at 40 CPU s, -j 3, on the
    same stalled queue and order as CLS71. Half of CLS71's proving finals since 08:59 took under 40 s, a failed one a median

@@ -43,3 +43,28 @@ Written 25 Nov 2026, 04:20 UTC.
 * **Decision:** if O1-O4 together prove at least 5 targets O0 does not (1 or more per CPU h of the 4.4 CPU h they
   spend, against CLS71's 1.0-1.2 now), add an ordering stage to the quick finals: a target whose default final fails
   gets the next precedence on its next turn, and test more orderings the same way. Else not adopted.
+
+## Result (25 Nov 05:29; exp/exp84_read.py)
+
+| arm | precedence | finished | proved | CPU h | per CPU h |
+|---|---|---:|---:|---:|---:|
+| P84O0 | default | 100 | 1 | 1.14 | 0.88 |
+| P84O1 | ordering 1 | 100 | 1 | 1.14 | 0.87 |
+| P84O2 | ordering 2 | 100 | 1 | 1.15 | 0.87 |
+| P84O3 | ordering 3 | 100 | 1 | 1.15 | 0.87 |
+| P84O4 | ordering 4 | 100 | 1 | 1.14 | 0.87 |
+
+* orderings O1-O4: union 1, not proved by O0 0 (0.00 per CPU h of their 4.58), O0 only 0.
+* **Not adopted.** All five arms proved the same one target, nslm_to_aa1 1093, and nothing else: the context had grown
+  since CLQ83's failure (its proof uses kNN lemmas and the fill lemmas true_19 and true_49), not the precedence. The
+  four orderings add 0 targets in 4.58 CPU h, against the bar of 5.
+* The precedences do change the search: the five proofs of 1093 differ (74, 76, 89, 143 and 157 lines; 10.6-17.4 CPU s
+  for the final), and every failed target used its 40 s in every arm. So on these targets a different completion is
+  no closer to a proof than the default's: they fail for want of hints or lemmas, not because of how the default
+  orients the equations.
+* With exp63 (0 of 120 at 20 s on production's frontier) and the 15 Nov stalled portfolio, a random precedence has
+  now added nothing in three tests on stalled goals; it helped only on 14 Nov, as a second run per goal, at twice
+  the time. Not tried: precedences chosen by a rule rather than at random (for example the defined operations
+  a, k, l, r, t above or below m, ld, rd), and KBO weights (`--kbo-weight0`).
+* nslm_to_aa1 1093 imported into production at 05:41 (P84O0's hints file into loops/UL/hints, then a solved.tsv row,
+  as a live climber's proof goes in).
