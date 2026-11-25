@@ -775,6 +775,12 @@ loops), production to 383, smoke with KDC (RST, started later, comes next time):
 (25 Nov 03:00-03:13, the user asked) `--realproofs --family=production --family=climbers --family=plainlive --family=cond`:
 production 1,725 (5 parts; CRP75 and REVF1/REVF2 now in this family, 63ca221), climbers 9,120 (with CLQ83), plainlive 265,
 cond 3,538 (final: all its sweeps have ended); 892,927 proofs in 38 families, realproofs/ 241 MB, every part under 10 MB.
+(25 Nov 15:35-18:52) `--climbs` (CLIMB_SKIP: SMK, .old, P85): the climbers' records since 23 Nov (CLS71, CLQ83, CLHL2-4,
+CLA67/B67, CC67*, CLK69, K70F/R, F76C/S, P84O0-4), climbs/ 840 MB. Ten of CLS71's realized rule logs were 11-50 MB:
+exp/hintdata_build.py now splits a rule-log tarball over 9.9 MB into numbered parts (tarxz_split: BASE_01.tar.xz, ...),
+the ten were re-tarred so, and the 116 unpushed commits were rebuilt as 149 (git reset --mixed origin/main, commits of at
+most 10 MB per loop and log kind): no blob over 9.9 MB in origin/main..HEAD. The one file over 10 MB in the tree is
+realproofs/THM_proofs.tar.gz (11.7 MB, from the first real-proofs commit, already pushed).
 
 **Totals (23 Nov 12:56, trust.py loops/TRUSTNOW/t1256): 48,512 of 51,784 solved (holdout 5,410 of 5,880), 3,272 unsolved, 0 untrusted.** Since 09:33 (10): loops/CI3 5 (the queue's last sweeps and the ranked PLL1), loops/CI2 1 (the live loop's c5W), production 4.
 
