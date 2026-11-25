@@ -623,3 +623,18 @@ at 60 s had failed on 489 and 515 (REVF1, 23 Nov); the long lemma lists were eno
 **A/B reading at 24 Nov 21:25** (exp/climbab.py --from 1047): climb: 111 of 480, 62.67 CPU h, 1.77 per CPU h; final-only: 94 of 472, 50.21 CPU h, 1.87 per CPU h. The climbing arm now proves more targets
 (64 each at 15:18; it trailed before); per CPU h the two are level. Since 15:33 CLQ83's 40 s finals take the
 quick targets of both arms alike, so CLS71's later targets are the slower ones, where the climbs seem to help.
+
+## A/B reading at 25 Nov 03:48 (exp/climbab.py --from 1047)
+
+| targets | arm | finished | proved | CPU h | per CPU h |
+|---|---|---:|---:|---:|---:|
+| new | climb | 572 | 114 | 79.07 | 1.44 |
+| new | final-only | 564 | 100 | 63.77 | 1.57 |
+| re-climb | climb | 120 | 18 | 3.27 | 5.50 |
+| re-climb | final-only | 108 | 17 | 18.72 | 0.91 |
+
+The new targets have nearly run out: 1136 new targets in all, against 1,129 at 00:18 (568 + 561), so 7 more in 3.5
+hours. Since then CLS71 finishes mostly re-climbs: 228 targets climbed again in this instance, after new proofs made
+them eligible again. On new targets, final-only still leads per CPU h and the climbing arm on count. The re-climb rows'
+CPU differ by a factor of 5.7 at nearly equal counts; that asymmetry is not yet explained (read climb.tsv for both
+arms' re-climbs before drawing anything from them).
