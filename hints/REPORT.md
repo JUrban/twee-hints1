@@ -62,7 +62,8 @@ added) is [notes/production-history.md](notes/production-history.md), generated 
 Everything below writes proofs into **loops/UL**, production's solved list. The totals above count only what
 exp/trust.py trusts.
 
-**1. The main loop: abs/ul86.sh.** loop.py, PID 64717, since 25 Nov 22:18: ul85 plus **`--listen 300`** with **twee-e61m**
+**1. The main loop: abs/ul87.sh.** loop.py, PID 71405, since 25 Nov 22:39 (ul86 restarted for the listen premise check:
+a listened proof may use only its own problem's axioms and lemmas; ul86, loop.py 64717, ran 22:18-22:38): ul85 plus **`--listen 300`** with **twee-e61m**
 (`--twee /project/bin/twee-pg61l`): each twee run (not Prover9, unfold or resumed runs) also listens to its original's
 unsolved plain goals; one proved there is rerun as a real goal with its proof printed and recorded as production's proof
 (results level `listen`); the search is the same as without, +4.6% CPU for 120 listened goals (exp90,
@@ -130,7 +131,7 @@ proofs in 63 minutes.
     HLW1's problems (cond/HLW1: 20 proofs in 936 runs, 0.90 per CPU h).
   * plainlive5 had dropped L (5 s, 100+30 siblings, 400 kNN ranked by lr2): 4 proofs in 18 h of run time since 12:38
     ([notes/2026-11-23-tail-allocation.md](notes/2026-11-23-tail-allocation.md)).
-* **The time ladder's 640 s rung, CLQ83 (exp87):** abs/clq87e.sh with CPUS=23, climb.py 66157 since 25 Nov 22:26 (clq87c.sh plus
+* **The time ladder's 640 s rung, CLQ83 (exp87):** abs/clq87e.sh with CPUS=23, climb.py 71407 since 25 Nov 22:39 (the listen premise check; 66157 from 22:26) (clq87c.sh plus
   `--listen 300 --listen-dist 100000` with twee-pg61l (e61m), as CLS71; clq87d.sh (--listen 8) ran 20:51-22:26, climb.py 46658;
   clq87c.sh, climb.py 4160478, ran 15:29-20:51) (`--share loops/CLS71`:
   CLS71's sketch and fill hints too): a full climb (20 sketch
@@ -164,7 +165,7 @@ proofs in 63 minutes.
 4.7 CPU h (clhl3.sh before it, 18:44-21:07: 0 in 4.1). Its targets were the heads exp67's arms and controls climb at the
 same time. Production also keeps the old climbs' hints as members sk@0 and sk@1:0.
 **The climber: abs/cls71j.sh (exp71; the 160 s rung of exp87),** climb.py --live into loops/UL, record loops/CLS71, **climb.py
-60285 since 25 Nov 22:03** (cls71i.sh plus `--listen 300 --listen-dist 100000`: each final listens to all its original's
+71408 since 25 Nov 22:39** (restarted for the listen premise check; climb.py 60285 from 22:03) (cls71i.sh plus `--listen 300 --listen-dist 100000`: each final listens to all its original's
 unsolved plain goals, +5% CPU for 120, exp90; cls71i.sh, climb.py 46097, ran 20:49-22:03) (listen fixed: climb.py 43358 from 20:34 listened to 6 goals production had solved and overwrote
 their hints files, restored; cls71h.sh plus **`--listen 8`** with **twee-e61m** from 21:41:49 (twee-e61l before, whose
 listened goals changed the search, exp90) (`--twee /project/bin/twee-pg61l`): each final

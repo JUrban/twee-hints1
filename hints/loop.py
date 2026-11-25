@@ -129,6 +129,23 @@ class Loop:
             self.sig[o] = hintlib.problem_signature(name)
         return self.sig[o]
 
+    def listen_bad_premises(self, x, out):
+        """(--listen) the premises of a listened goal X's proof (USEDAXIOMS of OUT) that X may not use: anything but
+        the axioms of X's own problem, lemma_*/true_* lemmas (not a bare lemma_knn_N) and srclem_/skax_ lemmas of a
+        named goal. A conditional target's hypotheses (axioms named after its conjecture, e.g. 'goals') are ground facts
+        about its Skolem constants and can make new equations provable, so a proof using them is not X's; trust.py
+        would take such a name as the problem's own."""
+        ua = next((ln.split()[1:] for ln in out.splitlines() if ln.startswith('USEDAXIOMS')), None)
+        if ua is None:
+            return ['(no USEDAXIOMS)']
+        try:
+            txt = open(os.path.join(PROB, x + '.p')).read()
+        except OSError:
+            return ['(no problem file)']
+        ax = set(re.findall(r'^(?:fof|cnf)\(\s*([^,\s]+)\s*,\s*axiom\s*,', txt, re.M))
+        return [u for u in ua if not (u in ax or (u.startswith(('lemma_', 'true_')) and not re.fullmatch(r'lemma_knn_\d+', u))
+                                      or re.match(r'(?:srclem|skax)_\d+_.+__goal_\d+$', u))]
+
     def listen_credit(self, name, path, cmd, env_, T, out):
         """(25 Nov, climb.py --listen) each listened goal this run proved (a 'SOLVEDGOAL listen_<goal>' line), rerun as a
         real goal: the same problem with that clause renamed lgoal_<goal> (names do not change the search) and the same
@@ -163,6 +180,10 @@ class Loop:
             i, j = o2.find('GIVEN-BEGIN'), o2.find('GIVEN-END')
             o2 = o2[:i] + o2[j:] if 0 <= i < j else o2
             ok2 = 'HINTS-END' in o2 and f'(lgoal_{x})' in o2
+            bad = self.listen_bad_premises(x, o2) if ok2 else []
+            if bad:   # (e.g. a conditional target's hypotheses, axioms about its own Skolem constants: not X's)
+                print(f'  listen: {name} proved {x}; its proof uses {" ".join(bad[:4])}: not credited', flush=True)
+                continue
             print(f'  listen: {name} proved {x}; rerun {"printed its proof" if ok2 else "FAILED"} in {time.time() - t0:.0f}s',
                   flush=True)
             if ok2:

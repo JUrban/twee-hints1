@@ -807,6 +807,9 @@ Next:
    cls71j.sh from 22:03 (`--listen 300 --listen-dist 100000`: all unsolved plain siblings), climb.py 60285; CLQ83 follows.**
    **(22:18) production as ul86 (abs/ul86.sh): ul85 plus `--listen 300` with twee-pg61l (e61m); loop.py 64717. Its first
    runs carry 6-271 listened goals. Tested in loops/LSTP90 (notes "Production listening").**
+   **(22:38) listen premise check: a conditional target's hypotheses (`goals`) could have served a listened proof and
+   been trusted; none of the 12 listened proofs did. listen_bad_premises in listen_credit; production ul87 (71405),
+   CLS71 71408, CLQ83 71407 restarted 22:39.**
 000000000000000000000000000000000000000000000000000000000000000000000000000000. **exp26 reading (25 Nov 21:21, [notes/2026-11-19-queue-renorm-ab.md](notes/2026-11-19-queue-renorm-ab.md)):** production's
    A/B on half the goals' deep runs (`--cp-renormalise-threshold 1000`, no queue renormalisation) over its last
    180,000 results. **Corrected 22:05:** my first table filtered on results.tsv's `t=` column, which is the time since

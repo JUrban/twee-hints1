@@ -1,6 +1,6 @@
 # Production history
 
-Generated 25 Nov 2026 22:27 by [exp/prodhistory.py](../exp/prodhistory.py) from the scripts abs/ul3.sh … ul86.sh (copies in [exp/prod/](../exp/prod/)) and their logs; rerun it after every production restart. What runs now, with the side loops, is in REPORT.md "Production now"; the totals over time are REPORT's summary table.
+Generated 25 Nov 2026 22:39 by [exp/prodhistory.py](../exp/prodhistory.py) from the scripts abs/ul3.sh … ul87.sh (copies in [exp/prod/](../exp/prod/)) and their logs; rerun it after every production restart. What runs now, with the side loops, is in REPORT.md "Production now"; the totals over time are REPORT's summary table.
 
 * **Written** is the newest dated entry of the script's header: when the version was written or first started.
 * **Last run** is the span of loops/ULNN.log (first and last write). A script that ran twice keeps only its second log (ul74: written 20 Nov 04:14, its log is the run of 21 Nov 16:50 to 22 Nov 07:12); some versions ran for minutes before a fix.
@@ -93,7 +93,8 @@ Generated 25 Nov 2026 22:27 by [exp/prodhistory.py](../exp/prodhistory.py) from 
 | [ul83](../exp/prod/ul83.sh) | 24 Nov | 24 Nov 07:34 – 24 Nov 11:22 | 3.8 | J= (default 17); ≥1 in flight | twee-pg61 + `--pg-threshold 0.25 --ground-joining-branch-limit 100` | 98 | (same options: a restart, or loop.py's code or the launch arguments changed) |
 | [ul84](../exp/prod/ul84.sh) | 24 Nov | 24 Nov 11:23 – 25 Nov 15:30 | 28.1 | J= (default 17); ≥3 in flight | twee-pg61 + `--pg-threshold 0.25 --ground-joining-branch-limit 100` | 274 | (same options: a restart, or loop.py's code or the launch arguments changed) |
 | [ul85](../exp/prod/ul85.sh) | 25 Nov 15:30 | 25 Nov 15:30 – 25 Nov 22:17 | 6.8 | J= (default 17); ≥3 in flight | twee-pg61 + `--pg-threshold 0.25 --ground-joining-branch-limit 100` | 16 | `--climb-hints` `/project/hintwork/loops/CLH,/project/hintwork/loops/CLHL,/project/hintwork/loops/CLU,/project/hintwork/loops/CLHL2,/project/hintwork/loops/FUD2p,/project/hintwork/loops/FUDs,/project/hintwork/loops/CLHL3,/project/hintwork/loops/CLHL4,/project/hintwork/loops/CLA67,/project/hintwork/loops/CLB67,/project/hintwork/loops/CLK69,/project/hintwork/loops/K70F,/project/hintwork/loops/K70R,/project/hintwork/loops/CLS71` → `/project/hintwork/loops/CLH,/project/hintwork/loops/CLHL,/project/hintwork/loops/CLU,/project/hintwork/loops/CLHL2,/project/hintwork/loops/FUD2p,/project/hintwork/loops/FUDs,/project/hintwork/loops/CLHL3,/project/hintwork/loops/CLHL4,/project/hintwork/loops/CLA67,/project/hintwork/loops/CLB67,/project/hintwork/loops/CLK69,/project/hintwork/loops/K70F,/project/hintwork/loops/K70R,/project/hintwork/loops/CLS71,/project/hintwork/loops/CLQ83` |
-| [ul86](../exp/prod/ul86.sh) | 25 Nov 22:18 | 25 Nov 22:18 – 25 Nov 22:25 | 0.1 | 4 (the running process) | twee-pg61l + `--pg-threshold 0.25 --ground-joining-branch-limit 100` | 0 | `--twee` `/project/bin/twee-pg61` → `/project/bin/twee-pg61l`; +`--listen` `${LISTEN:-300}` |
+| [ul86](../exp/prod/ul86.sh) | 25 Nov 22:18 | 25 Nov 22:18 – 25 Nov 22:38 | 0.3 | J= (default 17); ≥3 in flight | twee-pg61l + `--pg-threshold 0.25 --ground-joining-branch-limit 100` | 0 | `--twee` `/project/bin/twee-pg61` → `/project/bin/twee-pg61l`; +`--listen` `${LISTEN:-300}` |
+| [ul87](../exp/prod/ul87.sh) | 25 Nov 22:39 | 25 Nov 22:39 – 25 Nov 22:39 | 0.0 | 4 (the running process) | twee-pg61l + `--pg-threshold 0.25 --ground-joining-branch-limit 100` |  | (same options: a restart, or loop.py's code or the launch arguments changed) |
 
 ## Why each version (the header's newest entry, verbatim)
 
@@ -181,6 +182,7 @@ Generated 25 Nov 2026 22:27 by [exp/prodhistory.py](../exp/prodhistory.py) from 
 * **ul84** (24 Nov): (24 Nov) ul84: ul83 with J=4 instead of 2. Since the climber's 160 s finals (06:05) and its 08:59 restart its proofs come in chains (62 from 08:59 to 11:18), and production's cascade follows each with fresh L0 runs on the goals after it: ul83's L0 made 95 proofs in 4.06 CPU h (1,555 runs; 661 of 703 runs in its third hour were L0), so its 2 workers were busy with L0 alone. 2 more workers run those follow-ups sooner (notes/2026-11-23-tail-allocation.md, "ul84"). Launch: J=4 bash abs/ul84.sh.
 * **ul85** (25 Nov 15:30): (25 Nov 15:30) ul85: ul84 with loops/CLQ83 in --climb-hints, so production's sketch members also read the 640 s rung's sketch and fill hints (the user: keep the strengthened-theory hints in the global hint db). Launch: J=4 bash abs/ul85.sh.
 * **ul86** (25 Nov 22:18): (25 Nov 22:18) ul86: ul85 with --listen 300 and --twee /project/bin/twee-pg61l (twee-e61m): each twee run (not Prover9, unfold or resumed runs) also listens to its original's unsolved plain goals (up to 300); one proved there is rerun as a real goal with its proof printed and recorded as production's proof (user, 25 Nov: Prover9 searches with several goals). With e61m the search is the same as without; 120 listened goals cost +4.6% CPU in a 160 s run (exp90, notes/2026-11-25-time-ladder.md, "Production listening"). Launch: J=4 bash abs/ul86.sh.
+* **ul87** (25 Nov 22:39): (25 Nov 22:39) ul87: ul86 restarted for loop.py's listen premise check (listen_bad_premises): a listened goal's proof is credited only if it uses its own problem's axioms and lemmas, never a conditional target's hypotheses ('goals'), which are ground facts about the target's Skolem constants. Same settings. Launch: J=4 bash abs/ul87.sh.
 
 ## Side loops (their scripts, oldest first; copies in [exp/prod/side/](../exp/prod/side/))
 
@@ -235,7 +237,7 @@ Each line is the script's first header entry. Which ones run now is in REPORT.md
 * [p9c4.sh](../exp/prod/side/p9c4.sh): (18 Nov 17:52) p9c with 4 workers instead of 2 (log P9C4.log). By the portfolio's ratio rule it is the best deep member per CPU: 1.98 new proofs per CPU hour on the walls twee's chain failed (exp16), 1.44 live from 16:46 to 17:49 (3 proofs in 126 runs), against 1.16 for production's 80 s chain level. Its 225 queued stalled goals would take 2 workers about 2 hours. Restarting keeps loops/P9C/result …
 
 
-## The current version's full option list (ul86)
+## The current version's full option list (ul87)
 
 ```
 export TWEE_PG_ARGS="--pg-threshold 0.25 --ground-joining-branch-limit 100"

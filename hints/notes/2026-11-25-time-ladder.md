@@ -277,3 +277,20 @@ siblings as extra goals, credited by SOLVEDGOAL and a proof rerun), as a measure
   420's run, started earlier, listened to goals solved meanwhile (hence the skip).
 * **CLQ83** as abs/clq87e.sh (`--listen 300 --listen-dist 100000`) from 22:26:50, climb.py 66157, log line 2180,
   climb.tsv row 3004 on (4 finals, 206 to 1,576 s in, were cut).
+
+### The listen premise check (25 Nov 22:38)
+
+* **The hole:** a conditional target's hypotheses are axioms of its run (named after its conjecture, `goals`; e.g.
+  production's proof of im2_24_to_25__goal_520 uses `goals`). They are ground facts about the target's Skolem
+  constants and can make new equations provable, so a listened goal's proof must not use them. climb.py's
+  listen_record kept only the lemma_/true_ names of USEDAXIOMS, and trust.py resolves `goals` as the problem's own
+  conjecture, so such a proof would have been trusted.
+* **Checked:** all 12 listened proofs so far (CLS71 and CLQ83 proofs/*.listen, 20:39-22:26) use only lemma_, true_ and
+  `sos` premises: none affected. Production had credited none.
+* **Fix** (loop.py listen_bad_premises, in listen_credit, so climb.py and loop.py both): a credit needs every premise to
+  be an axiom of the listened goal's own problem, a lemma_/true_ lemma (not a bare lemma_knn_N) or a srclem_/skax_
+  lemma of a named goal. Tested on the 12 proofs (all pass) and on crafted premise lists (`goals`, lemma_knn_3,
+  assume_goal_7, none: refused).
+* **Restarts** (22:38:56 stop, 22:39:15 start): production as abs/ul87.sh (ul86's settings; ul86's log would be
+  truncated), loop.py 71405; CLS71 (cls71j.sh) climb.py 71408, log line 3349, climb.tsv row 35490 on; CLQ83 (clq87e.sh)
+  climb.py 71407, log line 2184, climb.tsv row 3071 on.
