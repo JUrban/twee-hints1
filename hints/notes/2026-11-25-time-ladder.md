@@ -307,3 +307,20 @@ siblings as extra goals, credited by SOLVEDGOAL and a proof rerun), as a measure
   run writes; trust.py scans it as dir DIR/listen, whose hints link to ../hints (its byte comparison then matches).
   Test loops/LSTP91 (as LSTP90): 4 credits, each in listen/r1/out with RESULT Theorem and USEDAXIOMS, hints the same
   bytes through the link.
+
+## The ladder at 23:33: CLS71 reaches goals it already finaled
+
+* The waiter fired: CLS71 started a final on nslm_to_aa1__goal_846, which had a CLS71 final before. Of cls71all.re's
+  1,891 unsolved goals, 76 have no CLS71 final, 1,323 one and 492 two.
+* **The 640 s rung never reached its list:** a live climber takes production's newly stalled goals before its
+  --reclimb list, and CLQ83's 58 finals since row 2093 all went to such goals (11 proofs); none of ladder640.re's 536
+  unsolved goals has had a 640 s final. The two rungs did not overlap (none of the 58 had a 160 s final since the
+  ladder start).
+* **Real proofs since 15:08** (each climber's round-1 solved rows whose production hints file is dated after 15:08,
+  less CLS71's 6 recorded by the 20:34 listen bug): CLS71 27 in 63.5 CPU h (0.43 per CPU h; 10 of them listened
+  goals), CLQ83 12 in 36.2 CPU h (0.33).
+* **Second finals still pay** (CLS71's whole history, 20 s and 160 s finals mixed): first finals 247 of 2,637 proved
+  (9.4%, 1.21 per CPU h), second finals 61 of 599 (10.2%, 0.82 per CPU h).
+* **Decision:** no change. CLS71 goes on with second 160 s finals (a changed context each time, and every final
+  listens to its original's unsolved goals); CLQ83 goes on with the new stalled goals, then its list. The ladder's
+  next step (a goal's failures move it to a longer rung) needs a climber that ranks its list above new targets.
