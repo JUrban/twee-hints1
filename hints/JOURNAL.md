@@ -810,6 +810,8 @@ Next:
    live dir until its first refresh) and overwrote their hints files in loops/UL/hints; restored from LST89's 20:32
    copies. Fix: live_solved() rereads the live dir's solved.tsv; never replace a hints file. CLS71 restarted 20:49
    (46097), CLQ83 as clq87d.sh 20:51 (46658); since, 22 listened goals, all unsolved. Notes "The listen bug".**
+   **(21:17) first listened proof since the fix: nslm_to_aa1__goal_1256 in goal 1250's final; trusted (t2118: 49,828
+   solved, 0 untrusted).**
 0000000000000000000000000000000000000000000000000000000000000000000000000000. **exp88 (do the hints slow the long runs down?, [notes/2026-11-25-time-ladder.md](notes/2026-11-25-time-ladder.md), "exp88"):**
    the user asked whether twee needs a speed-up for long runs and whether many hints slow them. GC: 91% productive at
    320,000 pairs, -A64m/-A256m slower. Profile at 160,000 pairs: making pairs 59%, rewriting 49%, renormalisation 23%,

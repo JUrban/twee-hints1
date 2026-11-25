@@ -221,3 +221,7 @@ siblings as extra goals, credited by SOLVEDGOAL and a proof rerun), as a measure
   finals started since, all 22 listened goals were unsolved in production.
 * **For counting:** listened proofs are climb.tsv rows tagged listen from row 34350 (CLS71) and row 2678 (CLQ83); the
   6 earlier rows are not new proofs.
+* **First listened proof since the fix:** nslm_to_aa1__goal_1256, listened in the 160 s final of nslm_to_aa1__goal_1250
+  (CLS71); its proof rerun took 364 s; hints file loops/UL/hints/nslm_to_aa1__goal_1256 (243 lines) at 21:17:32, one
+  loops/UL solved.tsv row, a used.tsv row naming its lemma_ and true_ premises. trust.py (loops/TRUSTNOW/t2118): trusted;
+  49,828 solved, 0 untrusted.
