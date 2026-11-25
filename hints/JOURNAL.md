@@ -856,6 +856,8 @@ Next:
    targets; no re-climb reached yet); HLW1 0.90. Open: the climb against the long final alone (exp76 +1 −0, exp67 nil).
    (08:59) CLS71 restarted (abs/cls71d.sh): --final-only-ab (half the targets by crc32 get only the 160 s final), twee
    --conditional-encoding fresh, -j 8.
+   **(25 Nov 03:48) A/B: new targets climb 114/572 (1.44 per CPU h), final-only 100/564 (1.57); the never-climbed targets ran out about
+   00:18, since then re-climbs (sets/cls71re): climb 18/121 (0.92), final-only 17/109 (1.20). climbab.py's re-climb CPU fixed.**
    **(17:03) aK2_eq_aK3_s 489, 494, 515 (untrusted since 23 Nov, 21 goals at 16:52) re-proved from trusted lemmas with 30+400 lemmas (REVF2): 0 untrusted, 49,325.**
    **(13:43) User: keep the climbs for now, let the A/B run.**
    **(13:28) Every final had sibling sketch hints (median 679-727), so the A/B prices a target's own climb only. exp36's ablation at 160 s
