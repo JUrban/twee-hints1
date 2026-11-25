@@ -792,6 +792,8 @@ Next:
    proved 9 of 63 targets CLQ83 had failed; 3 of CLQ83's 42 proofs on targets CLS71 also ran); the total rate (2.24) shows no gain.**
    **(23:50) CLQ83 ran dry at 21:00 (1,301 targets, 55 proofs); restarted on the 672 unsolved local heads (sets/localheads71, left to HLW1's
    plain sweep since 23 Nov; no climber final ever ran on them). CLS71 still excludes them.**
+   **(02:51) exp83b: 23 of 664 local heads, 3.01 per CPU h (HLW1's plain sweep 0.90), all trusted; plainlive's 60 s W runs had failed 10 of
+   the 23. Kept.**
 0000000000000000000000000000000000000000000000000000000000000000000000. **exp82 (Horn sibling lemmas, [notes/2026-11-24-horn-lemmas.md](notes/2026-11-24-horn-lemmas.md)).** 2,771 proved
    goals are genuine Horn clauses with no unit form, and lemma import has always dropped them (REPORT 2ae). TWEE_LEMMA_HORN=1
    adds the ones in a problem's sibling window as clause axioms (twee's ifeq encoding), on top of the same unit ones.

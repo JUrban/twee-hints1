@@ -116,3 +116,12 @@ CLS71's 1,226 targets finished since its 06:05 instance, so the local heads are 
 them, so the final-only A/B is untouched. Its first three targets: nslm_to_aa1 852, R1dist_to_aa1 464 and 460, all
 local heads. Reading from CLQ83.log line 1355 and climb.tsv row 1354 on: proofs per CPU h, against its 3.69 before and
 the plain W cycles on the same heads (HLW1 0.90 per CPU h). Keep at 1 per CPU h or more; else go back to sets/clq83.excl.
+
+**exp83b result (25 Nov 02:51, exp/clq83b_read.py):** 664 of the 672 local heads finished, 23 proved, 7.64 CPU h, **3.01
+per CPU h** (rule: keep at 1 or more; HLW1's plain sweep made 0.90). **Kept**, with sets/clq83b.excl. All 23 are
+trusted (loops/TRUSTNOW/t0238). By original: im2_24_to_25 4, aK2_eq_aK3_p 3, aK2eq_1234 3, nil3_31 2, ns_to_aa1_b 2,
+others 1 each. The plain live loop's 60 s W cycles on the same 23 heads (no hints): c40W 10 NO, 13 SAME (unchanged, not
+rerun); c41W 10 NO, 8 SAME, 3 THM, 2 not run. So a 40 s final with production's hints and the climber's lemma lists
+proves local heads that the plain 60 s runs fail. The rate rose through the night (0.72 at 00:18, 1.74 at 01:48, 3.06
+at 02:18): the queue's order put the heads near proved goals first, but proofs also came late. After the last 8 heads,
+CLQ83 takes newly stalled goals of both kinds. (02:51)
