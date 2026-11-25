@@ -783,6 +783,11 @@ ul75 5, XFL 1. REPORT's totals table
 has the history (user, 20 Nov: "update the total numbers in the report etc every now and then").
 
 Next:
+0000000000000000000000000000000000000000000000000000000000000000000000000. **exp85 (a portfolio of symbol precedences, [notes/2026-11-25-precedence-portfolio.md](notes/2026-11-25-precedence-portfolio.md)):**
+   the user: Veroff tries all precedences (120?); build a portfolio of the most complementary ones in randomized
+   stages. Stage 1: 121 orderings (default + each order of a,k,l,r,t once, m,ld,rd,e at random places) on up to 50
+   proved-but-not-easy goals made unsolved in the context, each goal's captured final replayed per ordering at 10 CPU s.
+   Capture from 08:07 (loops/P85C).
 000000000000000000000000000000000000000000000000000000000000000000000000. **exp84 (other symbol precedences on the quick finals' failures, [notes/2026-11-25-precedences.md](notes/2026-11-25-precedences.md)):**
    the user asked whether our portfolios try symbol precedences as Veroff does; they do not. 100 unsolved targets
    whose CLQ83 40 s final failed (sets/exp84.targets, seed 84), CLQ83's final rerun in five arms: P84O0 default
@@ -1542,6 +1547,7 @@ reports are written as the experiments run.
 | [notes/2026-11-24-horn-lemmas.md](notes/2026-11-24-horn-lemmas.md) | exp82: genuine Horn siblings as clause lemma axioms in plain 60 s runs on local heads |
 | [notes/2026-11-24-quick-finals.md](notes/2026-11-24-quick-finals.md) | exp83: a second live climber with no climbs and a 40 CPU s final, ahead of the climber on its stalled queue |
 | [notes/2026-11-25-precedences.md](notes/2026-11-25-precedences.md) | exp84: four other KBO symbol precedences against the default on 100 targets whose 40 s quick final failed |
+| [notes/2026-11-25-precedence-portfolio.md](notes/2026-11-25-precedence-portfolio.md) | exp85: a portfolio of symbol precedences in randomized stages; stage 1, 121 orderings on a small dev set |
 | [notes/2026-11-20-base-saturation.md](notes/2026-11-20-base-saturation.md) | exp39: base-theory runs as rule generators for the unsolved goals of the stronger theories |
 | [notes/2026-11-20-given-transfer.md](notes/2026-11-20-given-transfer.md) | exp38: unsolved goals that are variants of rules other runs derived and did not use (379 M in the given logs; transfer.py only matches proof steps); their ancestry as hints |
 | [notes/2026-11-19-from-zero-portfolio.md](notes/2026-11-19-from-zero-portfolio.md) | half1 from zero in 2 hours with today's deep portfolio (PGC), against PGA's 18,987 (exp27, from 07:18) |

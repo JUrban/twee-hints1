@@ -68,3 +68,5 @@ Written 25 Nov 2026, 04:20 UTC.
   a, k, l, r, t above or below m, ld, rd), and KBO weights (`--kbo-weight0`).
 * nslm_to_aa1 1093 imported into production at 05:41 (P84O0's hints file into loops/UL/hints, then a solved.tsv row,
   as a live climber's proof goes in).
+
+**Followed by exp85** (notes/2026-11-25-precedence-portfolio.md): all 120 orders of a, k, l, r, t with m, ld, rd, e free, on provable goals, for a complementary portfolio (the user's design).
