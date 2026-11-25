@@ -2197,21 +2197,21 @@ complete Output{..} config@Config{..} state =
 
     reported <- liftIO (newIORef (IntSet.empty, -1 :: Int))
     let
-      -- --multi-goal: after each new rule, report the goals it proved
-      checkGoals
-        | not cfg_multi_goal = return False
-        | otherwise = do
-            st <- StateM.get
-            (rep, lastN) <- liftIO (readIORef reported)
-            let n = fromIntegral (st_next_active st) :: Int
-            if n == lastN then return False else do
-              let new = [ g | g <- st_goals st, not (IntSet.member (goal_number g) rep),
-                              not (Map.null (Map.intersection (goal_lhs g) (goal_rhs g))) ]
-                  rep' = foldl' (flip IntSet.insert) rep (map goal_number new)
-              forM_ new $ \g -> liftIO $ putStrLn $
-                "SOLVEDGOAL " ++ goal_name g ++ " considered=" ++ show (st_considered st) ++ " rules=" ++ show n
-              liftIO (writeIORef reported (rep', n))
-              return (not (null (st_goals st)) && IntSet.size rep' >= length (st_goals st))
+      -- --multi-goal: after each new rule, report the goals it proved; (e61l) also without --multi-goal when the
+      -- problem has listened goals (isListened), which are reported here and nowhere else
+      checkGoals = do
+        st <- StateM.get
+        if not cfg_multi_goal && not (any (isListened . goal_name) (st_goals st)) then return False else do
+          (rep, lastN) <- liftIO (readIORef reported)
+          let n = fromIntegral (st_next_active st) :: Int
+          if n == lastN then return False else do
+            let new = [ g | g <- st_goals st, not (IntSet.member (goal_number g) rep),
+                            not (Map.null (Map.intersection (goal_lhs g) (goal_rhs g))) ]
+                rep' = foldl' (flip IntSet.insert) rep (map goal_number new)
+            forM_ new $ \g -> liftIO $ putStrLn $
+              "SOLVEDGOAL " ++ goal_name g ++ " considered=" ++ show (st_considered st) ++ " rules=" ++ show n
+            liftIO (writeIORef reported (rep', n))
+            return (cfg_multi_goal && not (null (st_goals st)) && IntSet.size rep' >= length (st_goals st))
       loop = do
         progress <- StateM.state (complete1 config)
         when (cfg_abstract_time > 0) $ StateM.get >>= setAbstractTime . clock
@@ -2353,11 +2353,18 @@ goalTerms state =
 solved :: Function f => State f -> Bool
 solved = not . null . solutions
 
+-- | (e61l) A listened goal: a negated conjecture named listen_*. When proved it is reported by a SOLVEDGOAL line
+-- (with or without --multi-goal) but it is never a solution of the problem: the run goes on, and its result,
+-- proof and hints are those of the other goals. (climb.py --listen: a long final's unsolved siblings.)
+isListened :: String -> Bool
+isListened = ("listen_" `isPrefixOf`)
+
 -- Return whatever goals we have proved and their proofs.
 {-# INLINEABLE solutions #-}
 solutions :: Function f => State f -> [ProvedGoal f]
 solutions State{..} = do
   Goal{goal_lhs = ts, goal_rhs = us, ..} <- st_goals
+  guard (not (isListened goal_name))
   let sols = Map.keys (Map.intersection ts us)
   guard (not (null sols))
   let sol:_ = sols
