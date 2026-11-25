@@ -59,3 +59,25 @@ notes/2026-11-19-hint-cost.md (exp25).
 * B costs 20% less a run, as exp25 found at 80 s (25%). Its proofs a run are 4.1% against A's 5.3%. With 10 proofs
   in all, that difference is noise (Fisher p about 0.75).
 * No L2 (the 40 -> 80 s resume) or 80 s variant rows yet: after the restart most workers ran 5 s levels.
+
+## 25 Nov 21:21 UTC: production's reading over its last 180,000 results (loops/UL/r5/results.tsv)
+
+Deep runs (budget above 5 s, not p9), arm B = crc32(goal) & 1 (`--cp-renormalise-threshold 1000`), in three
+windows of 60,000 results:
+
+| rows | arm | deep runs | proofs | CPU h | per CPU h | proofs a run |
+|---|---|---:|---:|---:|---:|---:|
+| 183200-243199 | A | 29683 | 344 | 70.8 | 4.86 | 1.16% |
+| 183200-243199 | B | 30309 | 363 | 71.8 | 5.06 | 1.20% |
+| 243200-303199 | A | 30002 | 60 | 114.9 | 0.52 | 0.20% |
+| 243200-303199 | B | 29998 | 78 | 105.3 | 0.74 | 0.26% |
+| 303200-363199 | A | 29901 | 211 | 132.2 | 1.60 | 0.71% |
+| 303200-363199 | B | 30099 | 207 | 114.3 | 1.81 | 0.69% |
+| all | A | 89586 | 615 | 317.8 | 1.93 | 0.69% |
+| all | B | 90406 | 648 | 291.4 | 2.22 | 0.72% |
+
+* B is ahead per CPU h in every window; in all, 2.22 against 1.93 (+15%), with 9% less CPU a run and 0.72% against 0.69% proofs a run.
+* So on production's hard goals, not renormalising costs no proofs a run and saves CPU; exp53's loss from zero
+  (first runs after the first hour, easier goals) does not carry over. My plan to drop the B arm at the next
+  restart is withdrawn; the candidate instead is B for all deep runs (one arm then), with this table as the
+  baseline to watch.
