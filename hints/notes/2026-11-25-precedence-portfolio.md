@@ -192,7 +192,7 @@ space is 9! = 362,880 orders, so after stage 2 that step is the way to new order
   not systematically; best-of-121 is a minimum over that scatter. A fixed-budget portfolio of orders loses against
   the default. A precedence portfolio can only pay where extra budget is spent anyway on stalled goals.
 
-## exp85e: orders on stalled goals at equal work (pre-registered 13:1x)
+## exp85e: orders on stalled goals at equal work (pre-registered, launched 13:07; bash 4143336)
 
 * The user's last stage: the portfolio against the default at equal work on stalled goals. Goals: the 22 of exp85's
   120 that neither order 0 nor 60 proved within 80,000 pairs (exp/sets/exp85e.goals, 12 originals).
