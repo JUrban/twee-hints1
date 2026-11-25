@@ -788,6 +788,9 @@ ul75 5, XFL 1. REPORT's totals table
 has the history (user, 20 Nov: "update the total numbers in the report etc every now and then").
 
 Next:
+00000000000000000000000000000000000000000000000000000000000000000000000000. **exp86 (long finals on the 576 local heads, [notes/2026-11-25-long-finals-heads.md](notes/2026-11-25-long-finals-heads.md)).**
+   (13:34) Production dry since 10:00, both climbers idle; 576 unsolved local heads only ever had CLQ83's 40 s final. CLQ83
+   restarted (abs/clq86.sh) with the 160 abstract s final and --reclimb sets/exp86.heads, -j 10; keep at 1 per CPU h after 8 CPU h.
 0000000000000000000000000000000000000000000000000000000000000000000000000. **exp85 (a portfolio of symbol precedences, [notes/2026-11-25-precedence-portfolio.md](notes/2026-11-25-precedence-portfolio.md)):**
    the user: Veroff tries all precedences (120?); build a portfolio of the most complementary ones in randomized
    stages. Stage 1: 121 orderings (default + each order of a,k,l,r,t once, m,ld,rd,e at random places) on up to 50
@@ -1563,6 +1566,7 @@ reports are written as the experiments run.
 | [notes/2026-11-24-quick-finals.md](notes/2026-11-24-quick-finals.md) | exp83: a second live climber with no climbs and a 40 CPU s final, ahead of the climber on its stalled queue |
 | [notes/2026-11-25-precedences.md](notes/2026-11-25-precedences.md) | exp84: four other KBO symbol precedences against the default on 100 targets whose 40 s quick final failed |
 | [notes/2026-11-25-precedence-portfolio.md](notes/2026-11-25-precedence-portfolio.md) | exp85: a portfolio of symbol precedences in randomized stages; stage 1, 121 orderings on a small dev set |
+| [notes/2026-11-25-long-finals-heads.md](notes/2026-11-25-long-finals-heads.md) | exp86: the long climber final on the 576 unsolved local heads that only had the 40 s quick final |
 | [notes/2026-11-20-base-saturation.md](notes/2026-11-20-base-saturation.md) | exp39: base-theory runs as rule generators for the unsolved goals of the stronger theories |
 | [notes/2026-11-20-given-transfer.md](notes/2026-11-20-given-transfer.md) | exp38: unsolved goals that are variants of rules other runs derived and did not use (379 M in the given logs; transfer.py only matches proof steps); their ancestry as hints |
 | [notes/2026-11-19-from-zero-portfolio.md](notes/2026-11-19-from-zero-portfolio.md) | half1 from zero in 2 hours with today's deep portfolio (PGC), against PGA's 18,987 (exp27, from 07:18) |
