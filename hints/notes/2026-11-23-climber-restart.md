@@ -643,3 +643,23 @@ quick targets of both arms alike, so CLS71's later targets are the slower ones, 
   targets' figures do not change.
 * On the re-climbs, final-only leads per CPU h as on the new targets; counts are nearly equal. On new targets the
   climbing arm leads on count, final-only per CPU h. The A/B keeps running (the user's decision, 24 Nov 13:43).
+
+## All unsolved goals as targets (25 Nov 14:58; the user)
+
+* The user (14:5x): "why do you say that the climber ran out of targets - we do have many unproved goals and those
+  should be the targets?" They should. CLS71's queue took only (a) goals production had just flagged as stalled (the
+  goal's last run in the latest round a failed L1+ run, after a failed fresh L0 run, and never climbed by CLS71) and
+  (b) sets/cls71re (870 goals whose 20 s final had failed, one more climb each). Production now runs mostly 5 s levels
+  and flags almost nothing, so from 09:45 CLS71 idled, with 10 threads free, while it had climbed most unsolved goals
+  only once. Of the 1,988 unsolved at 14:50: 893 had one CLS71 final, 512 two, and the 583 local heads (excluded,
+  sets/localheads71, only to split work with HLW1, which ended 24 Nov 08:48) 0 (572) or 1 (11). Re-climbs had yielded
+  0.66 (climb) and 0.86 (final-only) per CPU h in the A/B, against 0 for idle threads and about 3 proofs an hour for
+  the whole system since 10:00. Calling that "ran out of targets" was wrong: it ran out of targets under my rule.
+* Restart 14:58:19 (climb.py 4156578, bash 4156571; abs/cls71e.sh unchanged, env RECLIMB=sets/cls71all.re
+  EXCLUDE=sets/cls71f.excl): **re-climb list = all 1,988 unsolved goals** (exp/sets/cls71all.re), each while it has
+  fewer than 2 CLS71 finals (so the 893 once-climbed and the 572 never-climbed heads: 1,465), nearest proved goal below
+  first; excluded only the 52 heads exp86 just gave a 160 s final (exp/sets/cls71f.excl). The final-only A/B (crc32
+  bit 2) continues. Reading from CLS71.log line 2857 and climb.tsv row 31466 on: proofs per CPU h by arm, and by kind
+  (head, once-climbed). The first 10 climbs: mostly local heads (aK2_eq_aK3_b/c/d).
+* Not yet: goals with two CLS71 finals (512) are not taken (climb.py's re-climb cap is 2); a third climb would need a
+  cap option. Decide after this pass's yield.
