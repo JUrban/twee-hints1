@@ -261,3 +261,17 @@ siblings as extra goals, credited by SOLVEDGOAL and a proof rerun), as a measure
 * **Deployed:** CLS71 as abs/cls71j.sh (cls71i.sh plus `--listen 300 --listen-dist 100000`: all the original's unsolved
   plain goals) from 22:03:48, climb.py 60285, log line 3301, climb.tsv row 35134 on; CLQ83 as abs/clq87e.sh when its two
   oldest 640 s finals end.
+
+## Production listening: loop.py --listen (25 Nov, tested, not deployed yet)
+
+* **loop.py `--listen K`** (`--listen-dist`, default 100000; --cascade only; refuses a twee other than e61m/pg61l): each
+  twee run carries up to K of its original's unsolved goals of the loop (hintsel.listen_clauses), except Prover9 and
+  unfold variants and resumed runs (a loaded state cannot be replayed by the credit rerun). A credited goal (the rerun
+  printed its lgoal_ proof) is recorded in the cascade like the loop's own proof: kept output DIR/rN/out/<goal> (its
+  USEDAXIOMS: trust.py's record; skipped if it names assume_ or a bare lemma_knn_N), the proof (proof_write), the hints
+  file, solved.tsv, a results.tsv row (level `listen`, stats `LISTEN in <run's goal>`; the restart parse skips unknown
+  levels) and add_proof (pools, lemmas). The rerun is skipped for a goal solved meanwhile.
+* **Test** loops/LSTP90: nil3_26's 506 goals, 475 solved (production's, goals 5-10 left out), cascade 5,40, production's
+  main options (no --given-scan, --sync, variants), -j 2, --listen 300, 7 minutes: goal 5's run credited 10 and 7, goal
+  6's run 8 and 9, each with a solved row, hints, kept output with USEDAXIOMS, proof and a `listen` results row; goal
+  420's run, started earlier, listened to goals solved meanwhile (hence the skip).

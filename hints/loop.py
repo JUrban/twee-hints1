@@ -141,6 +141,8 @@ class Loop:
             self.listened = {}
         res = self.listened.setdefault(name, [])
         for x in got:
+            if x in getattr(self, 'solved', {}):   # (solved since this run started: no rerun)
+                continue
             txt = open(path).read()
             if txt.count(f'cnf(listen_{x},') != 1:
                 continue
@@ -165,6 +167,20 @@ class Loop:
                   flush=True)
             if ok2:
                 res.append((x, o2))
+
+    def listen_lines(self, name):
+        """(--listen K) up to K of NAME's original's unsolved goals of this loop as listened goal clauses
+        (hintsel.listen_clauses, as climb.py --listen)"""
+        import hintsel, lemmas
+        if not hasattr(self, 'orig_names'):
+            self.orig_names = collections.defaultdict(list)
+            for m in self.names:
+                if '__goal_' in m:
+                    self.orig_names[lemmas.split(m)[0]].append(m)
+        if '__goal_' not in name:
+            return []
+        uns = [m for m in self.orig_names.get(lemmas.split(name)[0], ()) if m not in self.solved]
+        return hintsel.listen_clauses(name, uns, self.a.listen, self.a.listen_dist)
 
     def output_hints(self, name, out, L=None, G=None):
         """the hints file rows of a proof's output: its lemmas and goal steps (and --aux), canonical, deduplicated
@@ -656,6 +672,10 @@ class Loop:
             with open(path, 'w') as f:
                 f.write(txt)
         lg = getattr(self, 'listen_goals', {}).get(name)
+        if lg is None and a.listen and var not in ('p9', 'unf') and not a.unfold and not (
+                resume and resume not in ('fresh', 'nosave')
+                and os.path.exists(os.path.join(self.dir, 'states', name + '.bin'))):
+            lg = self.listen_lines(name)   # (--listen; a resumed search could not be replayed by the credit rerun)
         if lg:
             # (25 Nov, exp89; climb.py --listen) listened goals: unsolved siblings as negated conjectures named
             # listen_<goal>; twee-e61l reports SOLVEDGOAL for each and never counts one as this run's proof
@@ -2306,6 +2326,35 @@ class Loop:
                                 hf.write(f'{l}\t{r}\n')
                         sf.write(f'{n}\t{rnd}\t{dt:.2f}\n'); sf.flush()
                         add_proof(n, rnd, dt, hs)
+                    for lgx, lgo in getattr(self, 'listened', {}).pop(n, []):
+                        # (--listen) a listened goal this run proved, rerun as a real goal with its proof printed
+                        # (listen_credit): recorded like a proof of this loop; the kept output is trust.py's record
+                        lgu = next((ln.split()[1:] for ln in lgo.splitlines() if ln.startswith('USEDAXIOMS')), None)
+                        if lgx in self.solved or os.path.exists(os.path.join(self.dir, 'hints', lgx)) or lgu is None or \
+                                any(u.startswith('assume_') or re.match(r'lemma_knn_\d+$', u) for u in lgu):
+                            print(f'  listen: {lgx} (in a run of {n}) not recorded: '
+                                  + ('solved meanwhile' if lgx in self.solved else 'no usable record'), flush=True)
+                            continue
+                        lgh = self.output_hints(lgx, lgo)
+                        if not lgh:
+                            continue
+                        new += 1
+                        if a.keep_out:
+                            lgd = os.path.join(self.dir, 'r%d' % rnd, 'out'); os.makedirs(lgd, exist_ok=True)
+                            with open(os.path.join(lgd, lgx), 'w') as lgf:
+                                lgf.write(lgo)
+                        if a.keep_proofs:
+                            try:
+                                self.proof_write(lgx, lgo)
+                            except Exception as e_:
+                                print(f'  listen: {lgx} proof_write error {e_!r}', flush=True)
+                        with open(os.path.join(self.dir, 'hints', lgx), 'w') as hf:
+                            for l, r in lgh:
+                                hf.write(f'{l}\t{r}\n')
+                        sf.write(f'{lgx}\t{rnd}\t0.00\n'); sf.flush()
+                        rf.write(f'{lgx}\tTHM\t0.00\tLISTEN in {n}\tlisten\tt={time.time()-t0:.0f}\n'); rf.flush()
+                        add_proof(lgx, rnd, 0.0, lgh)
+                        print(f'  listen: {lgx} proved in a run of {n}, recorded', flush=True)
                     if done_n % 50 == 0 and H and a.sched_pmin_auto and len(auto0) >= 100 and len(auto1) >= 50:
                         # --sched-pmin-auto: a fresh run pays as well as a resume when its actual success
                         # p0 = (resume proofs per wall second) x (mean fresh wall seconds); the scheduler's
@@ -2671,6 +2720,13 @@ def make_parser():
                     help='--relabel: new labels whose relabelled rows do not count in the level yields (another member)')
     ap.add_argument('--relabel-until', type=int, default=0,
                     help='--relabel: the first results row (0-based) written with this cascade\'s labels')
+    # (25 Nov, exp89/exp90) --listen K: each twee run (not Prover9, unfold or resumed runs) also carries up to K of its
+    # original's unsolved goals (nearest by goal number within --listen-dist, one plain equation each) as listened
+    # goals; one proved there is rerun as a real goal with its proof printed (listen_credit) and recorded as this
+    # loop's proof (--cascade only). Needs twee-e61m (twee-pg61l): twee-e61 would count a listened goal's proof as the
+    # run's own; with it the search is the same as without (exp90: 120 listened goals +4.6% CPU in a 160 s run).
+    ap.add_argument('--listen', type=int, default=0, help='runs carry up to K unsolved sibling goals as listened goals (twee-e61m)')
+    ap.add_argument('--listen-dist', type=int, default=100000, help='--listen: siblings within this many goal numbers')
     ap.add_argument('--ab-args', default='',
                     help='(19 Nov, exp25) --cascade: an A/B test in production. The runs above the first level\'s budget '
                          '(not p9) of half the goals, by a hash of the name, get these twee arguments; their results rows '
@@ -2802,6 +2858,11 @@ def init_dir(a):
 
 def main():
     a = make_parser().parse_args()
+    if a.listen and not any(x in a.twee for x in ('e61m', 'pg61l')):
+        sys.exit(f'--listen needs twee-e61m (--twee /project/bin/twee-pg61l), not {a.twee}: another twee counts a '
+                 'listened goal\'s proof as the run\'s own')
+    if a.listen and not a.cascade:
+        sys.exit('--listen records listened proofs in --cascade only')
     init_dir(a)
     lp = Loop(a)
     with open(os.path.join(a.dir, 'config.json'), 'w') as f:
