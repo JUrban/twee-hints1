@@ -136,3 +136,23 @@ space is 9! = 362,880 orders, so after stage 2 that step is the way to new order
 * 09:48: CLS71 had no target left (0 runs since its 09:45 refresh; new targets ran out about 00:18 and 596 of its 870
   re-climbs are done) and CLQ83 idles, so the replay was resumed with -j 10 (abs/exp85c.sh, exp/exp85c.sh, from 09:48:57;
   1,011 rows kept, 6,249 to go). Runs are deterministic under the abstract cap, so the thread count does not change rows.
+
+## exp85b result (10:21; exp/prec_portfolio.py loops/P85D/replay.tsv, and CPU figures from the rows)
+
+* **Every order proves every dev goal**: 60 of 60 under each of the 121 orders within 20,000 pairs (the largest
+  rounded work 18,000). So in this window the orders differ only in speed.
+* The default's work in 2000-pair steps: 1 step 32 goals, 2 steps 21, 3 steps 3, 5 steps 1, 6 steps 3; its CPU
+  median 2.9 s (q75 3.5, max 10.2). Most goals are at the measure's floor.
+* Work: the sum of the least work per goal over all 121 orders 152,000 against the default's 212,000; the cost
+  greedy reaches 152,000 with three orders (0, 119, 1). Dominance: 120 of 121 not dominated, none dominates the
+  default; in the user's "much faster" sense (a superset in at most half the total work) no order beats another.
+  BliStr's best-on (ties counted): order 1 best or tied on 49 goals, 19/28/45 on 47, the default on 35.
+* CPU (finer than the work steps, noisier): totals 176-199 s over the 60 goals for all orders, the default 191 s
+  (rank 62 of 121; by work rank 72). Per goal, the best of 121 orders against the default: median 0.88, q25 0.80, about
+  what the minimum of 121 noisy timings gives; some order is at least twice as fast on only 2 of 60 goals. Order 1:
+  median 1.01, never twice as fast; order 18 (the best total): median 0.96.
+* **Reading.** On goals the climber's final proves in 1-5 abstract s, the symbol precedence hardly matters: a
+  portfolio of orders buys about 10% CPU at best, inside the noise. The differences, if any, are on harder goals:
+  exp85's partial replay (goals needing 10-40 s, 10,000-pair cap) had 2 of 5 proved goals proved only by non-default
+  orders. Next: the same stage on goals of medium difficulty (the better work of orders 0 and 60 in 5-30 abstract s),
+  with a 40 abstract s cap, so the measure is far above its floor.
