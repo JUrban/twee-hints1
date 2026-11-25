@@ -87,7 +87,7 @@ def main_data():
             shutil.copy(os.path.join(src, n), os.path.join(d, n))
         commit(['proofs/' + o], 'proofs: %s (%d goals)' % (o, len(by[o])))
 
-CLIMB_SKIP = ('SMK', '.old')
+CLIMB_SKIP = ('SMK', '.old', 'P85')   # (25 Nov) P85C/P85D: exp85's capture copies (CLQ83's sketches copied)
 
 def tarxz(srcdir, names, dst):
     """a deterministic .tar.xz of srcdir/names (sorted, mtime 0, no owners), so reruns re-commit only changes"""

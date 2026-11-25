@@ -282,6 +282,7 @@ def main():
     ap.add_argument('--reclimb', default='', help='--live: goals that may be climbed once more (fewer than 2 finals)')
     # (25 Nov) the time ladder: a rung re-runs goals that already had finals in this dir
     ap.add_argument('--reclimb-max', type=int, default=2, help='--reclimb: while fewer than N finals in DIR (default 2)')
+    ap.add_argument('--share', default='', help='comma-separated climber dirs whose sketches/ and fillhints/ are loaded as hints too')
     ap.add_argument('--cpus', type=int, default=0,
                     help='--live: start a climb only while fewer than N twee processes run on the machine '
                          '(own ones included), so the climber fills the CPUs the loop leaves idle; -j caps it')
@@ -356,8 +357,9 @@ def main():
         w_ = l_.rstrip('\n').split('\t')
         if len(w_) >= 5 and w_[2] not in true[w_[0]]:
             true[w_[0]][w_[2]] = w_[1]; tkey[(w_[0], w_[1])] = (w_[3], w_[4]); checked[w_[0]].add(w_[2]); nre[0] += 1
-    for sub_ in ('fillhints', 'sketches'):   # (real hints first, as online)
-        d0_ = os.path.join(c.dir, sub_)
+    # (25 Nov, --share DIRS) also other climbers' sketch and fill hints (hints only: their true lemmas stay theirs)
+    for sub_, dd_ in [(x, y) for x in ('fillhints', 'sketches') for y in [c.dir] + [z for z in c.share.split(',') if z]]:   # (real hints first, as online)
+        d0_ = os.path.join(dd_, sub_)
         for t_ in (sorted(os.listdir(d0_)) if os.path.isdir(d0_) else ()):
             o_ = lemmas.split(t_)[0]
             for g_ in sorted(os.listdir(os.path.join(d0_, t_))):
