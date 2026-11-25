@@ -646,7 +646,7 @@ quick targets of both arms alike, so CLS71's later targets are the slower ones, 
 
 ## All unsolved goals as targets (25 Nov 14:58; the user)
 
-* The user (14:5x): "why do you say that the climber ran out of targets - we do have many unproved goals and those
+* The user (25 Nov, before the 14:58 restart): "why do you say that the climber ran out of targets - we do have many unproved goals and those
   should be the targets?" They should. CLS71's queue took only (a) goals production had just flagged as stalled (the
   goal's last run in the latest round a failed L1+ run, after a failed fresh L0 run, and never climbed by CLS71) and
   (b) sets/cls71re (870 goals whose 20 s final had failed, one more climb each). Production now runs mostly 5 s levels
