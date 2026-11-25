@@ -122,9 +122,9 @@ proofs in 63 minutes.
     HLW1's problems (cond/HLW1: 20 proofs in 936 runs, 0.90 per CPU h).
   * plainlive5 had dropped L (5 s, 100+30 siblings, 400 kNN ranked by lr2): 4 proofs in 18 h of run time since 12:38
     ([notes/2026-11-23-tail-allocation.md](notes/2026-11-23-tail-allocation.md)).
-* **The time ladder's 640 s rung, CLQ83 (exp87):** abs/clq87.sh, climb.py 4157884 since 25 Nov 15:08: final only, 640 abstract s
+* **The time ladder's 640 s rung, CLQ83 (exp87):** abs/clq87.sh with CPUS=23, climb.py 4158240 since 25 Nov 15:09: final only, 640 abstract s
   (1.28M pairs, --max-cpu 6400), on sets/ladder640.re (561 unsolved goals that failed 160 s finals), nearest proved goal first,
-  -j 5, --cpus 20 ([notes/2026-11-25-time-ladder.md](notes/2026-11-25-time-ladder.md)). Before: quick finals, climb.py 4153356
+  -j 5, --cpus 23 ([notes/2026-11-25-time-ladder.md](notes/2026-11-25-time-ladder.md)). Before: quick finals, climb.py 4153356
   (abs/clq83.sh) 14:28-15:08. exp86 (13:34-14:28,
   abs/clq86.sh) gave it the full 160 abstract s final on the 576 unsolved local heads that only had the 40 s one: 3 proofs
   in 52 finals, 0.37 per CPU h, stopped by its rule ([notes/2026-11-25-long-finals-heads.md](notes/2026-11-25-long-finals-heads.md)).

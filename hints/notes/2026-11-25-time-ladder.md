@@ -26,3 +26,6 @@ below first, sharing the 20-process budget (each starts a run only while fewer t
 * Next rungs: CLS71's failures of this pass go to 640 s, the 640 s failures to 2,560 s, by restarting with new lists.
 * Reading: proofs and CPU h per rung (climb.tsv finals from the rows above), and what the new proofs open (production's
   follow-ups). Memory: 1.28M-pair runs may grow to several GB; watch the total (60 GB).
+* 15:09: the 640 s rung got 1 slot (CLS71 held 10 under the 20-process gate), so it was restarted with CPUS=23 (climb.py
+  4158240, bash 4158234, from 15:09:11; log line 2106, climb.tsv row 2093 on): 5 finals at once, 22 twee processes in
+  all; CLS71's own gate (20) lets it shrink as its climbs end. About 3 CPUs over the usual 20, for climbing.
