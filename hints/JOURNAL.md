@@ -794,6 +794,11 @@ ul75 5, XFL 1. REPORT's totals table
 has the history (user, 20 Nov: "update the total numbers in the report etc every now and then").
 
 Next:
+00000000000000000000000000000000000000000000000000000000000000000000000000000. **exp89 (unsolved siblings as extra goals of a long run, [notes/2026-11-25-time-ladder.md](notes/2026-11-25-time-ladder.md), "exp89"):**
+   the user: Prover9 searches with several goals and reports each proved one; would that spare long runs? twee --multi-goal
+   (e21, 13 Nov: lost as a replacement of separate runs, REPORT 2p). exp/multigoal89.py: 23 exp85 captures at 320,000 pairs
+   plus up to 8 unsolved plain-equation siblings each (117 extras): **2 proved, nslm_to_aa1__goal_1047 and lra2aa__goal_427,
+   new**; exp/mgcredit89.py reran them with proofs into loops/MG89, merged into loops/UL, trusted (t1956: 49,825, 0 untrusted).
 0000000000000000000000000000000000000000000000000000000000000000000000000000. **exp88 (do the hints slow the long runs down?, [notes/2026-11-25-time-ladder.md](notes/2026-11-25-time-ladder.md), "exp88"):**
    the user asked whether twee needs a speed-up for long runs and whether many hints slow them. GC: 91% productive at
    320,000 pairs, -A64m/-A256m slower. Profile at 160,000 pairs: making pairs 59%, rewriting 49%, renormalisation 23%,

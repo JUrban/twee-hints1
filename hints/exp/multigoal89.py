@@ -12,7 +12,13 @@ r = [json.loads(l) for l in open(f'{cap}/log.jsonl') if json.loads(l)['goal'] ==
 o, n = g.rsplit('__goal_', 1); n = int(n)
 sib = sorted((abs(int(m.rsplit('__goal_', 1)[1]) - n), m) for m in allg
              if m.startswith(o + '__goal_') and m != g and m not in S)
-extra = [m for d, m in sib if d <= D][:K]
+def plain(m):
+    # (25 Nov 19:40) only goals that are a plain equation: a conditional goal (=>, ...) cannot be added as one negated
+    # unit clause (10 of the first 24 problems were rejected as non-Horn)
+    c = next(l for l in open(f'{PROB}/{m}.p') if l.startswith('fof(') and ',conjecture,' in l.replace(' ', ''))
+    body = re.sub(r'^(\s*!\s*\[[^\]]*\]\s*:\s*)*', '', c.split(',conjecture,', 1)[1].rsplit(').', 1)[0].strip())
+    return body.count(' = ') == 1 and not any(x in body for x in ('=>', '<=', '|', '&', '~', '!='))
+extra = [m for d, m in sib if d <= D and plain(m)][:K]
 a = list(r['args'])
 src = next(x for x in a if x.endswith('.p'))
 lines = open(src).read()

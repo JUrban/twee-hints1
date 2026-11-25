@@ -140,3 +140,39 @@ same selection as nearhints88.py, from the loop's current solved set). CLS71 res
 16524 (bash 16521) from 18:46:16, log line 3076, climb.tsv row 33404 on. Checked on the running finals: near10 finals
 carry 569-3,701 hints, pool finals 4,056-8,939. Reading: exp/hintarms88.py (finals, proofs, final CPU h per arm, split by
 --final-only-ab).
+
+## exp89: unsolved siblings as extra goals of a long run (25 Nov from 18:56)
+
+**Question.** The user: Prover9 can search with several goals and does not stop at the first, it only reports each
+proved one; would that work in twee and spare us repeating the long runs?
+
+**What exists.** twee has had `--multi-goal` since 13 Nov (e21): several negated conjectures, `SOLVEDGOAL <name>
+considered=N` for each as it is proved, on until all are proved or the limit. REPORT 2p (13 Nov): as a replacement for
+separate runs (a window of 5 goals, 5 times the budget) it lost, 21 against 28 and 4 against 5, because a separate run
+of goal k+1 has goal k as an axiom while in the joint search goal k is only joinable. A multi-goal run's RESULT is
+Theorem as soon as any goal is proved, so a loop must credit goals by their SOLVEDGOAL lines; the printed proof has
+every proved goal's proof, USEDAXIOMS their union.
+
+**Setup.** The other use: a long run kept as it is, plus its unsolved siblings as extra goals, nearly free (goal
+normalisation). exp/multigoal89.py: an exp85 capture (loops/P85C/cap: problem with its lemmas, hints, rule model; 24
+goals of the 99 captures with an unsolved sibling within 10, seed 89, exp/sets/exp89.goals) plus the negated,
+Skolemised conjectures of up to 8 siblings unsolved now, nearest by goal number within 10, `--multi-goal`, 160 abstract
+s (320,000 pairs). 10 of the 24 problems were rejected as non-Horn: a conditional sibling goal became a disjunction
+(my parsing); rerun with plain-equation siblings only (one had none left). Data loops/P85C/exp89 (rows.tsv,
+rows2.tsv).
+
+**Result.** 23 runs, 117 extra goals, **2 proved**: nslm_to_aa1__goal_1047@135169, lra2aa__goal_427@96080. 18 targets were proved in their runs
+(15 within 160,000 pairs, most within 60,000), and their runs went on to 320,000 pairs with the extras.
+2.6 CPU h.
+
+**The two proofs in production.** exp/mgcredit89.py reruns the problem with the proof and hints printed to just past
+the extra's SOLVEDGOAL (the same pair count both times) and writes a loop record, loops/MG89 (solved.tsv, hints/,
+out/, proofs/). Merged with merge.py loops/UL loops/MG89 (records written 19:33:38 and 19:56:02, the hints files' times).
+Their lemmas: 95 and 14 sibling and kNN lemmas, all trusted goals in t1934, plus the captures' climber fill lemmas
+(true_N); neither original is exposed. trust.py t1956: 49,825 solved, 0 untrusted.
+
+**Reading.** As a free add-on of a long run, extra goals give 2 proofs of 117 extras: small but
+positive at almost no cost. The better form, a goal proved mid-run added as an axiom of the same run, is what 13 Nov
+lacked; the siblings of these targets already get the target as a lemma in their separate runs, so it would repeat
+those runs' advantage, not add a new one. Next: listen mode in the ladder's finals (the nearest unsolved plain-equation
+siblings as extra goals, credited by SOLVEDGOAL and a proof rerun), as a measured member.

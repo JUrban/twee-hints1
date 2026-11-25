@@ -169,7 +169,8 @@ def main_climbs():
 # loops, whose proofs use each other's goals as lemmas
 RP_FAMILIES = [('production', ['UL', 'XFL', 'GML', 'STEPJ', 'SW20', 'ROOTS',
                                'CI1', 'CI2', 'CI3', 'CI4',   # (23 Nov) the plain sweeps' proofs, merged into UL
-                               'CRP75', 'REVF1', 'REVF2']),   # (25 Nov) exp75's replays of the climbers' conditional proofs; re-proofs of circular trust roots
+                               'CRP75', 'REVF1', 'REVF2',
+                               'MG89']),   # (25 Nov) exp89's extra goals of multi-goal replays   # (25 Nov) exp75's replays of the climbers' conditional proofs; re-proofs of circular trust roots
                ('smoke', ['HCT', 'HCT2', 'KCT', 'KCT2', 'KCT3', 'QKC', 'QKT', 'QKN', 'RCT', 'RTT', 'YDT', 'YDT2', 'HTT',
                           'HTT2', 'GFT', 'KDS', 'LSM', 'LTD', 'PIS', 'FRS', 'FRT', 'KDA', 'KDB', 'KDC',
                           'RST', 'PLS2', 'PLR1']),   # (23 Nov) the plain and ranked-plain variants' smoke tests
