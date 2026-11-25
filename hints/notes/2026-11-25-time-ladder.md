@@ -29,3 +29,18 @@ below first, sharing the 20-process budget (each starts a run only while fewer t
 * 15:09: the 640 s rung got 1 slot (CLS71 held 10 under the 20-process gate), so it was restarted with CPUS=23 (climb.py
   4158240, bash 4158234, from 15:09:11; log line 2106, climb.tsv row 2093 on): 5 finals at once, 22 twee processes in
   all; CLS71's own gate (20) lets it shrink as its climbs end. About 3 CPUs over the usual 20, for climbing.
+
+## The 640 s rung climbs (15:22; the user)
+
+* The user: "since you said that hints do not help with the current hard goals, shouldn't the climbers really be a major
+  weapon for those? because the climbers basically do create on-demand hints from the strengthened theory". First a
+  correction: I had not shown that hints do not help; the plain live loop (no hints) made the most of the last 52
+  proofs, an observation, not an ablation.
+* The climbers' record: the final-only A/B says a target's own climb adds little (new targets 19.9% against 17.7%
+  proved, 1.44 against 1.57 per CPU h), but the final-only arm still uses the sketch hints and fill lemmas of earlier
+  climbs of its original (44,711 sketch hints and 2,832 true lemmas reloaded at 14:58), so it measures one more climb,
+  not climbing. Fill lemmas are in 85% (CLQ83) and 94% (CLS71) of the climbers' proofs.
+* For the hardest goals, where time alone gave 0.37 per CPU h (exp86), new on-demand hints are what can change the
+  outcome, and the climb (20 sketch runs of 5 s, 3 s fills) is cheap next to a 640 s final. So the 640 s rung now climbs:
+  abs/clq87b.sh (exp/prod/side/clq87b.sh; abs/clq87.sh with `--runs 20`), CPUS=23, climb.py 4159470 (bash 4159464)
+  from 15:22:17; log line 2109, climb.tsv row 2093 on (no final finished before). The 160 s rung (CLS71) keeps its A/B.
