@@ -2361,7 +2361,12 @@ class Loop:
                             continue
                         new += 1
                         if a.keep_out:
-                            lgd = os.path.join(self.dir, 'r%d' % rnd, 'out'); os.makedirs(lgd, exist_ok=True)
+                            # (25 Nov 23:30) in DIR/listen/rN/out, not DIR/rN/out: a run of LGX itself, started before
+                            # this credit, would overwrite its kept output there (nil3_29__goal_475's did, a GaveUp).
+                            # trust.py scans DIR/*/rN/out as dir DIR/listen, whose hints link to DIR/hints
+                            lgd = os.path.join(self.dir, 'listen', 'r%d' % rnd, 'out'); os.makedirs(lgd, exist_ok=True)
+                            if not os.path.lexists(os.path.join(self.dir, 'listen', 'hints')):
+                                os.symlink('../hints', os.path.join(self.dir, 'listen', 'hints'))
                             with open(os.path.join(lgd, lgx), 'w') as lgf:
                                 lgf.write(lgo)
                         if a.keep_proofs:

@@ -294,3 +294,16 @@ siblings as extra goals, credited by SOLVEDGOAL and a proof rerun), as a measure
 * **Restarts** (22:38:56 stop, 22:39:15 start): production as abs/ul87.sh (ul86's settings; ul86's log would be
   truncated), loop.py 71405; CLS71 (cls71j.sh) climb.py 71408, log line 3349, climb.tsv row 35490 on; CLQ83 (clq87e.sh)
   climb.py 71407, log line 2184, climb.tsv row 3071 on.
+
+### Production's first listened credits (25 Nov 23:30) and the kept-output race
+
+* ul87's run of nil3_29__goal_474 (a conditional goal; its own proof uses its hypotheses `goals`) credited goals 445
+  and 475 as listened goals (neither proof uses `goals`): solved rows, hints, proofs, results rows `listen`. trust.py
+  (loops/TRUSTNOW/t2331): 49,861 solved, 0 untrusted, both trusted.
+* **Race:** a run of goal 475 itself, started before the credit, failed after it and wrote its kept output over the
+  credited one (loops/UL/r5/out/<goal> is per goal name). nil3_29 is not an exposed original, so trust.py did not need
+  the record; in an exposed original this would make a false "no record", never a false trust.
+* **Fix** (loop.py, from the next production restart): listened kept outputs go to DIR/listen/rN/out/<goal>, which no
+  run writes; trust.py scans it as dir DIR/listen, whose hints link to ../hints (its byte comparison then matches).
+  Test loops/LSTP91 (as LSTP90): 4 credits, each in listen/r1/out with RESULT Theorem and USEDAXIOMS, hints the same
+  bytes through the link.
