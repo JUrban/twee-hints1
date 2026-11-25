@@ -201,3 +201,32 @@ space is 9! = 362,880 orders, so after stage 2 that step is the way to new order
   Orders 0 and 60 at 80,000 are known to fail on all 22 (pre40.tsv). -j 10; rows loops/P85C/e85d.tsv, e85p.tsv.
 * Expected: if precedence variety matters on hard goals, P proves more than D; if the scatter is light as above, D
   (one long run) wins.
+
+## exp85e result (13:30; loops/P85C/e85p.tsv, e85d.tsv; figures from the rows)
+
+* 22 goals neither order 0 nor 60 proved within 80,000 pairs. **Arm D (the default at 320,000) proves 16; arm P
+  (orders 3, 116, 104, 20 at 80,000 each) proves 6.** Both 5, only P 1 (lra2aa__goal_426: order 20 at 49,055; the
+  default fails at 320,000), only D 11; the union 17.
+* Cost: P 1.73 CPU h (6.8M pairs, most runs at the cap), D 1.35 CPU h (4.1M pairs: proved runs stop early). Per
+  CPU h: P 3.5 proofs, D 11.9.
+* D's 16 proofs by work: 80-100k pairs 5, 100-160k 6, 160-320k 5. Most "stalled" goals were simply a little beyond
+  the 80,000 cap; continuing pays more than restarting under another order.
+* By order in P: order 20 proves 5, orders 3 and 116 2, order 104 1. On nil3_1K_e__goal_528 all four orders prove
+  within 32-48k while orders 0 and 60 failed at 80k (the default needs 104k): one goal where the precedence matters.
+
+## Conclusion of exp85 (the user's staged precedence portfolio)
+
+* Stages: easy goals (exp85b, 1-5 abstract s): every order proves every goal, CPU within about 10%. Medium goals
+  (exp85d, 5-20 abstract s): no order better than the default by more than 4% in total work; the per-goal scatter is
+  about 20%; splitting a budget over orders loses (40,000: 29 against 18). Stalled goals at equal work (exp85e): one
+  long default run 16, four orders 6.
+* So for twee on AIM, symbol precedence is a weak lever: it re-randomises the search by about +-20% in work, with a
+  light tail. Veroff's many precedences pay in Prover9, whose search changes more with the ordering; in twee, at a
+  fixed budget, the time is better spent continuing the default run. exp84 (random precedences on unsolved targets,
+  nothing new) agrees.
+* Worth keeping: a precedence variant as a last member on goals the default has failed at a long run (like
+  lra2aa_426), at a small share, measured by the ratio rule. Not built now: the frontier (production's stall) has
+  other cheaper members first (the climber's final, long default runs).
+* Hint reordering by the current term order (the user: Veroff reorders the hints per run): twee already matches hints
+  orientation-free and normalises them with the run's own rules (`--eqhint-normalise`), so a precedence change needs
+  no separate reordering.

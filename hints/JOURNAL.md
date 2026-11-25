@@ -801,6 +801,8 @@ Next:
    **(13:05) exp85d (30 goals of 5-20 abstract s, 121 orders at 82,000 pairs): the default 29, union 30; the best order saves 4% of total
    work; the per-goal scatter is about 20%, so k orders at B/k lose to the default at B (40,000: 29 against 18 with 2).
    exp85e: 4 orders at 80,000 against the default at 320,000 on the 22 goals both orders failed.**
+   **(13:30) exp85e: the default at 320,000 proves 16 of 22, the 4 orders at 80,000 each 6 (only they: 1); per CPU h 11.9 against 3.5.
+   exp85 ends: in twee the precedence scatters work by about 20%, so continuing the default beats restarting under other orders.**
 000000000000000000000000000000000000000000000000000000000000000000000000. **exp84 (other symbol precedences on the quick finals' failures, [notes/2026-11-25-precedences.md](notes/2026-11-25-precedences.md)):**
    the user asked whether our portfolios try symbol precedences as Veroff does; they do not. 100 unsolved targets
    whose CLQ83 40 s final failed (sets/exp84.targets, seed 84), CLQ83's final rerun in five arms: P84O0 default

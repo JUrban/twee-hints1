@@ -5177,6 +5177,18 @@ reproduced exactly).
 
 *Notes: [notes/2026-11-18-no-pg-no-model-walls.md](notes/2026-11-18-no-pg-no-model-walls.md), [notes/2026-11-19-far-goals-deep.md](notes/2026-11-19-far-goals-deep.md), [notes/2026-11-19-from-zero-explore.md](notes/2026-11-19-from-zero-explore.md), [notes/2026-11-19-queue-renorm-ab.md](notes/2026-11-19-queue-renorm-ab.md).*
 
+**Symbol precedences (exp84, exp85; 25 Nov, the user: Veroff tries many precedences; a staged portfolio, BliStr's
+difficulty window).** 121 orders of AIM's 9 symbols (the default and 120 random), replayed on the climber's
+captured final runs with abstract caps (identical inputs per order; work in considered pairs):
+* easy goals (60, proved in 1-5 abstract s): every order proves every goal; CPU totals within about 10%;
+* medium goals (30, 5-20 abstract s, cap 82,000 pairs): the default 29, the union 30; the best order saves 4% of the
+  total work; per goal the orders scatter about 20%, so k orders at a k-th of the budget lose (40,000 pairs: the
+  default 29, two orders at 20,000 each 18);
+* stalled goals (22 that orders 0 and 60 failed at 80,000), equal work: **the default at 320,000 proves 16, four
+  chosen orders at 80,000 each 6** (1 only they), 11.9 against 3.5 per CPU hour.
+* So in twee the precedence is a weak lever (a light-tailed re-randomisation); continuing a run beats restarting it
+  under another order. exp84's random precedences on unsolved targets found nothing either.
+
 The user: when a method loses 2 of the best method's proofs but adds 3 of its own, running both for a share of the
 time usually beats running the best one all the time. **The record agrees.** Since 12 Nov I decided almost every A/B by
 the better arm's count and called the second arm's unique proofs noise. Notes:
