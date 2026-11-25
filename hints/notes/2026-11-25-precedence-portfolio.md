@@ -49,3 +49,11 @@ Written 25 Nov 2026, 08:08 UTC.
   CPU on stalled unsolved goals (CLQ83's failures) before any production use.
 * Caveat: the dev goals are proved goals made unsolved in the context (their siblings' lemmas and the climbers'
   sketch hints still there); the use is on goals nobody has proved.
+
+## Capture and dev set (08:07-08:23)
+
+* Capture: 120 finals in 16 minutes, 76 proved within 40 CPU s in this context (without their own proofs; 44 failed).
+* Dev set (loops/P85C/dev.txt): 50 of the 120 (seed 85, from those proved with at least 1 CPU s or failed): 31 the
+  captured default proved (16 under 10 CPU s, 15 in 10-40 s: 11.8 to 38.5), 19 it failed at 40 s. So at the replay's
+  10 s cap the default proves about 16, and the other 34 are where other orderings can show what they add.
+* Replay from 08:23:17: 6,050 runs (50 x 121), -j 5, --cpu 10.
