@@ -887,7 +887,12 @@ makeContext hints prob = run (hints, prob) $ \(_, prob) -> do
   false   <- newFunction (withLabel "false" (name "false")) [] ty
   equals  <- newFunction (withLabel "equals" (name "equals")) [ty, ty] ty
 
-  let allFuns = usort $ [minimal, true, false, equals] ++ Jukebox.functions (hints, prob)
+  -- (e61l) the listened goals' own symbols (isListened) are numbered after all others, so the other symbols keep the
+  -- numbers they have without the listened goals (and the search of the run's own goal stays the same)
+  let mainFuns = usort $ [minimal, true, false, equals] ++
+                   Jukebox.functions (hints, [ inp | inp <- prob, not (isQuietGoal (tag inp)) ])
+      mainSet = Set.fromList mainFuns
+      allFuns = mainFuns ++ filter (`Set.notMember` mainSet) (usort (Jukebox.functions prob))
 
   return TweeContext {
     ctx_var = var,
@@ -900,6 +905,12 @@ makeContext hints prob = run (hints, prob) $ \(_, prob) -> do
     ctx_ids = Map.fromList (zip allFuns [0..]),
     ctx_saved = Map.empty }
 
+-- | (e61l) A listened goal (listen_*, Twee.isListened) or the credit rerun's goal (lgoal_*: climb.py renames a proved
+-- listened goal to rerun the same search as a real goal): left out of the precedence count, numbered after all other
+-- symbols and not flattened, so the problem's other goal searches exactly as without it
+isQuietGoal :: String -> Bool
+isQuietGoal t = isListened t || "lgoal_" `isPrefixOf` t
+
 flattenGoals :: Int -> Bool -> Bool -> Bool -> Int -> [Jukebox.Term] -> Problem Clause -> Problem Clause
 flattenGoals backwardsGoal flattenNonGround flattenAll full depthMod hints prob =
   run (hints, prob) $ \(_, prob) -> do
@@ -908,6 +919,8 @@ flattenGoals backwardsGoal flattenNonGround flattenAll full depthMod hints prob 
     return (prob ++ cs)
   where
     extraTerms prob = concatMap (input prob) prob
+    -- (e61l) a listened goal is not flattened: its definitions would be new axioms, and change the search
+    input _ inp | isQuietGoal (tag inp) = []
     input prob Input{what = Clause (Bind _ [Neg (x Jukebox.:=: y)])} =
       concatMap term (backwards backwardsGoal prob x) ++
       concatMap term (backwards backwardsGoal prob y)
@@ -1158,7 +1171,9 @@ runTwee globals (TSTPFlags tstp) horn precedence config0 flags@MainFlags{..} lat
         (fmap negate (elemIndex (base c) precedence))
         (maybeNegate (Map.findWithDefault 0 c funOccs))
     maybeNegate = if flags_flip_ordering then negate else id
-    funOccs = funsOcc prob
+    -- (e61l) symbol occurrences without the listened goals (isListened): otherwise their terms would change the
+    -- precedence, and with it the whole search of the run's own goal
+    funOccs = funsOcc [ inp | inp <- prob, not (isQuietGoal (tag inp)) ]
 #ifndef USE_LPO
     maxUnary =
       case filter (\(f, _) -> arity f == 1 && not (isType f)) (Map.toList funOccs) of
