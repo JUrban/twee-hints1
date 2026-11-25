@@ -135,6 +135,8 @@ class Loop:
         flags with the proof printed, so the rerun stops at that goal's proof. self.listened[name] gets (goal, output)
         for each rerun that printed a proof of it (exp/mgcredit89.py's check, by hand, on lra2aa__goal_427)"""
         got = [l.split()[1][len('listen_'):] for l in out.splitlines() if l.startswith('SOLVEDGOAL listen_')]
+        if '--load-state' in cmd:   # (a resumed search cannot be replayed from the problem; run_one adds none there)
+            got = []
         if not hasattr(self, 'listened'):
             self.listened = {}
         res = self.listened.setdefault(name, [])
@@ -146,6 +148,8 @@ class Loop:
             with open(p2, 'w') as f:
                 f.write(txt.replace(f'cnf(listen_{x},', f'cnf(lgoal_{x},'))
             c2 = [p2 if c == path else c for c in cmd if c != '--no-proof']
+            while '--dump-state' in c2:   # (never the goal's saved state: the rerun stops at X's proof)
+                i_ = c2.index('--dump-state'); del c2[i_:i_ + 2]
             t0 = time.time()
             try:
                 o2 = subprocess.run(c2, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, env=env_,
@@ -161,6 +165,28 @@ class Loop:
                   flush=True)
             if ok2:
                 res.append((x, o2))
+
+    def output_hints(self, name, out, L=None, G=None):
+        """the hints file rows of a proof's output: its lemmas and goal steps (and --aux), canonical, deduplicated
+        (run_one; climb.py and loop.py --listen for a listened goal's credit rerun)"""
+        if L is None:
+            L, G = hintlib.extract_hints(out)
+        sig = self.signature(name)
+        seen, hs = set(), []
+        for l, r in L + G:
+            if l == r:
+                continue
+            k = canon_key(l, r, sig)
+            if k[0] == k[1] or k in seen:
+                continue
+            seen.add(k); hs.append(k)
+        if self.a.aux:
+            for l, r in hintlib.extract_aux(out):
+                k = canon_key(l, r, sig)
+                if k[0] == k[1] or k in seen:
+                    continue
+                seen.add(k); hs.append(k)
+        return hs
 
     def hints_of(self, name):
         p = os.path.join(self.dir, 'hints', name)
@@ -850,20 +876,7 @@ class Loop:
         if ok:
             L, G = hintlib.extract_hints(out)
             sig = self.signature(name)
-            seen, hs = set(), []
-            for l, r in L + G:
-                if l == r:
-                    continue
-                k = canon_key(l, r, sig)
-                if k[0] == k[1] or k in seen:
-                    continue
-                seen.add(k); hs.append(k)
-            if self.a.aux:
-                for l, r in hintlib.extract_aux(out):
-                    k = canon_key(l, r, sig)
-                    if k[0] == k[1] or k in seen:
-                        continue
-                    seen.add(k); hs.append(k)
+            hs = self.output_hints(name, out, L, G)
             ax = set(givenlib.key(l, r, sig) for l, r in givenlib.axioms(name, path))
             pos = set(givenlib.key(l, r, sig) for l, r in L + G + hintlib.extract_hyp(out))
             rows = []

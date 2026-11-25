@@ -248,3 +248,9 @@ siblings as extra goals, credited by SOLVEDGOAL and a proof rerun), as a measure
   finish on e61l, and their credit reruns, on e61m, may not replay: then no record). CLS71 and CLQ83 finals started
   20:34-21:41 had a changed search; the three-arm hints A/B rows of that time are mixed.
 * **Next:** the cost with e61m (exp/listencost90m.sh), the same final with and without its listened goals.
+* **Shared code (25 Nov 22:00):** hintsel.listen_clauses (the choice of listened goals: nearest plain unsolved
+  siblings, Skolemised) and loop.output_hints (a proof output's hints rows, run_one's code) are used by climb.py; the
+  credit rerun drops `--dump-state` (it must never replace a goal's saved state) and a resumed run (`--load-state`) is
+  never credited. Test loops/LST90 (as LST89, twee-pg61l = e61m): goal 10's 20 s final credited goals 5, 7, 8 and 9
+  (LST89 with e61l: 5 and 6; e61l flattened the listened goals, which helps some of them, and changed the search);
+  goal 5's hints file byte-identical to LST89's.

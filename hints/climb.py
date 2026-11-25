@@ -718,39 +718,14 @@ def main():
         with lock:
             uns = [f'{o_}__goal_{m}' for m in allgoals.get(o_, ()) if f'{o_}__goal_{m}' != t
                    and f'{o_}__goal_{m}' not in lp.solved and f'{o_}__goal_{m}' not in LS]
-        res_ = []
-        for d_, m in sorted((abs(lemmas.split(m)[1] - n_), m) for m in uns):
-            if d_ > c.listen_dist or len(res_) >= c.listen:
-                break
-            try:
-                lits = hintsel.goal_lits(m)
-            except Exception:   # (a conditional or compound conjecture)
-                continue
-            if len(lits) != 1 or not lits[0][0]:
-                continue
-            _, l_, r_ = lits[0]
-            if any(x in l_ + r_ for x in ('=', '|', '&', '~', '>', '<', '!', '?')):
-                continue
-            sub = {v: f'sklg{len(res_)}_{v.lower()}' for v in set(re.findall(r'\b[A-Z][A-Za-z0-9_]*\b', l_ + ' ' + r_))}
-            f_ = lambda x: re.sub(r'\b[A-Z][A-Za-z0-9_]*\b', lambda q: sub[q.group(0)], x)
-            res_.append(f'cnf(listen_{m}, negated_conjecture, {f_(l_)} != {f_(r_)}).\n')
-        return res_
+        return hintsel.listen_clauses(t, uns, c.listen, c.listen_dist)
 
     def listen_record(t, x, o2):
         """(--listen) the records of listened goal X, proved in T's final and rerun with its proof printed, as for a
         target's real proof: the hints file (DIR/hints links to the live dir's), DIR/proofs/X.listen, used.tsv (tag
         listen:T, trust.py's record), solved.tsv (round 1), climb.tsv; the live dir's solved.tsv row is written by the
         main loop (listened_ok)"""
-        L_, G_ = hintlib.extract_hints(o2)
-        sig_ = hintlib.problem_signature(x)
-        seen_, hs_ = set(), []
-        for l_, r_ in L_ + G_:
-            if l_ == r_:
-                continue
-            k_ = loop.canon_key(l_, r_, sig_)
-            if k_[0] == k_[1] or k_ in seen_:
-                continue
-            seen_.add(k_); hs_.append(k_)
+        hs_ = lp.output_hints(x, o2)
         ua = next((ln.split()[1:] for ln in o2.splitlines() if ln.startswith('USEDAXIOMS')), None)
         if ua is None or not hs_ or any(u.startswith('assume_') for u in ua):
             print(f'{x} listened in the final of {t}: no usable record (USEDAXIOMS {ua is not None}, '
