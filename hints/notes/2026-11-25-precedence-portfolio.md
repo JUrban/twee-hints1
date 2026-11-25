@@ -156,3 +156,14 @@ space is 9! = 362,880 orders, so after stage 2 that step is the way to new order
   exp85's partial replay (goals needing 10-40 s, 10,000-pair cap) had 2 of 5 proved goals proved only by non-default
   orders. Next: the same stage on goals of medium difficulty (the better work of orders 0 and 60 in 5-30 abstract s),
   with a 40 abstract s cap, so the measure is far above its floor.
+
+## exp85d: medium-hard goals (10:23)
+
+* abs/exp85d.sh, exp/exp85d.sh, bash 4122881 from 10:23:57; rows in loops/P85C/pre40.tsv and loops/P85C/replay40.tsv.
+* Goals: exp85's 120 candidates (hard ones: the climber's targets; captures already in loops/P85C/cap, context t0758
+  without them). Pre-pass: orders 0 and 60 at `--abstract 40` (80,000 pairs), `--cpu 120` safety cap, -j 10.
+* Dev set: the goals whose lesser work of the two lies in [10000, 40000] pairs (5-20 abstract s, far above the 2000-pair
+  step); at most 30 (seed 85). Replay: all 121 orders at `--abstract 40`, -j 10 (at most 3,630 runs).
+* Question: on goals that need 5-20 abstract s, do orders other than the default prove goals the default misses
+  within 40 abstract s, or prove them much faster (the user's dominance)? If so, the greedy and cost portfolios
+  pick the complementary ones for stage 2 (a bigger random set); if not, precedences are not worth a portfolio slot.
