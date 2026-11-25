@@ -225,3 +225,26 @@ siblings as extra goals, credited by SOLVEDGOAL and a proof rerun), as a measure
   (CLS71); its proof rerun took 364 s; hints file loops/UL/hints/nslm_to_aa1__goal_1256 (243 lines) at 21:17:32, one
   loops/UL solved.tsv row, a used.tsv row naming its lemma_ and true_ premises. trust.py (loops/TRUSTNOW/t2118): trusted;
   49,828 solved, 0 untrusted.
+
+## exp90: listened goals changed the search (25 Nov 21:10-21:42)
+
+* **Question:** what do a final's listened goals cost? exp/listencost90.sh: CLS71's 160 s final of
+  nsmr_to_aa1__goal_893 (8 listened goals; its problem, hints and rule-goal file copied while it ran), run with and
+  without the listen_ lines, the same flags.
+* **twee-e61l, 320,000 pairs:** with them 69,936 rules, 342 CPU s; without 49,581 rules, 552 CPU s. Not a cost but a
+  different search: the target's own final was not the final it would have had.
+* **Cause, by elimination** (40,000-pair runs; a bare run without model, hints or parental filter: 13,372 rules
+  against 7,676): not the rule model, the hints or the filter. Two fixes left it unchanged: leaving listened goals out of
+  the occurrence count behind the precedence, and numbering their own symbols last. The cause is twee's goal
+  flattening (`--flatten-goal`, on by default): every negated goal's ground subterms become new definition axioms, the
+  listened goals' too.
+* **twee-e61m** (e61-listen 0031f9a): listened goals (listen_*) and the credit rerun's goal (lgoal_*, so that the rerun
+  is the same search) are not flattened, are left out of the precedence count, and their symbols are numbered last.
+  Tests: production flags with and without the 8 listened goals: the same 16,724 lines of given rules; e61m without
+  listened goals byte-identical to e61 on 5 problems (proofs printed, with and without hints); nil3_26__goal_10 with
+  goals 5 and 6 listened: both reported (pairs 1 and 37), each credit rerun stops at the same pair and prints its
+  lgoal_ proof.
+* **Deployed:** /project/bin/twee-pg61l execs twee-e61m from 21:41:49 (no climber restart; finals already running
+  finish on e61l, and their credit reruns, on e61m, may not replay: then no record). CLS71 and CLQ83 finals started
+  20:34-21:41 had a changed search; the three-arm hints A/B rows of that time are mixed.
+* **Next:** the cost with e61m (exp/listencost90m.sh), the same final with and without its listened goals.

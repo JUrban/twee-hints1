@@ -1,0 +1,3 @@
+#!/bin/bash
+# twee-pg61l: (25 Nov from 21:41) twee-e61m (e61-listen, listened goals leave the search unchanged); 20:20-21:41 twee-e61l
+exec /project/bin/twee-e61m "$@" $TWEE_PG_ARGS

@@ -159,7 +159,8 @@ proofs in 63 minutes.
 same time. Production also keeps the old climbs' hints as members sk@0 and sk@1:0.
 **The climber: abs/cls71i.sh (exp71; the 160 s rung of exp87),** climb.py --live into loops/UL, record loops/CLS71, **climb.py
 46097 since 25 Nov 20:49** (listen fixed: climb.py 43358 from 20:34 listened to 6 goals production had solved and overwrote
-their hints files, restored; cls71h.sh plus **`--listen 8`** with **twee-e61l** (`--twee /project/bin/twee-pg61l`): each final
+their hints files, restored; cls71h.sh plus **`--listen 8`** with **twee-e61m** from 21:41:49 (twee-e61l before, whose
+listened goals changed the search, exp90) (`--twee /project/bin/twee-pg61l`): each final
 carries up to 8 unsolved plain-equation siblings within 10 as listened goals, credited when proved, exp89; climb.tsv row 34179
 on; cls71h.sh, climb.py 16524, ran 18:46-20:34) (cls71e.sh plus **`--final-hints-ab`**: the finals in three arms by (crc32 >> 3) % 3 of the
 target's name, the pool hints, the sketch hints only, the sketch hints and the 10 nearest solved siblings' proof steps,

@@ -246,6 +246,7 @@ Repositories and directories:
 | e62 | 19 Nov 17:07 | e61 plus `--pg-order F` (exp35): a new pair's score × F ** sigmoid(q1 + q2), from the parents' stored rule-model scores, two lookups per pair; F = 1 (default) byte-identical to e61 on 3 goals. Wrapper `twee-pg62` (e62 with $TWEE_PG_ARGS) |
 | e63 | 23 Nov 15:59 | e62 plus `--lazy-lemmas`: axioms named lemma_* wait in a list by critical-pair score (times `--lazy-lemma-factor`, default 1) and become active when at most the best queued pair's score; startup at 1,575 axioms 8.1 s -> 1.2 s. Off: byte-identical to e62 on 3 goals. Not kept in --dump-state |
 | e61l | 25 Nov 20:20 | e61 (7e0c271) plus listened goals (branch e61-listen, 82f5b92): a negated conjecture named listen_* prints SOLVEDGOAL when proved and is never a solution (no stop, RESULT, proof or hints of it); without listen_ goals byte-identical to e61 on 6 captured problems, proofs printed. Wrapper twee-pg61l. For climb.py --listen (exp89). |
+| e61m | 25 Nov 21:38 | e61l plus: a listened goal (listen_*) or a credit rerun's goal (lgoal_*) is not flattened (twee's default goal flattening made each a set of new definition axioms), is left out of the occurrence count behind the precedence, and its own symbols are numbered after all others (e61-listen 0031f9a). With 8 listened goals the given rules are the same as without (16,724 lines, production flags); without them byte-identical to e61 on 5 problems; the credit rerun stops at the same pair. twee-pg61l runs it from 21:41:49. |
 
 Wrappers: `twee-pg` (e48 with $TWEE_PG_ARGS), `twee-pg50` (e50 with $TWEE_PG_ARGS; production until 18 Nov 07:30), `twee-pg61` (e61 with $TWEE_PG_ARGS; production since 18 Nov 07:30).
 
@@ -795,6 +796,13 @@ ul75 5, XFL 1. REPORT's totals table
 has the history (user, 20 Nov: "update the total numbers in the report etc every now and then").
 
 Next:
+0000000000000000000000000000000000000000000000000000000000000000000000000000000. **exp90 (25 Nov 21:10-21:42, [notes/2026-11-25-time-ladder.md](notes/2026-11-25-time-ladder.md), "exp90"): listened goals
+   changed the search.** The question: what 8 listened goals cost a 160 s final (exp/listencost90.sh; CLS71's final of
+   nsmr_to_aa1__goal_893, copied, run with and without them). With twee-e61l, at 320,000 pairs: 69,936 rules and 342 CPU s
+   with them against 49,581 and 552 without, a different search. Cause: twee flattens every negated goal into new
+   definition axioms (flatten-goal, on by default), listened ones too. Fix twee-e61m (also the precedence count and the
+   symbol numbers): the same given rules with and without them. twee-pg61l runs e61m from 21:41:49; the finals started
+   20:34-21:41 ran a changed search. The cost with e61m: exp/listencost90m.sh, below.
 000000000000000000000000000000000000000000000000000000000000000000000000000000. **exp26 reading (25 Nov 21:21, [notes/2026-11-19-queue-renorm-ab.md](notes/2026-11-19-queue-renorm-ab.md)):** production's
    A/B on half the goals' deep runs (`--cp-renormalise-threshold 1000`, no queue renormalisation) over its last
    180,000 results: B 648 proofs in 291.4 CPU h (2.22 per CPU h) against A 615 in 317.8 (1.93), +15%; ahead in each of
