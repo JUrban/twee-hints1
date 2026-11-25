@@ -280,6 +280,8 @@ def main():
     # nearest proven goal below first: CLS71's targets whose 20 s final failed get one climb with the current final time
     # (exp76: 160 s finals proved 2 of 30 such targets)
     ap.add_argument('--reclimb', default='', help='--live: goals that may be climbed once more (fewer than 2 finals)')
+    # (25 Nov) the time ladder: a rung re-runs goals that already had finals in this dir
+    ap.add_argument('--reclimb-max', type=int, default=2, help='--reclimb: while fewer than N finals in DIR (default 2)')
     ap.add_argument('--cpus', type=int, default=0,
                     help='--live: start a climb only while fewer than N twee processes run on the machine '
                          '(own ones included), so the climber fills the CPUs the loop leaves idle; -j caps it')
@@ -970,7 +972,7 @@ def live(c, a, lp, gl, pools, ix, climb, out, lock):
         if RECL:   # (--reclimb) after the new targets
             rs = set(res)
             res += sorted((n for n in RECL if n not in S and n not in skip and n not in busy and n not in rs
-                           and nclimb[n] < 2), key=lambda n: (dist(n), n))
+                           and nclimb[n] < c.reclimb_max), key=lambda n: (dist(n), n))
         if not c.reclimb_heads:
             return res
         # (--reclimb-heads N) each original's first unsolved goal, climbed up to N times (the climbs are randomized
