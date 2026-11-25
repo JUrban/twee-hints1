@@ -120,3 +120,16 @@ space is 9! = 362,880 orders, so after stage 2 that step is the way to new order
     with two orders standing in for all); at most 60 (seed 85). Selecting on order 0 and 60 favours those two a little;
   * replay: all 121 orders at `--abstract 10` (20,000 pairs, twice the window's top, so an order twice as slow as the
     better of the two still proves), `--cpu 60` safety cap, -j 5. About 60 x 121 runs; expected 2-3 hours.
+
+## exp85b pre-pass (09:36) and the resolution of twee's work count
+
+* Capture and pre-pass were quick (09:22:51-09:36:47): 295 of 300 proved by order 0 or 60 at 40,000 pairs; the
+  lesser work in [500, 10000] for 191, under 500 for 91, over 10,000 for 13; dev set 60 (loops/P85D/dev.txt). Replay
+  from 09:36:47: 7,260 runs.
+* **The work count is coarse.** Of 588 pre-pass proofs, 198 show exactly 2,000 considered pairs, 55 show 0, and 2001-2009
+  are common. twee rechecks the goals at most once per abstract second (recomputeGoals, `newTask 1 0.02` in Twee.hs;
+  src/Twee/Task.hs: a task runs at most once per its frequency in seconds of the abstract clock), which is 2,000 pairs
+  with `--abstract-time 2000`; a proof found by that recheck is seen only then. Others are seen at once (126, 132, ...).
+  So work is measured to about one abstract second. exp/prec_portfolio.py now rounds work up to steps of `--level
+  2000` pairs, so equal steps are ties (BliStr's best-on counts every tied order); the dominance and cost views use
+  the rounded values. BliStr's window [500, 10000] on the best value thus means: proved within 1 to 5 abstract s.

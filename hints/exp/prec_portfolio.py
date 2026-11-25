@@ -17,6 +17,7 @@ def opt(k, d):
     return A[A.index(k) + 1] if k in A else d
 P = A[0]
 K, R = int(opt('--k', 24)), int(opt('--redundancy', 2))
+LEVEL = int(opt('--level', 2000))
 C = float(opt('--cpu', 1e9))
 O = opt('--orders', '/project/twee/hints/exp/sets/exp85.orders')
 lists = {l.split('\t')[0]: l.rstrip('\n').split('\t')[1] if '\t' in l else '' for l in open(O) if l.strip()}
@@ -27,7 +28,11 @@ for l in open(P):
     if len(w) >= 4:
         res[w[0]][w[1]] = (w[2] == 'THM' and float(w[3]) <= C, float(w[3]))
         if len(w) >= 6 and w[5] != '-':
-            work[(w[0], w[1])] = int(w[5])
+            # (25 Nov) --level L: work rounded up to whole steps of L pairs. twee rechecks the goals at most once per
+            # abstract second (the recomputeGoals task, Twee.hs; 2000 pairs with --abstract-time 2000), so a proof
+            # found there shows about 2000, 4000, ...: finer differences are not measured; equal steps are ties
+            x = int(w[5])
+            work[(w[0], w[1])] = -(-x // LEVEL) * LEVEL if LEVEL > 1 else x
 G = sorted(g for g in res if len(res[g]) == len(lists))
 ids = sorted(lists, key=int)
 pr = {o: {g for g in G if res[g][o][0]} for o in ids}
