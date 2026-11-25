@@ -124,7 +124,8 @@ proofs in 63 minutes.
     HLW1's problems (cond/HLW1: 20 proofs in 936 runs, 0.90 per CPU h).
   * plainlive5 had dropped L (5 s, 100+30 siblings, 400 kNN ranked by lr2): 4 proofs in 18 h of run time since 12:38
     ([notes/2026-11-23-tail-allocation.md](notes/2026-11-23-tail-allocation.md)).
-* **The time ladder's 640 s rung, CLQ83 (exp87):** abs/clq87c.sh with CPUS=23, climb.py 4160478 since 25 Nov 15:29 (`--share loops/CLS71`:
+* **The time ladder's 640 s rung, CLQ83 (exp87):** abs/clq87d.sh with CPUS=23, climb.py 46658 since 25 Nov 20:51 (clq87c.sh plus
+  `--listen 8` with twee-pg61l, as CLS71; clq87c.sh, climb.py 4160478, ran 15:29-20:51) (`--share loops/CLS71`:
   CLS71's sketch and fill hints too): a full climb (20 sketch
   runs of 5 s, fills) and then a 640 abstract s final
   (1.28M pairs, --max-cpu 6400), on sets/ladder640.re (561 unsolved goals that failed 160 s finals), nearest proved goal first,
@@ -156,7 +157,8 @@ proofs in 63 minutes.
 4.7 CPU h (clhl3.sh before it, 18:44-21:07: 0 in 4.1). Its targets were the heads exp67's arms and controls climb at the
 same time. Production also keeps the old climbs' hints as members sk@0 and sk@1:0.
 **The climber: abs/cls71i.sh (exp71; the 160 s rung of exp87),** climb.py --live into loops/UL, record loops/CLS71, **climb.py
-43358 since 25 Nov 20:34** (cls71h.sh plus **`--listen 8`** with **twee-e61l** (`--twee /project/bin/twee-pg61l`): each final
+46097 since 25 Nov 20:49** (listen fixed: climb.py 43358 from 20:34 listened to 6 goals production had solved and overwrote
+their hints files, restored; cls71h.sh plus **`--listen 8`** with **twee-e61l** (`--twee /project/bin/twee-pg61l`): each final
 carries up to 8 unsolved plain-equation siblings within 10 as listened goals, credited when proved, exp89; climb.tsv row 34179
 on; cls71h.sh, climb.py 16524, ran 18:46-20:34) (cls71e.sh plus **`--final-hints-ab`**: the finals in three arms by (crc32 >> 3) % 3 of the
 target's name, the pool hints, the sketch hints only, the sketch hints and the 10 nearest solved siblings' proof steps,

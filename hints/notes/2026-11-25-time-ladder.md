@@ -201,3 +201,23 @@ siblings as extra goals, credited by SOLVEDGOAL and a proof rerun), as a measure
   43358 (bash 43355) from 20:34:08, log line 3181, climb.tsv row 34179 on. Its first finals carried 1-6 listened goals.
   The three-arm hints A/B goes on (listen applies to every arm). CLQ83 as abs/clq87d.sh when its two oldest 640 s finals
   (over 5,000 s in) end.
+
+### The listen bug (20:34-20:49) and its fix
+
+* **What went wrong:** the first deployed CLS71 (climb.py 43358) listened to goals production had already solved and
+  recorded 6 of them (nil3_30 goals 549-552 and 575, nil3_31 goal 502; climb.tsv rows 34179-34349, tag listen). A live
+  climber's lp.solved lacks the live dir's proofs from its own (re)start until its first refresh, and listen_record
+  wrote DIR/hints/<goal>, which is production's file (DIR/hints links to loops/UL/hints): 6 of production's hints files
+  were replaced by the listened proofs' hints (1 to 71 lines instead of 5 to 230). No solved.tsv row was added in
+  loops/UL (the live loop's check against its own solved set held).
+* **Repair:** the 6 files restored from loops/LST89/hints, copied from loops/UL/hints at 20:32:40, before the first
+  overwrite at 20:39:11 (their kept outputs in loops/UL/r5/out are from 23-25 Nov, so production had not rewritten them
+  since). The overwritten versions are kept in the session scratch. The 6 used.tsv rows (listen:<target>) stay: each is
+  a real proof whose premises are listed, so trust.py takes it as one more record of a goal that already has records.
+* **Fix** (climb.py, 20:49): live_solved() reads the live dir's solved.tsv afresh (at most once a minute, and afresh
+  before each record); listen_lines leaves those goals out; listen_record also refuses any goal that has a hints file.
+  CLS71 restarted at 20:49:35 (climb.py 46097, log line 3212, climb.tsv row 34350 on), CLQ83 as clq87d.sh at 20:51:31
+  (climb.py 46658, log line 2158, climb.tsv row 2678 on; its two oldest finals had ended at their CPU cap). In the 9
+  finals started since, all 22 listened goals were unsolved in production.
+* **For counting:** listened proofs are climb.tsv rows tagged listen from row 34350 (CLS71) and row 2678 (CLQ83); the
+  6 earlier rows are not new proofs.

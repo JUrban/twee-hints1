@@ -696,13 +696,28 @@ def main():
 
     tgroups = {}
 
+    live_sv = {}
+    def live_solved():
+        """(25 Nov 20:50) the live dir's solved goals, read afresh at most once a minute: lp.solved lacks the live dir's
+        proofs since DIR's copy of its solved.tsv until the first refresh after a (re)start, and --listen must neither
+        listen to nor record a goal already solved there (it did, 20:34-20:49, and overwrote 6 of production's hints
+        files; restored from loops/LST89's 20:32 copies)"""
+        if not c.live:
+            return set()
+        with lock:
+            if time.time() - live_sv.get('t', 0) > 60:
+                live_sv['S'] = {l.split('\t', 1)[0] for l in open(os.path.join(c.live, 'solved.tsv'))}
+                live_sv['t'] = time.time()
+            return live_sv['S']
+
     def listen_lines(t):
         """(--listen K) up to K of T's original's unsolved goals, nearest by goal number within --listen-dist, whose
         conjecture is one plain equation, as negated, Skolemised clauses named listen_<goal>"""
         o_, n_ = lemmas.split(t)
+        LS = live_solved()
         with lock:
             uns = [f'{o_}__goal_{m}' for m in allgoals.get(o_, ()) if f'{o_}__goal_{m}' != t
-                   and f'{o_}__goal_{m}' not in lp.solved]
+                   and f'{o_}__goal_{m}' not in lp.solved and f'{o_}__goal_{m}' not in LS]
         res_ = []
         for d_, m in sorted((abs(lemmas.split(m)[1] - n_), m) for m in uns):
             if d_ > c.listen_dist or len(res_) >= c.listen:
@@ -742,8 +757,12 @@ def main():
                   f'{len(hs_)} hints)', flush=True)
             return
         used_ = sorted(u for u in ua if u.startswith(('lemma_', 'true_')))
+        live_sv['t'] = 0   # (a fresh read: X may have been proved there during this final)
+        LS = live_solved()
         with lock:
-            if x in lp.solved:
+            if x in lp.solved or x in LS or os.path.exists(os.path.join(c.dir, 'hints', x)):
+                # (never replace a hints file: DIR/hints is the live dir's)
+                print(f'{x} listened in the final of {t}: solved meanwhile, not recorded', flush=True)
                 return
             lp.solved[x] = (1, 0.0)
             with open(os.path.join(c.dir, 'hints', x), 'w') as hf:

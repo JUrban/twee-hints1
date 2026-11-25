@@ -806,6 +806,10 @@ Next:
    loops/LST89 (nil3_26 goals 5-10 unsolved there): goal 10's final proved 5 and 6 as listened goals, records right.
    CLS71 restarted as cls71i.sh (--listen 8, twee-pg61l; 43358, climb.tsv row 34179 on); CLQ83 follows (clq87d.sh) when
    its two oldest 640 s finals end.**
+   **(20:49) listen bug: the first CLS71 listened to 6 goals production had solved (a live climber's lp.solved lags the
+   live dir until its first refresh) and overwrote their hints files in loops/UL/hints; restored from LST89's 20:32
+   copies. Fix: live_solved() rereads the live dir's solved.tsv; never replace a hints file. CLS71 restarted 20:49
+   (46097), CLQ83 as clq87d.sh 20:51 (46658); since, 22 listened goals, all unsolved. Notes "The listen bug".**
 0000000000000000000000000000000000000000000000000000000000000000000000000000. **exp88 (do the hints slow the long runs down?, [notes/2026-11-25-time-ladder.md](notes/2026-11-25-time-ladder.md), "exp88"):**
    the user asked whether twee needs a speed-up for long runs and whether many hints slow them. GC: 91% productive at
    320,000 pairs, -A64m/-A256m slower. Profile at 160,000 pairs: making pairs 59%, rewriting 49%, renormalisation 23%,
