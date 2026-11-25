@@ -62,8 +62,13 @@ added) is [notes/production-history.md](notes/production-history.md), generated 
 Everything below writes proofs into **loops/UL**, production's solved list. The totals above count only what
 exp/trust.py trusts.
 
-**1. The main loop: abs/ul85.sh.** loop.py, PID 4160713, since 25 Nov 15:30: ul84 with loops/CLQ83 in `--climb-hints`, so its
-sketch members also read the 640 s rung's sketch and fill hints ([notes/2026-11-25-time-ladder.md](notes/2026-11-25-time-ladder.md)).
+**1. The main loop: abs/ul86.sh.** loop.py, PID 64717, since 25 Nov 22:18: ul85 plus **`--listen 300`** with **twee-e61m**
+(`--twee /project/bin/twee-pg61l`): each twee run (not Prover9, unfold or resumed runs) also listens to its original's
+unsolved plain goals; one proved there is rerun as a real goal with its proof printed and recorded as production's proof
+(results level `listen`); the search is the same as without, +4.6% CPU for 120 listened goals (exp90,
+[notes/2026-11-25-time-ladder.md](notes/2026-11-25-time-ladder.md), "Production listening"). ul85 (15:30-22:18) was
+ul84 with loops/CLQ83 in `--climb-hints`, so its sketch members also read the 640 s rung's sketch and fill hints; its
+last line: 7,850 runs, 16 new in 24,425 s.
 ul84 24 Nov 11:23-25 Nov 15:30 (ul83 07:34-11:23, ul82 04:57-07:34, ul81
 02:56-04:57, ul80 02:19-02:56, ul79 01:15-02:18, ul78 from 23 Nov 23:43, ul77 from 23:24, ul76 from 21:14), all 51,784
 problems, **4 workers** (2 from 07:34, 4 from 04:57, 6 before). ul84 is ul83 with J=4: since the climber's 160 s finals

@@ -805,6 +805,8 @@ Next:
    20:34-21:41 ran a changed search. The cost with e61m: exp/listencost90m.sh, below.
    **Cost with e61m (same final, same search): 8 listened goals +1.2% CPU, all 120 of nsmr_to_aa1 +4.6%. CLS71 as
    cls71j.sh from 22:03 (`--listen 300 --listen-dist 100000`: all unsolved plain siblings), climb.py 60285; CLQ83 follows.**
+   **(22:18) production as ul86 (abs/ul86.sh): ul85 plus `--listen 300` with twee-pg61l (e61m); loop.py 64717. Its first
+   runs carry 6-271 listened goals. Tested in loops/LSTP90 (notes "Production listening").**
 000000000000000000000000000000000000000000000000000000000000000000000000000000. **exp26 reading (25 Nov 21:21, [notes/2026-11-19-queue-renorm-ab.md](notes/2026-11-19-queue-renorm-ab.md)):** production's
    A/B on half the goals' deep runs (`--cp-renormalise-threshold 1000`, no queue renormalisation) over its last
    180,000 results. **Corrected 22:05:** my first table filtered on results.tsv's `t=` column, which is the time since
