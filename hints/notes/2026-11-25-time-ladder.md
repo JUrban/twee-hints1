@@ -114,3 +114,29 @@ without --share): --final-nopool-ab plus --share loops/CLQ83 (the 47,142 sketch 
 (bash 13712), from 18:30:29; log line 3064, climb.tsv row 33302 on. Checked on the running finals: no-pool finals
 carry 395-568 sketch hints, the others 4,080-7,767 hints. Reading: finals, proofs and CPU h per arm (bit 3), split by
 bit 2, from row 33302.
+
+## exp88b: the 10 nearest siblings' proof steps as the hints (25 Nov 18:33-18:46)
+
+**Correction to exp88.** The 22 captures' pool hint files hold 6,939-26,863 hints (median
+14,741), not 7,500-10,000 (that was 6 of them).
+
+**Setup.** exp/nearhints88.py: each capture with its hints file replaced by the proof steps (loops/UL/hints) of the 10
+solved siblings nearest by goal number, nearest first, deduplicated; only siblings whose hint file is older than the
+capture's (solved before it). 320-2,675 hints (median 976). Same 160,000 pairs, lemmas, rule model
+and PG. loops/P85C/exp88b/near10.tsv.
+
+**Result.** Within 160,000 pairs: **pool 11, none 10, 10 nearest 12**; pool and none together 14, all three
+16. The 10 nearest against the pool: +3 -2; against none: +4 -2; proved by the 10
+nearest alone: com_Ralt__goal_411, lra2aa__goal_426. Median pairs per CPU s past 100,000 pairs: 1228 (pool 887, none 1,078).
+
+**Reading.** A small, near hint set is at least as good as the full pool here, and cheaper per pair; the three hint
+choices are complementary (16 of 22 together against 11 for the pool). 22 goals: the single-arm differences (12, 11, 10)
+are noise; the complementarity is not.
+
+**Change (18:46).** climb.py `--final-hints-ab`: the finals in three arms by (crc32 >> 3) % 3 of the target's name: 0 the
+pool hints, 1 the sketch hints only, 2 the sketch hints and the 10 nearest solved siblings' proof steps (near_hints, the
+same selection as nearhints88.py, from the loop's current solved set). CLS71 restarted as abs/cls71h.sh
+(exp/prod/side/cls71h.sh) in place of cls71g.sh (18:30:29-18:46:16, --final-nopool-ab: 9 finals, no proof): climb.py
+16524 (bash 16521) from 18:46:16, log line 3076, climb.tsv row 33404 on. Checked on the running finals: near10 finals
+carry 569-3,701 hints, pool finals 4,056-8,939. Reading: exp/hintarms88.py (finals, proofs, final CPU h per arm, split by
+--final-only-ab).

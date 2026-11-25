@@ -252,6 +252,10 @@ def main():
     # (their own climb's and their siblings'); without the production hints, 22 stalled goals at 160,000 pairs proved
     # 10 against 11 with them, 14 together, in fewer pairs on 6 of the 7 both proved (notes/2026-11-25-time-ladder.md)
     ap.add_argument('--final-nopool-ab', action='store_true', help='finals of targets with bit 3 of crc32 set: sketch hints only, no pool hints (A/B test)')
+    # (25 Nov) --final-hints-ab: three arms by (crc32 >> 3) % 3 of the target's name: 0 the pool hints (the default), 1 the
+    # sketch hints only (as --final-nopool-ab), 2 the sketch hints and the proof steps of the 10 solved siblings nearest by
+    # goal number: on 22 stalled goals at 160,000 pairs the pool proved 11, none 10, the 10 nearest 12, all three 16 (exp88b)
+    ap.add_argument('--final-hints-ab', action='store_true', help='finals in three arms by (crc32 >> 3) %% 3: pool hints, sketch hints only, sketch + 10 nearest siblings (A/B test)')
     ap.add_argument('--move-eps', type=float, default=0.1, help='--move-model: share of uniformly random moves')
     ap.add_argument('--up-single', action='store_true', help='--updown: going up also adds one assumption at a time')
     ap.add_argument('--up-levels', type=int, default=2, help='--up-single: levels of one-more-axiom')
@@ -488,8 +492,10 @@ def main():
         hints = hs + [h for h in lp.hints_for(t, pools, None) if h not in seen[o]]
         if tag == 'final':
             lp.capture_given.add(t)
-        if tag == 'final' and nopool(t):
+        if tag == 'final' and (nopool(t) or hints_arm(t) == 1):
             hints = hs
+        elif tag == 'final' and hints_arm(t) == 2:
+            hints = hs + [h for h in near_hints(t) if h not in seen[o]]
         # (23 Nov) each run's printed proof as DIR/proofs/<t>.<tag> (.weak for a weakened goal): sketch proofs are kept
         # as data, and none overwrites the final run's real proof (a target's runs are sequential in one thread)
         if not hasattr(lp, 'proof_name'):
@@ -678,6 +684,26 @@ def main():
         """--final-nopool-ab: the targets whose finals get the sketch hints only (bit 3 of crc32 of the target's name)"""
         import zlib
         return c.final_nopool_ab and (zlib.crc32(t.encode()) >> 3) % 2 == 1
+
+    def hints_arm(t):
+        """--final-hints-ab: 0 pool hints, 1 sketch hints only, 2 sketch hints and the 10 nearest siblings' (None: off)"""
+        import zlib
+        return (zlib.crc32(t.encode()) >> 3) % 3 if c.final_hints_ab else None
+
+    def near_hints(t, k=10):
+        """the proof steps (loops/UL/hints) of the K solved siblings of T nearest by goal number, nearest first, deduplicated
+        (exp/nearhints88.py's selection)"""
+        o_, n_ = t.rsplit('__goal_', 1)
+        with lock:
+            sib = sorted((abs(int(m.rsplit('__goal_', 1)[1]) - int(n_)), m) for m in lp.solved
+                         if m != t and m.startswith(o_ + '__goal_') and m.rsplit('__goal_', 1)[1].isdigit())
+        out_, seen_ = [], set()
+        for _, m in sib[:k]:
+            for h in lp.hints_of(m):
+                h = tuple(h[:2])
+                if len(h) == 2 and h not in seen_:
+                    seen_.add(h); out_.append(h)
+        return out_
 
     def nruns(t):
         """--final-only-ab: 0 sketch runs (the final only) on targets with bit 2 of crc32 set, else --runs"""

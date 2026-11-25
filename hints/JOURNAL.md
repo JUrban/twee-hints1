@@ -795,6 +795,10 @@ Next:
    on the 22 exp85 dev goals at 160,000 pairs, without hints 10 proofs, with 11, both 7, union 14, fewer pairs on 6 of 7.
    **(18:30) climb.py --final-nopool-ab (bit 3 of crc32: finals with sketch hints only); CLS71 restarted as cls71g.sh with it
    and --share loops/CLQ83 (13715, climb.tsv row 33302 on). Reading per arm.**
+   **exp88b (18:33-18:44): the 10 nearest solved siblings' proof steps as the hints (320-2,675; the pool 6,939-26,863): 12 of
+   the 22 within 160,000 pairs (pool 11, none 10; all three 16), 1,228 pairs per CPU s. (18:46) climb.py --final-hints-ab,
+   three final arms by (crc32 >> 3) % 3: pool, sketch hints only, sketch + 10 nearest; CLS71 restarted as cls71h.sh
+   (16524, climb.tsv row 33404 on; cls71g's 9 finals, no proof). Reading: exp/hintarms88.py.**
 000000000000000000000000000000000000000000000000000000000000000000000000000. **exp87 (the time ladder over all unsolved goals, [notes/2026-11-25-time-ladder.md](notes/2026-11-25-time-ladder.md)).**
    (15:08) The user: harder goals need more time. Unsolved goals had a median 0.34 CPU h in all, the longest run 5-17 min for most;
    production's 80-320 s levels got 17 runs since yesterday. Rungs: CLS71 160 s on 1,465 goals, CLQ83 640 s on 561 (abs/clq87.sh).
