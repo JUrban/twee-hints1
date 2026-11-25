@@ -24,3 +24,16 @@
 * **Rule (pre-registered):** keep while at 1 proof per CPU h or more after 8 CPU h (exp83b's rule); else stop and
   restore abs/clq83.sh. The comparison: CLQ83's 40 s finals on the same heads (3.01, but on the easier ones first) and
   CLS71's re-climbs (final-only 0.86 per CPU h).
+
+## Result (14:27; loops/CLQ83/climb.tsv from row 2038, figures from the rows)
+
+* **3 proofs in 52 finals, 8.13 CPU h: 0.37 per CPU h**, below the rule's 1. Stopped 14:28 (the 10 running finals
+  killed); abs/clq83.sh restored (EXCLUDE=sets/clq83b.excl, 40 s finals, -j 3, --cpus 23; climb.py 4153356 from
+  14:28:10, log from line 2099).
+* Proved: nslm_to_aa1__goal_1073 and 1067 (about 340 CPU s each), aK2_eq_aK3_a__goal_550; all three in loops/UL with
+  hints. 49 failed; final CPU median 529 s, max 1,602 s (the 1,600 s cap).
+* The queue put the heads nearest a proved goal first, so the rest of the 576 would likely do worse.
+* **Reading.** On real unsolved heads that failed the 40 s final, continuing to 160 abstract s yields 0.37 per CPU h,
+  against 11.9 on exp85e's known-provable goals: that figure was the selection, not the method. The 40 s stage already
+  took most of what a longer run of the same setting can find; the unsolved tail needs other inputs (new hints,
+  lemmas, or a different search), not more time with the same ones. Kept as a negative.

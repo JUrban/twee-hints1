@@ -791,6 +791,8 @@ Next:
 00000000000000000000000000000000000000000000000000000000000000000000000000. **exp86 (long finals on the 576 local heads, [notes/2026-11-25-long-finals-heads.md](notes/2026-11-25-long-finals-heads.md)).**
    (13:34) Production dry since 10:00, both climbers idle; 576 unsolved local heads only ever had CLQ83's 40 s final. CLQ83
    restarted (abs/clq86.sh) with the 160 abstract s final and --reclimb sets/exp86.heads, -j 10; keep at 1 per CPU h after 8 CPU h.
+   **(14:27) 3 proofs in 52 finals, 8.13 CPU h (0.37 per CPU h): stopped, abs/clq83.sh restored. More time with the same inputs
+   does not open the tail; exp85e's 11.9 came from known-provable goals.**
 0000000000000000000000000000000000000000000000000000000000000000000000000. **exp85 (a portfolio of symbol precedences, [notes/2026-11-25-precedence-portfolio.md](notes/2026-11-25-precedence-portfolio.md)):**
    the user: Veroff tries all precedences (120?); build a portfolio of the most complementary ones in randomized
    stages. Stage 1: 121 orderings (default + each order of a,k,l,r,t once, m,ld,rd,e at random places) on up to 50
