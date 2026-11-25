@@ -61,3 +61,15 @@ below first, sharing the 20-process budget (each starts a run only while fewer t
   4160707) from 15:30:10, J=4, log loops/UL85.log. Its climb hints rose from 121,325 steps and 6,036 fill lemmas to
   122,371 and 6,078 at the first rescan.
 * (3) `exp/hintdata_build.py --climbs` (now skipping exp85's copies P85C/P85D), from 15:35.
+
+## First reading (17:32; climb.tsv rows from 31466 (CLS71) and 2093 (CLQ83))
+
+* 160 s rung (CLS71, climbs or final-only by the A/B): 148 finals, all local heads with no earlier CLS71 final, **3
+  proofs** (nil3_23_32_to_30__goal_510, R1dist_to_aa1__goal_599, aK2_eq_aK3_1243b__goal_558), 22.6 CPU h: **0.13 per
+  CPU h**; final median 489 CPU s.
+* 640 s rung (CLQ83, climbs then the final, CLS71's hints shared from 15:29): 16 finals, **1 proof**
+  (aK2_eq_aK3_gen__goal_641), 9.8 CPU h: **0.10 per CPU h**; final median 2,244 CPU s.
+* The whole system 15:00-17:32: loops/UL 49,796 to 49,805. Memory: my processes 18.7 GB, the largest twee about 4 GB.
+* Reading: about 10 CPU h per proof on both rungs; the counts are small (3 and 1), so the two rates do not differ. The
+  ladder's logic stays: CLS71 reaches the 893 goals that already failed a 160 s climb after the remaining ~420 heads
+  (about 7 hours); they should then go to 640 s, not repeat 160 s (to do at that restart, with --share loops/CLQ83).
