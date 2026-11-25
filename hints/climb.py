@@ -256,6 +256,13 @@ def main():
     # sketch hints only (as --final-nopool-ab), 2 the sketch hints and the proof steps of the 10 solved siblings nearest by
     # goal number: on 22 stalled goals at 160,000 pairs the pool proved 11, none 10, the 10 nearest 12, all three 16 (exp88b)
     ap.add_argument('--final-hints-ab', action='store_true', help='finals in three arms by (crc32 >> 3) %% 3: pool hints, sketch hints only, sketch + 10 nearest siblings (A/B test)')
+    # (25 Nov, exp89; the user: Prover9 searches with several goals and reports each proved one) --listen K: each final
+    # also carries up to K of its original's unsolved goals (nearest by goal number within --listen-dist, one plain
+    # equation each) as listened goals; one proved there is rerun as a real goal with its proof printed and recorded
+    # like a target's real proof. Needs twee-e61l (--twee /project/bin/twee-pg61l): with another twee a listened
+    # goal's proof would count as the target's. exp89: 2 of 117 such goals proved at 320,000 pairs.
+    ap.add_argument('--listen', type=int, default=0, help='finals carry up to K unsolved sibling goals as listened goals (twee-e61l)')
+    ap.add_argument('--listen-dist', type=int, default=10, help='--listen: siblings within this many goal numbers')
     ap.add_argument('--move-eps', type=float, default=0.1, help='--move-model: share of uniformly random moves')
     ap.add_argument('--up-single', action='store_true', help='--updown: going up also adds one assumption at a time')
     ap.add_argument('--up-levels', type=int, default=2, help='--up-single: levels of one-more-axiom')
@@ -311,6 +318,10 @@ def main():
     loop.init_dir(a)
     lp = loop.Loop(a)
     lp.used = {}; lp.extra_axioms = {}; lp.assumed = {}; lp.capture_given = set(); lp.captured = {}
+    lp.listen_goals = {}; lp.listened = {}; listened_ok = lp.listened_ok = {}   # (--listen; live() reads lp.listened_ok)
+    if c.listen and 'e61l' not in a.twee and 'pg61l' not in a.twee:
+        sys.exit(f'--listen needs twee-e61l (--twee /project/bin/twee-pg61l), not {a.twee}: elsewhere a listened goal\'s '
+                 'proof would count as the target\'s')
     gl = {l.split()[0]: int(l.split()[1]) for l in open(c.goal_lines)}
     allgoals = lemmas.by_original(gl)
     pools = lp.build_pools()
@@ -501,11 +512,16 @@ def main():
         if not hasattr(lp, 'proof_name'):
             lp.proof_name = {}
         lp.proof_name[t] = f'{t}.{tag}' + ('.weak' if goal is not None else '')
+        if tag == 'final' and c.listen:
+            lp.listen_goals[t] = listen_lines(t)
         try:
             n, ok, dt, stats, res = lp.run_one(t, hints, 1, budget, False,
                                                c.final_cpu if tag == 'final' and c.final_cpu else a_cpu(budget))
         finally:
             lp.proof_name.pop(t, None)
+            lp.listen_goals.pop(t, None)
+        for x_, o2_ in lp.listened.pop(t, []):
+            listen_record(t, x_, o2_)
         lp.extra_axioms.pop(t, None)
         if tag == 'final':
             # the final run's given rules, failed or not: which sketch steps the real theory derives
@@ -679,6 +695,67 @@ def main():
         return 10 * b
 
     tgroups = {}
+
+    def listen_lines(t):
+        """(--listen K) up to K of T's original's unsolved goals, nearest by goal number within --listen-dist, whose
+        conjecture is one plain equation, as negated, Skolemised clauses named listen_<goal>"""
+        o_, n_ = lemmas.split(t)
+        with lock:
+            uns = [f'{o_}__goal_{m}' for m in allgoals.get(o_, ()) if f'{o_}__goal_{m}' != t
+                   and f'{o_}__goal_{m}' not in lp.solved]
+        res_ = []
+        for d_, m in sorted((abs(lemmas.split(m)[1] - n_), m) for m in uns):
+            if d_ > c.listen_dist or len(res_) >= c.listen:
+                break
+            try:
+                lits = hintsel.goal_lits(m)
+            except Exception:   # (a conditional or compound conjecture)
+                continue
+            if len(lits) != 1 or not lits[0][0]:
+                continue
+            _, l_, r_ = lits[0]
+            if any(x in l_ + r_ for x in ('=', '|', '&', '~', '>', '<', '!', '?')):
+                continue
+            sub = {v: f'sklg{len(res_)}_{v.lower()}' for v in set(re.findall(r'\b[A-Z][A-Za-z0-9_]*\b', l_ + ' ' + r_))}
+            f_ = lambda x: re.sub(r'\b[A-Z][A-Za-z0-9_]*\b', lambda q: sub[q.group(0)], x)
+            res_.append(f'cnf(listen_{m}, negated_conjecture, {f_(l_)} != {f_(r_)}).\n')
+        return res_
+
+    def listen_record(t, x, o2):
+        """(--listen) the records of listened goal X, proved in T's final and rerun with its proof printed, as for a
+        target's real proof: the hints file (DIR/hints links to the live dir's), DIR/proofs/X.listen, used.tsv (tag
+        listen:T, trust.py's record), solved.tsv (round 1), climb.tsv; the live dir's solved.tsv row is written by the
+        main loop (listened_ok)"""
+        L_, G_ = hintlib.extract_hints(o2)
+        sig_ = hintlib.problem_signature(x)
+        seen_, hs_ = set(), []
+        for l_, r_ in L_ + G_:
+            if l_ == r_:
+                continue
+            k_ = loop.canon_key(l_, r_, sig_)
+            if k_[0] == k_[1] or k_ in seen_:
+                continue
+            seen_.add(k_); hs_.append(k_)
+        ua = next((ln.split()[1:] for ln in o2.splitlines() if ln.startswith('USEDAXIOMS')), None)
+        if ua is None or not hs_ or any(u.startswith('assume_') for u in ua):
+            print(f'{x} listened in the final of {t}: no usable record (USEDAXIOMS {ua is not None}, '
+                  f'{len(hs_)} hints)', flush=True)
+            return
+        used_ = sorted(u for u in ua if u.startswith(('lemma_', 'true_')))
+        with lock:
+            if x in lp.solved:
+                return
+            lp.solved[x] = (1, 0.0)
+            with open(os.path.join(c.dir, 'hints', x), 'w') as hf:
+                hf.writelines(f'{l_}\t{r_}\n' for l_, r_ in hs_)
+            d_ = os.path.join(c.dir, 'proofs'); os.makedirs(d_, exist_ok=True)
+            with open(os.path.join(d_, x + '.listen'), 'w') as pf:
+                pf.write(f"% listened goal of {t}'s final (climb.py --listen)\n" + o2)
+            fu.write(f'{x}\tlisten:{t}\t{",".join(used_)}\t\t0\n'); fu.flush()
+            sf.write(f'{x}\t1\t0\n'); sf.flush()
+            out.write(f'{x}\tlisten\t0\tTHM\t0\t0\t\t\t{len(hs_)}\t{sum(u.startswith("true_") for u in used_)}\n')
+            out.flush()
+            listened_ok.setdefault(t, []).append(x)
 
     def nopool(t):
         """--final-nopool-ab: the targets whose finals get the sketch hints only (bit 3 of crc32 of the target's name)"""
@@ -1109,6 +1186,12 @@ def live(c, a, lp, gl, pools, ix, climb, out, lock):
                     with open(os.path.join(D, 'solved.tsv'), 'a') as sf:
                         sf.write(f'{t}\t{R}\t0\n')
                     nsolved += 1
+                for x_ in lp.listened_ok.pop(t, []):   # (--listen) its final's listened goals, recorded by listen_record
+                    if x_ not in S:
+                        with open(os.path.join(D, 'solved.tsv'), 'a') as sf:
+                            sf.write(f'{x_}\t{R}\t0\n')
+                        nsolved += 1
+                        print(f'{x_} THM listened in the final of {t} total={nsolved}', flush=True)
                 print(f'{t} {"THM" if ok else "NO"} sketch-runs={runs} total={nsolved} '
                       f'{time.time()-t0:.0f}s', flush=True)
 

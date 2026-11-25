@@ -176,3 +176,28 @@ positive at almost no cost. The better form, a goal proved mid-run added as an a
 lacked; the siblings of these targets already get the target as a lemma in their separate runs, so it would repeat
 those runs' advantage, not add a new one. Next: listen mode in the ladder's finals (the nearest unsolved plain-equation
 siblings as extra goals, credited by SOLVEDGOAL and a proof rerun), as a measured member.
+
+## Listen mode in the ladder (exp89, deployed 25 Nov 20:34)
+
+* **twee-e61l** (branch e61-listen, 82f5b92; /project/bin/twee-e61l, wrapper twee-pg61l): e61 plus listened goals. A
+  negated conjecture named `listen_*` prints `SOLVEDGOAL` when proved (also without --multi-goal) and is never a
+  solution: it does not stop the run or set RESULT, the proof or the hints. Without listen_ goals the output is
+  byte-identical to e61 on 6 captured problems (proofs printed). On lra2aa__goal_426's exp89 problem: the listened 427 at
+  96,080 pairs, the run on, GaveUp; renamed to a real goal, the run stops at 96,080 with its proof.
+* **loop.py**: `listen_goals[name]` (clauses appended to the run's problem, tmp/<tag>.l.p) and `listen_credit`: each
+  listened goal the run proved is rerun as a real goal (the clause renamed lgoal_<goal>, the same flags with the proof
+  printed: the same search, which stops at that goal's proof); `listened[name]` gets (goal, output).
+* **climb.py `--listen K`** (`--listen-dist`, 10): each final carries up to K of its original's unsolved goals nearest by
+  goal number whose conjecture is one plain equation; `listen_record` writes a credited goal's hints (DIR/hints, linked to
+  the live dir's), DIR/proofs/<goal>.listen, a used.tsv row (tag listen:<target>, its USEDAXIOMS lemma_/true_ names;
+  none with an assume_ name), solved.tsv (round 1) and climb.tsv (tag listen) rows; the live loop then writes the live
+  dir's solved.tsv row. climb.py refuses --listen with another twee (a listened goal's proof would count as the
+  target's).
+* **Test** (loops/LST89: production's solved goals without nil3_26 goals 5-10, hints copied; target goal 10, 20 s final,
+  --listen 8): the final proved goal 10 at 1.52 s and, before that, goals 5 and 6 as listened goals; each rerun printed its
+  proof (lgoal_ named in it); hints, proofs, used.tsv, solved.tsv and climb.tsv rows as above; production's hints files
+  untouched.
+* **Deployed:** CLS71 as abs/cls71i.sh (exp/prod/side/cls71i.sh): cls71h.sh plus --listen 8 and twee-pg61l; climb.py
+  43358 (bash 43355) from 20:34:08, log line 3181, climb.tsv row 34179 on. Its first finals carried 1-6 listened goals.
+  The three-arm hints A/B goes on (listen applies to every arm). CLQ83 as abs/clq87d.sh when its two oldest 640 s finals
+  (over 5,000 s in) end.

@@ -155,8 +155,10 @@ proofs in 63 minutes.
 **The head climber: abs/clhl4.sh (exp68),** stopped 23 Nov 23:30 after 21:07-23:30: 21 heads finished, 0 real proofs in
 4.7 CPU h (clhl3.sh before it, 18:44-21:07: 0 in 4.1). Its targets were the heads exp67's arms and controls climb at the
 same time. Production also keeps the old climbs' hints as members sk@0 and sk@1:0.
-**The climber: abs/cls71h.sh (exp71; the 160 s rung of exp87),** climb.py --live into loops/UL, record loops/CLS71, **climb.py
-16524 since 25 Nov 18:46** (cls71e.sh plus **`--final-hints-ab`**: the finals in three arms by (crc32 >> 3) % 3 of the
+**The climber: abs/cls71i.sh (exp71; the 160 s rung of exp87),** climb.py --live into loops/UL, record loops/CLS71, **climb.py
+43358 since 25 Nov 20:34** (cls71h.sh plus **`--listen 8`** with **twee-e61l** (`--twee /project/bin/twee-pg61l`): each final
+carries up to 8 unsolved plain-equation siblings within 10 as listened goals, credited when proved, exp89; climb.tsv row 34179
+on; cls71h.sh, climb.py 16524, ran 18:46-20:34) (cls71e.sh plus **`--final-hints-ab`**: the finals in three arms by (crc32 >> 3) % 3 of the
 target's name, the pool hints, the sketch hints only, the sketch hints and the 10 nearest solved siblings' proof steps,
 exp88/exp88b, [notes/2026-11-25-time-ladder.md](notes/2026-11-25-time-ladder.md), reading exp/hintarms88.py; and **`--share
 loops/CLQ83`**; climb.tsv row 33404 on; before, climb.py 4156578 from 14:58 as cls71e.sh, then cls71f/g 18:28-18:46) with env RECLIMB=sets/cls71all.re (all 1,988 unsolved goals, each while it has fewer than 2 finals: 1,465, the local heads

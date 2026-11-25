@@ -129,6 +129,39 @@ class Loop:
             self.sig[o] = hintlib.problem_signature(name)
         return self.sig[o]
 
+    def listen_credit(self, name, path, cmd, env_, T, out):
+        """(25 Nov, climb.py --listen) each listened goal this run proved (a 'SOLVEDGOAL listen_<goal>' line), rerun as a
+        real goal: the same problem with that clause renamed lgoal_<goal> (names do not change the search) and the same
+        flags with the proof printed, so the rerun stops at that goal's proof. self.listened[name] gets (goal, output)
+        for each rerun that printed a proof of it (exp/mgcredit89.py's check, by hand, on lra2aa__goal_427)"""
+        got = [l.split()[1][len('listen_'):] for l in out.splitlines() if l.startswith('SOLVEDGOAL listen_')]
+        if not hasattr(self, 'listened'):
+            self.listened = {}
+        res = self.listened.setdefault(name, [])
+        for x in got:
+            txt = open(path).read()
+            if txt.count(f'cnf(listen_{x},') != 1:
+                continue
+            p2 = path[:-2] + '.' + x + '.p'
+            with open(p2, 'w') as f:
+                f.write(txt.replace(f'cnf(listen_{x},', f'cnf(lgoal_{x},'))
+            c2 = [p2 if c == path else c for c in cmd if c != '--no-proof']
+            t0 = time.time()
+            try:
+                o2 = subprocess.run(c2, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, env=env_,
+                                    timeout=T * (self.a.wall_factor if '--abstract-time' in self.a.args else 1) + 30
+                                    ).stdout.decode('utf8', 'replace')
+            except subprocess.TimeoutExpired:
+                o2 = ''
+            os.unlink(p2)
+            i, j = o2.find('GIVEN-BEGIN'), o2.find('GIVEN-END')
+            o2 = o2[:i] + o2[j:] if 0 <= i < j else o2
+            ok2 = 'HINTS-END' in o2 and f'(lgoal_{x})' in o2
+            print(f'  listen: {name} proved {x}; rerun {"printed its proof" if ok2 else "FAILED"} in {time.time() - t0:.0f}s',
+                  flush=True)
+            if ok2:
+                res.append((x, o2))
+
     def hints_of(self, name):
         p = os.path.join(self.dir, 'hints', name)
         if not os.path.exists(p):
@@ -596,6 +629,14 @@ class Loop:
             path = os.path.join(self.dir, 'tmp', tag + '.p')
             with open(path, 'w') as f:
                 f.write(txt)
+        lg = getattr(self, 'listen_goals', {}).get(name)
+        if lg:
+            # (25 Nov, exp89; climb.py --listen) listened goals: unsolved siblings as negated conjectures named
+            # listen_<goal>; twee-e61l reports SOLVEDGOAL for each and never counts one as this run's proof
+            txt = open(path).read().rstrip('\n') + '\n' + ''.join(lg)
+            path = os.path.join(self.dir, 'tmp', tag + '.l.p')
+            with open(path, 'w') as f:
+                f.write(txt)
         if a.unfold or var == 'unf':
             # (unfold.py) the definitions substituted away: twee's KBO folds them, Prover9 unfolds;
             # some stalled goals are a rewrite step apart once unfolded. Hints are unfolded with the
@@ -738,6 +779,11 @@ class Loop:
                     self.proof_job(pn, tag, cmd, env_)
             except Exception as e_:
                 print(f'  keep-proofs: {name} error {e_!r}', flush=True)
+        if lg:
+            try:   # (before the hints file goes: the reruns need it)
+                self.listen_credit(name, path, cmd, env_, T, out)
+            except Exception as e_:   # (must not cost the run)
+                print(f'  listen: {name} error {e_!r}', flush=True)
         if hints and not os.environ.get('LOOP_KEEP_TMP'):
             try:
                 os.unlink(hpath)

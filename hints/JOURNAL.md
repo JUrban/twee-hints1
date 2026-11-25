@@ -245,6 +245,7 @@ Repositories and directories:
 | e61 | 18 Nov 07:25 | e60 with e50's strict rejected set for the early parental check (e60's lazy memo cost 6-8%): e50's speed; output byte-identical to e50 on 8 goals; resumes e50 states. **Production since 18 Nov 07:30** (twee-pg61) |
 | e62 | 19 Nov 17:07 | e61 plus `--pg-order F` (exp35): a new pair's score × F ** sigmoid(q1 + q2), from the parents' stored rule-model scores, two lookups per pair; F = 1 (default) byte-identical to e61 on 3 goals. Wrapper `twee-pg62` (e62 with $TWEE_PG_ARGS) |
 | e63 | 23 Nov 15:59 | e62 plus `--lazy-lemmas`: axioms named lemma_* wait in a list by critical-pair score (times `--lazy-lemma-factor`, default 1) and become active when at most the best queued pair's score; startup at 1,575 axioms 8.1 s -> 1.2 s. Off: byte-identical to e62 on 3 goals. Not kept in --dump-state |
+| e61l | 25 Nov 20:20 | e61 (7e0c271) plus listened goals (branch e61-listen, 82f5b92): a negated conjecture named listen_* prints SOLVEDGOAL when proved and is never a solution (no stop, RESULT, proof or hints of it); without listen_ goals byte-identical to e61 on 6 captured problems, proofs printed. Wrapper twee-pg61l. For climb.py --listen (exp89). |
 
 Wrappers: `twee-pg` (e48 with $TWEE_PG_ARGS), `twee-pg50` (e50 with $TWEE_PG_ARGS; production until 18 Nov 07:30), `twee-pg61` (e61 with $TWEE_PG_ARGS; production since 18 Nov 07:30).
 
@@ -799,6 +800,12 @@ Next:
    (e21, 13 Nov: lost as a replacement of separate runs, REPORT 2p). exp/multigoal89.py: 23 exp85 captures at 320,000 pairs
    plus up to 8 unsolved plain-equation siblings each (117 extras): **2 proved, nslm_to_aa1__goal_1047 and lra2aa__goal_427,
    new**; exp/mgcredit89.py reran them with proofs into loops/MG89, merged into loops/UL, trusted (t1956: 49,825, 0 untrusted).
+   **(20:34) listen mode: twee-e61l (listen_* goals: SOLVEDGOAL, never the run's proof), loop.py listen_goals/listen_credit
+   (a proved listened goal rerun as a real goal with its proof printed), climb.py --listen K (finals carry up to K unsolved
+   plain-equation siblings within 10; listen_record writes hints, proofs/X.listen, used.tsv listen:T, solved rows). Test
+   loops/LST89 (nil3_26 goals 5-10 unsolved there): goal 10's final proved 5 and 6 as listened goals, records right.
+   CLS71 restarted as cls71i.sh (--listen 8, twee-pg61l; 43358, climb.tsv row 34179 on); CLQ83 follows (clq87d.sh) when
+   its two oldest 640 s finals end.**
 0000000000000000000000000000000000000000000000000000000000000000000000000000. **exp88 (do the hints slow the long runs down?, [notes/2026-11-25-time-ladder.md](notes/2026-11-25-time-ladder.md), "exp88"):**
    the user asked whether twee needs a speed-up for long runs and whether many hints slow them. GC: 91% productive at
    320,000 pairs, -A64m/-A256m slower. Profile at 160,000 pairs: making pairs 59%, rewriting 49%, renormalisation 23%,
