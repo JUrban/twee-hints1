@@ -770,6 +770,8 @@ exp54/56/57/59, profile; 23 commits in hintdata, parts at most 9.9 MB, realproof
 KDA/KDB, production to 369: 632,292 proofs in 27 families, realproofs/ 133 MB, every part under 10 MB. exp60 later.
 (23 Nov 02:39-03:08) `--realproofs --skip=Z9` added exp60's arms (P3A 26,645, P3B 26,633, P3C 26,761 with their side
 loops), production to 383, smoke with KDC (RST, started later, comes next time): 712,749 proofs in 30 families, realproofs/ 151 MB, every part under 10 MB.
+(24 Nov 05:04, from hintdata's commits) production 610 (1 part) and plainlive 18 repacked. (24 Nov 08:50-08:57) climbers
+5,796 (1 part), cond 3,510 (5 parts) and plainlive 20 repacked after HLW1's end. Both logged here only on 25 Nov.
 (25 Nov 03:00-03:13, the user asked) `--realproofs --family=production --family=climbers --family=plainlive --family=cond`:
 production 1,725 (5 parts; CRP75 and REVF1/REVF2 now in this family, 63ca221), climbers 9,120 (with CLQ83), plainlive 265,
 cond 3,538 (final: all its sweeps have ended); 892,927 proofs in 38 families, realproofs/ 241 MB, every part under 10 MB.
