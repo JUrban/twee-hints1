@@ -57,3 +57,20 @@ Written 25 Nov 2026, 08:08 UTC.
   captured default proved (16 under 10 CPU s, 15 in 10-40 s: 11.8 to 38.5), 19 it failed at 40 s. So at the replay's
   10 s cap the default proves about 16, and the other 34 are where other orderings can show what they add.
 * Replay from 08:23:17: 6,050 runs (50 x 121), -j 5, --cpu 10.
+
+## Replay with abstract work (restarted 08:34)
+
+* The user (08:2x): an ordering or strategy also dominates another when it proves the problems much faster (in
+  abstract or real time) without losing any. The first replay recorded only THM/NO and CPU under a 10 CPU s cap, so
+  it was stopped at 292 rows (kept in loops/P85C/replay.v1.tsv) and restarted at 08:34:42 (abs/exp85r.sh,
+  exp/exp85r.sh, bash 4087625) with:
+  * twee's WORK line in every row (critical pairs considered, rules), failed runs included;
+  * an abstract cap: `--abstract 5` (twee `--max-time 5`; with `--abstract-time 2000` that is 10,000 considered
+    pairs, production's first cascade level), `--cpu 30` only as a safety cap. Deterministic: goal 420 under order 2
+    proved with exactly 2,013 pairs in both smoke runs; failed runs stop at 10,000. (The default's proof of 420 takes
+    10,407 pairs, 5.2 abstract s, so it fails at this cap.)
+* exp/prec_portfolio.py now also reports, from the work counts: the orders no other order dominates (a superset of
+  their goals, at most their work on each goal, and more goals or less total work); the orders no other beats in the
+  user's sense (a superset of their goals in at most half their total work); and a cost-greedy portfolio (cost: the
+  sum over goals of the least work among the chosen orders, an unproved goal twice the cap), beside the coverage
+  greedy with redundancy 2.

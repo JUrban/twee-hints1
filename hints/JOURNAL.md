@@ -793,6 +793,7 @@ Next:
    stages. Stage 1: 121 orderings (default + each order of a,k,l,r,t once, m,ld,rd,e at random places) on up to 50
    proved-but-not-easy goals made unsolved in the context, each goal's captured final replayed per ordering at 10 CPU s.
    Capture from 08:07 (loops/P85C).
+   **(08:34) Replay restarted to record twee's work (the user: faster also dominates) under an abstract cap of 5 s (10,000 pairs).**
 000000000000000000000000000000000000000000000000000000000000000000000000. **exp84 (other symbol precedences on the quick finals' failures, [notes/2026-11-25-precedences.md](notes/2026-11-25-precedences.md)):**
    the user asked whether our portfolios try symbol precedences as Veroff does; they do not. 100 unsolved targets
    whose CLQ83 40 s final failed (sets/exp84.targets, seed 84), CLQ83's final rerun in five arms: P84O0 default
