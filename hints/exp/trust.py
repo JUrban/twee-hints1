@@ -185,6 +185,7 @@ def main():
         return min(f, g2.replace('W', 'V'))
     frec = {}                                   # FILL node -> deps (None: unresolved)
     forms = collections.defaultdict(set)        # FORM node -> its FILL nodes
+    norec = {}                                  # FILL node without a premise record -> its FORM node
     nfp = 0
     for p in glob.glob(os.path.join(L, '*', 'true.tsv')):
         d = p.split('/')[-2]
@@ -203,6 +204,8 @@ def main():
             nf = norm(w[2])
             if nf:
                 forms[f'FORM:{w[0]}:{nf}'].add(node)
+            if (w[0], w[1]) not in prem and nf:
+                norec.setdefault(node, f'FORM:{w[0]}:{nf}')
             if (w[0], w[1]) not in prem or node in frec:
                 continue
             t, names = prem[(w[0], w[1])]
@@ -216,6 +219,13 @@ def main():
                 if r:
                     deps.add(r)
             frec[node] = deps; nfp += 1
+    # (25 Nov 23:55) a fill lemma without a premise record in its dir (CLQ83's true.tsv began as a copy of CLS71's, whose
+    # fillprem.tsv holds the records) rests on its formula: trusted when another fill lemma of the same original and
+    # formula is (the fixpoint adds a node only once its deps are trusted, so a copy cannot vouch for itself).
+    # CLQ83's listened nil3_23_32_to_27__goal_581 (an exposed original) used ten such copies
+    for node, fm in norec.items():
+        if node not in frec:
+            frec[node] = {fm}
     # exp/fillcheck.py's re-proofs of old fill lemmas (no fillprem record): proved rows, premises from USEDAXIOMS
     pc = os.path.join(L, 'TRUSTNOW', 'fillcheck.tsv')
     for i, l in enumerate(open(pc) if os.path.exists(pc) else ()):

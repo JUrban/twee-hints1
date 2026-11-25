@@ -324,3 +324,26 @@ siblings as extra goals, credited by SOLVEDGOAL and a proof rerun), as a measure
 * **Decision:** no change. CLS71 goes on with second 160 s finals (a changed context each time, and every final
   listens to its original's unsolved goals); CLQ83 goes on with the new stalled goals, then its list. The ladder's
   next step (a goal's failures move it to a longer rung) needs a climber that ranks its list above new targets.
+
+## The first hours of listening everywhere (25 Nov 23:52 UTC)
+
+* **167 new goals** in loops/UL after solved.tsv row 50,653 (the file's length when loops/LST90 copied it,
+  about 21:58), by the first source that recorded each (production results rows, the climbers' round-1 rows,
+  then the side loops' solved.tsv):
+  * side loops GML/XFL (given-rule retry, transfer): 53
+  * production, own runs: 48
+  * production, listened: 40
+  * CLS71, listened: 10
+  * CLS71, own climbs: 9
+  * CLQ83, own climbs: 6
+  * CLQ83, listened: 1
+* **By original** (top): nil3_30 18, nil3_26 16, nil3_27 16, aK2_eq_aK3_l 14, nil3_29 13, nil3_31 10, nil3_25 10, nil3_24 10.
+* Listened credits open goals for the follow-ups: production's L0/L1 runs on the goals after each new proof and
+  the side loops prove more around them. Before listening everywhere: 49,825 solved at 19:56 and 49,828 at 21:18
+  (the trust runs t1956, t2118), 3 in 82 minutes.
+* **trust.py** (23:55): CLQ83's listened nil3_23_32_to_27__goal_581 (an exposed original) was the one untrusted goal
+  (t2348): its proof used ten fill lemmas true_k that CLQ83's true.tsv has as copies of CLS71's rows (the dir began
+  with a copy), with their premise records only in CLS71's fillprem.tsv. A fill lemma without a premise record now
+  rests on its formula node (trusted when another fill lemma of the same original and formula is; the fixpoint adds
+  a node only once its deps are trusted, so a copy cannot vouch for itself). t2351: 49,982 solved, 0 untrusted; fill
+  lemmas trusted 23,620 (3,406 before: the copies).
