@@ -5080,6 +5080,8 @@ reproduced exactly).
 
 ## 2az. Portfolios: complementary methods kept, not dropped (user's request, 18 Nov 17:00)
 
+*Notes: [notes/2026-11-25-precedences.md](notes/2026-11-25-precedences.md).*
+
 *Notes: [notes/2026-11-24-quick-finals.md](notes/2026-11-24-quick-finals.md).*
 
 *Notes: [notes/2026-11-24-horn-lemmas.md](notes/2026-11-24-horn-lemmas.md).*
