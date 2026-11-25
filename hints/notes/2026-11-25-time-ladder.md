@@ -73,3 +73,44 @@ below first, sharing the 20-process budget (each starts a run only while fewer t
 * Reading: about 10 CPU h per proof on both rungs; the counts are small (3 and 1), so the two rates do not differ. The
   ladder's logic stays: CLS71 reaches the 893 goals that already failed a 160 s climb after the remaining ~420 heads
   (about 7 hours); they should then go to 640 s, not repeat 160 s (to do at that restart, with --share loops/CLQ83).
+
+## Do the hints slow the long runs down? (exp88, 25 Nov 17:39-18:31)
+
+**Question.** The user: do we need to speed twee up for the long runs, does it get much slower; and: does having many
+hints loaded slow the long runs down?
+
+**Setup.** Replays of exp85's captured production runs (loops/P85C/cap: problem, lemmas, hints file, rule model; the
+default precedence), twee-e61, TWEE_PG_ARGS as production. Data in loops/P85C/exp88; scripts exp/rtsrun88.py (one
+capture with RTS options, or the profiling build dist-prof2) and exp/hintcost88.py (a capture with or without its
+hints file; lemmas, rule model and PG kept). The production hint files here hold 7,500-10,000 hints; the 640 s rung's
+finals carry a median 10,000 (5,747-26,510, 20 files).
+
+**Results.**
+* GC (nil3_23_32_to_26__goal_557 to 320,000 pairs, 48,662 rules; gc_*.out): default 617 CPU s of which GC 55 (91%
+  productive), -A64m 637 (GC 15), -A256m 645 (GC 10); identical work. Not the bottleneck (as 14 Nov found).
+* Profile at 160,000 pairs (prof160k.prof, 26,541 rules, inherited time): making critical pairs 59% (overlaps 49%),
+  rewriting 49% (they overlap), queue renormalisation 23%, interreduction 19%; hint rewriting of each new pair's terms
+  (applyHints) 7.1%, hint lookups and normalisation about 2%, the rule model's scores about 3.5%. This repeats exp80's
+  finding (24 Nov: makePassives 80%, simplify 56%; no free speed-up).
+* With and without the hints file, 4 goals to 160,000 pairs (hints4.tsv): 3 pairs of runs both reaching 150,000
+  pairs: fewer pairs per CPU s with hints by 23%, 26%, 7%. Part is the hints' bookkeeping, part a different search (more
+  rules).
+* All 22 exp85 dev goals (stalled production goals that some precedence proves in 500-30,000 abstract work; all solved by
+  now) without hints to 160,000 pairs (nohints22.tsv), against exp85d's hinted default runs (e85d.tsv, to 320,000):
+  within 160,000 pairs **hinted 11, unhinted 10, both 7, union 14**; the unhinted run needed
+  fewer pairs on 6 of the 7 both proved. Median pairs per CPU s over runs past 100,000 pairs: hinted
+  887 (17 runs), unhinted 1078 (14).
+
+**Reading.** The hints cost about 10% of a long run's CPU directly (the profile) and 10-25% per pair in all; the long
+run's slowdown (about 2x per pair from 100,000 to 1.28M pairs) comes from the growing rule set (overlaps, rewriting,
+renormalisation, interreduction), not from the hints. On these stalled goals the production hints did not steer
+better than no hints: a complementary member, not a loss to drop (union 14 against 11). Caveat: 22 goals
+selected as stalled in hinted runs, which biases against hints; but every unsolved goal is such a goal.
+
+**Change (18:28-18:30).** climb.py `--final-nopool-ab`: the finals of targets with bit 3 of crc32 of the name set get
+only the sketch hints (their own climb's, their siblings', the shared dirs'), no pool hints; independent of
+--final-only-ab (bit 2). CLS71 restarted as abs/cls71g.sh (exp/prod/side/cls71g.sh; cls71f.sh ran 18:28:58-18:30:29
+without --share): --final-nopool-ab plus --share loops/CLQ83 (the 47,142 sketch hints became 47,444). climb.py 13715
+(bash 13712), from 18:30:29; log line 3064, climb.tsv row 33302 on. Checked on the running finals: no-pool finals
+carry 395-568 sketch hints, the others 4,080-7,767 hints. Reading: finals, proofs and CPU h per arm (bit 3), split by
+bit 2, from row 33302.

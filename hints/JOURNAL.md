@@ -788,6 +788,13 @@ ul75 5, XFL 1. REPORT's totals table
 has the history (user, 20 Nov: "update the total numbers in the report etc every now and then").
 
 Next:
+0000000000000000000000000000000000000000000000000000000000000000000000000000. **exp88 (do the hints slow the long runs down?, [notes/2026-11-25-time-ladder.md](notes/2026-11-25-time-ladder.md), "exp88"):**
+   the user asked whether twee needs a speed-up for long runs and whether many hints slow them. GC: 91% productive at
+   320,000 pairs, -A64m/-A256m slower. Profile at 160,000 pairs: making pairs 59%, rewriting 49%, renormalisation 23%,
+   interreduction 19%, hint rewriting 7%, hint lookups 2%, rule model 3.5% (as exp80). Hints cost 7-26% per pair (3 goals);
+   on the 22 exp85 dev goals at 160,000 pairs, without hints 10 proofs, with 11, both 7, union 14, fewer pairs on 6 of 7.
+   **(18:30) climb.py --final-nopool-ab (bit 3 of crc32: finals with sketch hints only); CLS71 restarted as cls71g.sh with it
+   and --share loops/CLQ83 (13715, climb.tsv row 33302 on). Reading per arm.**
 000000000000000000000000000000000000000000000000000000000000000000000000000. **exp87 (the time ladder over all unsolved goals, [notes/2026-11-25-time-ladder.md](notes/2026-11-25-time-ladder.md)).**
    (15:08) The user: harder goals need more time. Unsolved goals had a median 0.34 CPU h in all, the longest run 5-17 min for most;
    production's 80-320 s levels got 17 runs since yesterday. Rungs: CLS71 160 s on 1,465 goals, CLQ83 640 s on 561 (abs/clq87.sh).

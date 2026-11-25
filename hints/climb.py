@@ -248,6 +248,10 @@ def main():
     # climb hints their original already has, their siblings' climbs included), the others the full climb: does a target's
     # climb add to its long final? (exp76 +1 -0, exp67 nil)
     ap.add_argument('--final-only-ab', action='store_true', help='no sketch runs on targets with bit 2 of crc32 (A/B test)')
+    # (25 Nov) --final-nopool-ab: the finals of targets with bit 3 of crc32 set get no pool hints, only the sketch hints
+    # (their own climb's and their siblings'); without the production hints, 22 stalled goals at 160,000 pairs proved
+    # 10 against 11 with them, 14 together, in fewer pairs on 6 of the 7 both proved (notes/2026-11-25-time-ladder.md)
+    ap.add_argument('--final-nopool-ab', action='store_true', help='finals of targets with bit 3 of crc32 set: sketch hints only, no pool hints (A/B test)')
     ap.add_argument('--move-eps', type=float, default=0.1, help='--move-model: share of uniformly random moves')
     ap.add_argument('--up-single', action='store_true', help='--updown: going up also adds one assumption at a time')
     ap.add_argument('--up-levels', type=int, default=2, help='--up-single: levels of one-more-axiom')
@@ -484,6 +488,8 @@ def main():
         hints = hs + [h for h in lp.hints_for(t, pools, None) if h not in seen[o]]
         if tag == 'final':
             lp.capture_given.add(t)
+        if tag == 'final' and nopool(t):
+            hints = hs
         # (23 Nov) each run's printed proof as DIR/proofs/<t>.<tag> (.weak for a weakened goal): sketch proofs are kept
         # as data, and none overwrites the final run's real proof (a target's runs are sequential in one thread)
         if not hasattr(lp, 'proof_name'):
@@ -667,6 +673,11 @@ def main():
         return 10 * b
 
     tgroups = {}
+
+    def nopool(t):
+        """--final-nopool-ab: the targets whose finals get the sketch hints only (bit 3 of crc32 of the target's name)"""
+        import zlib
+        return c.final_nopool_ab and (zlib.crc32(t.encode()) >> 3) % 2 == 1
 
     def nruns(t):
         """--final-only-ab: 0 sketch runs (the final only) on targets with bit 2 of crc32 set, else --runs"""

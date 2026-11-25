@@ -100,6 +100,26 @@ def tarxz(srcdir, names, dst):
     else:
         os.replace(tmp, dst)
 
+def tarxz_split(srcdir, names, outdir, base, cap=9_900_000):
+    """(25 Nov; the user: tarballs at most 10 MB) OUTDIR/BASE.tar.xz of SRCDIR/NAMES, or, when that is over CAP bytes,
+    BASE_01.tar.xz, BASE_02.tar.xz, ... (the sorted names in equal runs, more parts until each fits); returns the paths"""
+    one = os.path.join(outdir, base + '.tar.xz')
+    tarxz(srcdir, names, one)
+    if os.path.getsize(one) <= cap:
+        return [one]
+    names = sorted(names); k = -(-os.path.getsize(one) // (cap * 9 // 10))
+    os.unlink(one)
+    while True:
+        step = -(-len(names) // k)
+        parts = [os.path.join(outdir, '%s_%02d.tar.xz' % (base, i + 1)) for i in range(-(-len(names) // step))]
+        for i, dst in enumerate(parts):
+            tarxz(srcdir, names[i * step:(i + 1) * step], dst)
+        if all(os.path.getsize(x) <= cap for x in parts) or step == 1:
+            return parts
+        for x in parts:
+            os.unlink(x)
+        k += 1
+
 def main_climbs():
     """(19 Nov 17:05; user: "the climber runs should probably be kept somewhere and also in the data repo and we should
     keep their stats for the lattice up-down climbing learning") climbs/<dir>/: every climb.py directory's records"""
@@ -135,9 +155,8 @@ def main_climbs():
                 by.setdefault(orig(n), []).append(n)
             batch, size = [], 0
             for o in sorted(by):
-                dst = os.path.join(out, sub, o + '.tar.xz')
-                tarxz(sd, by[o], dst)
-                batch.append(dst); size += os.path.getsize(dst)
+                for dst in tarxz_split(sd, by[o], os.path.join(out, sub), o):
+                    batch.append(dst); size += os.path.getsize(dst)
                 if size > 10_000_000:
                     commit(batch, 'climbs: %s %s rule logs (xz, per original, up to %s)' % (d, sub, o))
                     batch, size = [], 0
