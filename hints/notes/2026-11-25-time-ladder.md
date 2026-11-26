@@ -327,11 +327,11 @@ siblings as extra goals, credited by SOLVEDGOAL and a proof rerun), as a measure
 
 ## The first hours of listening everywhere (25 Nov 23:52 UTC)
 
-* **167 new goals** in loops/UL between 21:54 and 23:52: 49,826 distinct solved goals before, 49,993 after. (Counted
-  from loops/UL/solved.tsv, which has one line per recorded proof, so a re-proved goal has several: the cut was its
-  line 50,653, the file's length when loops/LST90 copied it at 21:54; first written here as "row 50,653, about
-  21:58", corrected 26 Nov.) By the first source that recorded each (production results rows, the climbers' round-1
-  rows, then the side loops' solved.tsv):
+* **167 goals** recorded in loops/UL/solved.tsv after its line 50,653 (its length when loops/LST90 copied it at 21:54),
+  by the first source that recorded each (production results rows, the climbers' round-1 rows, then the side
+  loops' solved.tsv). (26 Nov correction: a cut by line number is not a stable count, since the file has one line per
+  recorded proof and its earlier lines changed later; the totals over time are in "Solved over time, by trust run"
+  below. By those, loops/UL had 49,828 at 21:18 and 49,982 at 23:51, and 121 of the 154 came after 23:32.)
   * side loops GML/XFL (given-rule retry, transfer): 53
   * production, own runs: 48
   * production, listened: 40
@@ -430,3 +430,25 @@ siblings as extra goals, credited by SOLVEDGOAL and a proof rerun), as a measure
   came from runs of other originals: aK2_eq_aK3_1243 5 (in runs of nil3_15to7), nil3_1K_b 2 (aK2_eq_aK3_gen),
   nil3_1K_c 2, aK2_eq_aK3_gen 1 (nil3_1K_b); the other 9 were aK2_eq_aK3_gen's own. trust.py t0848: 50,449 solved, 0
   untrusted.
+
+## Solved over time, by trust run (26 Nov 11:15)
+
+Each exp/trust.py run counts loops/UL's solved goals the same way (trusted + untrusted, files loops/TRUSTNOW/tHHMM.*);
+the health checks' `cut -f1 loops/UL/solved.tsv | sort -u | wc -l` agrees within a few goals at the same minute.
+
+| trust run | solved | change | what ran |
+|---|---|---|---|
+| 25 Nov 19:56 (t1956) | 49,825 | | before listening in production |
+| 21:18 (t2118) | 49,828 | +3 in 82 min | |
+| 23:32 (t2331) | 49,861 | +33 | production listening from 22:18 (ul86, ul87) |
+| 23:48 (t2348) | 49,972 | +111 in 16 min | listened credits and their follow-ups |
+| 23:51 (t2351) | 49,982 | +10 | |
+| 26 Nov 00:59 (t0059) | 50,122 | +140 in 68 min | listening across originals from 00:49 (ul88) |
+| 01:48 (t0148) | 50,228 | +106 in 49 min | plainlive7 listening from 01:17 |
+| 06:48 (t0648) | 50,349 | +121 in 5 h | about 12 per half hour |
+| 08:48 (t0848) | 50,449 | +100 in 2 h | the 08:18-08:48 burst (64 in those 30 minutes) |
+| 10:56 (t1056) | 50,485 | +36 in 2 h 8 min | about 4 per half hour |
+
+So the fast phase ran from about 23:30 to about 01:50 (49,861 to 50,228, +367 in 2 h 16 min), in two waves (production
+listening, then listening across originals), not "the first two hours from 21:54" as first written here; 657 in all
+from 21:18 to 10:56.
