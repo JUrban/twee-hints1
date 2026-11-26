@@ -822,7 +822,7 @@ Next:
    **(22:38) listen premise check: a conditional target's hypotheses (`goals`) could have served a listened proof and
    been trusted; none of the 12 listened proofs did. listen_bad_premises in listen_credit; production ul87 (71405),
    CLS71 71408, CLQ83 71407 restarted 22:39.**
-   **(23:52) listening everywhere, first hours: 167 new goals after solved row 50,653 (about 21:58): production
+   **(23:52) listening everywhere, first hours: 167 new goals from 21:54 to 23:52 (49,826 to 49,993 distinct): production
    listened 40, own runs 48 (follow-ups), CLS71 listened 10 + own 9, CLQ83 1 + 6, side loops GML/XFL 53; mostly the nil3
    family (one axiom set, many unsolved goals). Before: 3 new in 82 minutes (19:56-21:18). trust.py: a fill lemma
    without a premise record rests on its formula (CLQ83's copied true.tsv rows); t2351: 49,982 solved, 0 untrusted.**

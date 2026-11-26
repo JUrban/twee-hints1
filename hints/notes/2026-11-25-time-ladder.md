@@ -327,9 +327,11 @@ siblings as extra goals, credited by SOLVEDGOAL and a proof rerun), as a measure
 
 ## The first hours of listening everywhere (25 Nov 23:52 UTC)
 
-* **167 new goals** in loops/UL after solved.tsv row 50,653 (the file's length when loops/LST90 copied it,
-  about 21:58), by the first source that recorded each (production results rows, the climbers' round-1 rows,
-  then the side loops' solved.tsv):
+* **167 new goals** in loops/UL between 21:54 and 23:52: 49,826 distinct solved goals before, 49,993 after. (Counted
+  from loops/UL/solved.tsv, which has one line per recorded proof, so a re-proved goal has several: the cut was its
+  line 50,653, the file's length when loops/LST90 copied it at 21:54; first written here as "row 50,653, about
+  21:58", corrected 26 Nov.) By the first source that recorded each (production results rows, the climbers' round-1
+  rows, then the side loops' solved.tsv):
   * side loops GML/XFL (given-rule retry, transfer): 53
   * production, own runs: 48
   * production, listened: 40
