@@ -493,3 +493,7 @@ from 21:18 to 10:56.
   HO, HE; cond/EXP94/log has their start and end times.
 * **Reading:** proved per arm and stage, +/- and the union, abstract seconds per proof. A THM here is a conditional
   proof (it may use unproved siblings); condprove's results.tsv says which.
+* **exp94 5 s stage** (NO 13:00:35-13:04:01, NE 13:04:01-13:06:53): original 0 of 134, equation 1 of 134,
+  nslm_to_aa1__goal_1121 (1.47 s, no unproved sibling used, 2 kNN lemmas; its original NO at 5.10 s). Imported via
+  condimport.py into loops/CI2 and merged into loops/UL (cond/EXP94/NE.import, NE.merge); trust.py t1318: 50,500
+  solved, 0 untrusted, this one trusted. The 60 s stage (HO, HE) runs.
