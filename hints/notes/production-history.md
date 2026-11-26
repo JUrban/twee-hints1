@@ -1,6 +1,6 @@
 # Production history
 
-Generated 26 Nov 2026 15:07 by [exp/prodhistory.py](../exp/prodhistory.py) from the scripts abs/ul3.sh … ul89.sh (copies in [exp/prod/](../exp/prod/)) and their logs; rerun it after every production restart. What runs now, with the side loops, is in REPORT.md "Production now"; the totals over time are REPORT's summary table.
+Generated 26 Nov 2026 15:11 by [exp/prodhistory.py](../exp/prodhistory.py) from the scripts abs/ul3.sh … ul90.sh (copies in [exp/prod/](../exp/prod/)) and their logs; rerun it after every production restart. What runs now, with the side loops, is in REPORT.md "Production now"; the totals over time are REPORT's summary table.
 
 * **Written** is the newest dated entry of the script's header: when the version was written or first started.
 * **Last run** is the span of loops/ULNN.log (first and last write). A script that ran twice keeps only its second log (ul74: written 20 Nov 04:14, its log is the run of 21 Nov 16:50 to 22 Nov 07:12); some versions ran for minutes before a fix.
@@ -96,7 +96,8 @@ Generated 26 Nov 2026 15:07 by [exp/prodhistory.py](../exp/prodhistory.py) from 
 | [ul86](../exp/prod/ul86.sh) | 25 Nov 22:18 | 25 Nov 22:18 – 25 Nov 22:38 | 0.3 | J= (default 17); ≥3 in flight | twee-pg61l + `--pg-threshold 0.25 --ground-joining-branch-limit 100` | 0 | `--twee` `/project/bin/twee-pg61` → `/project/bin/twee-pg61l`; +`--listen` `${LISTEN:-300}` |
 | [ul87](../exp/prod/ul87.sh) | 25 Nov 22:39 | 25 Nov 22:39 – 26 Nov 00:46 | 2.1 | J= (default 17); ≥3 in flight | twee-pg61l + `--pg-threshold 0.25 --ground-joining-branch-limit 100` | 160 | (same options: a restart, or loop.py's code or the launch arguments changed) |
 | [ul88](../exp/prod/ul88.sh) | 26 Nov 00:49 | 26 Nov 00:49 – 26 Nov 11:09 | 10.3 | J= (default 17); ≥3 in flight | twee-pg61l + `--pg-threshold 0.25 --ground-joining-branch-limit 100` | 162 | +`--listen-class` `${LCLASS:-150}` |
-| [ul89](../exp/prod/ul89.sh) | 26 Nov 11:11 | 26 Nov 11:12 – 26 Nov 15:05 | 3.9 | 4 (the running process) | twee-pg61l + `--pg-threshold 0.25 --ground-joining-branch-limit 100` | 6 | (same options: a restart, or loop.py's code or the launch arguments changed) |
+| [ul89](../exp/prod/ul89.sh) | 26 Nov 11:11 | 26 Nov 11:12 – 26 Nov 15:08 | 3.9 | J= (default 17); ≥3 in flight | twee-pg61l + `--pg-threshold 0.25 --ground-joining-branch-limit 100` | 6 | (same options: a restart, or loop.py's code or the launch arguments changed) |
+| [ul90](../exp/prod/ul90.sh) | 26 Nov 15:09 | 26 Nov 15:10 – 26 Nov 15:10 | 0.0 | 4 (the running process) | twee-pg61l + `--pg-threshold 0.25 --ground-joining-branch-limit 100` |  | (same options: a restart, or loop.py's code or the launch arguments changed) |
 
 ## Why each version (the header's newest entry, verbatim)
 
@@ -187,6 +188,7 @@ Generated 26 Nov 2026 15:07 by [exp/prodhistory.py](../exp/prodhistory.py) from 
 * **ul87** (25 Nov 22:39): (25 Nov 22:39) ul87: ul86 restarted for loop.py's listen premise check (listen_bad_premises): a listened goal's proof is credited only if it uses its own problem's axioms and lemmas, never a conditional target's hypotheses ('goals'), which are ground facts about the target's Skolem constants. Same settings. Launch: J=4 bash abs/ul87.sh.
 * **ul88** (26 Nov 00:49): (26 Nov 00:49) ul88: ul87 plus --listen-class "${LCLASS:-150}": each run also listens to up to 150 unsolved plain goals of the other originals with the same axioms (the same axiom lines; 854 of 1,671 unsolved goals have such siblings). A credit across originals may use only the problem's axioms and lemma names that say whose goal they are; lemma_goal_N is rewritten to lemma_knn_0_<run's original>__goal_N in the kept output and proof (loop.py listen_bad_premises, listen_credit). Test loops/LSTX93: nil3_23_32_to_26__goal_43's run proved and recorded nil3_23_32_to_25__goal_44. Also in: listened kept outputs in loops/UL/listen/rN/out (202d987). Same settings otherwise. Launch: J=4 bash abs/ul88.sh.
 * **ul89** (26 Nov 11:11): (26 Nov 11:11) ul89: ul88 restarted for hintsel.listen_equation (c32871d): conditional goals whose hypothesis has a variable side (t = X, X not in t) are listened too, as their equivalent equation C[X := t] (one-point rule); 135 of the 151 unsolved conditional goals (the user, 26 Nov: listen to the conditional goals too). Test: 40 solved such goals at 5 s, original proved 29, equation 30, original only 0. Also loop.py 244ed8e (the not-recorded message). Same settings. Launch: J=4 bash abs/ul89.sh.
+* **ul90** (26 Nov 15:09): (26 Nov 15:09) ul90: ul89 plus TWEE_LEMMA_EQN=1: a conditional goal whose hypothesis has a variable side runs as its equivalent equation (TWEE_LEMMA_EQN=1, lemmas.equation_problem in lemma_problem; lemmas 6234ec7). exp94 (the 134 unsolved such goals, plainlive's settings): 60 s equation 2 proved, the original 0, original only 0; 5 s 1 against 0. Same settings. Launch: J=4 bash abs/ul90.sh.
 
 ## Side loops (their scripts, oldest first; copies in [exp/prod/side/](../exp/prod/side/))
 
@@ -243,7 +245,7 @@ Each line is the script's first header entry. Which ones run now is in REPORT.md
 * [p9c4.sh](../exp/prod/side/p9c4.sh): (18 Nov 17:52) p9c with 4 workers instead of 2 (log P9C4.log). By the portfolio's ratio rule it is the best deep member per CPU: 1.98 new proofs per CPU hour on the walls twee's chain failed (exp16), 1.44 live from 16:46 to 17:49 (3 proofs in 126 runs), against 1.16 for production's 80 s chain level. Its 225 queued stalled goals would take 2 workers about 2 hours. Restarting keeps loops/P9C/result …
 
 
-## The current version's full option list (ul89)
+## The current version's full option list (ul90)
 
 ```
 export TWEE_PG_ARGS="--pg-threshold 0.25 --ground-joining-branch-limit 100"

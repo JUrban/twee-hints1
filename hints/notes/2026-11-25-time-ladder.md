@@ -512,3 +512,11 @@ from 21:18 to 10:56.
   c64 with --prev c63N/H/W): plainlive7 plus condprove.py --equation in N, H and W. A conditional goal's problem text
   changes, so each of them reruns once in N (and in H or W when it is a head). Production's and the climbers' own runs
   of conditional goals still use the conditional form; they listen to them as equations since 11:12.
+* **The same in production and the climbers** (15:10:15): lemmas.equation_problem (6234ec7) replaces a conditional
+  goal's conjecture line by lemma_form's equation; lemma_problem applies it under TWEE_LEMMA_EQN=1, which covers
+  loop.py's and climb.py's runs (both build their problems there; a run without lemmas still reads the original
+  file). hintsel.listen_equation had duplicated lemmas.unitize (15 Nov, used for solved conditional siblings as lemmas);
+  it now calls lemma_form (the same on all 51,784 goals up to variable names: 40 renamings), and condprove --equation
+  calls equation_problem (the same conjectures as exp94's HE on all 134). Production ul90 (abs/ul90.sh,
+  exp/prod/ul90.sh; loop.py 207594, results row 377,827 on) and CLS71 as abs/cls71l.sh (climb.py 207596, log line
+  4474 on), both from 15:10:15; CLQ83 as abs/clq87g.sh when its longest final (nslm_to_aa1__goal_1254) ends.
