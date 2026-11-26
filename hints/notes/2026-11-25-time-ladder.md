@@ -469,3 +469,5 @@ from 21:18 to 10:56.
   conjecture line). First runs: the 20 newest problem files of production and CLS71 listened to 820 goals, 81 of them conditional.
 * A credited conditional goal's kept output and proof are of the equation (named lgoal_<goal>), not of the
   hypothesis form; the two are equivalent, and trust.py checks the premises.
+* CLQ83 restarted as abs/clq87f.sh (climb.py 181853, 12:03:00; log line 2350, climb.tsv row 4626 on; CPUS=23) when its
+  longest final, nslm_to_aa1__goal_1382, ended (NO, 48,196 s total for that target).
