@@ -50,6 +50,9 @@ UNITIZE = os.environ.get('TWEE_LEMMA_UNITIZE', '1') != '0'
 # on top of the M unit ones, as clause axioms (twee encodes them with ifeq); 2,771 proved goals are Horn clauses.
 HORN = os.environ.get('TWEE_LEMMA_HORN', '0') == '1'
 _VAR = re.compile(r'X\d+')
+# (26 Nov, exp94) TWEE_LEMMA_EQN=1: lemma_problem gives a conditional goal that lemma_form unitizes its equation as the
+# conjecture (equation_problem); exp94 on the 134 unsolved such goals: 60 s, equation 2 proved, the original 0
+EQN = os.environ.get('TWEE_LEMMA_EQN', '0') == '1'
 
 def unitize(f):
     """The unit-equation fof formula equivalent to conjecture F, or None."""
@@ -119,6 +122,18 @@ def by_original(names):
         solved[o].add(k)
     return solved
 
+def equation_problem(name, txt):
+    """(26 Nov, exp94) problem text TXT of goal NAME with its conjecture line replaced by lemma_form(NAME) when NAME's
+    conjecture is conditional and unitizes (equivalent: the one-point rule); TXT unchanged otherwise"""
+    f = conjecture(name)
+    if not f or unit_eq(f):
+        return txt
+    e = lemma_form(name)
+    cl = [l for l in txt.splitlines(True) if re.match(r'fof\(\s*[^,\s]+\s*,\s*conjecture\s*,', l)]
+    if not e or len(cl) != 1:
+        return txt
+    return txt.replace(cl[0], f'fof(goals,conjecture,{e}).\n')
+
 def lemma_problem(name, solved, m, after=False):
     """Text of problem NAME with up to M proven siblings (solved: original ->
     set of goal numbers) as extra axioms, and the number of lemmas added."""
@@ -136,6 +151,8 @@ def lemma_problem(name, solved, m, after=False):
             if h:
                 horn.append((j, h))
     txt = open(os.path.join(PROB, name + '.p')).read().rstrip('\n') + '\n'
+    if EQN:
+        txt = equation_problem(name, txt)
     for j, f in lem + horn:
         txt += f'fof(lemma_goal_{j},axiom,{f}).\n'
     return txt, len(lem) + len(horn)

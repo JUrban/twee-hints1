@@ -191,29 +191,21 @@ if __name__ == '__main__' and sys.argv[1:2] == ['knnfiles']:
     knnfiles_main(sys.argv[2:])
 
 
-_VAR = re.compile(r'^[A-Z][A-Za-z0-9_]*$')
-
 def listen_equation(m):
-    """(26 Nov) goal M's conjecture as one plain equation (l, r), or None: a plain positive equation, or one hypothesis
-    t = X (X a variable not in t; either side) and one positive conclusion C, as C with X replaced by t (the one-point
-    rule: for all X, t = X -> C is equivalent to C[X := t]). 135 of the 151 unsolved conditional goals at 26 Nov 11:00
-    have such a hypothesis; the other 16 (terms on both sides) give None"""
-    lits = goal_lits(m)
-    if len(lits) == 1 and lits[0][0]:
-        _, l, r = lits[0]
-    elif len(lits) == 2 and sum(1 for p_, _, _ in lits if p_) == 1:
-        (_, a, b), = [x for x in lits if not x[0]]
-        (_, l, r), = [x for x in lits if x[0]]
-        vs = lambda x: set(re.findall(r'\b[A-Z][A-Za-z0-9_]*\b', x))
-        if _VAR.match(a) and a not in vs(b):
-            v, t = a, b
-        elif _VAR.match(b) and b not in vs(a):
-            v, t = b, a
-        else:
-            return None
-        l, r = (re.sub(rf'\b{v}\b', lambda q: t, x) for x in (l, r))
-    else:
+    """(26 Nov) goal M's conjecture as one plain equation (l, r), or None: a plain positive equation, or a conditional
+    goal with a variable-side hypothesis (t = X, X not in t) as C[X := t] (the one-point rule). The conversion is
+    lemmas.lemma_form's (lemmas.unitize, 15 Nov); c32871d had its own copy (the same on all 51,784 goals up to variable
+    names), replaced the same day"""
+    import lemmas
+    f = lemmas.lemma_form(m)
+    if not f:
         return None
+    b = re.sub(r'!\s*\[[^\]]*\]\s*:\s*', '', f).strip()
+    while b.startswith('(') and b.endswith(')'):
+        b = b[1:-1].strip()
+    if b.count('=') != 1:
+        return None
+    l, r = (x.strip() for x in b.split('='))
     if any(x in l + r for x in ('=', '|', '&', '~', '>', '<', '!', '?')):
         return None
     return l, r

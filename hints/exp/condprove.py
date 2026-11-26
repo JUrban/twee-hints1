@@ -55,7 +55,7 @@ HCAP = int(opt('--hints-lemmas', '0')); HDIR = opt('--hints-dir', '/project/hint
 # --prev compares the problems without the listened lines (they are not in p/<goal>.p)
 LISTEN = int(opt('--listen', '0'))
 # (26 Nov, exp94) --equation: a conditional goal whose hypothesis has a variable side (t = X) runs as its equivalent
-# equation C[X := t] (hintsel.listen_equation, the one-point rule) in place of its conjecture line; other goals as
+# equation C[X := t] (lemmas.equation_problem, the one-point rule) in place of its conjecture line; other goals as
 # before. condimport.py reruns p/<goal>.p, so an imported proof is of that equation
 EQN = '--equation' in a
 if LISTEN:
@@ -166,12 +166,8 @@ def one(g):
             f_ = lemmas.lemma_form(f'{o}__goal_{j}') or (lemmas.HORN and lemmas.conjecture(f'{o}__goal_{j}'))  # (exp82) Horn
             if f_:
                 txt += f'fof(lemma_goal_{j},axiom,{f_}).\n'
-    if EQN and len(hintsel.goal_lits(g)) == 2:
-        eq = hintsel.listen_equation(g)
-        cl = [l for l in txt.splitlines(True) if CONJ.match(l)]
-        if eq and len(cl) == 1:
-            vs = sorted(set(re.findall(r'\b[A-Z][A-Za-z0-9_]*\b', eq[0] + ' ' + eq[1])))
-            txt = txt.replace(cl[0], f'fof(goals,conjecture,{"! [" + ",".join(vs) + "] : " if vs else ""}{eq[0]} = {eq[1]}).\n')
+    if EQN:
+        txt = lemmas.equation_problem(g, txt)
     p = f'{OUT}/p/{g}.p'
     open(p, 'w').write(txt)
     if prevno.get(g) and os.path.exists(f'{prevdir[g]}/p/{g}.p') and _pk(open(f'{prevdir[g]}/p/{g}.p').read()) == _pk(txt):
