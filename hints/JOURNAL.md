@@ -796,6 +796,10 @@ ul75 5, XFL 1. REPORT's totals table
 has the history (user, 20 Nov: "update the total numbers in the report etc every now and then").
 
 Next:
+000000000000000000000000000000000000000000000000000000000000000000000000000000000000. **exp95 (26 Nov 19:20): the ladder's next rung.** CLS71 had finished its 160 s pass (all 1,222 unsolved goals of
+   its list had two failed finals) and ran nothing; climb.py --list-only, and CLS71 restarted as cls71m: a third final
+   each, at 640 s, -j 5; production's new stalled goals go to CLQ83 (640 s) only ([notes](notes/2026-11-25-time-ladder.md),
+   "The 160 s rung done; CLS71 moves to 640 s").
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000. **exp94 (26 Nov 13:00): conditional goals as equations, an A/B.** The 134 unsolved conditional goals with a
    variable-side hypothesis, as their problem (O) and as the equivalent equation (E, condprove.py --equation), at
    plainlive's N (5 s) then H (60 s) settings, same trusted set ([notes](notes/2026-11-25-time-ladder.md),
