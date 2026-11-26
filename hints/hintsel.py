@@ -191,11 +191,39 @@ if __name__ == '__main__' and sys.argv[1:2] == ['knnfiles']:
     knnfiles_main(sys.argv[2:])
 
 
+_VAR = re.compile(r'^[A-Z][A-Za-z0-9_]*$')
+
+def listen_equation(m):
+    """(26 Nov) goal M's conjecture as one plain equation (l, r), or None: a plain positive equation, or one hypothesis
+    t = X (X a variable not in t; either side) and one positive conclusion C, as C with X replaced by t (the one-point
+    rule: for all X, t = X -> C is equivalent to C[X := t]). 135 of the 151 unsolved conditional goals at 26 Nov 11:00
+    have such a hypothesis; the other 16 (terms on both sides) give None"""
+    lits = goal_lits(m)
+    if len(lits) == 1 and lits[0][0]:
+        _, l, r = lits[0]
+    elif len(lits) == 2 and sum(1 for p_, _, _ in lits if p_) == 1:
+        (_, a, b), = [x for x in lits if not x[0]]
+        (_, l, r), = [x for x in lits if x[0]]
+        vs = lambda x: set(re.findall(r'\b[A-Z][A-Za-z0-9_]*\b', x))
+        if _VAR.match(a) and a not in vs(b):
+            v, t = a, b
+        elif _VAR.match(b) and b not in vs(a):
+            v, t = b, a
+        else:
+            return None
+        l, r = (re.sub(rf'\b{v}\b', lambda q: t, x) for x in (l, r))
+    else:
+        return None
+    if any(x in l + r for x in ('=', '|', '&', '~', '>', '<', '!', '?')):
+        return None
+    return l, r
+
 def listen_clauses(t, unsolved, k, dist, start=0):
     """(25 Nov, exp89/exp90; climb.py and loop.py --listen) up to K of the goals UNSOLVED (names of T's original's
     goals) nearest to T by goal number, within DIST, whose conjecture is one plain positive equation, as negated,
     Skolemised clauses named listen_<goal> (twee-e61m: reported when proved, never the run's proof, the search
-    unchanged)"""
+    unchanged). (26 Nov) A conditional goal with a variable-side hypothesis is listened as its equivalent equation
+    (listen_equation)"""
     import lemmas
     n_ = lemmas.split(t)[1]
     res = []
@@ -203,14 +231,12 @@ def listen_clauses(t, unsolved, k, dist, start=0):
         if d_ > dist or len(res) >= k:
             break
         try:
-            lits = goal_lits(m)
-        except Exception:   # (a conditional or compound conjecture)
+            eq = listen_equation(m)
+        except Exception:   # (a compound conjecture)
             continue
-        if len(lits) != 1 or not lits[0][0]:
+        if eq is None:
             continue
-        _, l, r = lits[0]
-        if any(x in l + r for x in ('=', '|', '&', '~', '>', '<', '!', '?')):
-            continue
+        l, r = eq
         sub = {v: f'sklg{start + len(res)}_{v.lower()}' for v in set(re.findall(r'\b[A-Z][A-Za-z0-9_]*\b', l + ' ' + r))}
         f = lambda x: re.sub(r'\b[A-Z][A-Za-z0-9_]*\b', lambda q: sub[q.group(0)], x)
         res.append(f'cnf(listen_{m}, negated_conjecture, {f(l)} != {f(r)}).\n')
