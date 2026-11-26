@@ -407,3 +407,8 @@ siblings as extra goals, credited by SOLVEDGOAL and a proof rerun), as a measure
   imported by condimport.py (40 of 40); 20 merged into loops/UL.
   Of the 4 listened goals, 1 was merged as new (ns_to_aK1 603); the other 3 reached loops/UL during the sweep from
   other producers (hints files dated 01:17:30, 01:22:54, 01:32:49), so the merge skipped them.
+* **CLS71 with --listen-class 150** (abs/cls71k.sh, exp/prod/side/cls71k.sh): restarted as climb.py 105364 at 02:19:19
+  (ps lstart; log line 3625, climb.tsv row 36903 on), same environment (RECLIMB=sets/cls71all.re,
+  EXCLUDE=sets/cls71f.excl). Why: ul88's first 1.5 h made 28 listened credits, 15 across originals. First finals:
+  Ka_eq_aK3__goal_457 listened to 134 goals, 114 from other originals; R1dist_to_aa1 (a class of its own) to 113, none.
+  CLQ83 keeps clq87e.sh for now (its 640 s finals were 44-56 minutes in).
