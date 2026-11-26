@@ -452,3 +452,20 @@ the health checks' `cut -f1 loops/UL/solved.tsv | sort -u | wc -l` agrees within
 So the fast phase ran from about 23:30 to about 01:50 (49,861 to 50,228, +367 in 2 h 16 min), in two waves (production
 listening, then listening across originals), not "the first two hours from 21:54" as first written here; 657 in all
 from 21:18 to 10:56.
+
+## Listening to conditional goals (exp93, 26 Nov 11:12)
+
+* **The user (26 Nov):** listen to the conditional goals too. Of 1,294 unsolved goals at 11:00, 1,143 are plain
+  equations (listened already) and 151 have one hypothesis and one conclusion (l1 = r1 -> l = r); 135 of these have a
+  hypothesis with a variable side (t = X, X not in t), the other 16 terms on both sides.
+* **hintsel.listen_equation** (c32871d): such a goal is listened as C[X := t], which is equivalent (the one-point rule:
+  for all X, t = X -> C holds iff C[X := t] does). The other 16 stay out: their conclusion alone is a stronger,
+  usually false statement, and their hypotheses as axioms would change the search.
+* **Test** (scratchpad condeq; 40 of the 6,100 solved such goals, seed 11, twee-e61 at 5 abstract s): the original
+  problem proved 29, the equation 30, both 29, the original only 0.
+* **Deployed:** production ul89 (abs/ul89.sh, exp/prod/ul89.sh; PID 175279) and CLS71 (cls71k.sh again; climb.py
+  175280), both from 11:12:00; CLQ83 as abs/clq87f.sh (also --listen-class 150) once its 1 h 49 min final ends;
+  plainlive7's condprove loads hintsel at each sweep (a listened conditional goal's own run there uses its own
+  conjecture line). First runs: 30 recent problem files of production and CLS71, 820 listened goals, 81 conditional.
+* A credited conditional goal's kept output and proof are of the equation (named lgoal_<goal>), not of the
+  hypothesis form; the two are equivalent, and trust.py checks the premises.

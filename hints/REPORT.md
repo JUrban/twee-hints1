@@ -65,7 +65,9 @@ added) is [notes/production-history.md](notes/production-history.md), generated 
 Everything below writes proofs into **loops/UL**, production's solved list. The totals above count only what
 exp/trust.py trusts.
 
-**1. The main loop: abs/ul88.sh.** loop.py, PID 91876, since 26 Nov 00:49: ul87 plus **`--listen-class 150`**: each run
+**1. The main loop: abs/ul89.sh.** loop.py, PID 175279, since 26 Nov 11:12:00: ul88 restarted for hintsel.listen_equation
+(conditional goals whose hypothesis has a variable side are listened as their equivalent equation; 135 of the 151 unsolved
+conditional goals; the user asked for this on 26 Nov). ul88 (PID 91876, 00:49-11:12) was ul87 plus **`--listen-class 150`**: each run
 also listens to up to 150 unsolved plain goals of the other originals with the same axiom lines (854 of 1,671 unsolved
 goals have such siblings); such a credit may use only the problem's axioms and lemma names that say whose goal they are,
 and lemma_goal_N is rewritten to the run's original's goal (lemma_knn_0_<original>__goal_N) in its kept output and proof;
@@ -177,7 +179,7 @@ proofs in 63 minutes.
 4.7 CPU h (clhl3.sh before it, 18:44-21:07: 0 in 4.1). Its targets were the heads exp67's arms and controls climb at the
 same time. Production also keeps the old climbs' hints as members sk@0 and sk@1:0.
 **The climber: abs/cls71k.sh (exp71; the 160 s rung of exp87),** climb.py --live into loops/UL, record loops/CLS71, **climb.py
-105364 since 26 Nov 02:19:19** (cls71j.sh plus `--listen-class 150`: each final also listens to up to 150 unsolved goals of the
+175280 since 26 Nov 11:12:00** (restarted for hintsel.listen_equation; log line 4297 on; as climb.py 105364 from 02:19:19: cls71j.sh plus `--listen-class 150`: each final also listens to up to 150 unsolved goals of the
 other originals with the same axioms, as production's ul88; log line 3625 on; cls71j.sh ran as climb.py 71408 from 25 Nov
 22:39, restarted then for the listen premise check; climb.py 60285 from 22:03) (cls71i.sh plus `--listen 300 --listen-dist 100000`: each final listens to all its original's
 unsolved plain goals, +5% CPU for 120, exp90; cls71i.sh, climb.py 46097, ran 20:49-22:03) (listen fixed: climb.py 43358 from 20:34 listened to 6 goals production had solved and overwrote
