@@ -2381,7 +2381,10 @@ class Loop:
                         if lgx in self.solved or os.path.exists(os.path.join(self.dir, 'hints', lgx)) or lgu is None or \
                                 any(u.startswith('assume_') or re.match(r'lemma_knn_\d+$', u) for u in lgu):
                             print(f'  listen: {lgx} (in a run of {n}) not recorded: '
-                                  + ('solved meanwhile' if lgx in self.solved else 'no usable record'), flush=True)
+                                  + ('solved meanwhile' if lgx in self.solved else
+                                     'its hints file exists (solved elsewhere, not yet synced)'
+                                     if os.path.exists(os.path.join(self.dir, 'hints', lgx)) else 'no usable record'),
+                                  flush=True)
                             continue
                         lgh = self.output_hints(lgx, lgo)
                         if not lgh:
