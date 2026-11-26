@@ -416,3 +416,11 @@ siblings as extra goals, credited by SOLVEDGOAL and a proof rerun), as a measure
   2 CPU h of finals in flight (5 at 23-32 minutes now), and in about 5 hours it credited 1 listened goal. It takes the
   option at its next restart made for another reason. CLS71 since 02:19: 3 listened credits, all from its own
   original. plainlive7: c54W 5 listened rows (all THM), c54H and c55N none.
+* **The ladder's next step, re-read (26 Nov 04:50):** CLQ83's 104 finals since row 2093 all went to newly stalled goals
+  (production's, taken before its --reclimb list): 34 proved in 52.0 CPU h, **0.65 per CPU h**, above CLS71's 0.43
+  (15:08-23:33). Its list (ladder640.re: goals with two failed 160 s finals) never ran. A climber that ranks the list
+  first would trade a measured 0.65 for an unmeasured rate on goals that already failed twice, so the ladder stays as
+  it is; the list runs when the new stalled goals run out.
+* **Since 01:48** (69 production hints files dated after 01:48, by first producer; a re-proof rewrites the file, so
+  this is rough): production's own runs 21, plainlive7 14, CLQ83 11, CLS71 12 (7 listened), GML/XFL 5, production
+  listened 4, CLQ83 listened 2. loops/UL: 50,228 at 01:48, 50,295 at 04:48.
