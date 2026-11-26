@@ -424,3 +424,7 @@ siblings as extra goals, credited by SOLVEDGOAL and a proof rerun), as a measure
 * **Since 01:48** (69 production hints files dated after 01:48, by first producer; a re-proof rewrites the file, so
   this is rough): production's own runs 21, plainlive7 14, CLQ83 11, CLS71 12 (7 listened), GML/XFL 5, production
   listened 4, CLQ83 listened 2. loops/UL: 50,228 at 01:48, 50,295 at 04:48.
+* **08:18-08:48, a burst:** ul88's listened credits 43 to 62 and loops/UL 50,385 to 50,449. Of the 19 credits, 10
+  came from runs of other originals: aK2_eq_aK3_1243 5 (in runs of nil3_15to7), nil3_1K_b 2 (aK2_eq_aK3_gen),
+  nil3_1K_c 2, aK2_eq_aK3_gen 1 (nil3_1K_b); the other 9 were aK2_eq_aK3_gen's own. trust.py t0848: 50,449 solved, 0
+  untrusted.
