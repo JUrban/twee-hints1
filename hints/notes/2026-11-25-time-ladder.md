@@ -405,3 +405,5 @@ siblings as extra goals, credited by SOLVEDGOAL and a proof rerun), as a measure
 * **plainlive7's first sweep c54N** (650 runs, 01:17-01:35): 40 THM, 4 of them listened goals (aK2_eq_aK3_o 460 in
   410's run, nslm_to_aa1 973 in 1007's, ns_to_aK1 603 in 587's and 636 in 608's), each proved again in its own run and
   imported by condimport.py (40 of 40); 20 merged into loops/UL.
+  Of the 4 listened goals, 1 was merged as new (ns_to_aK1 603); the other 3 reached loops/UL during the sweep from
+  other producers (hints files dated 01:17:30, 01:22:54, 01:32:49), so the merge skipped them.
