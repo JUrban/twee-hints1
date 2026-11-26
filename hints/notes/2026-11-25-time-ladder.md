@@ -471,3 +471,7 @@ from 21:18 to 10:56.
   hypothesis form; the two are equivalent, and trust.py checks the premises.
 * CLQ83 restarted as abs/clq87f.sh (climb.py 181853, 12:03:00; log line 2350, climb.tsv row 4626 on; CPUS=23) when its
   longest final, nslm_to_aa1__goal_1382, ended (NO, 48,196 s total for that target).
+* **First conditional credit** (CLS71, by 12:18): nslm_to_aa1__goal_1133 (conditional) listened as its equation in
+  the final of nslm_to_aa1__goal_1405, rerun printed its proof in 67 s; used.tsv record (lemma_goal_1366, 1379, 1392
+  and kNN lemmas). trust.py t1218: 50,499 solved, 0 untrusted, this one trusted. ul89 had no listened credit in its
+  first 66 minutes.
