@@ -392,3 +392,10 @@ siblings as extra goals, credited by SOLVEDGOAL and a proof rerun), as a measure
   after its cycle c53 (cond/PLNL.stop), plainlive7 starts with --prev c53N, c53H, c53W.
 * Also: loop.py's axiom_class now calls lemmas.axiom_key (the same partition, one implementation; production's
   running ul88 keeps its loaded copy, which computes the same keys).
+* **First cross credit** (ul88, about 10 minutes in): a run of nil3_23_32_to_30__goal_593 proved
+  nil3_23_32_to_27__goal_576 (an exposed original); kept output loops/UL/listen/r5/out/<goal> (USEDAXIOMS: kNN lemmas
+  naming their goals and sos, no lemma_goal_N), hints, proof, solved row. trust.py t0059: 50,122 solved, 0 untrusted,
+  this one trusted.
+* **The listen cost in wall time** (results.tsv, failed runs by level, restarts from t= resets; noisy on the shared
+  machine): L0 median 9.91 s in ul85 (no listening), 9.27 s in ul87; L1 69.7 s and 75.6 s. No clear cost; exp90's
+  +4.6% CPU (120 goals, same search) stays the figure.
