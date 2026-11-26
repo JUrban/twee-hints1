@@ -148,7 +148,7 @@ proofs in 63 minutes.
     HLW1's problems (cond/HLW1: 20 proofs in 936 runs, 0.90 per CPU h).
   * plainlive5 had dropped L (5 s, 100+30 siblings, 400 kNN ranked by lr2): 4 proofs in 18 h of run time since 12:38
     ([notes/2026-11-23-tail-allocation.md](notes/2026-11-23-tail-allocation.md)).
-* **The time ladder's 640 s rung, CLQ83 (exp87):** abs/clq87f.sh with CPUS=23, climb.py 181853 since 26 Nov 12:03:00 (clq87e.sh plus `--listen-class 150` and hintsel.listen_equation; log line 2350 on; restarted when its 2 h 40 min final ended); clq87e.sh ran as climb.py 71407 from 25 Nov 22:39 (the listen premise check; 66157 from 22:26) (clq87c.sh plus
+* **The time ladder's 640 s rung, CLQ83 (exp87):** abs/clq87g.sh with CPUS=23, climb.py 215308 since 26 Nov 16:08:10 (clq87f.sh plus `TWEE_LEMMA_EQN=1`; log line 2378 on; restarted when nslm_to_aa1__goal_1254's final ended, NO after 14,675 s); clq87f.sh ran as climb.py 181853 from 12:03:00 (clq87e.sh plus `--listen-class 150` and hintsel.listen_equation; log line 2350 on; restarted when its 2 h 40 min final ended); clq87e.sh ran as climb.py 71407 from 25 Nov 22:39 (the listen premise check; 66157 from 22:26) (clq87c.sh plus
   `--listen 300 --listen-dist 100000` with twee-pg61l (e61m), as CLS71; clq87d.sh (--listen 8) ran 20:51-22:26, climb.py 46658;
   clq87c.sh, climb.py 4160478, ran 15:29-20:51) (`--share loops/CLS71`:
   CLS71's sketch and fill hints too): a full climb (20 sketch

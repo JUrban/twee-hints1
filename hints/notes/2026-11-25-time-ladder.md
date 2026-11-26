@@ -520,3 +520,6 @@ from 21:18 to 10:56.
   calls equation_problem (the same conjectures as exp94's HE on all 134). Production ul90 (abs/ul90.sh,
   exp/prod/ul90.sh; loop.py 207594, results row 377,827 on) and CLS71 as abs/cls71l.sh (climb.py 207596, log line
   4474 on), both from 15:10:15; CLQ83 as abs/clq87g.sh when its longest final (nslm_to_aa1__goal_1254) ends.
+* CLQ83 restarted as abs/clq87g.sh (climb.py 215308, 16:08:10; log line 2378, climb.tsv row 4898 on; CPUS=23) when
+  nslm_to_aa1__goal_1254's final ended (NO, 14,675 s for that target). Every loop now runs and listens to conditional
+  goals with a variable-side hypothesis as their equation.
