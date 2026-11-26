@@ -402,3 +402,6 @@ siblings as extra goals, credited by SOLVEDGOAL and a proof rerun), as a measure
 * plainlive6's last cycle c53W ended at 01:17:11 (167 runs, 68 THM, 25 imported into loops/CI2, 9 merged into
   loops/UL); plainlive7 (PID 96229) started at 01:17:27 with --prev c53N, c53H, c53W. Its first sweep c54N: 1,625
   unsolved goals (most SAME), twee-e61m with listen lines.
+* **plainlive7's first sweep c54N** (650 runs, 01:17-01:35): 40 THM, 4 of them listened goals (aK2_eq_aK3_o 460 in
+  410's run, nslm_to_aa1 973 in 1007's, ns_to_aK1 603 in 587's and 636 in 608's), each proved again in its own run and
+  imported by condimport.py (40 of 40); 20 merged into loops/UL.
