@@ -497,3 +497,18 @@ from 21:18 to 10:56.
   nslm_to_aa1__goal_1121 (1.47 s, no unproved sibling used, 2 kNN lemmas; its original NO at 5.10 s). Imported via
   condimport.py into loops/CI2 and merged into loops/UL (cond/EXP94/NE.import, NE.merge); trust.py t1318: 50,500
   solved, 0 untrusted, this one trusted. The 60 s stage (HO, HE) runs.
+* **exp94 result** (HO 13:06:53-14:06:20, HE 14:06:20-15:00:06; counted from the four results.tsv):
+
+  | stage | original | equation | equation only | original only | run seconds O / E |
+  |---|---|---|---|---|---|
+  | 5 s (N) | 0 | 1 | 1 | 0 | 786 / 645 |
+  | 60 s (H) | 0 | 2 | 2 | 0 | 14,114 / 12,612 |
+
+  The 60 s equation-only goals: nslm_to_aa1__goal_1121 (again, 2.87 s) and ns_to_aa1_c__goal_314 (120.37 s wall, no
+  unproved sibling, 16 proved siblings and 74 kNN lemmas; its original NO at 113.89 s). Imported (condimport.py 1 of
+  2, the other already solved) and merged; trust.py t1504: 50,512 solved, 0 untrusted, both trusted. Small numbers (2
+  of 134), but one-sided: the equation never lost, and its runs took 11-18% less wall time.
+* **Deployed:** plainlive8 (abs/plainlive8.sh, exp/prod/side/plainlive8.sh; PID 206709 from 15:06:23, first cycle
+  c64 with --prev c63N/H/W): plainlive7 plus condprove.py --equation in N, H and W. A conditional goal's problem text
+  changes, so each of them reruns once in N (and in H or W when it is a head). Production's and the climbers' own runs
+  of conditional goals still use the conditional form; they listen to them as equations since 11:12.

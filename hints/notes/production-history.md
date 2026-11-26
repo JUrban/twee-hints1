@@ -1,6 +1,6 @@
 # Production history
 
-Generated 26 Nov 2026 11:14 by [exp/prodhistory.py](../exp/prodhistory.py) from the scripts abs/ul3.sh … ul89.sh (copies in [exp/prod/](../exp/prod/)) and their logs; rerun it after every production restart. What runs now, with the side loops, is in REPORT.md "Production now"; the totals over time are REPORT's summary table.
+Generated 26 Nov 2026 15:07 by [exp/prodhistory.py](../exp/prodhistory.py) from the scripts abs/ul3.sh … ul89.sh (copies in [exp/prod/](../exp/prod/)) and their logs; rerun it after every production restart. What runs now, with the side loops, is in REPORT.md "Production now"; the totals over time are REPORT's summary table.
 
 * **Written** is the newest dated entry of the script's header: when the version was written or first started.
 * **Last run** is the span of loops/ULNN.log (first and last write). A script that ran twice keeps only its second log (ul74: written 20 Nov 04:14, its log is the run of 21 Nov 16:50 to 22 Nov 07:12); some versions ran for minutes before a fix.
@@ -96,7 +96,7 @@ Generated 26 Nov 2026 11:14 by [exp/prodhistory.py](../exp/prodhistory.py) from 
 | [ul86](../exp/prod/ul86.sh) | 25 Nov 22:18 | 25 Nov 22:18 – 25 Nov 22:38 | 0.3 | J= (default 17); ≥3 in flight | twee-pg61l + `--pg-threshold 0.25 --ground-joining-branch-limit 100` | 0 | `--twee` `/project/bin/twee-pg61` → `/project/bin/twee-pg61l`; +`--listen` `${LISTEN:-300}` |
 | [ul87](../exp/prod/ul87.sh) | 25 Nov 22:39 | 25 Nov 22:39 – 26 Nov 00:46 | 2.1 | J= (default 17); ≥3 in flight | twee-pg61l + `--pg-threshold 0.25 --ground-joining-branch-limit 100` | 160 | (same options: a restart, or loop.py's code or the launch arguments changed) |
 | [ul88](../exp/prod/ul88.sh) | 26 Nov 00:49 | 26 Nov 00:49 – 26 Nov 11:09 | 10.3 | J= (default 17); ≥3 in flight | twee-pg61l + `--pg-threshold 0.25 --ground-joining-branch-limit 100` | 162 | +`--listen-class` `${LCLASS:-150}` |
-| [ul89](../exp/prod/ul89.sh) | 26 Nov 11:11 | 26 Nov 11:12 – 26 Nov 11:13 | 0.0 | 4 (the running process) | twee-pg61l + `--pg-threshold 0.25 --ground-joining-branch-limit 100` |  | (same options: a restart, or loop.py's code or the launch arguments changed) |
+| [ul89](../exp/prod/ul89.sh) | 26 Nov 11:11 | 26 Nov 11:12 – 26 Nov 15:05 | 3.9 | 4 (the running process) | twee-pg61l + `--pg-threshold 0.25 --ground-joining-branch-limit 100` | 6 | (same options: a restart, or loop.py's code or the launch arguments changed) |
 
 ## Why each version (the header's newest entry, verbatim)
 
@@ -223,6 +223,7 @@ Each line is the script's first header entry. Which ones run now is in REPORT.md
 * [plainlive6.sh](../exp/prod/side/plainlive6.sh): (24 Nov, notes/2026-11-23-tail-allocation.md "plainlive6") plainlive5 plus W: the local heads (unsolved goals whose previous goal is proved, exp/heads.py --local) other than the first heads, at H's setting (100+30 siblings, 400 kNN, 60 s), rerun only when a goal's axioms or sibling lemmas changed (condprove.py --prev-ignore-knn): a newly proved sibling, not a moved kNN list (with kNN changes nearl …
 * [plainlive6_start.sh](../exp/prod/side/plainlive6_start.sh): (24 Nov) When the resumed HLW1 sweep has ended (cond/SWEEPQ.log "HLW1 done" after "HLW1 resumed"): stop abs/plainlive5.sh after its cycle (cond/PLNL.stop), then start abs/plainlive6.sh (N, H, and W on the local heads) with PREV_N, PREV_H plainlive5's last cycle and PREV_W cond/HLW1.
 * [plainlive7.sh](../exp/prod/side/plainlive7.sh): (26 Nov 00:58, exp92) plainlive7: plainlive6 with condprove.py --listen ${LISTEN:-300} in N, H and W: each run also listens to up to 300 unsolved plain goals of its original (twee-e61m: the search is the same); a listened goal proved there gets a run of the run's problem with its own conjecture, and that row goes through condimport.py as any other (test: scratchpad cp92, trusted without nil3_26 go …
+* [plainlive8.sh](../exp/prod/side/plainlive8.sh): (26 Nov 15:06, exp94) plainlive8: plainlive7 with condprove.py --equation in N, H and W: a conditional goal whose hypothesis has a variable side (t = X, X not in t) runs as its equivalent equation C[X := t] (hintsel.listen_equation). exp94 (the 134 unsolved such goals, same trusted set): 5 s original 0, equation 1; 60 s original 0, equation 2; the original only 0; both imported and trusted (t1318, …
 * [plainlive_start.sh](../exp/prod/side/plainlive_start.sh): (23 Nov) After PLN2: import and merge its proofs (loops/CI2), then start abs/plainlive.sh (PREV=cond/PLN2).
 * [sweepq.sh](../exp/prod/side/sweepq.sh): (23 Nov) A queue of full plain sweeps (notes/2026-11-23-conditional.md, "Sweep queue"): each line of cond/SWEEPQ.txt is "NAME condprove-args"; a sweep runs once (cond/NAME), on production's unsolved goals with the context loops/UL/solved.tsv at its start, --proved, ${J:-3} threads, then its proofs go into loops/CI3 and loops/UL. Waits for $AFTER (a file) first. Stops when the queue is done or cond …
 

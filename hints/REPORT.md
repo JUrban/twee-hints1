@@ -130,7 +130,7 @@ proofs in 63 minutes.
   every 5 minutes, binary twee-e39.
 * **Given-rule retry:** givenmatch.py live into loops/GML, PID 2074661, since 22 Nov 14:17. 2 threads, 60 and 160 s
   runs on GFAIL's hits.
-* **Plain live loop:** abs/plainlive7.sh, PID 96229, since 26 Nov 01:17:27: plainlive6 with `condprove.py --listen 300`
+* **Plain live loop:** abs/plainlive8.sh, PID 206709, since 26 Nov 15:06:23 (first cycle c64; exp94): plainlive7 with `condprove.py --equation`: a conditional goal with a variable-side hypothesis runs as its equivalent equation (exp94: 2 proved only that way, 0 only as the original). plainlive7 (PID 96229, 01:17:27-15:06) was plainlive6 with `condprove.py --listen 300`
   in N, H and W (exp92, twee-e61m: each run also listens to its original's unsolved plain goals; a listened goal gets a
   run of that problem with its own conjecture, and its row goes through condimport.py as any other;
   [notes/2026-11-25-time-ladder.md](notes/2026-11-25-time-ladder.md), "Listening in the plain live loop"); first --prev
