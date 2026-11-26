@@ -54,12 +54,16 @@ HCAP = int(opt('--hints-lemmas', '0')); HDIR = opt('--hints-dir', '/project/hint
 # any other (THM or NO), so condimport.py reruns p/<X>.p as usual. OUT/listened.tsv: X, the run's goal, THM/NO.
 # --prev compares the problems without the listened lines (they are not in p/<goal>.p)
 LISTEN = int(opt('--listen', '0'))
+# (26 Nov, exp94) --equation: a conditional goal whose hypothesis has a variable side (t = X) runs as its equivalent
+# equation C[X := t] (hintsel.listen_equation, the one-point rule) in place of its conjecture line; other goals as
+# before. condimport.py reruns p/<goal>.p, so an imported proof is of that equation
+EQN = '--equation' in a
 if LISTEN:
     if TWEE == '/project/bin/twee-pg61':
         TWEE = '/project/bin/twee-e61m'   # (twee-pg61 adds $TWEE_PG_ARGS, unset in plainlive's runs)
     assert 'e61m' in TWEE, f'--listen needs twee-e61m, not {TWEE}'
     assert not HCAP, '--listen with --hints-lemmas: the listened goal would need the run hints file'
-a = [x for x in a if x not in ('--all', '--proved', '--prev-ignore-knn')]
+a = [x for x in a if x not in ('--all', '--proved', '--prev-ignore-knn', '--equation')]
 OUT = os.path.abspath(a[0])
 assert not OUT.startswith('/project/hintwork/loops'), 'OUT must be outside loops/'
 os.makedirs(f'{OUT}/p', exist_ok=True); os.makedirs(f'{OUT}/proofs', exist_ok=True)
@@ -162,6 +166,12 @@ def one(g):
             f_ = lemmas.lemma_form(f'{o}__goal_{j}') or (lemmas.HORN and lemmas.conjecture(f'{o}__goal_{j}'))  # (exp82) Horn
             if f_:
                 txt += f'fof(lemma_goal_{j},axiom,{f_}).\n'
+    if EQN and len(hintsel.goal_lits(g)) == 2:
+        eq = hintsel.listen_equation(g)
+        cl = [l for l in txt.splitlines(True) if CONJ.match(l)]
+        if eq and len(cl) == 1:
+            vs = sorted(set(re.findall(r'\b[A-Z][A-Za-z0-9_]*\b', eq[0] + ' ' + eq[1])))
+            txt = txt.replace(cl[0], f'fof(goals,conjecture,{"! [" + ",".join(vs) + "] : " if vs else ""}{eq[0]} = {eq[1]}).\n')
     p = f'{OUT}/p/{g}.p'
     open(p, 'w').write(txt)
     if prevno.get(g) and os.path.exists(f'{prevdir[g]}/p/{g}.p') and _pk(open(f'{prevdir[g]}/p/{g}.p').read()) == _pk(txt):

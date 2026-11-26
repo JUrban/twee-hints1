@@ -475,3 +475,21 @@ from 21:18 to 10:56.
   the final of nslm_to_aa1__goal_1405, rerun printed its proof in 67 s; used.tsv record (lemma_goal_1366, 1379, 1392
   and kNN lemmas). trust.py t1218: 50,499 solved, 0 untrusted, this one trusted. ul89 had no listened credit in its
   first 66 minutes.
+
+## Conditional goals as equations, an A/B (exp94, launched 26 Nov 13:00:35)
+
+* **Question:** is an unsolved conditional goal (t = X -> C, X a variable not in t) easier for twee as its equivalent
+  equation C[X := t] than as its original problem? This morning's 40-goal check on solved goals at 5 s gave 29
+  against 30, with one proved only as the equation.
+* **Set:** exp/sets/exp94.goals, every goal of sets/all not in exp/sets/exp94.trusted (loops/UL's solved goals when
+  launched, 50,499) whose conjecture is one hypothesis with a variable side and one conclusion: 134 goals of 32
+  originals (1,285 unsolved in all). No sampling, no seed.
+* **Arms:** O runs each goal's conditional problem as condprove.py builds it; E is the same problem with the
+  conjecture line replaced by the equation (condprove.py --equation, new; hintsel.listen_equation). The same trusted
+  set, siblings and kNN lemmas in both. Two stages: plainlive's N setting (5 s, 30 siblings, 10 after, 100 kNN), then
+  its H setting (60 s, 100 siblings, 30 after, 400 kNN); no listening, no hints. twee-pg61 at --abstract-time 2000,
+  -j 4 (4 CPUs).
+* **Command** (from /project/hintwork): `J=4 bash /project/twee/hints/exp/exp94.sh cond/EXP94`; arms in order NO, NE,
+  HO, HE; cond/EXP94/log has their start and end times.
+* **Reading:** proved per arm and stage, +/- and the union, abstract seconds per proof. A THM here is a conditional
+  proof (it may use unproved siblings); condprove's results.tsv says which.
