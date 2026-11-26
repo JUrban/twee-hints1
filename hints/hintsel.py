@@ -191,7 +191,7 @@ if __name__ == '__main__' and sys.argv[1:2] == ['knnfiles']:
     knnfiles_main(sys.argv[2:])
 
 
-def listen_clauses(t, unsolved, k, dist):
+def listen_clauses(t, unsolved, k, dist, start=0):
     """(25 Nov, exp89/exp90; climb.py and loop.py --listen) up to K of the goals UNSOLVED (names of T's original's
     goals) nearest to T by goal number, within DIST, whose conjecture is one plain positive equation, as negated,
     Skolemised clauses named listen_<goal> (twee-e61m: reported when proved, never the run's proof, the search
@@ -211,7 +211,7 @@ def listen_clauses(t, unsolved, k, dist):
         _, l, r = lits[0]
         if any(x in l + r for x in ('=', '|', '&', '~', '>', '<', '!', '?')):
             continue
-        sub = {v: f'sklg{len(res)}_{v.lower()}' for v in set(re.findall(r'\b[A-Z][A-Za-z0-9_]*\b', l + ' ' + r))}
+        sub = {v: f'sklg{start + len(res)}_{v.lower()}' for v in set(re.findall(r'\b[A-Z][A-Za-z0-9_]*\b', l + ' ' + r))}
         f = lambda x: re.sub(r'\b[A-Z][A-Za-z0-9_]*\b', lambda q: sub[q.group(0)], x)
         res.append(f'cnf(listen_{m}, negated_conjecture, {f(l)} != {f(r)}).\n')
     return res

@@ -9,7 +9,7 @@ the proofs it finds to the pool.
 usage: loop.py SET DIR [--rounds N] [--timeout S] [-j N] [--twee BIN]
                [--args "..."] [--pool original|all] [--aux]
 """
-import argparse, collections, heapq, json, math, os, random, re, subprocess, sys, time
+import argparse, collections, hashlib, heapq, json, math, os, random, re, subprocess, sys, time
 from concurrent.futures import ThreadPoolExecutor, as_completed, wait, FIRST_COMPLETED
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import hintlib
@@ -129,7 +129,7 @@ class Loop:
             self.sig[o] = hintlib.problem_signature(name)
         return self.sig[o]
 
-    def listen_bad_premises(self, x, out):
+    def listen_bad_premises(self, x, out, run=None):
         """(--listen) the premises of a listened goal X's proof (USEDAXIOMS of OUT) that X may not use: anything but
         the axioms of X's own problem, lemma_*/true_* lemmas (not a bare lemma_knn_N) and srclem_/skax_ lemmas of a
         named goal. A conditional target's hypotheses (axioms named after its conjecture, e.g. 'goals') are ground facts
@@ -143,6 +143,11 @@ class Loop:
         except OSError:
             return ['(no problem file)']
         ax = set(re.findall(r'^(?:fof|cnf)\(\s*([^,\s]+)\s*,\s*axiom\s*,', txt, re.M))
+        if run and '__goal_' in run and orig_of(run) != orig_of(x):
+            # (26 Nov, --listen-class) a goal of another original with the same axioms: only lemma names that say whose
+            # goal they are (lemma_goal_N, translated to the run's original by listen_credit) or name it
+            return [u for u in ua if not (u in ax or re.fullmatch(r'lemma_goal_\d+', u)
+                                          or re.fullmatch(r'(?:lemma_knn_\d+|srclem_\d+|skax_\d+)_.+__goal_\d+', u))]
         return [u for u in ua if not (u in ax or (u.startswith(('lemma_', 'true_')) and not re.fullmatch(r'lemma_knn_\d+', u))
                                       or re.match(r'(?:srclem|skax)_\d+_.+__goal_\d+$', u))]
 
@@ -180,12 +185,16 @@ class Loop:
             i, j = o2.find('GIVEN-BEGIN'), o2.find('GIVEN-END')
             o2 = o2[:i] + o2[j:] if 0 <= i < j else o2
             ok2 = 'HINTS-END' in o2 and f'(lgoal_{x})' in o2
-            bad = self.listen_bad_premises(x, o2) if ok2 else []
+            bad = self.listen_bad_premises(x, o2, name) if ok2 else []
             if bad:   # (e.g. a conditional target's hypotheses, axioms about its own Skolem constants: not X's)
                 print(f'  listen: {name} proved {x}; its proof uses {" ".join(bad[:4])}: not credited', flush=True)
                 continue
             print(f'  listen: {name} proved {x}; rerun {"printed its proof" if ok2 else "FAILED"} in {time.time() - t0:.0f}s',
                   flush=True)
+            if ok2 and orig_of(x) != orig_of(name):
+                # (--listen-class) lemma_goal_N is the run's original's goal N: named so for trust.py, the proof and
+                # every later reader of X's output
+                o2 = re.sub(r'\blemma_goal_(\d+)\b', lambda q: f'lemma_knn_0_{orig_of(name)}__goal_{q.group(1)}', o2)
             if ok2:
                 res.append((x, o2))
 
@@ -201,7 +210,30 @@ class Loop:
         if '__goal_' not in name:
             return []
         uns = [m for m in self.orig_names.get(lemmas.split(name)[0], ()) if m not in self.solved]
-        return hintsel.listen_clauses(name, uns, self.a.listen, self.a.listen_dist)
+        res = hintsel.listen_clauses(name, uns, self.a.listen, self.a.listen_dist)
+        if getattr(self.a, 'listen_class', 0):
+            # (26 Nov) and up to --listen-class K unsolved goals of the other originals with the same axioms (the same
+            # lines, sorted), nearest by goal number: 854 of 1,671 unsolved goals had such siblings
+            o = lemmas.split(name)[0]
+            cl = self.axiom_class(o)
+            oth = [m for o2, ms in self.orig_names.items() if o2 != o and cl and self.axiom_class(o2) == cl
+                   for m in ms if m not in self.solved]
+            res += hintsel.listen_clauses(name, oth, self.a.listen_class, self.a.listen_dist, start=len(res))
+        return res
+
+    def axiom_class(self, o):
+        """(--listen-class) the axiom lines of original O's problems, sorted, as a hash ('' if unreadable)"""
+        if not hasattr(self, 'aclass'):
+            self.aclass = {}
+        if o not in self.aclass:
+            try:
+                m = next(m for m in self.orig_names[o])
+                ax = sorted(l.strip() for l in open(os.path.join(PROB, m + '.p'))
+                            if re.match(r'(?:fof|cnf)\(\s*[^,\s]+\s*,\s*axiom\s*,', l))
+                self.aclass[o] = hashlib.md5('\n'.join(ax).encode()).hexdigest() if ax else ''
+            except (OSError, StopIteration):
+                self.aclass[o] = ''
+        return self.aclass[o]
 
     def output_hints(self, name, out, L=None, G=None):
         """the hints file rows of a proof's output: its lemmas and goal steps (and --aux), canonical, deduplicated
@@ -2753,6 +2785,8 @@ def make_parser():
     # run's own; with it the search is the same as without (exp90: 120 listened goals +4.6% CPU in a 160 s run).
     ap.add_argument('--listen', type=int, default=0, help='runs carry up to K unsolved sibling goals as listened goals (twee-e61m)')
     ap.add_argument('--listen-dist', type=int, default=100000, help='--listen: siblings within this many goal numbers')
+    ap.add_argument('--listen-class', type=int, default=0,
+                    help='--listen: and up to K unsolved goals of other originals with the same axioms (lemma_goal_N translated)')
     ap.add_argument('--ab-args', default='',
                     help='(19 Nov, exp25) --cascade: an A/B test in production. The runs above the first level\'s budget '
                          '(not p9) of half the goals, by a hash of the name, get these twee arguments; their results rows '

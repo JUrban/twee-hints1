@@ -347,3 +347,28 @@ siblings as extra goals, credited by SOLVEDGOAL and a proof rerun), as a measure
   rests on its formula node (trusted when another fill lemma of the same original and formula is; the fixpoint adds
   a node only once its deps are trusted, so a copy cannot vouch for itself). t2351: 49,982 solved, 0 untrusted; fill
   lemmas trusted 23,620 (3,406 before: the copies).
+
+## Listening across originals (exp91, 26 Nov 00:53)
+
+* **Question:** a run of original A's goal listens to A's unsolved goals. 854 of the 1,671 unsolved goals (loops/UL at
+  00:20) have unsolved siblings in other originals with the same axiom lines (68 classes over 129 originals; e.g. the 6
+  nil3_23_32_to_* originals share one with 165 unsolved goals, 12 originals of Ka1_eq_Ka2, aK2rev, a_instances, ...
+  one with 153). Listening to those too is nearly free with twee-e61m (the search is unchanged), so does it prove more?
+* **loop.py `--listen-class K`** (hintsel.listen_clauses gets `start`, so the Skolem names do not collide): after the
+  own original's goals, up to K unsolved plain goals of the other originals of the same class (md5 of the sorted
+  axiom lines of the original's first problem), nearest by goal number. **Credit rules across originals**
+  (listen_bad_premises with the run's name): the problem's axioms, lemma_goal_N, and names that say whose goal they are
+  (lemma_knn_K_<goal>, srclem_N_<goal>, skax_N_<goal>); refused: true_k, lemma_fill_N (numbered per original), assume_,
+  a bare lemma_knn_N, the target's hypotheses. listen_credit rewrites lemma_goal_N to lemma_knn_0_<A>__goal_N in the
+  output (kept output, proof), which trust.py resolves to A's goal N.
+* **Tests:** loops/LSTX92 (nil3_23_32_to_25 and _26, goals 5-10 dropped) listened 23 of the other original's goals in
+  a run, but those dropped goals are conditional (not listened). loops/LSTX93: dropped nil3_23_32_to_25__goal_44 (the
+  same equation as nil3_23_32_to_26__goal_42) and nil3_23_32_to_26__goal_43, -j 1: goal 43's run proved 44 as a
+  listened goal, recorded with kept output listen/r1/out (RESULT Theorem, USEDAXIOMS lemma_knn_19_nil3_23_32_to_26__goal_61
+  sos), proof, hints and solved row. The translation and the premise lists checked by hand on a made-up USEDAXIOMS
+  line (cross refuses true_3, lemma_fill_2, goals, lemma_knn_5).
+* **Production ul88** (abs/ul88.sh, exp/prod/ul88.sh; `--listen-class 150`, also the listened-output folder) from
+  26 Nov 00:49:32 (ps lstart), loop.py PID 91876; ul87's last results row 366930 (t= resets after it). First runs: nil3_23_32_to_31__goal_549 listened to 135 goals,
+  115 from other originals; nil3_24__goal_477 to 50, 46 from others.
+* **Reading** (to do): credits whose goal's original differs from the run's (log lines "listen: X proved in a run of
+  Y"), per CPU h; L0's CPU per run before and after row 366930 (the listen cost).

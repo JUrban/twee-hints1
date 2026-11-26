@@ -796,6 +796,13 @@ ul75 5, XFL 1. REPORT's totals table
 has the history (user, 20 Nov: "update the total numbers in the report etc every now and then").
 
 Next:
+00000000000000000000000000000000000000000000000000000000000000000000000000000000. **exp91 (26 Nov 00:53): listening across originals.** loop.py `--listen-class K`: a run also listens to up to K
+   unsolved plain goals of the other originals with the same axiom lines (854 of 1,671 unsolved goals have such
+   siblings). Such a credit may use only the axioms and lemma names that say whose goal they are; lemma_goal_N is
+   rewritten to the run's original (lemma_knn_0_<A>__goal_N) for trust.py. Test loops/LSTX93 recorded a cross credit.
+   Production ul88 (`--listen-class 150`, PID 91876, from 00:49:32; also the listened-output folder). Reading to do:
+   cross credits per CPU h and L0's cost per run after row 366930 ([notes](notes/2026-11-25-time-ladder.md),
+   "Listening across originals").**
 0000000000000000000000000000000000000000000000000000000000000000000000000000000. **exp90 (25 Nov 21:10-21:42, [notes/2026-11-25-time-ladder.md](notes/2026-11-25-time-ladder.md), "exp90"): listened goals
    changed the search.** The question: what 8 listened goals cost a 160 s final (exp/listencost90.sh; CLS71's final of
    nsmr_to_aa1__goal_893, copied, run with and without them). With twee-e61l, at 320,000 pairs: 69,936 rules and 342 CPU s

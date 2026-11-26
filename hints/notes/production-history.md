@@ -1,6 +1,6 @@
 # Production history
 
-Generated 25 Nov 2026 22:39 by [exp/prodhistory.py](../exp/prodhistory.py) from the scripts abs/ul3.sh … ul87.sh (copies in [exp/prod/](../exp/prod/)) and their logs; rerun it after every production restart. What runs now, with the side loops, is in REPORT.md "Production now"; the totals over time are REPORT's summary table.
+Generated 26 Nov 2026 00:53 by [exp/prodhistory.py](../exp/prodhistory.py) from the scripts abs/ul3.sh … ul88.sh (copies in [exp/prod/](../exp/prod/)) and their logs; rerun it after every production restart. What runs now, with the side loops, is in REPORT.md "Production now"; the totals over time are REPORT's summary table.
 
 * **Written** is the newest dated entry of the script's header: when the version was written or first started.
 * **Last run** is the span of loops/ULNN.log (first and last write). A script that ran twice keeps only its second log (ul74: written 20 Nov 04:14, its log is the run of 21 Nov 16:50 to 22 Nov 07:12); some versions ran for minutes before a fix.
@@ -94,7 +94,8 @@ Generated 25 Nov 2026 22:39 by [exp/prodhistory.py](../exp/prodhistory.py) from 
 | [ul84](../exp/prod/ul84.sh) | 24 Nov | 24 Nov 11:23 – 25 Nov 15:30 | 28.1 | J= (default 17); ≥3 in flight | twee-pg61 + `--pg-threshold 0.25 --ground-joining-branch-limit 100` | 274 | (same options: a restart, or loop.py's code or the launch arguments changed) |
 | [ul85](../exp/prod/ul85.sh) | 25 Nov 15:30 | 25 Nov 15:30 – 25 Nov 22:17 | 6.8 | J= (default 17); ≥3 in flight | twee-pg61 + `--pg-threshold 0.25 --ground-joining-branch-limit 100` | 16 | `--climb-hints` `/project/hintwork/loops/CLH,/project/hintwork/loops/CLHL,/project/hintwork/loops/CLU,/project/hintwork/loops/CLHL2,/project/hintwork/loops/FUD2p,/project/hintwork/loops/FUDs,/project/hintwork/loops/CLHL3,/project/hintwork/loops/CLHL4,/project/hintwork/loops/CLA67,/project/hintwork/loops/CLB67,/project/hintwork/loops/CLK69,/project/hintwork/loops/K70F,/project/hintwork/loops/K70R,/project/hintwork/loops/CLS71` → `/project/hintwork/loops/CLH,/project/hintwork/loops/CLHL,/project/hintwork/loops/CLU,/project/hintwork/loops/CLHL2,/project/hintwork/loops/FUD2p,/project/hintwork/loops/FUDs,/project/hintwork/loops/CLHL3,/project/hintwork/loops/CLHL4,/project/hintwork/loops/CLA67,/project/hintwork/loops/CLB67,/project/hintwork/loops/CLK69,/project/hintwork/loops/K70F,/project/hintwork/loops/K70R,/project/hintwork/loops/CLS71,/project/hintwork/loops/CLQ83` |
 | [ul86](../exp/prod/ul86.sh) | 25 Nov 22:18 | 25 Nov 22:18 – 25 Nov 22:38 | 0.3 | J= (default 17); ≥3 in flight | twee-pg61l + `--pg-threshold 0.25 --ground-joining-branch-limit 100` | 0 | `--twee` `/project/bin/twee-pg61` → `/project/bin/twee-pg61l`; +`--listen` `${LISTEN:-300}` |
-| [ul87](../exp/prod/ul87.sh) | 25 Nov 22:39 | 25 Nov 22:39 – 25 Nov 22:39 | 0.0 | 4 (the running process) | twee-pg61l + `--pg-threshold 0.25 --ground-joining-branch-limit 100` |  | (same options: a restart, or loop.py's code or the launch arguments changed) |
+| [ul87](../exp/prod/ul87.sh) | 25 Nov 22:39 | 25 Nov 22:39 – 26 Nov 00:46 | 2.1 | J= (default 17); ≥3 in flight | twee-pg61l + `--pg-threshold 0.25 --ground-joining-branch-limit 100` | 160 | (same options: a restart, or loop.py's code or the launch arguments changed) |
+| [ul88](../exp/prod/ul88.sh) | 26 Nov 00:49 | 26 Nov 00:49 – 26 Nov 00:50 | 0.0 | 4 (the running process) | twee-pg61l + `--pg-threshold 0.25 --ground-joining-branch-limit 100` |  | +`--listen-class` `${LCLASS:-150}` |
 
 ## Why each version (the header's newest entry, verbatim)
 
@@ -183,6 +184,7 @@ Generated 25 Nov 2026 22:39 by [exp/prodhistory.py](../exp/prodhistory.py) from 
 * **ul85** (25 Nov 15:30): (25 Nov 15:30) ul85: ul84 with loops/CLQ83 in --climb-hints, so production's sketch members also read the 640 s rung's sketch and fill hints (the user: keep the strengthened-theory hints in the global hint db). Launch: J=4 bash abs/ul85.sh.
 * **ul86** (25 Nov 22:18): (25 Nov 22:18) ul86: ul85 with --listen 300 and --twee /project/bin/twee-pg61l (twee-e61m): each twee run (not Prover9, unfold or resumed runs) also listens to its original's unsolved plain goals (up to 300); one proved there is rerun as a real goal with its proof printed and recorded as production's proof (user, 25 Nov: Prover9 searches with several goals). With e61m the search is the same as without; 120 listened goals cost +4.6% CPU in a 160 s run (exp90, notes/2026-11-25-time-ladder.md, "Production listening"). Launch: J=4 bash abs/ul86.sh.
 * **ul87** (25 Nov 22:39): (25 Nov 22:39) ul87: ul86 restarted for loop.py's listen premise check (listen_bad_premises): a listened goal's proof is credited only if it uses its own problem's axioms and lemmas, never a conditional target's hypotheses ('goals'), which are ground facts about the target's Skolem constants. Same settings. Launch: J=4 bash abs/ul87.sh.
+* **ul88** (26 Nov 00:49): (26 Nov 00:49) ul88: ul87 plus --listen-class "${LCLASS:-150}": each run also listens to up to 150 unsolved plain goals of the other originals with the same axioms (the same axiom lines; 854 of 1,671 unsolved goals have such siblings). A credit across originals may use only the problem's axioms and lemma names that say whose goal they are; lemma_goal_N is rewritten to lemma_knn_0_<run's original>__goal_N in the kept output and proof (loop.py listen_bad_premises, listen_credit). Test loops/LSTX93: nil3_23_32_to_26__goal_43's run proved and recorded nil3_23_32_to_25__goal_44. Also in: listened kept outputs in loops/UL/listen/rN/out (202d987). Same settings otherwise. Launch: J=4 bash abs/ul88.sh.
 
 ## Side loops (their scripts, oldest first; copies in [exp/prod/side/](../exp/prod/side/))
 
@@ -237,7 +239,7 @@ Each line is the script's first header entry. Which ones run now is in REPORT.md
 * [p9c4.sh](../exp/prod/side/p9c4.sh): (18 Nov 17:52) p9c with 4 workers instead of 2 (log P9C4.log). By the portfolio's ratio rule it is the best deep member per CPU: 1.98 new proofs per CPU hour on the walls twee's chain failed (exp16), 1.44 live from 16:46 to 17:49 (3 proofs in 126 runs), against 1.16 for production's 80 s chain level. Its 225 queued stalled goals would take 2 workers about 2 hours. Restarting keeps loops/P9C/result …
 
 
-## The current version's full option list (ul87)
+## The current version's full option list (ul88)
 
 ```
 export TWEE_PG_ARGS="--pg-threshold 0.25 --ground-joining-branch-limit 100"
@@ -293,5 +295,6 @@ loop.py sets/all loops/UL
   --pass-every 1
   --ab-args --cp-renormalise-threshold 1000
   --listen ${LISTEN:-300}
+  --listen-class ${LCLASS:-150}
   --args --abstract-time 2000 --no-resume-requeue --no-eqhint-consider
 ```
