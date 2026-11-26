@@ -263,6 +263,8 @@ def main():
     # goal's proof would count as the target's. exp89: 2 of 117 such goals proved at 320,000 pairs.
     ap.add_argument('--listen', type=int, default=0, help='finals carry up to K unsolved sibling goals as listened goals (twee-e61l)')
     ap.add_argument('--listen-dist', type=int, default=10, help='--listen: siblings within this many goal numbers')
+    ap.add_argument('--listen-class', type=int, default=0,
+                    help='--listen: and up to K unsolved goals of other originals with the same axioms (loop.py --listen-class)')
     ap.add_argument('--move-eps', type=float, default=0.1, help='--move-model: share of uniformly random moves')
     ap.add_argument('--up-single', action='store_true', help='--updown: going up also adds one assumption at a time')
     ap.add_argument('--up-levels', type=int, default=2, help='--up-single: levels of one-more-axiom')
@@ -718,7 +720,17 @@ def main():
         with lock:
             uns = [f'{o_}__goal_{m}' for m in allgoals.get(o_, ()) if f'{o_}__goal_{m}' != t
                    and f'{o_}__goal_{m}' not in lp.solved and f'{o_}__goal_{m}' not in LS]
-        return hintsel.listen_clauses(t, uns, c.listen, c.listen_dist)
+        res = hintsel.listen_clauses(t, uns, c.listen, c.listen_dist)
+        if c.listen_class:
+            # (26 Nov, loop.py --listen-class) and up to K unsolved goals of the other originals with the same axioms
+            # (lemmas.axiom_key); lp.listen_credit checks such a proof's premises and names its lemma_goal_N
+            key = lemmas.axiom_key(t)
+            with lock:
+                oth = [f'{o2}__goal_{m}' for o2, ms in allgoals.items() if o2 != o_ and ms
+                       and lemmas.axiom_key(f'{o2}__goal_{min(ms)}') == key
+                       for m in ms if f'{o2}__goal_{m}' not in lp.solved and f'{o2}__goal_{m}' not in LS]
+            res += hintsel.listen_clauses(t, oth, c.listen_class, c.listen_dist, start=len(res))
+        return res
 
     def listen_record(t, x, o2):
         """(--listen) the records of listened goal X, proved in T's final and rerun with its proof printed, as for a
