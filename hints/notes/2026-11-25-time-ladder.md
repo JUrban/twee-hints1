@@ -523,3 +523,20 @@ from 21:18 to 10:56.
 * CLQ83 restarted as abs/clq87g.sh (climb.py 215308, 16:08:10; log line 2378, climb.tsv row 4898 on; CPUS=23) when
   nslm_to_aa1__goal_1254's final ended (NO, 14,675 s for that target). Every loop now runs and listens to conditional
   goals with a variable-side hypothesis as their equation.
+
+## The 160 s rung done; CLS71 moves to 640 s (26 Nov 19:20)
+
+* **19:18:** CLS71 ran no twee: all 1,222 unsolved goals of its list (sets/cls71all.re outside sets/cls71f.excl) had two
+  CLS71 finals (counted from climb.tsv's final rows), its --reclimb-max is 2, and production's new stalled goals come
+  rarely now. CLQ83 (640 s) had 5 finals running, production 4 runs, plainlive8 3.
+* **Change:** climb.py `--list-only` (a live climber skips the live loop's new stalled goals and climbs only its
+  --reclimb list). CLS71 restarted as abs/cls71m.sh (exp/prod/side/cls71m.sh; climb.py 240359 from 19:20:42, log line
+  4702 on): cls71l plus --list-only --reclimb-max 3, 640 s finals, -j 5, EXCLUDE also sets/ladder640.re (CLQ83's list),
+  so each goal gets a third final, at 640 s, nearest proved goal below first (the first five: R1dist_to_aa1 goals
+  460-475). The CPU gates stay (CLS71 --cpus 20, CLQ83 --cpus 23, counting all twee processes).
+* **Why 640 s and not a third 160 s final:** on production's newly stalled goals the 640 s rung made 0.65 proofs per CPU
+  h and the 160 s rung 0.43 (sections above), and second finals paid about as well as first ones (10.2% against 9.4%).
+  The 160 s rung for newly stalled goals ends with this; CLQ83 takes them at 640 s.
+* **Memory:** 640 s runs held 2.3-3.6 GB each at 19:18 (CLQ83), so 5 more add about 15 GB (about 40 GB in all); the
+  50 GB alert stays armed.
+* **Reading:** CLS71's finals from climb.tsv row 44,987 on: proved per CPU h against CLQ83's in the same hours.

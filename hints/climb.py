@@ -299,6 +299,9 @@ def main():
     ap.add_argument('--reclimb', default='', help='--live: goals that may be climbed once more (fewer than 2 finals)')
     # (25 Nov) the time ladder: a rung re-runs goals that already had finals in this dir
     ap.add_argument('--reclimb-max', type=int, default=2, help='--reclimb: while fewer than N finals in DIR (default 2)')
+    ap.add_argument('--list-only', action='store_true',
+                    help='--live: only the --reclimb list, not the live loop\'s new stalled goals (26 Nov: a second 640 s climber on\n'
+                         'CLS71\'s goals with two failed 160 s finals, beside CLQ83 on the new ones)')
     ap.add_argument('--share', default='', help='comma-separated climber dirs whose sketches/ and fillhints/ are loaded as hints too')
     ap.add_argument('--cpus', type=int, default=0,
                     help='--live: start a climb only while fewer than N twee processes run on the machine '
@@ -1091,6 +1094,8 @@ def live(c, a, lp, gl, pools, ix, climb, out, lock):
         res = [n for n, (ok, lev) in last.items() if ok == 'NO' and lev != 'L0' and n in fresh and n not in S
                and n not in climbed and n not in skip and n not in busy]
         res.sort(key=lambda n: (dist(n), n))
+        if c.list_only:   # (--list-only) only the list below
+            res = []
         if RECL:   # (--reclimb) after the new targets
             rs = set(res)
             res += sorted((n for n in RECL if n not in S and n not in skip and n not in busy and n not in rs

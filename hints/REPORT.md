@@ -181,8 +181,10 @@ proofs in 63 minutes.
 **The head climber: abs/clhl4.sh (exp68),** stopped 23 Nov 23:30 after 21:07-23:30: 21 heads finished, 0 real proofs in
 4.7 CPU h (clhl3.sh before it, 18:44-21:07: 0 in 4.1). Its targets were the heads exp67's arms and controls climb at the
 same time. Production also keeps the old climbs' hints as members sk@0 and sk@1:0.
-**The climber: abs/cls71k.sh (exp71; the 160 s rung of exp87),** climb.py --live into loops/UL, record loops/CLS71, **climb.py
-207596 since 26 Nov 15:10:15** (abs/cls71l.sh: cls71k plus `TWEE_LEMMA_EQN=1`; log line 4474 on; as climb.py 175280 from 11:12:00 restarted for hintsel.listen_equation; as climb.py 105364 from 02:19:19: cls71j.sh plus `--listen-class 150`: each final also listens to up to 150 unsolved goals of the
+**The climber: abs/cls71m.sh (exp71; since 26 Nov 19:20 a second 640 s rung of exp87),** climb.py --live into loops/UL, record loops/CLS71, **climb.py
+240359 since 26 Nov 19:20:42** (cls71l plus `--list-only --reclimb-max 3`, 640 s finals, -j 5, EXCLUDE also sets/ladder640.re: a third
+final at 640 s for each of the 1,222 unsolved goals of sets/cls71all.re, all of which had two failed 160 s finals; production's new
+stalled goals go to CLQ83 only; log line 4702 on). As climb.py 207596 from 15:10:15 (abs/cls71l.sh: cls71k plus `TWEE_LEMMA_EQN=1`; log line 4474 on; as climb.py 175280 from 11:12:00 restarted for hintsel.listen_equation; as climb.py 105364 from 02:19:19: cls71j.sh plus `--listen-class 150`: each final also listens to up to 150 unsolved goals of the
 other originals with the same axioms, as production's ul88; log line 3625 on; cls71j.sh ran as climb.py 71408 from 25 Nov
 22:39, restarted then for the listen premise check; climb.py 60285 from 22:03) (cls71i.sh plus `--listen 300 --listen-dist 100000`: each final listens to all its original's
 unsolved plain goals, +5% CPU for 120, exp90; cls71i.sh, climb.py 46097, ran 20:49-22:03) (listen fixed: climb.py 43358 from 20:34 listened to 6 goals production had solved and overwrote
