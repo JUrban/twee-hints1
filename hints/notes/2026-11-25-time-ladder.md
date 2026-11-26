@@ -412,3 +412,7 @@ siblings as extra goals, credited by SOLVEDGOAL and a proof rerun), as a measure
   EXCLUDE=sets/cls71f.excl). Why: ul88's first 1.5 h made 28 listened credits, 15 across originals. First finals:
   Ka_eq_aK3__goal_457 listened to 134 goals, 114 from other originals; R1dist_to_aa1 (a class of its own) to 113, none.
   CLQ83 keeps clq87e.sh for now (its 640 s finals were 44-56 minutes in).
+* **03:48:** CLQ83 stays on clq87e.sh (no --listen-class): its 640 s finals run 1-2.5 hours, so any restart cuts about
+  2 CPU h of finals in flight (5 at 23-32 minutes now), and in about 5 hours it credited 1 listened goal. It takes the
+  option at its next restart made for another reason. CLS71 since 02:19: 3 listened credits, all from its own
+  original. plainlive7: c54W 5 listened rows (all THM), c54H and c55N none.
