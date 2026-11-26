@@ -466,6 +466,6 @@ from 21:18 to 10:56.
 * **Deployed:** production ul89 (abs/ul89.sh, exp/prod/ul89.sh; PID 175279) and CLS71 (cls71k.sh again; climb.py
   175280), both from 11:12:00; CLQ83 as abs/clq87f.sh (also --listen-class 150) once its 1 h 49 min final ends;
   plainlive7's condprove loads hintsel at each sweep (a listened conditional goal's own run there uses its own
-  conjecture line). First runs: 30 recent problem files of production and CLS71, 820 listened goals, 81 conditional.
+  conjecture line). First runs: the 20 newest problem files of production and CLS71 listened to 820 goals, 81 of them conditional.
 * A credited conditional goal's kept output and proof are of the equation (named lgoal_<goal>), not of the
   hypothesis form; the two are equivalent, and trust.py checks the premises.

@@ -796,6 +796,11 @@ ul75 5, XFL 1. REPORT's totals table
 has the history (user, 20 Nov: "update the total numbers in the report etc every now and then").
 
 Next:
+0000000000000000000000000000000000000000000000000000000000000000000000000000000000. **exp93 (26 Nov 11:12): listening to conditional goals** (the user). 135 of the 151 unsolved conditional goals
+   have a hypothesis t = X with X a variable not in t; hintsel.listen_equation listens to them as their equivalent
+   equation C[X := t] (one-point rule). Test on 40 solved such goals at 5 s: original 29, equation 30, original only 0.
+   Production ul89, CLS71 from 11:12:00, CLQ83 after its long final ([notes](notes/2026-11-25-time-ladder.md),
+   "Listening to conditional goals"). Also there: "Solved over time, by trust run".**
 000000000000000000000000000000000000000000000000000000000000000000000000000000000. **exp92 (26 Nov 00:58): listening in the plain live loop.** condprove.py `--listen K` (twee-e61m): a listened goal
    proved in a run gets a run of that problem with its own conjecture, and its row goes through condimport.py like
    any other. Test (scratchpad cp92): the own rows unchanged, 4 listened rows, condimport 6 of 6. Deployed as
