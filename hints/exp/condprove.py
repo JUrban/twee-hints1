@@ -14,7 +14,7 @@ Write OUT outside /project/hintwork/loops."""
 import os, sys, re, subprocess, time, collections
 from concurrent.futures import ThreadPoolExecutor
 sys.path.insert(0, '/project/twee/hints')
-import lemmas
+import lemmas, hintsel
 a = sys.argv[1:]
 def opt(k, d):
     global a
@@ -47,6 +47,18 @@ def _pk(x):
 # /project/hintwork/loops/UL/hints/<goal>), the siblings nearest first, then the kNN lemmas by rank, at most CAP, as
 # twee's --hints-file OUT/h/<goal>.hints (default factor); the problem text stays as without
 HCAP = int(opt('--hints-lemmas', '0')); HDIR = opt('--hints-dir', '/project/hintwork/loops/UL/hints')
+# (26 Nov, exp92) --listen K: each run also listens to up to K unsolved plain goals of its original (hintsel.listen_clauses,
+# as loop.py --listen; twee-e61m, whose search is the same with and without them and, without them, the same as
+# twee-e61's). A listened goal X proved there gets a run of its own problem: the run's text (the original's axioms and
+# the run's lemmas, all trusted under --proved) with the run's conjecture line replaced by X's; its row is written like
+# any other (THM or NO), so condimport.py reruns p/<X>.p as usual. OUT/listened.tsv: X, the run's goal, THM/NO.
+# --prev compares the problems without the listened lines (they are not in p/<goal>.p)
+LISTEN = int(opt('--listen', '0'))
+if LISTEN:
+    if TWEE == '/project/bin/twee-pg61':
+        TWEE = '/project/bin/twee-e61m'   # (twee-pg61 adds $TWEE_PG_ARGS, unset in plainlive's runs)
+    assert 'e61m' in TWEE, f'--listen needs twee-e61m, not {TWEE}'
+    assert not HCAP, '--listen with --hints-lemmas: the listened goal would need the run hints file'
 a = [x for x in a if x not in ('--all', '--proved', '--prev-ignore-knn')]
 OUT = os.path.abspath(a[0])
 assert not OUT.startswith('/project/hintwork/loops'), 'OUT must be outside loops/'
@@ -102,10 +114,44 @@ elif IX.startswith('learned:') and index:
 elif IX:
     sys.exit(f'--index {IX}: kd, kp or learned:MODEL')
 print(f'condprove: {len(U)} unsolved goals to run ({len(done)} done), index {time.time()-t_:.0f}s', flush=True)
+import threading
+LOCK = threading.Lock(); STARTED, CRED = set(), set()
+UNS = collections.defaultdict(list)   # (--listen) original -> its unsolved goals
+for x in G:
+    if x not in T:
+        UNS[lemmas.split(x)[0]].append(x)
+CONJ = re.compile(r'fof\(\s*[^,\s]+\s*,\s*conjecture\s*,')
+def listen_one(g, x, txt):
+    """(--listen) X, proved as a listened goal in G's run: a run of G's problem with X's conjecture; its results row"""
+    with LOCK:
+        if x in STARTED or x in CRED or x in done or x in T:
+            return ''
+        CRED.add(x)
+    cl = [l for l in txt.splitlines(True) if CONJ.match(l)]
+    xl = [l for l in open(os.path.join(lemmas.PROB, x + '.p')) if CONJ.match(l)]
+    if len(cl) != 1 or len(xl) != 1:
+        return ''
+    tx = txt.replace(cl[0], xl[0].rstrip('\n') + '\n')
+    px = f'{OUT}/p/{x}.p'
+    open(px, 'w').write(tx)
+    t0 = time.time()
+    try:
+        r = subprocess.run([TWEE, px] + base + ['--quiet', '--no-proof'], capture_output=True, text=True,
+                           timeout=max(600, 10 * float(TM)))
+    except subprocess.TimeoutExpired:
+        return f'{x}\tTIMEOUT\t{time.time() - t0:.2f}\t-\t-\t0\n'
+    line = finish(x, px, r.stdout, time.time() - t0, [])
+    with open(f'{OUT}/listened.tsv', 'a') as f:
+        f.write(f'{x}\t{g}\t{line.split(chr(9))[1]}\n')
+    return line
 base = ['--max-time', TM, '--abstract-time', '2000', '--no-colour', '--no-resume-requeue', '--no-eqhint-consider'] + XARGS
 AX = re.compile(r'^Axiom \d+ \(([^)]*)\)')
 def one(g):
     o, k = lemmas.split(g)
+    with LOCK:
+        if g in CRED:   # (--listen) its row came from a listened proof in another run of this sweep
+            return ''
+        STARTED.add(g)
     if index:
         txt, _ = lemmas.lemma_problem_knn(g, allg, SIBS, index, KNN, skip=KSKIP)
     else:
@@ -139,17 +185,32 @@ def one(g):
                 break
         os.makedirs(f'{OUT}/h', exist_ok=True)
         hp = f'{OUT}/h/{g}.hints'; open(hp, 'w').write(''.join(hs[:HCAP])); hx = ['--hints-file', hp]
+    lg = hintsel.listen_clauses(g, UNS.get(o, ()), LISTEN, 100000) if LISTEN else []
+    rp = p
+    if lg:
+        rp = f'{OUT}/p/{g}.l.p'
+        open(rp, 'w').write(txt + ''.join(lg))
     t0 = time.time()
     try:
         # (24 Nov) the wall cap 10 x --time (at least 600 s): a flat 600 s stopped exp74's 1200 abstract s runs at about
         # a third of their time
-        r = subprocess.run([TWEE, p] + base + hx + ['--quiet', '--no-proof'], capture_output=True, text=True,
+        r = subprocess.run([TWEE, rp] + base + hx + ['--quiet', '--no-proof'], capture_output=True, text=True,
                            timeout=max(600, 10 * float(TM)))
     except subprocess.TimeoutExpired:
         # (23 Nov) --backwards-goal 2 ran past the abstract-time limit (10 minutes, 5.8 GB): a row, not a crash
         return f'{g}\tTIMEOUT\t{time.time() - t0:.2f}\t-\t-\t0\n'
+    finally:
+        if rp != p and os.path.exists(rp):
+            os.unlink(rp)
     dt = time.time() - t0
-    ok = 'RESULT: Theorem' in r.stdout
+    line = finish(g, p, r.stdout, dt, hx)
+    for x in (l.split()[1][len('listen_'):] for l in r.stdout.splitlines() if l.startswith('SOLVEDGOAL listen_')):
+        line += listen_one(g, x, txt)
+    return line
+def finish(g, p, stdout, dt, hx):
+    """a run's results row (a proved run is rerun with the proof printed into OUT/proofs/<goal>)"""
+    o = lemmas.split(g)[0]
+    ok = 'RESULT: Theorem' in stdout
     unp, pro, nk = '-', '-', 0
     if ok:
         r2 = subprocess.run([TWEE, p] + base + hx, capture_output=True, text=True, timeout=max(600, 10 * float(TM)))
@@ -162,8 +223,9 @@ def one(g):
     return f'{g}\t{"THM" if ok else "NO"}\t{dt:.2f}\t{unp}\t{pro}\t{nk}\n'
 n = 0; th = 0
 with open(RES, 'a') as fo, ThreadPoolExecutor(J) as ex:
-    for line in ex.map(one, U):
-        fo.write(line); fo.flush(); n += 1; th += line.split('\t')[1] == 'THM'
+    for out_ in ex.map(one, U):
+        for line in out_.splitlines(True):   # (--listen: a run's row plus its listened goals' rows; none if credited)
+            fo.write(line); fo.flush(); n += 1; th += line.split('\t')[1] == 'THM'
         if n % 200 == 0:
             print(f'condprove: {n}/{len(U)} THM {th} {time.strftime("%H:%M:%S")}', flush=True)
 print(f'condprove: done {n} THM {th} {time.strftime("%H:%M:%S")}', flush=True)

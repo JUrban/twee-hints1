@@ -372,3 +372,23 @@ siblings as extra goals, credited by SOLVEDGOAL and a proof rerun), as a measure
   115 from other originals; nil3_24__goal_477 to 50, 46 from others.
 * **Reading** (to do): credits whose goal's original differs from the run's (log lines "listen: X proved in a run of
   Y"), per CPU h; L0's CPU per run before and after row 366930 (the listen cost).
+
+## Listening in the plain live loop (exp92, 26 Nov 00:58)
+
+* **Why:** plainlive's cycles run a few hundred to 1,100 plain twee runs (N: 5 s; H, W: 60 s with 100+30 siblings and
+  400 kNN lemmas) on the unsolved goals, none listening. Production's listening credited 49 goals in ul87's 2 h 10 min.
+* **condprove.py `--listen K`** (twee-e61m; without listened goals its search is twee-e61's, so `--prev`'s SAME check
+  and condimport.py's reruns with twee-pg61 still hold): each run also listens to up to K unsolved plain goals of its
+  original (hintsel.listen_clauses). A listened goal X proved there gets a run of the run's problem with the
+  conjecture line replaced by X's (the same axioms and lemmas, all trusted under --proved; no hypothesis of the run's
+  goal, as conditional goals keep theirs inside the conjecture formula); its THM or NO row is written like any other,
+  p/<X>.p is that problem, and X's own run in the same sweep is skipped. OUT/listened.tsv: X, the run's goal, result.
+  The listened lines live in a temporary p/<goal>.l.p, so p/<goal>.p and the --prev comparison stay as before.
+* **Test** (scratchpad cp92; trusted = loops/UL solved without nil3_26 goals 5-10; runs of goals 5 and 6, -j 1, N's
+  settings): without --listen 2 rows (both THM); with it the same 2 rows (0.10 and 0.12 s against 0.09 and 0.11) plus
+  10 and 7 (in 5's run) and 8 and 9 (in 6's), each THM; condimport.py imported 6 of 6 (USEDAXIOMS: trusted kNN lemmas
+  and sos).
+* **Deployed** as abs/plainlive7.sh (exp/prod/side/plainlive7.sh; `--listen 300` in N, H and W): plainlive6 was stopped
+  after its cycle c53 (cond/PLNL.stop), plainlive7 starts with --prev c53N, c53H, c53W.
+* Also: loop.py's axiom_class now calls lemmas.axiom_key (the same partition, one implementation; production's
+  running ul88 keeps its loaded copy, which computes the same keys).

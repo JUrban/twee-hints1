@@ -796,6 +796,11 @@ ul75 5, XFL 1. REPORT's totals table
 has the history (user, 20 Nov: "update the total numbers in the report etc every now and then").
 
 Next:
+000000000000000000000000000000000000000000000000000000000000000000000000000000000. **exp92 (26 Nov 00:58): listening in the plain live loop.** condprove.py `--listen K` (twee-e61m): a listened goal
+   proved in a run gets a run of that problem with its own conjecture, and its row goes through condimport.py like
+   any other. Test (scratchpad cp92): the own rows unchanged, 4 listened rows, condimport 6 of 6. Deployed as
+   abs/plainlive7.sh after plainlive6's cycle c53 ([notes](notes/2026-11-25-time-ladder.md), "Listening in the plain
+   live loop").**
 00000000000000000000000000000000000000000000000000000000000000000000000000000000. **exp91 (26 Nov 00:53): listening across originals.** loop.py `--listen-class K`: a run also listens to up to K
    unsolved plain goals of the other originals with the same axiom lines (854 of 1,671 unsolved goals have such
    siblings). Such a credit may use only the axioms and lemma names that say whose goal they are; lemma_goal_N is

@@ -9,7 +9,7 @@ the proofs it finds to the pool.
 usage: loop.py SET DIR [--rounds N] [--timeout S] [-j N] [--twee BIN]
                [--args "..."] [--pool original|all] [--aux]
 """
-import argparse, collections, hashlib, heapq, json, math, os, random, re, subprocess, sys, time
+import argparse, collections, heapq, json, math, os, random, re, subprocess, sys, time
 from concurrent.futures import ThreadPoolExecutor, as_completed, wait, FIRST_COMPLETED
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import hintlib
@@ -222,18 +222,13 @@ class Loop:
         return res
 
     def axiom_class(self, o):
-        """(--listen-class) the axiom lines of original O's problems, sorted, as a hash ('' if unreadable)"""
-        if not hasattr(self, 'aclass'):
-            self.aclass = {}
-        if o not in self.aclass:
-            try:
-                m = next(m for m in self.orig_names[o])
-                ax = sorted(l.strip() for l in open(os.path.join(PROB, m + '.p'))
-                            if re.match(r'(?:fof|cnf)\(\s*[^,\s]+\s*,\s*axiom\s*,', l))
-                self.aclass[o] = hashlib.md5('\n'.join(ax).encode()).hexdigest() if ax else ''
-            except (OSError, StopIteration):
-                self.aclass[o] = ''
-        return self.aclass[o]
+        """(--listen-class) original O's axiom key (lemmas.axiom_key of its first goal: the sorted non-conjecture lines;
+        '' if unreadable)"""
+        import lemmas
+        try:
+            return lemmas.axiom_key(self.orig_names[o][0])
+        except (OSError, IndexError, KeyError):
+            return ''
 
     def output_hints(self, name, out, L=None, G=None):
         """the hints file rows of a proof's output: its lemmas and goal steps (and --aux), canonical, deduplicated
