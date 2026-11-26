@@ -126,7 +126,11 @@ proofs in 63 minutes.
   every 5 minutes, binary twee-e39.
 * **Given-rule retry:** givenmatch.py live into loops/GML, PID 2074661, since 22 Nov 14:17. 2 threads, 60 and 160 s
   runs on GFAIL's hits.
-* **Plain live loop:** abs/plainlive6.sh, PID 3879710, since 24 Nov 09:04 (plainlive5.sh 23 Nov 23:39-24 Nov 09:04,
+* **Plain live loop:** abs/plainlive7.sh, PID 96229, since 26 Nov 01:17:27: plainlive6 with `condprove.py --listen 300`
+  in N, H and W (exp92, twee-e61m: each run also listens to its original's unsolved plain goals; a listened goal gets a
+  run of that problem with its own conjecture, and its row goes through condimport.py as any other;
+  [notes/2026-11-25-time-ladder.md](notes/2026-11-25-time-ladder.md), "Listening in the plain live loop"); first --prev
+  c53N/H/W. plainlive6.sh, PID 3879710, ran 24 Nov 09:04 to 26 Nov 01:17:11 (plainlive5.sh 23 Nov 23:39-24 Nov 09:04,
   plainlive4.sh from 19:41, plainlive3.sh from 12:38). Every 30 minutes it runs plain runs (no hints, no rule model, no
   PG) on changed problems only, 3 threads, proofs via loops/CI2. Three settings:
   * N: 5 s, 30+10 siblings, 100 kNN lemmas;

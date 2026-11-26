@@ -399,3 +399,6 @@ siblings as extra goals, credited by SOLVEDGOAL and a proof rerun), as a measure
 * **The listen cost in wall time** (results.tsv, failed runs by level, restarts from t= resets; noisy on the shared
   machine): L0 median 9.91 s in ul85 (no listening), 9.27 s in ul87; L1 69.7 s and 75.6 s. No clear cost; exp90's
   +4.6% CPU (120 goals, same search) stays the figure.
+* plainlive6's last cycle c53W ended at 01:17:11 (167 runs, 68 THM, 25 imported into loops/CI2, 9 merged into
+  loops/UL); plainlive7 (PID 96229) started at 01:17:27 with --prev c53N, c53H, c53W. Its first sweep c54N: 1,625
+  unsolved goals (most SAME), twee-e61m with listen lines.
