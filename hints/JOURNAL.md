@@ -800,7 +800,8 @@ Next:
    variable-side hypothesis, as their problem (O) and as the equivalent equation (E, condprove.py --equation), at
    plainlive's N (5 s) then H (60 s) settings, same trusted set ([notes](notes/2026-11-25-time-ladder.md),
    "Conditional goals as equations, an A/B"). Result: 5 s original 0, equation 1; 60 s original 0, equation 2 (union 2,
-   original only 0); both imported and trusted (50,512 at t1504). plainlive8 runs conditional goals as equations from 15:06.
+   original only 0); both imported and trusted (50,512 at t1504). plainlive8 runs conditional goals as equations from 15:06,
+   production ul90 and CLS71 from 15:10:15 (TWEE_LEMMA_EQN=1, lemmas.equation_problem), CLQ83 after its long final.
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000. **exp93 (26 Nov 11:12): listening to conditional goals** (the user). 135 of the 151 unsolved conditional goals
    have a hypothesis t = X with X a variable not in t; hintsel.listen_equation listens to them as their equivalent
    equation C[X := t] (one-point rule). Test on 40 solved such goals at 5 s: original 29, equation 30, original only 0.
