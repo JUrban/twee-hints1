@@ -545,3 +545,21 @@ from 21:18 to 10:56.
   (aK2_eq_aK3_1243__goal_406, aK2_eq_aK3_p__goal_336, nsmr_to_aa1__goal_826, aK2_eq_aK3_d__goal_508), all trusted.
   640 s finals since the restarts: CLS71's third finals 0 of 28; CLQ83 (from 16:08) 4 of 51 finals, plus 4 direct
   and 2 listened.
+
+## The 2,560 s rung (27 Nov 01:20)
+
+* **cls71m's third 640 s finals:** 0 of 37 proved (climb.tsv rows 44,987-45,274; R1dist_to_aa1 10, aK2_eq_aK3_d 9,
+  aK2_eq_aK3_m 6, com_Ralt 4, aK2_eq_aK3_b 4, others 4). CLQ83's 640 s finals from 16:08 (row 4,898): 4 of 56, plus
+  4 direct and 3 listened; the two sets did not overlap. CLQ83's queue at 01:18: 11 new stalled goals beyond its 5
+  running, all with two failed CLS71 160 s finals (the same kind of goal as cls71m's list).
+* **Why 2,560 s and not more 640 s restarts:** exp85e (notes/2026-11-25-precedence-portfolio.md) found twee's work
+  scattered about 20% by restarts with other orders, and the default continued 4 times longer proved 16 of 22 against
+  6 (11.9 against 3.5 per CPU h); a third restart at the same length is the weak case.
+* **Change:** CLS71 restarted as abs/cls71n.sh (exp/prod/side/cls71n.sh; climb.py 277506 from 01:20:53, log line
+  4748, climb.tsv row 45,275 on): 2,560 s finals (wall cap 10 x), -j 2, --list-only, --reclimb-max 4, on
+  sets/ladder2560.re (exp/sets/ladder2560.re): the 185 unsolved goals with a failed 640 s final (CLQ83 from its
+  ladder start, row 2,093, 148; cls71m's 37), nearest proved goal below first (the first two: R1dist_to_aa1 goals 460
+  and 464). CLQ83 goes on at 640 s with the new stalled goals.
+* **Memory:** no 2,560 s run has been made before; 640 s runs held 2.3-3.6 GB, so these may reach about 10 GB each.
+  -j 2 first; the 50 GB alert stays armed.
+* **Reading:** CLS71's finals from row 45,275 on (proofs per CPU h) against CLQ83's 640 s finals in the same hours.

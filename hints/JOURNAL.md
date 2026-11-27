@@ -800,6 +800,8 @@ Next:
    its list had two failed finals) and ran nothing; climb.py --list-only, and CLS71 restarted as cls71m: a third final
    each, at 640 s, -j 5; production's new stalled goals go to CLQ83 (640 s) only ([notes](notes/2026-11-25-time-ladder.md),
    "The 160 s rung done; CLS71 moves to 640 s").
+   **(27 Nov 01:20) the third 640 s finals proved 0 of 37 (CLQ83's 640 s finals on new stalled goals 4 of 56): CLS71 moves to
+   2,560 s finals (cls71n, -j 2) on the 185 unsolved goals with a failed 640 s final ("The 2,560 s rung").**
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000. **exp94 (26 Nov 13:00): conditional goals as equations, an A/B.** The 134 unsolved conditional goals with a
    variable-side hypothesis, as their problem (O) and as the equivalent equation (E, condprove.py --equation), at
    plainlive's N (5 s) then H (60 s) settings, same trusted set ([notes](notes/2026-11-25-time-ladder.md),
