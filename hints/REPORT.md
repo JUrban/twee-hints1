@@ -182,7 +182,7 @@ proofs in 63 minutes.
 4.7 CPU h (clhl3.sh before it, 18:44-21:07: 0 in 4.1). Its targets were the heads exp67's arms and controls climb at the
 same time. Production also keeps the old climbs' hints as members sk@0 and sk@1:0.
 **The climber: abs/cls71n.sh (exp71; since 27 Nov 01:20 the ladder's 2,560 s rung, exp95),** climb.py --live into loops/UL, record loops/CLS71, **climb.py
-277506 since 27 Nov 01:20:53** (cls71m with 2560 s finals, -j 2, --reclimb-max 4, on sets/ladder2560.re: the 185 unsolved goals with a failed 640 s
+284582 since 27 Nov 02:18:48** (J=4; as climb.py 277506 from 01:20:53 with J=2) (cls71m with 2560 s finals, --reclimb-max 4, on sets/ladder2560.re: the 185 unsolved goals with a failed 640 s
 final, 148 of CLQ83's and 37 of cls71m's; log line 4748, climb.tsv row 45,275 on). cls71m (climb.py 240359, 26 Nov 19:20:42-27 Nov 01:20; third 640 s
 finals, 0 of 37 proved) was cls71l plus `--list-only --reclimb-max 3`, 640 s finals, -j 5, EXCLUDE also sets/ladder640.re: a third
 final at 640 s for each of the 1,222 unsolved goals of sets/cls71all.re, all of which had two failed 160 s finals; production's new

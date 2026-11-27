@@ -563,3 +563,6 @@ from 21:18 to 10:56.
 * **Memory:** no 2,560 s run has been made before; 640 s runs held 2.3-3.6 GB, so these may reach about 10 GB each.
   -j 2 first; the 50 GB alert stays armed.
 * **Reading:** CLS71's finals from row 45,275 on (proofs per CPU h) against CLQ83's 640 s finals in the same hours.
+* **02:18:** the two 2,560 s finals held 3.3 GB at 27 minutes and 3.8 GB at 57 (all my processes 24.4 GB, 10 twee),
+  so CLS71 restarted with J=4 (climb.py 284582 from 02:18:48, log line 4751, climb.tsv row 45,281 on; the two
+  stopped finals, R1dist_to_aa1 goals 460 and 464, wrote no final rows and start again).
