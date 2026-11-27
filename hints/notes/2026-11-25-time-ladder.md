@@ -592,3 +592,9 @@ from 21:18 to 10:56.
 * **08:18:** the burst goes on: trust.py t0818, 50,915 solved (+124 since t0748), holdout 5,764, 0 untrusted;
   production ul90 189 listened credits recorded in all, the plain live loop's 5 s pass c95N ran 917 problems (its
   sibling lemmas changed) and proved 90, 30 of them merged as new into loops/UL.
+* **27 Nov 15:42, the rungs by their rows** (climb.tsv final rows; the hours are the final runs' own seconds column,
+  one process each; sketch runs and direct reruns not counted): CLS71 2,560 s from row 45,275: 20 finals, 4 proved
+  (R1dist_to_aa1 475, aK2_eq_aK3_d 483, com_Ralt 330, one awaiting its direct run), 45.3 h, 0.09 per hour; CLQ83 640 s
+  from row 4,898: 139 finals, 11 proved, 106.0 h, 0.10 per hour; CLS71's third 640 s finals (rows 44,987-45,274): 37,
+  0, 28.1 h. The two working rungs pay about the same per hour on their own count; what a proof opens is not in these
+  numbers (Ka_eq_aK3 419 at 640 s, then 250 goals in 26 minutes). trust.py t1542: 51,140 solved, 0 untrusted.
