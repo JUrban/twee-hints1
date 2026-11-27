@@ -540,3 +540,8 @@ from 21:18 to 10:56.
 * **Memory:** 640 s runs held 2.3-3.6 GB each at 19:18 (CLQ83), so 5 more add about 15 GB (about 40 GB in all); the
   50 GB alert stays armed.
 * **Reading:** CLS71's finals from climb.tsv row 44,987 on: proved per CPU h against CLQ83's in the same hours.
+* **27 Nov 00:18 check:** trust.py t0018: 50,536 solved, 0 untrusted (the first trust run since ul90 and the climbers
+  ran conditional goals as equations). Of the 24 hints files loops/UL got since 15:10:15, 4 are of conditional goals
+  (aK2_eq_aK3_1243__goal_406, aK2_eq_aK3_p__goal_336, nsmr_to_aa1__goal_826, aK2_eq_aK3_d__goal_508), all trusted.
+  640 s finals since the restarts: CLS71's third finals 0 of 28; CLQ83 (from 16:08) 4 of 51 finals, plus 4 direct
+  and 2 listened.
