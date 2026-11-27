@@ -574,3 +574,18 @@ from 21:18 to 10:56.
   live climber that is production's file, so 475's direct run, when it ends, replaces the listen credit's hints file
   (both are proofs of 475, so no harm here; the listened file is kept in the scratchpad). climb.py write_hints now
   keeps an existing file in --live mode (both climb paths); the running climbers get it at their next restart.
+
+## A 640 s final opens 250 goals (27 Nov 07:22-07:48)
+
+* **What happened:** CLQ83's 640 s final proved Ka_eq_aK3__goal_419 (11 targets of that climb, 54,831 s in all on it;
+  its direct run proved it too) and then Ka_eq_aK3__goal_420; loops/UL got 250 new goals between trust runs t0618
+  and t0748 (hints files dated 07:22:09 on; 132 in 07:20-07:29, 50 in 07:30-07:39, 68 in 07:40-07:48), the first
+  ones Ka_eq_aK3 419 and 420, nil4_19K 394, aK2_eq_aK3_1243b 520 and 525, then many originals (nil3_23_32_to_25 22,
+  nsmr_to_aa1 18, aK2_eq_aK3_b 17, aK2_eq_aK3_d 15, nil3_1K_e 13, ...).
+* **How:** production ul90's listening: 150 listened credits recorded in UL90.log by 07:48 (2 before the burst), 104
+  of them across originals (--listen-class), e.g. 16 from one run of aK2_eq_aK3_1243b__goal_522. A sampled cross
+  credit, aKperms_1__goal_387, used one premise, lemma_knn_0_aK2_eq_aK3_1243b__goal_525 (the run's proved sibling 525,
+  renamed; the same axiom key).
+* **Trust:** trust.py t0748: 50,791 solved, 0 untrusted.
+* So the ladder's long finals matter more by what they open than by their own count: one 640 s proof (CLQ83's 8th
+  final proof since 16:08) was followed by 250 goals in 26 minutes, most of them through listening across originals.
