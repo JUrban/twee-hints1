@@ -566,3 +566,11 @@ from 21:18 to 10:56.
 * **02:18:** the two 2,560 s finals held 3.3 GB at 27 minutes and 3.8 GB at 57 (all my processes 24.4 GB, 10 twee),
   so CLS71 restarted with J=4 (climb.py 284582 from 02:18:48, log line 4751, climb.tsv row 45,281 on; the two
   stopped finals, R1dist_to_aa1 goals 460 and 464, wrote no final rows and start again).
+* **First 2,560 s proof (05:43):** R1dist_to_aa1__goal_475 (two failed 160 s finals, one failed 640 s final). Its own
+  final proved it in 2,481 s with true lemmas, which starts a direct run (no true lemmas, 2,560 s again) before the
+  record; the final of R1dist_to_aa1__goal_460 listened to it, and that credit's rerun (4,788 s) recorded it first.
+  trust.py t0548: 50,540 solved, 0 untrusted, 475 trusted. CLS71's 2,560 s finals so far: 1 of 5.
+* **A race found there:** climb.py's final path writes DIR/hints/<goal> without checking that the file exists; in a
+  live climber that is production's file, so 475's direct run, when it ends, replaces the listen credit's hints file
+  (both are proofs of 475, so no harm here; the listened file is kept in the scratchpad). climb.py write_hints now
+  keeps an existing file in --live mode (both climb paths); the running climbers get it at their next restart.

@@ -883,11 +883,21 @@ def main():
                 sf.write(f'{t}\t1\t0\n'); sf.flush()
                 if not direct:
                     out.write(f'{t}\tchain\t0\tTHM\t0\t0\t\t\t0\t{nt}\n'); out.flush()
-                with open(os.path.join(c.dir, 'hints', t), 'w') as hf:
-                    # (a chain proof: the true lemmas it used are hints too)
-                    for l, r in list(real) + ([] if direct else [k for k in last_true.get(t, []) if k not in real]):
-                        hf.write(f'{l}\t{r}\n')
+                # (a chain proof: the true lemmas it used are hints too)
+                write_hints(t, list(real) + ([] if direct else [k for k in last_true.get(t, []) if k not in real]))
         return t, real is not None, runs
+
+    def write_hints(t, rows):
+        """DIR/hints/T from a final's proof. (27 Nov) In a live climber DIR/hints is production's, and T may have been
+        recorded meanwhile (a listened credit from another final: R1dist_to_aa1__goal_475 at 05:43, its own direct
+        rerun still running), so an existing file is kept (memory: never replace a hints file)"""
+        p_ = os.path.join(c.dir, 'hints', t)
+        if c.live and os.path.exists(p_):
+            print(f'{t}: hints file exists (recorded meanwhile), kept', flush=True)
+            return
+        with open(p_, 'w') as hf:
+            for l, r in rows:
+                hf.write(f'{l}\t{r}\n')
 
     def weakenings(t):
         """(--updown) weaker goals: instances of T's unit conjecture, two variables merged (milder)
@@ -1020,9 +1030,7 @@ def main():
                 sf.write(f'{t}\t1\t0\n'); sf.flush()
                 if not direct:
                     out.write(f'{t}\tchain\t0\tTHM\t0\t0\t\t\t0\t{nt}\n'); out.flush()
-                with open(os.path.join(c.dir, 'hints', t), 'w') as hf:
-                    for l, r in list(real) + ([] if direct else [k for k in last_true.get(t, []) if k not in real]):
-                        hf.write(f'{l}\t{r}\n')
+                write_hints(t, list(real) + ([] if direct else [k for k in last_true.get(t, []) if k not in real]))
                 if c.chain:
                     # (--chain) the proof feeds the original's later targets at once: a sibling lemma,
                     # and its steps as hints (the online loop's chain, inside the climb)
