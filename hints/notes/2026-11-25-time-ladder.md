@@ -589,3 +589,6 @@ from 21:18 to 10:56.
 * **Trust:** trust.py t0748: 50,791 solved, 0 untrusted.
 * So the ladder's long finals matter more by what they open than by their own count: one 640 s proof (CLQ83's 8th
   final proof since 16:08) was followed by 250 goals in 26 minutes, most of them through listening across originals.
+* **08:18:** the burst goes on: trust.py t0818, 50,915 solved (+124 since t0748), holdout 5,764, 0 untrusted;
+  production ul90 189 listened credits recorded in all, the plain live loop's 5 s pass c95N ran 917 problems (its
+  sibling lemmas changed) and proved 90, 30 of them merged as new into loops/UL.
